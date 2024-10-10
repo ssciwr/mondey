@@ -196,7 +196,7 @@ export type ValidationError = {
 };
 
 export type GetLanguagesResponse = {
-	[key: string]: string;
+	[key: string]: number;
 };
 
 export type GetLanguagesError = unknown;
@@ -250,6 +250,21 @@ export type DeleteLanguageData = {
 export type DeleteLanguageResponse = unknown;
 
 export type DeleteLanguageError = HTTPValidationError;
+
+export type UpdateI18NData = {
+	body: {
+		[key: string]: {
+			[key: string]: string;
+		};
+	};
+	path: {
+		language_id: number;
+	};
+};
+
+export type UpdateI18NResponse = unknown;
+
+export type UpdateI18NError = HTTPValidationError;
 
 export type GetMilestoneGroupsAdminResponse = Array<MilestoneGroupAdmin>;
 

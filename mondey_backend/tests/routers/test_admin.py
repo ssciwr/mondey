@@ -1,3 +1,4 @@
+import json
 import pathlib
 
 import pytest
@@ -13,7 +14,35 @@ def test_post_language(admin_client: TestClient):
 def test_delete_language(admin_client: TestClient):
     response = admin_client.delete("/admin/languages/2")
     assert response.status_code == 200
-    assert admin_client.get("/languages").json() == {"1": "de", "3": "fr"}
+    assert admin_client.get("/languages").json() == {"de": 1, "fr": 3}
+
+
+def test_update_i18n(admin_client: TestClient, static_dir: pathlib.Path):
+    i18_json_path = static_dir / "i18n" / "1.json"
+    i18_json = {
+        "s1": {"k1": "v1", "k2": "v2"},
+        "accents": {"k1": "v1", "äéœ": "óíüúëþ"},
+    }
+    assert not i18_json_path.is_file()
+    response = admin_client.put("/admin/i18n/1", json=i18_json)
+    assert response.status_code == 200
+    assert i18_json_path.is_file()
+    with open(i18_json_path) as f:
+        assert json.load(f) == i18_json
+    i18_json["s1"]["k1"] = "MODIFIED!"
+    response = admin_client.put("/admin/i18n/1", json=i18_json)
+    assert response.status_code == 200
+    with open(i18_json_path) as f:
+        assert json.load(f) == i18_json
+
+
+def test_update_i18n_invalid_json(admin_client: TestClient, static_dir: pathlib.Path):
+    i18_json = {
+        "valid-section": {"key1": "value1"},
+        "invalid-section": "this-value-should-be-a-dict!",
+    }
+    response = admin_client.put("/admin/i18n/1", json=i18_json)
+    assert response.status_code == 422
 
 
 def test_get_milestone_groups(

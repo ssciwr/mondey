@@ -54,7 +54,7 @@
 			{@const title = $_(`admin.${textKey}`)}
 			<div class="mb-5">
 				<Label class="mb-2">{title}</Label>
-				{#each Object.entries($languages) as [lang_id, lang]}
+				{#each Object.entries($languages) as [lang, lang_id]}
 					<div class="mb-1">
 						<ButtonGroup class="w-full">
 							<InputAddon>{lang}</InputAddon>

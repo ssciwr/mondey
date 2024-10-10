@@ -43,7 +43,7 @@
 			</div>
 			<Button type="submit" class="mb-6">Login</Button>
 			{#if errorCode !== ''}
-				<Alert>{$_(errorCode)}</Alert>
+				<Alert>{$_(`login.${errorCode}`)}</Alert>
 			{/if}
 		</form>
 	</div>

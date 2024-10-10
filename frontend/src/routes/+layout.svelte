@@ -9,6 +9,12 @@
 	import { MoonSolid, SunSolid } from 'flowbite-svelte-icons';
 	import '../app.css';
 	import { base } from '$app/paths';
+	import { onMount } from 'svelte';
+	import { getTranslations } from '$lib/i18n';
+
+	onMount(() => {
+		getTranslations();
+	});
 </script>
 
 <Navbar>

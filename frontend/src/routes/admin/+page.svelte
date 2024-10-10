@@ -2,8 +2,8 @@
 
 <script lang="ts">
 	import { adminUser } from '$lib/admin.svelte';
-	import { updateLanguages } from '$lib/i18n';
 	import Languages from '$lib/components/Admin/Languages.svelte';
+	import Translations from '$lib/components/Admin/Translations.svelte';
 	import MilestoneGroups from '$lib/components/Admin/MilestoneGroups.svelte';
 	import Questions from '$lib/components/Admin/UserQuestions.svelte';
 	import Login from '$lib/components/Admin/Login.svelte';
@@ -13,7 +13,6 @@
 	import { LanguageOutline, BadgeCheckOutline, ClipboardListOutline } from 'flowbite-svelte-icons';
 
 	onMount(async () => {
-		updateLanguages();
 		adminUser.refresh();
 	});
 </script>
@@ -37,6 +36,13 @@
 				{$_('admin.user-questions')}
 			</div>
 			<Questions />
+		</TabItem>
+		<TabItem>
+			<div slot="title" class="flex items-center gap-2">
+				<LanguageOutline size="md" />
+				{$_('admin.translations')}
+			</div>
+			<Translations />
 		</TabItem>
 		<TabItem>
 			<div slot="title" class="flex items-center gap-2">
