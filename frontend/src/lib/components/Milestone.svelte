@@ -155,9 +155,9 @@
 							onClick={() => {
 								selectAnswer(answerIndex);
 							}}
-							tooltip={$_(`milestone.answer${answerIndex}.description`)}
+							tooltip={$_(`milestone.answer${answerIndex}-desc`)}
 						>
-							{$_(`milestone.answer${answerIndex}.text`)}
+							{$_(`milestone.answer${answerIndex}-text`)}
 						</MilestoneButton>
 					{/each}
 					<div class="flex flex-row justify-center">

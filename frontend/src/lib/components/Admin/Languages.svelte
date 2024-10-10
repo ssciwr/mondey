@@ -14,7 +14,7 @@
 	import ISO6391 from 'iso-639-1';
 	import { _ } from 'svelte-i18n';
 	import type { SelectOptionType } from 'flowbite-svelte';
-	import { updateLanguages } from '$lib/i18n';
+	import { getTranslations } from '$lib/i18n';
 	import { languages } from '$lib/stores/langStore';
 	import DeleteModal from '$lib/components/Admin/DeleteModal.svelte';
 	import AddButton from '$lib/components/Admin/AddButton.svelte';
@@ -37,7 +37,7 @@
 			console.log(error);
 		} else {
 			console.log(data);
-			await updateLanguages();
+			await getTranslations();
 		}
 	}
 
@@ -49,7 +49,7 @@
 			console.log(error);
 		} else {
 			console.log(data);
-			await updateLanguages();
+			await getTranslations();
 		}
 	}
 </script>
@@ -63,7 +63,7 @@
 			<TableHeadCell>Actions</TableHeadCell>
 		</TableHead>
 		<TableBody>
-			{#each Object.entries($languages) as [id, lang]}
+			{#each Object.entries($languages) as [lang, lang_id]}
 				<TableBodyRow>
 					<TableBodyCell>
 						{lang}
@@ -74,7 +74,7 @@
 					<TableBodyCell>
 						<DeleteButton
 							onclick={() => {
-								currentLanguageId = id;
+								currentLanguageId = lang_id;
 								showDeleteModal = true;
 							}}
 						/>

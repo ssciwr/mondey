@@ -124,7 +124,7 @@
 						<Label class="mb-2">Preview</Label>
 						<div class="flex flex-row">
 							<ButtonGroup class="mb-2 mr-2">
-								{#each Object.entries($languages) as [lang_id, lang]}
+								{#each Object.entries($languages) as [lang, lang_id]}
 									<Button
 										checked={preview_lang_id === lang_id}
 										on:click={(e) => {

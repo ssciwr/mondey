@@ -22,7 +22,7 @@
 				class="flex items-center"
 				on:click={() => {
 					locale.set(loc);
-					lang_id.set(`${Object.keys($languages).find((key) => $languages[key] === loc)}`);
+					lang_id.set($languages[loc]);
 					dropdownOpen = false;
 				}}
 			>
