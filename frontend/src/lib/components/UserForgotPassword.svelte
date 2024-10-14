@@ -16,7 +16,8 @@
 	};
 	const successButtonLabel: string = 'Zurück zur Startseite';
 	const pendingButtonLabel: string = 'Absenden';
-	const mailSentMessage: string = 'Überprüfen sie ihr e-mail Postfach';
+
+	const mailSentMessage: string = 'Überprüfen sie ihr E-Mail Postfach';
 	const alertTitle: string = 'Fehler';
 	let alertMessage: string = 'Die angegebene email Adresse hat ein falsches Format';
 	let valid: boolean = true;
@@ -34,6 +35,7 @@
 		};
 	} // README: this is a dummy. Needs to be replaced with real backend call later
 
+	// FIXME: check how this is done with the current API. needs to be integrated.
 	async function submitData(mailstring: string): Promise<void> {
 		try {
 			const response = await fetchDummy('api/forgot-password', {
@@ -68,29 +70,34 @@
 	/>
 {/if}
 
-<div class="container m-1 mx-auto w-full max-w-xl">
-	<Card class="container m-1 mx-auto mb-6 w-full max-w-xl items-center  justify-center pb-6 ">
-		{#if heading}
-			<Heading
-				tag="h3"
-				class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-				>{heading}</Heading
-			>
-		{/if}
-		{#if showSuccess === false}
-			<div class="m-1 m-3 mx-auto w-full flex-col space-y-6">
-				<DataInput
-					component={maildata.component}
-					label={maildata.props.label}
-					bind:value={maildata.value}
-					properties={maildata.props}
-					eventHandlers={{
-						'on:change': maildata.onchange,
-						'on:blur': maildata.onblur,
-						'on:click': maildata.onclick
-					}}
-				/>
-			</div>
+<Card class="container m-1 mx-auto mb-6 w-full max-w-xl items-center  justify-center">
+	<Heading
+		tag="h3"
+		class="m-2 p-2 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
+		>{heading}</Heading
+	>
+	{#if showSuccess === false}
+		<div class="m-2 mx-auto w-full flex-col space-y-6 p-2">
+			<DataInput
+				component={maildata.component}
+				label={maildata.props.label}
+				bind:value={maildata.value}
+				properties={maildata.props}
+				eventHandlers={{
+					'on:change': maildata.onchange,
+					'on:blur': maildata.onblur,
+					'on:click': maildata.onclick
+				}}
+			/>
+		</div>
+	{:else}
+		<div class="m-2 flex w-full items-center justify-center p-2">
+			<p>{mailSentMessage}</p>
+		</div>
+	{/if}
+
+	{#if showSuccess === false}
+		<div class="m-2 flex w-full items-center justify-center p-2">
 			<Button
 				size="md"
 				on:click={(event) => {
@@ -101,16 +108,15 @@
 					}
 				}}>{pendingButtonLabel}</Button
 			>
-		{:else}
-			<div class="m-1 m-3 mx-auto w-full flex-col space-y-6">
-				<p class=" items-center justify-center">{mailSentMessage}</p>
-			</div>
+		</div>
+	{:else}
+		<div class="m-2 flex w-full items-center justify-center p-2">
 			<Button
 				size="md"
 				on:click={(event) => {
-					goto(`${base}/`);
+					goto(`/${base}`);
 				}}>{successButtonLabel}</Button
 			>
-		{/if}
-	</Card>
-</div>
+		</div>
+	{/if}
+</Card>

@@ -41,8 +41,6 @@
 		const index = data.indexOf(item);
 		return componentProps[index];
 	});
-
-	$: console.log('data in gallery: ', data);
 </script>
 
 <div class="mx-auto p-4">
@@ -63,7 +61,7 @@
 				<!-- after example: https://flowbite-svelte.com/docs/forms/search-input#Search_with_dropdown -->
 				<div class="relative">
 					<Button
-						class="h-full whitespace-nowrap rounded-e-none border border-e-0 border-primary-700"
+						class="border-primary-700 h-full whitespace-nowrap rounded-e-none border border-e-0"
 					>
 						{searchCategory}
 						<ChevronDownOutline class="ms-2.5 h-2.5 w-2.5" />
