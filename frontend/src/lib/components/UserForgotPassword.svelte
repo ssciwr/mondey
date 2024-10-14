@@ -3,23 +3,27 @@
 	import { base } from '$app/paths';
 	import AlertMessage from '$lib/components/AlertMessage.svelte';
 	import DataInput from '$lib/components/DataInput/DataInput.svelte';
+	import { lang_id } from '$lib/stores/langStore';
 	import { Button, Card, Heading, Input } from 'flowbite-svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import { _ } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 
-	const heading = 'Passwort vergessen?';
+	const heading = $_('user.forgotPw.heading');
 	const maildata = {
 		component: Input,
 		type: 'text',
 		value: null,
 		props: {
-			placeholder: 'Bitte geben sie eine E-mail Adresse an um ihr Passwort zu erneuern'
+			placeholder: $_('user.forgotPw.placeholder')
 		}
 	};
-	const successButtonLabel: string = 'Zurück zur Startseite';
-	const pendingButtonLabel: string = 'Absenden';
-	const mailSentMessage: string = 'Überprüfen sie ihr E-Mail Postfach';
-	const alertTitle: string = 'Fehler';
+	const successButtonLabel: string = $_('user.forgotPw.success');
+	const pendingButtonLabel: string = $_('user.forgotPw.pending');
+	const mailSentMessage: string = $_('user.forgotPw.mailSentMessage');
+	const alertTitle: string = $_('user.forgotPw.alertTitle');
 
-	let alertMessage: string = 'Die angegebene email Adresse hat ein falsches Format';
+	let alertMessage: string = $_('user.forgotPw.alertMessage');
 	let valid: boolean = true;
 	let showAlert: boolean = !valid;
 	let showSuccess: boolean = false;
@@ -58,9 +62,21 @@
 		} catch (error) {
 			console.log(error);
 			showAlert = true;
-			alertMessage = 'Beim Senden ist ein Fehler aufgetreten';
+			alertMessage = $_('user.forgotPw.sendError');
 		}
 	}
+
+	let unsubscribe: () => void;
+
+	onMount(async () => {
+		unsubscribe = await lang_id.subscribe(() => {
+			console.log('language changed: ', get(lang_id));
+		});
+	});
+
+	onDestroy(() => {
+		unsubscribe();
+	});
 </script>
 
 {#if showAlert}

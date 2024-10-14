@@ -44,5 +44,18 @@
 		"help": "More information",
 		"image": "Image",
 		"images": "Images"
+	},
+	"user": {
+		"login": {},
+		"forgotPw": {
+			"heading": "Forgot your password?",
+			"placeholder": "Please enter your e-mail adress to get a new password",
+			"success": "Back to home",
+			"pending": "Send",
+			"alertTitle": "Error",
+			"alertMessage": "The given e-mail adress has a wrong format.",
+			"mailSentMessage": "Please check your e-mail inbox",
+			"sendError": "An error occured while sending the data. Please try again."
+		}
 	}
 }
