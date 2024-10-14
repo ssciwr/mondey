@@ -61,7 +61,7 @@
 				<!-- after example: https://flowbite-svelte.com/docs/forms/search-input#Search_with_dropdown -->
 				<div class="relative">
 					<Button
-						class="border-primary-700 h-full whitespace-nowrap rounded-e-none border border-e-0"
+						class="h-full whitespace-nowrap rounded-e-none border border-e-0 border-primary-700"
 					>
 						{searchCategory}
 						<ChevronDownOutline class="ms-2.5 h-2.5 w-2.5" />
