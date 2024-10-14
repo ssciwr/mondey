@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
+	import { resetForgotPassword } from '$lib/client/services.gen';
 	import AlertMessage from '$lib/components/AlertMessage.svelte';
 	import DataInput from '$lib/components/DataInput/DataInput.svelte';
-	import { lang_id } from '$lib/stores/langStore';
 	import { Button, Card, Heading, Input } from 'flowbite-svelte';
-	import { onDestroy, onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { get } from 'svelte/store';
 
 	const heading = $_('user.forgotPw.heading');
 	const maildata = {
@@ -37,26 +35,21 @@
 		}
 	}
 
-	function fetchDummy(endpoint: string, data: any): any {
-		return {
-			ok: true
-		};
-	} // README: this is a dummy. Needs to be replaced with real backend call later
-
-	// FIXME: check how this is done with the current API. needs to be integrated.
-	async function submitData(mailstring: string | null): Promise<void> {
+	async function submitData(mailstring: string): Promise<void> {
 		try {
-			const response = await fetchDummy('api/forgot-password', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
+			const data = {
+				body: {
+					email: mailstring
 				},
-				body: JSON.stringify(mailstring)
-			});
+				throwOnError: true
+			};
+			const { response, error } = await resetForgotPassword(data);
 
-			if (!response.ok) {
-				throw new Error('Network error');
+			if (error) {
+				console.log('error: ', error);
+				throw Error(error);
 			} else {
+				console.log('successful transmission, response status: ', response.status);
 				showSuccess = true;
 			}
 		} catch (error) {
@@ -65,18 +58,6 @@
 			alertMessage = $_('user.forgotPw.sendError');
 		}
 	}
-
-	let unsubscribe: () => void;
-
-	onMount(async () => {
-		unsubscribe = await lang_id.subscribe(() => {
-			console.log('language changed: ', get(lang_id));
-		});
-	});
-
-	onDestroy(() => {
-		unsubscribe();
-	});
 </script>
 
 {#if showAlert}
@@ -104,13 +85,7 @@
 				properties={maildata.props}
 			/>
 		</div>
-	{:else}
-		<div class="m-2 flex w-full items-center justify-center p-2">
-			<p>{mailSentMessage}</p>
-		</div>
-	{/if}
 
-	{#if showSuccess === false}
 		<div class="m-2 flex w-full items-center justify-center p-2">
 			<Button
 				size="md"
@@ -124,6 +99,9 @@
 			>
 		</div>
 	{:else}
+		<div class="m-2 flex w-full items-center justify-center p-2">
+			<p>{mailSentMessage}</p>
+		</div>
 		<div class="m-2 flex w-full items-center justify-center p-2">
 			<Button
 				size="md"
