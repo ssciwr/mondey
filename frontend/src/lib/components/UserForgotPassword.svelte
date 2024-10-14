@@ -70,7 +70,7 @@
 	/>
 {/if}
 
-<Card class="container m-1 mx-auto mb-6 w-full max-w-xl items-center  justify-center">
+<Card class="container m-2 mx-auto w-full max-w-xl items-center justify-center p-2">
 	<Heading
 		tag="h3"
 		class="m-2 p-2 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
