@@ -53,7 +53,7 @@
 			"success": "Zurück zur Startseite",
 			"pending": "Absenden",
 			"alertTitle": "Fehler",
-			"alertMessage": "Die angegebene email Adresse hat ein falsches Format",
+			"formatError": "Die angegebene email Adresse hat ein falsches Format",
 			"mailSentMessage": "Bitte überprüfen sie ihr E-Mail Postfach",
 			"sendError": "Beim Senden der Daten ist ein Fehler aufgetreten. Bitte versuchen sie es erneut"
 		}
