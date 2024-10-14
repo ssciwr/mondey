@@ -8,7 +8,7 @@
 	// variables
 	export let component: any;
 	export let value: any;
-	export let label: string;
+	export let label: string | null = null;
 	export let componentClass: string = '';
 	export let textTrigger: string = 'noAdditionalText';
 	export let showTextField: boolean = false;
@@ -63,7 +63,7 @@
 	<svelte:component
 		this={component}
 		class={highlight
-			? 'rounded border-2 border-primary-600 dark:border-primary-600 ' + componentClass
+			? 'border-primary-600 dark:border-primary-600 rounded border-2 ' + componentClass
 			: componentClass}
 		bind:value
 		{...properties}
