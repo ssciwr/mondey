@@ -14,6 +14,8 @@ from .databases.users import create_user_db_and_tables
 from .routers import admin
 from .routers import auth
 from .routers import milestones
+from .routers import research
+from .routers import questions
 from .routers import users
 from .settings import app_settings
 
@@ -25,24 +27,28 @@ async def lifespan(app: FastAPI):
     yield
 
 
-# ensure static files directory exists
-pathlib.Path(app_settings.STATIC_FILES_PATH).mkdir(parents=True, exist_ok=True)
-app = FastAPI(lifespan=lifespan, title="MONDEY API", root_path="/api")
-app.include_router(milestones.router)
-app.include_router(admin.router)
-app.include_router(users.router)
-app.include_router(auth.router)
-app.mount(
-    "/static", StaticFiles(directory=app_settings.STATIC_FILES_PATH), name="static"
-)
-if app_settings.ENABLE_CORS:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["http://localhost:5173"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+def create_app() -> FastAPI:
+    # ensure static files directory exists
+    pathlib.Path(app_settings.STATIC_FILES_PATH).mkdir(parents=True, exist_ok=True)
+    app = FastAPI(lifespan=lifespan, title="MONDEY API", root_path="/api")
+    app.include_router(milestones.create_router())
+    app.include_router(questions.create_router())
+    app.include_router(admin.create_router())
+    app.include_router(users.create_router())
+    app.include_router(auth.create_router())
+    app.include_router(research.create_router())
+    app.mount(
+        "/static", StaticFiles(directory=app_settings.STATIC_FILES_PATH), name="static"
     )
+    if app_settings.ENABLE_CORS:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["http://localhost:5173"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+    return app
 
 
 def main():
@@ -55,11 +61,13 @@ def main():
     for key, value in app_settings:
         logger.info(f"{key}: {value if key != 'SECRET' else '****************'}")
     uvicorn.run(
-        "mondey_backend.main:app",
+        "mondey_backend.main:create_app",
         host=app_settings.HOST,
         port=app_settings.PORT,
         reload=app_settings.RELOAD,
         log_level=app_settings.LOG_LEVEL,
+        forwarded_allow_ips="*",
+        factory=True,
     )
 
 

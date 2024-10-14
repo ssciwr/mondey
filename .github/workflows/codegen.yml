@@ -1,11 +1,11 @@
-name: format code
+name: codegen and format
 on:
   pull_request:
     branches:
       - main
 
 jobs:
-  format-frontend:
+  codegen-and-format:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -22,6 +22,9 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -30,11 +33,18 @@ jobs:
           node-version: 22
           cache: 'pnpm'
           cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: "Export openapi.json from fastapi app"
+        run: |
+            cd ../mondey_backend
+            pip install .
+            mondey-export-openapi-json
       - run: pnpm install
+      - name: "Generate frontend fetch API client code"
+        run: pnpm openapi-ts
       - run: pnpm format
       - uses: EndBug/add-and-commit@v9
         with:
           add: "*"
           author_name: "github-actions[bot]"
           author_email: "github-actions[bot]@users.noreply.github.com"
-          message: "pnpm format"
+          message: "update openapi.json & openapi-ts client, run pnpm format"

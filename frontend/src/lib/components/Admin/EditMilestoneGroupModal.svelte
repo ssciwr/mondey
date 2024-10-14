@@ -1,90 +1,98 @@
+<svelte:options runes={true} />
+
 <script lang="ts">
-	import {
-		Button,
-		InputAddon,
-		Textarea,
-		Input,
-		Label,
-		ButtonGroup,
-		Fileupload,
-		Modal
-	} from 'flowbite-svelte';
-	import { lang_id, languages } from '$lib/stores/adminStore';
-	import { patchMilestoneGroup, uploadMilestoneGroupImage } from '$lib/admin';
+	import { InputAddon, Textarea, Label, ButtonGroup, Fileupload, Modal } from 'flowbite-svelte';
+	import { _ } from 'svelte-i18n';
+	import { onMount } from 'svelte';
+	import { languages } from '$lib/stores/langStore';
+	import type { MilestoneGroupAdmin } from '$lib/client/types.gen';
+	import { updateMilestoneGroupAdmin, uploadMilestoneGroupImage } from '$lib/client/services.gen';
+	import { milestoneGroupImageUrl, refreshMilestoneGroups } from '$lib/admin.svelte';
+	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
+	import CancelButton from '$lib/components/Admin/CancelButton.svelte';
 
-	export let open: boolean = false;
-	export let milestoneGroup: object | null = null;
+	let {
+		open = $bindable(false),
+		milestoneGroup
+	}: { open: boolean; milestoneGroup: MilestoneGroupAdmin | null } = $props();
+	let files: FileList | undefined = $state(undefined);
+	let image: string = $state('');
 
-	let files: FileList;
-	let image: string | ArrayBuffer | null | undefined = null;
+	const textKeys = ['title', 'desc'];
 
-	$: if (milestoneGroup !== null) {
-		image = `${import.meta.env.VITE_MONDEY_API_URL}/static/milestone_group_${milestoneGroup.id}.jpg`;
+	onMount(() => {
+		if (milestoneGroup) {
+			image = milestoneGroupImageUrl(milestoneGroup.id);
+		}
+	});
+
+	function updateImageToUpload(event: Event) {
+		const target = event.target as HTMLInputElement;
+		if (target.files && target.files.length > 0) {
+			image = URL.createObjectURL(target.files[0]);
+		}
 	}
 
-	$: if (files) {
-		const reader = new FileReader();
-		reader.readAsDataURL(files[0]);
-		reader.onload = (e) => {
-			image = e?.target?.result;
-		};
-	}
-
-	async function reloadImg(url) {
-		console.log(`Reloading ${url}`);
+	async function reloadImg(url: string) {
 		await fetch(url, { cache: 'reload', mode: 'no-cors' });
-		document.body.querySelectorAll(`img[src='${url}']`).forEach((img) => (img.src = url));
+		document.body
+			.querySelectorAll(`img[src='${url}']`)
+			.forEach((img) => ((img as HTMLImageElement).src = url));
 	}
 
 	export async function saveChanges() {
-		try {
-			await patchMilestoneGroup(milestoneGroup);
-			if (files) {
-				await uploadMilestoneGroupImage(milestoneGroup.id, files[0]);
-				reloadImg(
-					`${import.meta.env.VITE_MONDEY_API_URL}/static/milestone_group_${milestoneGroup.id}.jpg`
-				);
+		if (!milestoneGroup) {
+			return;
+		}
+		const { data, error } = await updateMilestoneGroupAdmin({ body: milestoneGroup });
+		if (error) {
+			console.log(error);
+		} else {
+			console.log(data);
+			if (files && files.length > 0) {
+				await uploadMilestoneGroupImage({
+					body: { file: files[0] },
+					path: { milestone_group_id: milestoneGroup.id }
+				});
+				await reloadImg(milestoneGroupImageUrl(milestoneGroup.id));
 			}
-		} catch (e) {
-			console.error(e);
+			await refreshMilestoneGroups();
 		}
 	}
 </script>
 
-<Modal title="Edit milestone group" bind:open autoclose size="xl">
+<Modal title={$_('admin.edit')} bind:open autoclose size="xl">
 	{#if milestoneGroup}
+		{#each textKeys as textKey}
+			{@const title = $_(`admin.${textKey}`)}
+			<div class="mb-5">
+				<Label class="mb-2">{title}</Label>
+				{#each Object.entries($languages) as [lang_id, lang]}
+					<div class="mb-1">
+						<ButtonGroup class="w-full">
+							<InputAddon>{lang}</InputAddon>
+							<Textarea bind:value={milestoneGroup.text[lang_id][textKey]} placeholder={title} />
+						</ButtonGroup>
+					</div>
+				{/each}
+			</div>
+		{/each}
 		<div class="mb-5">
-			<Label class="mb-2">Title</Label>
-			{#each Object.entries(milestoneGroup.text) as [lang_id, text]}
-				<div class="mb-1">
-					<ButtonGroup class="w-full">
-						<InputAddon>{$languages[text.lang_id]}</InputAddon>
-						<Input bind:value={text.title} placeholder="Title" />
-					</ButtonGroup>
-				</div>
-			{/each}
-		</div>
-		<div class="mb-5">
-			<Label class="mb-2">Description</Label>
-			{#each Object.entries(milestoneGroup.text) as [lang_id, text]}
-				<div class="mb-1">
-					<ButtonGroup class="w-full">
-						<InputAddon>{$languages[text.lang_id]}</InputAddon>
-						<Textarea bind:value={text.desc} placeholder="Description" />
-					</ButtonGroup>
-				</div>
-			{/each}
-		</div>
-		<div class="mb-5">
-			<Label for="img_upload" class="pb-2">Image</Label>
+			<Label for="img_upload" class="pb-2">{$_('admin.image')}</Label>
 			<div class="flex flex-row">
 				<img src={image} width="48" height="48" alt="MilestoneGroup" class="mx-2" />
-				<Fileupload bind:files accept=".jpg, .jpeg" id="img_upload" class="mb-2 flex-grow-0" />
+				<Fileupload
+					bind:files
+					onchange={updateImageToUpload}
+					accept=".jpg, .jpeg"
+					id="img_upload"
+					class="mb-2 flex-grow-0"
+				/>
 			</div>
 		</div>
 	{/if}
 	<svelte:fragment slot="footer">
-		<Button color="green" on:click={saveChanges}>Save changes</Button>
-		<Button color="alternative">Cancel</Button>
+		<SaveButton onclick={saveChanges} />
+		<CancelButton />
 	</svelte:fragment>
 </Modal>

@@ -1,9 +1,6 @@
-import { writable } from 'svelte/store';
+import { writable, type Writable } from 'svelte/store';
+import type { MilestoneGroupAdmin, UserQuestionAdmin } from '$lib/client/types.gen';
 
-export const isLoggedIn = writable(false);
+export const milestoneGroups: Writable<Array<MilestoneGroupAdmin>> = writable([]);
 
-export const milestoneGroups = writable([]);
-
-export const languages = writable({});
-
-export const lang_id = writable('1');
+export const userQuestions: Writable<Array<UserQuestionAdmin>> = writable([]);

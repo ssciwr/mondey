@@ -44,7 +44,9 @@ async def get_user_manager(
     yield UserManager(user_db)
 
 
-cookie_transport = CookieTransport(cookie_max_age=3600)
+cookie_transport = CookieTransport(
+    cookie_max_age=3600, cookie_secure=app_settings.COOKIE_SECURE
+)
 
 
 def get_database_strategy(

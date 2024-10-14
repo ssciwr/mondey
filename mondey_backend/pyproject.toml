@@ -17,6 +17,7 @@ dependencies = [
     "aiosqlite",
     "python-multipart",
     "pydantic-settings",
+    "click",
 ]
 dynamic = ["version"]
 
@@ -29,6 +30,7 @@ tests = [
 
 [project.scripts]
 mondey-backend = "mondey_backend.main:main"
+mondey-export-openapi-json = "mondey_backend.export:export_openapi_json"
 
 [tool.hatch.version]
 path = "src/mondey_backend/__init__.py"

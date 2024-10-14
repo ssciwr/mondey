@@ -28,8 +28,9 @@ The first admin user can only be created by modifying the database directly.
 After you have registered a user using the swagger UI, you can promote them to an admin user with e.g.:
 
 ```bash
-sqlite3 users.db
+sqlite3 db/users.db
 sqlite> UPDATE user SET is_superuser = 1 WHERE email = 'youremail@yourdomain.com';
+sqlite> .quit
 ```
 
 ## Configuration

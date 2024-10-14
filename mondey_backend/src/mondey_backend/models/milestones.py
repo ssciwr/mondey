@@ -54,7 +54,7 @@ class MilestoneGroupTextPublic(MilestoneGroupTextBase):
 
 class MilestoneGroup(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    order: int
+    order: int = 0
     text: Mapped[dict[int, MilestoneGroupText]] = Relationship(
         sa_relationship=relationship(
             collection_class=attribute_keyed_dict("lang_id"),
@@ -74,29 +74,26 @@ class MilestoneGroupAdmin(SQLModel):
     id: int
     order: int
     text: dict[int, MilestoneGroupText] = {}
-    milestones: list[Milestone] = []
+    milestones: list[MilestoneAdmin] = []
 
 
 ## MilestoneText
 
 
 class MilestoneTextBase(SQLModel):
-    name: str
-    desc: str
-    observation: str
-    help: str
+    title: str = ""
+    desc: str = ""
+    obs: str = ""
+    help: str = ""
 
 
 class MilestoneText(MilestoneTextBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
     milestone_id: int | None = Field(
-        default=None, foreign_key="milestone.id", index=True
+        default=None, foreign_key="milestone.id", primary_key=True
     )
-    lang: str = fixed_length_string_field(2, index=True)
-
-
-class MilestoneTextCreate(MilestoneTextBase):
-    lang: str = fixed_length_string_field(2, index=True)
+    lang_id: int | None = Field(
+        default=None, foreign_key="language.id", primary_key=True
+    )
 
 
 class MilestoneTextPublic(MilestoneTextBase):
@@ -106,54 +103,48 @@ class MilestoneTextPublic(MilestoneTextBase):
 ## Milestone
 
 
-class MilestoneBase(SQLModel):
-    order: int
-    group_id: int | None = Field(default=None, foreign_key="milestonegroup.id")
-
-
-class Milestone(MilestoneBase, table=True):
+class Milestone(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
+    group_id: int | None = Field(default=None, foreign_key="milestonegroup.id")
+    order: int = 0
     group: MilestoneGroup | None = back_populates("milestones")
+    text: Mapped[dict[int, MilestoneText]] = Relationship(
+        sa_relationship=relationship(
+            collection_class=attribute_keyed_dict("lang_id"),
+            cascade="all, delete-orphan",
+        )
+    )
     images: Mapped[list[MilestoneImage]] = back_populates("milestone")
 
 
-class MilestonePublic(MilestoneBase):
+class MilestonePublic(SQLModel):
     id: int
+    text: dict[int, MilestoneTextPublic] = {}
+    images: list[MilestoneImagePublic] = []
 
 
-class MilestoneCreate(MilestoneBase):
-    pass
-
-
-class MilestoneUpdate(SQLModel):
-    name: str | None = None
-    desc: str | None = None
-    howto: str | None = None
-    help: str | None = None
-    order: int | None = None
-    group_id: int | None = None
+class MilestoneAdmin(SQLModel):
+    id: int
+    group_id: int
+    order: int
+    text: dict[int, MilestoneText] = {}
+    images: list[MilestoneImage] = []
 
 
 ## MilestoneImage
 
 
-class MilestoneImageBase(SQLModel):
-    image: str
-    milestone_id: int | None = Field(default=None, foreign_key="milestone.id")
-    approved: bool = False
-
-
-class MilestoneImage(MilestoneImageBase, table=True):
+class MilestoneImage(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
+    milestone_id: int | None = Field(default=None, foreign_key="milestone.id")
+    filename: str = ""
+    approved: bool = False
     milestone: Milestone | None = back_populates("images")
 
 
-class MilestoneImagePublic(MilestoneImageBase):
-    id: int
-
-
-class MilestoneImageCreate(MilestoneImageBase):
-    pass
+class MilestoneImagePublic(SQLModel):
+    filename: str
+    approved: bool
 
 
 ## MilestoneAnswer

@@ -6,5 +6,9 @@ from ..models.users import UserRead
 from ..models.users import UserUpdate
 from ..users import fastapi_users
 
-router = APIRouter(prefix="/users", tags=["users"])
-router.include_router(fastapi_users.get_users_router(UserRead, UserUpdate))
+
+def create_router() -> APIRouter:
+    router = APIRouter(prefix="/users", tags=["users"])
+    router.include_router(fastapi_users.get_users_router(UserRead, UserUpdate))
+
+    return router

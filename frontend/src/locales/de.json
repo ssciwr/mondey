@@ -1,4 +1,5 @@
 {
+	"LOGIN_BAD_CREDENTIALS": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
 	"milestone": {
 		"answer0": {
 			"text": "Noch gar nicht",
@@ -25,6 +26,23 @@
 	},
 	"admin": {
 		"languages": "Sprachen",
-		"milestonegroups": "Meilensteingruppen"
+		"milestones": "Meilensteine",
+		"milestone-groups": "Meilensteingruppen",
+		"user-questions": "Benutzerfragen",
+		"question": "Frage",
+		"add": "Hinzufügen",
+		"edit": "Bearbeiten",
+		"delete": "Löschen",
+		"delete-are-you-sure": "Möchten Sie dies wirklich löschen?",
+		"yes-sure": "Ja, ich bin sicher",
+		"no-cancel": "Nein, abbrechen",
+		"save-changes": "Änderungen speichern",
+		"cancel": "Abbrechen",
+		"title": "Titel",
+		"desc": "Beschreibung",
+		"obs": "Beobachtungshinweise",
+		"help": "Förderhilfen",
+		"image": "Bild",
+		"images": "Bilder"
 	}
 }

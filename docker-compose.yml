@@ -23,9 +23,9 @@ services:
     ports:
       - "80:80"
       - "443:443"
-#    volumes:
-#      - ${MONDEY_SSL_CERT:-./cert.pem}:/MONDEY_ssl_cert.pem
-#      - ${MONDEY_SSL_KEY:-./key.pem}:/MONDEY_ssl_key.pem
+    volumes:
+      - ${MONDEY_SSL_CERT:-./cert.pem}:/mondey_ssl_cert.pem
+      - ${MONDEY_SSL_KEY:-./key.pem}:/mondey_ssl_key.pem
 #  email:
 #    image: "boky/postfix"
 #    environment:

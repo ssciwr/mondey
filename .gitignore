@@ -170,3 +170,6 @@ dmypy.json
 
 # static images
 mondey_backend/static/*.jpg
+
+# ssl keys
+*.pem
