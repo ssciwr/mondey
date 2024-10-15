@@ -44,17 +44,6 @@
 
 
 	const data = [
-		// {
-		// 	component: Input,
-		// 	props: {
-		// 		label: $_('registration.usernameLabel'),
-		// 		type: 'text',
-		// 		placeholder: $_('registration.usernameLabel'),
-		// 		required: true,
-		// 		id: 'username'
-		// 	},
-		// 	value: ''
-		// },
 		{
 			component: Input,
 			props: {
@@ -92,7 +81,7 @@
 	];
 
 	let showAlert: boolean = false;
-	let success: boolean = true;
+	let success: boolean = false;
 	let alertMessage = $_('registration.alertMessageMissing'); 
 </script>
 
