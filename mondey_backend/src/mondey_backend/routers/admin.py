@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+import pathlib
+
 from fastapi import APIRouter
 from fastapi import UploadFile
 from sqlmodel import col
@@ -42,6 +45,18 @@ def create_router() -> APIRouter:
         language = get(session, Language, language_id)
         session.delete(language)
         session.commit()
+        return {"ok": True}
+
+    @router.put("/i18n/{language_id}")
+    async def update_i18n(language_id: int, i18dict: dict[str, dict[str, str]]):
+        i18json_path = (
+            pathlib.Path(app_settings.STATIC_FILES_PATH)
+            / "i18n"
+            / f"{language_id}.json"
+        )
+        i18json_path.parent.mkdir(exist_ok=True)
+        with open(i18json_path, "w", encoding="utf-8") as i18json_file:
+            json.dump(i18dict, i18json_file, separators=(",", ":"), ensure_ascii=False)
         return {"ok": True}
 
     @router.get("/milestone-groups/", response_model=list[MilestoneGroupAdmin])

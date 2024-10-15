@@ -20,7 +20,6 @@ function AdminUser() {
 			return user;
 		},
 		login: async function (loginData: Body_auth_cookie_login_auth_login_post) {
-			console.log(loginData);
 			const { data, error } = await authCookieLogin({ body: loginData });
 			if (error) {
 				return error?.detail as string;
