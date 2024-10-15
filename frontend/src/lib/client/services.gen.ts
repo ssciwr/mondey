@@ -28,6 +28,9 @@ import type {
 	DeleteLanguageData,
 	DeleteLanguageError,
 	DeleteLanguageResponse,
+	UpdateI18NData,
+	UpdateI18NError,
+	UpdateI18NResponse,
 	GetMilestoneGroupsAdminError,
 	GetMilestoneGroupsAdminResponse,
 	CreateMilestoneGroupAdminError,
@@ -216,6 +219,18 @@ export const deleteLanguage = <ThrowOnError extends boolean = false>(
 	>({
 		...options,
 		url: '/admin/languages/{language_id}'
+	});
+};
+
+/**
+ * Update I18N
+ */
+export const updateI18N = <ThrowOnError extends boolean = false>(
+	options: Options<UpdateI18NData, ThrowOnError>
+) => {
+	return (options?.client ?? client).put<UpdateI18NResponse, UpdateI18NError, ThrowOnError>({
+		...options,
+		url: '/admin/i18n/{language_id}'
 	});
 };
 

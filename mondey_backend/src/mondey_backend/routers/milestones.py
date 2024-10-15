@@ -16,12 +16,12 @@ from ..models.milestones import MilestonePublic
 def create_router() -> APIRouter:
     router = APIRouter(tags=["milestones"])
 
-    @router.get("/languages/", response_model=dict[int, str])
+    @router.get("/languages/", response_model=dict[str, int])
     def get_languages(
         session: SessionDep,
     ):
         return {
-            language.id: language.lang
+            language.lang: language.id
             for language in session.exec(select(Language)).all()
         }
 

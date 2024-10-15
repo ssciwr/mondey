@@ -1,22 +1,16 @@
 {
-	"LOGIN_BAD_CREDENTIALS": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
+	"login": {
+		"LOGIN_BAD_CREDENTIALS": "Ungültige E-Mail-Adresse oder ungültiges Passwort"
+	},
 	"milestone": {
-		"answer0": {
-			"text": "Noch gar nicht",
-			"description": "Das Kind macht noch keine Anstalten bzw. ist noch nicht in der Lage, das Verhalten auszuführen."
-		},
-		"answer1": {
-			"text": "In Ansätzen",
-			"description": "Das Kind zeigt erste Ansätze, das Verhalten auszuführen, weicht dabei aber noch erheblich von der Beschreibung ab oder/und ist sehr unsicher."
-		},
-		"answer2": {
-			"text": "Weitgehend",
-			"description": "Das Kind beherrscht das Verhalten im Prinzip, zeigt es aber erst selten, ist dabei  noch leicht unsicher oder führt es nicht ganz sauber aus."
-		},
-		"answer3": {
-			"text": "Zuverlässig",
-			"description": "Das Kind zeigt das Verhalten mehrmals sicher und genau wie beschrieben."
-		},
+		"answer0-text": "Noch gar nicht",
+		"answer0-desc": "Das Kind macht noch keine Anstalten bzw. ist noch nicht in der Lage, das Verhalten auszuführen.",
+		"answer1-text": "In Ansätzen",
+		"answer1-desc": "Das Kind zeigt erste Ansätze, das Verhalten auszuführen, weicht dabei aber noch erheblich von der Beschreibung ab oder/und ist sehr unsicher.",
+		"answer2-text": "Weitgehend",
+		"answer2-desc": "Das Kind beherrscht das Verhalten im Prinzip, zeigt es aber erst selten, ist dabei  noch leicht unsicher oder führt es nicht ganz sauber aus.",
+		"answer3-text": "Zuverlässig",
+		"answer3-desc": "Das Kind zeigt das Verhalten mehrmals sicher und genau wie beschrieben.",
 		"milestones": "Meilensteine",
 		"observation": "Beobachtungshinweise",
 		"help": "Förderhilfen",
@@ -28,6 +22,7 @@
 		"languages": "Sprachen",
 		"milestones": "Meilensteine",
 		"milestone-groups": "Meilensteingruppen",
+		"translations": "Übersetzungen",
 		"user-questions": "Benutzerfragen",
 		"question": "Frage",
 		"add": "Hinzufügen",
