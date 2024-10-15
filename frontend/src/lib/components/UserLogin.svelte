@@ -87,7 +87,7 @@
 {#if showAlert}
 	<AlertMessage
 		title={$_('login.alertMessageTitle')}
-		message={$_('login.alertMessage')}
+		message={$_('login.LOGIN_BAD_CREDENTIALS')}
 		lastpage={`${base}/userLand/userLogin`}
 		onclick={() => {
 			showAlert = false;

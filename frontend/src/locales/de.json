@@ -1,7 +1,4 @@
 {
-	"login": {
-		"LOGIN_BAD_CREDENTIALS": "Ungültige E-Mail-Adresse oder ungültiges Passwort"
-	},
 	"milestone": {
 		"answer0-text": "Noch gar nicht",
 		"answer0-desc": "Das Kind macht noch keine Anstalten bzw. ist noch nicht in der Lage, das Verhalten auszuführen.",
@@ -40,11 +37,26 @@
 		"image": "Bild",
 		"images": "Bilder"
 	},
+	"registration": {
+		"heading": "Als neuer Benutzer registrieren", 
+		"alertMessage": "Bitte füllen Sie alle Felder aus.", 
+		"alertMessageTitle": "Fehler",
+		"usernameLabel": "Benutzername",
+		"passwordLabel": "Passwort",
+		"emailLabel": "e-Mail",
+		"passwordConfirmLabel": "Passwort wiederholen",
+		"role": "Rolle",
+		"observerRole": "Beobachter",
+		"scientistRole": "Wissenschaftler",
+		"adminRole": "Admin",
+		"submitButtonLabel": "Absenden",
+		"selectPlaceholder": "Bitte auswählen"
+	},
 	"login": {
 		"heading": "Einloggen",
 		"alreadyLoggedInMessage": "Sie sind bereits angemeldet. Melden sie sich zuerst ab um den Account zu wechseln.",
 		"alertMessageTitle": "Fehler",
-		"alertMessage": "Einloggen nicht erfolgreich. Eingaben sind falsch",
+		"LOGIN_BAD_CREDENTIALS": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
 		"usernameLabel": "Benutzerkennung",
 		"passwordLabel": "Passwort",
 		"role": "Rolle",
