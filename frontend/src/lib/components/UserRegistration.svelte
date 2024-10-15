@@ -6,7 +6,7 @@
 	import DataInput from '$lib/components/DataInput/DataInput.svelte';
 	import { preventDefault } from '$lib/util';
 	import { Button, Card, Heading, Input } from 'flowbite-svelte';
-	
+	import { CheckCircleOutline } from 'flowbite-svelte-icons';
 	import { _ } from 'svelte-i18n';
 
 
@@ -17,21 +17,24 @@
 		}
 	};
 
-
-	function verify() {
-		return data[1].value !== "" && data[2].value === data[1].value;
-	}
-
 	async function submitData() {
 
-		const equalPW = verify();
+		const equalPW = data[1].value !== "" && data[2].value === data[1].value;
 
 		if (equalPW) {
 			userData.body.email = data[0].value
 			userData.body.password = data[1].value
-			console.log('userData: ', userData);
 			const result = await registerRegister(userData)
-			console.log(result);
+
+			if (result.error) {
+				console.log('error: ', result.error); 
+				showAlert = true;
+				data.map((element)=> {element.value = "";});
+			}
+			else {
+				console.log('successful transmission: ', result.response.status);
+				success=true;
+			}
 		}
 		else {
 			showAlert = true; 
@@ -89,6 +92,7 @@
 	];
 
 	let showAlert: boolean = false;
+	let success: boolean = true;
 	let alertMessage = $_('registration.alertMessageMissing'); 
 </script>
 
@@ -106,14 +110,14 @@
 {/if}
 
 <!-- The actual content -->
-<div class="container m-1 mx-auto w-full max-w-xl">
-	<Card class="container m-1 mx-auto w-full max-w-xl">
-		<Heading
-			tag="h3"
-			class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-			>{$_('registration.heading')}
-		</Heading>
+<Card class="container m-2 p-2 mx-auto w-full max-w-xl">
+	<Heading
+		tag="h3"
+		class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
+		>{$_('registration.heading')}
+	</Heading>
 
+	{#if success === false}
 		<form onsubmit={preventDefault(submitData)} class="m-2 mx-auto w-full flex-col space-y-6">
 			{#each data as element, i}
 				<DataInput
@@ -134,5 +138,18 @@
 			class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 			>{$_('registration.submitButtonLabel')}</Button>
 		</form>
-	</Card>
-</div>
+	{:else}
+		<div class="m-2 p-2 w-full mx-auto text-gray-700 dark:text-gray-400 flex justify-center items-center"> 
+			<CheckCircleOutline size="xl" color='green' class="m-2"/>  
+			<div class="m-2 p-2">
+			{$_('registration.successMessage')}
+			</div>
+		</div>
+		<Button 
+		type="button" 
+		class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
+		href = "/">
+		{$_('registration.goHome')}
+		</Button>
+	{/if}
+</Card>

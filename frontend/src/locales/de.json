@@ -51,7 +51,9 @@
 		"scientistRole": "Wissenschaftler",
 		"adminRole": "Admin",
 		"submitButtonLabel": "Absenden",
-		"selectPlaceholder": "Bitte auswählen"
+		"selectPlaceholder": "Bitte auswählen", 
+		"successMessage": "Bitte überprüfen sie ihr E-Mail Postfach", 
+		"goHome": "Zur Hauptseite"
 	},
 	"login": {
 		"heading": "Einloggen",
