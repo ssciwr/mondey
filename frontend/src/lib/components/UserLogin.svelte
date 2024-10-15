@@ -116,7 +116,10 @@
 
 				<UserLoginUtil cls="p-6 mb-3" bind:checked={remember} />
 
-				<Button type="submit">{$_('login.submitButtonLabel')}</Button>
+				<Button
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
+					type="submit">{$_('login.submitButtonLabel')}</Button
+				>
 			</form>
 		</Card>
 
