@@ -1,24 +1,57 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import { registerRegister } from '$lib/client/services.gen';
+	import { type RegisterRegisterData } from '$lib/client/types.gen';
 	import AlertMessage from '$lib/components/AlertMessage.svelte';
 	import DataInput from '$lib/components/DataInput/DataInput.svelte';
 	import { preventDefault } from '$lib/util';
 	import { Button, Card, Heading, Input } from 'flowbite-svelte';
+	
 	import { _ } from 'svelte-i18n';
 
 
+	const userData: RegisterRegisterData = {
+		body: {
+			email: "",
+			password: ""
+		}
+	};
+
+
+	function verify() {
+		return data[1].value !== "" && data[2].value === data[1].value;
+	}
+
+	async function submitData() {
+
+		const equalPW = verify();
+
+		if (equalPW) {
+			userData.body.email = data[0].value
+			userData.body.password = data[1].value
+			console.log('userData: ', userData);
+			const result = await registerRegister(userData)
+			console.log(result);
+		}
+		else {
+			showAlert = true; 
+			alertMessage = $_('registration.alertMessagePasswords')
+		}
+	}
+
+
 	const data = [
-		{
-			component: Input,
-			props: {
-				label: $_('registration.usernameLabel'),
-				type: 'text',
-				placeholder: $_('registration.usernameLabel'),
-				required: true,
-				id: 'username'
-			},
-			value: ''
-		},
+		// {
+		// 	component: Input,
+		// 	props: {
+		// 		label: $_('registration.usernameLabel'),
+		// 		type: 'text',
+		// 		placeholder: $_('registration.usernameLabel'),
+		// 		required: true,
+		// 		id: 'username'
+		// 	},
+		// 	value: ''
+		// },
 		{
 			component: Input,
 			props: {
@@ -56,14 +89,14 @@
 	];
 
 	let showAlert: boolean = false;
-
+	let alertMessage = $_('registration.alertMessageMissing'); 
 </script>
 
 <!-- Show big alert message when something is missing -->
 {#if showAlert}
 	<AlertMessage
 		title={$_('registration.alertMessageTitle')}
-		message={$_('registration.alertMessage')}
+		message={alertMessage}
 		infopage="{base}/info"
 		infotitle="Was passiert mit den Daten"
 		onclick={() => {
@@ -81,10 +114,7 @@
 			>{$_('registration.heading')}
 		</Heading>
 
-		<form onsubmit={preventDefault((e) => {
-			console.log('event: ', e);
-		})} class="m-2 mx-auto w-full flex-col space-y-6">
-
+		<form onsubmit={preventDefault(submitData)} class="m-2 mx-auto w-full flex-col space-y-6">
 			{#each data as element, i}
 				<DataInput
 					component={element.component}
