@@ -9,45 +9,42 @@
 	import { CheckCircleOutline } from 'flowbite-svelte-icons';
 	import { _ } from 'svelte-i18n';
 
-
 	const userData: RegisterRegisterData = {
 		body: {
-			email: "",
-			password: ""
+			email: '',
+			password: ''
 		}
 	};
 
 	async function submitData() {
-
-		const equalPW = data[1].value !== "" && data[2].value === data[1].value;
+		const equalPW = data[1].value !== '' && data[2].value === data[1].value;
 
 		if (equalPW) {
-			userData.body.email = data[0].value
-			userData.body.password = data[1].value
-			const result = await registerRegister(userData)
+			userData.body.email = data[0].value;
+			userData.body.password = data[1].value;
+			const result = await registerRegister(userData);
 
 			if (result.error) {
-				console.log('error: ', result.error); 
+				console.log('error: ', result.error);
 				showAlert = true;
-				data.map((element)=> {element.value = "";});
-			}
-			else {
+				data.map((element) => {
+					element.value = '';
+				});
+			} else {
 				console.log('successful transmission: ', result.response.status);
-				success=true;
+				success = true;
 			}
-		}
-		else {
-			showAlert = true; 
-			alertMessage = $_('registration.alertMessagePasswords')
+		} else {
+			showAlert = true;
+			alertMessage = $_('registration.alertMessagePasswords');
 		}
 	}
-
 
 	const data = [
 		{
 			component: Input,
 			props: {
-				label:  $_('registration.emailLabel'),
+				label: $_('registration.emailLabel'),
 				type: 'email',
 				placeholder: $_('registration.emailLabel'),
 				required: true,
@@ -65,7 +62,6 @@
 				id: 'password'
 			},
 			value: ''
-
 		},
 		{
 			component: Input,
@@ -82,7 +78,7 @@
 
 	let showAlert: boolean = false;
 	let success: boolean = false;
-	let alertMessage = $_('registration.alertMessageMissing'); 
+	let alertMessage = $_('registration.alertMessageMissing');
 </script>
 
 <!-- Show big alert message when something is missing -->
@@ -93,13 +89,13 @@
 		infopage="{base}/info"
 		infotitle="Was passiert mit den Daten"
 		onclick={() => {
-			showAlert = false;		
+			showAlert = false;
 		}}
 	/>
 {/if}
 
 <!-- The actual content -->
-<Card class="container m-2 p-2 mx-auto w-full max-w-xl">
+<Card class="container m-2 mx-auto w-full max-w-xl p-2">
 	<Heading
 		tag="h3"
 		class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
@@ -123,22 +119,26 @@
 			{/each}
 
 			<Button
-			type="submit"
-			class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
-			>{$_('registration.submitButtonLabel')}</Button>
+				type="submit"
+				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+				>{$_('registration.submitButtonLabel')}</Button
+			>
 		</form>
 	{:else}
-		<div class="m-2 p-2 w-full mx-auto text-gray-700 dark:text-gray-400 flex justify-center items-center"> 
-			<CheckCircleOutline size="xl" color='green' class="m-2"/>  
+		<div
+			class="m-2 mx-auto flex w-full items-center justify-center p-2 text-gray-700 dark:text-gray-400"
+		>
+			<CheckCircleOutline size="xl" color="green" class="m-2" />
 			<div class="m-2 p-2">
-			{$_('registration.successMessage')}
+				{$_('registration.successMessage')}
 			</div>
 		</div>
-		<Button 
-		type="button" 
-		class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
-		href = "/">
-		{$_('registration.goHome')}
+		<Button
+			type="button"
+			class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+			href="/"
+		>
+			{$_('registration.goHome')}
 		</Button>
 	{/if}
 </Card>

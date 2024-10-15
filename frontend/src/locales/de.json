@@ -38,8 +38,8 @@
 		"images": "Bilder"
 	},
 	"registration": {
-		"heading": "Als neuer Benutzer registrieren", 
-		"alertMessageMissing": "Bitte füllen Sie alle Felder aus.", 
+		"heading": "Als neuer Benutzer registrieren",
+		"alertMessageMissing": "Bitte füllen Sie alle Felder aus.",
 		"alertMessagePasswords": "Passwörter stimmen nicht überein",
 		"alertMessageTitle": "Fehler",
 		"usernameLabel": "Benutzername",
@@ -51,8 +51,8 @@
 		"scientistRole": "Wissenschaftler",
 		"adminRole": "Admin",
 		"submitButtonLabel": "Absenden",
-		"selectPlaceholder": "Bitte auswählen", 
-		"successMessage": "Bitte überprüfen sie ihr E-Mail Postfach", 
+		"selectPlaceholder": "Bitte auswählen",
+		"successMessage": "Bitte überprüfen sie ihr E-Mail Postfach",
 		"goHome": "Zur Hauptseite"
 	},
 	"login": {
