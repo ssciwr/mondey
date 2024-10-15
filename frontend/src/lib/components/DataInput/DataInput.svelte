@@ -8,7 +8,7 @@
 	// variables
 	export let component: any;
 	export let value: any;
-	export let label: string;
+	export let label: string | null = null;
 	export let componentClass: string = '';
 	export let textTrigger: string = 'noAdditionalText';
 	export let showTextField: boolean = false;
@@ -56,7 +56,7 @@
 </script>
 
 {#if label}
-	<Label class="font-semibold text-gray-700 dark:text-gray-400">{label}</Label>
+	<Label for={properties.id} class="font-semibold text-gray-700 dark:text-gray-400">{label}</Label>
 {/if}
 
 <div class="space-y-4">
