@@ -1,57 +1,14 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 
 	import UserLoginUtil from '$lib/components//UserLoginUtil.svelte';
 	import AlertMessage from '$lib/components/AlertMessage.svelte';
 	import DataInput from '$lib/components/DataInput/DataInput.svelte';
-	import NavigationButtons from '$lib/components/Navigation/NavigationButtons.svelte';
 
-	import { hash, users, type UserData } from '$lib/stores/userStore';
-	import { Card, Heading, Input, Select } from 'flowbite-svelte';
+	import { users } from '$lib/stores/userStore';
+	import { Button, Card, Heading, Input, Select } from 'flowbite-svelte';
 	import { onDestroy, onMount } from 'svelte';
-	import 
-
-	// functionality
-
-	/**
-	 * This currently immitates the behavior of a login system by fetching data from
-	 * the userstore that has been precreated. What fetchWithCredentials does currently will later go into the backend
-	 */
-	async function validateCredentials() {
-		// README: this should not be set here but in the child component. However, indication of something missing should
-		// not happen immediatelly in the first round of entry, so this code here defers it until the first hit of the login button.
-
-		const user = await users.fetchWithCredentials(
-			data[0].value,
-			await hash(data[1].value),
-			data[2].value
-		);
-
-		console.log(user);
-
-		if (user) {
-			userID = user.id;
-
-			if (remember) {
-				localStorage.setItem('currentUser', JSON.stringify(userID));
-			} else {
-				localStorage.removeItem('currentUser');
-			}
-
-			await users.setLoggedIn(userID);
-
-			await users.save();
-
-			goto(`${base}/userLand/userLandingpage/`);
-		} else {
-			showAlert = true;
-			data = data.map((element) => {
-				element.value = null;
-				return element;
-			});
-		}
-	}
+	import { _ } from 'svelte-i18n';
 
 	// data and variables
 	let data = [
@@ -59,78 +16,56 @@
 			component: Input,
 			value: null,
 			props: {
-				label: 'Benutzerkennung',
+				label: $_('login.usernameLabel'),
 				type: 'text',
-				placeholder: 'Benutzerkennung',
-				required: true
+				placeholder: $_('login.usernameLabel'),
+				required: true,
+				id: 'username'
 			}
 		},
 		{
 			component: Input,
 			value: null,
 			props: {
-				label: 'Passwort',
+				label: $_('login.passwordLabel'),
 				type: 'password',
-				placeholder: 'Passwort',
-				required: true
+				placeholder: $_('login.passwordLabel'),
+				required: true,
+				id: 'password'
 			}
 		},
 		{
 			component: Select,
 			value: null,
 			props: {
-				label: 'Rolle',
-				items: ['Beobachter', 'Wissenschaftler', 'Admin'].map((v) => {
-					return { name: String(v), value: v };
-				}),
-				placeholder: 'Bitte auswählen',
-				required: true
+				label: $_('login.role'),
+				items: [$_('login.observerRole'), $_('login.scientistRole'), $_('login.adminRole')].map(
+					(v) => {
+						return { name: String(v), value: v };
+					}
+				),
+				placeholder: $_('login.selectPlaceholder'),
+				required: true,
+				id: 'role'
 			}
 		}
 	];
 
-	const buttons = [
-		{
-			label: 'Login',
-			href: null,
-			onclick: validateCredentials
-		}
-	];
-
-	let alertMessage = 'Eingaben sind falsch';
+	let alertMessage = $_('login.alertMessage');
 	let userID: string;
 	let remember: boolean = false;
 	let showAlert: boolean = false;
-	const heading = 'Einloggen';
+	const heading = $_('login.heading');
 
 	// check if credentials are stored
-	onMount(async () => {
-		// make dummyUser if not already there
-		users.load();
+	onMount(async () => {});
 
-		// check if credentials are saved
-		const savedUID = JSON.parse(localStorage.getItem('currentUser'));
-
-		if (savedUID) {
-			userID = savedUID;
-
-			const user: UserData = (await users.fetch(userID)) as UserData;
-
-			data[0].value = user.name;
-			data[1].value = user.password;
-			data[2].value = user.role;
-			remember = true;
-		}
-	});
-
-	onDestroy(async () => {
-		await users.save();
-	});
+	onDestroy(async () => {});
 </script>
 
 {#if showAlert}
 	<AlertMessage
-		title={'Fehler'}
+		title={$_('login.alertMessageTitle')}
 		message={alertMessage}
 		lastpage={`${base}/userLand/userLogin`}
 		onclick={() => {
@@ -141,29 +76,29 @@
 
 {#if users.get()['loggedIn'] && users.get()['loggedIn'] !== null}
 	<AlertMessage
-		title={'Fehler'}
-		message={`Sie sind bereits angemeldet. Melden sie sich zuerst ab um den Account zu wechseln.`}
+		title={$_('login.alertMessageTitle')}
+		message={$_('login.alreadyLoggedInMessage')}
 		lastpage={`${base}`}
 		onclick={() => {
 			showAlert = false;
 		}}
 	/>
 {:else}
-	<div class="container m-1 mx-auto w-full max-w-xl">
-		<Card class="container m-1 mx-auto mb-6 w-full max-w-xl pb-6">
+	<div class="container m-2 mx-auto w-full max-w-xl">
+		<Card class="container m-2 mx-auto mb-6 w-full max-w-xl pb-6">
 			{#if heading}
 				<Heading
 					tag="h3"
-					class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
+					class="m-2 mb-3 p-2 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
 					>{heading}</Heading
 				>
 			{/if}
 
 			<form
-				class="m-1 m-3 mx-auto w-full flex-col space-y-6"
 				onsubmit={(event) => {
 					console.log('event: ', event);
 				}}
+				class="m-2 mx-auto w-full flex-col space-y-6"
 			>
 				{#each data as element}
 					<DataInput
@@ -178,11 +113,11 @@
 						}}
 					/>
 				{/each}
+
+				<UserLoginUtil cls="p-6 mb-3" bind:checked={remember} />
+
+				<Button type="submit">{$_('login.submitButtonLabel')}</Button>
 			</form>
-
-			<UserLoginUtil cls="p-6 mb-3" bind:checked={remember} />
-
-			<NavigationButtons {buttons} />
 		</Card>
 
 		<span class="container mx-auto w-full text-gray-700 dark:text-gray-400">Not registered?</span>

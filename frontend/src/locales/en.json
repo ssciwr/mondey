@@ -45,7 +45,20 @@
 		"image": "Image",
 		"images": "Images"
 	},
-	"login": {},
+	"login": {
+		"heading": "Sign in",
+		"alreadyLoggedIn": "You are already logged in. Sign out first to use to another account",
+		"alertMessageTitle": "Error",
+		"alertMessage": "Wrong entries",
+		"usernameLabel": "Username",
+		"passwordLabel": "Password",
+		"role": "role",
+		"observerRole": "observer",
+		"scientistRole": "scientist",
+		"adminRole": "admin",
+		"submitButtonLabel": "Submit",
+		"selectPlaceholder": "Please select"
+	},
 	"forgotPw": {
 		"heading": "Forgot your password?",
 		"placeholder": "Please enter your e-mail adress to get a new password",

@@ -46,16 +46,19 @@
 		"images": "Bilder"
 	},
 	"login": {
-		"alreadyLoggedIn": "Sie sind bereits angemeldet. Melden sie sich zuerst ab um den Account zu wechseln.",
+		"heading": "Einloggen",
+		"alreadyLoggedInMessage": "Sie sind bereits angemeldet. Melden sie sich zuerst ab um den Account zu wechseln.",
 		"alertMessageTitle": "Fehler",
-		"label": "Benutzerkennung",
+		"alertMessage": "Eingaben sind falsch",
+		"usernameLabel": "Benutzerkennung",
 		"passwordLabel": "Passwort",
 		"role": "Rolle",
 		"observerRole": "Beobachter",
 		"scientistRole": "Wissenschaftler",
-		"adminRole": "adminRole",
-		"selectPlaceholder": "Bitte auswählen", 
-		
+		"adminRole": "Admin",
+		"submitButtonLabel": "Absenden",
+		"selectPlaceholder": "Bitte auswählen"
+	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",
 		"placeholder": "Bitte geben sie eine E-mail Adresse an um ihr Passwort zu erneuern",
