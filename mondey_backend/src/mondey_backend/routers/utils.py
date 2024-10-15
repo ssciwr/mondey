@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import logging
 import pathlib
 from collections.abc import Iterable
@@ -7,14 +8,19 @@ from collections.abc import Iterable
 from fastapi import HTTPException
 from fastapi import UploadFile
 from sqlmodel import SQLModel
+from sqlmodel import col
+from sqlmodel import select
 
 from ..dependencies import SessionDep
+from ..models.children import Child
 from ..models.milestones import MilestoneAdmin
+from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneGroupAdmin
 from ..models.milestones import MilestoneGroupText
 from ..models.milestones import MilestoneText
 from ..models.questions import UserQuestionAdmin
 from ..models.questions import UserQuestionText
+from ..users import User
 
 Text = MilestoneText | MilestoneGroupText | UserQuestionText
 
@@ -77,3 +83,37 @@ def update_user_question_text(session: SessionDep, user_question: UserQuestionAd
     _update_text(
         session, UserQuestionText, user_question.text.values(), user_question.id
     )
+
+
+def _session_has_expired(milestone_answer_session: MilestoneAnswerSession) -> bool:
+    session_lifetime_days = 7
+    return (
+        datetime.datetime.now() - milestone_answer_session.created_at
+        > datetime.timedelta(days=session_lifetime_days)
+    )
+
+
+def get_or_create_current_milestone_answer_session(
+    session: SessionDep, current_active_user: User, child_id: int
+):
+    child = session.get(Child, child_id)
+    if child is None or child.user_id != current_active_user.id:
+        raise HTTPException(401)
+    milestone_answer_session = session.exec(
+        select(MilestoneAnswerSession)
+        .where(
+            col(MilestoneAnswerSession.user_id) == current_active_user.id
+            and col(MilestoneAnswerSession.child_id) == child_id
+        )
+        .order_by(col(MilestoneAnswerSession.created_at).desc())
+    ).first()
+    if milestone_answer_session is None or _session_has_expired(
+        milestone_answer_session
+    ):
+        milestone_answer_session = MilestoneAnswerSession(
+            child_id=child_id,
+            user_id=current_active_user.id,
+            created_at=datetime.datetime.now(),
+        )
+        add(session, milestone_answer_session)
+    return milestone_answer_session

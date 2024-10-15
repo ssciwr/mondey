@@ -17,20 +17,29 @@
 		ArrowRightOutline,
 		ArrowLeftOutline
 	} from 'flowbite-svelte-icons';
-	import type { MilestoneGroupPublic, MilestonePublic } from '$lib/client/types.gen';
+	import type {
+		MilestoneGroupPublic,
+		MilestonePublic,
+		MilestoneAnswerSessionPublic
+	} from '$lib/client/types.gen';
+	import { updateMilestoneAnswer } from '$lib/client/services.gen';
 	import MilestoneButton from '$lib/components/MilestoneButton.svelte';
 	import { lang_id } from '$lib/stores/langStore';
 	import { _ } from 'svelte-i18n';
 
 	let {
 		milestoneGroup = undefined,
-		milestoneAnswers = {}
-	}: { milestoneGroup?: MilestoneGroupPublic; milestoneAnswers?: Record<string, number> } =
-		$props();
+		milestoneAnswerSession = undefined
+	}: {
+		milestoneGroup?: MilestoneGroupPublic;
+		milestoneAnswerSession?: MilestoneAnswerSessionPublic;
+	} = $props();
 
 	let currentMilestoneIndex = $state(0);
 	let currentMilestone = $state(undefined as MilestonePublic | undefined);
-	let selectedAnswer = $state(undefined as number | undefined);
+	let selectedAnswer = $derived(
+		milestoneAnswerSession?.answers?.[`${currentMilestone?.id}`]?.answer
+	);
 	let autoGoToNextMilestone = $state(false);
 	let currentImageIndex = $state(0);
 
@@ -38,7 +47,6 @@
 		console.log(milestoneGroup);
 		if (milestoneGroup && milestoneGroup.milestones) {
 			currentMilestone = milestoneGroup.milestones[currentMilestoneIndex];
-			selectedAnswer = milestoneAnswers[currentMilestone.id];
 		}
 	});
 
@@ -55,21 +63,29 @@
 		}
 		currentMilestoneIndex -= 1;
 		currentMilestone = milestoneGroup.milestones[currentMilestoneIndex];
-		selectedAnswer = milestoneAnswers[currentMilestone.id];
 	}
 
-	function nextMilestone() {
+	async function nextMilestone() {
 		if (
 			!milestoneGroup ||
 			!milestoneGroup.milestones ||
 			!currentMilestone ||
-			selectedAnswer === undefined
+			selectedAnswer === undefined ||
+			!milestoneAnswerSession
 		) {
 			return;
 		}
-		milestoneAnswers[currentMilestone.id] = selectedAnswer;
-		// todo: API call to submit answer
-		console.log(`TODO: submit answer ${selectedAnswer} for milestone ${currentMilestoneIndex}`);
+		const { data, error } = await updateMilestoneAnswer({
+			body: { milestone_id: currentMilestone.id, answer: selectedAnswer },
+			path: {
+				milestone_answer_session_id: milestoneAnswerSession.id
+			}
+		});
+		if (error) {
+			console.log(error);
+			return;
+		}
+		milestoneAnswerSession.answers[`${currentMilestone.id}`] = data;
 		if (currentMilestoneIndex + 1 == milestoneGroup.milestones.length) {
 			console.log(`TODO: redirect to next milestone group or back to group overview`);
 			// todo: redirect to bereichuebersicht? or go to next set of milestones?
@@ -77,11 +93,21 @@
 		}
 		currentMilestoneIndex += 1;
 		currentMilestone = milestoneGroup.milestones[currentMilestoneIndex];
-		selectedAnswer = milestoneAnswers[currentMilestone.id];
 	}
 
 	function selectAnswer(answer: number | undefined) {
-		selectedAnswer = answer;
+		if (!currentMilestone) {
+			console.log('selectAnswer: missing currentMilestone');
+			return;
+		}
+		if (!milestoneAnswerSession) {
+			console.log('selectAnswer: missing milestoneAnswerSession');
+			return;
+		}
+		milestoneAnswerSession.answers[`${currentMilestone.id}`] = {
+			milestone_id: currentMilestone.id,
+			answer: answer
+		};
 		if (selectedAnswer !== undefined && autoGoToNextMilestone) {
 			nextMilestone();
 		}

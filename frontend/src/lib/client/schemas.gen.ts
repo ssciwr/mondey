@@ -312,6 +312,46 @@ export const MilestoneAdminSchema = {
 	title: 'MilestoneAdmin'
 } as const;
 
+export const MilestoneAnswerPublicSchema = {
+	properties: {
+		milestone_id: {
+			type: 'integer',
+			title: 'Milestone Id'
+		},
+		answer: {
+			type: 'integer',
+			title: 'Answer'
+		}
+	},
+	type: 'object',
+	required: ['milestone_id', 'answer'],
+	title: 'MilestoneAnswerPublic'
+} as const;
+
+export const MilestoneAnswerSessionPublicSchema = {
+	properties: {
+		id: {
+			type: 'integer',
+			title: 'Id'
+		},
+		created_at: {
+			type: 'string',
+			format: 'date-time',
+			title: 'Created At'
+		},
+		answers: {
+			additionalProperties: {
+				$ref: '#/components/schemas/MilestoneAnswerPublic'
+			},
+			type: 'object',
+			title: 'Answers'
+		}
+	},
+	type: 'object',
+	required: ['id', 'created_at', 'answers'],
+	title: 'MilestoneAnswerSessionPublic'
+} as const;
+
 export const MilestoneGroupAdminSchema = {
 	properties: {
 		id: {

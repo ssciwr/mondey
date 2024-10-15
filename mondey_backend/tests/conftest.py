@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import pathlib
 
 import pytest
@@ -19,6 +20,8 @@ from mondey_backend.main import create_app
 from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Language
 from mondey_backend.models.milestones import Milestone
+from mondey_backend.models.milestones import MilestoneAnswer
+from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.models.milestones import MilestoneGroupText
 from mondey_backend.models.milestones import MilestoneImage
@@ -142,6 +145,29 @@ def session():
                 user_id=3, name="child3", birth_year=2021, birth_month=1, has_image=True
             )
         )
+        # add an (expired) milestone answer session for child 1 / user 1 with no answers
+        session.add(
+            MilestoneAnswerSession(
+                child_id=1, user_id=1, created_at=datetime.datetime(2024, 1, 1)
+            )
+        )
+        # add another (current) milestone answer session for child 1 / user 1 with 2 answers
+        session.add(
+            MilestoneAnswerSession(
+                child_id=1, user_id=1, created_at=datetime.datetime.now()
+            )
+        )
+        # add two milestone answers
+        session.add(MilestoneAnswer(answer_session_id=2, milestone_id=1, answer=0))
+        session.add(MilestoneAnswer(answer_session_id=2, milestone_id=2, answer=3))
+        # add an (expired) milestone answer session for child 3 / user 3 with 1 answer
+        session.add(
+            MilestoneAnswerSession(
+                child_id=3, user_id=3, created_at=datetime.datetime(2024, 1, 1)
+            )
+        )
+        session.add(MilestoneAnswer(answer_session_id=3, milestone_id=7, answer=2))
+
         yield session
 
 

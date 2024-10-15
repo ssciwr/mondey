@@ -97,6 +97,12 @@ import type {
 	UploadChildImageData,
 	UploadChildImageError,
 	UploadChildImageResponse,
+	GetCurrentMilestoneAnswerSessionData,
+	GetCurrentMilestoneAnswerSessionError,
+	GetCurrentMilestoneAnswerSessionResponse,
+	UpdateMilestoneAnswerData,
+	UpdateMilestoneAnswerError,
+	UpdateMilestoneAnswerResponse,
 	AuthCookieLoginData,
 	AuthCookieLoginError,
 	AuthCookieLoginResponse,
@@ -623,6 +629,38 @@ export const uploadChildImage = <ThrowOnError extends boolean = false>(
 			...options?.headers
 		},
 		url: '/users/children-images/{child_id}'
+	});
+};
+
+/**
+ * Get Current Milestone Answer Session
+ */
+export const getCurrentMilestoneAnswerSession = <ThrowOnError extends boolean = false>(
+	options: Options<GetCurrentMilestoneAnswerSessionData, ThrowOnError>
+) => {
+	return (options?.client ?? client).get<
+		GetCurrentMilestoneAnswerSessionResponse,
+		GetCurrentMilestoneAnswerSessionError,
+		ThrowOnError
+	>({
+		...options,
+		url: '/users/milestone-answers/{child_id}'
+	});
+};
+
+/**
+ * Update Milestone Answer
+ */
+export const updateMilestoneAnswer = <ThrowOnError extends boolean = false>(
+	options: Options<UpdateMilestoneAnswerData, ThrowOnError>
+) => {
+	return (options?.client ?? client).put<
+		UpdateMilestoneAnswerResponse,
+		UpdateMilestoneAnswerError,
+		ThrowOnError
+	>({
+		...options,
+		url: '/users/milestone-answers/{milestone_answer_session_id}'
 	});
 };
 

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import datetime
+
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import attribute_keyed_dict
 from sqlalchemy.orm import relationship
 from sqlmodel import Field
 from sqlmodel import Relationship
 from sqlmodel import SQLModel
+from sqlmodel import text
 
 from .utils import back_populates
 from .utils import fixed_length_string_field
@@ -145,3 +148,44 @@ class MilestoneImage(SQLModel, table=True):
 class MilestoneImagePublic(SQLModel):
     filename: str
     approved: bool
+
+
+## MilestoneAnswer
+
+
+class MilestoneAnswerPublic(SQLModel):
+    milestone_id: int
+    answer: int
+
+
+class MilestoneAnswer(SQLModel, table=True):
+    answer_session_id: int | None = Field(
+        default=None, foreign_key="milestoneanswersession.id", primary_key=True
+    )
+    milestone_id: int | None = Field(
+        default=None, foreign_key="milestone.id", primary_key=True
+    )
+    answer: int
+
+
+class MilestoneAnswerSession(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    child_id: int
+    user_id: int
+    created_at: datetime.datetime = Field(
+        sa_column_kwargs={
+            "server_default": text("CURRENT_TIMESTAMP"),
+        }
+    )
+    answers: Mapped[dict[int, MilestoneAnswer]] = Relationship(
+        sa_relationship=relationship(
+            collection_class=attribute_keyed_dict("milestone_id"),
+            cascade="all, delete-orphan",
+        )
+    )
+
+
+class MilestoneAnswerSessionPublic(SQLModel):
+    id: int
+    created_at: datetime.datetime
+    answers: dict[int, MilestoneAnswerPublic]

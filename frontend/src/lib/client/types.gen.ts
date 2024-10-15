@@ -85,6 +85,19 @@ export type MilestoneAdmin = {
 	images?: Array<MilestoneImage>;
 };
 
+export type MilestoneAnswerPublic = {
+	milestone_id: number;
+	answer: number;
+};
+
+export type MilestoneAnswerSessionPublic = {
+	id: number;
+	created_at: string;
+	answers: {
+		[key: string]: MilestoneAnswerPublic;
+	};
+};
+
 export type MilestoneGroupAdmin = {
 	id: number;
 	order: number;
@@ -480,6 +493,27 @@ export type UploadChildImageData = {
 export type UploadChildImageResponse = unknown;
 
 export type UploadChildImageError = HTTPValidationError;
+
+export type GetCurrentMilestoneAnswerSessionData = {
+	path: {
+		child_id: number;
+	};
+};
+
+export type GetCurrentMilestoneAnswerSessionResponse = MilestoneAnswerSessionPublic;
+
+export type GetCurrentMilestoneAnswerSessionError = HTTPValidationError;
+
+export type UpdateMilestoneAnswerData = {
+	body: MilestoneAnswerPublic;
+	path: {
+		milestone_answer_session_id: number;
+	};
+};
+
+export type UpdateMilestoneAnswerResponse = MilestoneAnswerPublic;
+
+export type UpdateMilestoneAnswerError = HTTPValidationError;
 
 export type AuthCookieLoginData = {
 	body: Body_auth_cookie_login_auth_login_post;
