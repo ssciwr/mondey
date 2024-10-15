@@ -56,14 +56,14 @@
 </script>
 
 {#if label}
-	<Label class="font-semibold text-gray-700 dark:text-gray-400">{label}</Label>
+	<Label for={properties.id} class="font-semibold text-gray-700 dark:text-gray-400">{label}</Label>
 {/if}
 
 <div class="space-y-4">
 	<svelte:component
 		this={component}
 		class={highlight
-			? 'rounded border-2 border-primary-600 dark:border-primary-600 ' + componentClass
+			? 'border-primary-600 dark:border-primary-600 rounded border-2 ' + componentClass
 			: componentClass}
 		bind:value
 		{...properties}
