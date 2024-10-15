@@ -59,7 +59,6 @@
 		{
 			label: 'Abschließen',
 			onclick: async () => {
-				console.log('build shit');
 				const childData = buildDataToSend(data);
 				const required = buildRequired(data);
 				const verified = await verifyInput(childData, required);

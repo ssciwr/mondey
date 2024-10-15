@@ -56,5 +56,14 @@
 		"adminRole": "adminRole",
 		"selectPlaceholder": "Bitte auswählen", 
 		
+	"forgotPw": {
+		"heading": "Passwort vergessen?",
+		"placeholder": "Bitte geben sie eine E-mail Adresse an um ihr Passwort zu erneuern",
+		"success": "Zurück zur Startseite",
+		"pending": "Absenden",
+		"alertTitle": "Fehler",
+		"formatError": "Die angegebene email Adresse hat ein falsches Format",
+		"mailSentMessage": "Bitte überprüfen sie ihr E-Mail Postfach",
+		"sendError": "Beim Senden der Daten ist ein Fehler aufgetreten. Bitte versuchen sie es erneut"
 	}
 }

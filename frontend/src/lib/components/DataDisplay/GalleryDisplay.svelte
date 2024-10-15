@@ -41,8 +41,6 @@
 		const index = data.indexOf(item);
 		return componentProps[index];
 	});
-
-	$: console.log('data in gallery: ', data);
 </script>
 
 <div class="mx-auto p-4">
