@@ -44,5 +44,17 @@
 		"help": "Förderhilfen",
 		"image": "Bild",
 		"images": "Bilder"
+	},
+	"login": {
+		"alreadyLoggedIn": "Sie sind bereits angemeldet. Melden sie sich zuerst ab um den Account zu wechseln.",
+		"alertMessageTitle": "Fehler",
+		"label": "Benutzerkennung",
+		"passwordLabel": "Passwort",
+		"role": "Rolle",
+		"observerRole": "Beobachter",
+		"scientistRole": "Wissenschaftler",
+		"adminRole": "adminRole",
+		"selectPlaceholder": "Bitte auswählen", 
+		
 	}
 }

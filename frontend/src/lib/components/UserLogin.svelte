@@ -8,8 +8,9 @@
 	import NavigationButtons from '$lib/components/Navigation/NavigationButtons.svelte';
 
 	import { hash, users, type UserData } from '$lib/stores/userStore';
-	import { Card, Heading } from 'flowbite-svelte';
+	import { Card, Heading, Input, Select } from 'flowbite-svelte';
 	import { onDestroy, onMount } from 'svelte';
+	import 
 
 	// functionality
 
@@ -53,7 +54,40 @@
 	}
 
 	// data and variables
-	export let data: any[];
+	let data = [
+		{
+			component: Input,
+			value: null,
+			props: {
+				label: 'Benutzerkennung',
+				type: 'text',
+				placeholder: 'Benutzerkennung',
+				required: true
+			}
+		},
+		{
+			component: Input,
+			value: null,
+			props: {
+				label: 'Passwort',
+				type: 'password',
+				placeholder: 'Passwort',
+				required: true
+			}
+		},
+		{
+			component: Select,
+			value: null,
+			props: {
+				label: 'Rolle',
+				items: ['Beobachter', 'Wissenschaftler', 'Admin'].map((v) => {
+					return { name: String(v), value: v };
+				}),
+				placeholder: 'Bitte auswählen',
+				required: true
+			}
+		}
+	];
 
 	const buttons = [
 		{
@@ -125,7 +159,12 @@
 				>
 			{/if}
 
-			<form class="m-1 m-3 mx-auto w-full flex-col space-y-6">
+			<form
+				class="m-1 m-3 mx-auto w-full flex-col space-y-6"
+				onsubmit={(event) => {
+					console.log('event: ', event);
+				}}
+			>
 				{#each data as element}
 					<DataInput
 						component={element.component}
@@ -149,7 +188,7 @@
 		<span class="container mx-auto w-full text-gray-700 dark:text-gray-400">Not registered?</span>
 		<a
 			href={`${base}/userLand/userRegistration`}
-			class="text-primary-700 hover:underline dark:text-primary-500"
+			class="text-primary-700 dark:text-primary-500 hover:underline"
 		>
 			Create account
 		</a>
