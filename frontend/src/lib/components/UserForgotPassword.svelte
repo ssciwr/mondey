@@ -83,6 +83,7 @@
 		</div>
 		<div class="m-2 flex w-full items-center justify-center p-2">
 			<Button
+				class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 				size="md"
 				type="button"
 				on:click={(event) => {
