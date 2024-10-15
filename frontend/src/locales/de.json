@@ -49,7 +49,7 @@
 		"heading": "Einloggen",
 		"alreadyLoggedInMessage": "Sie sind bereits angemeldet. Melden sie sich zuerst ab um den Account zu wechseln.",
 		"alertMessageTitle": "Fehler",
-		"alertMessage": "Eingaben sind falsch",
+		"alertMessage": "Einloggen nicht erfolgreich. Eingaben sind falsch",
 		"usernameLabel": "Benutzerkennung",
 		"passwordLabel": "Passwort",
 		"role": "Rolle",
