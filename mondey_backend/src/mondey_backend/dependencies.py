@@ -33,6 +33,8 @@ def current_active_researcher(
 
 ResearchDep = Depends(current_active_researcher)
 
+CurrentActiveResearchDep = Annotated[User, Depends(current_active_user)]
+
 current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
 
 AdminDep = Depends(current_active_superuser)

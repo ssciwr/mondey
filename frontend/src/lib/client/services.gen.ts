@@ -80,6 +80,23 @@ import type {
 	UsersDeleteUserData,
 	UsersDeleteUserError,
 	UsersDeleteUserResponse,
+	GetChildrenError,
+	GetChildrenResponse,
+	CreateChildData,
+	CreateChildError,
+	CreateChildResponse,
+	UpdateChildData,
+	UpdateChildError,
+	UpdateChildResponse,
+	DeleteChildData,
+	DeleteChildError,
+	DeleteChildResponse,
+	GetChildImageData,
+	GetChildImageError,
+	GetChildImageResponse,
+	UploadChildImageData,
+	UploadChildImageError,
+	UploadChildImageResponse,
 	AuthCookieLoginData,
 	AuthCookieLoginError,
 	AuthCookieLoginResponse,
@@ -525,6 +542,87 @@ export const usersDeleteUser = <ThrowOnError extends boolean = false>(
 	>({
 		...options,
 		url: '/users/{id}'
+	});
+};
+
+/**
+ * Get Children
+ */
+export const getChildren = <ThrowOnError extends boolean = false>(
+	options?: Options<unknown, ThrowOnError>
+) => {
+	return (options?.client ?? client).get<GetChildrenResponse, GetChildrenError, ThrowOnError>({
+		...options,
+		url: '/users/children/'
+	});
+};
+
+/**
+ * Create Child
+ */
+export const createChild = <ThrowOnError extends boolean = false>(
+	options: Options<CreateChildData, ThrowOnError>
+) => {
+	return (options?.client ?? client).post<CreateChildResponse, CreateChildError, ThrowOnError>({
+		...options,
+		url: '/users/children/'
+	});
+};
+
+/**
+ * Update Child
+ */
+export const updateChild = <ThrowOnError extends boolean = false>(
+	options: Options<UpdateChildData, ThrowOnError>
+) => {
+	return (options?.client ?? client).put<UpdateChildResponse, UpdateChildError, ThrowOnError>({
+		...options,
+		url: '/users/children'
+	});
+};
+
+/**
+ * Delete Child
+ */
+export const deleteChild = <ThrowOnError extends boolean = false>(
+	options: Options<DeleteChildData, ThrowOnError>
+) => {
+	return (options?.client ?? client).delete<DeleteChildResponse, DeleteChildError, ThrowOnError>({
+		...options,
+		url: '/users/children/{child_id}'
+	});
+};
+
+/**
+ * Get Child Image
+ */
+export const getChildImage = <ThrowOnError extends boolean = false>(
+	options: Options<GetChildImageData, ThrowOnError>
+) => {
+	return (options?.client ?? client).get<GetChildImageResponse, GetChildImageError, ThrowOnError>({
+		...options,
+		url: '/users/children-images/{child_id}'
+	});
+};
+
+/**
+ * Upload Child Image
+ */
+export const uploadChildImage = <ThrowOnError extends boolean = false>(
+	options: Options<UploadChildImageData, ThrowOnError>
+) => {
+	return (options?.client ?? client).put<
+		UploadChildImageResponse,
+		UploadChildImageError,
+		ThrowOnError
+	>({
+		...options,
+		...formDataBodySerializer,
+		headers: {
+			'Content-Type': null,
+			...options?.headers
+		},
+		url: '/users/children-images/{child_id}'
 	});
 };
 
