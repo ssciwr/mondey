@@ -10,7 +10,7 @@
 	import { type AuthCookieLoginData, type UserRead } from '$lib/client/types.gen';
 	import { currentUser } from '$lib/stores/userStore';
 	import { preventDefault } from '$lib/util';
-	import { Button, Card, Heading, Input, Select } from 'flowbite-svelte';
+	import { Button, Card, Heading, Input } from 'flowbite-svelte';
 	import { _ } from 'svelte-i18n';
 
 	async function refresh(): Promise<string> {
@@ -21,6 +21,9 @@
 			return returned.error.detail;
 		} else {
 			console.log('Successfully retrieved active user');
+			// TODO: remove this in the final version, this sets verified to true
+			// to emulate a successful user registration
+			returned.data.is_verified = true;
 			currentUser.set(returned.data as UserRead);
 			return 'success';
 		}
@@ -81,21 +84,6 @@
 				placeholder: $_('login.passwordLabel'),
 				required: true,
 				id: 'password'
-			}
-		},
-		{
-			component: Select,
-			value: '',
-			props: {
-				label: $_('login.role'),
-				items: [$_('login.observerRole'), $_('login.researcherRole'), $_('login.adminRole')].map(
-					(v) => {
-						return { name: String(v), value: v };
-					}
-				),
-				placeholder: $_('login.selectPlaceholder'),
-				required: true,
-				id: 'role'
 			}
 		}
 	];
