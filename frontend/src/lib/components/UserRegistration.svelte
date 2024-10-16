@@ -29,7 +29,9 @@
 			userData.body.is_active = true;
 
 			const result = await registerRegister(userData);
-
+			data.forEach((element) => {
+				element.value = '';
+			});
 			if (result.error) {
 				console.log('error: ', result.response.status, result.error.detail);
 				alertMessage = $_('registration.alertMessageError') + ': ' + result.error.detail;
