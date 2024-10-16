@@ -6,17 +6,32 @@
 	import DataInput from '$lib/components/DataInput/DataInput.svelte';
 
 	import { goto } from '$app/navigation';
-	import { authCookieLogin } from '$lib/client';
+	import { authCookieLogin, usersCurrentUser } from '$lib/client/services.gen';
 	import {
 		type AuthCookieLoginData,
-		type Body_auth_cookie_login_auth_login_post
+		type Body_auth_cookie_login_auth_login_post,
+		type UserRead
 	} from '$lib/client/types.gen';
+	import { currentUser } from '$lib/stores/userStore';
 	import { preventDefault } from '$lib/util';
 	import { Button, Card, Heading, Input, Select } from 'flowbite-svelte';
 	import { _ } from 'svelte-i18n';
 
+	async function refresh(): Promise<string> {
+		const returned = await usersCurrentUser();
+		console.log('returned on refresh: ', returned);
+		if (returned.error) {
+			console.log('Error getting current user: ', returned.error.detail);
+			currentUser.set(null as unknown as UserRead);
+			return returned.error.detail;
+		} else {
+			currentUser.set(returned.data as UserRead);
+			return 'success';
+		}
+	}
+
 	// functionality
-	async function submitData() {
+	async function submitData(): Promise<void> {
 		const loginData: Body_auth_cookie_login_auth_login_post = {
 			username: formData[0].value,
 			password: formData[1].value
@@ -26,6 +41,8 @@
 			body: loginData
 		};
 
+		console.log('logindata: ', data);
+
 		const authReturn = await authCookieLogin(data);
 
 		if (authReturn.error) {
@@ -34,7 +51,16 @@
 				element.value = '';
 			}
 		} else {
-			goto('/userLand/userLandingpage');
+			const status: string = await refresh();
+
+			if (status !== 'success') {
+				console.log('error during retrieving active users: ', status);
+				showAlert = true;
+				alertMessage = $_('login.unauthorized') + ': ' + status;
+			} else {
+				console.log('login and user retrieval successful');
+				goto('/userLand/userLandingpage');
+			}
 		}
 	}
 
@@ -81,13 +107,13 @@
 
 	let remember: boolean = false;
 	let showAlert: boolean = false;
-	$: console.log('remember: ', remember, 'showAlert: ', showAlert);
+	let alertMessage: string = $_('login.badCredentials');
 </script>
 
 {#if showAlert}
 	<AlertMessage
 		title={$_('login.alertMessageTitle')}
-		message={$_('login.badCredentials')}
+		message={alertMessage}
 		lastpage={`${base}/userLand/userLogin`}
 		onclick={() => {
 			showAlert = false;
@@ -95,16 +121,6 @@
 	/>
 {/if}
 
-<!-- {#if users.get()['loggedIn'] && users.get()['loggedIn'] !== null}
-	<AlertMessage
-		title={$_('login.alertMessageTitle')}
-		message={$_('login.alreadyLoggedInMessage')}
-		lastpage={`${base}`}
-		onclick={() => {
-			showAlert = false;
-		}}
-	/>
-{:else} -->
 <div class="container m-2 mx-auto w-full max-w-xl">
 	<Card class="container m-2 mx-auto mb-6 w-full max-w-xl pb-6">
 		<Heading
