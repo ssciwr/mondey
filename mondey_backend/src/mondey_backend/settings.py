@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import os
-
 from pydantic_settings import BaseSettings
 from pydantic_settings import SettingsConfigDict
 
@@ -13,6 +11,7 @@ class AppSettings(BaseSettings):
     SECRET: str = "abc123"
     DATABASE_PATH: str = "db"
     STATIC_FILES_PATH: str = "static"
+    PRIVATE_FILES_PATH: str = "private"
     ENABLE_CORS: bool = True
     HOST: str = "localhost"
     PORT: int = 8000
@@ -22,5 +21,3 @@ class AppSettings(BaseSettings):
 
 
 app_settings = AppSettings()
-if os.environ.get("PYTEST_VERSION"):
-    app_settings.STATIC_FILES_PATH = "static2"

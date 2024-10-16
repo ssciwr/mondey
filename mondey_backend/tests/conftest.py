@@ -16,6 +16,7 @@ from mondey_backend.dependencies import current_active_superuser
 from mondey_backend.dependencies import current_active_user
 from mondey_backend.dependencies import get_session
 from mondey_backend.main import create_app
+from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Language
 from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneGroup
@@ -36,8 +37,21 @@ def static_dir(tmp_path_factory: pytest.TempPathFactory):
     return static_dir
 
 
+@pytest.fixture(scope="session")
+def private_dir(tmp_path_factory: pytest.TempPathFactory):
+    # use the same single temporary directory in all tests for private files
+    private_dir = tmp_path_factory.mktemp("private")
+    children_dir = private_dir / "children"
+    children_dir.mkdir()
+    # add some child image files
+    for filename in ["2.jpg", "3.jpg"]:
+        with (children_dir / filename).open("w") as f:
+            f.write(filename)
+    return private_dir
+
+
 @pytest.fixture
-def session(static_dir: pathlib.Path):
+def session():
     # use a new in-memory SQLite database for each test
     engine = create_engine(
         "sqlite://",
@@ -103,12 +117,37 @@ def session(static_dir: pathlib.Path):
         session.add(MilestoneImage(milestone_id=1, filename="m2.jpg", approved=True))
         session.add(MilestoneImage(milestone_id=2, filename="m3.jpg", approved=True))
         session.commit()
+        # add 2 children for user 1
+        session.add(
+            Child(
+                user_id=1,
+                name="child1",
+                birth_year=2022,
+                birth_month=3,
+                has_image=False,
+            )
+        )
+        session.add(
+            Child(
+                user_id=1,
+                name="child2",
+                birth_year=2024,
+                birth_month=12,
+                has_image=True,
+            )
+        )
+        # add a child for user 3
+        session.add(
+            Child(
+                user_id=3, name="child3", birth_year=2021, birth_month=1, has_image=True
+            )
+        )
         yield session
 
 
 @pytest.fixture
 def active_admin_user():
-    UserRead(
+    return UserRead(
         id=3,
         email="admin@mondey.de",
         is_active=True,
@@ -120,7 +159,7 @@ def active_admin_user():
 
 @pytest.fixture
 def active_research_user():
-    UserRead(
+    return UserRead(
         id=2,
         email="research@mondey.de",
         is_active=True,
@@ -132,7 +171,7 @@ def active_research_user():
 
 @pytest.fixture
 def active_user():
-    UserRead(
+    return UserRead(
         id=1,
         email="user@mondey.de",
         is_active=True,
@@ -143,10 +182,19 @@ def active_user():
 
 
 @pytest.fixture(scope="session")
-def app(static_dir: pathlib.Path):
+def app(static_dir: pathlib.Path, private_dir: pathlib.Path):
     settings.app_settings.STATIC_FILES_PATH = str(static_dir)
+    settings.app_settings.PRIVATE_FILES_PATH = str(private_dir)
     app = create_app()
     return app
+
+
+@pytest.fixture
+def public_client(app: FastAPI, session: Session):
+    app.dependency_overrides[get_session] = lambda: session
+    client = TestClient(app)
+    yield client
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture
@@ -165,6 +213,7 @@ def research_client(
     active_research_user: UserRead,
 ):
     app.dependency_overrides[get_session] = lambda: session
+    app.dependency_overrides[current_active_user] = lambda: active_research_user
     app.dependency_overrides[current_active_researcher] = lambda: active_research_user
     client = TestClient(app)
     yield client
@@ -178,6 +227,7 @@ def admin_client(
     active_admin_user: UserRead,
 ):
     app.dependency_overrides[get_session] = lambda: session
+    app.dependency_overrides[current_active_user] = lambda: active_admin_user
     app.dependency_overrides[current_active_superuser] = lambda: active_admin_user
     client = TestClient(app)
     yield client

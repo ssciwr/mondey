@@ -18,6 +18,10 @@ export type Body_reset_reset_password_auth_reset_password_post = {
 	password: string;
 };
 
+export type Body_upload_child_image_users_children_images__child_id__put = {
+	file: Blob | File;
+};
+
 export type Body_upload_milestone_group_image_admin_milestone_group_images__milestone_group_id__put =
 	{
 		file: Blob | File;
@@ -33,6 +37,21 @@ export type Body_verify_request_token_auth_request_verify_token_post = {
 
 export type Body_verify_verify_auth_verify_post = {
 	token: string;
+};
+
+export type ChildCreate = {
+	name?: string;
+	birth_year: number;
+	birth_month: number;
+	has_image: boolean;
+};
+
+export type ChildPublic = {
+	name?: string;
+	birth_year: number;
+	birth_month: number;
+	has_image: boolean;
+	id: number;
 };
 
 export type ErrorModel = {
@@ -410,6 +429,57 @@ export type UsersDeleteUserData = {
 export type UsersDeleteUserResponse = void;
 
 export type UsersDeleteUserError = unknown | HTTPValidationError;
+
+export type GetChildrenResponse = Array<ChildPublic>;
+
+export type GetChildrenError = unknown;
+
+export type CreateChildData = {
+	body: ChildCreate;
+};
+
+export type CreateChildResponse = ChildPublic;
+
+export type CreateChildError = HTTPValidationError;
+
+export type UpdateChildData = {
+	body: ChildPublic;
+};
+
+export type UpdateChildResponse = ChildPublic;
+
+export type UpdateChildError = HTTPValidationError;
+
+export type DeleteChildData = {
+	path: {
+		child_id: number;
+	};
+};
+
+export type DeleteChildResponse = unknown;
+
+export type DeleteChildError = HTTPValidationError;
+
+export type GetChildImageData = {
+	path: {
+		child_id: number;
+	};
+};
+
+export type GetChildImageResponse = unknown;
+
+export type GetChildImageError = HTTPValidationError;
+
+export type UploadChildImageData = {
+	body: Body_upload_child_image_users_children_images__child_id__put;
+	path: {
+		child_id: number;
+	};
+};
+
+export type UploadChildImageResponse = unknown;
+
+export type UploadChildImageError = HTTPValidationError;
 
 export type AuthCookieLoginData = {
 	body: Body_auth_cookie_login_auth_login_post;
