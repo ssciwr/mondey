@@ -144,7 +144,7 @@
 
 			<Button
 				type="submit"
-				class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
+				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
 				>{$_('registration.submitButtonLabel')}</Button
 			>
 		</form>
@@ -159,7 +159,7 @@
 		</div>
 		<Button
 			type="button"
-			class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
+			class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
 			href="/"
 		>
 			{$_('registration.goHome')}
