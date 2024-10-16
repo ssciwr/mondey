@@ -5,35 +5,41 @@
 	import AlertMessage from '$lib/components/AlertMessage.svelte';
 	import DataInput from '$lib/components/DataInput/DataInput.svelte';
 	import { preventDefault } from '$lib/util';
-	import { Button, Card, Heading, Input } from 'flowbite-svelte';
+	import { Button, Card, Heading, Input, Select } from 'flowbite-svelte';
 	import { CheckCircleOutline } from 'flowbite-svelte-icons';
 	import { _ } from 'svelte-i18n';
 
 	const userData: RegisterRegisterData = {
 		body: {
 			email: '',
-			password: ''
+			password: '',
+			is_superuser: false,
+			is_researcher: false
 		}
 	};
 
-	async function submitData() {
+	async function submitData(): Promise<void> {
 		const equalPW = data[1].value !== '' && data[2].value === data[1].value;
 
 		if (equalPW) {
 			userData.body.email = data[0].value;
 			userData.body.password = data[1].value;
+			userData.body.is_researcher = data[3].value === $_('registration.researcherRole');
+			userData.body.is_superuser = data[3].value === $_('registration.adminRole');
+
 			const result = await registerRegister(userData);
 
 			if (result.error) {
-				console.log('error: ', result.error);
+				console.log('error: ', result.response.status, result.error.detail);
+				alertMessage = $_('registration.alertMessageError') + ': ' + result.error.detail;
 				showAlert = true;
-				data.map((element) => {
-					element.value = '';
-				});
 			} else {
 				console.log('successful transmission: ', result.response.status);
 				success = true;
 			}
+			data.map((element) => {
+				element.value = '';
+			});
 		} else {
 			showAlert = true;
 			alertMessage = $_('registration.alertMessagePasswords');
@@ -71,6 +77,24 @@
 				placeholder: $_('registration.passwordConfirmLabel'),
 				required: true,
 				id: 'passwordConfirm'
+			},
+			value: ''
+		},
+		{
+			component: Select,
+			props: {
+				label: $_('registration.role'),
+				type: 'text',
+				placeholder: $_('registration.selectPlaceholder'),
+				required: true,
+				id: 'role',
+				items: [
+					$_('registration.observerRole'),
+					$_('registration.researcherRole'),
+					$_('registration.adminRole')
+				].map((v) => {
+					return { name: String(v), value: v };
+				})
 			},
 			value: ''
 		}
@@ -120,7 +144,7 @@
 
 			<Button
 				type="submit"
-				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+				class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 				>{$_('registration.submitButtonLabel')}</Button
 			>
 		</form>
@@ -135,7 +159,7 @@
 		</div>
 		<Button
 			type="button"
-			class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+			class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 			href="/"
 		>
 			{$_('registration.goHome')}

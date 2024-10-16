@@ -45,7 +45,7 @@
 			value: '',
 			props: {
 				label: $_('login.usernameLabel'),
-				type: 'text',
+				type: 'email',
 				placeholder: $_('login.usernameLabel'),
 				required: true,
 				id: 'username'
@@ -67,7 +67,7 @@
 			value: '',
 			props: {
 				label: $_('login.role'),
-				items: [$_('login.observerRole'), $_('login.scientistRole'), $_('login.adminRole')].map(
+				items: [$_('login.observerRole'), $_('login.researcherRole'), $_('login.adminRole')].map(
 					(v) => {
 						return { name: String(v), value: v };
 					}
@@ -87,7 +87,7 @@
 {#if showAlert}
 	<AlertMessage
 		title={$_('login.alertMessageTitle')}
-		message={$_('login.LOGIN_BAD_CREDENTIALS')}
+		message={$_('login.badCredentials')}
 		lastpage={`${base}/userLand/userLogin`}
 		onclick={() => {
 			showAlert = false;
@@ -131,7 +131,7 @@
 			<UserLoginUtil cls="p-6 mb-3" bind:checked={remember} />
 
 			<Button
-				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+				class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 				type="submit">{$_('login.submitButtonLabel')}</Button
 			>
 		</form>
@@ -140,7 +140,7 @@
 	<span class="container mx-auto w-full text-gray-700 dark:text-gray-400">Not registered?</span>
 	<a
 		href={`${base}/userLand/userRegistration`}
-		class="text-primary-700 hover:underline dark:text-primary-500"
+		class="text-primary-700 dark:text-primary-500 hover:underline"
 	>
 		Create account
 	</a>
