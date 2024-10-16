@@ -8,6 +8,7 @@
 
 	import { onDestroy } from 'svelte';
 
+	console.log('user: ', get(currentUser));
 	const isVerifed = get(currentUser)?.is_verified;
 	let currentPersonal = 'userDataInput';
 	let currentChildren = 'childrenGallery';
@@ -25,8 +26,6 @@
 		unsubscribeChildren();
 		unsubscribePersonal();
 	});
-	console.log('user: ', get(currentUser));
-	console.log('  verified: ', isVerifed);
 </script>
 
 {#if isVerifed === true}

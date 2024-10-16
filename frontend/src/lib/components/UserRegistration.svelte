@@ -29,9 +29,7 @@
 			userData.body.is_active = true;
 
 			const result = await registerRegister(userData);
-			data.forEach((element) => {
-				element.value = '';
-			});
+
 			if (result.error) {
 				console.log('error: ', result.response.status, result.error.detail);
 				alertMessage = $_('registration.alertMessageError') + ': ' + result.error.detail;
@@ -99,7 +97,7 @@
 					return { name: String(v), value: v };
 				})
 			},
-			value: ''
+			value: $_('registration.observerRole')
 		}
 	];
 
@@ -147,7 +145,7 @@
 
 			<Button
 				type="submit"
-				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+				class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 				>{$_('registration.submitButtonLabel')}</Button
 			>
 		</form>

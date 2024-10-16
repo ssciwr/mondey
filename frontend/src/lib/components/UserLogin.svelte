@@ -17,13 +17,10 @@
 		const returned = await usersCurrentUser();
 		if (returned.error) {
 			console.log('Error getting current user: ', returned.error.detail);
-			currentUser.set(null as unknown as UserRead);
+			currentUser.set(null);
 			return returned.error.detail;
 		} else {
 			console.log('Successfully retrieved active user');
-			// TODO: remove this in the final version, this sets verified to true
-			// to emulate a successful user registration
-			returned.data.is_verified = true;
 			currentUser.set(returned.data as UserRead);
 			return 'success';
 		}
@@ -42,9 +39,6 @@
 
 		// forget user data again to not have a plain text password lying around in memory somewhere
 		// any longer than needed
-		formData.forEach((element) => {
-			element.value = '';
-		});
 
 		if (authReturn.error) {
 			showAlert = true;
@@ -130,7 +124,7 @@
 			<UserLoginUtil cls="p-6 mb-3" bind:checked={remember} />
 
 			<Button
-				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+				class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 				type="submit">{$_('login.submitButtonLabel')}</Button
 			>
 		</form>
@@ -139,7 +133,7 @@
 	<span class="container mx-auto w-full text-gray-700 dark:text-gray-400">Not registered?</span>
 	<a
 		href={`${base}/userLand/userRegistration`}
-		class="text-primary-700 hover:underline dark:text-primary-500"
+		class="text-primary-700 dark:text-primary-500 hover:underline"
 	>
 		Create account
 	</a>

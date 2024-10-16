@@ -88,6 +88,6 @@ async function hash(input: string): string {
 	return hash;
 }
 
-const currentUser = writable(null as unknown as UserRead);
+const currentUser = writable(null as null | UserRead);
 
 export { createDummyUser, currentUser, hash, users, UserStore, type UserData, type UserList };
