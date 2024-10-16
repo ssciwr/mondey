@@ -4,6 +4,7 @@ from typing import Annotated
 
 from fastapi import Depends
 from fastapi import Request
+from fastapi import HTTPException
 from fastapi_users import BaseUserManager
 from fastapi_users import FastAPIUsers
 from fastapi_users import IntegerIDMixin
@@ -17,6 +18,7 @@ from .databases.users import AccessToken
 from .databases.users import User
 from .databases.users import get_access_token_db
 from .databases.users import get_user_db
+from .databases.users import get_async_session
 from .settings import app_settings
 
 
@@ -26,6 +28,18 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
 
     async def on_after_register(self, user: User, request: Request | None = None):
         print(f"User {user.id} has registered.")
+        
+        # Fetch the user from the database
+        async with get_async_session() as session:
+            db_user = await session.get(User, user.id)
+            if not db_user:
+                raise HTTPException(status_code=404, detail="User not found")
+            
+            # Update the is_verified attribute
+            db_user.is_verified = True
+            session.add(db_user)
+            await session.commit()
+            await session.refresh(db_user)
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Request | None = None
