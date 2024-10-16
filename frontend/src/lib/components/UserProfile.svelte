@@ -17,7 +17,6 @@
 	let alertMessage: string = $_('login.alertMessageError');
 
 	const unsubscribe = currentUser.subscribe((data) => {
-		console.log('data: ', data);
 		userData = data;
 	});
 
@@ -36,7 +35,7 @@
 
 	onDestroy(unsubscribe);
 
-	$: console.log('userData: ', userData);
+	$: console.log('userData in profile: ', userData);
 </script>
 
 <Popover {triggeredBy} class="text-gray-700 dark:text-gray-400">

@@ -7,11 +7,7 @@
 
 	import { goto } from '$app/navigation';
 	import { authCookieLogin, usersCurrentUser } from '$lib/client/services.gen';
-	import {
-		type AuthCookieLoginData,
-		type Body_auth_cookie_login_auth_login_post,
-		type UserRead
-	} from '$lib/client/types.gen';
+	import { type AuthCookieLoginData, type UserRead } from '$lib/client/types.gen';
 	import { currentUser } from '$lib/stores/userStore';
 	import { preventDefault } from '$lib/util';
 	import { Button, Card, Heading, Input, Select } from 'flowbite-svelte';
@@ -19,12 +15,12 @@
 
 	async function refresh(): Promise<string> {
 		const returned = await usersCurrentUser();
-		console.log('returned on refresh: ', returned);
 		if (returned.error) {
 			console.log('Error getting current user: ', returned.error.detail);
 			currentUser.set(null as unknown as UserRead);
 			return returned.error.detail;
 		} else {
+			console.log('Successfully retrieved active user');
 			currentUser.set(returned.data as UserRead);
 			return 'success';
 		}
@@ -32,24 +28,23 @@
 
 	// functionality
 	async function submitData(): Promise<void> {
-		const loginData: Body_auth_cookie_login_auth_login_post = {
-			username: formData[0].value,
-			password: formData[1].value
+		const loginData: AuthCookieLoginData = {
+			body: {
+				username: formData[0].value,
+				password: formData[1].value
+			}
 		};
 
-		const data: AuthCookieLoginData = {
-			body: loginData
-		};
+		const authReturn = await authCookieLogin(loginData);
 
-		console.log('logindata: ', data);
-
-		const authReturn = await authCookieLogin(data);
+		// forget user data again to not have a plain text password lying around in memory somewhere
+		// any longer than needed
+		formData.forEach((element) => {
+			element.value = '';
+		});
 
 		if (authReturn.error) {
 			showAlert = true;
-			for (let element of formData) {
-				element.value = '';
-			}
 		} else {
 			const status: string = await refresh();
 
@@ -147,7 +142,7 @@
 			<UserLoginUtil cls="p-6 mb-3" bind:checked={remember} />
 
 			<Button
-				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+				class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 				type="submit">{$_('login.submitButtonLabel')}</Button
 			>
 		</form>
@@ -156,9 +151,8 @@
 	<span class="container mx-auto w-full text-gray-700 dark:text-gray-400">Not registered?</span>
 	<a
 		href={`${base}/userLand/userRegistration`}
-		class="text-primary-700 hover:underline dark:text-primary-500"
+		class="text-primary-700 dark:text-primary-500 hover:underline"
 	>
 		Create account
 	</a>
 </div>
-<!-- {/if} -->
