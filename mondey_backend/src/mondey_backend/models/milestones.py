@@ -145,15 +145,3 @@ class MilestoneImage(SQLModel, table=True):
 class MilestoneImagePublic(SQLModel):
     filename: str
     approved: bool
-
-
-## MilestoneAnswer
-
-
-# class MilestoneAnswer(SQLModel, table=True):
-#     milestone_id: int | None = Field(default=None, foreign_key="milestone.id")
-#     user_id: int | None = Field(default=None, foreign_key="user.id")
-#     created_at: datetime.datetime = Field(
-#         default_factory=datetime.datetime.now,
-#     )
-#     answer: int

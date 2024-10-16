@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import pathlib
 from collections.abc import Iterable
 
 from fastapi import HTTPException
@@ -21,6 +22,7 @@ Text = MilestoneText | MilestoneGroupText | UserQuestionText
 def write_file(file: UploadFile, filename: str):
     logging.warning(f"Saving file {file.filename} to {filename}")
     try:
+        pathlib.Path(filename).parent.mkdir(exist_ok=True)
         contents = file.file.read()
         with open(filename, "wb") as f:
             f.write(contents)

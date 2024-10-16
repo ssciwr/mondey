@@ -114,7 +114,9 @@ def test_delete_milestone_group_invalid_group_id(admin_client: TestClient):
     "endpoint",
     ["/admin/languages/1", "/admin/milestone-groups/1", "/admin/milestones/1"],
 )
-@pytest.mark.parametrize("client_type", ["user_client", "research_client"])
+@pytest.mark.parametrize(
+    "client_type", ["public_client", "user_client", "research_client"]
+)
 def test_delete_endpoints_invalid_admin_user(
     endpoint: str, client_type: str, request: pytest.FixtureRequest
 ):

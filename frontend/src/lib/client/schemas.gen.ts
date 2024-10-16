@@ -84,6 +84,19 @@ export const Body_reset_reset_password_auth_reset_password_postSchema = {
 	title: 'Body_reset_reset_password_auth_reset_password_post'
 } as const;
 
+export const Body_upload_child_image_users_children_images__child_id__putSchema = {
+	properties: {
+		file: {
+			type: 'string',
+			format: 'binary',
+			title: 'File'
+		}
+	},
+	type: 'object',
+	required: ['file'],
+	title: 'Body_upload_child_image_users_children_images__child_id__put'
+} as const;
+
 export const Body_upload_milestone_group_image_admin_milestone_group_images__milestone_group_id__putSchema =
 	{
 		properties: {
@@ -134,6 +147,60 @@ export const Body_verify_verify_auth_verify_postSchema = {
 	type: 'object',
 	required: ['token'],
 	title: 'Body_verify_verify_auth_verify_post'
+} as const;
+
+export const ChildCreateSchema = {
+	properties: {
+		name: {
+			type: 'string',
+			title: 'Name',
+			default: ''
+		},
+		birth_year: {
+			type: 'integer',
+			title: 'Birth Year'
+		},
+		birth_month: {
+			type: 'integer',
+			title: 'Birth Month'
+		},
+		has_image: {
+			type: 'boolean',
+			title: 'Has Image'
+		}
+	},
+	type: 'object',
+	required: ['birth_year', 'birth_month', 'has_image'],
+	title: 'ChildCreate'
+} as const;
+
+export const ChildPublicSchema = {
+	properties: {
+		name: {
+			type: 'string',
+			title: 'Name',
+			default: ''
+		},
+		birth_year: {
+			type: 'integer',
+			title: 'Birth Year'
+		},
+		birth_month: {
+			type: 'integer',
+			title: 'Birth Month'
+		},
+		has_image: {
+			type: 'boolean',
+			title: 'Has Image'
+		},
+		id: {
+			type: 'integer',
+			title: 'Id'
+		}
+	},
+	type: 'object',
+	required: ['birth_year', 'birth_month', 'has_image', 'id'],
+	title: 'ChildPublic'
 } as const;
 
 export const ErrorModelSchema = {
