@@ -61,6 +61,8 @@
 		"alreadyLoggedInMessage": "Sie sind bereits angemeldet. Melden sie sich zuerst ab um den Account zu wechseln.",
 		"alertMessageTitle": "Fehler",
 		"badCredentials": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
+		"badActiveUser": "Der Benutzer konnte nicht gefunden werden",
+		"unauthorized": "Zugang verweigert",
 		"usernameLabel": "Benutzerkennung",
 		"passwordLabel": "Passwort",
 		"role": "Rolle",
@@ -68,7 +70,10 @@
 		"researcherRole": "Wissenschaftler",
 		"adminRole": "Admin",
 		"submitButtonLabel": "Absenden",
-		"selectPlaceholder": "Bitte auswählen"
+		"selectPlaceholder": "Bitte auswählen",
+		"profileButtonLabelDefault": "Einloggen oder Registrieren",
+		"profileButtonLabelLogout": "Logout",
+		"profileTitleDefault": "Willkommen!"
 	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",
