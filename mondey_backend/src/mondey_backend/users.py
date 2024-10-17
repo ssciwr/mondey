@@ -15,12 +15,11 @@ from fastapi_users.authentication import CookieTransport
 from fastapi_users.authentication.strategy.db import AccessTokenDatabase
 from fastapi_users.authentication.strategy.db import DatabaseStrategy
 from fastapi_users.db import SQLAlchemyUserDatabase
-from sqlalchemy.future import select
 
 from .databases.users import AccessToken
 from .databases.users import User
+from .databases.users import async_session_maker
 from .databases.users import get_access_token_db
-from .databases.users import get_async_session
 from .databases.users import get_user_db
 from .settings import app_settings
 
@@ -32,22 +31,15 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     async def on_after_register(self, user: User, request: Request | None = None):
         # README: Sets the verified flag artificially to allow users to work without an
         # actual verification process for now. this can go again as soon as we have an email server for verification.
-        # why can´t we use a contextmanager here?: TypeError: 'async_generator' object does not support the [asynchronous] context manager protocol
-        async for session in get_async_session():
-            # find user in database
-            result = await session.execute(select(User).filter(User.id == user.id))
-            user_entry = result.scalars().first()
-
-            # set verified artificially and write back
-            if user_entry:
-                user_entry.is_verified = True
-                session.add(user_entry)
+        async with async_session_maker() as session:
+            user_db = await session.get(User, user.id)
+            if user_db:
+                user_db.is_verified = True
                 await session.commit()
-                await session.refresh(user_entry)
+                await session.refresh(user_db)
 
-                print("user object: ", user_entry.__dict__)
-                print(f"User {user_entry.id} has registered.")
-                print(f"User is verified? {user_entry.is_verified}")
+                print(f"User {user_db.id} has registered.")
+                print(f"User is verified? {user_db.is_verified}")
         # end README
 
     async def on_after_forgot_password(
