@@ -43,15 +43,14 @@ export type ChildCreate = {
 	name?: string;
 	birth_year: number;
 	birth_month: number;
-	has_image: boolean;
 };
 
 export type ChildPublic = {
 	name?: string;
 	birth_year: number;
 	birth_month: number;
-	has_image: boolean;
 	id: number;
+	has_image: boolean;
 };
 
 export type ErrorModel = {
@@ -83,6 +82,19 @@ export type MilestoneAdmin = {
 		[key: string]: MilestoneText;
 	};
 	images?: Array<MilestoneImage>;
+};
+
+export type MilestoneAnswerPublic = {
+	milestone_id: number;
+	answer: number;
+};
+
+export type MilestoneAnswerSessionPublic = {
+	id: number;
+	created_at: string;
+	answers: {
+		[key: string]: MilestoneAnswerPublic;
+	};
 };
 
 export type MilestoneGroupAdmin = {
@@ -434,14 +446,6 @@ export type GetChildrenResponse = Array<ChildPublic>;
 
 export type GetChildrenError = unknown;
 
-export type CreateChildData = {
-	body: ChildCreate;
-};
-
-export type CreateChildResponse = ChildPublic;
-
-export type CreateChildError = HTTPValidationError;
-
 export type UpdateChildData = {
 	body: ChildPublic;
 };
@@ -449,6 +453,14 @@ export type UpdateChildData = {
 export type UpdateChildResponse = ChildPublic;
 
 export type UpdateChildError = HTTPValidationError;
+
+export type CreateChildData = {
+	body: ChildCreate;
+};
+
+export type CreateChildResponse = ChildPublic;
+
+export type CreateChildError = HTTPValidationError;
 
 export type DeleteChildData = {
 	path: {
@@ -480,6 +492,27 @@ export type UploadChildImageData = {
 export type UploadChildImageResponse = unknown;
 
 export type UploadChildImageError = HTTPValidationError;
+
+export type GetCurrentMilestoneAnswerSessionData = {
+	path: {
+		child_id: number;
+	};
+};
+
+export type GetCurrentMilestoneAnswerSessionResponse = MilestoneAnswerSessionPublic;
+
+export type GetCurrentMilestoneAnswerSessionError = HTTPValidationError;
+
+export type UpdateMilestoneAnswerData = {
+	body: MilestoneAnswerPublic;
+	path: {
+		milestone_answer_session_id: number;
+	};
+};
+
+export type UpdateMilestoneAnswerResponse = MilestoneAnswerPublic;
+
+export type UpdateMilestoneAnswerError = HTTPValidationError;
 
 export type AuthCookieLoginData = {
 	body: Body_auth_cookie_login_auth_login_post;
