@@ -3,14 +3,12 @@ from __future__ import annotations
 import datetime
 
 from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import attribute_keyed_dict
-from sqlalchemy.orm import relationship
 from sqlmodel import Field
-from sqlmodel import Relationship
 from sqlmodel import SQLModel
 from sqlmodel import text
 
 from .utils import back_populates
+from .utils import dict_relationship
 from .utils import fixed_length_string_field
 
 # Note: models with relationships are defined in the same file to
@@ -24,6 +22,26 @@ class Language(SQLModel, table=True):
 
 class LanguageCreate(SQLModel):
     lang: str = fixed_length_string_field(2, index=True)
+
+
+## MilestoneAgeGroup
+
+
+class MilestoneAgeGroupBase(SQLModel):
+    months_min: int
+    months_max: int
+
+
+class MilestoneAgeGroupCreate(MilestoneAgeGroupBase):
+    pass
+
+
+class MilestoneAgeGroup(MilestoneAgeGroupBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+
+
+class MilestoneAgeGroupPublic(MilestoneAgeGroupBase):
+    id: int
 
 
 ## MilestoneGroupText
@@ -57,13 +75,9 @@ class MilestoneGroupTextPublic(MilestoneGroupTextBase):
 
 class MilestoneGroup(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
+    age_group_id: int = Field(foreign_key="milestoneagegroup.id")
     order: int = 0
-    text: Mapped[dict[int, MilestoneGroupText]] = Relationship(
-        sa_relationship=relationship(
-            collection_class=attribute_keyed_dict("lang_id"),
-            cascade="all, delete-orphan",
-        )
-    )
+    text: Mapped[dict[int, MilestoneGroupText]] = dict_relationship(key="lang_id")
     milestones: Mapped[list[Milestone]] = back_populates("group")
 
 
@@ -75,6 +89,7 @@ class MilestoneGroupPublic(SQLModel):
 
 class MilestoneGroupAdmin(SQLModel):
     id: int
+    age_group_id: int
     order: int
     text: dict[int, MilestoneGroupText] = {}
     milestones: list[MilestoneAdmin] = []
@@ -111,12 +126,7 @@ class Milestone(SQLModel, table=True):
     group_id: int | None = Field(default=None, foreign_key="milestonegroup.id")
     order: int = 0
     group: MilestoneGroup | None = back_populates("milestones")
-    text: Mapped[dict[int, MilestoneText]] = Relationship(
-        sa_relationship=relationship(
-            collection_class=attribute_keyed_dict("lang_id"),
-            cascade="all, delete-orphan",
-        )
-    )
+    text: Mapped[dict[int, MilestoneText]] = dict_relationship(key="lang_id")
     images: Mapped[list[MilestoneImage]] = back_populates("milestone")
 
 
@@ -170,22 +180,20 @@ class MilestoneAnswer(SQLModel, table=True):
 
 class MilestoneAnswerSession(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    child_id: int
+    child_id: int = Field(foreign_key="child.id")
+    age_group_id: int = Field(foreign_key="milestoneagegroup.id")
     user_id: int
     created_at: datetime.datetime = Field(
         sa_column_kwargs={
             "server_default": text("CURRENT_TIMESTAMP"),
         }
     )
-    answers: Mapped[dict[int, MilestoneAnswer]] = Relationship(
-        sa_relationship=relationship(
-            collection_class=attribute_keyed_dict("milestone_id"),
-            cascade="all, delete-orphan",
-        )
-    )
+    answers: Mapped[dict[int, MilestoneAnswer]] = dict_relationship(key="milestone_id")
 
 
 class MilestoneAnswerSessionPublic(SQLModel):
     id: int
+    child_id: int
+    age_group_id: int
     created_at: datetime.datetime
     answers: dict[int, MilestoneAnswerPublic]

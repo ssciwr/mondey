@@ -8,6 +8,8 @@ from sqlmodel import select
 from ..dependencies import SessionDep
 from ..models.milestones import Language
 from ..models.milestones import Milestone
+from ..models.milestones import MilestoneAgeGroup
+from ..models.milestones import MilestoneAgeGroupPublic
 from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupPublic
 from ..models.milestones import MilestonePublic
@@ -44,9 +46,11 @@ def create_router() -> APIRouter:
         return milestone
 
     @router.get("/milestone-groups/", response_model=list[MilestoneGroupPublic])
-    def get_milestone_groups(session: SessionDep):
+    def get_milestone_groups(session: SessionDep, milestone_age_group_id: int):
         milestone_groups = session.exec(
-            select(MilestoneGroup).order_by(col(MilestoneGroup.order))
+            select(MilestoneGroup)
+            .where(col(MilestoneGroup.age_group_id) == milestone_age_group_id)
+            .order_by(col(MilestoneGroup.order))
         ).all()
         return milestone_groups
 
@@ -58,5 +62,12 @@ def create_router() -> APIRouter:
         if not milestone_group:
             raise HTTPException(status_code=404, detail="milestone_group not found")
         return milestone_group
+
+    @router.get("/milestone-age-groups/", response_model=list[MilestoneAgeGroupPublic])
+    def get_milestone_age_groups(session: SessionDep):
+        milestone_age_groups = session.exec(
+            select(MilestoneAgeGroup).order_by(col(MilestoneAgeGroup.months_min))
+        ).all()
+        return milestone_age_groups
 
     return router
