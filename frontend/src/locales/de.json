@@ -75,6 +75,54 @@
 		"profileButtonLabelLogout": "Logout",
 		"profileTitleDefault": "Willkommen!"
 	},
+	"userData": {
+		"heading": "Benutzerdaten eingeben",
+		"alertMessageTitle": "Fehler",
+		"alertMessageMissing": "Bitte füllen Sie die benötigten Felder (hervorgehoben) aus.",
+		"submitButtonLabel": "Abschließen",
+		"yearOfBirth": {
+			"label": "Geburtsjahr",
+			"placeholder": "Bitte auswählen"
+		},
+		"gender": {
+			"label": "Geschlecht",
+			"placeholder": "Bitte auswählen",
+			"items": {
+				"male": "männlich",
+				"female": "weiblich",
+				"divers": "divers",
+				"other": "Anderes"
+			}
+		},
+		"education": {
+			"label": "Höchster Bildungsabschluss",
+			"items": {
+				"none": "kein Schulabschluss",
+				"secondarylower": "Hauptschulabschluss",
+				"secondary": "Realschulabschluss",
+				"alevel": "Abitur",
+				"bsc": "Bachelor",
+				"msc": "Master",
+				"phd": "Promotion",
+				"other": "Anderer"
+			},
+			"placeholder": "Bitte auswählen"
+		},
+		"workingHours": {
+			"label": "Arbeitszeit/Woche",
+			"other": "Andere",
+			"placeholder": "Bitte auswählen"
+		},
+		"incomePerYear": {
+			"label": "Familieneinkommen/Jahr",
+			"other": "Anderes",
+			"placeholder": "Bitte auswählen"
+		},
+		"profession": {
+			"label": "Beruf",
+			"placeholder": "Geben sie ihren Beruf an"
+		}
+	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",
 		"placeholder": "Bitte geben sie eine E-mail Adresse an um ihr Passwort zu erneuern",
