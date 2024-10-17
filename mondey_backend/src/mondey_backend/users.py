@@ -1,3 +1,6 @@
+# TODO: 17th Oct. 2024: remove the artificial verification setting again as soon as
+# the email verification server has been implemented. See 'README' block @ line 33f
+
 from __future__ import annotations
 
 from typing import Annotated
@@ -15,6 +18,7 @@ from fastapi_users.db import SQLAlchemyUserDatabase
 
 from .databases.users import AccessToken
 from .databases.users import User
+from .databases.users import async_session_maker
 from .databases.users import get_access_token_db
 from .databases.users import get_user_db
 from .settings import app_settings
@@ -25,7 +29,18 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     verification_token_secret = app_settings.SECRET
 
     async def on_after_register(self, user: User, request: Request | None = None):
-        print(f"User {user.id} has registered.")
+        # README: Sets the verified flag artificially to allow users to work without an
+        # actual verification process for now. this can go again as soon as we have an email server for verification.
+        async with async_session_maker() as session:
+            user_db = await session.get(User, user.id)
+            if user_db:
+                user_db.is_verified = True
+                await session.commit()
+                await session.refresh(user_db)
+
+                print(f"User {user_db.id} has registered.")
+                print(f"User is verified? {user_db.is_verified}")
+        # end README
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Request | None = None

@@ -1,4 +1,6 @@
+import { type UserRead } from '$lib/client/types.gen';
 import { BasicStore } from '$lib/stores/basicStore';
+import { writable } from 'svelte/store';
 
 interface UserData {
 	name: string;
@@ -86,4 +88,6 @@ async function hash(input: string): string {
 	return hash;
 }
 
-export { createDummyUser, hash, users, UserStore, type UserData, type UserList };
+const currentUser = writable(null as null | UserRead);
+
+export { createDummyUser, currentUser, hash, users, UserStore, type UserData, type UserList };
