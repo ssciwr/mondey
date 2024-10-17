@@ -55,10 +55,11 @@ def test_get_milestone_groups(
 
 
 def test_post_milestone_group(admin_client: TestClient):
-    response = admin_client.post("/admin/milestone-groups/")
+    response = admin_client.post("/admin/milestone-groups/1")
     assert response.status_code == 200
     assert response.json() == {
         "id": 3,
+        "age_group_id": 1,
         "order": 0,
         "text": {
             "1": {

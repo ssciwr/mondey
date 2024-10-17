@@ -20,6 +20,7 @@ from mondey_backend.main import create_app
 from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Language
 from mondey_backend.models.milestones import Milestone
+from mondey_backend.models.milestones import MilestoneAgeGroup
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroup
@@ -69,8 +70,11 @@ def session():
         for lang in ["de", "en", "fr"]:
             session.add(Language(lang=lang))
         lang_ids = [1, 2, 3]
+        # add two milestone age groups
+        session.add(MilestoneAgeGroup(months_min=0, months_max=36, years=lang_ids))
+        session.add(MilestoneAgeGroup(months_min=36, months_max=72, years=lang_ids))
         # add a milestone group with 3 milestones
-        session.add(MilestoneGroup(order=2))
+        session.add(MilestoneGroup(order=2, age_group_id=1))
         for lang_id in lang_ids:
             lbl = f"g1_l{lang_id}"
             session.add(
@@ -93,7 +97,7 @@ def session():
                     )
                 )
         # add a second milestone group with 2 milestones
-        session.add(MilestoneGroup(order=1))
+        session.add(MilestoneGroup(order=1, age_group_id=1))
         for lang_id in lang_ids:
             lbl = f"g1_l{lang_id}"
             session.add(
@@ -361,6 +365,7 @@ def milestone_group1():
 def milestone_group_admin1():
     return {
         "id": 1,
+        "age_group_id": 1,
         "order": 2,
         "text": {
             "1": {"group_id": 1, "desc": "g1_l1_d", "title": "g1_l1_t", "lang_id": 1},
@@ -554,6 +559,7 @@ def milestone_group2():
 def milestone_group_admin2():
     return {
         "id": 2,
+        "age_group_id": 1,
         "order": 1,
         "text": {
             "1": {"group_id": 2, "desc": "g1_l1_d", "title": "g1_l1_t", "lang_id": 1},
