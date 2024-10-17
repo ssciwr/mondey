@@ -1,5 +1,5 @@
-# TODO: 17th Oct. 2024: remove the artificial verification set again as soon as
-# the email verification server has been implemented. See 'README' block @ line 33ff
+# TODO: 17th Oct. 2024: remove the artificial verification setting again as soon as
+# the email verification server has been implemented. See 'README' block @ line 33f
 
 from __future__ import annotations
 
