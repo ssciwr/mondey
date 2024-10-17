@@ -52,7 +52,7 @@
 
 	const imageInterval = 5000;
 	setInterval(() => {
-		if (currentMilestone && currentMilestone.images) {
+		if (currentMilestone && currentMilestone.images && currentMilestone.images.length > 0) {
 			currentImageIndex = (currentImageIndex + 1) % currentMilestone.images.length;
 		}
 	}, imageInterval);
@@ -62,6 +62,7 @@
 			return;
 		}
 		currentMilestoneIndex -= 1;
+		currentImageIndex = 0;
 		currentMilestone = milestoneGroup.milestones[currentMilestoneIndex];
 	}
 
@@ -92,6 +93,7 @@
 			return;
 		}
 		currentMilestoneIndex += 1;
+		currentImageIndex = 0;
 		currentMilestone = milestoneGroup.milestones[currentMilestoneIndex];
 	}
 
