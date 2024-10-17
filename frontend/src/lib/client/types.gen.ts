@@ -43,15 +43,14 @@ export type ChildCreate = {
 	name?: string;
 	birth_year: number;
 	birth_month: number;
-	has_image: boolean;
 };
 
 export type ChildPublic = {
 	name?: string;
 	birth_year: number;
 	birth_month: number;
-	has_image: boolean;
 	id: number;
+	has_image: boolean;
 };
 
 export type ErrorModel = {
@@ -447,14 +446,6 @@ export type GetChildrenResponse = Array<ChildPublic>;
 
 export type GetChildrenError = unknown;
 
-export type CreateChildData = {
-	body: ChildCreate;
-};
-
-export type CreateChildResponse = ChildPublic;
-
-export type CreateChildError = HTTPValidationError;
-
 export type UpdateChildData = {
 	body: ChildPublic;
 };
@@ -462,6 +453,14 @@ export type UpdateChildData = {
 export type UpdateChildResponse = ChildPublic;
 
 export type UpdateChildError = HTTPValidationError;
+
+export type CreateChildData = {
+	body: ChildCreate;
+};
+
+export type CreateChildResponse = ChildPublic;
+
+export type CreateChildError = HTTPValidationError;
 
 export type DeleteChildData = {
 	path: {

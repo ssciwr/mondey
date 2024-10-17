@@ -82,12 +82,12 @@ import type {
 	UsersDeleteUserResponse,
 	GetChildrenError,
 	GetChildrenResponse,
-	CreateChildData,
-	CreateChildError,
-	CreateChildResponse,
 	UpdateChildData,
 	UpdateChildError,
 	UpdateChildResponse,
+	CreateChildData,
+	CreateChildError,
+	CreateChildResponse,
 	DeleteChildData,
 	DeleteChildError,
 	DeleteChildResponse,
@@ -564,6 +564,18 @@ export const getChildren = <ThrowOnError extends boolean = false>(
 };
 
 /**
+ * Update Child
+ */
+export const updateChild = <ThrowOnError extends boolean = false>(
+	options: Options<UpdateChildData, ThrowOnError>
+) => {
+	return (options?.client ?? client).put<UpdateChildResponse, UpdateChildError, ThrowOnError>({
+		...options,
+		url: '/users/children/'
+	});
+};
+
+/**
  * Create Child
  */
 export const createChild = <ThrowOnError extends boolean = false>(
@@ -572,18 +584,6 @@ export const createChild = <ThrowOnError extends boolean = false>(
 	return (options?.client ?? client).post<CreateChildResponse, CreateChildError, ThrowOnError>({
 		...options,
 		url: '/users/children/'
-	});
-};
-
-/**
- * Update Child
- */
-export const updateChild = <ThrowOnError extends boolean = false>(
-	options: Options<UpdateChildData, ThrowOnError>
-) => {
-	return (options?.client ?? client).put<UpdateChildResponse, UpdateChildError, ThrowOnError>({
-		...options,
-		url: '/users/children'
 	});
 };
 

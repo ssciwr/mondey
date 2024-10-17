@@ -163,14 +163,10 @@ export const ChildCreateSchema = {
 		birth_month: {
 			type: 'integer',
 			title: 'Birth Month'
-		},
-		has_image: {
-			type: 'boolean',
-			title: 'Has Image'
 		}
 	},
 	type: 'object',
-	required: ['birth_year', 'birth_month', 'has_image'],
+	required: ['birth_year', 'birth_month'],
 	title: 'ChildCreate'
 } as const;
 
@@ -189,17 +185,17 @@ export const ChildPublicSchema = {
 			type: 'integer',
 			title: 'Birth Month'
 		},
-		has_image: {
-			type: 'boolean',
-			title: 'Has Image'
-		},
 		id: {
 			type: 'integer',
 			title: 'Id'
+		},
+		has_image: {
+			type: 'boolean',
+			title: 'Has Image'
 		}
 	},
 	type: 'object',
-	required: ['birth_year', 'birth_month', 'has_image', 'id'],
+	required: ['birth_year', 'birth_month', 'id', 'has_image'],
 	title: 'ChildPublic'
 } as const;
 
