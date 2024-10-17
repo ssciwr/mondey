@@ -1,10 +1,12 @@
+# TODO: 17th Oct. 2024: remove the artificial verification set again as soon as
+# the email verification server has been implemented. See 'README' block @ line 33ff
+
 from __future__ import annotations
 
 from typing import Annotated
 
 from fastapi import Depends
 from fastapi import Request
-from fastapi import HTTPException
 from fastapi_users import BaseUserManager
 from fastapi_users import FastAPIUsers
 from fastapi_users import IntegerIDMixin
@@ -13,12 +15,13 @@ from fastapi_users.authentication import CookieTransport
 from fastapi_users.authentication.strategy.db import AccessTokenDatabase
 from fastapi_users.authentication.strategy.db import DatabaseStrategy
 from fastapi_users.db import SQLAlchemyUserDatabase
+from sqlalchemy.future import select
 
 from .databases.users import AccessToken
 from .databases.users import User
 from .databases.users import get_access_token_db
-from .databases.users import get_user_db
 from .databases.users import get_async_session
+from .databases.users import get_user_db
 from .settings import app_settings
 
 
@@ -27,19 +30,24 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     verification_token_secret = app_settings.SECRET
 
     async def on_after_register(self, user: User, request: Request | None = None):
-        print(f"User {user.id} has registered.")
-        
-        # Fetch the user from the database
-        async with get_async_session() as session:
-            db_user = await session.get(User, user.id)
-            if not db_user:
-                raise HTTPException(status_code=404, detail="User not found")
-            
-            # Update the is_verified attribute
-            db_user.is_verified = True
-            session.add(db_user)
-            await session.commit()
-            await session.refresh(db_user)
+        # README: Sets the verified flag artificially to allow users to work without an
+        # actual verification process for now. this can go again as soon as we have an email server for verification.
+        async for session in get_async_session():
+            # find user in database
+            result = await session.execute(select(User).filter(User.id == user.id))
+            user_entry = result.scalars().first()
+
+            # set verified artificially and write back
+            if user_entry:
+                user_entry.is_verified = True
+                session.add(user_entry)
+                await session.commit()
+                await session.refresh(user_entry)
+
+                print("user object: ", user_entry.__dict__)
+                print(f"User {user_entry.id} has registered.")
+                print(f"User is verified? {user_entry.is_verified}")
+        # end README
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Request | None = None
