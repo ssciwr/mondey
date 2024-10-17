@@ -32,6 +32,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     async def on_after_register(self, user: User, request: Request | None = None):
         # README: Sets the verified flag artificially to allow users to work without an
         # actual verification process for now. this can go again as soon as we have an email server for verification.
+        # why can´t we use a contextmanager here?: TypeError: 'async_generator' object does not support the [asynchronous] context manager protocol
         async for session in get_async_session():
             # find user in database
             result = await session.execute(select(User).filter(User.id == user.id))
