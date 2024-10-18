@@ -163,14 +163,10 @@ export const ChildCreateSchema = {
 		birth_month: {
 			type: 'integer',
 			title: 'Birth Month'
-		},
-		has_image: {
-			type: 'boolean',
-			title: 'Has Image'
 		}
 	},
 	type: 'object',
-	required: ['birth_year', 'birth_month', 'has_image'],
+	required: ['birth_year', 'birth_month'],
 	title: 'ChildCreate'
 } as const;
 
@@ -189,17 +185,17 @@ export const ChildPublicSchema = {
 			type: 'integer',
 			title: 'Birth Month'
 		},
-		has_image: {
-			type: 'boolean',
-			title: 'Has Image'
-		},
 		id: {
 			type: 'integer',
 			title: 'Id'
+		},
+		has_image: {
+			type: 'boolean',
+			title: 'Has Image'
 		}
 	},
 	type: 'object',
-	required: ['birth_year', 'birth_month', 'has_image', 'id'],
+	required: ['birth_year', 'birth_month', 'id', 'has_image'],
 	title: 'ChildPublic'
 } as const;
 
@@ -310,6 +306,46 @@ export const MilestoneAdminSchema = {
 	type: 'object',
 	required: ['id', 'group_id', 'order'],
 	title: 'MilestoneAdmin'
+} as const;
+
+export const MilestoneAnswerPublicSchema = {
+	properties: {
+		milestone_id: {
+			type: 'integer',
+			title: 'Milestone Id'
+		},
+		answer: {
+			type: 'integer',
+			title: 'Answer'
+		}
+	},
+	type: 'object',
+	required: ['milestone_id', 'answer'],
+	title: 'MilestoneAnswerPublic'
+} as const;
+
+export const MilestoneAnswerSessionPublicSchema = {
+	properties: {
+		id: {
+			type: 'integer',
+			title: 'Id'
+		},
+		created_at: {
+			type: 'string',
+			format: 'date-time',
+			title: 'Created At'
+		},
+		answers: {
+			additionalProperties: {
+				$ref: '#/components/schemas/MilestoneAnswerPublic'
+			},
+			type: 'object',
+			title: 'Answers'
+		}
+	},
+	type: 'object',
+	required: ['id', 'created_at', 'answers'],
+	title: 'MilestoneAnswerSessionPublic'
 } as const;
 
 export const MilestoneGroupAdminSchema = {
