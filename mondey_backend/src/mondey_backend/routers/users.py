@@ -18,6 +18,7 @@ from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneAnswerSessionPublic
+from ..models.users import ObserverData
 from ..models.users import UserRead
 from ..models.users import UserUpdate
 from ..settings import app_settings
@@ -31,6 +32,18 @@ from .utils import write_file
 def create_router() -> APIRouter:
     router = APIRouter(prefix="/users", tags=["users"])
     router.include_router(fastapi_users.get_users_router(UserRead, UserUpdate))
+
+    @router.get("/data/", response_model=ObserverData)
+    def get_userdata(session: SessionDep, current_active_user: CurrentActiveUserDep):
+        return ObserverData()
+
+    @router.post("/data/", response_model=ObserverData)
+    def create_userdata(session: SessionDep, current_active_user: CurrentActiveUserDep):
+        return ObserverData()
+
+    @router.put("/data/", response_model=ObserverData)
+    def update_userdata(session: SessionDep, current_active_user: CurrentActiveUserDep):
+        return ObserverData()
 
     @router.get("/children/", response_model=list[ChildPublic])
     def get_children(session: SessionDep, current_active_user: CurrentActiveUserDep):
