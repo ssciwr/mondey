@@ -81,6 +81,7 @@
 		"alertMessageMissing": "Bitte füllen Sie die benötigten Felder (hervorgehoben) aus.",
 		"alertMessageError": "Ein Fehler ist aufgetreten",
 		"submitButtonLabel": "Abschließen",
+		"changeButtonLabel": "Ändern",
 		"submitSuccessMessage": "Vielen Dank!",
 		"yearOfBirth": {
 			"label": "Geburtsjahr",

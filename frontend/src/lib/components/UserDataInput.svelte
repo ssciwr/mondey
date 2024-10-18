@@ -56,17 +56,21 @@
 					label={element.props.label}
 					properties={element.props}
 					textTrigger={element.props.textTrigger}
+					disabled={done}
 					eventHandlers={{
-						'on:change': () => {
-							done = false;
-							element?.onchange();
+						'on:change': (e) => {
+							if (element.onchange) {
+								element.onchange(e);
+							}
 						},
 						'on:blur': element.onblur,
 						'on:click': element.onclick
 					}}
 					additionalEventHandlers={{
-						'on:change': () => {
-							done = false;
+						'on:change': (e) => {
+							if (element.additionalOnChange) {
+								element.additionalOnChange(e);
+							}
 						},
 						'on:blur': element.onblur,
 						'on:click': element.onclick
@@ -74,10 +78,20 @@
 				/>
 			{/each}
 			{#if done}
-				<div class="m-2 flex items-center justify-center p-2 text-gray-700 dark:text-gray-400">
-					<CheckCircleOutline size="xl" color="green" class="m-2" />
+				<div
+					class="m-2 flex w-full items-center justify-center p-2 text-gray-700 dark:text-gray-400"
+				>
+					<CheckCircleOutline size="xl" color="green" class="" />
 					{$_('userData.submitSuccessMessage')}
 				</div>
+
+				<Button
+					type="button"
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
+					on:click={(e) => {
+						done = false;
+					}}>{$_('userData.changeButtonLabel')}</Button
+				>
 			{:else}
 				<Button
 					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
