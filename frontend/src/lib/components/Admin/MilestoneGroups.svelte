@@ -31,6 +31,8 @@
 	import type { MilestoneAdmin, MilestoneGroupAdmin } from '$lib/client/types.gen';
 	import { onMount } from 'svelte';
 
+	let { milestone_age_group_id }: { milestone_age_group_id: number } = $props();
+
 	let currentMilestoneGroup = $state(null as MilestoneGroupAdmin | null);
 	let openMilestoneGroupIndex = $state(null as number | null);
 	let showEditMilestoneGroupModal = $state(false);
@@ -49,7 +51,9 @@
 	}
 
 	async function addMilestoneGroup() {
-		const { data, error } = await createMilestoneGroupAdmin();
+		const { data, error } = await createMilestoneGroupAdmin({
+			path: { milestone_age_group_id: milestone_age_group_id }
+		});
 		if (error || data === undefined) {
 			console.log(error);
 			currentMilestoneGroup = null;
@@ -118,13 +122,13 @@
 </script>
 
 <Card size="xl" class="m-5">
-	{#if milestoneGroups}
+	{#if `${milestone_age_group_id}` in $milestoneGroups}
 		<Table>
 			<TableHead>
 				<TableHeadCell colSpan="4">{$_('admin.milestone-groups')}</TableHeadCell>
 			</TableHead>
 			<TableBody>
-				{#each $milestoneGroups as milestoneGroup, groupIndex (milestoneGroup.id)}
+				{#each $milestoneGroups[`${milestone_age_group_id}`] as milestoneGroup, groupIndex (milestoneGroup.id)}
 					{@const groupTitle = milestoneGroup.text[$lang_id]?.title}
 					<TableBodyRow
 						on:click={() => {

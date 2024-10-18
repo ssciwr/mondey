@@ -20,6 +20,7 @@ from mondey_backend.main import create_app
 from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Language
 from mondey_backend.models.milestones import Milestone
+from mondey_backend.models.milestones import MilestoneAgeGroup
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroup
@@ -69,8 +70,11 @@ def session():
         for lang in ["de", "en", "fr"]:
             session.add(Language(lang=lang))
         lang_ids = [1, 2, 3]
+        # add two milestone age groups
+        session.add(MilestoneAgeGroup(months_min=0, months_max=36, years=lang_ids))
+        session.add(MilestoneAgeGroup(months_min=36, months_max=72, years=lang_ids))
         # add a milestone group with 3 milestones
-        session.add(MilestoneGroup(order=2))
+        session.add(MilestoneGroup(order=2, age_group_id=1))
         for lang_id in lang_ids:
             lbl = f"g1_l{lang_id}"
             session.add(
@@ -93,7 +97,7 @@ def session():
                     )
                 )
         # add a second milestone group with 2 milestones
-        session.add(MilestoneGroup(order=1))
+        session.add(MilestoneGroup(order=1, age_group_id=1))
         for lang_id in lang_ids:
             lbl = f"g1_l{lang_id}"
             session.add(
@@ -120,41 +124,50 @@ def session():
         session.add(MilestoneImage(milestone_id=1, filename="m2.jpg", approved=True))
         session.add(MilestoneImage(milestone_id=2, filename="m3.jpg", approved=True))
         session.commit()
-        # add 2 children for user 1
+        # add a ~1 yr old child for user 1
+        today = datetime.datetime.today()
         session.add(
             Child(
                 user_id=1,
                 name="child1",
-                birth_year=2022,
-                birth_month=3,
+                birth_year=today.year - 1,
+                birth_month=today.month,
                 has_image=False,
             )
         )
+        # add a ~4 yr old child for user 2
         session.add(
             Child(
                 user_id=1,
                 name="child2",
-                birth_year=2024,
+                birth_year=today.year - 4,
                 birth_month=12,
                 has_image=True,
             )
         )
-        # add a child for user 3
+        # add a ~5 year old child for user 3
         session.add(
             Child(
-                user_id=3, name="child3", birth_year=2021, birth_month=1, has_image=True
+                user_id=3,
+                name="child3",
+                birth_year=today.year - 5,
+                birth_month=7,
+                has_image=True,
             )
         )
         # add an (expired) milestone answer session for child 1 / user 1 with no answers
         session.add(
             MilestoneAnswerSession(
-                child_id=1, user_id=1, created_at=datetime.datetime(2024, 1, 1)
+                child_id=1,
+                user_id=1,
+                age_group_id=1,
+                created_at=datetime.datetime(today.year - 1, 1, 1),
             )
         )
         # add another (current) milestone answer session for child 1 / user 1 with 2 answers
         session.add(
             MilestoneAnswerSession(
-                child_id=1, user_id=1, created_at=datetime.datetime.now()
+                child_id=1, user_id=1, age_group_id=1, created_at=today
             )
         )
         # add two milestone answers
@@ -163,7 +176,10 @@ def session():
         # add an (expired) milestone answer session for child 3 / user 3 with 1 answer
         session.add(
             MilestoneAnswerSession(
-                child_id=3, user_id=3, created_at=datetime.datetime(2024, 1, 1)
+                child_id=3,
+                user_id=3,
+                age_group_id=2,
+                created_at=datetime.datetime(today.year - 1, 1, 1),
             )
         )
         session.add(MilestoneAnswer(answer_session_id=3, milestone_id=7, answer=2))
@@ -269,6 +285,34 @@ def jpg_file(tmp_path: pathlib.Path):
 
 
 @pytest.fixture
+def children():
+    today = datetime.datetime.today()
+    return [
+        {
+            "birth_month": today.month,
+            "birth_year": today.year - 1,
+            "id": 1,
+            "name": "child1",
+            "has_image": False,
+        },
+        {
+            "birth_month": 12,
+            "birth_year": today.year - 4,
+            "id": 2,
+            "name": "child2",
+            "has_image": True,
+        },
+        {
+            "birth_month": 7,
+            "birth_year": today.year - 5,
+            "id": 3,
+            "name": "child3",
+            "has_image": True,
+        },
+    ]
+
+
+@pytest.fixture
 def milestone_group1():
     return {
         "id": 1,
@@ -361,6 +405,7 @@ def milestone_group1():
 def milestone_group_admin1():
     return {
         "id": 1,
+        "age_group_id": 1,
         "order": 2,
         "text": {
             "1": {"group_id": 1, "desc": "g1_l1_d", "title": "g1_l1_t", "lang_id": 1},
@@ -554,6 +599,7 @@ def milestone_group2():
 def milestone_group_admin2():
     return {
         "id": 2,
+        "age_group_id": 1,
         "order": 1,
         "text": {
             "1": {"group_id": 2, "desc": "g1_l1_d", "title": "g1_l1_t", "lang_id": 1},

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from sqlalchemy import String
+from sqlalchemy.orm import attribute_keyed_dict
 from sqlalchemy.orm import relationship
 from sqlmodel import Field
 from sqlmodel import Relationship
@@ -10,6 +11,15 @@ def back_populates(name: str):
     # Workaround for "please state the generic argument using an annotation" sqlalchemy error
     # https://github.com/fastapi/sqlmodel/discussions/771#discussioncomment-10326074
     return Relationship(sa_relationship=relationship(back_populates=name))
+
+
+def dict_relationship(key: str):
+    return Relationship(
+        sa_relationship=relationship(
+            collection_class=attribute_keyed_dict(key),
+            cascade="all, delete-orphan",
+        )
+    )
 
 
 def fixed_length_string_field(max_length: int, **kwargs):

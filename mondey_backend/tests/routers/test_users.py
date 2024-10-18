@@ -11,25 +11,12 @@ def _is_approx_now(iso_date_string: str, delta=datetime.timedelta(hours=1)) -> b
     )
 
 
-def test_get_children(user_client: TestClient):
+def test_get_children(
+    user_client: TestClient, children: list[dict[str, str | bool | int]]
+):
     response = user_client.get("/users/children/")
     assert response.status_code == 200
-    assert response.json() == [
-        {
-            "birth_month": 3,
-            "birth_year": 2022,
-            "id": 1,
-            "name": "child1",
-            "has_image": False,
-        },
-        {
-            "birth_month": 12,
-            "birth_year": 2024,
-            "id": 2,
-            "name": "child2",
-            "has_image": True,
-        },
-    ]
+    assert response.json() == [children[0], children[1]]
 
 
 def test_get_children_no_children(research_client: TestClient):
@@ -38,18 +25,12 @@ def test_get_children_no_children(research_client: TestClient):
     assert response.json() == []
 
 
-def test_get_children_admin_user_1_child(admin_client: TestClient):
+def test_get_children_admin_user_1_child(
+    admin_client: TestClient, children: list[dict[str, str | bool | int]]
+):
     response = admin_client.get("/users/children/")
     assert response.status_code == 200
-    assert response.json() == [
-        {
-            "birth_month": 1,
-            "birth_year": 2021,
-            "id": 3,
-            "name": "child3",
-            "has_image": True,
-        }
-    ]
+    assert response.json() == [children[2]]
 
 
 def test_get_children_invalid_user(public_client: TestClient):
@@ -128,28 +109,34 @@ def test_upload_child_image(
     (children_dir / "1.jpg").unlink()
 
 
-def test_get_milestone_answers_user_does_not_own_child(admin_client: TestClient):
+def test_get_milestone_answers_child1_user_does_not_own_child(admin_client: TestClient):
     response = admin_client.get("/users/milestone-answers/1")
     assert response.status_code == 401
 
 
-def test_get_milestone_answers_child_does_not_exist(admin_client: TestClient):
+def test_get_milestone_answers_child8_child_does_not_exist(admin_client: TestClient):
     response = admin_client.get("/users/milestone-answers/8")
     assert response.status_code == 401
 
 
-def test_get_milestone_answers_no_current_answer_session(admin_client: TestClient):
+def test_get_milestone_answers_child3_no_current_answer_session(
+    admin_client: TestClient,
+):
     response = admin_client.get("/users/milestone-answers/3")
     assert response.status_code == 200
     assert response.json()["id"] == 4
+    assert response.json()["child_id"] == 3
+    assert response.json()["age_group_id"] == 2
     assert _is_approx_now(response.json()["created_at"])
     assert response.json()["answers"] == {}
 
 
-def test_get_milestone_answers_current_answer_session(user_client: TestClient):
+def test_get_milestone_answers_child1_current_answer_session(user_client: TestClient):
     response = user_client.get("/users/milestone-answers/1")
     assert response.status_code == 200
     assert response.json()["id"] == 2
+    assert response.json()["child_id"] == 1
+    assert response.json()["age_group_id"] == 1
     assert response.json()["answers"] == {
         "1": {"milestone_id": 1, "answer": 0},
         "2": {"milestone_id": 2, "answer": 3},
@@ -157,10 +144,12 @@ def test_get_milestone_answers_current_answer_session(user_client: TestClient):
     assert _is_approx_now(response.json()["created_at"])
 
 
-def test_update_milestone_answer_current_answer_session_no_existing_answer(
+def test_update_milestone_answer_current_answer_session_no_answer_session(
     user_client: TestClient,
 ):
     current_answer_session = user_client.get("/users/milestone-answers/1").json()
+    assert current_answer_session["child_id"] == 1
+    assert current_answer_session["age_group_id"] == 1
     assert "6" not in current_answer_session["answers"]
     new_answer = {"milestone_id": 6, "answer": 2}
     response = user_client.put(
@@ -200,4 +189,4 @@ def test_update_milestone_answer_invalid_answer_session(user_client: TestClient)
     response = user_client.put(
         "/users/milestone-answers/16", json={"milestone_id": 1, "answer": 2}
     )
-    assert response.status_code == 401
+    assert response.status_code == 404
