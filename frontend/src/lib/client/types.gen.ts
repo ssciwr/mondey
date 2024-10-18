@@ -442,10 +442,6 @@ export type UsersDeleteUserResponse = void;
 
 export type UsersDeleteUserError = unknown | HTTPValidationError;
 
-export type GetChildrenResponse = Array<ChildPublic>;
-
-export type GetChildrenError = unknown;
-
 export type UpdateChildData = {
 	body: ChildPublic;
 };

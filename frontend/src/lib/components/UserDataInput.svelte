@@ -106,14 +106,14 @@
 
 				<Button
 					type="button"
-					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
+					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
 					on:click={(e) => {
 						done = false;
 					}}>{$_('userData.changeButtonLabel')}</Button
 				>
 			{:else}
 				<Button
-					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
+					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
 					type="submit">{$_('userData.submitButtonLabel')}</Button
 				>
 			{/if}
