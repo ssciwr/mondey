@@ -2,6 +2,7 @@
 	import RadioList from '$lib/components/DataInput/RadioList.svelte';
 	import UserLandingPage from '$lib/components/UserLandingPage.svelte';
 	import { Input, Select } from 'flowbite-svelte';
+	import { _ } from 'svelte-i18n';
 
 	// this stuff here will become backend calls in the end because that is where the data this page will be filled with
 	// will come from. Hence, they are not put into a separate library or anything
@@ -30,17 +31,19 @@
 			return values;
 		}
 	}
+
 	const userData = [
 		{
 			component: Select,
 			value: null,
 			additionalValue: null,
 			props: {
-				name: 'Geburtsjahr',
+				name: $_('userData.yearOfBirth.label'),
 				items: numericalRange(60, 1960, 1, true),
-				placeholder: 'Bitte auswählen',
-				label: 'Geburtsjahr',
-				required: true
+				placeholder: $_('userData.yearOfBirth.placeholder'),
+				label: $_('userData.yearOfBirth.label'),
+				required: true,
+				id: 'yearOfBirth'
 			}
 		},
 		{
@@ -48,14 +51,21 @@
 			value: null,
 			additionalValue: null,
 			props: {
-				name: 'Geschlecht',
-				items: ['männlich', 'weiblich', 'divers', 'Anderes'].map((v) => {
+				name: $_('userData.gender.label'),
+				items: [
+					$_('userData.gender.items.male'),
+					$_('userData.gender.items.female'),
+					$_('userData.gender.items.divers'),
+					$_('userData.gender.items.other')
+				].map((v) => {
 					return { label: String(v), value: v };
 				}),
-				label: 'Geschlecht',
+				label: $_('userData.gender.label'),
+				placeholder: $_('userData.gender.placeholder'),
 				required: true,
-				textTrigger: 'Anderes',
-				selected: false
+				textTrigger: $_('userData.gender.items.other'),
+				selected: false,
+				id: 'gender'
 			}
 		},
 		{
@@ -63,23 +73,24 @@
 			value: null,
 			additionalValue: null,
 			props: {
-				name: 'Höchster Bildungsabschluss',
+				name: $_('userData.education.label'),
 				items: [
-					'kein Schulabschluss',
-					'Hauptschulabschluss',
-					'Realschulabschluss',
-					'Abitur',
-					'Bachelor',
-					'Master',
-					'Promotion',
-					'Anderer'
+					$_('userData.education.items.none'),
+					$_('userData.education.items.secondarylower'),
+					$_('userData.education.items.secondary'),
+					$_('userData.education.items.alevel'),
+					$_('userData.education.items.bsc'),
+					$_('userData.education.items.msc'),
+					$_('userData.education.items.phd'),
+					$_('userData.education.items.other')
 				].map((v) => {
 					return { name: String(v), value: v };
 				}),
-				placeholder: 'Bitte auswählen',
+				placeholder: $_('userData.education.placeholder'),
 				required: true,
-				label: 'Höchster Bildungsabschluss',
-				textTrigger: 'Anderer'
+				label: $_('userData.education.label'),
+				textTrigger: $_('userData.education.items.other'),
+				id: 'education'
 			}
 		},
 		{
@@ -87,12 +98,13 @@
 			value: null,
 			additionalValue: null,
 			props: {
-				name: 'Arbeitszeit/Woche',
+				name: $_('userData.workingHours.label'),
 				items: intervalRange(13, 0, 5, true),
-				placeholder: 'Bitte auswählen',
-				label: 'Arbeitszeit/Woche',
+				placeholder: $_('userData.workingHours.placeholder'),
+				label: $_('userData.workingHours.label'),
 				required: true,
-				textTrigger: 'Andere'
+				textTrigger: $_('userData.workingHours.other'),
+				id: 'workingHours'
 			}
 		},
 		{
@@ -100,12 +112,13 @@
 			value: null,
 			additionalValue: null,
 			props: {
-				name: 'Familieneinkommen/Jahr',
+				name: $_('userData.incomePerYear.label'),
 				items: intervalRange(23, 0, 5000, true),
-				placeholder: 'Bitte auswählen',
-				label: 'Familieneinkommen/Jahr',
+				placeholder: $_('userData.incomePerYear.placeholder'),
+				label: $_('userData.incomePerYear.label'),
 				required: true,
-				textTrigger: 'Anderes'
+				textTrigger: $_('userData.incomePerYear.other'),
+				id: 'incomePerYear'
 			}
 		},
 		{
@@ -113,11 +126,12 @@
 			value: null,
 			additionalValue: null,
 			props: {
-				name: 'Beruf',
+				name: $_('userData.profession.label'),
 				type: 'text',
-				placeholder: 'Geben sie ihren Beruf an',
-				label: 'Beruf',
-				required: true
+				placeholder: $_('userData.profession.placeholder'),
+				label: $_('userData.profession.label'),
+				required: true,
+				id: 'profession'
 			}
 		}
 	];

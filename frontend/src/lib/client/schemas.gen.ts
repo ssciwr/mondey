@@ -623,6 +623,55 @@ export const MilestoneTextPublicSchema = {
 	title: 'MilestoneTextPublic'
 } as const;
 
+export const ObserverSchema = {
+	properties: {
+		user_id: {
+			type: 'integer',
+			title: 'User Id'
+		},
+		year_of_birth: {
+			type: 'string',
+			maxLength: 255,
+			title: 'Year Of Birth'
+		},
+		gender: {
+			type: 'string',
+			maxLength: 255,
+			title: 'Gender'
+		},
+		education: {
+			type: 'string',
+			maxLength: 255,
+			title: 'Education'
+		},
+		working_hours: {
+			type: 'string',
+			maxLength: 255,
+			title: 'Working Hours'
+		},
+		income_per_year: {
+			type: 'string',
+			maxLength: 255,
+			title: 'Income Per Year'
+		},
+		profession: {
+			type: 'string',
+			maxLength: 255,
+			title: 'Profession'
+		}
+	},
+	type: 'object',
+	required: [
+		'year_of_birth',
+		'gender',
+		'education',
+		'working_hours',
+		'income_per_year',
+		'profession'
+	],
+	title: 'Observer'
+} as const;
+
 export const UserCreateSchema = {
 	properties: {
 		email: {

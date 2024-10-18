@@ -162,6 +162,16 @@ export type MilestoneTextPublic = {
 	help?: string;
 };
 
+export type Observer = {
+	user_id?: number;
+	year_of_birth: string;
+	gender: string;
+	education: string;
+	working_hours: string;
+	income_per_year: string;
+	profession: string;
+};
+
 export type UserCreate = {
 	email: string;
 	password: string;
@@ -441,6 +451,14 @@ export type UsersDeleteUserData = {
 export type UsersDeleteUserResponse = void;
 
 export type UsersDeleteUserError = unknown | HTTPValidationError;
+
+export type GetObserverResponse = Observer;
+
+export type GetObserverError = unknown;
+
+export type CreateObserverResponse = Observer;
+
+export type CreateObserverError = unknown;
 
 export type GetChildrenResponse = Array<ChildPublic>;
 
