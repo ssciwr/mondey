@@ -53,7 +53,6 @@
 	$: valid = evalValid(value);
 	$: highlight = !valid && properties.required === true;
 	$: showTextField = checkShowTextfield(value);
-	$: console.log('value in datainput: ', value);
 </script>
 
 {#if label}

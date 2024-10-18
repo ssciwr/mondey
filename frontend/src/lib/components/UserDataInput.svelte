@@ -8,22 +8,41 @@
 
 	import {} from '$lib/client/services.gen';
 
+	// TODO: As researcher, you don´t have to provide these data. Researchers have another component that is all there own and does not yet exist. Hence, the userlandingpage should not have this component
+
+	// TODO: not sure this is good.... seems like a lot of logic and work to do here...
+	function checkDataFilled(values: any[]) {
+		console.log('checkfilled: ', values);
+		let allFilled = true;
+		for (const element of values) {
+			console.log('  element: ', element);
+			allFilled = allFilled && element !== null && element !== '' && element !== undefined;
+		}
+		console.log('all done: ', allFilled);
+		return allFilled;
+	}
+
 	async function submitData() {
-		try {
-			// TODO: call the respective API function here to update the data
-			// TODO: add button icon and ok message
-			done = true;
-		} catch (error) {
+		const error: Error | null = null;
+		// TODO: call the respective API function here to update the data
+		done = true;
+
+		if (error) {
 			showAlert = true;
 			alertMessage = $_('userData.alertMessageError') + ': ' + error.detail;
 		}
 	}
 
 	// this can, but does not have to, come from a database later.
+	// TODO: this needs to load data from the backend
 	export let data: any[];
 
 	let showAlert: boolean = false;
-	let done: boolean = false;
+	let done: boolean = checkDataFilled(
+		data.map((element) => {
+			return element.value;
+		})
+	);
 	let alertMessage = $_('userData.alertMessageMissing');
 </script>
 
