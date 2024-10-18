@@ -80,8 +80,6 @@ import type {
 	UsersDeleteUserData,
 	UsersDeleteUserError,
 	UsersDeleteUserResponse,
-	GetChildrenError,
-	GetChildrenResponse,
 	UpdateChildData,
 	UpdateChildError,
 	UpdateChildResponse,
@@ -548,18 +546,6 @@ export const usersDeleteUser = <ThrowOnError extends boolean = false>(
 	>({
 		...options,
 		url: '/users/{id}'
-	});
-};
-
-/**
- * Get Children
- */
-export const getChildren = <ThrowOnError extends boolean = false>(
-	options?: Options<unknown, ThrowOnError>
-) => {
-	return (options?.client ?? client).get<GetChildrenResponse, GetChildrenError, ThrowOnError>({
-		...options,
-		url: '/users/children/'
 	});
 };
 
