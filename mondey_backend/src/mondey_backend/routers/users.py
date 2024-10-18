@@ -6,6 +6,8 @@ from fastapi import APIRouter
 from fastapi import HTTPException
 from fastapi import UploadFile
 from fastapi.responses import FileResponse
+from sqlmodel import col
+from sqlmodel import select
 
 from ..dependencies import CurrentActiveUserDep
 from ..dependencies import SessionDep
@@ -29,6 +31,15 @@ from .utils import write_file
 def create_router() -> APIRouter:
     router = APIRouter(prefix="/users", tags=["users"])
     router.include_router(fastapi_users.get_users_router(UserRead, UserUpdate))
+
+    @router.get("/children/", response_model=list[ChildPublic])
+    def get_children(session: SessionDep, current_active_user: CurrentActiveUserDep):
+        return [
+            child
+            for child in session.exec(
+                select(Child).where(col(Child.user_id) == current_active_user.id)
+            ).all()
+        ]
 
     @router.post("/children/", response_model=ChildPublic)
     def create_child(
