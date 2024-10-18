@@ -79,7 +79,9 @@
 		"heading": "Benutzerdaten eingeben",
 		"alertMessageTitle": "Fehler",
 		"alertMessageMissing": "Bitte füllen Sie die benötigten Felder (hervorgehoben) aus.",
+		"alertMessageError": "Ein Fehler ist aufgetreten",
 		"submitButtonLabel": "Abschließen",
+		"submitSuccessMessage": "Vielen Dank!",
 		"yearOfBirth": {
 			"label": "Geburtsjahr",
 			"placeholder": "Bitte auswählen"

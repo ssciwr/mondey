@@ -6,7 +6,6 @@ from fastapi_users_db_sqlalchemy.access_token import SQLAlchemyBaseAccessTokenTa
 from sqlalchemy import Boolean
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
-from sqlalchemy import String
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import declared_attr
@@ -40,17 +39,3 @@ class AccessToken(SQLAlchemyBaseAccessTokenTable[int], Base):
         return mapped_column(
             Integer, ForeignKey("user.id", ondelete="cascade"), nullable=False
         )
-
-
-class ObserverData(Base):
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    birthYear: Mapped[int] = mapped_column(Integer, nullable=False)
-    gender: Mapped[str] = mapped_column(String(255), nullable=False)
-    education: Mapped[str] = mapped_column(String(255), nullable=False)
-    workingHours: Mapped[str] = mapped_column(String(255), nullable=False)
-    incomePerYear: Mapped[str] = mapped_column(String(255), nullable=False)
-    profession: Mapped[str] = mapped_column(String(255), nullable=False)
-    langid: Mapped[int] = mapped_column(Integer, nullable=False)
-    userid: Mapped[int] = mapped_column(
-        Integer, ForeignKey("user.id", ondelete="cascade"), nullable=False
-    )

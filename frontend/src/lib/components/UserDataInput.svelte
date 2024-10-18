@@ -1,41 +1,37 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import AlertMessage from '$lib/components/AlertMessage.svelte';
 	import DataInput from '$lib/components/DataInput/DataInput.svelte';
 	import { preventDefault } from '$lib/util';
 	import { Button, Card, Heading } from 'flowbite-svelte';
+	import { CheckCircleOutline } from 'flowbite-svelte-icons';
 	import { _ } from 'svelte-i18n';
 
 	import {} from '$lib/client/services.gen';
 
-	function validate(): boolean {
-		missingValues = data.map((element) => element.value === '' || element.value === null);
-		return missingValues.every((v) => v === false);
-	}
-
 	async function submitData() {
-		const valid = validate();
-		if (valid) {
-			showAlert = false;
-			goto('/userLand/userLandingpage');
-		} else {
+		try {
+			// TODO: call the respective API function here to update the data
+			// TODO: add button icon and ok message
+			done = true;
+		} catch (error) {
 			showAlert = true;
+			alertMessage = $_('userData.alertMessageError') + ': ' + error.detail;
 		}
 	}
-	
+
 	// this can, but does not have to, come from a database later.
 	export let data: any[];
 
-	let missingValues = data.map(() => false);
-
-	let showAlert: boolean = true;
+	let showAlert: boolean = false;
+	let done: boolean = false;
+	let alertMessage = $_('userData.alertMessageMissing');
 </script>
 
 <!-- Show big alert message when something is missing -->
 {#if showAlert}
 	<AlertMessage
 		title={$_('userData.alertMessageTitle')}
-		message={$_('userData.alertMessageMissing')}
+		message={alertMessage}
 		onclick={() => {
 			showAlert = false;
 		}}
@@ -61,21 +57,33 @@
 					properties={element.props}
 					textTrigger={element.props.textTrigger}
 					eventHandlers={{
-						'on:change': element.onchange,
+						'on:change': () => {
+							done = false;
+							element?.onchange();
+						},
 						'on:blur': element.onblur,
 						'on:click': element.onclick
 					}}
 					additionalEventHandlers={{
-						'on:change': element.onchange,
+						'on:change': () => {
+							done = false;
+						},
 						'on:blur': element.onblur,
 						'on:click': element.onclick
 					}}
 				/>
 			{/each}
+			{#if done}
+				<div class="m-2 flex items-center justify-center p-2 text-gray-700 dark:text-gray-400">
+					<CheckCircleOutline size="xl" color="green" class="m-2" />
+					{$_('userData.submitSuccessMessage')}
+				</div>
+			{:else}
+				<Button
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
+					type="submit">{$_('userData.submitButtonLabel')}</Button
+				>
+			{/if}
 		</form>
-		<Button
-			class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
-			type="submit">{$_('userData.submitButtonLabel')}</Button
-		>
 	</Card>
 </div>
