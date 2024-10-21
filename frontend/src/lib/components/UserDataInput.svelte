@@ -50,7 +50,7 @@
 	const buttons = [
 		{
 			label: 'Abschließen',
-			onclick: acceptData,
+			onclick: submitData,
 			disabled: true
 		}
 	];
