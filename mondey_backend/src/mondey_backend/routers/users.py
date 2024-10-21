@@ -168,14 +168,14 @@ def create_router() -> APIRouter:
         try:
             print("userid: ", current_active_user.id)
 
-            user_answers = list(
+            user_answers = [
                 UserAnswerPublic(id=answer.id, answer=answer.answer)
                 for answer in session.exec(
                     select(UserAnswer).where(
                         col(UserAnswer.user_id) == current_active_user.id
                     )
                 ).all()
-            )
+            ]
 
             print("normal operation: get_current_user_answers")
             return user_answers
@@ -190,58 +190,58 @@ def create_router() -> APIRouter:
         current_active_user: CurrentActiveUserDep,
         user_answers: list[UserAnswerPublic],
     ):
+        print("user_answer_session: ", session)
+        if session is None:
+            raise HTTPException(401)
+
         for answer in user_answers:
             full_answer = UserAnswer(
                 id=answer.id, user_id=current_active_user.id, answer=answer.answer
             )
             db_useranswers = UserAnswer.model_validate(full_answer)
             add(session, db_useranswers)
-        return db_useranswers
+
+        return user_answers
 
     @router.put("/user-answers/{user_id}", response_model=list[UserAnswerPublic])
     def update_current_user_answers(
         session: SessionDep,
         current_active_user: CurrentActiveUserDep,
-        answers: list[UserAnswerPublic],
+        new_answers: list[UserAnswerPublic],
     ):
-        for answer in answers:
-            try:
-                user_answer_session = get(
-                    session, UserAnswer, current_active_user.id, answer.id
+        print("user_answer_session: ", session)
+        if session is None:
+            raise HTTPException(401)
+
+        answers_of_user = {
+            answer.id: answer
+            for answer in session.exec(
+                select(UserAnswer).where(UserAnswer.user_id == current_active_user.id)
+            ).all()
+        }
+
+        for new_answer in new_answers:
+            if new_answer is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"UserAnswer with id {new_answer.id} not found",
                 )
-            except Exception as e:
-                print("shit happened in backend: ", e)
-                raise e
+            else:
+                stored_answer = answers_of_user[new_answer.id]
 
-            print("user_answer_session: ", user_answer_session)
-            if (
-                user_answer_session is None
-                or user_answer_session.user_id != current_active_user.id
-            ):
-                raise HTTPException(401)
+                print(
+                    "normal operation: update_current_user_answers",
+                    session,
+                    new_answer.id,
+                    new_answer.answer,
+                    stored_answer.answer,
+                )
 
-            print(
-                "normal operation: update_current_user_answers",
-                user_answer_session,
-                answers,
-            )
+                stored_answer.answer = new_answer.answer
+                session.add(stored_answer)
 
-        # user_answer = user_answer_session.answers.get(answer.user_question_id)
+        session.commit()
 
-        # print("user answer stuff:  ", user_answer_session.id, current_active_user.id)
-
-        # if user_answer is None:
-        #     user_answer = UserAnswer(
-        #         id=user_answer_session.id,
-        #         user_question_id=answer.user_question_id,
-        #         user_id=current_active_user.id,
-        #         answer=answer.answer,
-        #     )
-        #     add(session, user_answer)
-        # else:
-        #     user_answer.answer = answer.answer
-        #     session.commit()
-
-        return answers
+        return new_answers
 
     return router
