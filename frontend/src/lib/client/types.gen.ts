@@ -171,7 +171,6 @@ export type MilestoneTextPublic = {
  */
 export type UserAnswerPublic = {
 	id: number;
-	user_question_id: number;
 	answer: string;
 };
 
@@ -527,20 +526,25 @@ export type UpdateMilestoneAnswerResponse = MilestoneAnswerPublic;
 
 export type UpdateMilestoneAnswerError = HTTPValidationError;
 
-export type GetCurrentUserAnswersResponse = UserAnswerPublic;
+export type GetCurrentUserAnswersResponse = Array<UserAnswerPublic>;
 
 export type GetCurrentUserAnswersError = unknown;
 
 export type UpdateCurrentUserAnswersData = {
-	body: UserAnswerPublic;
-	query: {
-		milestone_answer_session_id: number;
-	};
+	body: Array<UserAnswerPublic>;
 };
 
-export type UpdateCurrentUserAnswersResponse = unknown;
+export type UpdateCurrentUserAnswersResponse = Array<UserAnswerPublic>;
 
 export type UpdateCurrentUserAnswersError = HTTPValidationError;
+
+export type CreateUserAnswersData = {
+	body: Array<UserAnswerPublic>;
+};
+
+export type CreateUserAnswersResponse = Array<UserAnswerPublic>;
+
+export type CreateUserAnswersError = HTTPValidationError;
 
 export type AuthCookieLoginData = {
 	body: Body_auth_cookie_login_auth_login_post;

@@ -1,17 +1,39 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import {
+		createUserAnswers,
 		getCurrentUserAnswers,
 		getUserQuestions,
+		updateCurrentUserAnswers,
 		usersCurrentUser
 	} from '$lib/client/services.gen';
+	import { type GetUserQuestionsResponse, type UserAnswerPublic } from '$lib/client/types.gen';
 	import AlertMessage from '$lib/components/AlertMessage.svelte';
 	import DataInput from '$lib/components/DataInput/DataInput.svelte';
-	import { users, type UserData } from '$lib/stores/userStore';
 	import { preventDefault } from '$lib/util';
 	import { Button, Card, Heading } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
+
+	function convertQuestions(questionaire: GetUserQuestionsResponse) {
+		// TODO: once questions come from the database we can do this with the questionaire
+
+		questionaire.map((e) => {
+			return e;
+		});
+	}
+
+	function convertAnswers(questionaire: GetUserQuestionsResponse | undefined): UserAnswerPublic[] {
+		// TODO: once questions come from the database we can do this with the questionaire
+		// for (let element of questionaire) {
+		// }
+
+		return data.map((e, index) => {
+			return {
+				id: index,
+				answer: String(e.value)
+			} as UserAnswerPublic;
+		});
+	}
 
 	function validate(): boolean {
 		missingValues = data.map((element) => element.value === '' || element.value === null);
@@ -20,32 +42,39 @@
 
 	async function submitData() {
 		const valid = validate();
+
+		console.log('data: ', data);
+
 		if (valid) {
-			for (let i = 0; i < data.length; ++i) {
-				(userData as UserData)[data[i].props.name] = {};
-				(userData as UserData)[data[i].props.name]['value'] = data[i].value;
-				(userData as UserData)[data[i].props.name]['additionalValue'] = data[i].additionalValue;
+			const answers = convertAnswers(questionaire);
+			console.log('answers: ', answers);
+
+			const response = await updateCurrentUserAnswers({
+				body: answers,
+				query: { session_id: userID }
+			});
+
+			console.log('response on update: ', response);
+
+			if (response.error) {
+				console.log('shit happened when sending user question answers: ', response.error);
+				showAlert = true;
+				alertMessage = 'shit happened when sending user question answers: ' + response.error;
+			} else {
+				console.log('alright, yay!');
 			}
-
-			if (userID) {
-				await users.update(userID, userData);
-			}
-
-			await users.save();
-
-			buttons[0].disabled = true;
-			showAlert = false;
-			goto('/userLand/userLandingpage');
 		} else {
 			showAlert = true;
 		}
 	}
 
-	let userData: UserData;
 	let userID: number | undefined;
 
 	// this can, but does not have to, come from a database later.
 	export let data: any[];
+
+	// this is the data that will be used in the end
+	let questionaire: GetUserQuestionsResponse | undefined = [];
 
 	onMount(async () => {
 		const currentUser = await usersCurrentUser();
@@ -54,24 +83,49 @@
 			showAlert = true;
 			alertMessage = 'current user could not be found. log out and try again';
 		} else {
+			console.log('current user: ', currentUser?.data?.email, currentUser?.data?.id);
 			userID = currentUser?.data?.id;
 
-			const otherData = await getUserQuestions();
+			const getUserQuestionsResponse = await getUserQuestions();
 
-			if (otherData.error) {
+			if (getUserQuestionsResponse.error) {
 				showAlert = true;
 				alertMessage =
 					'questionaire could not be retrieved. Execute the proper rituals to apeace the machine spirits';
 			} else {
+				questionaire = getUserQuestionsResponse?.data;
+				console.log('data from backend: ', 'questionaire: ', questionaire);
 			}
 
-			const currentAnswers = await getCurrentUserAnswers();
-			if (currentAnswers.error) {
+			let currentAnswers;
+			try {
+				currentAnswers = await getCurrentUserAnswers();
+			} catch (error) {
+				console.log('Error happened when getting current answers:', error);
+			}
+			if (currentAnswers?.error) {
 				showAlert = true;
 				alertMessage =
 					'answers could not be retrieved. Execute the proper rituals to apeace the machine spirits';
 			} else {
-				console.log('data from backend: ', otherData, currentAnswers);
+				console.log('data from backend: ', 'currentAnswers: ', currentAnswers?.data);
+			}
+
+			if (currentAnswers?.data?.length === 0) {
+				const createAnswerResponse = await createUserAnswers({
+					body: data.map((e, index) => {
+						return {
+							id: index,
+							answer: ''
+						};
+					})
+				});
+
+				if (createAnswerResponse.error) {
+					console.log('shit happened when adding dummy answers');
+				} else {
+					console.log('creation of empty answers successful');
+				}
 			}
 		}
 	});

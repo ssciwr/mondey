@@ -18,6 +18,7 @@ from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneAnswerSessionPublic
+from ..models.questions import UserAnswer
 from ..models.questions import UserAnswerPublic
 from ..models.users import UserRead
 from ..models.users import UserUpdate
@@ -156,36 +157,91 @@ def create_router() -> APIRouter:
         return milestone_answer
 
     # Endpoints for answers to user question
-    @router.get("/user-answers/{user_id}", response_model=UserAnswerPublic)
+    @router.get("/user-answers/{user_id}", response_model=list[UserAnswerPublic])
     def get_current_user_answers(
         session: SessionDep, current_active_user: CurrentActiveUserDep
     ):
-        # TODO: check if there is answer data for the curernt user in the database,
+        # TODO: check if there is answer data for the current user in the database,
         # if not, create it and return the new empty struct
         # else return the found stuff
-        if False:
-            raise HTTPException(401)
-        else:
-            print("normal operation: get_current_user_answers")
-            pass
 
-    @router.put("user_answers/{user_id}")
+        try:
+            print("userid: ", current_active_user.id)
+
+            user_answers = list(
+                UserAnswerPublic(id=answer.id, answer=answer.answer)
+                for answer in session.exec(
+                    select(UserAnswer).where(
+                        col(UserAnswer.user_id) == current_active_user.id
+                    )
+                ).all()
+            )
+
+            print("normal operation: get_current_user_answers")
+            return user_answers
+
+        except Exception as err:
+            print("shit happened when getting current answers")
+            raise HTTPException(500) from err
+
+    @router.post("/user-answers/{user_id}", response_model=list[UserAnswerPublic])
+    def create_user_answers(
+        session: SessionDep,
+        current_active_user: CurrentActiveUserDep,
+        user_answers: list[UserAnswerPublic],
+    ):
+        for answer in user_answers:
+            full_answer = UserAnswer(
+                id=answer.id, user_id=current_active_user.id, answer=answer.answer
+            )
+            db_useranswers = UserAnswer.model_validate(full_answer)
+            add(session, db_useranswers)
+        return db_useranswers
+
+    @router.put("/user-answers/{user_id}", response_model=list[UserAnswerPublic])
     def update_current_user_answers(
         session: SessionDep,
         current_active_user: CurrentActiveUserDep,
-        milestone_answer_session_id: int,
-        answer: UserAnswerPublic,
+        answers: list[UserAnswerPublic],
     ):
-        # TODO: replace the current with the new data in the database
-        milestone_answer_session = session.get(
-            MilestoneAnswerSession, milestone_answer_session_id
-        )
-        if (
-            milestone_answer_session is None
-            or milestone_answer_session.user_id != current_active_user.id
-        ):
-            raise HTTPException(401)
-        else:
-            print("normal operation: update_current_user_answers")
+        for answer in answers:
+            try:
+                user_answer_session = get(
+                    session, UserAnswer, current_active_user.id, answer.id
+                )
+            except Exception as e:
+                print("shit happened in backend: ", e)
+                raise e
+
+            print("user_answer_session: ", user_answer_session)
+            if (
+                user_answer_session is None
+                or user_answer_session.user_id != current_active_user.id
+            ):
+                raise HTTPException(401)
+
+            print(
+                "normal operation: update_current_user_answers",
+                user_answer_session,
+                answers,
+            )
+
+        # user_answer = user_answer_session.answers.get(answer.user_question_id)
+
+        # print("user answer stuff:  ", user_answer_session.id, current_active_user.id)
+
+        # if user_answer is None:
+        #     user_answer = UserAnswer(
+        #         id=user_answer_session.id,
+        #         user_question_id=answer.user_question_id,
+        #         user_id=current_active_user.id,
+        #         answer=answer.answer,
+        #     )
+        #     add(session, user_answer)
+        # else:
+        #     user_answer.answer = answer.answer
+        #     session.commit()
+
+        return answers
 
     return router

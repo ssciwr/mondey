@@ -67,8 +67,9 @@ class UserAnswer(SQLModel, table=True):
         Makes sure this is created as a table in the database, by default True
     """
 
-    id: int | None = Field(default=None, primary_key=True)
-    user_question_id: int | None = Field(default=None, foreign_key="userquestion.id")
+    id: int | None = Field(
+        default=None, primary_key=True, foreign_key="userquestion.id"
+    )
     user_id: int
     answer: str
 
@@ -83,5 +84,4 @@ class UserAnswerPublic(SQLModel):
     """
 
     id: int
-    user_question_id: int
     answer: str

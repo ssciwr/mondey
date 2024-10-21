@@ -629,17 +629,13 @@ export const UserAnswerPublicSchema = {
 			type: 'integer',
 			title: 'Id'
 		},
-		user_question_id: {
-			type: 'integer',
-			title: 'User Question Id'
-		},
 		answer: {
 			type: 'string',
 			title: 'Answer'
 		}
 	},
 	type: 'object',
-	required: ['id', 'user_question_id', 'answer'],
+	required: ['id', 'answer'],
 	title: 'UserAnswerPublic',
 	description: `External data model for UserAnswers
 
