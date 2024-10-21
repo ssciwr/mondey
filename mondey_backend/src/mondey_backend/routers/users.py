@@ -18,6 +18,7 @@ from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneAnswerSessionPublic
+from ..models.users import UserAnswerPublic
 from ..models.users import UserRead
 from ..models.users import UserUpdate
 from ..settings import app_settings
@@ -32,6 +33,7 @@ def create_router() -> APIRouter:
     router = APIRouter(prefix="/users", tags=["users"])
     router.include_router(fastapi_users.get_users_router(UserRead, UserUpdate))
 
+    # children endpoints
     @router.get("/children/", response_model=list[ChildPublic])
     def get_children(session: SessionDep, current_active_user: CurrentActiveUserDep):
         return [
@@ -110,6 +112,7 @@ def create_router() -> APIRouter:
         write_file(file, filename)
         return {"ok": True}
 
+    # milestone endpoints
     @router.get(
         "/milestone-answers/{child_id}", response_model=MilestoneAnswerSessionPublic
     )
@@ -153,3 +156,45 @@ def create_router() -> APIRouter:
         return milestone_answer
 
     return router
+
+    # userquestion endpoints: TODO: replace milestone naming with final database name
+    @router.get("/user-answers/{user_id}", response_model=UserAnswerPublic)
+    def get_current_user_answers(
+        session: SessionDep,
+        current_active_user: CurrentActiveUserDep,
+        milestone_answer_session_id: int,
+        answer: MilestoneAnswerPublic,
+    ):
+        # TODO: check if there is answer data for the curernt user in the database,
+        # if not, create it and return the new empty struct
+        # else return the found stuff
+        milestone_answer_session = session.get(
+            MilestoneAnswerSession, milestone_answer_session_id
+        )
+        if (
+            milestone_answer_session is None
+            or milestone_answer_session.user_id != current_active_user.id
+        ):
+            raise HTTPException(401)
+        else:
+            print("normal operation: get_current_user_answers")
+            pass
+
+    @router.put("user_answers/{user_id}")
+    def update_current_user_answers(
+        session: SessionDep,
+        current_active_user: CurrentActiveUserDep,
+        milestone_answer_session_id: int,
+        answer: UserAnswerPublic,
+    ):
+        # TODO: replace the current with the new data in the database
+        milestone_answer_session = session.get(
+            MilestoneAnswerSession, milestone_answer_session_id
+        )
+        if (
+            milestone_answer_session is None
+            or milestone_answer_session.user_id != current_active_user.id
+        ):
+            raise HTTPException(401)
+        else:
+            print("normal operation: update_current_user_answers")

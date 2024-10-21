@@ -52,3 +52,36 @@ class UserQuestionAdmin(SQLModel):
     input: str
     options: str
     text: dict[int, UserQuestionText] = {}
+
+
+# Answers to user questions. Internal model and 'public' model exposed to the forntend app
+class UserAnswer(SQLModel, table=True):
+    """
+    Internal model for user answers.
+
+    Parameters
+    ----------
+    SQLModel : Pydantic model  basic sqlmodel pydantic type
+
+    table : bool, True
+        Makes sure this is created as a table in the database, by default True
+    """
+
+    id: int | None = Field(default=None, primary_key=True)
+    user_question_id: int | None = Field(default=None, foreign_key="userquestion.id")
+    user_id: int
+    answer: str
+
+
+class UserAnswerPublic(SQLModel):
+    """
+    External data model for UserAnswers
+
+    Parameters
+    ----------
+    SQLModel : Pydantic model  basic sqlmodel pydantic type
+    """
+
+    id: int
+    user_question_id: int
+    answer: str
