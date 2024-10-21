@@ -162,6 +162,19 @@ export type MilestoneTextPublic = {
 	help?: string;
 };
 
+/**
+ * External data model for UserAnswers
+ *
+ * Parameters
+ * ----------
+ * SQLModel : Pydantic model  basic sqlmodel pydantic type
+ */
+export type UserAnswerPublic = {
+	id: number;
+	user_question_id: number;
+	answer: string;
+};
+
 export type UserCreate = {
 	email: string;
 	password: string;
@@ -513,6 +526,21 @@ export type UpdateMilestoneAnswerData = {
 export type UpdateMilestoneAnswerResponse = MilestoneAnswerPublic;
 
 export type UpdateMilestoneAnswerError = HTTPValidationError;
+
+export type GetCurrentUserAnswersResponse = UserAnswerPublic;
+
+export type GetCurrentUserAnswersError = unknown;
+
+export type UpdateCurrentUserAnswersData = {
+	body: UserAnswerPublic;
+	query: {
+		milestone_answer_session_id: number;
+	};
+};
+
+export type UpdateCurrentUserAnswersResponse = unknown;
+
+export type UpdateCurrentUserAnswersError = HTTPValidationError;
 
 export type AuthCookieLoginData = {
 	body: Body_auth_cookie_login_auth_login_post;

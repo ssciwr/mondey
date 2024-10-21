@@ -155,26 +155,15 @@ def create_router() -> APIRouter:
             session.commit()
         return milestone_answer
 
-    return router
-
-    # userquestion endpoints: TODO: replace milestone naming with final database name
+    # Endpoints for answers to user question
     @router.get("/user-answers/{user_id}", response_model=UserAnswerPublic)
     def get_current_user_answers(
-        session: SessionDep,
-        current_active_user: CurrentActiveUserDep,
-        milestone_answer_session_id: int,
-        answer: MilestoneAnswerPublic,
+        session: SessionDep, current_active_user: CurrentActiveUserDep
     ):
         # TODO: check if there is answer data for the curernt user in the database,
         # if not, create it and return the new empty struct
         # else return the found stuff
-        milestone_answer_session = session.get(
-            MilestoneAnswerSession, milestone_answer_session_id
-        )
-        if (
-            milestone_answer_session is None
-            or milestone_answer_session.user_id != current_active_user.id
-        ):
+        if False:
             raise HTTPException(401)
         else:
             print("normal operation: get_current_user_answers")
@@ -198,3 +187,5 @@ def create_router() -> APIRouter:
             raise HTTPException(401)
         else:
             print("normal operation: update_current_user_answers")
+
+    return router

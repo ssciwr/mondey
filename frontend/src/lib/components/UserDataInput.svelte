@@ -1,10 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import {
+		getCurrentUserAnswers,
+		getUserQuestions,
+		usersCurrentUser
+	} from '$lib/client/services.gen';
 	import AlertMessage from '$lib/components/AlertMessage.svelte';
 	import DataInput from '$lib/components/DataInput/DataInput.svelte';
 	import { users, type UserData } from '$lib/stores/userStore';
 	import { preventDefault } from '$lib/util';
 	import { Button, Card, Heading } from 'flowbite-svelte';
+	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 
 	function validate(): boolean {
@@ -36,10 +42,39 @@
 	}
 
 	let userData: UserData;
-	let userID: string;
+	let userID: number | undefined;
 
 	// this can, but does not have to, come from a database later.
 	export let data: any[];
+
+	onMount(async () => {
+		const currentUser = await usersCurrentUser();
+
+		if (currentUser.error) {
+			showAlert = true;
+			alertMessage = 'current user could not be found. log out and try again';
+		} else {
+			userID = currentUser?.data?.id;
+
+			const otherData = await getUserQuestions();
+
+			if (otherData.error) {
+				showAlert = true;
+				alertMessage =
+					'questionaire could not be retrieved. Execute the proper rituals to apeace the machine spirits';
+			} else {
+			}
+
+			const currentAnswers = await getCurrentUserAnswers();
+			if (currentAnswers.error) {
+				showAlert = true;
+				alertMessage =
+					'answers could not be retrieved. Execute the proper rituals to apeace the machine spirits';
+			} else {
+				console.log('data from backend: ', otherData, currentAnswers);
+			}
+		}
+	});
 
 	let missingValues = data.map(() => false);
 
@@ -108,7 +143,7 @@
 				/>
 			{/each}
 			<Button
-				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+				class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 				type="submit">{$_('userData.submitButtonLabel')}</Button
 			>
 		</form>
