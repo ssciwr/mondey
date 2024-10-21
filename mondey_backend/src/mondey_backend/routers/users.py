@@ -18,7 +18,7 @@ from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneAnswerSessionPublic
-from ..models.users import UserAnswerPublic
+from ..models.questions import UserAnswerPublic
 from ..models.users import UserRead
 from ..models.users import UserUpdate
 from ..settings import app_settings

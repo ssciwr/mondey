@@ -60,7 +60,7 @@
 {#if showAlert}
 	<AlertMessage
 		title={$_('userData.alertMessageTitle')}
-		message={$_('userData.alertMessageMissing')}
+		message={alertMessage}
 		onclick={() => {
 			showAlert = false;
 		}}
@@ -107,10 +107,10 @@
 					}}
 				/>
 			{/each}
+			<Button
+				class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
+				type="submit">{$_('userData.submitButtonLabel')}</Button
+			>
 		</form>
-		<Button
-			class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
-			type="submit">{$_('userData.submitButtonLabel')}</Button
-		>
 	</Card>
 </div>
