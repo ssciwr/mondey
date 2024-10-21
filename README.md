@@ -32,3 +32,7 @@ These API interfaces are only temporarily public for convenience during developm
 
 - [API documentation](https://mondey.lkeegan.dev/api/redoc)
 - [Swagger UI to interact with API](https://mondey.lkeegan.dev/api/docs)
+
+### Licensing
+
+The source code in this repository is distributed under [AGPL-3.0-or-later](LICENSE).
