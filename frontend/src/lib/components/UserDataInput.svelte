@@ -32,12 +32,14 @@
 			if (e.additionalValue !== '' && e.additionalValue !== null) {
 				return {
 					id: index,
-					answer: String(e.additionalValue)
+					answer: String(e.additionalValue),
+					non_standard: true
 				} as UserAnswerPublic;
 			} else {
 				return {
 					id: index,
-					answer: String(e.value)
+					answer: String(e.value),
+					non_standard: false
 				} as UserAnswerPublic;
 			}
 		});
@@ -61,7 +63,7 @@
 
 			// disable all elements to make editing a conscious choice
 			for (let element of data) {
-				element.disabled = true;
+				element.props.disabled = true;
 			}
 			dataIsCurrent = true;
 		}
@@ -78,8 +80,7 @@
 
 	// flags for enabling and disabling visual hints
 	let showAlert: boolean = false;
-	let dataIsCurrent: boolean = false;
-	$: reload = false;
+	$: dataIsCurrent = false;
 
 	// what is shown in the alert if showAlert === true
 	let alertMessage: string = $_('userData.alertMessageMissing');
@@ -121,7 +122,8 @@
 					body: data.map((e, index) => {
 						return {
 							id: index,
-							answer: ''
+							answer: '',
+							non_standard: false
 						};
 					})
 				});
@@ -136,21 +138,22 @@
 			} else {
 				console.log('data from backend: ', 'currentAnswers: ', currentAnswers?.data);
 				for (let i = 0; i < data.length; i++) {
-					data[i].value = currentAnswers.data[i].answer;
-					data[i].disabled = true;
+					if (currentAnswers?.data[i].non_standard === true) {
+						data[i].additionalValue = currentAnswers.data[i].answer;
+						data[i].value = data[i].props.textTrigger;
+						data[i].showTextField = true;
+					} else {
+						data[i].value = currentAnswers.data[i].answer;
+					}
+					data[i].props.disabled = true;
 					dataIsCurrent = true;
 				}
 			}
 		}
-		console.log('onmount done');
-		reload = true;
+		console.log('onmount done: ', data);
 	});
-	console.log(
-		'data: ',
-		data.map((e) => {
-			e.value;
-		})
-	);
+
+	$: console.log(data, dataIsCurrent);
 </script>
 
 <!-- Show big alert message when something is missing -->
@@ -201,7 +204,7 @@
 					on:click={() => {
 						console.log('dataiscurrent click');
 						for (let element of data) {
-							element.disabled = false;
+							element.props.disabled = false;
 						}
 						dataIsCurrent = false;
 					}}

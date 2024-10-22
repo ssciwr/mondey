@@ -37,7 +37,6 @@
 			component: Select,
 			value: null,
 			additionalValue: null,
-			disabled: false,
 			showTextField: false,
 			props: {
 				name: $_('userData.yearOfBirth.label'),
@@ -45,14 +44,14 @@
 				placeholder: $_('userData.yearOfBirth.placeholder'),
 				label: $_('userData.yearOfBirth.label'),
 				required: true,
-				id: 'yearOfBirth'
+				id: 'yearOfBirth',
+				disabled: false
 			}
 		},
 		{
 			component: RadioList,
 			value: null,
 			additionalValue: null,
-			disabled: false,
 			showTextField: false,
 			props: {
 				name: $_('userData.gender.label'),
@@ -69,14 +68,14 @@
 				required: true,
 				textTrigger: $_('userData.gender.items.other'),
 				selected: false,
-				id: 'gender'
+				id: 'gender',
+				disabled: false
 			}
 		},
 		{
 			component: Select,
 			value: null,
 			additionalValue: null,
-			disabled: false,
 			showTextField: false,
 			props: {
 				name: $_('userData.education.label'),
@@ -96,14 +95,14 @@
 				required: true,
 				label: $_('userData.education.label'),
 				textTrigger: $_('userData.education.items.other'),
-				id: 'education'
+				id: 'education',
+				disabled: false
 			}
 		},
 		{
 			component: Select,
 			value: null,
 			additionalValue: null,
-			disabled: false,
 			showTextField: false,
 			props: {
 				name: $_('userData.workingHours.label'),
@@ -112,14 +111,14 @@
 				label: $_('userData.workingHours.label'),
 				required: true,
 				textTrigger: $_('userData.workingHours.other'),
-				id: 'workingHours'
+				id: 'workingHours',
+				disabled: false
 			}
 		},
 		{
 			component: Select,
 			value: null,
 			additionalValue: null,
-			disabled: false,
 			showTextField: false,
 			props: {
 				name: $_('userData.incomePerYear.label'),
@@ -128,14 +127,14 @@
 				label: $_('userData.incomePerYear.label'),
 				required: true,
 				textTrigger: $_('userData.incomePerYear.other'),
-				id: 'incomePerYear'
+				id: 'incomePerYear',
+				disabled: false
 			}
 		},
 		{
 			component: Input,
 			value: null,
 			additionalValue: null,
-			disabled: false,
 			showTextField: false,
 			props: {
 				name: $_('userData.profession.label'),
@@ -143,7 +142,8 @@
 				placeholder: $_('userData.profession.placeholder'),
 				label: $_('userData.profession.label'),
 				required: true,
-				id: 'profession'
+				id: 'profession',
+				disabled: false
 			}
 		}
 	];

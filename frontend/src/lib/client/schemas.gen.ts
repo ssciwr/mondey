@@ -632,10 +632,14 @@ export const UserAnswerPublicSchema = {
 		answer: {
 			type: 'string',
 			title: 'Answer'
+		},
+		non_standard: {
+			type: 'boolean',
+			title: 'Non Standard'
 		}
 	},
 	type: 'object',
-	required: ['id', 'answer'],
+	required: ['id', 'answer', 'non_standard'],
 	title: 'UserAnswerPublic',
 	description: `External data model for UserAnswers
 

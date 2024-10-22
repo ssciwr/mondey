@@ -172,6 +172,7 @@ export type MilestoneTextPublic = {
 export type UserAnswerPublic = {
 	id: number;
 	answer: string;
+	non_standard: boolean;
 };
 
 export type UserCreate = {

@@ -72,6 +72,7 @@ class UserAnswer(SQLModel, table=True):
     )
     user_id: int
     answer: str
+    non_standard: bool
 
 
 class UserAnswerPublic(SQLModel):
@@ -85,3 +86,4 @@ class UserAnswerPublic(SQLModel):
 
     id: int
     answer: str
+    non_standard: bool

@@ -163,7 +163,9 @@ def create_router() -> APIRouter:
     ):
         try:
             user_answers = [
-                UserAnswerPublic(id=answer.id, answer=answer.answer)
+                UserAnswerPublic(
+                    id=answer.id, answer=answer.answer, non_standard=answer.non_standard
+                )
                 for answer in session.exec(
                     select(UserAnswer).where(
                         col(UserAnswer.user_id) == current_active_user.id
@@ -188,7 +190,10 @@ def create_router() -> APIRouter:
         try:
             for answer in user_answers:
                 full_answer = UserAnswer(
-                    id=answer.id, user_id=current_active_user.id, answer=answer.answer
+                    id=answer.id,
+                    user_id=current_active_user.id,
+                    answer=answer.answer,
+                    non_standard=answer.non_standard,
                 )
                 db_useranswers = UserAnswer.model_validate(full_answer)
                 add(session, db_useranswers)
@@ -224,6 +229,7 @@ def create_router() -> APIRouter:
                 else:
                     stored_answer = answers_of_user[new_answer.id]
                     stored_answer.answer = new_answer.answer
+                    stored_answer.non_standard = new_answer.non_standard
                     session.add(stored_answer)
             session.commit()
         except Exception as err:
