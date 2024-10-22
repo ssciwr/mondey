@@ -53,7 +53,6 @@
 	$: valid = evalValid(value);
 	$: highlight = !valid && properties.required === true;
 	$: showTextField = checkShowTextfield(value);
-	$: console.log('props: ', properties, 'disabled: ', properties.disabled);
 </script>
 
 {#if label}
@@ -64,7 +63,7 @@
 	<svelte:component
 		this={component}
 		class={highlight
-			? 'rounded border-2 border-primary-600 dark:border-primary-600 ' + componentClass
+			? 'border-primary-600 dark:border-primary-600 rounded border-2 ' + componentClass
 			: componentClass}
 		bind:value
 		{...properties}

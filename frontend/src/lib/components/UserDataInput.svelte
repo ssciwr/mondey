@@ -152,8 +152,6 @@
 		}
 		console.log('onmount done: ', data);
 	});
-
-	$: console.log(data, dataIsCurrent);
 </script>
 
 <!-- Show big alert message when something is missing -->
@@ -200,12 +198,16 @@
 			{#if dataIsCurrent === true}
 				<Button
 					type="button"
-					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 					on:click={() => {
 						console.log('dataiscurrent click');
 						for (let element of data) {
 							element.props.disabled = false;
 						}
+
+						// README: this forces a rerender. It is necessary because svelte does not react to nested references being changed. There must be a better solution to this? Svelte 5 runes would be one that comes to mind.
+						data = [...data];
+
 						dataIsCurrent = false;
 					}}
 				>
@@ -213,7 +215,7 @@
 				</Button>
 			{:else}
 				<Button
-					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 					type="submit">{$_('userData.submitButtonLabel')}</Button
 				>
 			{/if}
