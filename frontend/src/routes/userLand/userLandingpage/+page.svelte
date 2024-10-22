@@ -13,7 +13,7 @@
 
 		if (asItems) {
 			return values.map((v) => {
-				return { name: String(v), value: v };
+				return { name: String(v), value: String(v) };
 			});
 		} else {
 			return values;
@@ -25,7 +25,7 @@
 
 		if (asItems) {
 			return values.map((v) => {
-				return { name: String(v), value: v };
+				return { name: String(v), value: String(v) };
 			});
 		} else {
 			return values;
@@ -37,6 +37,8 @@
 			component: Select,
 			value: null,
 			additionalValue: null,
+			disabled: false,
+			showTextField: false,
 			props: {
 				name: $_('userData.yearOfBirth.label'),
 				items: numericalRange(60, 1960, 1, true),
@@ -50,6 +52,8 @@
 			component: RadioList,
 			value: null,
 			additionalValue: null,
+			disabled: false,
+			showTextField: false,
 			props: {
 				name: $_('userData.gender.label'),
 				items: [
@@ -72,6 +76,8 @@
 			component: Select,
 			value: null,
 			additionalValue: null,
+			disabled: false,
+			showTextField: false,
 			props: {
 				name: $_('userData.education.label'),
 				items: [
@@ -97,6 +103,8 @@
 			component: Select,
 			value: null,
 			additionalValue: null,
+			disabled: false,
+			showTextField: false,
 			props: {
 				name: $_('userData.workingHours.label'),
 				items: intervalRange(13, 0, 5, true),
@@ -111,6 +119,8 @@
 			component: Select,
 			value: null,
 			additionalValue: null,
+			disabled: false,
+			showTextField: false,
 			props: {
 				name: $_('userData.incomePerYear.label'),
 				items: intervalRange(23, 0, 5000, true),
@@ -125,6 +135,8 @@
 			component: Input,
 			value: null,
 			additionalValue: null,
+			disabled: false,
+			showTextField: false,
 			props: {
 				name: $_('userData.profession.label'),
 				type: 'text',

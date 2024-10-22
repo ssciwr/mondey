@@ -13,6 +13,7 @@
 	export let textTrigger: string = 'noAdditionalText';
 	export let showTextField: boolean = false;
 	export let additionalInput: any = null;
+	export let disabled: boolean = false;
 
 	// data to display and event handlers for dynamcis.
 	export let properties: any = {};
@@ -53,6 +54,7 @@
 	$: valid = evalValid(value);
 	$: highlight = !valid && properties.required === true;
 	$: showTextField = checkShowTextfield(value);
+	$: console.log('disabled field: ', disabled);
 </script>
 
 {#if label}
@@ -62,8 +64,9 @@
 <div class="space-y-4">
 	<svelte:component
 		this={component}
+		{disabled}
 		class={highlight
-			? 'rounded border-2 border-primary-600 dark:border-primary-600 ' + componentClass
+			? 'border-primary-600 dark:border-primary-600 rounded border-2 ' + componentClass
 			: componentClass}
 		bind:value
 		{...properties}
@@ -74,6 +77,7 @@
 
 	{#if showTextField === true}
 		<Textarea
+			{disabled}
 			bind:value={additionalInput}
 			on:blur={additionalEventHandlers['on:blur']}
 			on:change={additionalEventHandlers['on:change']}

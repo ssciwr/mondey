@@ -61,9 +61,9 @@
 
 			// disable all elements to make editing a conscious choice
 			for (let element of data) {
-				element.props.disabled = true;
+				element.disabled = true;
 			}
-			currentDataSubmitted = true;
+			dataIsCurrent = true;
 		}
 	}
 
@@ -78,7 +78,8 @@
 
 	// flags for enabling and disabling visual hints
 	let showAlert: boolean = false;
-	let currentDataSubmitted: boolean = false;
+	let dataIsCurrent: boolean = false;
+	$: reload = false;
 
 	// what is shown in the alert if showAlert === true
 	let alertMessage: string = $_('userData.alertMessageMissing');
@@ -86,6 +87,7 @@
 	// load questions and current answers from server and put them into the data
 	// structure that the UserDataInput component understands
 	onMount(async () => {
+		console.log('onmount');
 		const currentUser = await usersCurrentUser();
 
 		if (currentUser.error) {
@@ -135,10 +137,20 @@
 				console.log('data from backend: ', 'currentAnswers: ', currentAnswers?.data);
 				for (let i = 0; i < data.length; i++) {
 					data[i].value = currentAnswers.data[i].answer;
+					data[i].disabled = true;
+					dataIsCurrent = true;
 				}
 			}
 		}
+		console.log('onmount done');
+		reload = true;
 	});
+	console.log(
+		'data: ',
+		data.map((e) => {
+			e.value;
+		})
+	);
 </script>
 
 <!-- Show big alert message when something is missing -->
@@ -182,17 +194,19 @@
 					}}
 				/>
 			{/each}
-			{#if currentDataSubmitted === true}
+			{#if dataIsCurrent === true}
 				<Button
 					type="button"
 					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 					on:click={() => {
+						console.log('dataiscurrent click');
 						for (let element of data) {
-							element.props.disabled = false;
+							element.disabled = false;
 						}
+						dataIsCurrent = false;
 					}}
 				>
-					<div class="flex items-center justify-center">$_('userData.changeData')</div>
+					<div class="flex items-center justify-center">{$_('userData.changeData')}</div>
 				</Button>
 			{:else}
 				<Button

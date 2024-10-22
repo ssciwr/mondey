@@ -16,6 +16,7 @@
 		dispatch('click', { value: event.target.value });
 	}
 	export let value: any;
+	export let disabled: boolean = false;
 	let windowWidth = 1920;
 	$: smallScreen = windowWidth < 800;
 </script>
@@ -27,6 +28,7 @@
 		{#each $$props.items as item, index}
 			<RadioButton
 				class="mx-2"
+				{disabled}
 				bind:group={value}
 				value={item.value}
 				on:change={handleChange}
@@ -38,6 +40,7 @@
 		{#each $$props.items as item, index}
 			<Radio
 				class="mx-2"
+				{disabled}
 				bind:group={value}
 				value={item.value}
 				on:change={handleChange}
