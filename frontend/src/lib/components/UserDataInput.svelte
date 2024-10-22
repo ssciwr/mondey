@@ -14,68 +14,77 @@
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 
-	function convertQuestions(questionaire: GetUserQuestionsResponse) {
-		// TODO: once questions come from the database we can do this with the questionaire
-
-		questionaire.map((e) => {
+	function convertQuestions(questionnaire: GetUserQuestionsResponse): GetUserQuestionsResponse {
+		// TODO: once questions come from the database we can do this with the questionnaire
+		// different algorithm that makes use of the component lookup table in '$lib/stores' is needed here then.
+		questionnaire.map((e) => {
 			return e;
 		});
+		return questionnaire;
 	}
 
-	function convertAnswers(questionaire: GetUserQuestionsResponse | undefined): UserAnswerPublic[] {
-		// TODO: once questions come from the database we can do this with the questionaire
-		// for (let element of questionaire) {
-		// }
+	function convertAnswers(questionnaire: GetUserQuestionsResponse | undefined): UserAnswerPublic[] {
+		// TODO: once questions come from the database we can do this with the questionnaire
+		// his version is temporary until the underlying datastructure has been changed to accomodate
+		// the backend models
 
 		return data.map((e, index) => {
-			return {
-				id: index,
-				answer: String(e.value)
-			} as UserAnswerPublic;
+			if (e.additionalValue !== '' && e.additionalValue !== null) {
+				return {
+					id: index,
+					answer: String(e.additionalValue)
+				} as UserAnswerPublic;
+			} else {
+				return {
+					id: index,
+					answer: String(e.value)
+				} as UserAnswerPublic;
+			}
 		});
-	}
-
-	function validate(): boolean {
-		missingValues = data.map((element) => element.value === '' || element.value === null);
-		return missingValues.every((v) => v === false);
 	}
 
 	async function submitData() {
-		const valid = validate();
+		const answers = convertAnswers(questionnaire);
+		console.log('answers: ', answers);
 
-		console.log('data: ', data);
+		const response = await updateCurrentUserAnswers({
+			body: answers,
+			query: { session_id: userID }
+		});
 
-		if (valid) {
-			const answers = convertAnswers(questionaire);
-			console.log('answers: ', answers);
-
-			const response = await updateCurrentUserAnswers({
-				body: answers,
-				query: { session_id: userID }
-			});
-
-			console.log('response on update: ', response);
-
-			if (response.error) {
-				console.log('shit happened when sending user question answers: ', response.error);
-				showAlert = true;
-				alertMessage = 'shit happened when sending user question answers: ' + response.error;
-			} else {
-				console.log('alright, yay!');
-			}
-		} else {
+		if (response.error) {
+			console.log('Error happened when sending user question answers: ', response.error);
+			alertMessage = $_('userData.alertMessageError');
 			showAlert = true;
+		} else {
+			console.log('successfully sent data to backend, yay!');
+
+			// disable all elements to make editing a conscious choice
+			for (let element of data) {
+				element.props.disabled = true;
+			}
+			currentDataSubmitted = true;
 		}
 	}
 
+	// README: is storing userID a problem?
 	let userID: number | undefined;
 
 	// this can, but does not have to, come from a database later.
 	export let data: any[];
 
 	// this is the data that will be used in the end
-	let questionaire: GetUserQuestionsResponse | undefined = [];
+	let questionnaire: GetUserQuestionsResponse | undefined = [];
 
+	// flags for enabling and disabling visual hints
+	let showAlert: boolean = false;
+	let currentDataSubmitted: boolean = false;
+
+	// what is shown in the alert if showAlert === true
+	let alertMessage: string = $_('userData.alertMessageMissing');
+
+	// load questions and current answers from server and put them into the data
+	// structure that the UserDataInput component understands
 	onMount(async () => {
 		const currentUser = await usersCurrentUser();
 
@@ -83,36 +92,30 @@
 			showAlert = true;
 			alertMessage = 'current user could not be found. log out and try again';
 		} else {
-			console.log('current user: ', currentUser?.data?.email, currentUser?.data?.id);
 			userID = currentUser?.data?.id;
 
-			const getUserQuestionsResponse = await getUserQuestions();
+			const userQuestions = await getUserQuestions();
 
-			if (getUserQuestionsResponse.error) {
+			if (userQuestions.error) {
 				showAlert = true;
-				alertMessage =
-					'questionaire could not be retrieved. Execute the proper rituals to apeace the machine spirits';
+				alertMessage = $_('userData.alertMessageError');
+				console.log('questions could not be retrieved.', userQuestions?.error);
 			} else {
-				questionaire = getUserQuestionsResponse?.data;
-				console.log('data from backend: ', 'questionaire: ', questionaire);
+				questionnaire = convertQuestions(userQuestions?.data as GetUserQuestionsResponse);
+				console.log('data from backend: ', 'questionnaire: ', questionnaire);
 			}
 
-			let currentAnswers;
-			try {
-				currentAnswers = await getCurrentUserAnswers();
-			} catch (error) {
-				console.log('Error happened when getting current answers:', error);
-			}
+			// get current answers. if nothing is there, create a set of empty answers
+			let currentAnswers = await getCurrentUserAnswers();
+
 			if (currentAnswers?.error) {
 				showAlert = true;
-				alertMessage =
-					'answers could not be retrieved. Execute the proper rituals to apeace the machine spirits';
-			} else {
-				console.log('data from backend: ', 'currentAnswers: ', currentAnswers?.data);
-			}
-
-			if (currentAnswers?.data?.length === 0) {
+				console.log('answers could not be retrieved.', currentAnswers?.error);
+				alertMessage = $_('userData.alertMessageError');
+			} else if (currentAnswers?.data?.length === 0) {
 				const createAnswerResponse = await createUserAnswers({
+					// TODO: replace this with questionnaire based algo
+					// once that is fixed
 					body: data.map((e, index) => {
 						return {
 							id: index,
@@ -122,27 +125,20 @@
 				});
 
 				if (createAnswerResponse.error) {
-					console.log('shit happened when adding dummy answers');
+					console.log('Something went wrong when adding default answers');
+					showAlert = true;
+					alertMessage = $_('userData.alertMessageError');
 				} else {
-					console.log('creation of empty answers successful');
+					console.log('Creation of empty answers successful');
+				}
+			} else {
+				console.log('data from backend: ', 'currentAnswers: ', currentAnswers?.data);
+				for (let i = 0; i < data.length; i++) {
+					data[i].value = currentAnswers.data[i].answer;
 				}
 			}
 		}
 	});
-
-	let missingValues = data.map(() => false);
-
-	let showAlert: boolean = true;
-
-	let alertMessage: string = 'Bitte füllen Sie die benötigten Felder (hervorgehoben) aus.';
-
-	const buttons = [
-		{
-			label: 'Abschließen',
-			onclick: submitData,
-			disabled: true
-		}
-	];
 </script>
 
 <!-- Show big alert message when something is missing -->
@@ -175,31 +171,35 @@
 					properties={element.props}
 					textTrigger={element.props.textTrigger}
 					eventHandlers={{
-						'on:change': (e) => {
-							buttons[0].disabled = false;
-							if (element.onchange) {
-								element.onchange(e);
-							}
-						},
+						'on:change': element.onchange,
 						'on:blur': element.onblur,
 						'on:click': element.onclick
 					}}
 					additionalEventHandlers={{
-						'on:change': (e) => {
-							buttons[0].disabled = false;
-							if (element.additionalOnChange) {
-								element.additionalOnChange(e);
-							}
-						},
+						'on:change': element.onchange,
 						'on:blur': element.onblur,
 						'on:click': element.onclick
 					}}
 				/>
 			{/each}
-			<Button
-				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
-				type="submit">{$_('userData.submitButtonLabel')}</Button
-			>
+			{#if currentDataSubmitted === true}
+				<Button
+					type="button"
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
+					on:click={() => {
+						for (let element of data) {
+							element.props.disabled = false;
+						}
+					}}
+				>
+					<div class="flex items-center justify-center">$_('userData.changeData')</div>
+				</Button>
+			{:else}
+				<Button
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
+					type="submit">{$_('userData.submitButtonLabel')}</Button
+				>
+			{/if}
 		</form>
 	</Card>
 </div>

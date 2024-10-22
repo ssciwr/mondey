@@ -161,13 +161,7 @@ def create_router() -> APIRouter:
     def get_current_user_answers(
         session: SessionDep, current_active_user: CurrentActiveUserDep
     ):
-        # TODO: check if there is answer data for the current user in the database,
-        # if not, create it and return the new empty struct
-        # else return the found stuff
-
         try:
-            print("userid: ", current_active_user.id)
-
             user_answers = [
                 UserAnswerPublic(id=answer.id, answer=answer.answer)
                 for answer in session.exec(
@@ -176,13 +170,11 @@ def create_router() -> APIRouter:
                     )
                 ).all()
             ]
-
-            print("normal operation: get_current_user_answers")
             return user_answers
 
         except Exception as err:
-            print("shit happened when getting current answers")
-            raise HTTPException(500) from err
+            session.rollback()
+            raise HTTPException(500, detail=err) from err
 
     @router.post("/user-answers/{user_id}", response_model=list[UserAnswerPublic])
     def create_user_answers(
@@ -190,18 +182,21 @@ def create_router() -> APIRouter:
         current_active_user: CurrentActiveUserDep,
         user_answers: list[UserAnswerPublic],
     ):
-        print("user_answer_session: ", session)
         if session is None:
-            raise HTTPException(401)
+            raise HTTPException(401, detail="no session")
 
-        for answer in user_answers:
-            full_answer = UserAnswer(
-                id=answer.id, user_id=current_active_user.id, answer=answer.answer
-            )
-            db_useranswers = UserAnswer.model_validate(full_answer)
-            add(session, db_useranswers)
+        try:
+            for answer in user_answers:
+                full_answer = UserAnswer(
+                    id=answer.id, user_id=current_active_user.id, answer=answer.answer
+                )
+                db_useranswers = UserAnswer.model_validate(full_answer)
+                add(session, db_useranswers)
 
-        return user_answers
+            return user_answers
+        except Exception as err:
+            session.rollback()
+            raise HTTPException(500, detail=err) from err
 
     @router.put("/user-answers/{user_id}", response_model=list[UserAnswerPublic])
     def update_current_user_answers(
@@ -209,7 +204,6 @@ def create_router() -> APIRouter:
         current_active_user: CurrentActiveUserDep,
         new_answers: list[UserAnswerPublic],
     ):
-        print("user_answer_session: ", session)
         if session is None:
             raise HTTPException(401)
 
@@ -220,27 +214,21 @@ def create_router() -> APIRouter:
             ).all()
         }
 
-        for new_answer in new_answers:
-            if new_answer is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"UserAnswer with id {new_answer.id} not found",
-                )
-            else:
-                stored_answer = answers_of_user[new_answer.id]
-
-                print(
-                    "normal operation: update_current_user_answers",
-                    session,
-                    new_answer.id,
-                    new_answer.answer,
-                    stored_answer.answer,
-                )
-
-                stored_answer.answer = new_answer.answer
-                session.add(stored_answer)
-
-        session.commit()
+        try:
+            for new_answer in new_answers:
+                if new_answer is None:
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"UserAnswer with id {new_answer.id} not found",
+                    )
+                else:
+                    stored_answer = answers_of_user[new_answer.id]
+                    stored_answer.answer = new_answer.answer
+                    session.add(stored_answer)
+            session.commit()
+        except Exception as err:
+            session.rollback()
+            raise HTTPException(500, detail=err) from err
 
         return new_answers
 
