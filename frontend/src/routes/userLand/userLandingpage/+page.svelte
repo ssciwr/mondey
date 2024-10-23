@@ -2,7 +2,6 @@
 	import RadioList from '$lib/components/DataInput/RadioList.svelte';
 	import UserLandingPage from '$lib/components/UserLandingPage.svelte';
 	import { Input, Select } from 'flowbite-svelte';
-	import { _ } from 'svelte-i18n';
 
 	// this stuff here will become backend calls in the end because that is where the data this page will be filled with
 	// will come from. Hence, they are not put into a separate library or anything
@@ -37,14 +36,12 @@
 			component: Select,
 			value: null,
 			additionalValue: null,
-			showTextField: false,
 			props: {
-				name: $_('userData.yearOfBirth.label'),
+				name: 'Geburtsjahr',
 				items: numericalRange(60, 1960, 1, true),
-				placeholder: $_('userData.yearOfBirth.placeholder'),
-				label: $_('userData.yearOfBirth.label'),
+				placeholder: 'Bitte auswählen',
+				label: 'Geburtsjahr',
 				required: true,
-				id: 'yearOfBirth',
 				disabled: false
 			}
 		},
@@ -52,97 +49,81 @@
 			component: RadioList,
 			value: null,
 			additionalValue: null,
-			showTextField: false,
 			props: {
-				name: $_('userData.gender.label'),
-				items: [
-					$_('userData.gender.items.male'),
-					$_('userData.gender.items.female'),
-					$_('userData.gender.items.divers'),
-					$_('userData.gender.items.other')
-				].map((v) => {
-					return { label: String(v), value: v };
+				name: 'Geschlecht',
+				items: ['männlich', 'weiblich', 'divers', 'Anderes'].map((v) => {
+					return { label: String(v), value: String(v) };
 				}),
-				label: $_('userData.gender.label'),
-				placeholder: $_('userData.gender.placeholder'),
+				label: 'Geschlecht',
 				required: true,
-				textTrigger: $_('userData.gender.items.other'),
-				selected: false,
-				id: 'gender',
-				disabled: false
+				disabled: false,
+				textTrigger: 'Anderes',
+				selected: false
 			}
 		},
 		{
 			component: Select,
 			value: null,
 			additionalValue: null,
-			showTextField: false,
 			props: {
-				name: $_('userData.education.label'),
+				name: 'Höchster Bildungsabschluss',
 				items: [
-					$_('userData.education.items.none'),
-					$_('userData.education.items.secondarylower'),
-					$_('userData.education.items.secondary'),
-					$_('userData.education.items.alevel'),
-					$_('userData.education.items.bsc'),
-					$_('userData.education.items.msc'),
-					$_('userData.education.items.phd'),
-					$_('userData.education.items.other')
+					'kein Schulabschluss',
+					'Hauptschulabschluss',
+					'Realschulabschluss',
+					'Abitur',
+					'Bachelor',
+					'Master',
+					'Promotion',
+					'Anderer'
 				].map((v) => {
-					return { name: String(v), value: v };
+					return { name: String(v), value: String(v) };
 				}),
-				placeholder: $_('userData.education.placeholder'),
+				placeholder: 'Bitte auswählen',
 				required: true,
-				label: $_('userData.education.label'),
-				textTrigger: $_('userData.education.items.other'),
-				id: 'education',
-				disabled: false
+				disabled: false,
+				label: 'Höchster Bildungsabschluss',
+				textTrigger: 'Anderer'
 			}
 		},
 		{
 			component: Select,
 			value: null,
 			additionalValue: null,
-			showTextField: false,
 			props: {
-				name: $_('userData.workingHours.label'),
+				name: 'Arbeitszeit/Woche',
 				items: intervalRange(13, 0, 5, true),
-				placeholder: $_('userData.workingHours.placeholder'),
-				label: $_('userData.workingHours.label'),
+				placeholder: 'Bitte auswählen',
+				label: 'Arbeitszeit/Woche',
 				required: true,
-				textTrigger: $_('userData.workingHours.other'),
-				id: 'workingHours',
-				disabled: false
+				disabled: false,
+				textTrigger: 'Andere'
 			}
 		},
 		{
 			component: Select,
 			value: null,
 			additionalValue: null,
-			showTextField: false,
 			props: {
-				name: $_('userData.incomePerYear.label'),
+				name: 'Familieneinkommen/Jahr',
 				items: intervalRange(23, 0, 5000, true),
-				placeholder: $_('userData.incomePerYear.placeholder'),
-				label: $_('userData.incomePerYear.label'),
+				placeholder: 'Bitte auswählen',
+				label: 'Familieneinkommen/Jahr',
 				required: true,
-				textTrigger: $_('userData.incomePerYear.other'),
-				id: 'incomePerYear',
-				disabled: false
+				disabled: false,
+				textTrigger: 'Anderes'
 			}
 		},
 		{
 			component: Input,
 			value: null,
 			additionalValue: null,
-			showTextField: false,
 			props: {
-				name: $_('userData.profession.label'),
+				name: 'Beruf',
 				type: 'text',
-				placeholder: $_('userData.profession.placeholder'),
-				label: $_('userData.profession.label'),
+				placeholder: 'Geben sie ihren Beruf an',
+				label: 'Beruf',
 				required: true,
-				id: 'profession',
 				disabled: false
 			}
 		}
