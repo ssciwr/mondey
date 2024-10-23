@@ -180,15 +180,7 @@ def create_router() -> APIRouter:
             current_answer = session.get(
                 UserAnswer, (current_active_user.id, new_answer.question_id)
             )
-            # TODO: make this more robust
-            #   for new_answer in new_answers:
-            #     db_new_answer = session.get(UserAnswer, new_answer.id)
-            #     if not db_new_answer:
-            #         db_new_answer = UserAnswer.model_validate(new_answer, update={"user_id": current_active_user.id})
-            #         session.add(db_new_answer)
-            #     else:
-            #         for key, value in new_answer.model_dump().items():
-            #             setattr(db_new_answer, key, value)
+
             if current_answer is None:
                 session.add(
                     UserAnswer(
@@ -199,32 +191,10 @@ def create_router() -> APIRouter:
                     )
                 )
             else:
-                current_answer.answer = new_answer.answer
-
-        stored_answers = {
-            answer.question_id: answer
-            for answer in session.exec(
-                select(UserAnswer).where(UserAnswer.user_id == current_active_user.id)
-            ).all()
-        }
-
-        if len(stored_answers) > 0:
-            for new_answer in new_answers:
-                stored_answer = stored_answers[new_answer.question_id]
-                stored_answer.answer = new_answer.answer
-                stored_answer.non_standard = new_answer.non_standard
-                session.add(stored_answer)
-        else:
-            for new_answer in new_answers:
-                session.add(
-                    UserAnswer(
-                        user_id=current_active_user.id,
-                        question_id=new_answer.question_id,
-                        answer=new_answer.answer,
-                        non_standard=new_answer.non_standard,
-                    )
+                db_answer = UserAnswer.model_validate(
+                    new_answer, update={"user_id": current_active_user.id}
                 )
-
+                add(session, db_answer)
         session.commit()
         return new_answers
 
