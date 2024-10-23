@@ -30,13 +30,13 @@
 		return data.map((e, index) => {
 			if (e.additionalValue !== '' && e.additionalValue !== null) {
 				return {
-					question_id: index + 1,
+					question_id: index,
 					answer: String(e.additionalValue),
 					non_standard: true
 				} as UserAnswerPublic;
 			} else {
 				return {
-					question_id: index + 1,
+					question_id: index,
 					answer: String(e.value),
 					non_standard: false
 				} as UserAnswerPublic;
@@ -64,6 +64,7 @@
 				element.props.disabled = true;
 			}
 			dataIsCurrent = true;
+			data = [...data]; // TODO: forces a rerender. need a better way to do this
 		}
 	}
 
@@ -128,6 +129,7 @@
 					}
 					data[i].props.disabled = true;
 					dataIsCurrent = true;
+					data = [...data]; // TODO: forces a rerender. need a better way to do this
 				}
 			}
 		}
