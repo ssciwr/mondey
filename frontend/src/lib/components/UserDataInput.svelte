@@ -1,6 +1,5 @@
 <script lang="ts">
 	import {
-		createUserAnswers,
 		getCurrentUserAnswers,
 		getUserQuestions,
 		updateCurrentUserAnswers,
@@ -24,20 +23,20 @@
 	}
 
 	function convertAnswers(questionnaire: GetUserQuestionsResponse | undefined): UserAnswerPublic[] {
-		// TODO: once questions come from the database we can do this with the questionnaire
-		// his version is temporary until the underlying datastructure has been changed to accomodate
+		// TODO: once questions come from the database we can do this with the actual questionnaire
+		// this version is temporary until the underlying datastructure has been changed to accommodate
 		// the backend models
 
 		return data.map((e, index) => {
 			if (e.additionalValue !== '' && e.additionalValue !== null) {
 				return {
-					id: index,
+					question_id: index + 1,
 					answer: String(e.additionalValue),
 					non_standard: true
 				} as UserAnswerPublic;
 			} else {
 				return {
-					id: index,
+					question_id: index + 1,
 					answer: String(e.value),
 					non_standard: false
 				} as UserAnswerPublic;
@@ -47,7 +46,6 @@
 
 	async function submitData() {
 		const answers = convertAnswers(questionnaire);
-		console.log('answers: ', answers);
 
 		const response = await updateCurrentUserAnswers({
 			body: answers,
@@ -108,35 +106,18 @@
 				console.log('data from backend: ', 'questionnaire: ', questionnaire);
 			}
 
-			// get current answers. if nothing is there, create a set of empty answers
+			// get current answers.
 			let currentAnswers = await getCurrentUserAnswers();
 
 			if (currentAnswers?.error) {
 				showAlert = true;
 				console.log('answers could not be retrieved.', currentAnswers?.error);
 				alertMessage = $_('userData.alertMessageError');
-			} else if (currentAnswers?.data?.length === 0) {
-				const createAnswerResponse = await createUserAnswers({
-					// TODO: replace this with questionnaire based algo
-					// once that is fixed
-					body: data.map((e, index) => {
-						return {
-							id: index,
-							answer: '',
-							non_standard: false
-						};
-					})
-				});
-
-				if (createAnswerResponse.error) {
-					console.log('Something went wrong when adding default answers');
-					showAlert = true;
-					alertMessage = $_('userData.alertMessageError');
-				} else {
-					console.log('Creation of empty answers successful');
-				}
+			} else if (currentAnswers?.data.length === 0) {
+				console.log('currently no answers'); // debug output. Can go later
 			} else {
 				console.log('data from backend: ', 'currentAnswers: ', currentAnswers?.data);
+
 				for (let i = 0; i < data.length; i++) {
 					if (currentAnswers?.data[i].non_standard === true) {
 						data[i].additionalValue = currentAnswers.data[i].answer;
@@ -198,7 +179,7 @@
 			{#if dataIsCurrent === true}
 				<Button
 					type="button"
-					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 					on:click={() => {
 						console.log('dataiscurrent click');
 						for (let element of data) {
@@ -215,7 +196,7 @@
 				</Button>
 			{:else}
 				<Button
-					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 					type="submit">{$_('userData.submitButtonLabel')}</Button
 				>
 			{/if}

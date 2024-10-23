@@ -17,6 +17,7 @@
 	}
 	export let value: any;
 	export let disabled: boolean = false;
+	export let required: boolean = false;
 	let windowWidth = 1920;
 	$: smallScreen = windowWidth < 800;
 </script>
@@ -25,10 +26,11 @@
 
 <div class="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 	{#if smallScreen}
-		{#each $$props.items as item, index}
+		{#each $$props.items as item}
 			<RadioButton
 				class="mx-2"
 				{disabled}
+				{required}
 				bind:group={value}
 				value={item.value}
 				on:change={handleChange}
@@ -37,10 +39,11 @@
 			>
 		{/each}
 	{:else}
-		{#each $$props.items as item, index}
+		{#each $$props.items as item}
 			<Radio
 				class="mx-2"
 				{disabled}
+				{required}
 				bind:group={value}
 				value={item.value}
 				on:change={handleChange}

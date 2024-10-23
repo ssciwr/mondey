@@ -22,11 +22,7 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-tests = [
-    "pytest",
-    "pytest-randomly",
-    "pytest-cov",
-]
+tests = ["pytest", "pytest-randomly", "pytest-cov", "pytest-mock"]
 
 [project.scripts]
 mondey-backend = "mondey_backend.main:main"

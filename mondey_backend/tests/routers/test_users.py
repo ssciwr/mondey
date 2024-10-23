@@ -201,3 +201,111 @@ def test_update_milestone_answer_invalid_answer_session(user_client: TestClient)
         "/users/milestone-answers/16", json={"milestone_id": 1, "answer": 2}
     )
     assert response.status_code == 401
+
+
+def test_get_current_user_answers_works(user_client: TestClient):
+    response = user_client.get("/users/user-answers/")
+    assert response.status_code == 200
+    assert response.json() == [
+        {"answer": "lorem ipsum", "non_standard": False, "question_id": 1},
+        {"answer": "dolor sit", "non_standard": True, "question_id": 2},
+    ]
+
+
+def test_get_current_user_answers_invalid_user(public_client: TestClient):
+    response = public_client.get("/users/user_answers/")
+    assert response.status_code == 401
+
+
+def test_update_current_answers_prexisting(user_client: TestClient):
+    response = user_client.put(
+        "/users/user-answers/",
+        json=[
+            {
+                "answer": "dolor",
+                "question_id": 1,
+                "non_standard": True,
+            },
+            {
+                "answer": "amet",
+                "question_id": 2,
+                "non_standard": False,
+            },
+        ],
+    )
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "answer": "dolor",
+            "question_id": 1,
+            "non_standard": True,
+        },
+        {
+            "answer": "amet",
+            "question_id": 2,
+            "non_standard": False,
+        },
+    ]
+
+    response = user_client.get("/users/user-answers/")
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "answer": "dolor",
+            "question_id": 1,
+            "non_standard": True,
+        },
+        {
+            "answer": "amet",
+            "question_id": 2,
+            "non_standard": False,
+        },
+    ]
+
+
+def test_update_current_answers_no_prexisting(second_user_client: TestClient):
+    response = second_user_client.put(
+        "/users/user-answers/",
+        json=[
+            {
+                "answer": "dolor",
+                "question_id": 1,
+                "non_standard": True,
+            },
+            {
+                "answer": "amet",
+                "question_id": 2,
+                "non_standard": False,
+            },
+        ],
+    )
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "answer": "dolor",
+            "question_id": 1,
+            "non_standard": True,
+        },
+        {
+            "answer": "amet",
+            "question_id": 2,
+            "non_standard": False,
+        },
+    ]
+
+    response = second_user_client.get("/users/user-answers/")
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "answer": "dolor",
+            "question_id": 1,
+            "non_standard": True,
+        },
+        {
+            "answer": "amet",
+            "question_id": 2,
+            "non_standard": False,
+        },
+    ]

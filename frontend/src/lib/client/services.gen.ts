@@ -108,9 +108,6 @@ import type {
 	UpdateCurrentUserAnswersData,
 	UpdateCurrentUserAnswersError,
 	UpdateCurrentUserAnswersResponse,
-	CreateUserAnswersData,
-	CreateUserAnswersError,
-	CreateUserAnswersResponse,
 	AuthCookieLoginData,
 	AuthCookieLoginError,
 	AuthCookieLoginResponse,
@@ -684,7 +681,7 @@ export const getCurrentUserAnswers = <ThrowOnError extends boolean = false>(
 		ThrowOnError
 	>({
 		...options,
-		url: '/users/user-answers/{user_id}'
+		url: '/users/user-answers/'
 	});
 };
 
@@ -700,23 +697,7 @@ export const updateCurrentUserAnswers = <ThrowOnError extends boolean = false>(
 		ThrowOnError
 	>({
 		...options,
-		url: '/users/user-answers/{user_id}'
-	});
-};
-
-/**
- * Create User Answers
- */
-export const createUserAnswers = <ThrowOnError extends boolean = false>(
-	options: Options<CreateUserAnswersData, ThrowOnError>
-) => {
-	return (options?.client ?? client).post<
-		CreateUserAnswersResponse,
-		CreateUserAnswersError,
-		ThrowOnError
-	>({
-		...options,
-		url: '/users/user-answers/{user_id}'
+		url: '/users/user-answers/'
 	});
 };
 

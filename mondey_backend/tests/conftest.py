@@ -6,11 +6,6 @@ import pathlib
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlmodel import Session
-from sqlmodel import SQLModel
-from sqlmodel import create_engine
-from sqlmodel.pool import StaticPool
-
 from mondey_backend import settings
 from mondey_backend.dependencies import current_active_researcher
 from mondey_backend.dependencies import current_active_superuser
@@ -26,7 +21,12 @@ from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.models.milestones import MilestoneGroupText
 from mondey_backend.models.milestones import MilestoneImage
 from mondey_backend.models.milestones import MilestoneText
+from mondey_backend.models.questions import UserAnswer
 from mondey_backend.models.users import UserRead
+from sqlmodel import Session
+from sqlmodel import SQLModel
+from sqlmodel import create_engine
+from sqlmodel.pool import StaticPool
 
 
 @pytest.fixture(scope="session")
@@ -168,6 +168,18 @@ def session():
         )
         session.add(MilestoneAnswer(answer_session_id=3, milestone_id=7, answer=2))
 
+        # add user answers for user 1
+        session.add(
+            UserAnswer(
+                id=1, question_id=1, user_id=1, answer="lorem ipsum", non_standard=False
+            )
+        )
+        session.add(
+            UserAnswer(
+                id=2, question_id=2, user_id=1, answer="dolor sit", non_standard=True
+            )
+        )
+
         yield session
 
 
@@ -207,6 +219,18 @@ def active_user():
     )
 
 
+@pytest.fixture
+def second_active_user():
+    return UserRead(
+        id=2,
+        email="user2@mondey.de",
+        is_active=True,
+        is_superuser=False,
+        is_researcher=False,
+        is_verified=True,
+    )
+
+
 @pytest.fixture(scope="session")
 def app(static_dir: pathlib.Path, private_dir: pathlib.Path):
     settings.app_settings.STATIC_FILES_PATH = str(static_dir)
@@ -227,6 +251,15 @@ def public_client(app: FastAPI, session: Session):
 def user_client(app: FastAPI, session: Session, active_user: UserRead):
     app.dependency_overrides[get_session] = lambda: session
     app.dependency_overrides[current_active_user] = lambda: active_user
+    client = TestClient(app)
+    yield client
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def second_user_client(app: FastAPI, session: Session, second_active_user: UserRead):
+    app.dependency_overrides[get_session] = lambda: session
+    app.dependency_overrides[current_active_user] = lambda: second_active_user
     client = TestClient(app)
     yield client
     app.dependency_overrides.clear()

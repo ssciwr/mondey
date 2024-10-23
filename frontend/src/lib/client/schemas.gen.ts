@@ -625,13 +625,13 @@ export const MilestoneTextPublicSchema = {
 
 export const UserAnswerPublicSchema = {
 	properties: {
-		id: {
-			type: 'integer',
-			title: 'Id'
-		},
 		answer: {
 			type: 'string',
 			title: 'Answer'
+		},
+		question_id: {
+			type: 'integer',
+			title: 'Question Id'
 		},
 		non_standard: {
 			type: 'boolean',
@@ -639,7 +639,7 @@ export const UserAnswerPublicSchema = {
 		}
 	},
 	type: 'object',
-	required: ['id', 'answer', 'non_standard'],
+	required: ['answer', 'question_id', 'non_standard'],
 	title: 'UserAnswerPublic',
 	description: `External data model for UserAnswers
 

@@ -170,8 +170,8 @@ export type MilestoneTextPublic = {
  * SQLModel : Pydantic model  basic sqlmodel pydantic type
  */
 export type UserAnswerPublic = {
-	id: number;
 	answer: string;
+	question_id: number;
 	non_standard: boolean;
 };
 
@@ -538,14 +538,6 @@ export type UpdateCurrentUserAnswersData = {
 export type UpdateCurrentUserAnswersResponse = Array<UserAnswerPublic>;
 
 export type UpdateCurrentUserAnswersError = HTTPValidationError;
-
-export type CreateUserAnswersData = {
-	body: Array<UserAnswerPublic>;
-};
-
-export type CreateUserAnswersResponse = Array<UserAnswerPublic>;
-
-export type CreateUserAnswersError = HTTPValidationError;
 
 export type AuthCookieLoginData = {
 	body: Body_auth_cookie_login_auth_login_post;

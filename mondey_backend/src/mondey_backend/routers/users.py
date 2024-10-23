@@ -157,85 +157,58 @@ def create_router() -> APIRouter:
         return milestone_answer
 
     # Endpoints for answers to user question
-    @router.get("/user-answers/{user_id}", response_model=list[UserAnswerPublic])
+    @router.get("/user-answers/", response_model=list[UserAnswerPublic])
     def get_current_user_answers(
         session: SessionDep, current_active_user: CurrentActiveUserDep
     ):
-        try:
-            user_answers = [
-                UserAnswerPublic(
-                    id=answer.id, answer=answer.answer, non_standard=answer.non_standard
-                )
-                for answer in session.exec(
-                    select(UserAnswer).where(
-                        col(UserAnswer.user_id) == current_active_user.id
-                    )
-                ).all()
-            ]
-            return user_answers
+        answers = session.exec(
+            select(UserAnswer).where(col(UserAnswer.user_id) == current_active_user.id)
+        ).all()
 
-        except Exception as err:
-            session.rollback()
-            raise HTTPException(500, detail=err) from err
+        user_answers = [
+            UserAnswerPublic(
+                answer=answer.answer,
+                non_standard=answer.non_standard,
+                question_id=answer.question_id,
+            )
+            for answer in answers
+        ]
+        return user_answers
 
-    @router.post("/user-answers/{user_id}", response_model=list[UserAnswerPublic])
-    def create_user_answers(
-        session: SessionDep,
-        current_active_user: CurrentActiveUserDep,
-        user_answers: list[UserAnswerPublic],
-    ):
-        if session is None:
-            raise HTTPException(401, detail="no session")
-
-        try:
-            for answer in user_answers:
-                full_answer = UserAnswer(
-                    id=answer.id,
-                    user_id=current_active_user.id,
-                    answer=answer.answer,
-                    non_standard=answer.non_standard,
-                )
-                db_useranswers = UserAnswer.model_validate(full_answer)
-                add(session, db_useranswers)
-
-            return user_answers
-        except Exception as err:
-            session.rollback()
-            raise HTTPException(500, detail=err) from err
-
-    @router.put("/user-answers/{user_id}", response_model=list[UserAnswerPublic])
+    @router.put("/user-answers/", response_model=list[UserAnswerPublic])
     def update_current_user_answers(
         session: SessionDep,
         current_active_user: CurrentActiveUserDep,
         new_answers: list[UserAnswerPublic],
     ):
         if session is None:
-            raise HTTPException(401)
+            raise HTTPException(401, detail="no session")
 
-        answers_of_user = {
-            answer.id: answer
+        stored_answers = {
+            answer.question_id: answer
             for answer in session.exec(
                 select(UserAnswer).where(UserAnswer.user_id == current_active_user.id)
             ).all()
         }
 
-        try:
+        if len(stored_answers) > 0:
             for new_answer in new_answers:
-                if new_answer is None:
-                    raise HTTPException(
-                        status_code=404,
-                        detail=f"UserAnswer with id {new_answer.id} not found",
+                stored_answer = stored_answers[new_answer.question_id]
+                stored_answer.answer = new_answer.answer
+                stored_answer.non_standard = new_answer.non_standard
+                session.add(stored_answer)
+        else:
+            for new_answer in new_answers:
+                session.add(
+                    UserAnswer(
+                        user_id=current_active_user.id,
+                        question_id=new_answer.question_id,
+                        answer=new_answer.answer,
+                        non_standard=new_answer.non_standard,
                     )
-                else:
-                    stored_answer = answers_of_user[new_answer.id]
-                    stored_answer.answer = new_answer.answer
-                    stored_answer.non_standard = new_answer.non_standard
-                    session.add(stored_answer)
-            session.commit()
-        except Exception as err:
-            session.rollback()
-            raise HTTPException(500, detail=err) from err
+                )
 
+        session.commit()
         return new_answers
 
     return router
