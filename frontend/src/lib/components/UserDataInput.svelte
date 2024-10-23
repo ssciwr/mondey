@@ -16,9 +16,6 @@
 	function convertQuestions(questionnaire: GetUserQuestionsResponse): GetUserQuestionsResponse {
 		// TODO: once questions come from the database we can do this with the questionnaire
 		// different algorithm that makes use of the component lookup table in '$lib/stores' is needed here then.
-		questionnaire.map((e) => {
-			return e;
-		});
 		return questionnaire;
 	}
 
@@ -28,13 +25,28 @@
 		// the backend models
 
 		return data.map((e, index) => {
-			if (e.additionalValue !== '' && e.additionalValue !== null && e.value === e.textTrigger) {
+			console.log(
+				'condition: ',
+				e.additionalValue !== '',
+				e.additionalValue !== null,
+				e.value === e.textTrigger,
+				e.value,
+				e.additionalValue,
+				e.props.textTrigger
+			);
+			if (
+				e.additionalValue !== '' &&
+				e.additionalValue !== null &&
+				e.value === e.props.textTrigger
+			) {
+				console.log('with additional: ', e);
 				return {
 					question_id: index,
 					answer: String(e.additionalValue),
 					non_standard: true
 				} as UserAnswerPublic;
 			} else {
+				console.log('with normal', e);
 				return {
 					question_id: index,
 					answer: String(e.value),
@@ -86,7 +98,7 @@
 
 	// flags for enabling and disabling visual hints
 	let showAlert: boolean = false;
-	$: dataIsCurrent = false;
+	let dataIsCurrent: boolean = false;
 
 	// what is shown in the alert if showAlert === true
 	let alertMessage: string = $_('userData.alertMessageMissing');
@@ -188,7 +200,7 @@
 			{#if dataIsCurrent === true}
 				<Button
 					type="button"
-					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 					on:click={() => {
 						console.log('dataiscurrent click');
 						for (let element of data) {
@@ -205,7 +217,7 @@
 				</Button>
 			{:else}
 				<Button
-					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 					type="submit">{$_('userData.submitButtonLabel')}</Button
 				>
 			{/if}
