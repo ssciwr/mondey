@@ -28,7 +28,7 @@
 		// the backend models
 
 		return data.map((e, index) => {
-			if (e.additionalValue !== '' && e.additionalValue !== null) {
+			if (e.additionalValue !== '' && e.additionalValue !== null && e.value === e.textTrigger) {
 				return {
 					question_id: index,
 					answer: String(e.additionalValue),
@@ -58,6 +58,13 @@
 			showAlert = true;
 		} else {
 			console.log('successfully sent data to backend, yay!');
+			console.log('answers sent: ', answers);
+			console.log(
+				'original answers: ',
+				data.map((e) => {
+					return [e.value, e.additionalValue];
+				})
+			);
 
 			// disable all elements to make editing a conscious choice
 			for (let element of data) {
@@ -181,7 +188,7 @@
 			{#if dataIsCurrent === true}
 				<Button
 					type="button"
-					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 					on:click={() => {
 						console.log('dataiscurrent click');
 						for (let element of data) {
@@ -198,7 +205,7 @@
 				</Button>
 			{:else}
 				<Button
-					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 					type="submit">{$_('userData.submitButtonLabel')}</Button
 				>
 			{/if}
