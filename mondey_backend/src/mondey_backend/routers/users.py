@@ -165,15 +165,7 @@ def create_router() -> APIRouter:
             select(UserAnswer).where(col(UserAnswer.user_id) == current_active_user.id)
         ).all()
 
-        user_answers = [
-            UserAnswerPublic(
-                answer=answer.answer,
-                non_standard=answer.non_standard,
-                question_id=answer.question_id,
-            )
-            for answer in answers
-        ]
-        return user_answers
+        return answers
 
     @router.put("/user-answers/", response_model=list[UserAnswerPublic])
     def update_current_user_answers(
@@ -183,6 +175,31 @@ def create_router() -> APIRouter:
     ):
         if session is None:
             raise HTTPException(401, detail="no session")
+
+        for new_answer in new_answers:
+            current_answer = session.get(
+                UserAnswer, (current_active_user.id, new_answer.question_id)
+            )
+            # TODO: make this more robust
+            #   for new_answer in new_answers:
+            #     db_new_answer = session.get(UserAnswer, new_answer.id)
+            #     if not db_new_answer:
+            #         db_new_answer = UserAnswer.model_validate(new_answer, update={"user_id": current_active_user.id})
+            #         session.add(db_new_answer)
+            #     else:
+            #         for key, value in new_answer.model_dump().items():
+            #             setattr(db_new_answer, key, value)
+            if current_answer is None:
+                session.add(
+                    UserAnswer(
+                        user_id=current_active_user.id,
+                        question_id=new_answer.question_id,
+                        answer=new_answer.answer,
+                        non_standard=new_answer.non_standard,
+                    )
+                )
+            else:
+                current_answer.answer = new_answer.answer
 
         stored_answers = {
             answer.question_id: answer

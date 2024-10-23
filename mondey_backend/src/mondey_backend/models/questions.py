@@ -69,9 +69,11 @@ class UserAnswer(SQLModel, table=True):
         Makes sure this is created as a table in the database, by default True
     """
 
-    id: int | None = Field(default=None, primary_key=True)
-    user_id: int
-    question_id: int = Field(default=None, foreign_key="userquestion.id")
+    # remove id, make user_id a primary key and quesiton_id a primary key and then work with those.
+    user_id: int = Field(default=None, primary_key=True)
+    question_id: int = Field(
+        default=None, primary_key=True, foreign_key="userquestion.id"
+    )
     answer: str
     # flag that tells the frontend if the answer has been given via an  additional text field => won´t be correctly displayed otherwise
     non_standard: bool
