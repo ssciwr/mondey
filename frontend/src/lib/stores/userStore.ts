@@ -1,14 +1,9 @@
-import {
-	authCookieLogin,
-	usersCurrentUser
-} from '$lib/client/services.gen';
+import { authCookieLogin, usersCurrentUser } from '$lib/client/services.gen';
 import { type UserRead } from '$lib/client/types.gen';
 import { BasicStore } from '$lib/stores/basicStore';
 import { writable } from 'svelte/store';
 
-import {
-	type Body_auth_cookie_login_auth_login_post
-} from '$lib/client/types.gen';
+import { type Body_auth_cookie_login_auth_login_post } from '$lib/client/types.gen';
 
 interface UserData {
 	name: string;
@@ -107,15 +102,14 @@ async function login(loginData: Body_auth_cookie_login_auth_login_post) {
 	}
 }
 
-async function  refresh() {
+async function refresh() {
 	const { data, error } = await usersCurrentUser();
 	if (error || data === undefined) {
 		console.log('Failed to get current User');
 		currentUser.set(data as UserRead);
 	} else {
-		currentUser.set(null)
+		currentUser.set(null);
 	}
 }
 
 export { createDummyUser, currentUser, hash, login, refresh, users, type UserData, type UserList };
-

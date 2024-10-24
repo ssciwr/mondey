@@ -24,8 +24,8 @@ export const componentTable = {
 	multiSelect: MultiSelect,
 	select: Select,
 	fileupload: Fileupload,
-	textarea: Textarea, 
-	adminPage: AdminPage, 
+	textarea: Textarea,
+	adminPage: AdminPage,
 	researchPage: ResearchPage
 };
 export const activeTabPersonal = writable('userDataInput');
