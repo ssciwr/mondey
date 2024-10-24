@@ -4,10 +4,10 @@
 	import { type RegisterRegisterData } from '$lib/client/types.gen';
 	import AlertMessage from '$lib/components/AlertMessage.svelte';
 	import DataInput from '$lib/components/DataInput/DataInput.svelte';
+	import UserVerify from '$lib/components/UserVerify.svelte';
 	import { preventDefault } from '$lib/util';
 	import { Button, Card, Heading, Input, Select } from 'flowbite-svelte';
 	import { _ } from 'svelte-i18n';
-	import UserVerify from './UserVerify.svelte';
 
 	async function submitData(): Promise<void> {
 		const equalPW = data[1].value !== '' && data[2].value === data[1].value;
@@ -145,7 +145,7 @@
 
 			<Button
 				type="submit"
-				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+				class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 				>{$_('registration.submitButtonLabel')}</Button
 			>
 		</form>

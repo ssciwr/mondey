@@ -22,7 +22,7 @@
 	});
 </script>
 
-<Tabs tabStyle="pill">
+<Tabs tabStyle="underline">
 	{#if milestoneAgeGroups.value}
 		{#each milestoneAgeGroups.value as milestoneAgeGroup (milestoneAgeGroup.id)}
 			<TabItem open={milestoneAgeGroup.id === milestoneAgeGroups.value[0].id}>

@@ -1,14 +1,9 @@
 <script lang="ts">
+	import UserVerify from '$lib/components/UserVerify.svelte';
 	import { componentTable } from '$lib/stores/componentStore';
 	import { currentUser, refresh } from '$lib/stores/userStore';
 	import { Button, TabItem, Tabs } from 'flowbite-svelte';
-	import {
-		AtomOutline,
-		CheckCircleOutline,
-		CogSolid,
-		GridPlusSolid,
-		ProfileCardSolid
-	} from 'flowbite-svelte-icons';
+	import { AtomOutline, CogSolid, GridPlusSolid, ProfileCardSolid } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { get } from 'svelte/store';
@@ -62,28 +57,14 @@
 			</Tabs>
 		</div>
 	{:else}
-		<div
-			class="m-2 mx-auto flex w-full items-center justify-center p-2 text-gray-700 dark:text-gray-400"
-		>
-			<CheckCircleOutline size="xl" color="green" class="m-2" />
-			<div class="m-2 p-2">
-				{$_('registration.successMessage')}
-			</div>
-		</div>
-		<Button
-			type="button"
-			class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
-			href="/"
-		>
-			{$_('registration.goHome')}
-		</Button>
+		<UserVerify />
 	{/if}
 {:else}
 	<div
 		class="m-2 mx-auto flex w-full items-center justify-center p-2 text-gray-700 dark:text-gray-400"
 	>
 		<div class="m-2 p-2">
-			{$_('registration.successMessage')}
+			{$_('login.notLoggedIn')}
 		</div>
 	</div>
 	<Button
