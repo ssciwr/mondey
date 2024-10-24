@@ -36,6 +36,7 @@ def test_delete_language_invalid_language_id(admin_client: TestClient):
 
 
 def test_update_i18n(admin_client: TestClient, static_dir: pathlib.Path):
+    assert admin_client.post("/admin/languages/", json={"id": "nl"}).status_code == 200
     i18_json_path = static_dir / "i18n" / "nl.json"
     i18_json = {
         "s1": {"k1": "v1", "k2": "v2"},
