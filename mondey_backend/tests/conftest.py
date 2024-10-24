@@ -6,6 +6,11 @@ import pathlib
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from sqlmodel import Session
+from sqlmodel import SQLModel
+from sqlmodel import create_engine
+from sqlmodel.pool import StaticPool
+
 from mondey_backend import settings
 from mondey_backend.dependencies import current_active_researcher
 from mondey_backend.dependencies import current_active_superuser
@@ -24,10 +29,6 @@ from mondey_backend.models.milestones import MilestoneImage
 from mondey_backend.models.milestones import MilestoneText
 from mondey_backend.models.questions import UserAnswer
 from mondey_backend.models.users import UserRead
-from sqlmodel import Session
-from sqlmodel import SQLModel
-from sqlmodel import create_engine
-from sqlmodel.pool import StaticPool
 
 
 @pytest.fixture(scope="session")
@@ -67,16 +68,16 @@ def session():
     # add some test data
     with Session(engine) as session:
         # add 3 languages
-        for lang in ["de", "en", "fr"]:
-            session.add(Language(lang=lang))
-        lang_ids = [1, 2, 3]
+        lang_ids = ["de", "en", "fr"]
+        for lang_id in lang_ids:
+            session.add(Language(id=lang_id))
         # add two milestone age groups
-        session.add(MilestoneAgeGroup(months_min=0, months_max=36, years=lang_ids))
-        session.add(MilestoneAgeGroup(months_min=36, months_max=72, years=lang_ids))
+        session.add(MilestoneAgeGroup(months_min=0, months_max=36))
+        session.add(MilestoneAgeGroup(months_min=36, months_max=72))
         # add a milestone group with 3 milestones
         session.add(MilestoneGroup(order=2, age_group_id=1))
         for lang_id in lang_ids:
-            lbl = f"g1_l{lang_id}"
+            lbl = f"g1_{lang_id}"
             session.add(
                 MilestoneGroupText(
                     group_id=1, lang_id=lang_id, title=f"{lbl}_t", desc=f"{lbl}_d"
@@ -85,7 +86,7 @@ def session():
         for milestone_id in [1, 2, 3]:
             session.add(Milestone(order=0, group_id=1))
             for lang_id in lang_ids:
-                lbl = f"m{milestone_id}_l{lang_id}"
+                lbl = f"m{milestone_id}_{lang_id}"
                 session.add(
                     MilestoneText(
                         milestone_id=milestone_id,
@@ -99,7 +100,7 @@ def session():
         # add a second milestone group with 2 milestones
         session.add(MilestoneGroup(order=1, age_group_id=1))
         for lang_id in lang_ids:
-            lbl = f"g1_l{lang_id}"
+            lbl = f"g1_{lang_id}"
             session.add(
                 MilestoneGroupText(
                     group_id=2, lang_id=lang_id, title=f"{lbl}_t", desc=f"{lbl}_d"
@@ -108,7 +109,7 @@ def session():
         for milestone_id in [4, 5]:
             session.add(Milestone(order=0, group_id=2))
             for lang_id in lang_ids:
-                lbl = f"m{milestone_id}_l{lang_id}"
+                lbl = f"m{milestone_id}_{lang_id}"
                 session.add(
                     MilestoneText(
                         milestone_id=milestone_id,
@@ -350,31 +351,31 @@ def milestone_group1():
     return {
         "id": 1,
         "text": {
-            "1": {"title": "g1_l1_t", "desc": "g1_l1_d"},
-            "2": {"title": "g1_l2_t", "desc": "g1_l2_d"},
-            "3": {"title": "g1_l3_t", "desc": "g1_l3_d"},
+            "de": {"title": "g1_de_t", "desc": "g1_de_d"},
+            "en": {"title": "g1_en_t", "desc": "g1_en_d"},
+            "fr": {"title": "g1_fr_t", "desc": "g1_fr_d"},
         },
         "milestones": [
             {
                 "id": 1,
                 "text": {
-                    "1": {
-                        "title": "m1_l1_t",
-                        "desc": "m1_l1_d",
-                        "obs": "m1_l1_o",
-                        "help": "m1_l1_h",
+                    "de": {
+                        "title": "m1_de_t",
+                        "desc": "m1_de_d",
+                        "obs": "m1_de_o",
+                        "help": "m1_de_h",
                     },
-                    "2": {
-                        "title": "m1_l2_t",
-                        "desc": "m1_l2_d",
-                        "obs": "m1_l2_o",
-                        "help": "m1_l2_h",
+                    "en": {
+                        "title": "m1_en_t",
+                        "desc": "m1_en_d",
+                        "obs": "m1_en_o",
+                        "help": "m1_en_h",
                     },
-                    "3": {
-                        "title": "m1_l3_t",
-                        "desc": "m1_l3_d",
-                        "obs": "m1_l3_o",
-                        "help": "m1_l3_h",
+                    "fr": {
+                        "title": "m1_fr_t",
+                        "desc": "m1_fr_d",
+                        "obs": "m1_fr_o",
+                        "help": "m1_fr_h",
                     },
                 },
                 "images": [
@@ -385,23 +386,23 @@ def milestone_group1():
             {
                 "id": 2,
                 "text": {
-                    "1": {
-                        "title": "m2_l1_t",
-                        "desc": "m2_l1_d",
-                        "obs": "m2_l1_o",
-                        "help": "m2_l1_h",
+                    "de": {
+                        "title": "m2_de_t",
+                        "desc": "m2_de_d",
+                        "obs": "m2_de_o",
+                        "help": "m2_de_h",
                     },
-                    "2": {
-                        "title": "m2_l2_t",
-                        "desc": "m2_l2_d",
-                        "obs": "m2_l2_o",
-                        "help": "m2_l2_h",
+                    "en": {
+                        "title": "m2_en_t",
+                        "desc": "m2_en_d",
+                        "obs": "m2_en_o",
+                        "help": "m2_en_h",
                     },
-                    "3": {
-                        "title": "m2_l3_t",
-                        "desc": "m2_l3_d",
-                        "obs": "m2_l3_o",
-                        "help": "m2_l3_h",
+                    "fr": {
+                        "title": "m2_fr_t",
+                        "desc": "m2_fr_d",
+                        "obs": "m2_fr_o",
+                        "help": "m2_fr_h",
                     },
                 },
                 "images": [{"filename": "m3.jpg", "approved": True}],
@@ -409,23 +410,23 @@ def milestone_group1():
             {
                 "id": 3,
                 "text": {
-                    "1": {
-                        "title": "m3_l1_t",
-                        "desc": "m3_l1_d",
-                        "obs": "m3_l1_o",
-                        "help": "m3_l1_h",
+                    "de": {
+                        "title": "m3_de_t",
+                        "desc": "m3_de_d",
+                        "obs": "m3_de_o",
+                        "help": "m3_de_h",
                     },
-                    "2": {
-                        "title": "m3_l2_t",
-                        "desc": "m3_l2_d",
-                        "obs": "m3_l2_o",
-                        "help": "m3_l2_h",
+                    "en": {
+                        "title": "m3_en_t",
+                        "desc": "m3_en_d",
+                        "obs": "m3_en_o",
+                        "help": "m3_en_h",
                     },
-                    "3": {
-                        "title": "m3_l3_t",
-                        "desc": "m3_l3_d",
-                        "obs": "m3_l3_o",
-                        "help": "m3_l3_h",
+                    "fr": {
+                        "title": "m3_fr_t",
+                        "desc": "m3_fr_d",
+                        "obs": "m3_fr_o",
+                        "help": "m3_fr_h",
                     },
                 },
                 "images": [],
@@ -441,9 +442,24 @@ def milestone_group_admin1():
         "age_group_id": 1,
         "order": 2,
         "text": {
-            "1": {"group_id": 1, "desc": "g1_l1_d", "title": "g1_l1_t", "lang_id": 1},
-            "2": {"group_id": 1, "desc": "g1_l2_d", "title": "g1_l2_t", "lang_id": 2},
-            "3": {"group_id": 1, "desc": "g1_l3_d", "title": "g1_l3_t", "lang_id": 3},
+            "de": {
+                "group_id": 1,
+                "desc": "g1_de_d",
+                "title": "g1_de_t",
+                "lang_id": "de",
+            },
+            "en": {
+                "group_id": 1,
+                "desc": "g1_en_d",
+                "title": "g1_en_t",
+                "lang_id": "en",
+            },
+            "fr": {
+                "group_id": 1,
+                "desc": "g1_fr_d",
+                "title": "g1_fr_t",
+                "lang_id": "fr",
+            },
         },
         "milestones": [
             {
@@ -465,29 +481,29 @@ def milestone_group_admin1():
                     },
                 ],
                 "text": {
-                    "1": {
-                        "obs": "m1_l1_o",
-                        "help": "m1_l1_h",
-                        "title": "m1_l1_t",
-                        "desc": "m1_l1_d",
+                    "de": {
+                        "obs": "m1_de_o",
+                        "help": "m1_de_h",
+                        "title": "m1_de_t",
+                        "desc": "m1_de_d",
                         "milestone_id": 1,
-                        "lang_id": 1,
+                        "lang_id": "de",
                     },
-                    "2": {
-                        "obs": "m1_l2_o",
-                        "help": "m1_l2_h",
-                        "title": "m1_l2_t",
-                        "desc": "m1_l2_d",
+                    "en": {
+                        "obs": "m1_en_o",
+                        "help": "m1_en_h",
+                        "title": "m1_en_t",
+                        "desc": "m1_en_d",
                         "milestone_id": 1,
-                        "lang_id": 2,
+                        "lang_id": "en",
                     },
-                    "3": {
-                        "obs": "m1_l3_o",
-                        "help": "m1_l3_h",
-                        "title": "m1_l3_t",
-                        "desc": "m1_l3_d",
+                    "fr": {
+                        "obs": "m1_fr_o",
+                        "help": "m1_fr_h",
+                        "title": "m1_fr_t",
+                        "desc": "m1_fr_d",
                         "milestone_id": 1,
-                        "lang_id": 3,
+                        "lang_id": "fr",
                     },
                 },
             },
@@ -504,29 +520,29 @@ def milestone_group_admin1():
                     }
                 ],
                 "text": {
-                    "1": {
-                        "obs": "m2_l1_o",
-                        "help": "m2_l1_h",
-                        "title": "m2_l1_t",
-                        "desc": "m2_l1_d",
+                    "de": {
+                        "obs": "m2_de_o",
+                        "help": "m2_de_h",
+                        "title": "m2_de_t",
+                        "desc": "m2_de_d",
                         "milestone_id": 2,
-                        "lang_id": 1,
+                        "lang_id": "de",
                     },
-                    "2": {
-                        "obs": "m2_l2_o",
-                        "help": "m2_l2_h",
-                        "title": "m2_l2_t",
-                        "desc": "m2_l2_d",
+                    "en": {
+                        "obs": "m2_en_o",
+                        "help": "m2_en_h",
+                        "title": "m2_en_t",
+                        "desc": "m2_en_d",
                         "milestone_id": 2,
-                        "lang_id": 2,
+                        "lang_id": "en",
                     },
-                    "3": {
-                        "obs": "m2_l3_o",
-                        "help": "m2_l3_h",
-                        "title": "m2_l3_t",
-                        "desc": "m2_l3_d",
+                    "fr": {
+                        "obs": "m2_fr_o",
+                        "help": "m2_fr_h",
+                        "title": "m2_fr_t",
+                        "desc": "m2_fr_d",
                         "milestone_id": 2,
-                        "lang_id": 3,
+                        "lang_id": "fr",
                     },
                 },
             },
@@ -536,29 +552,29 @@ def milestone_group_admin1():
                 "id": 3,
                 "images": [],
                 "text": {
-                    "1": {
-                        "obs": "m3_l1_o",
-                        "help": "m3_l1_h",
-                        "title": "m3_l1_t",
-                        "desc": "m3_l1_d",
+                    "de": {
+                        "obs": "m3_de_o",
+                        "help": "m3_de_h",
+                        "title": "m3_de_t",
+                        "desc": "m3_de_d",
                         "milestone_id": 3,
-                        "lang_id": 1,
+                        "lang_id": "de",
                     },
-                    "2": {
-                        "obs": "m3_l2_o",
-                        "help": "m3_l2_h",
-                        "title": "m3_l2_t",
-                        "desc": "m3_l2_d",
+                    "en": {
+                        "obs": "m3_en_o",
+                        "help": "m3_en_h",
+                        "title": "m3_en_t",
+                        "desc": "m3_en_d",
                         "milestone_id": 3,
-                        "lang_id": 2,
+                        "lang_id": "en",
                     },
-                    "3": {
-                        "obs": "m3_l3_o",
-                        "help": "m3_l3_h",
-                        "title": "m3_l3_t",
-                        "desc": "m3_l3_d",
+                    "fr": {
+                        "obs": "m3_fr_o",
+                        "help": "m3_fr_h",
+                        "title": "m3_fr_t",
+                        "desc": "m3_fr_d",
                         "milestone_id": 3,
-                        "lang_id": 3,
+                        "lang_id": "fr",
                     },
                 },
             },
@@ -571,32 +587,32 @@ def milestone_group2():
     return {
         "id": 2,
         "text": {
-            "1": {"title": "g1_l1_t", "desc": "g1_l1_d"},
-            "2": {"title": "g1_l2_t", "desc": "g1_l2_d"},
-            "3": {"title": "g1_l3_t", "desc": "g1_l3_d"},
+            "de": {"title": "g1_de_t", "desc": "g1_de_d"},
+            "en": {"title": "g1_en_t", "desc": "g1_en_d"},
+            "fr": {"title": "g1_fr_t", "desc": "g1_fr_d"},
         },
         "milestones": [
             {
                 "id": 4,
                 "images": [],
                 "text": {
-                    "1": {
-                        "desc": "m4_l1_d",
-                        "title": "m4_l1_t",
-                        "obs": "m4_l1_o",
-                        "help": "m4_l1_h",
+                    "de": {
+                        "desc": "m4_de_d",
+                        "title": "m4_de_t",
+                        "obs": "m4_de_o",
+                        "help": "m4_de_h",
                     },
-                    "2": {
-                        "desc": "m4_l2_d",
-                        "title": "m4_l2_t",
-                        "obs": "m4_l2_o",
-                        "help": "m4_l2_h",
+                    "en": {
+                        "desc": "m4_en_d",
+                        "title": "m4_en_t",
+                        "obs": "m4_en_o",
+                        "help": "m4_en_h",
                     },
-                    "3": {
-                        "desc": "m4_l3_d",
-                        "title": "m4_l3_t",
-                        "obs": "m4_l3_o",
-                        "help": "m4_l3_h",
+                    "fr": {
+                        "desc": "m4_fr_d",
+                        "title": "m4_fr_t",
+                        "obs": "m4_fr_o",
+                        "help": "m4_fr_h",
                     },
                 },
             },
@@ -604,23 +620,23 @@ def milestone_group2():
                 "id": 5,
                 "images": [],
                 "text": {
-                    "1": {
-                        "desc": "m5_l1_d",
-                        "title": "m5_l1_t",
-                        "obs": "m5_l1_o",
-                        "help": "m5_l1_h",
+                    "de": {
+                        "desc": "m5_de_d",
+                        "title": "m5_de_t",
+                        "obs": "m5_de_o",
+                        "help": "m5_de_h",
                     },
-                    "2": {
-                        "desc": "m5_l2_d",
-                        "title": "m5_l2_t",
-                        "obs": "m5_l2_o",
-                        "help": "m5_l2_h",
+                    "en": {
+                        "desc": "m5_en_d",
+                        "title": "m5_en_t",
+                        "obs": "m5_en_o",
+                        "help": "m5_en_h",
                     },
-                    "3": {
-                        "desc": "m5_l3_d",
-                        "title": "m5_l3_t",
-                        "obs": "m5_l3_o",
-                        "help": "m5_l3_h",
+                    "fr": {
+                        "desc": "m5_fr_d",
+                        "title": "m5_fr_t",
+                        "obs": "m5_fr_o",
+                        "help": "m5_fr_h",
                     },
                 },
             },
@@ -635,9 +651,24 @@ def milestone_group_admin2():
         "age_group_id": 1,
         "order": 1,
         "text": {
-            "1": {"group_id": 2, "desc": "g1_l1_d", "title": "g1_l1_t", "lang_id": 1},
-            "2": {"group_id": 2, "desc": "g1_l2_d", "title": "g1_l2_t", "lang_id": 2},
-            "3": {"group_id": 2, "desc": "g1_l3_d", "title": "g1_l3_t", "lang_id": 3},
+            "de": {
+                "group_id": 2,
+                "desc": "g1_de_d",
+                "title": "g1_de_t",
+                "lang_id": "de",
+            },
+            "en": {
+                "group_id": 2,
+                "desc": "g1_en_d",
+                "title": "g1_en_t",
+                "lang_id": "en",
+            },
+            "fr": {
+                "group_id": 2,
+                "desc": "g1_fr_d",
+                "title": "g1_fr_t",
+                "lang_id": "fr",
+            },
         },
         "milestones": [
             {
@@ -646,29 +677,29 @@ def milestone_group_admin2():
                 "id": 4,
                 "images": [],
                 "text": {
-                    "1": {
-                        "obs": "m4_l1_o",
-                        "help": "m4_l1_h",
-                        "title": "m4_l1_t",
-                        "desc": "m4_l1_d",
+                    "de": {
+                        "obs": "m4_de_o",
+                        "help": "m4_de_h",
+                        "title": "m4_de_t",
+                        "desc": "m4_de_d",
                         "milestone_id": 4,
-                        "lang_id": 1,
+                        "lang_id": "de",
                     },
-                    "2": {
-                        "obs": "m4_l2_o",
-                        "help": "m4_l2_h",
-                        "title": "m4_l2_t",
-                        "desc": "m4_l2_d",
+                    "en": {
+                        "obs": "m4_en_o",
+                        "help": "m4_en_h",
+                        "title": "m4_en_t",
+                        "desc": "m4_en_d",
                         "milestone_id": 4,
-                        "lang_id": 2,
+                        "lang_id": "en",
                     },
-                    "3": {
-                        "obs": "m4_l3_o",
-                        "help": "m4_l3_h",
-                        "title": "m4_l3_t",
-                        "desc": "m4_l3_d",
+                    "fr": {
+                        "obs": "m4_fr_o",
+                        "help": "m4_fr_h",
+                        "title": "m4_fr_t",
+                        "desc": "m4_fr_d",
                         "milestone_id": 4,
-                        "lang_id": 3,
+                        "lang_id": "fr",
                     },
                 },
             },
@@ -678,29 +709,29 @@ def milestone_group_admin2():
                 "id": 5,
                 "images": [],
                 "text": {
-                    "1": {
-                        "obs": "m5_l1_o",
-                        "help": "m5_l1_h",
-                        "title": "m5_l1_t",
-                        "desc": "m5_l1_d",
+                    "de": {
+                        "obs": "m5_de_o",
+                        "help": "m5_de_h",
+                        "title": "m5_de_t",
+                        "desc": "m5_de_d",
                         "milestone_id": 5,
-                        "lang_id": 1,
+                        "lang_id": "de",
                     },
-                    "2": {
-                        "obs": "m5_l2_o",
-                        "help": "m5_l2_h",
-                        "title": "m5_l2_t",
-                        "desc": "m5_l2_d",
+                    "en": {
+                        "obs": "m5_en_o",
+                        "help": "m5_en_h",
+                        "title": "m5_en_t",
+                        "desc": "m5_en_d",
                         "milestone_id": 5,
-                        "lang_id": 2,
+                        "lang_id": "en",
                     },
-                    "3": {
-                        "obs": "m5_l3_o",
-                        "help": "m5_l3_h",
-                        "title": "m5_l3_t",
-                        "desc": "m5_l3_d",
+                    "fr": {
+                        "obs": "m5_fr_o",
+                        "help": "m5_fr_h",
+                        "title": "m5_fr_t",
+                        "desc": "m5_fr_d",
                         "milestone_id": 5,
-                        "lang_id": 3,
+                        "lang_id": "fr",
                     },
                 },
             },

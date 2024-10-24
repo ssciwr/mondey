@@ -9,7 +9,7 @@ class TestMilestones:
         client = request.getfixturevalue(client_type)
         response = client.get("/languages/")
         assert response.status_code == 200
-        assert response.json() == {"de": 1, "en": 2, "fr": 3}
+        assert response.json() == ["de", "en", "fr"]
 
     def test_get_milestone_groups_age_group_1(
         self,

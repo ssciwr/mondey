@@ -12,10 +12,9 @@
 		Select
 	} from 'flowbite-svelte';
 	import ISO6391 from 'iso-639-1';
-	import { _ } from 'svelte-i18n';
+	import { _, locales } from 'svelte-i18n';
 	import type { SelectOptionType } from 'flowbite-svelte';
 	import { getTranslations } from '$lib/i18n';
-	import { languages } from '$lib/stores/langStore';
 	import DeleteModal from '$lib/components/Admin/DeleteModal.svelte';
 	import AddButton from '$lib/components/Admin/AddButton.svelte';
 	import DeleteButton from '$lib/components/Admin/DeleteButton.svelte';
@@ -27,12 +26,12 @@
 		return { value: k, name: langNames[i] };
 	}) as SelectOptionType<string>[];
 
-	let selectedLang: string = $state('');
+	let selectedLangId: string = $state('');
 	let currentLanguageId: string = $state('');
 	let showDeleteModal: boolean = $state(false);
 
 	async function createLanguageAndUpdateLanguages() {
-		const { data, error } = await createLanguage({ body: { lang: selectedLang } });
+		const { data, error } = await createLanguage({ body: { id: selectedLangId } });
 		if (error) {
 			console.log(error);
 		} else {
@@ -43,7 +42,7 @@
 
 	async function deleteLanguageAndUpdateLanguages() {
 		const { data, error } = await deleteLanguage({
-			path: { language_id: Number(currentLanguageId) }
+			path: { language_id: currentLanguageId }
 		});
 		if (error) {
 			console.log(error);
@@ -63,19 +62,19 @@
 			<TableHeadCell>Actions</TableHeadCell>
 		</TableHead>
 		<TableBody>
-			{#each Object.entries($languages) as [lang, lang_id]}
+			{#each $locales as lang_id}
 				<TableBodyRow>
 					<TableBodyCell>
-						{lang}
+						{lang_id}
 					</TableBodyCell>
 					<TableBodyCell>
-						{ISO6391.getNativeName(lang)}
+						{ISO6391.getNativeName(lang_id)}
 					</TableBodyCell>
 					<TableBodyCell>
-						{#if lang_id > 2}
+						{#if !['de', 'en'].includes(lang_id)}
 							<DeleteButton
 								onclick={() => {
-									currentLanguageId = `${lang_id}`;
+									currentLanguageId = lang_id;
 									showDeleteModal = true;
 								}}
 							/>
@@ -89,12 +88,12 @@
 					<Select
 						class="mt-2"
 						items={langItems}
-						bind:value={selectedLang}
+						bind:value={selectedLangId}
 						placeholder="Select a language..."
 					/>
 				</TableBodyCell>
 				<TableBodyCell>
-					<AddButton onclick={createLanguageAndUpdateLanguages} disabled={selectedLang === ''} />
+					<AddButton onclick={createLanguageAndUpdateLanguages} disabled={selectedLangId === ''} />
 				</TableBodyCell>
 			</TableBodyRow>
 		</TableBody>
