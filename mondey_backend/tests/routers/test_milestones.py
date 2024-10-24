@@ -41,8 +41,7 @@ class TestMilestones:
     ):
         client = request.getfixturevalue(client_type)
         response = client.get("/milestone-groups/?milestone_age_group_id=67")
-        assert response.status_code == 200
-        assert response.json() == []
+        assert response.status_code == 404
 
     def test_get_milestone_group(
         self,
