@@ -111,6 +111,7 @@ async function refresh() {
 		console.log('Failed to get current User');
 	} else {
 		currentUser.set(data as UserRead);
+
 	}
 }
 

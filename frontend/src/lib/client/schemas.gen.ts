@@ -843,7 +843,7 @@ export const UserQuestionTextSchema = {
 		lang_id: {
 			anyOf: [
 				{
-					type: 'integer'
+					type: 'string'
 				},
 				{
 					type: 'null'

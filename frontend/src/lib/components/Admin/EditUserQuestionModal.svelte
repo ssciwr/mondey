@@ -1,27 +1,27 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
+	import { refreshUserQuestions } from '$lib/admin.svelte';
+	import { updateUserQuestion } from '$lib/client/services.gen';
+	import type { UserQuestionAdmin } from '$lib/client/types.gen';
+	import CancelButton from '$lib/components/Admin/CancelButton.svelte';
+	import InputPreview from '$lib/components/Admin/InputPreview.svelte';
+	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
+	import { languages } from '$lib/stores/langStore';
 	import {
-		Button,
 		Badge,
-		Card,
-		InputAddon,
-		Textarea,
-		Input,
-		Label,
+		Button,
 		ButtonGroup,
+		Card,
+		Input,
+		InputAddon,
+		Label,
 		Modal,
 		Select,
+		Textarea,
 		type SelectOptionType
 	} from 'flowbite-svelte';
 	import { _ } from 'svelte-i18n';
-	import { languages } from '$lib/stores/langStore';
-	import { updateUserQuestion } from '$lib/client/services.gen';
-	import InputPreview from '$lib/components/Admin/InputPreview.svelte';
-	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
-	import CancelButton from '$lib/components/Admin/CancelButton.svelte';
-	import type { UserQuestionAdmin } from '$lib/client/types.gen';
-	import { refreshUserQuestions } from '$lib/admin.svelte';
 
 	let {
 		open = $bindable(false),
@@ -40,8 +40,11 @@
 		if (!userQuestion) {
 			return;
 		}
+		console.log('userQuestion: ', userQuestion);
 		const values = userQuestion.options.split(';');
+		console.log('values: ', values);
 		for (const lang_id in $languages) {
+			console.log(' language shit: ', lang_id, $languages);
 			const items = userQuestion.text[lang_id].options.split(';');
 			userQuestion.text[lang_id].options_json = JSON.stringify(
 				values.map(function (value, index) {

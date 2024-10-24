@@ -17,7 +17,7 @@ class UserQuestionText(UserQuestionTextBase, table=True):
     user_question_id: int | None = Field(
         default=None, foreign_key="userquestion.id", primary_key=True
     )
-    lang_id: int | None = Field(
+    lang_id: str | None = Field(
         default=None, foreign_key="language.id", primary_key=True
     )
     options: str = ""
@@ -32,7 +32,7 @@ class UserQuestion(SQLModel, table=True):
     order: int = 0
     input: str = "text"
     options: str = ""
-    text: Mapped[dict[int, UserQuestionText]] = Relationship(
+    text: Mapped[dict[str, UserQuestionText]] = Relationship(
         sa_relationship=relationship(
             collection_class=attribute_keyed_dict("lang_id"),
             cascade="all, delete-orphan",
@@ -43,7 +43,7 @@ class UserQuestion(SQLModel, table=True):
 class UserQuestionPublic(SQLModel):
     id: int
     input: str
-    text: dict[int, UserQuestionTextPublic] = {}
+    text: dict[str, UserQuestionTextPublic] = {}
 
 
 class UserQuestionAdmin(SQLModel):
@@ -51,7 +51,7 @@ class UserQuestionAdmin(SQLModel):
     order: int
     input: str
     options: str
-    text: dict[int, UserQuestionText] = {}
+    text: dict[str, UserQuestionText] = {}
 
 
 # Answers to user questions. Internal model and 'public' model exposed to the forntend app

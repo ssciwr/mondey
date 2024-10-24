@@ -3,9 +3,9 @@
 	import { base } from '$app/paths';
 	import { authCookieLogout } from '$lib/client/services.gen';
 	import { type UserRead } from '$lib/client/types.gen';
-	import { currentUser } from '$lib/stores/userStore';
+	import { currentUser, refresh } from '$lib/stores/userStore';
 	import { Button, Heading, Popover } from 'flowbite-svelte';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { get } from 'svelte/store';
 	import AlertMessage from './AlertMessage.svelte';
@@ -16,8 +16,8 @@
 	let showAlert: boolean = false;
 	let alertMessage: string = $_('login.alertMessageError');
 
-	const unsubscribe = currentUser.subscribe((data) => {
-		userData = data;
+	onMount(async () => {
+		await refresh();
 	});
 
 	async function logout(): Promise<void> {
@@ -27,15 +27,11 @@
 			showAlert = true;
 			alertMessage += ': ' + response.error.detail;
 		} else {
-			console.log('Successful logout of user ', userData.email, response.response.status);
+			console.log('Successful logout of user ', userData?.email, response.response.status);
 			userData = null;
 			goto(`/${base}`);
 		}
 	}
-
-	onDestroy(unsubscribe);
-
-	$: console.log('userData in profile: ', userData);
 </script>
 
 <Popover {triggeredBy} class="text-gray-700 dark:text-gray-400">

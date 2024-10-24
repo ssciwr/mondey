@@ -220,7 +220,7 @@ export type UserQuestionText = {
 	question?: string;
 	options_json?: string;
 	user_question_id?: number | null;
-	lang_id?: number | null;
+	lang_id?: string | null;
 	options?: string;
 };
 
