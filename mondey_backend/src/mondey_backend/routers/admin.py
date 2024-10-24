@@ -4,6 +4,7 @@ import json
 import pathlib
 
 from fastapi import APIRouter
+from fastapi import HTTPException
 from fastapi import UploadFile
 from sqlmodel import col
 from sqlmodel import select
@@ -45,6 +46,10 @@ def create_router() -> APIRouter:
 
     @router.delete("/languages/{language_id}")
     def delete_language(session: SessionDep, language_id: int):
+        if language_id <= 2:
+            raise HTTPException(
+                status_code=400, detail="DE and EN languages cannot be deleted"
+            )
         language = get(session, Language, language_id)
         session.delete(language)
         session.commit()

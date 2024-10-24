@@ -72,12 +72,14 @@
 						{ISO6391.getNativeName(lang)}
 					</TableBodyCell>
 					<TableBodyCell>
-						<DeleteButton
-							onclick={() => {
-								currentLanguageId = lang_id;
-								showDeleteModal = true;
-							}}
-						/>
+						{#if lang_id > 2}
+							<DeleteButton
+								onclick={() => {
+									currentLanguageId = `${lang_id}`;
+									showDeleteModal = true;
+								}}
+							/>
+						{/if}
 					</TableBodyCell>
 				</TableBodyRow>
 			{/each}

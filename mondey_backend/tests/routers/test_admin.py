@@ -12,9 +12,22 @@ def test_post_language(admin_client: TestClient):
 
 
 def test_delete_language(admin_client: TestClient):
-    response = admin_client.delete("/admin/languages/2")
+    response = admin_client.delete("/admin/languages/3")
     assert response.status_code == 200
-    assert admin_client.get("/languages").json() == {"de": 1, "fr": 3}
+    assert admin_client.get("/languages").json() == {"de": 1, "en": 2}
+
+
+@pytest.mark.parametrize("lang_id", [1, 2])
+def test_delete_language_invalid_de_en_cannot_be_deleted(
+    admin_client: TestClient, lang_id: int
+):
+    response = admin_client.delete(f"/admin/languages/{lang_id}")
+    assert response.status_code == 400
+
+
+def test_delete_language_invalid_language_id(admin_client: TestClient):
+    response = admin_client.delete("/admin/languages/67")
+    assert response.status_code == 404
 
 
 def test_update_i18n(admin_client: TestClient, static_dir: pathlib.Path):
