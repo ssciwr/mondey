@@ -18,6 +18,8 @@ from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneAnswerSessionPublic
+from ..models.questions import UserAnswer
+from ..models.questions import UserAnswerPublic
 from ..models.users import UserRead
 from ..models.users import UserUpdate
 from ..settings import app_settings
@@ -32,6 +34,7 @@ def create_router() -> APIRouter:
     router = APIRouter(prefix="/users", tags=["users"])
     router.include_router(fastapi_users.get_users_router(UserRead, UserUpdate))
 
+    # children endpoints
     @router.get("/children/", response_model=list[ChildPublic])
     def get_children(session: SessionDep, current_active_user: CurrentActiveUserDep):
         return [
@@ -110,6 +113,7 @@ def create_router() -> APIRouter:
         write_file(file, filename)
         return {"ok": True}
 
+    # milestone endpoints
     @router.get(
         "/milestone-answers/{child_id}", response_model=MilestoneAnswerSessionPublic
     )
@@ -148,5 +152,39 @@ def create_router() -> APIRouter:
             milestone_answer.answer = answer.answer
             session.commit()
         return milestone_answer
+
+    # Endpoints for answers to user question
+    @router.get("/user-answers/", response_model=list[UserAnswerPublic])
+    def get_current_user_answers(
+        session: SessionDep, current_active_user: CurrentActiveUserDep
+    ):
+        answers = session.exec(
+            select(UserAnswer).where(col(UserAnswer.user_id) == current_active_user.id)
+        ).all()
+
+        return answers
+
+    @router.put("/user-answers/", response_model=list[UserAnswerPublic])
+    def update_current_user_answers(
+        session: SessionDep,
+        current_active_user: CurrentActiveUserDep,
+        new_answers: list[UserAnswerPublic],
+    ):
+        for new_answer in new_answers:
+            current_answer = session.get(
+                UserAnswer, (current_active_user.id, new_answer.question_id)
+            )
+
+            if current_answer is None:
+                current_answer = UserAnswer.model_validate(
+                    new_answer, update={"user_id": current_active_user.id}
+                )
+                add(session, current_answer)
+            else:
+                for key, value in new_answer.model_dump().items():
+                    setattr(current_answer, key, value)
+
+        session.commit()
+        return new_answers
 
     return router

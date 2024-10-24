@@ -74,6 +74,7 @@
 
 	{#if showTextField === true}
 		<Textarea
+			disabled={properties.disabled}
 			bind:value={additionalInput}
 			on:blur={additionalEventHandlers['on:blur']}
 			on:change={additionalEventHandlers['on:change']}

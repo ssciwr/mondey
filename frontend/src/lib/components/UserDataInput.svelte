@@ -1,117 +1,160 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { base } from '$app/paths';
+	import {
+		getCurrentUserAnswers,
+		getUserQuestions,
+		updateCurrentUserAnswers,
+		usersCurrentUser
+	} from '$lib/client/services.gen';
+	import { type GetUserQuestionsResponse, type UserAnswerPublic } from '$lib/client/types.gen';
 	import AlertMessage from '$lib/components/AlertMessage.svelte';
 	import DataInput from '$lib/components/DataInput/DataInput.svelte';
-	import NavigationButtons from '$lib/components/Navigation/NavigationButtons.svelte';
-	import { users, type UserData } from '$lib/stores/userStore';
-	import { Card, Heading } from 'flowbite-svelte';
-	import { afterUpdate, onDestroy, onMount } from 'svelte';
+	import { preventDefault } from '$lib/util';
+	import { Button, Card, Heading } from 'flowbite-svelte';
+	import { onMount } from 'svelte';
+	import { _ } from 'svelte-i18n';
 
-	function validate(): boolean {
-		missingValues = data.map((element) => element.value === '' || element.value === null);
-		return missingValues.every((v) => v === false);
+	function convertQuestions(questionnaire: GetUserQuestionsResponse): GetUserQuestionsResponse {
+		// TODO: once questions come from the database we can do this with the questionnaire
+		// different algorithm that makes use of the component lookup table in '$lib/stores' is needed here then.
+		return questionnaire;
 	}
 
-	async function acceptData() {
-		const valid = validate();
-		if (valid) {
-			for (let i = 0; i < data.length; ++i) {
-				(userData as UserData)[data[i].props.name] = {};
-				(userData as UserData)[data[i].props.name]['value'] = data[i].value;
-				(userData as UserData)[data[i].props.name]['additionalValue'] = data[i].additionalValue;
-			}
+	function convertAnswers(questionnaire: GetUserQuestionsResponse | undefined): UserAnswerPublic[] {
+		// TODO: once questions come from the database we can do this with the actual questionnaire
+		// this version is temporary until the underlying datastructure has been changed to accommodate
+		// the backend models
 
-			if (userID) {
-				await users.update(userID, userData);
-			}
-
-			await users.save();
-
-			buttons[0].disabled = true;
-			showAlert = false;
-			goto('/userLand/userLandingpage');
-		} else {
-			showAlert = true;
-		}
-	}
-
-	let userData: UserData;
-	let userID: string;
-
-	onMount(async () => {
-		console.log('loading users');
-		await users.load();
-		userID = users.get()['loggedIn'] as string;
-		userData = users.get()[userID] as UserData;
-
-		// initialize data values to stuff that is there already if
-		// data has been supplied already for that user.
-		const keys = [
-			'Geburtsjahr',
-			'Geschlecht',
-			'Höchster Bildungsabschluss',
-			'Arbeitszeit/Woche',
-			'Familieneinkommen/Jahr',
-			'Beruf'
-		];
-		let allThere: boolean = false;
-		for (let i = 0; i < data.length; ++i) {
-			if (userData[keys[i]]) {
-				data[i]['value'] = userData[keys[i]].value;
-				data[i]['additionalValue'] = userData[keys[i]].additionalValue;
-
-				if (data[i].props['selected']) {
-					data[i].props['selected'] = data[i].props.items.map((e) => {
-						return e.value === userData[keys[i]].value;
-					});
-				}
+		return data.map((e, index) => {
+			console.log(
+				'condition: ',
+				e.additionalValue !== '',
+				e.additionalValue !== null,
+				e.value === e.textTrigger,
+				e.value,
+				e.additionalValue,
+				e.props.textTrigger
+			);
+			if (
+				e.additionalValue !== '' &&
+				e.additionalValue !== null &&
+				e.value === e.props.textTrigger
+			) {
+				console.log('with additional: ', e);
+				return {
+					question_id: index,
+					answer: String(e.additionalValue),
+					non_standard: true
+				} as UserAnswerPublic;
 			} else {
-				allThere = true;
+				console.log('with normal', e);
+				return {
+					question_id: index,
+					answer: String(e.value),
+					non_standard: false
+				} as UserAnswerPublic;
 			}
+		});
+	}
+
+	async function submitData() {
+		const answers = convertAnswers(questionnaire);
+		const currentUser = await usersCurrentUser();
+		if (currentUser.error) {
+			showAlert = true;
+			alertMessage = $_('userData.alertMessageUserNotFound');
 		}
-		showAlert = allThere;
-		console.log('loaded data: ', data);
-		buttons[0].label = 'Fertig';
-	});
 
-	onDestroy(async () => {
-		users.save();
-	});
+		const response = await updateCurrentUserAnswers({
+			body: answers
+			// query: { session_id: currentUser?.data?.id }
+		});
 
-	afterUpdate(async () => {
-		users.save();
-	});
+		if (response.error) {
+			console.log('Error happened when sending user question answers: ', response.error);
+			alertMessage = $_('userData.alertMessageError');
+			showAlert = true;
+		} else {
+			console.log('successfully sent data to backend, yay!');
+			console.log('answers sent: ', answers);
+			console.log(
+				'original answers: ',
+				data.map((e) => {
+					return [e.value, e.additionalValue];
+				})
+			);
+
+			// disable all elements to make editing a conscious choice
+			for (let element of data) {
+				element.props.disabled = true;
+			}
+			dataIsCurrent = true;
+			data = [...data]; // TODO: forces a rerender. need a better way to do this
+		}
+	}
 
 	// this can, but does not have to, come from a database later.
 	export let data: any[];
 
-	// validation / data acceptance
+	// this is the data that will be used in the end
+	let questionnaire: GetUserQuestionsResponse | undefined = [];
 
-	const heading = 'Benutzerdaten eingeben';
+	// flags for enabling and disabling visual hints
+	let showAlert: boolean = false;
+	let dataIsCurrent: boolean = false;
 
-	let missingValues = data.map(() => false);
+	// what is shown in the alert if showAlert === true
+	let alertMessage: string = $_('userData.alertMessageMissing');
 
-	let showAlert: boolean = true;
+	// load questions and current answers from server and put them into the data
+	// structure that the UserDataInput component understands
+	onMount(async () => {
+		console.log('onmount');
 
-	let alertMessage: string = 'Bitte füllen Sie die benötigten Felder (hervorgehoben) aus.';
+		const userQuestions = await getUserQuestions();
 
-	const buttons = [
-		{
-			label: 'Abschließen',
-			onclick: acceptData,
-			disabled: true
+		if (userQuestions.error) {
+			showAlert = true;
+			alertMessage = $_('userData.alertMessageError');
+			console.log('questions could not be retrieved.', userQuestions?.error);
+		} else {
+			questionnaire = convertQuestions(userQuestions?.data as GetUserQuestionsResponse);
+			console.log('data from backend: ', 'questionnaire: ', questionnaire);
 		}
-	];
+
+		// get current answers.
+		let currentAnswers = await getCurrentUserAnswers();
+
+		if (currentAnswers?.error) {
+			showAlert = true;
+			console.log('answers could not be retrieved.', currentAnswers?.error);
+			alertMessage = $_('userData.alertMessageError');
+		} else if (currentAnswers?.data.length === 0) {
+			console.log('currently no answers'); // debug output. Can go later
+		} else {
+			console.log('data from backend: ', 'currentAnswers: ', currentAnswers?.data);
+
+			for (let i = 0; i < data.length; i++) {
+				if (currentAnswers?.data[i].non_standard === true) {
+					data[i].additionalValue = currentAnswers.data[i].answer;
+					data[i].value = data[i].props.textTrigger;
+					data[i].showTextField = true;
+				} else {
+					data[i].value = currentAnswers.data[i].answer;
+				}
+				data[i].props.disabled = true;
+				dataIsCurrent = true;
+				data = [...data]; // TODO: forces a rerender. need a better way to do this
+			}
+		}
+		console.log('onmount done: ', data);
+	});
 </script>
 
 <!-- Show big alert message when something is missing -->
 {#if showAlert}
 	<AlertMessage
-		title="Fehler"
+		title={$_('userData.alertMessageTitle')}
 		message={alertMessage}
-		infopage={`${base}/info`}
-		infotitle="Was passiert mit den Daten"
 		onclick={() => {
 			showAlert = false;
 		}}
@@ -121,15 +164,13 @@
 <!-- The actual content -->
 <div class="container m-1 mx-auto w-full max-w-xl">
 	<Card class="container m-1 mx-auto w-full max-w-xl">
-		{#if heading}
-			<Heading
-				tag="h3"
-				class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-				>{heading}</Heading
-			>
-		{/if}
+		<Heading
+			tag="h3"
+			class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
+			>{$_('userData.heading')}</Heading
+		>
 
-		<form class="m-1 mx-auto w-full flex-col space-y-6">
+		<form class="m-1 mx-auto w-full flex-col space-y-6" onsubmit={preventDefault(submitData)}>
 			{#each data as element, i}
 				<DataInput
 					component={element.component}
@@ -139,28 +180,41 @@
 					properties={element.props}
 					textTrigger={element.props.textTrigger}
 					eventHandlers={{
-						'on:change': (e) => {
-							buttons[0].disabled = false;
-							if (element.onchange) {
-								element.onchange(e);
-							}
-						},
+						'on:change': element.onchange,
 						'on:blur': element.onblur,
 						'on:click': element.onclick
 					}}
 					additionalEventHandlers={{
-						'on:change': (e) => {
-							buttons[0].disabled = false;
-							if (element.additionalOnChange) {
-								element.additionalOnChange(e);
-							}
-						},
+						'on:change': element.onchange,
 						'on:blur': element.onblur,
 						'on:click': element.onclick
 					}}
 				/>
 			{/each}
+			{#if dataIsCurrent === true}
+				<Button
+					type="button"
+					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					on:click={() => {
+						console.log('dataiscurrent click');
+						for (let element of data) {
+							element.props.disabled = false;
+						}
+
+						// README: this forces a rerender. It is necessary because svelte does not react to nested references being changed. There must be a better solution to this? Svelte 5 runes would be one that comes to mind.
+						data = [...data];
+
+						dataIsCurrent = false;
+					}}
+				>
+					<div class="flex items-center justify-center">{$_('userData.changeData')}</div>
+				</Button>
+			{:else}
+				<Button
+					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					type="submit">{$_('userData.submitButtonLabel')}</Button
+				>
+			{/if}
 		</form>
-		<NavigationButtons {buttons} />
 	</Card>
 </div>

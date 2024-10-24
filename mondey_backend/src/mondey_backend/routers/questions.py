@@ -19,6 +19,7 @@ def create_router() -> APIRouter:
         user_questions = session.exec(
             select(UserQuestion).order_by(col(UserQuestion.order))
         ).all()
+
         return user_questions
 
     return router

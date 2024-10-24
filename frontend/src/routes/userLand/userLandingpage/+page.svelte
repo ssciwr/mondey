@@ -12,7 +12,7 @@
 
 		if (asItems) {
 			return values.map((v) => {
-				return { name: String(v), value: v };
+				return { name: String(v), value: String(v) };
 			});
 		} else {
 			return values;
@@ -24,12 +24,13 @@
 
 		if (asItems) {
 			return values.map((v) => {
-				return { name: String(v), value: v };
+				return { name: String(v), value: String(v) };
 			});
 		} else {
 			return values;
 		}
 	}
+
 	const userData = [
 		{
 			component: Select,
@@ -40,7 +41,8 @@
 				items: numericalRange(60, 1960, 1, true),
 				placeholder: 'Bitte auswählen',
 				label: 'Geburtsjahr',
-				required: true
+				required: true,
+				disabled: false
 			}
 		},
 		{
@@ -50,10 +52,11 @@
 			props: {
 				name: 'Geschlecht',
 				items: ['männlich', 'weiblich', 'divers', 'Anderes'].map((v) => {
-					return { label: String(v), value: v };
+					return { label: String(v), value: String(v) };
 				}),
 				label: 'Geschlecht',
 				required: true,
+				disabled: false,
 				textTrigger: 'Anderes',
 				selected: false
 			}
@@ -74,10 +77,11 @@
 					'Promotion',
 					'Anderer'
 				].map((v) => {
-					return { name: String(v), value: v };
+					return { name: String(v), value: String(v) };
 				}),
 				placeholder: 'Bitte auswählen',
 				required: true,
+				disabled: false,
 				label: 'Höchster Bildungsabschluss',
 				textTrigger: 'Anderer'
 			}
@@ -92,6 +96,7 @@
 				placeholder: 'Bitte auswählen',
 				label: 'Arbeitszeit/Woche',
 				required: true,
+				disabled: false,
 				textTrigger: 'Andere'
 			}
 		},
@@ -105,6 +110,7 @@
 				placeholder: 'Bitte auswählen',
 				label: 'Familieneinkommen/Jahr',
 				required: true,
+				disabled: false,
 				textTrigger: 'Anderes'
 			}
 		},
@@ -117,7 +123,8 @@
 				type: 'text',
 				placeholder: 'Geben sie ihren Beruf an',
 				label: 'Beruf',
-				required: true
+				required: true,
+				disabled: false
 			}
 		}
 	];

@@ -52,3 +52,41 @@ class UserQuestionAdmin(SQLModel):
     input: str
     options: str
     text: dict[int, UserQuestionText] = {}
+
+
+# Answers to user questions. Internal model and 'public' model exposed to the forntend app
+
+
+class UserAnswer(SQLModel, table=True):
+    """
+    Internal model for user answers.
+
+    Parameters
+    ----------
+    UserAnswerBase : Base type for all UserAnswer models
+
+    table : bool, True
+        Makes sure this is created as a table in the database, by default True
+    """
+
+    user_id: int = Field(default=None, primary_key=True)
+    question_id: int = Field(
+        default=None, primary_key=True, foreign_key="userquestion.id"
+    )
+    answer: str
+    # flag that tells the frontend if the answer has been given via an  additional text field => won´t be correctly displayed otherwise
+    non_standard: bool
+
+
+class UserAnswerPublic(SQLModel):
+    """
+    External data model for UserAnswers
+
+    Parameters
+    ----------
+    SQLModel : Pydantic model  basic sqlmodel pydantic type
+    """
+
+    answer: str
+    question_id: int
+    non_standard: bool

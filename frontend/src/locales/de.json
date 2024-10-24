@@ -79,6 +79,15 @@
 		"profileButtonLabelLogout": "Logout",
 		"profileTitleDefault": "Willkommen!"
 	},
+	"userData": {
+		"heading": "Benutzerdaten eingeben",
+		"alertMessageTitle": "Fehler",
+		"alertMessageMissing": "Bitte füllen Sie die benötigten Felder (hervorgehoben) aus.",
+		"alertMessageUserNotFound": "Kein aktiver Benutzer. Bitte loggen sie sich erneut ein",
+		"alertMessageError": "Ein Fehler ist aufgetreten. Bitte versuchen sie es später erneut.",
+		"submitButtonLabel": "Abschließen",
+		"changeData": "Daten vollständig, zum bearbeiten klicken"
+	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",
 		"placeholder": "Bitte geben sie eine E-mail Adresse an um ihr Passwort zu erneuern",

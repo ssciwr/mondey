@@ -671,6 +671,31 @@ export const MilestoneTextPublicSchema = {
 	title: 'MilestoneTextPublic'
 } as const;
 
+export const UserAnswerPublicSchema = {
+	properties: {
+		answer: {
+			type: 'string',
+			title: 'Answer'
+		},
+		question_id: {
+			type: 'integer',
+			title: 'Question Id'
+		},
+		non_standard: {
+			type: 'boolean',
+			title: 'Non Standard'
+		}
+	},
+	type: 'object',
+	required: ['answer', 'question_id', 'non_standard'],
+	title: 'UserAnswerPublic',
+	description: `External data model for UserAnswers
+
+Parameters
+----------
+SQLModel : Pydantic model  basic sqlmodel pydantic type`
+} as const;
+
 export const UserCreateSchema = {
 	properties: {
 		email: {

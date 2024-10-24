@@ -117,6 +117,11 @@ import type {
 	UpdateMilestoneAnswerData,
 	UpdateMilestoneAnswerError,
 	UpdateMilestoneAnswerResponse,
+	GetCurrentUserAnswersError,
+	GetCurrentUserAnswersResponse,
+	UpdateCurrentUserAnswersData,
+	UpdateCurrentUserAnswersError,
+	UpdateCurrentUserAnswersResponse,
 	AuthCookieLoginData,
 	AuthCookieLoginError,
 	AuthCookieLoginResponse,
@@ -739,6 +744,38 @@ export const updateMilestoneAnswer = <ThrowOnError extends boolean = false>(
 	>({
 		...options,
 		url: '/users/milestone-answers/{milestone_answer_session_id}'
+	});
+};
+
+/**
+ * Get Current User Answers
+ */
+export const getCurrentUserAnswers = <ThrowOnError extends boolean = false>(
+	options?: Options<unknown, ThrowOnError>
+) => {
+	return (options?.client ?? client).get<
+		GetCurrentUserAnswersResponse,
+		GetCurrentUserAnswersError,
+		ThrowOnError
+	>({
+		...options,
+		url: '/users/user-answers/'
+	});
+};
+
+/**
+ * Update Current User Answers
+ */
+export const updateCurrentUserAnswers = <ThrowOnError extends boolean = false>(
+	options: Options<UpdateCurrentUserAnswersData, ThrowOnError>
+) => {
+	return (options?.client ?? client).put<
+		UpdateCurrentUserAnswersResponse,
+		UpdateCurrentUserAnswersError,
+		ThrowOnError
+	>({
+		...options,
+		url: '/users/user-answers/'
 	});
 };
 
