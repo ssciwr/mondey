@@ -173,28 +173,20 @@ def create_router() -> APIRouter:
         current_active_user: CurrentActiveUserDep,
         new_answers: list[UserAnswerPublic],
     ):
-        if session is None:
-            raise HTTPException(401, detail="no session")
-
         for new_answer in new_answers:
             current_answer = session.get(
                 UserAnswer, (current_active_user.id, new_answer.question_id)
             )
 
             if current_answer is None:
-                session.add(
-                    UserAnswer(
-                        user_id=current_active_user.id,
-                        question_id=new_answer.question_id,
-                        answer=new_answer.answer,
-                        non_standard=new_answer.non_standard,
-                    )
-                )
-            else:
-                db_answer = UserAnswer.model_validate(
+                current_answer = UserAnswer.model_validate(
                     new_answer, update={"user_id": current_active_user.id}
                 )
-                add(session, db_answer)
+                add(session, current_answer)
+            else:
+                for key, value in new_answer.model_dump().items():
+                    setattr(current_answer, key, value)
+
         session.commit()
         return new_answers
 

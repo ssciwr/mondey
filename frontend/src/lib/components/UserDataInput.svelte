@@ -58,10 +58,15 @@
 
 	async function submitData() {
 		const answers = convertAnswers(questionnaire);
+		const currentUser = await usersCurrentUser();
+		if (currentUser.error) {
+			showAlert = true;
+			alertMessage = $_('userData.alertMessageUserNotFound');
+		}
 
 		const response = await updateCurrentUserAnswers({
-			body: answers,
-			query: { session_id: userID }
+			body: answers
+			// query: { session_id: currentUser?.data?.id }
 		});
 
 		if (response.error) {
@@ -87,9 +92,6 @@
 		}
 	}
 
-	// README: is storing userID a problem?
-	let userID: number | undefined;
-
 	// this can, but does not have to, come from a database later.
 	export let data: any[];
 
@@ -107,49 +109,41 @@
 	// structure that the UserDataInput component understands
 	onMount(async () => {
 		console.log('onmount');
-		const currentUser = await usersCurrentUser();
 
-		if (currentUser.error) {
+		const userQuestions = await getUserQuestions();
+
+		if (userQuestions.error) {
 			showAlert = true;
-			alertMessage = 'current user could not be found. log out and try again';
+			alertMessage = $_('userData.alertMessageError');
+			console.log('questions could not be retrieved.', userQuestions?.error);
 		} else {
-			userID = currentUser?.data?.id;
+			questionnaire = convertQuestions(userQuestions?.data as GetUserQuestionsResponse);
+			console.log('data from backend: ', 'questionnaire: ', questionnaire);
+		}
 
-			const userQuestions = await getUserQuestions();
+		// get current answers.
+		let currentAnswers = await getCurrentUserAnswers();
 
-			if (userQuestions.error) {
-				showAlert = true;
-				alertMessage = $_('userData.alertMessageError');
-				console.log('questions could not be retrieved.', userQuestions?.error);
-			} else {
-				questionnaire = convertQuestions(userQuestions?.data as GetUserQuestionsResponse);
-				console.log('data from backend: ', 'questionnaire: ', questionnaire);
-			}
+		if (currentAnswers?.error) {
+			showAlert = true;
+			console.log('answers could not be retrieved.', currentAnswers?.error);
+			alertMessage = $_('userData.alertMessageError');
+		} else if (currentAnswers?.data.length === 0) {
+			console.log('currently no answers'); // debug output. Can go later
+		} else {
+			console.log('data from backend: ', 'currentAnswers: ', currentAnswers?.data);
 
-			// get current answers.
-			let currentAnswers = await getCurrentUserAnswers();
-
-			if (currentAnswers?.error) {
-				showAlert = true;
-				console.log('answers could not be retrieved.', currentAnswers?.error);
-				alertMessage = $_('userData.alertMessageError');
-			} else if (currentAnswers?.data.length === 0) {
-				console.log('currently no answers'); // debug output. Can go later
-			} else {
-				console.log('data from backend: ', 'currentAnswers: ', currentAnswers?.data);
-
-				for (let i = 0; i < data.length; i++) {
-					if (currentAnswers?.data[i].non_standard === true) {
-						data[i].additionalValue = currentAnswers.data[i].answer;
-						data[i].value = data[i].props.textTrigger;
-						data[i].showTextField = true;
-					} else {
-						data[i].value = currentAnswers.data[i].answer;
-					}
-					data[i].props.disabled = true;
-					dataIsCurrent = true;
-					data = [...data]; // TODO: forces a rerender. need a better way to do this
+			for (let i = 0; i < data.length; i++) {
+				if (currentAnswers?.data[i].non_standard === true) {
+					data[i].additionalValue = currentAnswers.data[i].answer;
+					data[i].value = data[i].props.textTrigger;
+					data[i].showTextField = true;
+				} else {
+					data[i].value = currentAnswers.data[i].answer;
 				}
+				data[i].props.disabled = true;
+				dataIsCurrent = true;
+				data = [...data]; // TODO: forces a rerender. need a better way to do this
 			}
 		}
 		console.log('onmount done: ', data);
@@ -200,7 +194,7 @@
 			{#if dataIsCurrent === true}
 				<Button
 					type="button"
-					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 					on:click={() => {
 						console.log('dataiscurrent click');
 						for (let element of data) {
@@ -217,7 +211,7 @@
 				</Button>
 			{:else}
 				<Button
-					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 					type="submit">{$_('userData.submitButtonLabel')}</Button
 				>
 			{/if}
