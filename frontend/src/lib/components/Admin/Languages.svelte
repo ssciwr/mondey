@@ -73,12 +73,12 @@
 					</TableBodyCell>
 					<TableBodyCell>
 						{#if lang_id > 2}
-						<DeleteButton
-							onclick={() => {
-								currentLanguageId = `${lang_id}`;
-								showDeleteModal = true;
-							}}
-						/>
+							<DeleteButton
+								onclick={() => {
+									currentLanguageId = `${lang_id}`;
+									showDeleteModal = true;
+								}}
+							/>
 						{/if}
 					</TableBodyCell>
 				</TableBodyRow>
