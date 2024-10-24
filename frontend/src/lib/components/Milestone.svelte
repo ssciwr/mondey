@@ -24,8 +24,7 @@
 	} from '$lib/client/types.gen';
 	import { updateMilestoneAnswer } from '$lib/client/services.gen';
 	import MilestoneButton from '$lib/components/MilestoneButton.svelte';
-	import { lang_id } from '$lib/stores/langStore';
-	import { _ } from 'svelte-i18n';
+	import { _, locale } from 'svelte-i18n';
 
 	let {
 		milestoneGroup = undefined,
@@ -119,7 +118,7 @@
 <div
 	class="border-1 flex flex-col border border-gray-200 bg-white shadow md:max-w-7xl md:rounded-lg dark:border-gray-700 dark:bg-gray-800"
 >
-	{#if milestoneGroup && milestoneGroup.text && milestoneGroup.milestones && currentMilestone && currentMilestone.text && currentMilestone.images}
+	{#if $locale && milestoneGroup && milestoneGroup.text && milestoneGroup.milestones && currentMilestone && currentMilestone.text && currentMilestone.images}
 		<div class="bg-gray-100 md:rounded-t-lg dark:bg-gray-600">
 			<Breadcrumb
 				olClass="inline-flex items-center space-x-1 rtl:space-x-reverse md:space-x-3 rtl:space-x-reverse flex-wrap"
@@ -130,7 +129,7 @@
 				<BreadcrumbItem href="#">{$_('milestone.milestones')}</BreadcrumbItem>
 				<!-- reload below is a temporary hack for demo purposes -->
 				<BreadcrumbItem href="javascript:window.location.reload(true)"
-					>{milestoneGroup.text[$lang_id].title}</BreadcrumbItem
+					>{milestoneGroup.text[$locale].title}</BreadcrumbItem
 				>
 				<BreadcrumbItem
 					>{currentMilestoneIndex + 1} / {milestoneGroup.milestones.length}</BreadcrumbItem
@@ -151,9 +150,9 @@
 				</div>
 				<div class="m-2 md:m-4">
 					<h2 class="mb-2 text-2xl font-bold text-gray-700 dark:text-gray-400">
-						{currentMilestone.text[$lang_id].title}
+						{currentMilestone.text[$locale].title}
 					</h2>
-					<P>{currentMilestone.text[$lang_id].desc}</P>
+					<P>{currentMilestone.text[$locale].desc}</P>
 					<Accordion flush>
 						<AccordionItem>
 							<span slot="header" class="flex gap-2 text-base">
@@ -161,7 +160,7 @@
 								<span>{$_('milestone.observation')}</span>
 							</span>
 							<P>
-								{currentMilestone.text[$lang_id].obs}
+								{currentMilestone.text[$locale].obs}
 							</P>
 						</AccordionItem>
 						<AccordionItem>
@@ -170,7 +169,7 @@
 								<span>{$_('milestone.help')}</span>
 							</span>
 							<P>
-								{currentMilestone.text[$lang_id].help}
+								{currentMilestone.text[$locale].help}
 							</P>
 						</AccordionItem>
 					</Accordion>

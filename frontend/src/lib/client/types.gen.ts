@@ -66,12 +66,7 @@ export type HTTPValidationError = {
 };
 
 export type Language = {
-	id?: number | null;
-	lang: string;
-};
-
-export type LanguageCreate = {
-	lang: string;
+	id: string;
 };
 
 export type MilestoneAdmin = {
@@ -132,7 +127,7 @@ export type MilestoneGroupText = {
 	title?: string;
 	desc?: string;
 	group_id?: number | null;
-	lang_id?: number | null;
+	lang_id?: string | null;
 };
 
 export type MilestoneGroupTextPublic = {
@@ -166,7 +161,7 @@ export type MilestoneText = {
 	obs?: string;
 	help?: string;
 	milestone_id?: number | null;
-	lang_id?: number | null;
+	lang_id?: string | null;
 };
 
 export type MilestoneTextPublic = {
@@ -220,7 +215,7 @@ export type UserQuestionText = {
 	question?: string;
 	options_json?: string;
 	user_question_id?: number | null;
-	lang_id?: number | null;
+	lang_id?: string | null;
 	options?: string;
 };
 
@@ -253,9 +248,7 @@ export type ValidationError = {
 	type: string;
 };
 
-export type GetLanguagesResponse = {
-	[key: string]: number;
-};
+export type GetLanguagesResponse = Array<string>;
 
 export type GetLanguagesError = unknown;
 
@@ -302,7 +295,7 @@ export type GetUserQuestionsResponse = Array<UserQuestionPublic>;
 export type GetUserQuestionsError = unknown;
 
 export type CreateLanguageData = {
-	body: LanguageCreate;
+	body: Language;
 };
 
 export type CreateLanguageResponse = Language;
@@ -311,7 +304,7 @@ export type CreateLanguageError = HTTPValidationError;
 
 export type DeleteLanguageData = {
 	path: {
-		language_id: number;
+		language_id: string;
 	};
 };
 
@@ -326,7 +319,7 @@ export type UpdateI18NData = {
 		};
 	};
 	path: {
-		language_id: number;
+		language_id: string;
 	};
 };
 

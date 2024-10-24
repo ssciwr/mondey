@@ -16,12 +16,7 @@ from .utils import fixed_length_string_field
 
 
 class Language(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    lang: str = fixed_length_string_field(2, index=True)
-
-
-class LanguageCreate(SQLModel):
-    lang: str = fixed_length_string_field(2, index=True)
+    id: str = fixed_length_string_field(max_length=2, index=True, primary_key=True)
 
 
 ## MilestoneAgeGroup
@@ -56,14 +51,14 @@ class MilestoneGroupText(MilestoneGroupTextBase, table=True):
     group_id: int | None = Field(
         default=None, foreign_key="milestonegroup.id", primary_key=True
     )
-    lang_id: int | None = Field(
-        default=None, foreign_key="language.id", primary_key=True
+    lang_id: str | None = fixed_length_string_field(
+        max_length=2, default=None, foreign_key="language.id", primary_key=True
     )
 
 
 class MilestoneGroupTextCreate(MilestoneGroupTextBase):
     group_id: int
-    lang_id: int
+    lang_id: str
 
 
 class MilestoneGroupTextPublic(MilestoneGroupTextBase):
@@ -77,13 +72,13 @@ class MilestoneGroup(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     age_group_id: int = Field(foreign_key="milestoneagegroup.id")
     order: int = 0
-    text: Mapped[dict[int, MilestoneGroupText]] = dict_relationship(key="lang_id")
+    text: Mapped[dict[str, MilestoneGroupText]] = dict_relationship(key="lang_id")
     milestones: Mapped[list[Milestone]] = back_populates("group")
 
 
 class MilestoneGroupPublic(SQLModel):
     id: int
-    text: dict[int, MilestoneGroupTextPublic] = {}
+    text: dict[str, MilestoneGroupTextPublic] = {}
     milestones: list[MilestonePublic] = []
 
 
@@ -91,7 +86,7 @@ class MilestoneGroupAdmin(SQLModel):
     id: int
     age_group_id: int
     order: int
-    text: dict[int, MilestoneGroupText] = {}
+    text: dict[str, MilestoneGroupText] = {}
     milestones: list[MilestoneAdmin] = []
 
 
@@ -109,8 +104,8 @@ class MilestoneText(MilestoneTextBase, table=True):
     milestone_id: int | None = Field(
         default=None, foreign_key="milestone.id", primary_key=True
     )
-    lang_id: int | None = Field(
-        default=None, foreign_key="language.id", primary_key=True
+    lang_id: str | None = fixed_length_string_field(
+        max_length=2, default=None, foreign_key="language.id", primary_key=True
     )
 
 
@@ -126,13 +121,13 @@ class Milestone(SQLModel, table=True):
     group_id: int | None = Field(default=None, foreign_key="milestonegroup.id")
     order: int = 0
     group: MilestoneGroup | None = back_populates("milestones")
-    text: Mapped[dict[int, MilestoneText]] = dict_relationship(key="lang_id")
+    text: Mapped[dict[str, MilestoneText]] = dict_relationship(key="lang_id")
     images: Mapped[list[MilestoneImage]] = back_populates("milestone")
 
 
 class MilestonePublic(SQLModel):
     id: int
-    text: dict[int, MilestoneTextPublic] = {}
+    text: dict[str, MilestoneTextPublic] = {}
     images: list[MilestoneImagePublic] = []
 
 
@@ -140,7 +135,7 @@ class MilestoneAdmin(SQLModel):
     id: int
     group_id: int
     order: int
-    text: dict[int, MilestoneText] = {}
+    text: dict[str, MilestoneText] = {}
     images: list[MilestoneImage] = []
 
 

@@ -6,44 +6,49 @@ from fastapi.testclient import TestClient
 
 
 def test_post_language(admin_client: TestClient):
-    response = admin_client.post("/admin/languages/", json={"lang": "es"})
+    response = admin_client.post("/admin/languages/", json={"id": "es"})
     assert response.status_code == 200
-    assert response.json() == {"id": 4, "lang": "es"}
+    assert response.json() == {"id": "es"}
+
+
+def test_post_language_invalid_already_exists(admin_client: TestClient):
+    response = admin_client.post("/admin/languages/", json={"id": "de"})
+    assert response.status_code == 400
 
 
 def test_delete_language(admin_client: TestClient):
-    response = admin_client.delete("/admin/languages/3")
+    response = admin_client.delete("/admin/languages/fr")
     assert response.status_code == 200
-    assert admin_client.get("/languages").json() == {"de": 1, "en": 2}
+    assert admin_client.get("/languages").json() == ["de", "en"]
 
 
-@pytest.mark.parametrize("lang_id", [1, 2])
+@pytest.mark.parametrize("lang_id", ["de", "en"])
 def test_delete_language_invalid_de_en_cannot_be_deleted(
-    admin_client: TestClient, lang_id: int
+    admin_client: TestClient, lang_id: str
 ):
     response = admin_client.delete(f"/admin/languages/{lang_id}")
     assert response.status_code == 400
 
 
 def test_delete_language_invalid_language_id(admin_client: TestClient):
-    response = admin_client.delete("/admin/languages/67")
+    response = admin_client.delete("/admin/languages/zz")
     assert response.status_code == 404
 
 
 def test_update_i18n(admin_client: TestClient, static_dir: pathlib.Path):
-    i18_json_path = static_dir / "i18n" / "1.json"
+    i18_json_path = static_dir / "i18n" / "nl.json"
     i18_json = {
         "s1": {"k1": "v1", "k2": "v2"},
         "accents": {"k1": "v1", "äéœ": "óíüúëþ"},
     }
     assert not i18_json_path.is_file()
-    response = admin_client.put("/admin/i18n/1", json=i18_json)
+    response = admin_client.put("/admin/i18n/nl", json=i18_json)
     assert response.status_code == 200
     assert i18_json_path.is_file()
     with open(i18_json_path) as f:
         assert json.load(f) == i18_json
     i18_json["s1"]["k1"] = "MODIFIED!"
-    response = admin_client.put("/admin/i18n/1", json=i18_json)
+    response = admin_client.put("/admin/i18n/nl", json=i18_json)
     assert response.status_code == 200
     with open(i18_json_path) as f:
         assert json.load(f) == i18_json
@@ -54,7 +59,7 @@ def test_update_i18n_invalid_json(admin_client: TestClient, static_dir: pathlib.
         "valid-section": {"key1": "value1"},
         "invalid-section": "this-value-should-be-a-dict!",
     }
-    response = admin_client.put("/admin/i18n/1", json=i18_json)
+    response = admin_client.put("/admin/i18n/en", json=i18_json)
     assert response.status_code == 422
 
 
@@ -103,21 +108,21 @@ def test_post_milestone_group(admin_client: TestClient):
         "age_group_id": 1,
         "order": 0,
         "text": {
-            "1": {
+            "de": {
                 "group_id": 3,
-                "lang_id": 1,
+                "lang_id": "de",
                 "title": "",
                 "desc": "",
             },
-            "2": {
+            "en": {
                 "group_id": 3,
-                "lang_id": 2,
+                "lang_id": "en",
                 "title": "",
                 "desc": "",
             },
-            "3": {
+            "fr": {
                 "group_id": 3,
-                "lang_id": 3,
+                "lang_id": "fr",
                 "title": "",
                 "desc": "",
             },
@@ -129,10 +134,10 @@ def test_post_milestone_group(admin_client: TestClient):
 def test_put_milestone_group(admin_client: TestClient, milestone_group_admin1: dict):
     milestone_group = milestone_group_admin1
     milestone_group["order"] = 6
-    milestone_group["text"]["1"]["title"] = "asdsd"
-    milestone_group["text"]["1"]["desc"] = "12xzascdasdf"
-    milestone_group["text"]["2"]["title"] = "asqwdreqweqw"
-    milestone_group["text"]["2"]["desc"] = "th567"
+    milestone_group["text"]["de"]["title"] = "asdsd"
+    milestone_group["text"]["de"]["desc"] = "12xzascdasdf"
+    milestone_group["text"]["en"]["title"] = "asqwdreqweqw"
+    milestone_group["text"]["en"]["desc"] = "th567"
     response = admin_client.put("/admin/milestone-groups", json=milestone_group)
     assert response.status_code == 200
     assert response.json() == milestone_group
@@ -154,7 +159,7 @@ def test_delete_milestone_group_invalid_group_id(admin_client: TestClient):
 
 @pytest.mark.parametrize(
     "endpoint",
-    ["/admin/languages/1", "/admin/milestone-groups/1", "/admin/milestones/1"],
+    ["/admin/languages/fr", "/admin/milestone-groups/1", "/admin/milestones/1"],
 )
 @pytest.mark.parametrize(
     "client_type", ["public_client", "user_client", "research_client"]
@@ -189,25 +194,25 @@ def test_post_milestone(admin_client: TestClient):
         "group_id": 2,
         "order": 0,
         "text": {
-            "1": {
+            "de": {
                 "milestone_id": 6,
-                "lang_id": 1,
+                "lang_id": "de",
                 "title": "",
                 "desc": "",
                 "obs": "",
                 "help": "",
             },
-            "2": {
+            "en": {
                 "milestone_id": 6,
-                "lang_id": 2,
+                "lang_id": "en",
                 "title": "",
                 "desc": "",
                 "obs": "",
                 "help": "",
             },
-            "3": {
+            "fr": {
                 "milestone_id": 6,
-                "lang_id": 3,
+                "lang_id": "fr",
                 "title": "",
                 "desc": "",
                 "obs": "",
@@ -221,12 +226,12 @@ def test_post_milestone(admin_client: TestClient):
 def test_put_milestone(admin_client: TestClient, milestone_group_admin1: dict):
     milestone = milestone_group_admin1["milestones"][0]
     milestone["order"] = 6
-    milestone["text"]["1"]["title"] = "asdsd"
-    milestone["text"]["1"]["desc"] = "12xzascdasdf"
-    milestone["text"]["1"]["obs"] = "asdrgf"
-    milestone["text"]["1"]["help"] = "jgfhj"
-    milestone["text"]["2"]["title"] = "asqwdreqweqw"
-    milestone["text"]["2"]["desc"] = "th567"
+    milestone["text"]["de"]["title"] = "asdsd"
+    milestone["text"]["de"]["desc"] = "12xzascdasdf"
+    milestone["text"]["de"]["obs"] = "asdrgf"
+    milestone["text"]["de"]["help"] = "jgfhj"
+    milestone["text"]["en"]["title"] = "asqwdreqweqw"
+    milestone["text"]["en"]["desc"] = "th567"
     response = admin_client.put("/admin/milestones", json=milestone)
     assert response.status_code == 200
     assert response.json() == milestone

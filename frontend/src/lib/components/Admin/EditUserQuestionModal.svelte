@@ -14,8 +14,7 @@
 		Select,
 		type SelectOptionType
 	} from 'flowbite-svelte';
-	import { _ } from 'svelte-i18n';
-	import { languages } from '$lib/stores/langStore';
+	import { _, locales } from 'svelte-i18n';
 	import { updateUserQuestion } from '$lib/client/services.gen';
 	import InputPreview from '$lib/components/Admin/InputPreview.svelte';
 	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
@@ -41,7 +40,7 @@
 			return;
 		}
 		const values = userQuestion.options.split(';');
-		for (const lang_id in $languages) {
+		for (const lang_id in $locales) {
 			const items = userQuestion.text[lang_id].options.split(';');
 			userQuestion.text[lang_id].options_json = JSON.stringify(
 				values.map(function (value, index) {
@@ -51,7 +50,7 @@
 		}
 	}
 
-	export async function saveChanges() {
+	async function saveChanges() {
 		if (!userQuestion) {
 			return;
 		}
@@ -74,7 +73,7 @@
 					{#each Object.values(userQuestion.text) as text}
 						<div class="mb-1">
 							<ButtonGroup class="w-full">
-								<InputAddon>{$languages[text.lang_id]}</InputAddon>
+								<InputAddon>{$locales[text.lang_id]}</InputAddon>
 								<Input
 									bind:value={text.question}
 									on:input={() => {
@@ -106,7 +105,7 @@
 						{#each Object.values(userQuestion.text) as text}
 							<div class="mb-1">
 								<ButtonGroup class="w-full">
-									<InputAddon>{$languages[text.lang_id]}</InputAddon>
+									<InputAddon>{$locales[text.lang_id]}</InputAddon>
 									<Textarea
 										bind:value={text.options}
 										on:input={updateOptionsJson}
@@ -124,13 +123,13 @@
 						<Label class="mb-2">Preview</Label>
 						<div class="flex flex-row">
 							<ButtonGroup class="mb-2 mr-2">
-								{#each Object.entries($languages) as [lang, lang_id]}
+								{#each $locales as lang_id}
 									<Button
 										checked={preview_lang_id === lang_id}
 										on:click={(e) => {
 											e.stopPropagation();
 											preview_lang_id = lang_id;
-										}}>{lang}</Button
+										}}>{lang_id}</Button
 									>
 								{/each}
 							</ButtonGroup>

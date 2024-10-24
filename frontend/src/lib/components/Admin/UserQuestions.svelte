@@ -11,8 +11,7 @@
 		Card
 	} from 'flowbite-svelte';
 
-	import { _ } from 'svelte-i18n';
-	import { lang_id } from '$lib/stores/langStore';
+	import { _, locale } from 'svelte-i18n';
 	import { userQuestions } from '$lib/stores/adminStore';
 	import { onMount } from 'svelte';
 	import { refreshUserQuestions } from '$lib/admin.svelte';
@@ -79,13 +78,13 @@
 			{#each $userQuestions as userQuestion, groupIndex (userQuestion.id)}
 				<TableBodyRow>
 					<TableBodyCell>
-						{userQuestion?.text[$lang_id]?.question}
+						{userQuestion?.text[$locale]?.question}
 					</TableBodyCell>
 					<TableBodyCell>
 						{userQuestion?.input}
 					</TableBodyCell>
 					<TableBodyCell>
-						{userQuestion?.text[$lang_id]?.options}
+						{userQuestion?.text[$locale]?.options}
 					</TableBodyCell>
 					<TableBodyCell>
 						<EditButton

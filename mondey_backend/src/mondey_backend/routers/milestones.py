@@ -18,14 +18,11 @@ from .utils import get
 def create_router() -> APIRouter:
     router = APIRouter(tags=["milestones"])
 
-    @router.get("/languages/", response_model=dict[str, int])
+    @router.get("/languages/", response_model=list[str])
     def get_languages(
         session: SessionDep,
     ):
-        return {
-            language.lang: language.id
-            for language in session.exec(select(Language)).all()
-        }
+        return [language.id for language in session.exec(select(Language)).all()]
 
     @router.get("/milestones/", response_model=list[MilestonePublic])
     def get_milestones(

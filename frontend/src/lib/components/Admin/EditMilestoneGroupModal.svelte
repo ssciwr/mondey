@@ -2,9 +2,8 @@
 
 <script lang="ts">
 	import { InputAddon, Textarea, Label, ButtonGroup, Fileupload, Modal } from 'flowbite-svelte';
-	import { _ } from 'svelte-i18n';
+	import { _, locales } from 'svelte-i18n';
 	import { onMount } from 'svelte';
-	import { languages } from '$lib/stores/langStore';
 	import type { MilestoneGroupAdmin } from '$lib/client/types.gen';
 	import { updateMilestoneGroupAdmin, uploadMilestoneGroupImage } from '$lib/client/services.gen';
 	import { milestoneGroupImageUrl, refreshMilestoneGroups } from '$lib/admin.svelte';
@@ -67,10 +66,10 @@
 			{@const title = $_(`admin.${textKey}`)}
 			<div class="mb-5">
 				<Label class="mb-2">{title}</Label>
-				{#each Object.entries($languages) as [lang, lang_id]}
+				{#each $locales as lang_id}
 					<div class="mb-1">
 						<ButtonGroup class="w-full">
-							<InputAddon>{lang}</InputAddon>
+							<InputAddon>{lang_id}</InputAddon>
 							<Textarea bind:value={milestoneGroup.text[lang_id][textKey]} placeholder={title} />
 						</ButtonGroup>
 					</div>
