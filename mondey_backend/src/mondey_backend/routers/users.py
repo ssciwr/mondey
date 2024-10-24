@@ -135,13 +135,10 @@ def create_router() -> APIRouter:
         milestone_answer_session_id: int,
         answer: MilestoneAnswerPublic,
     ):
-        milestone_answer_session = session.get(
-            MilestoneAnswerSession, milestone_answer_session_id
+        milestone_answer_session = get(
+            session, MilestoneAnswerSession, milestone_answer_session_id
         )
-        if (
-            milestone_answer_session is None
-            or milestone_answer_session.user_id != current_active_user.id
-        ):
+        if milestone_answer_session.user_id != current_active_user.id:
             raise HTTPException(401)
         milestone_answer = milestone_answer_session.answers.get(answer.milestone_id)
         if milestone_answer is None:

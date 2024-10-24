@@ -15,7 +15,14 @@
 	let childId = $state(undefined as number | undefined);
 
 	async function updateMilestoneGroups() {
-		const { data, error } = await getMilestoneGroups();
+		if (!milestoneAnswerSession) {
+			return;
+		}
+		const { data, error } = await getMilestoneGroups({
+			query: {
+				milestone_age_group_id: milestoneAnswerSession.age_group_id
+			}
+		});
 		if (error || data === undefined) {
 			console.log(error);
 		} else {
@@ -50,8 +57,8 @@
 	}
 
 	onMount(async () => {
-		await updateMilestoneGroups();
 		await updateMilestoneAnswerSession();
+		await updateMilestoneGroups();
 	});
 </script>
 

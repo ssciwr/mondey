@@ -19,9 +19,11 @@
 		"languages": "Sprachen",
 		"milestones": "Meilensteine",
 		"milestone-groups": "Meilensteingruppen",
+		"milestone-age-groups": "Meilenstein-Altersgruppen",
 		"translations": "Übersetzungen",
 		"user-questions": "Benutzerfragen",
 		"question": "Frage",
+		"actions": "Aktionen",
 		"add": "Hinzufügen",
 		"edit": "Bearbeiten",
 		"delete": "Löschen",
@@ -35,7 +37,9 @@
 		"obs": "Beobachtungshinweise",
 		"help": "Förderhilfen",
 		"image": "Bild",
-		"images": "Bilder"
+		"images": "Bilder",
+		"min-age-months": "Mindestalter in Monaten",
+		"max-age-months": "Höchstalter in Monaten"
 	},
 	"registration": {
 		"heading": "Als neuer Benutzer registrieren",
