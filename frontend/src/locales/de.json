@@ -16,6 +16,7 @@
 		"autonext": "Automatisch weiter"
 	},
 	"admin": {
+		"title": "Administration",
 		"languages": "Sprachen",
 		"milestones": "Meilensteine",
 		"milestone-groups": "Meilensteingruppen",
@@ -32,7 +33,6 @@
 		"no-cancel": "Nein, abbrechen",
 		"save-changes": "Änderungen speichern",
 		"cancel": "Abbrechen",
-		"title": "Titel",
 		"desc": "Beschreibung",
 		"obs": "Beobachtungshinweise",
 		"help": "Förderhilfen",
@@ -40,6 +40,9 @@
 		"images": "Bilder",
 		"min-age-months": "Mindestalter in Monaten",
 		"max-age-months": "Höchstalter in Monaten"
+	},
+	"researcher": {
+		"title": "Wissenschaft"
 	},
 	"registration": {
 		"heading": "Als neuer Benutzer registrieren",
