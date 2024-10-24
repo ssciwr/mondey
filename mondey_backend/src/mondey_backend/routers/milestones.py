@@ -1,16 +1,18 @@
 from __future__ import annotations
 
 from fastapi import APIRouter
-from fastapi import HTTPException
 from sqlmodel import col
 from sqlmodel import select
 
 from ..dependencies import SessionDep
 from ..models.milestones import Language
 from ..models.milestones import Milestone
+from ..models.milestones import MilestoneAgeGroup
+from ..models.milestones import MilestoneAgeGroupPublic
 from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupPublic
 from ..models.milestones import MilestonePublic
+from .utils import get
 
 
 def create_router() -> APIRouter:
@@ -36,17 +38,15 @@ def create_router() -> APIRouter:
 
     @router.get("/milestones/{milestone_id}", response_model=MilestonePublic)
     def get_milestone(session: SessionDep, milestone_id: int):
-        milestone = session.get(Milestone, milestone_id)
-        if not milestone:
-            raise HTTPException(
-                status_code=404, detail=f"Milestone with id {milestone_id} not found"
-            )
-        return milestone
+        return get(session, Milestone, milestone_id)
 
     @router.get("/milestone-groups/", response_model=list[MilestoneGroupPublic])
-    def get_milestone_groups(session: SessionDep):
+    def get_milestone_groups(session: SessionDep, milestone_age_group_id: int):
+        milestone_age_group = get(session, MilestoneAgeGroup, milestone_age_group_id)
         milestone_groups = session.exec(
-            select(MilestoneGroup).order_by(col(MilestoneGroup.order))
+            select(MilestoneGroup)
+            .where(col(MilestoneGroup.age_group_id) == milestone_age_group.id)
+            .order_by(col(MilestoneGroup.order))
         ).all()
         return milestone_groups
 
@@ -54,9 +54,13 @@ def create_router() -> APIRouter:
         "/milestone-groups/{milestone_group_id}", response_model=MilestoneGroupPublic
     )
     def get_milestone_group(session: SessionDep, milestone_group_id: int):
-        milestone_group = session.get(MilestoneGroup, milestone_group_id)
-        if not milestone_group:
-            raise HTTPException(status_code=404, detail="milestone_group not found")
-        return milestone_group
+        return get(session, MilestoneGroup, milestone_group_id)
+
+    @router.get("/milestone-age-groups/", response_model=list[MilestoneAgeGroupPublic])
+    def get_milestone_age_groups(session: SessionDep):
+        milestone_age_groups = session.exec(
+            select(MilestoneAgeGroup).order_by(col(MilestoneAgeGroup.months_min))
+        ).all()
+        return milestone_age_groups
 
     return router
