@@ -126,7 +126,6 @@ def test_get_milestone_answers_child3_no_current_answer_session(
     assert response.status_code == 200
     assert response.json()["id"] == 4
     assert response.json()["child_id"] == 3
-    assert response.json()["age_group_id"] == 2
     assert _is_approx_now(response.json()["created_at"])
     assert response.json()["answers"] == {}
 
@@ -136,7 +135,6 @@ def test_get_milestone_answers_child1_current_answer_session(user_client: TestCl
     assert response.status_code == 200
     assert response.json()["id"] == 2
     assert response.json()["child_id"] == 1
-    assert response.json()["age_group_id"] == 1
     assert response.json()["answers"] == {
         "1": {"milestone_id": 1, "answer": 0},
         "2": {"milestone_id": 2, "answer": 3},
@@ -149,7 +147,6 @@ def test_update_milestone_answer_current_answer_session_no_answer_session(
 ):
     current_answer_session = user_client.get("/users/milestone-answers/1").json()
     assert current_answer_session["child_id"] == 1
-    assert current_answer_session["age_group_id"] == 1
     assert "6" not in current_answer_session["answers"]
     new_answer = {"milestone_id": 6, "answer": 2}
     response = user_client.put(

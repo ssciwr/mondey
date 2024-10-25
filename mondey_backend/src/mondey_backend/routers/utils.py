@@ -14,7 +14,6 @@ from sqlmodel import select
 from ..dependencies import SessionDep
 from ..models.children import Child
 from ..models.milestones import MilestoneAdmin
-from ..models.milestones import MilestoneAgeGroup
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneGroupAdmin
 from ..models.milestones import MilestoneGroupText
@@ -94,31 +93,12 @@ def _session_has_expired(milestone_answer_session: MilestoneAnswerSession) -> bo
     )
 
 
-def get_child_age_in_months(child: Child) -> int:
-    today = datetime.date.today()
-    return (today.year - child.birth_year) * 12 + (today.month - child.birth_month)
-
-
-def get_milestone_age_group_id(session: SessionDep, child: Child) -> int:
-    child_age_in_months = get_child_age_in_months(child)
-    milestone_age_group = session.exec(
-        select(MilestoneAgeGroup).where(
-            (col(MilestoneAgeGroup.months_min) <= child_age_in_months)
-            & (child_age_in_months < col(MilestoneAgeGroup.months_max))
-        )
-    ).one_or_none()
-    if milestone_age_group is None or milestone_age_group.id is None:
-        raise HTTPException(404, "No milestone age group found for this child")
-    return milestone_age_group.id
-
-
 def get_or_create_current_milestone_answer_session(
     session: SessionDep, current_active_user: User, child_id: int
 ):
     child = session.get(Child, child_id)
     if child is None or child.user_id != current_active_user.id:
         raise HTTPException(401)
-    milestone_age_group_id = get_milestone_age_group_id(session, child)
     milestone_answer_session = session.exec(
         select(MilestoneAnswerSession)
         .where(
@@ -132,7 +112,6 @@ def get_or_create_current_milestone_answer_session(
     ):
         milestone_answer_session = MilestoneAnswerSession(
             child_id=child_id,
-            age_group_id=milestone_age_group_id,
             user_id=current_active_user.id,
             created_at=datetime.datetime.now(),
         )
