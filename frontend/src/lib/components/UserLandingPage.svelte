@@ -13,8 +13,6 @@
 	onMount(async () => {
 		await refresh();
 	});
-
-	export let userData: any[];
 </script>
 
 {#if get(currentUser)}
@@ -26,7 +24,7 @@
 						<ProfileCardSolid size="lg" />
 						Persönliche Daten
 					</div>
-					<svelte:component this={componentTable['userDataInput']} data={userData} />
+					<svelte:component this={componentTable['userDataInput']} />
 				</TabItem>
 				<TabItem>
 					<div slot="title" class="flex items-center gap-2 text-lg">
@@ -69,7 +67,7 @@
 	</div>
 	<Button
 		type="button"
-		class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+		class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 		href="/"
 	>
 		{$_('registration.goHome')}

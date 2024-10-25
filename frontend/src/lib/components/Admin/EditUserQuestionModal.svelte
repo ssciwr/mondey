@@ -49,8 +49,6 @@
 				})
 			);
 		}
-
-		console.log('userQuestion after: ', userQuestion);
 	}
 
 	export async function saveChanges() {
@@ -86,7 +84,6 @@
 								/>
 							</ButtonGroup>
 						</div>
-						{console.log('done')}
 					{/each}
 				</div>
 				<div class="mb-5">
@@ -118,6 +115,15 @@
 								</ButtonGroup>
 							</div>
 						{/each}
+						<Label class="mb-2">Additional Option</Label>
+						<div class="mb-1">
+							<ButtonGroup class="w-full">
+								<Textarea
+									bind:value={userQuestion.additional_option}
+									placeholder="Displayed additional option"
+								/>
+							</ButtonGroup>
+						</div>
 					</div>
 				{/if}
 			</div>

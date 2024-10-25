@@ -33,12 +33,14 @@ class UserQuestion(SQLModel, table=True):
     input: str = "text"
     options: str = ""
     text: Mapped[dict[str, UserQuestionText]] = dict_relationship(key="lang_id")
+    additional_option: str = ""
 
 
 class UserQuestionPublic(SQLModel):
     id: int
     input: str
     text: dict[str, UserQuestionTextPublic] = {}
+    additional_option: str = ""
 
 
 class UserQuestionAdmin(SQLModel):
@@ -47,6 +49,7 @@ class UserQuestionAdmin(SQLModel):
     input: str
     options: str
     text: dict[str, UserQuestionText] = {}
+    additional_option: str = ""
 
 
 # Answers to user questions. Internal model and 'public' model exposed to the forntend app
@@ -70,7 +73,7 @@ class UserAnswer(SQLModel, table=True):
     )
     answer: str
     # flag that tells the frontend if the answer has been given via an  additional text field => won´t be correctly displayed otherwise
-    non_standard: bool
+    additional_answer: str
 
 
 class UserAnswerPublic(SQLModel):
@@ -84,4 +87,4 @@ class UserAnswerPublic(SQLModel):
 
     answer: str
     question_id: int
-    non_standard: bool
+    additional_answer: str

@@ -9,10 +9,15 @@ import ResearchPage from '$lib/components/ResearchPage.svelte';
 import UserDataInput from '$lib/components/UserDataInput.svelte';
 
 import { Fileupload, Input, MultiSelect, Select, Textarea } from 'flowbite-svelte';
+import type { Component } from 'svelte';
 import { writable } from 'svelte/store';
 
+interface ComponentTable {
+	[key: string]: Component
+}
+
 // put all the components here. can be an expanding list
-export const componentTable = {
+export const componentTable: ComponentTable = {
 	userDataInput: UserDataInput,
 	childrenGallery: ChildrenGallery,
 	childrenRegistration: ChildrenRegistration,

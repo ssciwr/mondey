@@ -659,13 +659,13 @@ export const UserAnswerPublicSchema = {
 			type: 'integer',
 			title: 'Question Id'
 		},
-		non_standard: {
-			type: 'boolean',
-			title: 'Non Standard'
+		additional_answer: {
+			type: 'string',
+			title: 'Additional Answer'
 		}
 	},
 	type: 'object',
-	required: ['answer', 'question_id', 'non_standard'],
+	required: ['answer', 'question_id', 'additional_answer'],
 	title: 'UserAnswerPublic',
 	description: `External data model for UserAnswers
 
@@ -764,6 +764,11 @@ export const UserQuestionAdminSchema = {
 			type: 'object',
 			title: 'Text',
 			default: {}
+		},
+		additional_option: {
+			type: 'string',
+			title: 'Additional Option',
+			default: ''
 		}
 	},
 	type: 'object',
@@ -788,6 +793,11 @@ export const UserQuestionPublicSchema = {
 			type: 'object',
 			title: 'Text',
 			default: {}
+		},
+		additional_option: {
+			type: 'string',
+			title: 'Additional Option',
+			default: ''
 		}
 	},
 	type: 'object',

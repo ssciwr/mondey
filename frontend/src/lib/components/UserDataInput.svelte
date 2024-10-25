@@ -8,23 +8,49 @@
 	import { type GetUserQuestionsResponse, type UserAnswerPublic } from '$lib/client/types.gen';
 	import AlertMessage from '$lib/components/AlertMessage.svelte';
 	import DataInput from '$lib/components/DataInput/DataInput.svelte';
+	import { componentTable } from '$lib/stores/componentStore';
 	import { preventDefault } from '$lib/util';
 	import { Button, Card, Heading } from 'flowbite-svelte';
-	import { onMount } from 'svelte';
-	import { _ } from 'svelte-i18n';
+	import { onMount, type Component } from 'svelte';
+	import { _, locale } from 'svelte-i18n';
 
-	function convertQuestions(questionnaire: GetUserQuestionsResponse): GetUserQuestionsResponse {
-		// TODO: once questions come from the database we can do this with the questionnaire
-		// different algorithm that makes use of the component lookup table in '$lib/stores' is needed here then.
-		return questionnaire;
+	interface QuestionaireProps {
+		label: String;
+		type: String;
+		required: Boolean;
+		disabled: Boolean;
 	}
 
-	function convertAnswers(questionnaire: GetUserQuestionsResponse | undefined): UserAnswerPublic[] {
-		// TODO: once questions come from the database we can do this with the actual questionnaire
-		// this version is temporary until the underlying datastructure has been changed to accommodate
-		// the backend models
+	interface QuestionaireElement {
+		component: Component;
+		value: String | null;
+		additionalValue: String | null;
+		props: QuestionaireProps;
+	}
 
-		return data.map((e, index) => {
+	function convertQuestions(questionaire: GetUserQuestionsResponse): QuestionaireElement[] {
+		return questionaire.map((element) => {
+			console.log('question element: ', element);
+
+			return {
+				component: componentTable[element.input],
+				value: null,
+				additionalValue: null,
+				showTextField: false,
+				props: {
+					items: JSON.parse(element?.text[$locale].options_json),
+					label: element?.text[$locale].question,
+					type: 'text',
+					required: true,
+					disabled: false,
+					textTrigger: element.additional_option
+				}
+			};
+		});
+	}
+
+	function convertAnswers(questionaire: QuestionaireElement[]): UserAnswerPublic[] {
+		return questionaire.map((e, index) => {
 			console.log(
 				'condition: ',
 				e.additionalValue !== '',
@@ -42,22 +68,22 @@
 				console.log('with additional: ', e);
 				return {
 					question_id: index,
-					answer: String(e.additionalValue),
-					non_standard: true
+					answer: String(e.value),
+					additional_answer: String(e.additionalValue)
 				} as UserAnswerPublic;
 			} else {
 				console.log('with normal', e);
 				return {
 					question_id: index,
 					answer: String(e.value),
-					non_standard: false
+					additional_answer: ''
 				} as UserAnswerPublic;
 			}
 		});
 	}
 
 	async function submitData() {
-		const answers = convertAnswers(questionnaire);
+		const answers = convertAnswers(questionaire);
 		const currentUser = await usersCurrentUser();
 		if (currentUser.error) {
 			showAlert = true;
@@ -66,7 +92,6 @@
 
 		const response = await updateCurrentUserAnswers({
 			body: answers
-			// query: { session_id: currentUser?.data?.id }
 		});
 
 		if (response.error) {
@@ -78,25 +103,22 @@
 			console.log('answers sent: ', answers);
 			console.log(
 				'original answers: ',
-				data.map((e) => {
+				questionaire.map((e) => {
 					return [e.value, e.additionalValue];
 				})
 			);
 
 			// disable all elements to make editing a conscious choice
-			for (let element of data) {
+			for (let element of questionaire) {
 				element.props.disabled = true;
 			}
+			questionaire = [...questionaire];
 			dataIsCurrent = true;
-			data = [...data]; // TODO: forces a rerender. need a better way to do this
 		}
 	}
 
-	// this can, but does not have to, come from a database later.
-	export let data: any[];
-
 	// this is the data that will be used in the end
-	let questionnaire: GetUserQuestionsResponse | undefined = [];
+	let questionaire: any[] = [];
 
 	// flags for enabling and disabling visual hints
 	let showAlert: boolean = false;
@@ -117,8 +139,8 @@
 			alertMessage = $_('userData.alertMessageError');
 			console.log('questions could not be retrieved.', userQuestions?.error);
 		} else {
-			questionnaire = convertQuestions(userQuestions?.data as GetUserQuestionsResponse);
-			console.log('data from backend: ', 'questionnaire: ', questionnaire);
+			questionaire = convertQuestions(userQuestions?.data as GetUserQuestionsResponse);
+			console.log('data from backend: ', 'questionaire: ', questionaire);
 		}
 
 		// get current answers.
@@ -133,21 +155,38 @@
 		} else {
 			console.log('data from backend: ', 'currentAnswers: ', currentAnswers?.data);
 
-			for (let i = 0; i < data.length; i++) {
-				if (currentAnswers?.data[i].non_standard === true) {
-					data[i].additionalValue = currentAnswers.data[i].answer;
-					data[i].value = data[i].props.textTrigger;
-					data[i].showTextField = true;
+			for (let i = 0; i < currentAnswers?.data.length; i++) {
+				if (
+					currentAnswers?.data[i].additional_answer !== null &&
+					currentAnswers?.data[i].additional_answer !== undefined
+				) {
+					console.log('with additional: ', currentAnswers.data[i]);
+					questionaire[i].additionalValue = currentAnswers.data[i].additional_answer;
+					console.log(
+						'displayed thing: ',
+						questionaire[i].props.textTrigger,
+						'label: ',
+						questionaire[i].props.items.slice(-1)[0]
+					);
+					questionaire[i].value = questionaire[i].props.items.slice(-1)[0].value;
+					questionaire[i].showTextField = true;
+					console.log('end result: ', questionaire[i]);
 				} else {
-					data[i].value = currentAnswers.data[i].answer;
+					console.log('without additional: ', currentAnswers.data[i]);
+
+					questionaire[i].value = currentAnswers.data[i].answer;
 				}
-				data[i].props.disabled = true;
+				questionaire[i].props.disabled = true;
 				dataIsCurrent = true;
-				data = [...data]; // TODO: forces a rerender. need a better way to do this
+				questionaire = [...questionaire]; // TODO: forces a rerender. need a better way to do this
 			}
 		}
-		console.log('onmount done: ', data);
+		console.log('onmount done: ', questionaire);
 	});
+	$: console.log(
+		questionaire.map((e) => e.value),
+		questionaire.map((e) => e.additionalValue)
+	);
 </script>
 
 <!-- Show big alert message when something is missing -->
@@ -171,7 +210,7 @@
 		>
 
 		<form class="m-1 mx-auto w-full flex-col space-y-6" onsubmit={preventDefault(submitData)}>
-			{#each data as element, i}
+			{#each questionaire as element, i}
 				<DataInput
 					component={element.component}
 					bind:value={element.value}
@@ -194,15 +233,15 @@
 			{#if dataIsCurrent === true}
 				<Button
 					type="button"
-					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 					on:click={() => {
 						console.log('dataiscurrent click');
-						for (let element of data) {
+						for (let element of questionaire) {
 							element.props.disabled = false;
 						}
 
 						// README: this forces a rerender. It is necessary because svelte does not react to nested references being changed. There must be a better solution to this? Svelte 5 runes would be one that comes to mind.
-						data = [...data];
+						questionaire = [...questionaire];
 
 						dataIsCurrent = false;
 					}}
@@ -211,7 +250,7 @@
 				</Button>
 			{:else}
 				<Button
-					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 					type="submit">{$_('userData.submitButtonLabel')}</Button
 				>
 			{/if}

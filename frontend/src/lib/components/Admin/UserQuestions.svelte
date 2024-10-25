@@ -61,6 +61,7 @@
 	onMount(async () => {
 		await refreshUserQuestions();
 	});
+	console.log('langid: ', $lang_id);
 </script>
 
 <Card size="xl" class="m-5">
