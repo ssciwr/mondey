@@ -28,7 +28,7 @@
 		userQuestion
 	}: { open: boolean; userQuestion: UserQuestionAdmin | undefined } = $props();
 
-	let preview_lang_id = $state('1');
+	let preview_lang = $state('de');
 	let preview_answer = $state('');
 
 	const inputTypes: Array<SelectOptionType<string>> = [
@@ -73,20 +73,22 @@
 		<div class="flex flex-row items-center">
 			<div class="mr-5 grow">
 				<div class="mb-5">
-					<Label class="mb-2">{$_('admin.question')}</Label>
+					<Label class="mb-2">Question</Label>
 					{#each Object.values(userQuestion.text) as text}
+						{console.log('lang stuff: ', text.lang_id, $languages)}
 						<div class="mb-1">
 							<ButtonGroup class="w-full">
-								<InputAddon>{$languages[text.lang_id]}</InputAddon>
+								<InputAddon>{text.lang_id}</InputAddon>
 								<Input
 									bind:value={text.question}
 									on:input={() => {
 										userQuestion = userQuestion;
 									}}
-									placeholder={$_('admin.question')}
+									placeholder={'blah'}
 								/>
 							</ButtonGroup>
 						</div>
+						{console.log('done')}
 					{/each}
 				</div>
 				<div class="mb-5">
@@ -109,7 +111,7 @@
 						{#each Object.values(userQuestion.text) as text}
 							<div class="mb-1">
 								<ButtonGroup class="w-full">
-									<InputAddon>{$languages[text.lang_id]}</InputAddon>
+									<InputAddon>{text.lang_id}</InputAddon>
 									<Textarea
 										bind:value={text.options}
 										on:input={updateOptionsJson}
@@ -127,23 +129,19 @@
 						<Label class="mb-2">Preview</Label>
 						<div class="flex flex-row">
 							<ButtonGroup class="mb-2 mr-2">
-								{#each Object.entries($languages) as [lang, lang_id]}
+								{#each $languages as lang}
 									<Button
-										checked={preview_lang_id === lang_id}
+										checked={preview_lang === lang}
 										on:click={(e) => {
 											e.stopPropagation();
-											preview_lang_id = lang_id;
+											preview_lang = lang;
 										}}>{lang}</Button
 									>
 								{/each}
 							</ButtonGroup>
 						</div>
 						<Card class="mb-4 bg-blue-300">
-							<InputPreview
-								data={userQuestion}
-								lang_id={preview_lang_id}
-								bind:answer={preview_answer}
-							/>
+							<InputPreview data={userQuestion} lang={preview_lang} bind:answer={preview_answer} />
 						</Card>
 						<Label class="mb-2">Generated answer:</Label>
 						<Badge large border color="dark">{preview_answer}</Badge>

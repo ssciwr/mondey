@@ -238,38 +238,14 @@ export const HTTPValidationErrorSchema = {
 export const LanguageSchema = {
 	properties: {
 		id: {
-			anyOf: [
-				{
-					type: 'integer'
-				},
-				{
-					type: 'null'
-				}
-			],
+			type: 'string',
+			maxLength: 2,
 			title: 'Id'
-		},
-		lang: {
-			type: 'string',
-			maxLength: 2,
-			title: 'Lang'
 		}
 	},
 	type: 'object',
-	required: ['lang'],
+	required: ['id'],
 	title: 'Language'
-} as const;
-
-export const LanguageCreateSchema = {
-	properties: {
-		lang: {
-			type: 'string',
-			maxLength: 2,
-			title: 'Lang'
-		}
-	},
-	type: 'object',
-	required: ['lang'],
-	title: 'LanguageCreate'
 } as const;
 
 export const MilestoneAdminSchema = {
@@ -482,7 +458,8 @@ export const MilestoneGroupTextSchema = {
 		lang_id: {
 			anyOf: [
 				{
-					type: 'integer'
+					type: 'string',
+					maxLength: 2
 				},
 				{
 					type: 'null'
@@ -631,7 +608,8 @@ export const MilestoneTextSchema = {
 		lang_id: {
 			anyOf: [
 				{
-					type: 'integer'
+					type: 'string',
+					maxLength: 2
 				},
 				{
 					type: 'null'
@@ -843,7 +821,8 @@ export const UserQuestionTextSchema = {
 		lang_id: {
 			anyOf: [
 				{
-					type: 'string'
+					type: 'string',
+					maxLength: 2
 				},
 				{
 					type: 'null'

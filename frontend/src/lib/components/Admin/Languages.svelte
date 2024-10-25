@@ -64,6 +64,7 @@
 		</TableHead>
 		<TableBody>
 			{#each Object.entries($languages) as [lang, lang_id]}
+				{console.log('languages: ', lang, lang_id)}
 				<TableBodyRow>
 					<TableBodyCell>
 						{lang}

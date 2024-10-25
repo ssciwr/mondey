@@ -40,7 +40,7 @@ def write_file(file: UploadFile, filename: str):
         file.file.close()
 
 
-def get(session: SessionDep, entity: type, ident: int):
+def get(session: SessionDep, entity: type, ident: int | str):
     instance = session.get(entity, ident)
     if not instance:
         raise HTTPException(

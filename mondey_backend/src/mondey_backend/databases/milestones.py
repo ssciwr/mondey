@@ -19,6 +19,6 @@ def create_database():
     with Session(engine) as session:
         # add "de" and "en" Languages if no languages are present in the database:
         if session.exec(select(Language)).first() is None:
-            session.add(Language(lang="de"))
-            session.add(Language(lang="en"))
+            session.add(Language(id="de"))
+            session.add(Language(id="en"))
             session.commit()
