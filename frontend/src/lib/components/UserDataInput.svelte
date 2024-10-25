@@ -15,10 +15,12 @@
 	import { _, locale } from 'svelte-i18n';
 
 	interface QuestionaireProps {
-		label: String;
-		type: String;
+		label: string;
+		type: string;
 		required: Boolean;
 		disabled: Boolean;
+		items: any[];
+		textTrigger: string | undefined;
 	}
 
 	interface QuestionaireElement {
