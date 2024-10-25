@@ -32,17 +32,12 @@
 	async function addUserQuestion() {
 		const { data, error } = await createUserQuestion();
 		if (error) {
-			console.log('error adding');
 			console.log(error);
 			currentUserQuestion = undefined;
-			console.log('done');
 		} else {
-			console.log('success in adding');
-			console.log(data);
 			await refreshUserQuestions();
 			currentUserQuestion = data;
 			showEditUserQuestionModal = true;
-			console.log('done');
 		}
 	}
 

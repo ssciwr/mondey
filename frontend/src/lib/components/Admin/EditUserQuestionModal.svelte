@@ -40,11 +40,8 @@
 		if (!userQuestion) {
 			return;
 		}
-		console.log('userQuestion: ', userQuestion);
 		const values = userQuestion.options.split(';');
-		console.log('values: ', values);
-		for (const lang_id in $languages) {
-			console.log(' language shit: ', lang_id, $languages);
+		for (const lang_id of $languages) {
 			const items = userQuestion.text[lang_id].options.split(';');
 			userQuestion.text[lang_id].options_json = JSON.stringify(
 				values.map(function (value, index) {
@@ -52,6 +49,8 @@
 				})
 			);
 		}
+
+		console.log('userQuestion after: ', userQuestion);
 	}
 
 	export async function saveChanges() {
@@ -75,7 +74,6 @@
 				<div class="mb-5">
 					<Label class="mb-2">Question</Label>
 					{#each Object.values(userQuestion.text) as text}
-						{console.log('lang stuff: ', text.lang_id, $languages)}
 						<div class="mb-1">
 							<ButtonGroup class="w-full">
 								<InputAddon>{text.lang_id}</InputAddon>
@@ -84,7 +82,7 @@
 									on:input={() => {
 										userQuestion = userQuestion;
 									}}
-									placeholder={'blah'}
+									placeholder={$_('admin.placeholder')}
 								/>
 							</ButtonGroup>
 						</div>
@@ -100,11 +98,11 @@
 						<Label class="mb-2">Options</Label>
 						<div class="mb-1">
 							<ButtonGroup class="w-full">
-								<InputAddon>name</InputAddon>
+								<InputAddon>Option values</InputAddon>
 								<Textarea
 									bind:value={userQuestion.options}
 									on:input={updateOptionsJson}
-									placeholder="Option names"
+									placeholder="Option values"
 								/>
 							</ButtonGroup>
 						</div>
@@ -115,7 +113,7 @@
 									<Textarea
 										bind:value={text.options}
 										on:input={updateOptionsJson}
-										placeholder="Options"
+										placeholder="Displayed options"
 									/>
 								</ButtonGroup>
 							</div>
