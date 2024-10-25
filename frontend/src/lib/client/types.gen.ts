@@ -196,7 +196,8 @@ export type UserCreate = {
 export type UserQuestionAdmin = {
 	id: number;
 	order: number;
-	input: string;
+	component?: string;
+	type?: string;
 	options: string;
 	text?: {
 		[key: string]: UserQuestionText;
@@ -206,7 +207,8 @@ export type UserQuestionAdmin = {
 
 export type UserQuestionPublic = {
 	id: number;
-	input: string;
+	component?: string;
+	type?: string;
 	text?: {
 		[key: string]: UserQuestionTextPublic;
 	};

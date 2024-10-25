@@ -749,9 +749,15 @@ export const UserQuestionAdminSchema = {
 			type: 'integer',
 			title: 'Order'
 		},
-		input: {
+		component: {
 			type: 'string',
-			title: 'Input'
+			title: 'Component',
+			default: 'select'
+		},
+		type: {
+			type: 'string',
+			title: 'Type',
+			default: 'text'
 		},
 		options: {
 			type: 'string',
@@ -772,7 +778,7 @@ export const UserQuestionAdminSchema = {
 		}
 	},
 	type: 'object',
-	required: ['id', 'order', 'input', 'options'],
+	required: ['id', 'order', 'options'],
 	title: 'UserQuestionAdmin'
 } as const;
 
@@ -782,9 +788,15 @@ export const UserQuestionPublicSchema = {
 			type: 'integer',
 			title: 'Id'
 		},
-		input: {
+		component: {
 			type: 'string',
-			title: 'Input'
+			title: 'Component',
+			default: 'select'
+		},
+		type: {
+			type: 'string',
+			title: 'Type',
+			default: 'text'
 		},
 		text: {
 			additionalProperties: {
@@ -801,7 +813,7 @@ export const UserQuestionPublicSchema = {
 		}
 	},
 	type: 'object',
-	required: ['id', 'input'],
+	required: ['id'],
 	title: 'UserQuestionPublic'
 } as const;
 

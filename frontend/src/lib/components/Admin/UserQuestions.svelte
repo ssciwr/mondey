@@ -2,27 +2,27 @@
 
 <script lang="ts">
 	import {
+		Card,
 		Table,
 		TableBody,
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell,
-		Card
+		TableHeadCell
 	} from 'flowbite-svelte';
 
-	import { _ } from 'svelte-i18n';
-	import { lang_id } from '$lib/stores/langStore';
-	import { userQuestions } from '$lib/stores/adminStore';
-	import { onMount } from 'svelte';
 	import { refreshUserQuestions } from '$lib/admin.svelte';
-	import { deleteUserQuestion, createUserQuestion } from '$lib/client/services.gen';
+	import { createUserQuestion, deleteUserQuestion } from '$lib/client/services.gen';
 	import type { UserQuestionAdmin } from '$lib/client/types.gen';
-	import EditUserQuestionModal from '$lib/components/Admin/EditUserQuestionModal.svelte';
-	import DeleteModal from '$lib/components/Admin/DeleteModal.svelte';
 	import AddButton from '$lib/components/Admin/AddButton.svelte';
-	import EditButton from '$lib/components/Admin/EditButton.svelte';
 	import DeleteButton from '$lib/components/Admin/DeleteButton.svelte';
+	import DeleteModal from '$lib/components/Admin/DeleteModal.svelte';
+	import EditButton from '$lib/components/Admin/EditButton.svelte';
+	import EditUserQuestionModal from '$lib/components/Admin/EditUserQuestionModal.svelte';
+	import { userQuestions } from '$lib/stores/adminStore';
+	import { lang_id } from '$lib/stores/langStore';
+	import { onMount } from 'svelte';
+	import { _ } from 'svelte-i18n';
 
 	let currentUserQuestion = $state(undefined as UserQuestionAdmin | undefined);
 	let currentUserQuestionId = $state(null as number | null);
@@ -61,10 +61,9 @@
 	onMount(async () => {
 		await refreshUserQuestions();
 	});
-	console.log('langid: ', $lang_id);
 </script>
 
-<Card size="xl" class="m-5">
+<Card size="xl" class="m-5 w-full">
 	<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">
 		{$_('admin.user-questions')}
 	</h3>
@@ -82,7 +81,7 @@
 						{userQuestion?.text[$lang_id]?.question}
 					</TableBodyCell>
 					<TableBodyCell>
-						{userQuestion?.input}
+						{userQuestion?.component}
 					</TableBodyCell>
 					<TableBodyCell>
 						{userQuestion?.text[$lang_id]?.options}

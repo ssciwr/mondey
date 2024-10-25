@@ -30,7 +30,8 @@ class UserQuestionTextPublic(UserQuestionTextBase):
 class UserQuestion(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     order: int = 0
-    input: str = "text"
+    component: str = "select"
+    type: str = "text"
     options: str = ""
     text: Mapped[dict[str, UserQuestionText]] = dict_relationship(key="lang_id")
     additional_option: str = ""
@@ -38,7 +39,8 @@ class UserQuestion(SQLModel, table=True):
 
 class UserQuestionPublic(SQLModel):
     id: int
-    input: str
+    component: str = "select"
+    type: str = "text"
     text: dict[str, UserQuestionTextPublic] = {}
     additional_option: str = ""
 
@@ -46,7 +48,8 @@ class UserQuestionPublic(SQLModel):
 class UserQuestionAdmin(SQLModel):
     id: int
     order: int
-    input: str
+    component: str = "select"
+    type: str = "text"
     options: str
     text: dict[str, UserQuestionText] = {}
     additional_option: str = ""

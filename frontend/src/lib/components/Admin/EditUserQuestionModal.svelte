@@ -31,6 +31,7 @@
 	let preview_lang = $state('de');
 	let preview_answer = $state('');
 
+	// FIXME: use the componentTable here
 	const inputTypes: Array<SelectOptionType<string>> = [
 		{ value: 'text', name: 'text' },
 		{ value: 'select', name: 'select' }
@@ -88,9 +89,14 @@
 				</div>
 				<div class="mb-5">
 					<Label class="mb-2">Input type</Label>
-					<Select class="mt-2" items={inputTypes} bind:value={userQuestion.input} placeholder="" />
+					<Select
+						class="mt-2"
+						items={inputTypes}
+						bind:value={userQuestion.component}
+						placeholder=""
+					/>
 				</div>
-				{#if userQuestion.input === 'select'}
+				{#if userQuestion.component === 'select'}
 					<div class="mb-5">
 						<Label class="mb-2">Options</Label>
 						<div class="mb-1">

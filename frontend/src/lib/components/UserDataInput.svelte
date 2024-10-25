@@ -32,13 +32,11 @@
 
 	function convertQuestions(questionaire: GetUserQuestionsResponse): QuestionaireElement[] {
 		return questionaire.map((element) => {
-			console.log('question element: ', element);
-
+			console.log('question element');
 			return {
-				component: componentTable[element.input],
+				component: componentTable[element.component],
 				value: null,
 				additionalValue: null,
-				showTextField: false,
 				props: {
 					items: JSON.parse(element?.text[$locale].options_json),
 					label: element?.text[$locale].question,
@@ -53,28 +51,17 @@
 
 	function convertAnswers(questionaire: QuestionaireElement[]): UserAnswerPublic[] {
 		return questionaire.map((e, index) => {
-			console.log(
-				'condition: ',
-				e.additionalValue !== '',
-				e.additionalValue !== null,
-				e.value === e.textTrigger,
-				e.value,
-				e.additionalValue,
-				e.props.textTrigger
-			);
 			if (
 				e.additionalValue !== '' &&
 				e.additionalValue !== null &&
 				e.value === e.props.textTrigger
 			) {
-				console.log('with additional: ', e);
 				return {
 					question_id: index,
 					answer: String(e.value),
 					additional_answer: String(e.additionalValue)
 				} as UserAnswerPublic;
 			} else {
-				console.log('with normal', e);
 				return {
 					question_id: index,
 					answer: String(e.value),
@@ -135,6 +122,7 @@
 		console.log('onmount');
 
 		const userQuestions = await getUserQuestions();
+		console.log('userquestions from backend', userQuestions);
 
 		if (userQuestions.error) {
 			showAlert = true;
@@ -147,6 +135,7 @@
 
 		// get current answers.
 		let currentAnswers = await getCurrentUserAnswers();
+		console.log('user answers from backend', currentAnswers);
 
 		if (currentAnswers?.error) {
 			showAlert = true;
@@ -155,8 +144,6 @@
 		} else if (currentAnswers?.data.length === 0) {
 			console.log('currently no answers'); // debug output. Can go later
 		} else {
-			console.log('data from backend: ', 'currentAnswers: ', currentAnswers?.data);
-
 			for (let i = 0; i < currentAnswers?.data.length; i++) {
 				if (
 					currentAnswers?.data[i].additional_answer !== null &&
@@ -171,7 +158,6 @@
 						questionaire[i].props.items.slice(-1)[0]
 					);
 					questionaire[i].value = questionaire[i].props.items.slice(-1)[0].value;
-					questionaire[i].showTextField = true;
 					console.log('end result: ', questionaire[i]);
 				} else {
 					console.log('without additional: ', currentAnswers.data[i]);
