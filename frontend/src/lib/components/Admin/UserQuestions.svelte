@@ -20,9 +20,8 @@
 	import EditButton from '$lib/components/Admin/EditButton.svelte';
 	import EditUserQuestionModal from '$lib/components/Admin/EditUserQuestionModal.svelte';
 	import { userQuestions } from '$lib/stores/adminStore';
-	import { lang_id } from '$lib/stores/langStore';
 	import { onMount } from 'svelte';
-	import { _ } from 'svelte-i18n';
+	import { _, locale } from 'svelte-i18n';
 
 	let currentUserQuestion = $state(undefined as UserQuestionAdmin | undefined);
 	let currentUserQuestionId = $state(null as number | null);
@@ -78,13 +77,13 @@
 			{#each $userQuestions as userQuestion, groupIndex (userQuestion.id)}
 				<TableBodyRow>
 					<TableBodyCell>
-						{userQuestion?.text[$lang_id]?.question}
+						{userQuestion?.text[$locale]?.question}
 					</TableBodyCell>
 					<TableBodyCell>
 						{userQuestion?.component}
 					</TableBodyCell>
 					<TableBodyCell>
-						{userQuestion?.text[$lang_id]?.options}
+						{userQuestion?.text[$locale]?.options}
 					</TableBodyCell>
 					<TableBodyCell>
 						<EditButton
