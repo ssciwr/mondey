@@ -32,9 +32,6 @@
 			goto(`/${base}`);
 		}
 	}
-	$effect(() => {
-		console.log('userdata in profile: ', userData);
-	});
 </script>
 
 <Popover {triggeredBy} class="text-gray-700 dark:text-gray-400">

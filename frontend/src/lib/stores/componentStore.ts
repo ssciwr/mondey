@@ -5,10 +5,9 @@ import RadioList from '$lib/components/DataInput/RadioList.svelte';
 import Milestone from '$lib/components/Milestone.svelte';
 import MilestoneGroup from '$lib/components/MilestoneGroup.svelte';
 import MilestoneOverview from '$lib/components/MilestoneOverview.svelte';
-import ResearchPage from '$lib/components/ResearchPage.svelte';
 import UserDataInput from '$lib/components/UserDataInput.svelte';
 
-import { Fileupload, Input, MultiSelect, Select, Textarea } from 'flowbite-svelte';
+import { Card, Fileupload, Input, MultiSelect, Select, Textarea } from 'flowbite-svelte';
 import type { Component } from 'svelte';
 import { writable } from 'svelte/store';
 
@@ -31,7 +30,7 @@ export const componentTable: ComponentTable = {
 	fileupload: Fileupload,
 	textarea: Textarea,
 	adminPage: AdminPage,
-	researchPage: ResearchPage
+	researchPage: Card
 };
 export const activeTabPersonal = writable('userDataInput');
 export const activeTabChildren = writable('childrenGallery');
