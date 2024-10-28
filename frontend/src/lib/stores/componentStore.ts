@@ -13,7 +13,7 @@ import type { Component } from 'svelte';
 import { writable } from 'svelte/store';
 
 interface ComponentTable {
-	[key: string]: Component
+	[key: string]: Component;
 }
 
 // put all the components here. can be an expanding list

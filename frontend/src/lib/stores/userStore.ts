@@ -104,15 +104,23 @@ async function login(loginData: Body_auth_cookie_login_auth_login_post) {
 
 async function refreshUser() {
 	const { data, error } = await usersCurrentUser();
-	
+
 	if (error || data === undefined) {
 		currentUser.set(null);
 
 		console.log('Failed to get current User');
 	} else {
 		currentUser.set(data as UserRead);
-
 	}
 }
 
-export { createDummyUser, currentUser, hash, login, refreshUser, users, type UserData, type UserList };
+export {
+	createDummyUser,
+	currentUser,
+	hash,
+	login,
+	refreshUser,
+	users,
+	type UserData,
+	type UserList
+};
