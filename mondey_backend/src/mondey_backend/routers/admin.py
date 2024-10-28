@@ -39,6 +39,7 @@ def create_router() -> APIRouter:
 
     @router.post("/languages/", response_model=Language)
     def create_language(session: SessionDep, language: Language):
+        print("language: ", language)
         db_language = Language.model_validate(language)
         if session.get(Language, db_language.id) is not None:
             raise HTTPException(400, "Language already exists")
@@ -52,6 +53,7 @@ def create_router() -> APIRouter:
                 status_code=400, detail=f"{language_id} language cannot be deleted"
             )
         language = get(session, Language, language_id)
+        print(" found language to delete: ", language)
         session.delete(language)
         session.commit()
         return {"ok": True}

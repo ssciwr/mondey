@@ -28,12 +28,12 @@
 	}) as SelectOptionType<string>[];
 
 	let selectedLang: string = $state('');
-	let currentLanguageId: string = $state('');
+	let currentLanguage: string = $state('');
 	let showDeleteModal: boolean = $state(false);
 
 	async function createLanguageAndUpdateLanguages() {
 		console.log('selected language: ', selectedLang);
-		const { data, error } = await createLanguage({ body: { lang: selectedLang } });
+		const { data, error } = await createLanguage({ body: { id: selectedLang } });
 		if (error) {
 			console.log(error);
 		} else {
@@ -44,7 +44,7 @@
 
 	async function deleteLanguageAndUpdateLanguages() {
 		const { data, error } = await deleteLanguage({
-			path: { language_id: Number(currentLanguageId) }
+			path: { language_id: currentLanguage }
 		});
 		if (error) {
 			console.log(error);
@@ -74,10 +74,11 @@
 						{ISO6391.getNativeName(lang)}
 					</TableBodyCell>
 					<TableBodyCell>
-						{#if lang_id > 2}
+						{console.log('language id: ', lang_id)}
+						{#if lang_id >= 2}
 							<DeleteButton
 								onclick={() => {
-									currentLanguageId = `${lang_id}`;
+									currentLanguage = `${lang}`;
 									showDeleteModal = true;
 								}}
 							/>
