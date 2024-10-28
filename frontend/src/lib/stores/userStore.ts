@@ -102,7 +102,7 @@ async function login(loginData: Body_auth_cookie_login_auth_login_post) {
 	}
 }
 
-async function refresh() {
+async function refreshUser() {
 	const { data, error } = await usersCurrentUser();
 	
 	if (error || data === undefined) {
@@ -115,4 +115,4 @@ async function refresh() {
 	}
 }
 
-export { createDummyUser, currentUser, hash, login, refresh, users, type UserData, type UserList };
+export { createDummyUser, currentUser, hash, login, refreshUser, users, type UserData, type UserList };

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import UserVerify from '$lib/components/UserVerify.svelte';
 	import { componentTable } from '$lib/stores/componentStore';
-	import { currentUser, refresh } from '$lib/stores/userStore';
+	import { currentUser, refreshUser } from '$lib/stores/userStore';
 	import { Button, TabItem, Tabs } from 'flowbite-svelte';
 	import { AtomOutline, CogSolid, GridPlusSolid, ProfileCardSolid } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
@@ -11,7 +11,7 @@
 	console.log('user: ', get(currentUser));
 
 	onMount(async () => {
-		await refresh();
+		await refreshUser();
 	});
 </script>
 
