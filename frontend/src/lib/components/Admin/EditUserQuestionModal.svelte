@@ -74,7 +74,7 @@
 					{#each Object.values(userQuestion.text) as text}
 						<div class="mb-1">
 							<ButtonGroup class="w-full">
-								<InputAddon>{$locales[text.lang_id]}</InputAddon>
+								<InputAddon>{text.lang_id}</InputAddon>
 								<Input
 									bind:value={text.question}
 									on:input={() => {
@@ -111,7 +111,7 @@
 						{#each Object.values(userQuestion.text) as text}
 							<div class="mb-1">
 								<ButtonGroup class="w-full">
-									<InputAddon>{$locales[text.lang_id]}</InputAddon>
+									<InputAddon>{text.lang_id}</InputAddon>
 									<Textarea
 										bind:value={text.options}
 										on:input={updateOptionsJson}
@@ -140,10 +140,10 @@
 							<ButtonGroup class="mb-2 mr-2">
 								{#each $locales as lang_id}
 									<Button
-										checked={preview_lang === lang}
+										checked={preview_lang === lang_id}
 										on:click={(e) => {
 											e.stopPropagation();
-											preview_lang_id = lang_id;
+											preview_lang = lang_id;
 										}}>{lang_id}</Button
 									>
 								{/each}
