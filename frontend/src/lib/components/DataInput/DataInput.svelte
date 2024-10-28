@@ -8,6 +8,7 @@
 	import { Label, Textarea } from 'flowbite-svelte';
 
 	// variables
+	// Simplify this as much as possible
 	let component: any = $state();
 	let value: any = $state();
 	let label: string | null = $state(null);
@@ -19,11 +20,6 @@
 	let additionalEventHandlers = $state({});
 	let showTextField: boolean = $derived(checkShowTextfield(value));
 
-	// custom valid checker that can optionally be supplied
-	let checkValid = $state((_: any) => {
-		return true;
-	});
-
 	// functionality for showing the textfield when the trigger is selected
 	function checkShowTextfield(v: any): boolean {
 		if (v instanceof Array) {
@@ -32,19 +28,6 @@
 			return v === textTrigger;
 		}
 	}
-
-	function evalValid(v: any): boolean {
-		let result = true;
-		if (Array.isArray(v)) {
-			result = v.length > 0;
-		}
-
-		return result && value !== undefined && value !== null && value !== '' && checkValid(null);
-	}
-
-	// reactive statement that makes sure 'valid' updates the page
-	let valid = $derived(evalValid(value));
-	let highlight = $derived(!valid && properties.required === true);
 </script>
 
 {#if label}
