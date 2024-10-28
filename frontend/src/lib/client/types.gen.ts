@@ -181,7 +181,7 @@ export type MilestoneTextPublic = {
 export type UserAnswerPublic = {
 	answer: string;
 	question_id: number;
-	additional_answer: string;
+	additional_answer: string | null;
 };
 
 export type UserCreate = {

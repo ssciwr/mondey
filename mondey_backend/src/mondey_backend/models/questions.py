@@ -76,7 +76,7 @@ class UserAnswer(SQLModel, table=True):
     )
     answer: str
     # flag that tells the frontend if the answer has been given via an  additional text field => won´t be correctly displayed otherwise
-    additional_answer: str
+    additional_answer: str | None
 
 
 class UserAnswerPublic(SQLModel):
@@ -90,4 +90,4 @@ class UserAnswerPublic(SQLModel):
 
     answer: str
     question_id: int
-    additional_answer: str
+    additional_answer: str | None

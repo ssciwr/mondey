@@ -191,7 +191,7 @@ def session():
                 question_id=1,
                 user_id=1,
                 answer="lorem ipsum",
-                additional_answer="",
+                additional_answer=None,
             )
         )
         session.add(

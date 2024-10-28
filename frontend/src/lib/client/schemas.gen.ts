@@ -660,7 +660,14 @@ export const UserAnswerPublicSchema = {
 			title: 'Question Id'
 		},
 		additional_answer: {
-			type: 'string',
+			anyOf: [
+				{
+					type: 'string'
+				},
+				{
+					type: 'null'
+				}
+			],
 			title: 'Additional Answer'
 		}
 	},
