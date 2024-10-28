@@ -19,26 +19,6 @@ class Language(SQLModel, table=True):
     id: str = fixed_length_string_field(max_length=2, index=True, primary_key=True)
 
 
-## MilestoneAgeGroup
-
-
-class MilestoneAgeGroupBase(SQLModel):
-    months_min: int
-    months_max: int
-
-
-class MilestoneAgeGroupCreate(MilestoneAgeGroupBase):
-    pass
-
-
-class MilestoneAgeGroup(MilestoneAgeGroupBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-
-
-class MilestoneAgeGroupPublic(MilestoneAgeGroupBase):
-    id: int
-
-
 ## MilestoneGroupText
 
 
@@ -70,7 +50,6 @@ class MilestoneGroupTextPublic(MilestoneGroupTextBase):
 
 class MilestoneGroup(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    age_group_id: int = Field(foreign_key="milestoneagegroup.id")
     order: int = 0
     text: Mapped[dict[str, MilestoneGroupText]] = dict_relationship(key="lang_id")
     milestones: Mapped[list[Milestone]] = back_populates("group")
@@ -84,7 +63,6 @@ class MilestoneGroupPublic(SQLModel):
 
 class MilestoneGroupAdmin(SQLModel):
     id: int
-    age_group_id: int
     order: int
     text: dict[str, MilestoneGroupText] = {}
     milestones: list[MilestoneAdmin] = []
@@ -176,7 +154,6 @@ class MilestoneAnswer(SQLModel, table=True):
 class MilestoneAnswerSession(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     child_id: int = Field(foreign_key="child.id")
-    age_group_id: int = Field(foreign_key="milestoneagegroup.id")
     user_id: int
     created_at: datetime.datetime = Field(
         sa_column_kwargs={
@@ -189,6 +166,5 @@ class MilestoneAnswerSession(SQLModel, table=True):
 class MilestoneAnswerSessionPublic(SQLModel):
     id: int
     child_id: int
-    age_group_id: int
     created_at: datetime.datetime
     answers: dict[int, MilestoneAnswerPublic]

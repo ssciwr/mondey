@@ -15,14 +15,11 @@ import type {
 	GetMilestoneData,
 	GetMilestoneError,
 	GetMilestoneResponse,
-	GetMilestoneGroupsData,
 	GetMilestoneGroupsError,
 	GetMilestoneGroupsResponse,
 	GetMilestoneGroupData,
 	GetMilestoneGroupError,
 	GetMilestoneGroupResponse,
-	GetMilestoneAgeGroupsError,
-	GetMilestoneAgeGroupsResponse,
 	GetUserQuestionsError,
 	GetUserQuestionsResponse,
 	CreateLanguageData,
@@ -34,19 +31,8 @@ import type {
 	UpdateI18NData,
 	UpdateI18NError,
 	UpdateI18NResponse,
-	UpdateMilestoneAgeGroupData,
-	UpdateMilestoneAgeGroupError,
-	UpdateMilestoneAgeGroupResponse,
-	CreateMilestoneAgeGroupData,
-	CreateMilestoneAgeGroupError,
-	CreateMilestoneAgeGroupResponse,
-	DeleteMilestoneAgeGroupData,
-	DeleteMilestoneAgeGroupError,
-	DeleteMilestoneAgeGroupResponse,
-	GetMilestoneGroupsAdminData,
 	GetMilestoneGroupsAdminError,
 	GetMilestoneGroupsAdminResponse,
-	CreateMilestoneGroupAdminData,
 	CreateMilestoneGroupAdminError,
 	CreateMilestoneGroupAdminResponse,
 	UpdateMilestoneGroupAdminData,
@@ -188,7 +174,7 @@ export const getMilestone = <ThrowOnError extends boolean = false>(
  * Get Milestone Groups
  */
 export const getMilestoneGroups = <ThrowOnError extends boolean = false>(
-	options: Options<GetMilestoneGroupsData, ThrowOnError>
+	options?: Options<unknown, ThrowOnError>
 ) => {
 	return (options?.client ?? client).get<
 		GetMilestoneGroupsResponse,
@@ -213,22 +199,6 @@ export const getMilestoneGroup = <ThrowOnError extends boolean = false>(
 	>({
 		...options,
 		url: '/milestone-groups/{milestone_group_id}'
-	});
-};
-
-/**
- * Get Milestone Age Groups
- */
-export const getMilestoneAgeGroups = <ThrowOnError extends boolean = false>(
-	options?: Options<unknown, ThrowOnError>
-) => {
-	return (options?.client ?? client).get<
-		GetMilestoneAgeGroupsResponse,
-		GetMilestoneAgeGroupsError,
-		ThrowOnError
-	>({
-		...options,
-		url: '/milestone-age-groups/'
 	});
 };
 
@@ -293,58 +263,10 @@ export const updateI18N = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Update Milestone Age Group
- */
-export const updateMilestoneAgeGroup = <ThrowOnError extends boolean = false>(
-	options: Options<UpdateMilestoneAgeGroupData, ThrowOnError>
-) => {
-	return (options?.client ?? client).put<
-		UpdateMilestoneAgeGroupResponse,
-		UpdateMilestoneAgeGroupError,
-		ThrowOnError
-	>({
-		...options,
-		url: '/admin/milestone-age-groups/'
-	});
-};
-
-/**
- * Create Milestone Age Group
- */
-export const createMilestoneAgeGroup = <ThrowOnError extends boolean = false>(
-	options: Options<CreateMilestoneAgeGroupData, ThrowOnError>
-) => {
-	return (options?.client ?? client).post<
-		CreateMilestoneAgeGroupResponse,
-		CreateMilestoneAgeGroupError,
-		ThrowOnError
-	>({
-		...options,
-		url: '/admin/milestone-age-groups/'
-	});
-};
-
-/**
- * Delete Milestone Age Group
- */
-export const deleteMilestoneAgeGroup = <ThrowOnError extends boolean = false>(
-	options: Options<DeleteMilestoneAgeGroupData, ThrowOnError>
-) => {
-	return (options?.client ?? client).delete<
-		DeleteMilestoneAgeGroupResponse,
-		DeleteMilestoneAgeGroupError,
-		ThrowOnError
-	>({
-		...options,
-		url: '/admin/milestone-age-groups/{milestone_age_group_id}'
-	});
-};
-
-/**
  * Get Milestone Groups Admin
  */
 export const getMilestoneGroupsAdmin = <ThrowOnError extends boolean = false>(
-	options: Options<GetMilestoneGroupsAdminData, ThrowOnError>
+	options?: Options<unknown, ThrowOnError>
 ) => {
 	return (options?.client ?? client).get<
 		GetMilestoneGroupsAdminResponse,
@@ -360,7 +282,7 @@ export const getMilestoneGroupsAdmin = <ThrowOnError extends boolean = false>(
  * Create Milestone Group Admin
  */
 export const createMilestoneGroupAdmin = <ThrowOnError extends boolean = false>(
-	options: Options<CreateMilestoneGroupAdminData, ThrowOnError>
+	options?: Options<unknown, ThrowOnError>
 ) => {
 	return (options?.client ?? client).post<
 		CreateMilestoneGroupAdminResponse,
@@ -368,7 +290,7 @@ export const createMilestoneGroupAdmin = <ThrowOnError extends boolean = false>(
 		ThrowOnError
 	>({
 		...options,
-		url: '/admin/milestone-groups/{milestone_age_group_id}'
+		url: '/admin/milestone-groups/'
 	});
 };
 

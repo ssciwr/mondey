@@ -14,9 +14,6 @@ from ..dependencies import SessionDep
 from ..models.milestones import Language
 from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAdmin
-from ..models.milestones import MilestoneAgeGroup
-from ..models.milestones import MilestoneAgeGroupCreate
-from ..models.milestones import MilestoneAgeGroupPublic
 from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupAdmin
 from ..models.milestones import MilestoneGroupText
@@ -71,46 +68,16 @@ def create_router() -> APIRouter:
             json.dump(i18dict, i18json_file, separators=(",", ":"), ensure_ascii=False)
         return {"ok": True}
 
-    @router.post("/milestone-age-groups/", response_model=MilestoneAgeGroupPublic)
-    def create_milestone_age_group(
-        session: SessionDep, milestone_age_group: MilestoneAgeGroupCreate
-    ):
-        db_milestone_age_group = MilestoneAgeGroup.model_validate(milestone_age_group)
-        add(session, db_milestone_age_group)
-        return db_milestone_age_group
-
-    @router.put("/milestone-age-groups/", response_model=MilestoneAgeGroupPublic)
-    def update_milestone_age_group(
-        session: SessionDep,
-        milestone_age_group: MilestoneAgeGroupPublic,
-    ):
-        db_milestone_age_group = get(session, MilestoneAgeGroup, milestone_age_group.id)
-        for key, value in milestone_age_group.model_dump().items():
-            setattr(db_milestone_age_group, key, value)
-        add(session, db_milestone_age_group)
-        return db_milestone_age_group
-
-    @router.delete("/milestone-age-groups/{milestone_age_group_id}")
-    def delete_milestone_age_group(session: SessionDep, milestone_age_group_id: int):
-        milestone_age_group = get(session, MilestoneAgeGroup, milestone_age_group_id)
-        session.delete(milestone_age_group)
-        session.commit()
-        return {"ok": True}
-
     @router.get("/milestone-groups/", response_model=list[MilestoneGroupAdmin])
-    def get_milestone_groups_admin(session: SessionDep, milestone_age_group_id: int):
+    def get_milestone_groups_admin(session: SessionDep):
         milestone_groups = session.exec(
-            select(MilestoneGroup)
-            .where(col(MilestoneGroup.age_group_id) == milestone_age_group_id)
-            .order_by(col(MilestoneGroup.order))
+            select(MilestoneGroup).order_by(col(MilestoneGroup.order))
         ).all()
         return milestone_groups
 
-    @router.post(
-        "/milestone-groups/{milestone_age_group_id}", response_model=MilestoneGroupAdmin
-    )
-    def create_milestone_group_admin(session: SessionDep, milestone_age_group_id: int):
-        db_milestone_group = MilestoneGroup(age_group_id=milestone_age_group_id)
+    @router.post("/milestone-groups/", response_model=MilestoneGroupAdmin)
+    def create_milestone_group_admin(session: SessionDep):
+        db_milestone_group = MilestoneGroup()
         add(session, db_milestone_group)
         for language in session.exec(select(Language)).all():
             session.add(
