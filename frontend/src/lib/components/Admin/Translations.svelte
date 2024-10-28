@@ -1,10 +1,6 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-	import { updateI18N } from '$lib/client/services.gen';
-	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
-	import { getI18nJson, getTranslations } from '$lib/i18n';
-	import { languages } from '$lib/stores/langStore';
 	import {
 		Accordion,
 		AccordionItem,
@@ -15,26 +11,29 @@
 		Label
 	} from 'flowbite-svelte';
 	import { onMount } from 'svelte';
-	import { _ } from 'svelte-i18n';
+	import { _, locales } from 'svelte-i18n';
+	import { getI18nJson, getTranslations } from '$lib/i18n';
+	import { updateI18N } from '$lib/client/services.gen';
+	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
 	import de from '../../../locales/de.json';
 
 	type Translation = Record<string, Record<string, string>>;
 	let translations = $state({} as Record<string, Translation>);
 
 	async function refreshTranslations() {
-		for (const [lang, lang_id] of Object.entries($languages)) {
-			if (lang !== 'de') {
-				translations[lang] = await getI18nJson(lang_id);
+		for (const lang_id of $locales) {
+			if (lang_id !== 'de') {
+				translations[lang_id] = await getI18nJson(lang_id);
 			}
 		}
 	}
 
 	async function saveChanges() {
-		for (const lang of Object.keys(translations)) {
+		for (const lang_id of Object.keys(translations)) {
 			const { data, error } = await updateI18N({
-				body: translations[lang],
+				body: translations[lang_id],
 				path: {
-					language_id: $languages[lang]
+					language_id: lang_id
 				}
 			});
 			if (error) {
