@@ -6,6 +6,11 @@ import pathlib
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from sqlmodel import Session
+from sqlmodel import SQLModel
+from sqlmodel import create_engine
+from sqlmodel.pool import StaticPool
+
 from mondey_backend import settings
 from mondey_backend.dependencies import current_active_researcher
 from mondey_backend.dependencies import current_active_superuser
@@ -24,10 +29,6 @@ from mondey_backend.models.milestones import MilestoneImage
 from mondey_backend.models.milestones import MilestoneText
 from mondey_backend.models.questions import UserAnswer
 from mondey_backend.models.users import UserRead
-from sqlmodel import Session
-from sqlmodel import SQLModel
-from sqlmodel import create_engine
-from sqlmodel.pool import StaticPool
 
 
 @pytest.fixture(scope="session")

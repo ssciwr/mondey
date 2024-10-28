@@ -128,7 +128,7 @@
 			</TableHead>
 			<TableBody>
 				{#each $milestoneGroups[`${milestone_age_group_id}`] as milestoneGroup, groupIndex (milestoneGroup.id)}
-					{@const groupTitle = milestoneGroup.text[$$locale]?.title}
+					{@const groupTitle = milestoneGroup.text[$locale]?.title}
 					<TableBodyRow
 						on:click={() => {
 							toggleOpenGroupIndex(groupIndex);

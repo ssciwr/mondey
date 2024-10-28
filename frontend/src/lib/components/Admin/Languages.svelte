@@ -26,13 +26,12 @@
 		return { value: k, name: langNames[i] };
 	}) as SelectOptionType<string>[];
 
-	let selectedLang: string = $state('');
-	let currentLanguage: string = $state('');
+	let selectedLangId: string = $state('');
+	let currentLanguageId: string = $state('');
 	let showDeleteModal: boolean = $state(false);
 
 	async function createLanguageAndUpdateLanguages() {
-		console.log('selected language: ', selectedLang);
-		const { data, error } = await createLanguage({ body: { id: selectedLang } });
+		const { data, error } = await createLanguage({ body: { id: selectedLangId } });
 		if (error) {
 			console.log(error);
 		} else {
@@ -43,7 +42,7 @@
 
 	async function deleteLanguageAndUpdateLanguages() {
 		const { data, error } = await deleteLanguage({
-			path: { language_id: currentLanguage }
+			path: { language_id: currentLanguageId }
 		});
 		if (error) {
 			console.log(error);
@@ -63,21 +62,19 @@
 			<TableHeadCell>Actions</TableHeadCell>
 		</TableHead>
 		<TableBody>
-			{#each Object.entries($locales) as [lang_id, lang]}
-				{console.log('languages: ', lang, lang_id)}
+			{#each $locales as lang_id}
 				<TableBodyRow>
 					<TableBodyCell>
-						{lang}
+						{lang_id}
 					</TableBodyCell>
 					<TableBodyCell>
-						{ISO6391.getNativeName(lang)}
+						{ISO6391.getNativeName(lang_id)}
 					</TableBodyCell>
 					<TableBodyCell>
-						{console.log('language id: ', lang_id)}
-						{#if lang_id >= 2}
+						{#if !['de', 'en'].includes(lang_id)}
 							<DeleteButton
 								onclick={() => {
-									currentLanguage = `${lang}`;
+									currentLanguageId = lang_id;
 									showDeleteModal = true;
 								}}
 							/>
@@ -91,12 +88,12 @@
 					<Select
 						class="mt-2"
 						items={langItems}
-						bind:value={selectedLang}
+						bind:value={selectedLangId}
 						placeholder="Select a language..."
 					/>
 				</TableBodyCell>
 				<TableBodyCell>
-					<AddButton onclick={createLanguageAndUpdateLanguages} disabled={selectedLang === ''} />
+					<AddButton onclick={createLanguageAndUpdateLanguages} disabled={selectedLangId === ''} />
 				</TableBodyCell>
 			</TableBodyRow>
 		</TableBody>

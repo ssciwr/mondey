@@ -53,11 +53,10 @@
 			{@const title = $_(`admin.${textKey}`)}
 			<div class="mb-5">
 				<Label class="mb-2">{title}</Label>
-				{#each Object.entries($locales) as [lang, lang_id]}
-					{console.log('lang, lang_id', lang, lang_id)}
+				{#each $locales as lang_id}
 					<div class="mb-1">
 						<ButtonGroup class="w-full">
-							<InputAddon>{lang}</InputAddon>
+							<InputAddon>{lang_id}</InputAddon>
 							<Textarea bind:value={milestone.text[lang_id][textKey]} placeholder={title} />
 						</ButtonGroup>
 					</div>

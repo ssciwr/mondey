@@ -41,7 +41,7 @@
 			return;
 		}
 		const values = userQuestion.options.split(';');
-		for (const lang_id of $locales) {
+		for (const lang_id in $locales) {
 			const items = userQuestion.text[lang_id].options.split(';');
 			userQuestion.text[lang_id].options_json = JSON.stringify(
 				values.map(function (value, index) {
@@ -51,7 +51,7 @@
 		}
 	}
 
-	export async function saveChanges() {
+	async function saveChanges() {
 		if (!userQuestion) {
 			return;
 		}
@@ -74,7 +74,7 @@
 					{#each Object.values(userQuestion.text) as text}
 						<div class="mb-1">
 							<ButtonGroup class="w-full">
-								<InputAddon>{text.lang_id}</InputAddon>
+								<InputAddon>{$locales[text.lang_id]}</InputAddon>
 								<Input
 									bind:value={text.question}
 									on:input={() => {
@@ -111,7 +111,7 @@
 						{#each Object.values(userQuestion.text) as text}
 							<div class="mb-1">
 								<ButtonGroup class="w-full">
-									<InputAddon>{text.lang_id}</InputAddon>
+									<InputAddon>{$locales[text.lang_id]}</InputAddon>
 									<Textarea
 										bind:value={text.options}
 										on:input={updateOptionsJson}
@@ -138,13 +138,13 @@
 						<Label class="mb-2">Preview</Label>
 						<div class="flex flex-row">
 							<ButtonGroup class="mb-2 mr-2">
-								{#each $locales as lang}
+								{#each $locales as lang_id}
 									<Button
 										checked={preview_lang === lang}
 										on:click={(e) => {
 											e.stopPropagation();
-											preview_lang = lang;
-										}}>{lang}</Button
+											preview_lang_id = lang_id;
+										}}>{lang_id}</Button
 									>
 								{/each}
 							</ButtonGroup>

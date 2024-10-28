@@ -39,7 +39,6 @@ def create_router() -> APIRouter:
 
     @router.post("/languages/", response_model=Language)
     def create_language(session: SessionDep, language: Language):
-        print("language: ", language)
         db_language = Language.model_validate(language)
         if session.get(Language, db_language.id) is not None:
             raise HTTPException(400, "Language already exists")

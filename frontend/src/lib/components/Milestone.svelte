@@ -24,7 +24,7 @@
 		QuestionCircleSolid
 	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
-	import { _ } from 'svelte-i18n';
+	import { _, locale } from 'svelte-i18n';
 
 	let {
 		milestoneGroup = undefined,
@@ -118,7 +118,7 @@
 <div
 	class="border-1 flex flex-col border border-gray-200 bg-white shadow md:max-w-7xl md:rounded-lg dark:border-gray-700 dark:bg-gray-800"
 >
-	{#if milestoneGroup && milestoneGroup.text && milestoneGroup.milestones && currentMilestone && currentMilestone.text && currentMilestone.images}
+	{#if $locale && milestoneGroup && milestoneGroup.text && milestoneGroup.milestones && currentMilestone && currentMilestone.text && currentMilestone.images}
 		<div class="bg-gray-100 md:rounded-t-lg dark:bg-gray-600">
 			<Breadcrumb
 				olClass="inline-flex items-center space-x-1 rtl:space-x-reverse md:space-x-3 rtl:space-x-reverse flex-wrap"
