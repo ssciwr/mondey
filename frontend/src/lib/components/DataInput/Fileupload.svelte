@@ -1,5 +1,4 @@
 <script lang="ts">
-	// TODO: make this work the same way as datainput where necessary
 	import { Fileupload } from 'flowbite-svelte';
 
 	export let value;
