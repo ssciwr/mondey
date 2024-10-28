@@ -147,7 +147,8 @@
 			for (let i = 0; i < currentAnswers?.data.length; i++) {
 				if (
 					currentAnswers?.data[i].additional_answer !== null &&
-					currentAnswers?.data[i].additional_answer !== undefined
+					currentAnswers?.data[i].additional_answer !== undefined &&
+					currentAnswers?.data[i].additional_answer !== ''
 				) {
 					console.log('with additional: ', currentAnswers.data[i]);
 					questionaire[i].additionalValue = currentAnswers.data[i].additional_answer;
@@ -171,10 +172,6 @@
 		}
 		console.log('onmount done: ', questionaire);
 	});
-	$: console.log(
-		questionaire.map((e) => e.value),
-		questionaire.map((e) => e.additionalValue)
-	);
 </script>
 
 <!-- Show big alert message when something is missing -->

@@ -1,25 +1,25 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
+	import { createLanguage, deleteLanguage } from '$lib/client/services.gen';
+	import AddButton from '$lib/components/Admin/AddButton.svelte';
+	import DeleteButton from '$lib/components/Admin/DeleteButton.svelte';
+	import DeleteModal from '$lib/components/Admin/DeleteModal.svelte';
+	import { getTranslations } from '$lib/i18n';
+	import { languages } from '$lib/stores/langStore';
+	import type { SelectOptionType } from 'flowbite-svelte';
 	import {
+		Card,
+		Select,
 		Table,
 		TableBody,
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell,
-		Card,
-		Select
+		TableHeadCell
 	} from 'flowbite-svelte';
 	import ISO6391 from 'iso-639-1';
 	import { _ } from 'svelte-i18n';
-	import type { SelectOptionType } from 'flowbite-svelte';
-	import { getTranslations } from '$lib/i18n';
-	import { languages } from '$lib/stores/langStore';
-	import DeleteModal from '$lib/components/Admin/DeleteModal.svelte';
-	import AddButton from '$lib/components/Admin/AddButton.svelte';
-	import DeleteButton from '$lib/components/Admin/DeleteButton.svelte';
-	import { createLanguage, deleteLanguage } from '$lib/client/services.gen';
 
 	const langCodes = ISO6391.getAllCodes();
 	const langNames = ISO6391.getAllNativeNames();
@@ -32,6 +32,7 @@
 	let showDeleteModal: boolean = $state(false);
 
 	async function createLanguageAndUpdateLanguages() {
+		console.log('selected language: ', selectedLang);
 		const { data, error } = await createLanguage({ body: { lang: selectedLang } });
 		if (error) {
 			console.log(error);
@@ -63,7 +64,7 @@
 			<TableHeadCell>Actions</TableHeadCell>
 		</TableHead>
 		<TableBody>
-			{#each Object.entries($languages) as [lang, lang_id]}
+			{#each Object.entries($languages) as [lang_id, lang]}
 				{console.log('languages: ', lang, lang_id)}
 				<TableBodyRow>
 					<TableBodyCell>

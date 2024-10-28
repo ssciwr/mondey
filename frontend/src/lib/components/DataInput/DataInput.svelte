@@ -1,5 +1,3 @@
-<svelte:options runes={true} />
-
 <script lang="ts">
 	// README: wrt event handlers: in svelte 5 there is a better solution to this, but since we don´t have this yet and
 	// the svelte 4 solution requires a lot of boilerplate code (https://github.com/sveltejs/svelte/issues/2837#issuecomment-1848225140)
@@ -8,17 +6,30 @@
 	import { Label, Textarea } from 'flowbite-svelte';
 
 	// variables
-	// Simplify this as much as possible
-	let component: any = $state();
-	let value: any = $state();
-	let label: string | null = $state(null);
-	let componentClass: string = $state('');
-	let textTrigger: string = $state('noAdditionalText');
-	let additionalInput: any = $state(null);
-	let properties: any = $state({});
-	let eventHandlers = $state({});
-	let additionalEventHandlers = $state({});
-	let showTextField: boolean = $derived(checkShowTextfield(value));
+	export let component: any;
+	export let value: any;
+	export let label: string | null = null;
+	export let componentClass: string = '';
+	export let textTrigger: string = 'noAdditionalText';
+	export let showTextField: boolean = false;
+	export let additionalInput: any = null;
+
+	// data to display and event handlers for dynamcis.
+	export let properties: any = {};
+
+	interface EventHandler {
+		[key: string]: (event: Event) => void | Promise<void>;
+	}
+
+	// README: This structure is not necessary here yet, as the events could be exposed directly,
+	// but will afais be useful later in svelte5
+	export let eventHandlers: EventHandler = {};
+	export let additionalEventHandlers: EventHandler = {};
+
+	// custom valid checker that can optionally be supplied
+	export let checkValid = (_) => {
+		return true;
+	};
 
 	// functionality for showing the textfield when the trigger is selected
 	function checkShowTextfield(v: any): boolean {
@@ -28,6 +39,20 @@
 			return v === textTrigger;
 		}
 	}
+
+	function evalValid(v: any): boolean {
+		let result = true;
+		if (Array.isArray(v)) {
+			result = v.length > 0;
+		}
+
+		return result && value !== undefined && value !== null && value !== '' && checkValid();
+	}
+
+	// reactive statement that makes sure 'valid' updates the page
+	$: valid = evalValid(value);
+	$: highlight = !valid && properties.required === true;
+	$: showTextField = checkShowTextfield(value);
 </script>
 
 {#if label}
@@ -38,7 +63,7 @@
 	<svelte:component
 		this={component}
 		class={highlight
-			? 'border-primary-600 dark:border-primary-600 rounded border-2 ' + componentClass
+			? 'rounded border-2 border-primary-600 dark:border-primary-600 ' + componentClass
 			: componentClass}
 		bind:value
 		{...properties}
