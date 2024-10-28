@@ -1,3 +1,5 @@
+<svelte:options runes={true} />
+
 <script lang="ts">
 	import {
 		getCurrentUserAnswers,
@@ -14,32 +16,34 @@
 	import { onMount, type Component } from 'svelte';
 	import { _, locale } from 'svelte-i18n';
 
-	interface QuestionaireProps {
+	type QuestionaireProps = {
 		label: string;
 		type: string;
 		required: Boolean;
 		disabled: Boolean;
 		items: any[];
 		textTrigger: string | undefined;
-	}
+	};
 
-	interface QuestionaireElement {
+	type QuestionaireElement = {
 		component: Component;
 		value: String | null;
 		additionalValue: String | null;
 		props: QuestionaireProps;
-	}
+	};
 
 	function convertQuestions(questionaire: GetUserQuestionsResponse): QuestionaireElement[] {
 		return questionaire.map((element) => {
-			console.log('question element');
+			// TODO: this should be simplified into something that uses
+			// as little additional structure as possible compared to UserQuestionPublic
+
 			return {
 				component: componentTable[element.component],
 				value: null,
 				additionalValue: null,
 				props: {
-					items: JSON.parse(element?.text[$locale].options_json),
-					label: element?.text[$locale].question,
+					items: JSON.parse(element.text[$locale].options_json),
+					label: element.text[$locale].question,
 					type: 'text',
 					required: true,
 					disabled: false,
@@ -101,20 +105,19 @@
 			for (let element of questionaire) {
 				element.props.disabled = true;
 			}
-			questionaire = [...questionaire];
 			dataIsCurrent = true;
 		}
 	}
 
 	// this is the data that will be used in the end
-	let questionaire: any[] = [];
+	let questionaire: any[] = $state([]);
 
 	// flags for enabling and disabling visual hints
-	let showAlert: boolean = false;
-	let dataIsCurrent: boolean = false;
+	let showAlert: boolean = $state(false);
+	let dataIsCurrent: boolean = $state(false);
 
 	// what is shown in the alert if showAlert === true
-	let alertMessage: string = $_('userData.alertMessageMissing');
+	let alertMessage: string = $state($_('userData.alertMessageMissing'));
 
 	// load questions and current answers from server and put them into the data
 	// structure that the UserDataInput component understands
@@ -150,24 +153,14 @@
 					currentAnswers?.data[i].additional_answer !== undefined &&
 					currentAnswers?.data[i].additional_answer !== ''
 				) {
-					console.log('with additional: ', currentAnswers.data[i]);
 					questionaire[i].additionalValue = currentAnswers.data[i].additional_answer;
-					console.log(
-						'displayed thing: ',
-						questionaire[i].props.textTrigger,
-						'label: ',
-						questionaire[i].props.items.slice(-1)[0]
-					);
-					questionaire[i].value = questionaire[i].props.items.slice(-1)[0].value;
-					console.log('end result: ', questionaire[i]);
-				} else {
-					console.log('without additional: ', currentAnswers.data[i]);
 
+					questionaire[i].value = questionaire[i].props.items.slice(-1)[0].value; // FIXME: there needs to be a better way to do this. relies on ordering being such that the trigger for a textfield is at the end
+				} else {
 					questionaire[i].value = currentAnswers.data[i].answer;
 				}
 				questionaire[i].props.disabled = true;
 				dataIsCurrent = true;
-				questionaire = [...questionaire]; // TODO: forces a rerender. need a better way to do this
 			}
 		}
 		console.log('onmount done: ', questionaire);
@@ -218,7 +211,7 @@
 			{#if dataIsCurrent === true}
 				<Button
 					type="button"
-					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 					on:click={() => {
 						console.log('dataiscurrent click');
 						for (let element of questionaire) {
@@ -235,7 +228,7 @@
 				</Button>
 			{:else}
 				<Button
-					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 					type="submit">{$_('userData.submitButtonLabel')}</Button
 				>
 			{/if}

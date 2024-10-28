@@ -1,6 +1,4 @@
 <script lang="ts">
-	// TODO: make this use runes mode, make it analogour to data input,  //
-	// simplify where possible
 	import { Radio, RadioButton } from 'flowbite-svelte';
 	import { createEventDispatcher } from 'svelte';
 
