@@ -1,6 +1,10 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
+	import { updateI18N } from '$lib/client/services.gen';
+	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
+	import { getI18nJson, getTranslations } from '$lib/i18n';
+	import { languages } from '$lib/stores/langStore';
 	import {
 		Accordion,
 		AccordionItem,
@@ -8,21 +12,10 @@
 		Card,
 		Input,
 		InputAddon,
-		Label,
-		P,
-		Table,
-		TableBody,
-		TableBodyCell,
-		TableBodyRow,
-		TableHead,
-		TableHeadCell
+		Label
 	} from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { getI18nJson, getTranslations } from '$lib/i18n';
-	import { languages } from '$lib/stores/langStore';
-	import { updateI18N } from '$lib/client/services.gen';
-	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
 	import de from '../../../locales/de.json';
 
 	type Translation = Record<string, Record<string, string>>;

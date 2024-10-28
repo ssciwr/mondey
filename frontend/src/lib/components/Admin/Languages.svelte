@@ -6,7 +6,6 @@
 	import DeleteButton from '$lib/components/Admin/DeleteButton.svelte';
 	import DeleteModal from '$lib/components/Admin/DeleteModal.svelte';
 	import { getTranslations } from '$lib/i18n';
-	import { languages } from '$lib/stores/langStore';
 	import type { SelectOptionType } from 'flowbite-svelte';
 	import {
 		Card,
@@ -19,7 +18,7 @@
 		TableHeadCell
 	} from 'flowbite-svelte';
 	import ISO6391 from 'iso-639-1';
-	import { _ } from 'svelte-i18n';
+	import { _, locales } from 'svelte-i18n';
 
 	const langCodes = ISO6391.getAllCodes();
 	const langNames = ISO6391.getAllNativeNames();
@@ -64,7 +63,7 @@
 			<TableHeadCell>Actions</TableHeadCell>
 		</TableHead>
 		<TableBody>
-			{#each Object.entries($languages) as [lang_id, lang]}
+			{#each Object.entries($locales) as [lang_id, lang]}
 				{console.log('languages: ', lang, lang_id)}
 				<TableBodyRow>
 					<TableBodyCell>

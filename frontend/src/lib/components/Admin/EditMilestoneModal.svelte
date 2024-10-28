@@ -1,14 +1,13 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-	import { InputAddon, Textarea, Label, ButtonGroup, Fileupload, Modal } from 'flowbite-svelte';
-	import { languages } from '$lib/stores/langStore';
-	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
-	import CancelButton from '$lib/components/Admin/CancelButton.svelte';
-	import { _ } from 'svelte-i18n';
-	import type { MilestoneAdmin } from '$lib/client/types.gen';
 	import { refreshMilestoneGroups } from '$lib/admin.svelte';
 	import { updateMilestone, uploadMilestoneImage } from '$lib/client/services.gen';
+	import type { MilestoneAdmin } from '$lib/client/types.gen';
+	import CancelButton from '$lib/components/Admin/CancelButton.svelte';
+	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
+	import { ButtonGroup, Fileupload, InputAddon, Label, Modal, Textarea } from 'flowbite-svelte';
+	import { _, locales } from 'svelte-i18n';
 
 	let { open = $bindable(false), milestone }: { open: boolean; milestone: MilestoneAdmin | null } =
 		$props();
@@ -54,7 +53,8 @@
 			{@const title = $_(`admin.${textKey}`)}
 			<div class="mb-5">
 				<Label class="mb-2">{title}</Label>
-				{#each Object.entries($languages) as [lang, lang_id]}
+				{#each Object.entries($locales) as [lang, lang_id]}
+					{console.log('lang, lang_id', lang, lang_id)}
 					<div class="mb-1">
 						<ButtonGroup class="w-full">
 							<InputAddon>{lang}</InputAddon>

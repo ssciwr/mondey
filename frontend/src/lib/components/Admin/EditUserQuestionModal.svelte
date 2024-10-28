@@ -7,7 +7,6 @@
 	import CancelButton from '$lib/components/Admin/CancelButton.svelte';
 	import InputPreview from '$lib/components/Admin/InputPreview.svelte';
 	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
-	import { languages } from '$lib/stores/langStore';
 	import {
 		Badge,
 		Button,
@@ -21,7 +20,7 @@
 		Textarea,
 		type SelectOptionType
 	} from 'flowbite-svelte';
-	import { _ } from 'svelte-i18n';
+	import { _, locales } from 'svelte-i18n';
 
 	let {
 		open = $bindable(false),
@@ -42,7 +41,7 @@
 			return;
 		}
 		const values = userQuestion.options.split(';');
-		for (const lang_id of $languages) {
+		for (const lang_id of $locales) {
 			const items = userQuestion.text[lang_id].options.split(';');
 			userQuestion.text[lang_id].options_json = JSON.stringify(
 				values.map(function (value, index) {
@@ -139,7 +138,7 @@
 						<Label class="mb-2">Preview</Label>
 						<div class="flex flex-row">
 							<ButtonGroup class="mb-2 mr-2">
-								{#each $languages as lang}
+								{#each $locales as lang}
 									<Button
 										checked={preview_lang === lang}
 										on:click={(e) => {

@@ -10,7 +10,7 @@
 		TableHeadCell,
 		Card
 	} from 'flowbite-svelte';
-	import { _ } from 'svelte-i18n';
+	import { _, locales } from 'svelte-i18n';
 	import ChevronUpOutline from 'flowbite-svelte-icons/ChevronUpOutline.svelte';
 	import ChevronDownOutline from 'flowbite-svelte-icons/ChevronDownOutline.svelte';
 	import EditMilestoneGroupModal from '$lib/components/Admin/EditMilestoneGroupModal.svelte';
@@ -19,7 +19,6 @@
 	import AddButton from '$lib/components/Admin/AddButton.svelte';
 	import EditButton from '$lib/components/Admin/EditButton.svelte';
 	import DeleteButton from '$lib/components/Admin/DeleteButton.svelte';
-	import { lang_id } from '$lib/stores/langStore';
 	import { milestoneGroups } from '$lib/stores/adminStore';
 	import { refreshMilestoneGroups, milestoneGroupImageUrl } from '$lib/admin.svelte';
 	import {

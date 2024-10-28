@@ -1,31 +1,30 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { updateMilestoneAnswer } from '$lib/client/services.gen';
+	import type {
+		MilestoneAnswerSessionPublic,
+		MilestoneGroupPublic,
+		MilestonePublic
+	} from '$lib/client/types.gen';
+	import MilestoneButton from '$lib/components/MilestoneButton.svelte';
 	import {
-		P,
+		Accordion,
+		AccordionItem,
 		Breadcrumb,
 		BreadcrumbItem,
-		AccordionItem,
-		Accordion,
 		Button,
-		Checkbox
+		Checkbox,
+		P
 	} from 'flowbite-svelte';
 	import {
-		QuestionCircleSolid,
-		InfoCircleSolid,
+		ArrowLeftOutline,
 		ArrowRightOutline,
-		ArrowLeftOutline
+		InfoCircleSolid,
+		QuestionCircleSolid
 	} from 'flowbite-svelte-icons';
-	import type {
-		MilestoneGroupPublic,
-		MilestonePublic,
-		MilestoneAnswerSessionPublic
-	} from '$lib/client/types.gen';
-	import { updateMilestoneAnswer } from '$lib/client/services.gen';
-	import MilestoneButton from '$lib/components/MilestoneButton.svelte';
-	import { lang_id } from '$lib/stores/langStore';
-	import { _ } from 'svelte-i18n';
+	import { onMount } from 'svelte';
+	import { _, locales } from 'svelte-i18n';
 
 	let {
 		milestoneGroup = undefined,
