@@ -20,7 +20,6 @@ from mondey_backend.main import create_app
 from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Language
 from mondey_backend.models.milestones import Milestone
-from mondey_backend.models.milestones import MilestoneAgeGroup
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroup
@@ -71,11 +70,8 @@ def session():
         lang_ids = ["de", "en", "fr"]
         for lang_id in lang_ids:
             session.add(Language(id=lang_id))
-        # add two milestone age groups
-        session.add(MilestoneAgeGroup(months_min=0, months_max=36))
-        session.add(MilestoneAgeGroup(months_min=36, months_max=72))
         # add a milestone group with 3 milestones
-        session.add(MilestoneGroup(order=2, age_group_id=1))
+        session.add(MilestoneGroup(order=2))
         for lang_id in lang_ids:
             lbl = f"g1_{lang_id}"
             session.add(
@@ -98,7 +94,7 @@ def session():
                     )
                 )
         # add a second milestone group with 2 milestones
-        session.add(MilestoneGroup(order=1, age_group_id=1))
+        session.add(MilestoneGroup(order=1))
         for lang_id in lang_ids:
             lbl = f"g1_{lang_id}"
             session.add(
@@ -161,16 +157,11 @@ def session():
             MilestoneAnswerSession(
                 child_id=1,
                 user_id=1,
-                age_group_id=1,
                 created_at=datetime.datetime(today.year - 1, 1, 1),
             )
         )
         # add another (current) milestone answer session for child 1 / user 1 with 2 answers
-        session.add(
-            MilestoneAnswerSession(
-                child_id=1, user_id=1, age_group_id=1, created_at=today
-            )
-        )
+        session.add(MilestoneAnswerSession(child_id=1, user_id=1, created_at=today))
         # add two milestone answers
         session.add(MilestoneAnswer(answer_session_id=2, milestone_id=1, answer=0))
         session.add(MilestoneAnswer(answer_session_id=2, milestone_id=2, answer=3))
@@ -179,7 +170,6 @@ def session():
             MilestoneAnswerSession(
                 child_id=3,
                 user_id=3,
-                age_group_id=2,
                 created_at=datetime.datetime(today.year - 1, 1, 1),
             )
         )
@@ -447,7 +437,6 @@ def milestone_group1():
 def milestone_group_admin1():
     return {
         "id": 1,
-        "age_group_id": 1,
         "order": 2,
         "text": {
             "de": {
@@ -656,7 +645,6 @@ def milestone_group2():
 def milestone_group_admin2():
     return {
         "id": 2,
-        "age_group_id": 1,
         "order": 1,
         "text": {
             "de": {

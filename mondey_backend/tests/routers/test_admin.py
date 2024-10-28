@@ -64,49 +64,20 @@ def test_update_i18n_invalid_json(admin_client: TestClient, static_dir: pathlib.
     assert response.status_code == 422
 
 
-def test_get_milestone_groups_age_group_1(
+def test_get_milestone_groups(
     admin_client: TestClient, milestone_group_admin1: dict, milestone_group_admin2: dict
 ):
-    response = admin_client.get("/admin/milestone-groups/?milestone_age_group_id=1")
+    response = admin_client.get("/admin/milestone-groups/")
     assert response.status_code == 200
     assert len(response.json()) == 2
     assert response.json() == [milestone_group_admin2, milestone_group_admin1]
 
 
-def test_get_milestone_groups_age_group_2(
-    admin_client: TestClient, milestone_group_admin1: dict, milestone_group_admin2: dict
-):
-    response = admin_client.get("/admin/milestone-groups/?milestone_age_group_id=2")
-    assert response.status_code == 200
-    assert response.json() == []
-
-
-def test_create_update_and_delete_milestone_age_group(admin_client: TestClient):
-    assert admin_client.get("/milestone-age-groups/").json()[-1]["id"] == 2
-    response = admin_client.post(
-        "/admin/milestone-age-groups/", json={"months_min": 73, "months_max": 75}
-    )
-    assert response.status_code == 200
-    assert response.json() == {"id": 3, "months_min": 73, "months_max": 75}
-    assert admin_client.get("/milestone-age-groups/").json()[-1] == response.json()
-    response = admin_client.put(
-        "/admin/milestone-age-groups/",
-        json={"id": 3, "months_min": 97, "months_max": 111},
-    )
-    assert response.status_code == 200
-    assert response.json() == {"id": 3, "months_min": 97, "months_max": 111}
-    assert admin_client.get("/milestone-age-groups/").json()[-1] == response.json()
-    response = admin_client.delete("/admin/milestone-age-groups/3")
-    assert response.status_code == 200
-    assert admin_client.get("/milestone-age-groups/").json()[-1]["id"] == 2
-
-
 def test_post_milestone_group(admin_client: TestClient):
-    response = admin_client.post("/admin/milestone-groups/1")
+    response = admin_client.post("/admin/milestone-groups/")
     assert response.status_code == 200
     assert response.json() == {
         "id": 3,
-        "age_group_id": 1,
         "order": 0,
         "text": {
             "de": {

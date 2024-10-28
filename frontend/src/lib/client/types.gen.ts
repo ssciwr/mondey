@@ -79,17 +79,6 @@ export type MilestoneAdmin = {
 	images?: Array<MilestoneImage>;
 };
 
-export type MilestoneAgeGroupCreate = {
-	months_min: number;
-	months_max: number;
-};
-
-export type MilestoneAgeGroupPublic = {
-	months_min: number;
-	months_max: number;
-	id: number;
-};
-
 export type MilestoneAnswerPublic = {
 	milestone_id: number;
 	answer: number;
@@ -98,7 +87,6 @@ export type MilestoneAnswerPublic = {
 export type MilestoneAnswerSessionPublic = {
 	id: number;
 	child_id: number;
-	age_group_id: number;
 	created_at: string;
 	answers: {
 		[key: string]: MilestoneAnswerPublic;
@@ -107,7 +95,6 @@ export type MilestoneAnswerSessionPublic = {
 
 export type MilestoneGroupAdmin = {
 	id: number;
-	age_group_id: number;
 	order: number;
 	text?: {
 		[key: string]: MilestoneGroupText;
@@ -270,15 +257,9 @@ export type GetMilestoneResponse = MilestonePublic;
 
 export type GetMilestoneError = HTTPValidationError;
 
-export type GetMilestoneGroupsData = {
-	query: {
-		milestone_age_group_id: number;
-	};
-};
-
 export type GetMilestoneGroupsResponse = Array<MilestoneGroupPublic>;
 
-export type GetMilestoneGroupsError = HTTPValidationError;
+export type GetMilestoneGroupsError = unknown;
 
 export type GetMilestoneGroupData = {
 	path: {
@@ -289,10 +270,6 @@ export type GetMilestoneGroupData = {
 export type GetMilestoneGroupResponse = MilestoneGroupPublic;
 
 export type GetMilestoneGroupError = HTTPValidationError;
-
-export type GetMilestoneAgeGroupsResponse = Array<MilestoneAgeGroupPublic>;
-
-export type GetMilestoneAgeGroupsError = unknown;
 
 export type GetUserQuestionsResponse = Array<UserQuestionPublic>;
 
@@ -331,51 +308,13 @@ export type UpdateI18NResponse = unknown;
 
 export type UpdateI18NError = HTTPValidationError;
 
-export type UpdateMilestoneAgeGroupData = {
-	body: MilestoneAgeGroupPublic;
-};
-
-export type UpdateMilestoneAgeGroupResponse = MilestoneAgeGroupPublic;
-
-export type UpdateMilestoneAgeGroupError = HTTPValidationError;
-
-export type CreateMilestoneAgeGroupData = {
-	body: MilestoneAgeGroupCreate;
-};
-
-export type CreateMilestoneAgeGroupResponse = MilestoneAgeGroupPublic;
-
-export type CreateMilestoneAgeGroupError = HTTPValidationError;
-
-export type DeleteMilestoneAgeGroupData = {
-	path: {
-		milestone_age_group_id: number;
-	};
-};
-
-export type DeleteMilestoneAgeGroupResponse = unknown;
-
-export type DeleteMilestoneAgeGroupError = HTTPValidationError;
-
-export type GetMilestoneGroupsAdminData = {
-	query: {
-		milestone_age_group_id: number;
-	};
-};
-
 export type GetMilestoneGroupsAdminResponse = Array<MilestoneGroupAdmin>;
 
-export type GetMilestoneGroupsAdminError = HTTPValidationError;
-
-export type CreateMilestoneGroupAdminData = {
-	path: {
-		milestone_age_group_id: number;
-	};
-};
+export type GetMilestoneGroupsAdminError = unknown;
 
 export type CreateMilestoneGroupAdminResponse = MilestoneGroupAdmin;
 
-export type CreateMilestoneGroupAdminError = HTTPValidationError;
+export type CreateMilestoneGroupAdminError = unknown;
 
 export type UpdateMilestoneGroupAdminData = {
 	body: MilestoneGroupAdmin;

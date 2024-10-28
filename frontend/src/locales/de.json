@@ -20,7 +20,6 @@
 		"languages": "Sprachen",
 		"milestones": "Meilensteine",
 		"milestone-groups": "Meilensteingruppen",
-		"milestone-age-groups": "Meilenstein-Altersgruppen",
 		"translations": "Übersetzungen",
 		"user-questions": "Benutzerfragen",
 		"question": "Frage",
@@ -45,7 +44,8 @@
 		"editUserQuestionTitle": "Frage an Benutzer editieren"
 	},
 	"researcher": {
-		"title": "Wissenschaft"
+		"title": "Wissenschaft",
+		"images": "Bilder"
 	},
 	"registration": {
 		"heading": "Als neuer Benutzer registrieren",

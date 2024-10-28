@@ -11,7 +11,7 @@ class TestMilestones:
         assert response.status_code == 200
         assert response.json() == ["de", "en", "fr"]
 
-    def test_get_milestone_groups_age_group_1(
+    def test_get_milestone_groups(
         self,
         client_type: str,
         milestone_group1: dict,
@@ -19,29 +19,10 @@ class TestMilestones:
         request: pytest.FixtureRequest,
     ):
         client = request.getfixturevalue(client_type)
-        response = client.get("/milestone-groups/?milestone_age_group_id=1")
+        response = client.get("/milestone-groups/")
         assert response.status_code == 200
         assert len(response.json()) == 2
         assert response.json() == [milestone_group2, milestone_group1]
-
-    def test_get_milestone_groups_age_group_2(
-        self,
-        client_type: str,
-        request: pytest.FixtureRequest,
-    ):
-        client = request.getfixturevalue(client_type)
-        response = client.get("/milestone-groups/?milestone_age_group_id=2")
-        assert response.status_code == 200
-        assert response.json() == []
-
-    def test_get_milestone_groups_invalid_age_group(
-        self,
-        client_type: str,
-        request: pytest.FixtureRequest,
-    ):
-        client = request.getfixturevalue(client_type)
-        response = client.get("/milestone-groups/?milestone_age_group_id=67")
-        assert response.status_code == 404
 
     def test_get_milestone_group(
         self,
@@ -64,19 +45,3 @@ class TestMilestones:
         client = request.getfixturevalue(client_type)
         response = client.get("/milestone-groups/99")
         assert response.status_code == 404
-
-    def test_get_milestone_age_groups(
-        self,
-        client_type: str,
-        milestone_group1: dict,
-        milestone_group2: dict,
-        request: pytest.FixtureRequest,
-    ):
-        client = request.getfixturevalue(client_type)
-        response = client.get("/milestone-age-groups/")
-        assert response.status_code == 200
-        assert len(response.json()) == 2
-        assert response.json() == [
-            {"id": 1, "months_min": 0, "months_max": 36},
-            {"id": 2, "months_min": 36, "months_max": 72},
-        ]

@@ -284,42 +284,6 @@ export const MilestoneAdminSchema = {
 	title: 'MilestoneAdmin'
 } as const;
 
-export const MilestoneAgeGroupCreateSchema = {
-	properties: {
-		months_min: {
-			type: 'integer',
-			title: 'Months Min'
-		},
-		months_max: {
-			type: 'integer',
-			title: 'Months Max'
-		}
-	},
-	type: 'object',
-	required: ['months_min', 'months_max'],
-	title: 'MilestoneAgeGroupCreate'
-} as const;
-
-export const MilestoneAgeGroupPublicSchema = {
-	properties: {
-		months_min: {
-			type: 'integer',
-			title: 'Months Min'
-		},
-		months_max: {
-			type: 'integer',
-			title: 'Months Max'
-		},
-		id: {
-			type: 'integer',
-			title: 'Id'
-		}
-	},
-	type: 'object',
-	required: ['months_min', 'months_max', 'id'],
-	title: 'MilestoneAgeGroupPublic'
-} as const;
-
 export const MilestoneAnswerPublicSchema = {
 	properties: {
 		milestone_id: {
@@ -346,10 +310,6 @@ export const MilestoneAnswerSessionPublicSchema = {
 			type: 'integer',
 			title: 'Child Id'
 		},
-		age_group_id: {
-			type: 'integer',
-			title: 'Age Group Id'
-		},
 		created_at: {
 			type: 'string',
 			format: 'date-time',
@@ -364,7 +324,7 @@ export const MilestoneAnswerSessionPublicSchema = {
 		}
 	},
 	type: 'object',
-	required: ['id', 'child_id', 'age_group_id', 'created_at', 'answers'],
+	required: ['id', 'child_id', 'created_at', 'answers'],
 	title: 'MilestoneAnswerSessionPublic'
 } as const;
 
@@ -373,10 +333,6 @@ export const MilestoneGroupAdminSchema = {
 		id: {
 			type: 'integer',
 			title: 'Id'
-		},
-		age_group_id: {
-			type: 'integer',
-			title: 'Age Group Id'
 		},
 		order: {
 			type: 'integer',
@@ -400,7 +356,7 @@ export const MilestoneGroupAdminSchema = {
 		}
 	},
 	type: 'object',
-	required: ['id', 'age_group_id', 'order'],
+	required: ['id', 'order'],
 	title: 'MilestoneGroupAdmin'
 } as const;
 
