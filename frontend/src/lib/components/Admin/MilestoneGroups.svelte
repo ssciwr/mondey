@@ -1,26 +1,7 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-	import {
-		Table,
-		TableBody,
-		TableBodyCell,
-		TableBodyRow,
-		TableHead,
-		TableHeadCell,
-		Card
-	} from 'flowbite-svelte';
-	import { _, locales } from 'svelte-i18n';
-	import ChevronUpOutline from 'flowbite-svelte-icons/ChevronUpOutline.svelte';
-	import ChevronDownOutline from 'flowbite-svelte-icons/ChevronDownOutline.svelte';
-	import EditMilestoneGroupModal from '$lib/components/Admin/EditMilestoneGroupModal.svelte';
-	import EditMilestoneModal from '$lib/components/Admin/EditMilestoneModal.svelte';
-	import DeleteModal from '$lib/components/Admin/DeleteModal.svelte';
-	import AddButton from '$lib/components/Admin/AddButton.svelte';
-	import EditButton from '$lib/components/Admin/EditButton.svelte';
-	import DeleteButton from '$lib/components/Admin/DeleteButton.svelte';
-	import { milestoneGroups } from '$lib/stores/adminStore';
-	import { refreshMilestoneGroups, milestoneGroupImageUrl } from '$lib/admin.svelte';
+	import { milestoneGroupImageUrl, refreshMilestoneGroups } from '$lib/admin.svelte';
 	import {
 		createMilestone,
 		createMilestoneGroupAdmin,
@@ -28,7 +9,26 @@
 		deleteMilestoneGroupAdmin
 	} from '$lib/client/services.gen';
 	import type { MilestoneAdmin, MilestoneGroupAdmin } from '$lib/client/types.gen';
+	import AddButton from '$lib/components/Admin/AddButton.svelte';
+	import DeleteButton from '$lib/components/Admin/DeleteButton.svelte';
+	import DeleteModal from '$lib/components/Admin/DeleteModal.svelte';
+	import EditButton from '$lib/components/Admin/EditButton.svelte';
+	import EditMilestoneGroupModal from '$lib/components/Admin/EditMilestoneGroupModal.svelte';
+	import EditMilestoneModal from '$lib/components/Admin/EditMilestoneModal.svelte';
+	import { milestoneGroups } from '$lib/stores/adminStore';
+	import {
+		Card,
+		Table,
+		TableBody,
+		TableBodyCell,
+		TableBodyRow,
+		TableHead,
+		TableHeadCell
+	} from 'flowbite-svelte';
+	import ChevronDownOutline from 'flowbite-svelte-icons/ChevronDownOutline.svelte';
+	import ChevronUpOutline from 'flowbite-svelte-icons/ChevronUpOutline.svelte';
 	import { onMount } from 'svelte';
+	import { _, locale } from 'svelte-i18n';
 
 	let { milestone_age_group_id }: { milestone_age_group_id: number } = $props();
 
@@ -128,7 +128,7 @@
 			</TableHead>
 			<TableBody>
 				{#each $milestoneGroups[`${milestone_age_group_id}`] as milestoneGroup, groupIndex (milestoneGroup.id)}
-					{@const groupTitle = milestoneGroup.text[$lang_id]?.title}
+					{@const groupTitle = milestoneGroup.text[$$locale]?.title}
 					<TableBodyRow
 						on:click={() => {
 							toggleOpenGroupIndex(groupIndex);
@@ -181,7 +181,7 @@
 									</TableHead>
 									<TableBody>
 										{#each milestoneGroup.milestones as milestone (milestone.id)}
-											{@const milestoneTitle = milestone?.text[$lang_id]?.title}
+											{@const milestoneTitle = milestone?.text[$locale]?.title}
 											<TableBodyRow>
 												<TableBodyCell>
 													{#if milestone?.images?.length}

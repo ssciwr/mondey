@@ -24,7 +24,7 @@
 		QuestionCircleSolid
 	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
-	import { _, locales } from 'svelte-i18n';
+	import { _ } from 'svelte-i18n';
 
 	let {
 		milestoneGroup = undefined,
@@ -129,7 +129,7 @@
 				<BreadcrumbItem href="#">{$_('milestone.milestones')}</BreadcrumbItem>
 				<!-- reload below is a temporary hack for demo purposes -->
 				<BreadcrumbItem href="javascript:window.location.reload(true)"
-					>{milestoneGroup.text[$lang_id].title}</BreadcrumbItem
+					>{milestoneGroup.text[$locale].title}</BreadcrumbItem
 				>
 				<BreadcrumbItem
 					>{currentMilestoneIndex + 1} / {milestoneGroup.milestones.length}</BreadcrumbItem
@@ -150,9 +150,9 @@
 				</div>
 				<div class="m-2 md:m-4">
 					<h2 class="mb-2 text-2xl font-bold text-gray-700 dark:text-gray-400">
-						{currentMilestone.text[$lang_id].title}
+						{currentMilestone.text[$locale].title}
 					</h2>
-					<P>{currentMilestone.text[$lang_id].desc}</P>
+					<P>{currentMilestone.text[$locale].desc}</P>
 					<Accordion flush>
 						<AccordionItem>
 							<span slot="header" class="flex gap-2 text-base">
@@ -160,7 +160,7 @@
 								<span>{$_('milestone.observation')}</span>
 							</span>
 							<P>
-								{currentMilestone.text[$lang_id].obs}
+								{currentMilestone.text[$locale].obs}
 							</P>
 						</AccordionItem>
 						<AccordionItem>
@@ -169,7 +169,7 @@
 								<span>{$_('milestone.help')}</span>
 							</span>
 							<P>
-								{currentMilestone.text[$lang_id].help}
+								{currentMilestone.text[$locale].help}
 							</P>
 						</AccordionItem>
 					</Accordion>
