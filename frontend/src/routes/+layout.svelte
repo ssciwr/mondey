@@ -19,12 +19,11 @@
 
 <Navbar>
 	<NavBrand href={base}>
-		<img src={logo_light} class="block h-16 dark:hidden" alt="MONDEY Logo" />
-		<img src={logo_dark} class="hidden h-16 dark:block" alt="MONDEY Logo" />
+		<img src={logo_light} class="block mt-6 h-12 dark:hidden" alt="MONDEY Logo" />
+		<img src={logo_dark} class="hidden mt-6 h-12 dark:block" alt="MONDEY Logo" />
 	</NavBrand>
 	<NavHamburger />
-	<NavUl ulClass="flex space-x-4 text-lg ">
-		<NavLi href={base} active={true}>Home</NavLi>
+	<NavUl ulClass="flex items-center mt-8 space-x-14 text-lg ">
 		<NavLi href={base}>Aktuelles</NavLi>
 		<NavLi href={base}>Downloads</NavLi>
 		<NavLi href={base}>Kontakt</NavLi>
