@@ -3,6 +3,9 @@ import pathlib
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlmodel import select
+
+from mondey_backend.models.questions import UserQuestion
 
 
 def test_post_language(admin_client: TestClient):
@@ -335,25 +338,92 @@ def test_update_user_question_works(admin_client: TestClient):
 
     assert response.status_code == 200
 
+    assert response.json() == {
+        "id": 1,
+        "component": "textarea",
+        "type": "other_thing",
+        "order": 0,
+        "options": "some_options",
+        "text": {
+            "de": {
+                "options_json": "",
+                "user_question_id": 1,
+                "options": "",
+                "lang_id": "de",
+                "question": "",
+            },
+            "en": {
+                "options_json": "",
+                "user_question_id": 1,
+                "options": "",
+                "lang_id": "en",
+                "question": "",
+            },
+            "fr": {
+                "options_json": "",
+                "user_question_id": 1,
+                "options": "",
+                "lang_id": "fr",
+                "question": "",
+            },
+        },
+        "additional_option": "nothing",
+    }
 
-# def test_update_user_question_id_not_there():
-#     assert 3 == 5
+
+def test_update_user_question_id_not_there(admin_client: TestClient):
+    user_question_admin = {
+        "id": "5",
+        "component": "textarea",
+        "type": "other_thing",
+        "order": 0,
+        "options": "some_options",
+        "text": {
+            "de": {
+                "options_json": "",
+                "user_question_id": 1,
+                "options": "",
+                "lang_id": "de",
+                "question": "",
+            },
+            "en": {
+                "options_json": "",
+                "user_question_id": 1,
+                "options": "",
+                "lang_id": "en",
+                "question": "",
+            },
+            "fr": {
+                "options_json": "",
+                "user_question_id": 1,
+                "options": "",
+                "lang_id": "fr",
+                "question": "",
+            },
+        },
+        "additional_option": "nothing",
+    }
+
+    response = admin_client.put("/admin/user-questions", json=user_question_admin)
+
+    assert response.status_code == 404
 
 
-# def test_update_user_question_database_error():
-#     assert 3 == 5
+def test_delete_user_question_works(session, admin_client: TestClient):
+    response = admin_client.delete("/admin/user-questions/1")
+
+    assert response.status_code == 200
+    assert response.json() == {"ok": True}
+
+    user_questions = session.exec(select(UserQuestion)).all()
+    assert len(user_questions) == 1
+    assert user_questions[0].id == 2
 
 
-# def test_delete_user_question_works():
-#     assert 3 == 5
+def test_delete_user_question_id_not_there(admin_client: TestClient):
+    response = admin_client.delete("/admin/user-questions/12")
 
-
-# def test_delete_user_question_id_not_there():
-#     assert 3 == 5
-
-
-# def test_delete_user_question_database_error():
-#     assert 3 == 5
+    assert response.status_code == 404
 
 
 def test_get_child_question_admin_works(admin_client: TestClient, child_questions):
@@ -402,14 +472,6 @@ def test_create_child_question_works(admin_client: TestClient):
     }
 
 
-# def test_create_child_question_id_exists():
-#     assert 3 == 5
-
-
-# def test_create_child_question_id_database_error():
-#     assert 3 == 5
-
-
 # def test_update_child_question_works():
 #     assert 3 == 5
 
@@ -418,17 +480,9 @@ def test_create_child_question_works(admin_client: TestClient):
 #     assert 3 == 5
 
 
-# def test_update_child_question_database_error():
-#     assert 3 == 5
-
-
 # def test_delete_child_question_works():
 #     assert 3 == 5
 
 
 # def test_delete_child_question_id_not_there():
-#     assert 3 == 5
-
-
-# def test_delete_child_question_database_error():
 #     assert 3 == 5
