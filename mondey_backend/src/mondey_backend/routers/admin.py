@@ -49,7 +49,6 @@ def create_router() -> APIRouter:
                 status_code=400, detail=f"{language_id} language cannot be deleted"
             )
         language = get(session, Language, language_id)
-        print(" found language to delete: ", language)
         session.delete(language)
         session.commit()
         return {"ok": True}
