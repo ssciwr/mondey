@@ -1,4 +1,4 @@
-name: codegen and format
+name: codegen
 on:
   pull_request:
     branches:
@@ -41,10 +41,9 @@ jobs:
       - run: pnpm install
       - name: "Generate frontend fetch API client code"
         run: pnpm openapi-ts
-      - run: pnpm format
       - uses: EndBug/add-and-commit@v9
         with:
           add: "*"
           author_name: "github-actions[bot]"
           author_email: "github-actions[bot]@users.noreply.github.com"
-          message: "update openapi.json & openapi-ts client, run pnpm format"
+          message: "update openapi.json & openapi-ts client"

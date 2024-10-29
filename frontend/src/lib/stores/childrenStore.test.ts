@@ -92,7 +92,7 @@ describe('normal functionality', () => {
 		reset();
 		try {
 			await children.addChildObservation('alpha', 'childC', mockChildData3.observationData);
-		} catch (error: Error | unknown) {
+		} catch (error) {
 			expect((error as Error).message).toBe(
 				'Child token childC does not exist for user token alpha'
 			);
@@ -103,7 +103,7 @@ describe('normal functionality', () => {
 		reset();
 		try {
 			await children.addChildObservation('x', 'childC', mockChildData3.observationData);
-		} catch (error: Error | unknown) {
+		} catch (error) {
 			expect((error as Error).message).toBe('User token x not found');
 		}
 	});
@@ -118,7 +118,7 @@ describe('normal functionality', () => {
 		reset();
 		try {
 			await children.addChildData('alpha', 'childA', mockChildData3.childData);
-		} catch (error: Error | unknown) {
+		} catch (error) {
 			expect((error as Error).message).toBe(
 				'Child token childA already exists for user token alpha'
 			);
@@ -126,7 +126,7 @@ describe('normal functionality', () => {
 
 		try {
 			await children.addChildData('x', 'childA', mockChildData3.childData);
-		} catch (error: Error | unknown) {
+		} catch (error) {
 			expect((error as Error).message).toBe('User token x not found');
 		}
 	});
@@ -135,13 +135,13 @@ describe('normal functionality', () => {
 		reset();
 		try {
 			await children.removeChildData('x', 'childA');
-		} catch (error: Error | unknown) {
+		} catch (error) {
 			expect((error as Error).message).toBe('User token x not found');
 		}
 
 		try {
 			await children.removeChildData('alpha', 'notthere');
-		} catch (error: Error | unknown) {
+		} catch (error) {
 			expect((error as Error).message).toBe('Child token notthere not found for user token alpha');
 		}
 	});
@@ -167,13 +167,13 @@ describe('normal functionality', () => {
 
 		try {
 			await children.fetchObservationData('x', 'childA');
-		} catch (error: Error | unknown) {
+		} catch (error) {
 			expect((error as Error).message).toBe('No such user in the childrenstore');
 		}
 
 		try {
 			await children.fetchObservationData('alpha', 'unknown');
-		} catch (error: Error | unknown) {
+		} catch (error) {
 			expect((error as Error).message).toBe('No such child in the childrenstore for user alpha');
 		}
 	});
@@ -200,7 +200,7 @@ describe('normal functionality', () => {
 
 		try {
 			await children.fetchChildrenDataforUser('x');
-		} catch (error: Error | unknown) {
+		} catch (error) {
 			expect((error as Error).message).toBe('No such user in the childrenstore');
 		}
 	});
@@ -210,7 +210,7 @@ describe('normal functionality', () => {
 
 		try {
 			await children.fetchObservationDataForUser('x');
-		} catch (error: Error | unknown) {
+		} catch (error) {
 			expect((error as Error).message).toBe('No such user in the childrenstore');
 		}
 	});
