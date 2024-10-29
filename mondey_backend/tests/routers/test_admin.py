@@ -5,6 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import select
 
+from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import UserQuestion
 
 
@@ -257,7 +258,7 @@ def test_post_milestone_image(
 
 
 def test_get_user_question_admin_works(admin_client: TestClient, user_questions):
-    response = admin_client.get("/admin/user-questions")
+    response = admin_client.get("/admin/user-questions/")
 
     assert response.status_code == 200
 
@@ -266,7 +267,7 @@ def test_get_user_question_admin_works(admin_client: TestClient, user_questions)
 
 
 def test_create_user_question_works(admin_client: TestClient):
-    response = admin_client.post("/admin/user-questions")
+    response = admin_client.post("/admin/user-questions/")
     assert response.status_code == 200
     assert response.json() == {
         "id": 3,
@@ -303,7 +304,7 @@ def test_create_user_question_works(admin_client: TestClient):
 
 def test_update_user_question_works(admin_client: TestClient):
     user_question_admin = {
-        "id": "1",
+        "id": 1,
         "component": "textarea",
         "type": "other_thing",
         "order": 0,
@@ -334,7 +335,7 @@ def test_update_user_question_works(admin_client: TestClient):
         "additional_option": "nothing",
     }
 
-    response = admin_client.put("/admin/user-questions", json=user_question_admin)
+    response = admin_client.put("/admin/user-questions/", json=user_question_admin)
 
     assert response.status_code == 200
 
@@ -373,7 +374,7 @@ def test_update_user_question_works(admin_client: TestClient):
 
 def test_update_user_question_id_not_there(admin_client: TestClient):
     user_question_admin = {
-        "id": "5",
+        "id": 5,
         "component": "textarea",
         "type": "other_thing",
         "order": 0,
@@ -381,21 +382,21 @@ def test_update_user_question_id_not_there(admin_client: TestClient):
         "text": {
             "de": {
                 "options_json": "",
-                "user_question_id": 1,
+                "user_question_id": 5,
                 "options": "",
                 "lang_id": "de",
                 "question": "",
             },
             "en": {
                 "options_json": "",
-                "user_question_id": 1,
+                "user_question_id": 5,
                 "options": "",
                 "lang_id": "en",
                 "question": "",
             },
             "fr": {
                 "options_json": "",
-                "user_question_id": 1,
+                "user_question_id": 5,
                 "options": "",
                 "lang_id": "fr",
                 "question": "",
@@ -404,7 +405,7 @@ def test_update_user_question_id_not_there(admin_client: TestClient):
         "additional_option": "nothing",
     }
 
-    response = admin_client.put("/admin/user-questions", json=user_question_admin)
+    response = admin_client.put("/admin/user-questions/", json=user_question_admin)
 
     assert response.status_code == 404
 
@@ -427,16 +428,15 @@ def test_delete_user_question_id_not_there(admin_client: TestClient):
 
 
 def test_get_child_question_admin_works(admin_client: TestClient, child_questions):
-    response = admin_client.get("/admin/child-questions")
+    response = admin_client.get("/admin/child-questions/")
 
     assert response.status_code == 200
-
     assert [element["order"] for element in response.json()] == [0, 1]
     assert response.json() == child_questions
 
 
 def test_create_child_question_works(admin_client: TestClient):
-    response = admin_client.post("/admin/child-questions")
+    response = admin_client.post("/admin/child-questions/")
 
     assert response.status_code == 200
     assert response.json() == {
@@ -472,17 +472,88 @@ def test_create_child_question_works(admin_client: TestClient):
     }
 
 
-# def test_update_child_question_works():
-#     assert 3 == 5
+def test_update_child_question_works(admin_client: TestClient):
+    child_question_admin = {
+        "id": 2,
+        "component": "textarea",
+        "type": "other_thing",
+        "order": 0,
+        "options": "some_options",
+        "text": {
+            "de": {
+                "options_json": "",
+                "child_question_id": 2,
+                "options": "",
+                "lang_id": "de",
+                "question": "",
+            },
+            "en": {
+                "options_json": "",
+                "child_question_id": 2,
+                "options": "",
+                "lang_id": "en",
+                "question": "",
+            },
+            "fr": {
+                "options_json": "",
+                "child_question_id": 2,
+                "options": "",
+                "lang_id": "fr",
+                "question": "",
+            },
+        },
+        "additional_option": "nothing",
+    }
+    response = admin_client.put("/admin/child-questions", json=child_question_admin)
+    assert response.status_code == 200
 
 
-# def test_update_child_question_id_not_there():
-#     assert 3 == 5
+def test_update_child_question_id_not_there(admin_client: TestClient):
+    child_question_admin = {
+        "id": 5,
+        "component": "textarea",
+        "type": "other_thing",
+        "order": 0,
+        "options": "some_options",
+        "text": {
+            "de": {
+                "options_json": "",
+                "child_question_id": 5,
+                "options": "",
+                "lang_id": "de",
+                "question": "",
+            },
+            "en": {
+                "options_json": "",
+                "child_question_id": 5,
+                "options": "",
+                "lang_id": "en",
+                "question": "",
+            },
+            "fr": {
+                "options_json": "",
+                "child_question_id": 5,
+                "options": "",
+                "lang_id": "fr",
+                "question": "",
+            },
+        },
+        "additional_option": "nothing",
+    }
+    response = admin_client.put("/admin/child-questions/", json=child_question_admin)
+    assert response.status_code == 404
 
 
-# def test_delete_child_question_works():
-#     assert 3 == 5
+def test_delete_child_question_works(session, admin_client: TestClient):
+    response = admin_client.delete("/admin/child-questions/1")
+    assert response.status_code == 200
+    assert response.json() == {"ok": True}
+
+    child_questions = session.exec(select(ChildQuestion)).all()
+    assert len(child_questions) == 1
+    assert child_questions[0].id == 2
 
 
-# def test_delete_child_question_id_not_there():
-#     assert 3 == 5
+def test_delete_child_question_id_not_there(admin_client: TestClient):
+    response = admin_client.delete("/admin/child-questions/12")
+    assert response.status_code == 404
