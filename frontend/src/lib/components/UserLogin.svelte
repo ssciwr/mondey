@@ -3,16 +3,18 @@
 
 	import UserLoginUtil from '$lib/components//UserLoginUtil.svelte';
 	import AlertMessage from '$lib/components/AlertMessage.svelte';
-	import DataInput from '$lib/components/DataInput/DataInput.svelte';
 
 	import { goto } from '$app/navigation';
 	import { authCookieLogin, usersCurrentUser } from '$lib/client/services.gen';
 	import { type AuthCookieLoginData, type UserRead } from '$lib/client/types.gen';
 	import { currentUser } from '$lib/stores/userStore';
 	import { preventDefault } from '$lib/util';
-	import { Button, Card, Heading, Input } from 'flowbite-svelte';
+	import { Button, Card, Heading, Input, Label } from 'flowbite-svelte';
 	import { _ } from 'svelte-i18n';
 
+	// TODO: make the remember thing functional again
+
+	// FIXME: make use of the logic of the AdminUser structure and get rid of the UserStore
 	async function refresh(): Promise<string> {
 		const returned = await usersCurrentUser();
 		if (returned.error) {
@@ -30,8 +32,8 @@
 	async function submitData(): Promise<void> {
 		const loginData: AuthCookieLoginData = {
 			body: {
-				username: formData[0].value,
-				password: formData[1].value
+				username: username,
+				password: password
 			}
 		};
 
@@ -57,33 +59,9 @@
 	}
 
 	// form data and variables
-	let formData = [
-		{
-			component: Input,
-			value: '',
-			props: {
-				label: $_('login.usernameLabel'),
-				type: 'email',
-				placeholder: $_('login.usernameLabel'),
-				required: true,
-				id: 'username',
-				autocomplete: 'username'
-			}
-		},
-		{
-			component: Input,
-			value: '',
-			props: {
-				label: $_('login.passwordLabel'),
-				type: 'password',
-				placeholder: $_('login.passwordLabel'),
-				required: true,
-				id: 'password',
-				autocomplete: 'password'
-			}
-		}
-	];
 
+	let username: string = '';
+	let password: string = '';
 	let remember: boolean = false;
 	let showAlert: boolean = false;
 	let alertMessage: string = $_('login.badCredentials');
@@ -109,24 +87,37 @@
 		>
 
 		<form onsubmit={preventDefault(submitData)} class="m-2 mx-auto w-full flex-col space-y-6">
-			{#each formData as element}
-				<DataInput
-					component={element.component}
-					label={element.props.label}
-					bind:value={element.value}
-					properties={element.props}
-					eventHandlers={{
-						'on:change': element.onchange,
-						'on:blur': element.onblur,
-						'on:click': element.onclick
-					}}
+			<div class="space-y-4">
+				<Label for={'username'} class="font-semibold text-gray-700 dark:text-gray-400"
+					>{$_('login.usernameLabel')}</Label
+				>
+				<Input
+					type="email"
+					bind:value={username}
+					autocomplete="username"
+					id="username"
+					placeholder={$_('login.usernameLabel')}
+					required
 				/>
-			{/each}
+			</div>
+			<div class="space-y-4">
+				<Label for={'password'} class="font-semibold text-gray-700 dark:text-gray-400"
+					>{$_('login.passwordLabel')}</Label
+				>
+				<Input
+					type="password"
+					bind:value={password}
+					autocomplete="current-password"
+					id="password"
+					placeholder={$_('login.passwordLabel')}
+					required
+				/>
+			</div>
 
 			<UserLoginUtil cls="p-6 mb-3" bind:checked={remember} />
 
 			<Button
-				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+				class="dark:bg-primay-700 bg-primary-700 hover:bg-primary-800 dark:hover:bg-primary-800 w-full text-center text-sm text-white hover:text-white"
 				type="submit">{$_('login.submitButtonLabel')}</Button
 			>
 		</form>
@@ -135,7 +126,7 @@
 	<span class="container mx-auto w-full text-gray-700 dark:text-gray-400">Not registered?</span>
 	<a
 		href={`${base}/userLand/userRegistration`}
-		class="text-primary-700 hover:underline dark:text-primary-500"
+		class="text-primary-700 dark:text-primary-500 hover:underline"
 	>
 		Create account
 	</a>
