@@ -353,8 +353,7 @@ def test_get_child_question_admin_works(admin_client: TestClient):
 
     assert response.status_code == 200
 
-    assert [element["order"] for element in response.json()] == [1, 2]
-    print("response: ", response.json())
+    assert [element["order"] for element in response.json()] == [0, 1]
     assert response.json() == [
         {
             "id": 1,
@@ -369,13 +368,13 @@ def test_get_child_question_admin_works(admin_client: TestClient):
                     "lang_id": "de",
                     "options": "[x,y,z]",
                     "options_json": "",
-                    "question": "Wo sonst?",
+                    "question": "was?",
                 },
                 "en": {
                     "question_id": 1,
                     "lang_id": "en",
                     "options": "[1,2,3]",
-                    "question": "Where else?",
+                    "question": "what?",
                     "options_json": "",
                 },
             },
@@ -383,7 +382,7 @@ def test_get_child_question_admin_works(admin_client: TestClient):
         {
             "id": 2,
             "order": 1,
-            "component": "textarea",
+            "component": "select",
             "options": "[a2,b2,c2,other]",
             "additional_option": "other",
             "type": "text",
@@ -393,22 +392,18 @@ def test_get_child_question_admin_works(admin_client: TestClient):
                     "lang_id": "de",
                     "options": "[x2,y2,z2]",
                     "options_json": "",
-                    "question": "Was noch?",
+                    "question": "Wo?",
                 },
                 "en": {
                     "question_id": 2,
                     "lang_id": "en",
                     "options": "[12,22,32]",
-                    "question": "What else?",
+                    "question": "Where?",
                     "options_json": "",
                 },
             },
         },
     ]
-
-
-def test_get_child_question_admin_userid_not_there():
-    assert 3 == 5
 
 
 def test_create_child_question_works():

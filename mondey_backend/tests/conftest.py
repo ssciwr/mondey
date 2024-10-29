@@ -241,8 +241,18 @@ def session():
                 options="[a,b,c,other]",
                 additional_option="other",
                 text={
-                    "de": ChildQuestionText(question_id=1, lang_id=1, question="was?"),
-                    "en": ChildQuestionText(question_id=1, lang_id=2, question="what?"),
+                    "de": ChildQuestionText(
+                        question_id=1,
+                        lang_id="de",
+                        question="was?",
+                        options="[x,y,z]",
+                    ),
+                    "en": ChildQuestionText(
+                        question_id=1,
+                        lang_id="en",
+                        question="what?",
+                        options="[1,2,3]",
+                    ),
                 },
             ),
             ChildQuestion(
@@ -253,13 +263,15 @@ def session():
                 text={
                     "de": ChildQuestionText(
                         question_id=2,
-                        lang_id=1,
+                        lang_id="de",
                         question="Wo?",
+                        options="[x2,y2,z2]",
                     ),
                     "en": ChildQuestionText(
                         question_id=2,
-                        lang_id=2,
+                        lang_id="en",
                         question="Where?",
+                        options="[12,22,32]",
                     ),
                 },
             ),
