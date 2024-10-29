@@ -75,7 +75,6 @@ class UserAnswer(SQLModel, table=True):
         default=None, primary_key=True, foreign_key="userquestion.id"
     )
     answer: str
-    # flag that tells the frontend if the answer has been given via an  additional text field => won´t be correctly displayed otherwise
     additional_answer: str | None
 
 
