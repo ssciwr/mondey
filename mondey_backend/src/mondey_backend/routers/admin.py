@@ -172,6 +172,8 @@ def create_router() -> APIRouter:
         user_questions = session.exec(
             select(UserQuestion).order_by(col(UserQuestion.order))
         ).all()
+
+        print("user questions retrieved from database: ", user_questions)
         return user_questions
 
     @router.post("/user-questions/", response_model=UserQuestionAdmin)

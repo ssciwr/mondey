@@ -179,69 +179,72 @@ def session():
         )
         session.add(MilestoneAnswer(answer_session_id=3, milestone_id=7, answer=2))
 
-        # add user questions for user 1
-        session.add(
+        # add user questions for admin
+        user_questions = [
             UserQuestion(
                 id=1,
                 order=1,
                 options="[a,b,c,other]",
                 additional_option="other",
+                component="select",
                 text={
                     "de": UserQuestionText(
                         question_id=1,
-                        lang_id=1,
+                        lang_id="de",
                         options="[x,y,z]",
                         question="Wo sonst?",
+                        options_json="",
                     ),
                     "en": UserQuestionText(
                         question_id=1,
-                        lang_id=2,
+                        lang_id="en",
                         options="[1,2,3]",
                         question="Where else?",
+                        options_json="",
                     ),
                 },
-            )
-        )
-
-        session.add(
+            ),
             UserQuestion(
                 id=2,
                 order=2,
-                componet="textarea",
+                component="textarea",
                 options="[a2,b2,c2,other]",
                 additional_option="other",
                 text={
                     "de": UserQuestionText(
                         question_id=2,
-                        lang_id=1,
+                        lang_id="de",
                         options="[x2,y2,z2]",
                         question="Was noch?",
+                        options_json="",
                     ),
                     "en": UserQuestionText(
                         question_id=2,
-                        lang_id=2,
+                        lang_id="en",
                         options="[12,22,32]",
                         question="What else?",
+                        options_json="",
                     ),
                 },
-            )
-        )
+            ),
+        ]
+        for user_question in user_questions:
+            session.add(user_question)
+            for lang in user_question.text:
+                session.add(user_question.text[lang])
 
         # add child questions for user 1
-        session.add(
+        child_questions = [
             ChildQuestion(
                 id=1,
                 order=0,
                 options="[a,b,c,other]",
-                additional_option="",
+                additional_option="other",
                 text={
                     "de": ChildQuestionText(question_id=1, lang_id=1, question="was?"),
                     "en": ChildQuestionText(question_id=1, lang_id=2, question="what?"),
                 },
-            )
-        )
-
-        session.add(
+            ),
             ChildQuestion(
                 id=2,
                 order=1,
@@ -259,8 +262,13 @@ def session():
                         question="Where?",
                     ),
                 },
-            )
-        )
+            ),
+        ]
+
+        for child_question in child_questions:
+            session.add(child_question)
+            for lang in child_question.text:
+                session.add(child_question.text[lang])
 
         # add user answers for user 1
         session.add(
@@ -281,6 +289,7 @@ def session():
                 additional_answer="dolor sit",
             )
         )
+        session.commit()
 
         # add child answers for user 1
 

@@ -16,6 +16,10 @@ class QuestionTextBase(SQLModel):
 
 
 class QuestionText(QuestionTextBase):
+    question_id: int | None = Field(
+        default=None, foreign_key="question.id", primary_key=True
+    )
+
     lang_id: str | None = fixed_length_string_field(
         max_length=2, default=None, foreign_key="language.id", primary_key=True
     )
@@ -84,7 +88,7 @@ class ChildQuestionPublic(QuestionPublic):
 
 
 class UserQuestionAdmin(QuestionAdmin):
-    pass
+    text: Mapped[dict[str, UserQuestionText]] = dict_relationship(key="lang_id")
 
 
 class ChildQuestionAdmin(QuestionAdmin):
