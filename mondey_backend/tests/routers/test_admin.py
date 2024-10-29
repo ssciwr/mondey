@@ -251,12 +251,60 @@ def test_post_milestone_image(
 
 
 # tests for user questions
-def test_get_user_question_admin_works():
-    assert 3 == 5
 
 
-def test_get_user_question_admin_userid_not_there():
-    assert 3 == 5
+def test_get_user_question_admin_works(admin_client: TestClient):
+    response = admin_client.get("/admin/user-questions")
+
+    assert response.status_code == 200
+
+    assert [element["order"] for element in response.json()] == [1, 2]
+    assert response.json() == [
+        {
+            "id": 1,
+            "order": 1,
+            "component": "select",
+            "options": "[a,b,c,other]",
+            "additional_option": "other",
+            "type": "text",
+            "text": {
+                "de": {
+                    "question_id": "1",
+                    "lang_id": "1",
+                    "options": "[x,y,z]",
+                    "question": "Wo sonst?",
+                },
+                "en": {
+                    "question_id": "1",
+                    "lang_id": "2",
+                    "options": "[1,2,3]",
+                    "question": "Where else?",
+                },
+            },
+        },
+        {
+            "id": 2,
+            "order": 2,
+            "component": "textarea",
+            "options": "[a2,b2,c2,other]",
+            "additional_option": "other",
+            "type": "text",
+            "text": {
+                "de": {
+                    "question_id": "2",
+                    "lang_id": "1",
+                    "options": "[x2,y2,z2]",
+                    "question": "Was noch?",
+                },
+                "en": {
+                    "question_id": "2",
+                    "lang_id": "2",
+                    "options": "[12,22,32]",
+                    "question": "What else?",
+                },
+            },
+        },
+    ]
 
 
 def test_create_user_question_works():

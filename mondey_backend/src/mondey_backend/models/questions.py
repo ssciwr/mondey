@@ -16,7 +16,6 @@ class QuestionTextBase(SQLModel):
 
 
 class QuestionText(QuestionTextBase):
-    question_id: int | None
     lang_id: str | None = fixed_length_string_field(
         max_length=2, default=None, foreign_key="language.id", primary_key=True
     )

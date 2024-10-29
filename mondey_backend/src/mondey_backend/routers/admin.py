@@ -21,9 +21,10 @@ from ..models.milestones import MilestoneImage
 from ..models.milestones import MilestoneText
 from ..models.questions import ChildQuestion
 from ..models.questions import ChildQuestionAdmin
-from ..models.questions import QuestionText
+from ..models.questions import ChildQuestionText
 from ..models.questions import UserQuestion
 from ..models.questions import UserQuestionAdmin
+from ..models.questions import UserQuestionText
 from ..settings import app_settings
 from .utils import add
 from .utils import get
@@ -178,7 +179,9 @@ def create_router() -> APIRouter:
         user_question = UserQuestion()
         add(session, user_question)
         for language in session.exec(select(Language)).all():
-            session.add(QuestionText(question_id=user_question.id, lang_id=language.id))
+            session.add(
+                UserQuestionText(question_id=user_question.id, lang_id=language.id)
+            )
         session.commit()
         session.refresh(user_question)
         return user_question
@@ -218,7 +221,7 @@ def create_router() -> APIRouter:
         add(session, child_question)
         for language in session.exec(select(Language)).all():
             session.add(
-                QuestionText(question_id=child_question.id, lang_id=language.id)
+                ChildQuestionText(question_id=child_question.id, lang_id=language.id)
             )
         session.commit()
         session.refresh(child_question)
