@@ -22,6 +22,8 @@ import type {
 	GetMilestoneGroupResponse,
 	GetUserQuestionsError,
 	GetUserQuestionsResponse,
+	GetChildQuestionsError,
+	GetChildQuestionsResponse,
 	CreateLanguageData,
 	CreateLanguageError,
 	CreateLanguageResponse,
@@ -66,6 +68,16 @@ import type {
 	DeleteUserQuestionData,
 	DeleteUserQuestionError,
 	DeleteUserQuestionResponse,
+	GetChildQuestionsAdminError,
+	GetChildQuestionsAdminResponse,
+	UpdateChildQuestionData,
+	UpdateChildQuestionError,
+	UpdateChildQuestionResponse,
+	CreateChildQuestionError,
+	CreateChildQuestionResponse,
+	DeleteChildQuestionData,
+	DeleteChildQuestionError,
+	DeleteChildQuestionResponse,
 	UsersCurrentUserError,
 	UsersCurrentUserResponse,
 	UsersPatchCurrentUserData,
@@ -108,6 +120,11 @@ import type {
 	UpdateCurrentUserAnswersData,
 	UpdateCurrentUserAnswersError,
 	UpdateCurrentUserAnswersResponse,
+	GetCurrentChildrenAnswersError,
+	GetCurrentChildrenAnswersResponse,
+	UpdateCurrentChildrenAnswersData,
+	UpdateCurrentChildrenAnswersError,
+	UpdateCurrentChildrenAnswersResponse,
 	AuthCookieLoginData,
 	AuthCookieLoginError,
 	AuthCookieLoginResponse,
@@ -215,6 +232,22 @@ export const getUserQuestions = <ThrowOnError extends boolean = false>(
 	>({
 		...options,
 		url: '/user-questions/'
+	});
+};
+
+/**
+ * Get Child Questions
+ */
+export const getChildQuestions = <ThrowOnError extends boolean = false>(
+	options?: Options<unknown, ThrowOnError>
+) => {
+	return (options?.client ?? client).get<
+		GetChildQuestionsResponse,
+		GetChildQuestionsError,
+		ThrowOnError
+	>({
+		...options,
+		url: '/child-questions/'
 	});
 };
 
@@ -481,6 +514,70 @@ export const deleteUserQuestion = <ThrowOnError extends boolean = false>(
 };
 
 /**
+ * Get Child Questions Admin
+ */
+export const getChildQuestionsAdmin = <ThrowOnError extends boolean = false>(
+	options?: Options<unknown, ThrowOnError>
+) => {
+	return (options?.client ?? client).get<
+		GetChildQuestionsAdminResponse,
+		GetChildQuestionsAdminError,
+		ThrowOnError
+	>({
+		...options,
+		url: '/admin/child-questions/'
+	});
+};
+
+/**
+ * Update Child Question
+ */
+export const updateChildQuestion = <ThrowOnError extends boolean = false>(
+	options: Options<UpdateChildQuestionData, ThrowOnError>
+) => {
+	return (options?.client ?? client).put<
+		UpdateChildQuestionResponse,
+		UpdateChildQuestionError,
+		ThrowOnError
+	>({
+		...options,
+		url: '/admin/child-questions/'
+	});
+};
+
+/**
+ * Create Child Question
+ */
+export const createChildQuestion = <ThrowOnError extends boolean = false>(
+	options?: Options<unknown, ThrowOnError>
+) => {
+	return (options?.client ?? client).post<
+		CreateChildQuestionResponse,
+		CreateChildQuestionError,
+		ThrowOnError
+	>({
+		...options,
+		url: '/admin/child-questions/'
+	});
+};
+
+/**
+ * Delete Child Question
+ */
+export const deleteChildQuestion = <ThrowOnError extends boolean = false>(
+	options: Options<DeleteChildQuestionData, ThrowOnError>
+) => {
+	return (options?.client ?? client).delete<
+		DeleteChildQuestionResponse,
+		DeleteChildQuestionError,
+		ThrowOnError
+	>({
+		...options,
+		url: '/admin/child-questions/{child_question_id}'
+	});
+};
+
+/**
  * Users:Current User
  */
 export const usersCurrentUser = <ThrowOnError extends boolean = false>(
@@ -698,6 +795,38 @@ export const updateCurrentUserAnswers = <ThrowOnError extends boolean = false>(
 	>({
 		...options,
 		url: '/users/user-answers/'
+	});
+};
+
+/**
+ * Get Current Children Answers
+ */
+export const getCurrentChildrenAnswers = <ThrowOnError extends boolean = false>(
+	options?: Options<unknown, ThrowOnError>
+) => {
+	return (options?.client ?? client).get<
+		GetCurrentChildrenAnswersResponse,
+		GetCurrentChildrenAnswersError,
+		ThrowOnError
+	>({
+		...options,
+		url: '/users/children-answers/'
+	});
+};
+
+/**
+ * Update Current Children Answers
+ */
+export const updateCurrentChildrenAnswers = <ThrowOnError extends boolean = false>(
+	options: Options<UpdateCurrentChildrenAnswersData, ThrowOnError>
+) => {
+	return (options?.client ?? client).put<
+		UpdateCurrentChildrenAnswersResponse,
+		UpdateCurrentChildrenAnswersError,
+		ThrowOnError
+	>({
+		...options,
+		url: '/users/children-answers/'
 	});
 };
 
