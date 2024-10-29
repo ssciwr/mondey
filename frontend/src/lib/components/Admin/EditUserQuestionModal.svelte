@@ -43,7 +43,6 @@
 		const values = userQuestion.options.split(';');
 		for (const lang_id of $locales) {
 			const items = userQuestion.text[lang_id].options.split(';');
-			console.log('items: ', items);
 			userQuestion.text[lang_id].options_json = JSON.stringify(
 				values.map(function (value, index) {
 					return { value: value, name: items[index] };
