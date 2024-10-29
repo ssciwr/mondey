@@ -78,6 +78,10 @@ class UserQuestionPublic(QuestionPublic):
     pass
 
 
+class UserQuestionAdmin(QuestionAdmin):
+    text: Mapped[dict[str, UserQuestionText]] = dict_relationship(key="lang_id")
+
+
 # Child question classes
 class ChildQuestion(Question, table=True):
     text: Mapped[dict[str, ChildQuestionText]] = dict_relationship(key="lang_id")
@@ -85,10 +89,6 @@ class ChildQuestion(Question, table=True):
 
 class ChildQuestionPublic(QuestionPublic):
     pass
-
-
-class UserQuestionAdmin(QuestionAdmin):
-    text: Mapped[dict[str, UserQuestionText]] = dict_relationship(key="lang_id")
 
 
 class ChildQuestionAdmin(QuestionAdmin):

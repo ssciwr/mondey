@@ -202,6 +202,13 @@ def session():
                         question="Where else?",
                         options_json="",
                     ),
+                    "fr": UserQuestionText(
+                        question_id=1,
+                        lang_id="fr",
+                        options="[1,2,3]",
+                        question="french words",
+                        options_json="",
+                    ),
                 },
             ),
             UserQuestion(
@@ -223,6 +230,13 @@ def session():
                         lang_id="en",
                         options="[12,22,32]",
                         question="What else?",
+                        options_json="",
+                    ),
+                    "fr": UserQuestionText(
+                        question_id=2,
+                        lang_id="fr",
+                        options="[12,22,32]",
+                        question="french words",
                         options_json="",
                     ),
                 },
@@ -253,6 +267,12 @@ def session():
                         question="what?",
                         options="[1,2,3]",
                     ),
+                    "fr": ChildQuestionText(
+                        question_id=1,
+                        lang_id="fr",
+                        question="french...",
+                        options="[1,2,3]",
+                    ),
                 },
             ),
             ChildQuestion(
@@ -271,6 +291,12 @@ def session():
                         question_id=2,
                         lang_id="en",
                         question="Where?",
+                        options="[12,22,32]",
+                    ),
+                    "fr": ChildQuestionText(
+                        question_id=2,
+                        lang_id="fr",
+                        question="french...",
                         options="[12,22,32]",
                     ),
                 },
@@ -306,6 +332,142 @@ def session():
         # add child answers for user 1
 
         yield session
+
+
+@pytest.fixture
+def user_questions():
+    return [
+        {
+            "id": 1,
+            "order": 1,
+            "component": "select",
+            "options": "[a,b,c,other]",
+            "additional_option": "other",
+            "type": "text",
+            "text": {
+                "de": {
+                    "question_id": 1,
+                    "lang_id": "de",
+                    "options": "[x,y,z]",
+                    "options_json": "",
+                    "question": "Wo sonst?",
+                },
+                "en": {
+                    "question_id": 1,
+                    "lang_id": "en",
+                    "options": "[1,2,3]",
+                    "question": "Where else?",
+                    "options_json": "",
+                },
+                "fr": {
+                    "question_id": 1,
+                    "lang_id": "fr",
+                    "options": "[1,2,3]",
+                    "question": "french words",
+                    "options_json": "",
+                },
+            },
+        },
+        {
+            "id": 2,
+            "order": 2,
+            "component": "textarea",
+            "options": "[a2,b2,c2,other]",
+            "additional_option": "other",
+            "type": "text",
+            "text": {
+                "de": {
+                    "question_id": 2,
+                    "lang_id": "de",
+                    "options": "[x2,y2,z2]",
+                    "options_json": "",
+                    "question": "Was noch?",
+                },
+                "en": {
+                    "question_id": 2,
+                    "lang_id": "en",
+                    "options": "[12,22,32]",
+                    "question": "What else?",
+                    "options_json": "",
+                },
+                "fr": {
+                    "question_id": 2,
+                    "lang_id": "fr",
+                    "options": "[12,22,32]",
+                    "question": "french words",
+                    "options_json": "",
+                },
+            },
+        },
+    ]
+
+
+@pytest.fixture
+def child_questions():
+    return [
+        {
+            "id": 1,
+            "order": 0,
+            "component": "select",
+            "options": "[a,b,c,other]",
+            "additional_option": "other",
+            "type": "text",
+            "text": {
+                "de": {
+                    "question_id": 1,
+                    "lang_id": "de",
+                    "options": "[x,y,z]",
+                    "options_json": "",
+                    "question": "was?",
+                },
+                "en": {
+                    "question_id": 1,
+                    "lang_id": "en",
+                    "options": "[1,2,3]",
+                    "question": "what?",
+                    "options_json": "",
+                },
+                "fr": {
+                    "question_id": 1,
+                    "lang_id": "fr",
+                    "question": "french...",
+                    "options": "[1,2,3]",
+                    "options_json": "",
+                },
+            },
+        },
+        {
+            "id": 2,
+            "order": 1,
+            "component": "select",
+            "options": "[a2,b2,c2,other]",
+            "additional_option": "other",
+            "type": "text",
+            "text": {
+                "de": {
+                    "question_id": 2,
+                    "lang_id": "de",
+                    "options": "[x2,y2,z2]",
+                    "options_json": "",
+                    "question": "Wo?",
+                },
+                "en": {
+                    "question_id": 2,
+                    "lang_id": "en",
+                    "options": "[12,22,32]",
+                    "question": "Where?",
+                    "options_json": "",
+                },
+                "fr": {
+                    "question_id": 2,
+                    "lang_id": "fr",
+                    "question": "french...",
+                    "options": "[12,22,32]",
+                    "options_json": "",
+                },
+            },
+        },
+    ]
 
 
 @pytest.fixture

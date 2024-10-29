@@ -253,190 +253,182 @@ def test_post_milestone_image(
 # tests for user questions
 
 
-def test_get_user_question_admin_works(admin_client: TestClient):
+def test_get_user_question_admin_works(admin_client: TestClient, user_questions):
     response = admin_client.get("/admin/user-questions")
 
     assert response.status_code == 200
 
     assert [element["order"] for element in response.json()] == [1, 2]
-    print("response: ", response.json())
-    assert response.json() == [
-        {
-            "id": 1,
-            "order": 1,
-            "component": "select",
-            "options": "[a,b,c,other]",
-            "additional_option": "other",
-            "type": "text",
-            "text": {
-                "de": {
-                    "question_id": 1,
-                    "lang_id": "de",
-                    "options": "[x,y,z]",
-                    "options_json": "",
-                    "question": "Wo sonst?",
-                },
-                "en": {
-                    "question_id": 1,
-                    "lang_id": "en",
-                    "options": "[1,2,3]",
-                    "question": "Where else?",
-                    "options_json": "",
-                },
+    assert response.json() == user_questions
+
+
+def test_create_user_question_works(admin_client: TestClient):
+    response = admin_client.post("/admin/user-questions")
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": 3,
+        "order": 0,
+        "component": "select",
+        "type": "text",
+        "options": "",
+        "text": {
+            "de": {
+                "options_json": "",
+                "question_id": 3,
+                "options": "",
+                "lang_id": "de",
+                "question": "",
+            },
+            "en": {
+                "options_json": "",
+                "question_id": 3,
+                "options": "",
+                "lang_id": "en",
+                "question": "",
+            },
+            "fr": {
+                "options_json": "",
+                "question_id": 3,
+                "options": "",
+                "lang_id": "fr",
+                "question": "",
             },
         },
-        {
-            "id": 2,
-            "order": 2,
-            "component": "textarea",
-            "options": "[a2,b2,c2,other]",
-            "additional_option": "other",
-            "type": "text",
-            "text": {
-                "de": {
-                    "question_id": 2,
-                    "lang_id": "de",
-                    "options": "[x2,y2,z2]",
-                    "options_json": "",
-                    "question": "Was noch?",
-                },
-                "en": {
-                    "question_id": 2,
-                    "lang_id": "en",
-                    "options": "[12,22,32]",
-                    "question": "What else?",
-                    "options_json": "",
-                },
+        "additional_option": "",
+    }
+
+
+def test_update_user_question_works(admin_client: TestClient):
+    user_question_admin = {
+        "id": "1",
+        "component": "textarea",
+        "type": "other_thing",
+        "order": 0,
+        "options": "some_options",
+        "text": {
+            "de": {
+                "options_json": "",
+                "question_id": 1,
+                "options": "",
+                "lang_id": "de",
+                "question": "",
+            },
+            "en": {
+                "options_json": "",
+                "question_id": 1,
+                "options": "",
+                "lang_id": "en",
+                "question": "",
+            },
+            "fr": {
+                "options_json": "",
+                "question_id": 1,
+                "options": "",
+                "lang_id": "fr",
+                "question": "",
             },
         },
-    ]
+        "additional_option": "nothing",
+    }
+
+    response = admin_client.put("/admin/user-questions", json=user_question_admin)
+
+    assert response.status_code == 200
 
 
-def test_create_user_question_works():
-    assert 3 == 5
+# def test_update_user_question_id_not_there():
+#     assert 3 == 5
 
 
-def test_create_user_question_id_exists():
-    assert 3 == 5
+# def test_update_user_question_database_error():
+#     assert 3 == 5
 
 
-def test_create_user_question_id_database_error():
-    assert 3 == 5
+# def test_delete_user_question_works():
+#     assert 3 == 5
 
 
-def test_update_user_question_works():
-    assert 3 == 5
+# def test_delete_user_question_id_not_there():
+#     assert 3 == 5
 
 
-def test_update_user_question_id_not_there():
-    assert 3 == 5
+# def test_delete_user_question_database_error():
+#     assert 3 == 5
 
 
-def test_update_user_question_database_error():
-    assert 3 == 5
-
-
-def test_delete_user_question_works():
-    assert 3 == 5
-
-
-def test_delete_user_question_id_not_there():
-    assert 3 == 5
-
-
-def test_delete_user_question_database_error():
-    assert 3 == 5
-
-
-def test_get_child_question_admin_works(admin_client: TestClient):
+def test_get_child_question_admin_works(admin_client: TestClient, child_questions):
     response = admin_client.get("/admin/child-questions")
 
     assert response.status_code == 200
 
     assert [element["order"] for element in response.json()] == [0, 1]
-    assert response.json() == [
-        {
-            "id": 1,
-            "order": 0,
-            "component": "select",
-            "options": "[a,b,c,other]",
-            "additional_option": "other",
-            "type": "text",
-            "text": {
-                "de": {
-                    "question_id": 1,
-                    "lang_id": "de",
-                    "options": "[x,y,z]",
-                    "options_json": "",
-                    "question": "was?",
-                },
-                "en": {
-                    "question_id": 1,
-                    "lang_id": "en",
-                    "options": "[1,2,3]",
-                    "question": "what?",
-                    "options_json": "",
-                },
+    assert response.json() == child_questions
+
+
+def test_create_child_question_works(admin_client: TestClient):
+    response = admin_client.post("/admin/child-questions")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": 3,
+        "order": 0,
+        "component": "select",
+        "type": "text",
+        "options": "",
+        "text": {
+            "de": {
+                "options_json": "",
+                "question_id": 3,
+                "options": "",
+                "lang_id": "de",
+                "question": "",
+            },
+            "en": {
+                "options_json": "",
+                "question_id": 3,
+                "options": "",
+                "lang_id": "en",
+                "question": "",
+            },
+            "fr": {
+                "options_json": "",
+                "question_id": 3,
+                "options": "",
+                "lang_id": "fr",
+                "question": "",
             },
         },
-        {
-            "id": 2,
-            "order": 1,
-            "component": "select",
-            "options": "[a2,b2,c2,other]",
-            "additional_option": "other",
-            "type": "text",
-            "text": {
-                "de": {
-                    "question_id": 2,
-                    "lang_id": "de",
-                    "options": "[x2,y2,z2]",
-                    "options_json": "",
-                    "question": "Wo?",
-                },
-                "en": {
-                    "question_id": 2,
-                    "lang_id": "en",
-                    "options": "[12,22,32]",
-                    "question": "Where?",
-                    "options_json": "",
-                },
-            },
-        },
-    ]
+        "additional_option": "",
+    }
 
 
-def test_create_child_question_works():
-    assert 3 == 5
+# def test_create_child_question_id_exists():
+#     assert 3 == 5
 
 
-def test_create_child_question_id_exists():
-    assert 3 == 5
+# def test_create_child_question_id_database_error():
+#     assert 3 == 5
 
 
-def test_create_child_question_id_database_error():
-    assert 3 == 5
+# def test_update_child_question_works():
+#     assert 3 == 5
 
 
-def test_update_child_question_works():
-    assert 3 == 5
+# def test_update_child_question_id_not_there():
+#     assert 3 == 5
 
 
-def test_update_child_question_id_not_there():
-    assert 3 == 5
+# def test_update_child_question_database_error():
+#     assert 3 == 5
 
 
-def test_update_child_question_database_error():
-    assert 3 == 5
+# def test_delete_child_question_works():
+#     assert 3 == 5
 
 
-def test_delete_child_question_works():
-    assert 3 == 5
+# def test_delete_child_question_id_not_there():
+#     assert 3 == 5
 
 
-def test_delete_child_question_id_not_there():
-    assert 3 == 5
-
-
-def test_delete_child_question_database_error():
-    assert 3 == 5
+# def test_delete_child_question_database_error():
+#     assert 3 == 5
