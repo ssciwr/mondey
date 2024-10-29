@@ -189,21 +189,21 @@ def session():
                 component="select",
                 text={
                     "de": UserQuestionText(
-                        question_id=1,
+                        user_question_id=1,
                         lang_id="de",
                         options="[x,y,z]",
                         question="Wo sonst?",
                         options_json="",
                     ),
                     "en": UserQuestionText(
-                        question_id=1,
+                        user_question_id=1,
                         lang_id="en",
                         options="[1,2,3]",
                         question="Where else?",
                         options_json="",
                     ),
                     "fr": UserQuestionText(
-                        question_id=1,
+                        user_question_id=1,
                         lang_id="fr",
                         options="[1,2,3]",
                         question="french words",
@@ -219,21 +219,21 @@ def session():
                 additional_option="other",
                 text={
                     "de": UserQuestionText(
-                        question_id=2,
+                        user_question_id=2,
                         lang_id="de",
                         options="[x2,y2,z2]",
                         question="Was noch?",
                         options_json="",
                     ),
                     "en": UserQuestionText(
-                        question_id=2,
+                        user_question_id=2,
                         lang_id="en",
                         options="[12,22,32]",
                         question="What else?",
                         options_json="",
                     ),
                     "fr": UserQuestionText(
-                        question_id=2,
+                        user_question_id=2,
                         lang_id="fr",
                         options="[12,22,32]",
                         question="french words",
@@ -256,19 +256,19 @@ def session():
                 additional_option="other",
                 text={
                     "de": ChildQuestionText(
-                        question_id=1,
+                        child_question_id=1,
                         lang_id="de",
                         question="was?",
                         options="[x,y,z]",
                     ),
                     "en": ChildQuestionText(
-                        question_id=1,
+                        child_question_id=1,
                         lang_id="en",
                         question="what?",
                         options="[1,2,3]",
                     ),
                     "fr": ChildQuestionText(
-                        question_id=1,
+                        child_question_id=1,
                         lang_id="fr",
                         question="french...",
                         options="[1,2,3]",
@@ -282,19 +282,19 @@ def session():
                 additional_option="other",
                 text={
                     "de": ChildQuestionText(
-                        question_id=2,
+                        child_question_id=2,
                         lang_id="de",
                         question="Wo?",
                         options="[x2,y2,z2]",
                     ),
                     "en": ChildQuestionText(
-                        question_id=2,
+                        child_question_id=2,
                         lang_id="en",
                         question="Where?",
                         options="[12,22,32]",
                     ),
                     "fr": ChildQuestionText(
-                        question_id=2,
+                        child_question_id=2,
                         lang_id="fr",
                         question="french...",
                         options="[12,22,32]",
@@ -346,21 +346,21 @@ def user_questions():
             "type": "text",
             "text": {
                 "de": {
-                    "question_id": 1,
+                    "user_question_id": 1,
                     "lang_id": "de",
                     "options": "[x,y,z]",
                     "options_json": "",
                     "question": "Wo sonst?",
                 },
                 "en": {
-                    "question_id": 1,
+                    "user_question_id": 1,
                     "lang_id": "en",
                     "options": "[1,2,3]",
                     "question": "Where else?",
                     "options_json": "",
                 },
                 "fr": {
-                    "question_id": 1,
+                    "user_question_id": 1,
                     "lang_id": "fr",
                     "options": "[1,2,3]",
                     "question": "french words",
@@ -377,21 +377,21 @@ def user_questions():
             "type": "text",
             "text": {
                 "de": {
-                    "question_id": 2,
+                    "user_question_id": 2,
                     "lang_id": "de",
                     "options": "[x2,y2,z2]",
                     "options_json": "",
                     "question": "Was noch?",
                 },
                 "en": {
-                    "question_id": 2,
+                    "user_question_id": 2,
                     "lang_id": "en",
                     "options": "[12,22,32]",
                     "question": "What else?",
                     "options_json": "",
                 },
                 "fr": {
-                    "question_id": 2,
+                    "user_question_id": 2,
                     "lang_id": "fr",
                     "options": "[12,22,32]",
                     "question": "french words",
@@ -414,21 +414,21 @@ def child_questions():
             "type": "text",
             "text": {
                 "de": {
-                    "question_id": 1,
+                    "child_question_id": 1,
                     "lang_id": "de",
                     "options": "[x,y,z]",
                     "options_json": "",
                     "question": "was?",
                 },
                 "en": {
-                    "question_id": 1,
+                    "child_question_id": 1,
                     "lang_id": "en",
                     "options": "[1,2,3]",
                     "question": "what?",
                     "options_json": "",
                 },
                 "fr": {
-                    "question_id": 1,
+                    "child_question_id": 1,
                     "lang_id": "fr",
                     "question": "french...",
                     "options": "[1,2,3]",
@@ -445,21 +445,21 @@ def child_questions():
             "type": "text",
             "text": {
                 "de": {
-                    "question_id": 2,
+                    "child_question_id": 2,
                     "lang_id": "de",
                     "options": "[x2,y2,z2]",
                     "options_json": "",
                     "question": "Wo?",
                 },
                 "en": {
-                    "question_id": 2,
+                    "child_question_id": 2,
                     "lang_id": "en",
                     "options": "[12,22,32]",
                     "question": "Where?",
                     "options_json": "",
                 },
                 "fr": {
-                    "question_id": 2,
+                    "child_question_id": 2,
                     "lang_id": "fr",
                     "question": "french...",
                     "options": "[12,22,32]",

@@ -19,11 +19,12 @@ from ..models.milestones import MilestoneGroupAdmin
 from ..models.milestones import MilestoneGroupText
 from ..models.milestones import MilestoneText
 from ..models.questions import ChildQuestionAdmin
-from ..models.questions import QuestionText
+from ..models.questions import ChildQuestionText
 from ..models.questions import UserQuestionAdmin
+from ..models.questions import UserQuestionText
 from ..users import User
 
-Text = MilestoneText | MilestoneGroupText | QuestionText
+Text = MilestoneText | MilestoneGroupText | UserQuestionText | ChildQuestionText
 
 
 def write_file(file: UploadFile, filename: str):
@@ -81,11 +82,15 @@ def update_milestone_group_text(
 
 
 def update_user_question_text(session: SessionDep, user_question: UserQuestionAdmin):
-    _update_text(session, QuestionText, user_question.text.values(), user_question.id)
+    _update_text(
+        session, UserQuestionText, user_question.text.values(), user_question.id
+    )
 
 
 def update_child_question_text(session: SessionDep, child_question: ChildQuestionAdmin):
-    _update_text(session, QuestionText, child_question.text.values(), child_question.id)
+    _update_text(
+        session, ChildQuestionText, child_question.text.values(), child_question.id
+    )
 
 
 def _session_has_expired(milestone_answer_session: MilestoneAnswerSession) -> bool:

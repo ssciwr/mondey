@@ -182,7 +182,7 @@ def create_router() -> APIRouter:
         add(session, user_question)
         for language in session.exec(select(Language)).all():
             session.add(
-                UserQuestionText(question_id=user_question.id, lang_id=language.id)
+                UserQuestionText(user_question_id=user_question.id, lang_id=language.id)
             )
         session.commit()
         session.refresh(user_question)
@@ -223,7 +223,9 @@ def create_router() -> APIRouter:
         add(session, child_question)
         for language in session.exec(select(Language)).all():
             session.add(
-                ChildQuestionText(question_id=child_question.id, lang_id=language.id)
+                ChildQuestionText(
+                    child_question_id=child_question.id, lang_id=language.id
+                )
             )
         session.commit()
         session.refresh(child_question)

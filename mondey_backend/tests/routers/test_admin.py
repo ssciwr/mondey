@@ -274,21 +274,21 @@ def test_create_user_question_works(admin_client: TestClient):
         "text": {
             "de": {
                 "options_json": "",
-                "question_id": 3,
+                "user_question_id": 3,
                 "options": "",
                 "lang_id": "de",
                 "question": "",
             },
             "en": {
                 "options_json": "",
-                "question_id": 3,
+                "user_question_id": 3,
                 "options": "",
                 "lang_id": "en",
                 "question": "",
             },
             "fr": {
                 "options_json": "",
-                "question_id": 3,
+                "user_question_id": 3,
                 "options": "",
                 "lang_id": "fr",
                 "question": "",
@@ -308,21 +308,21 @@ def test_update_user_question_works(admin_client: TestClient):
         "text": {
             "de": {
                 "options_json": "",
-                "question_id": 1,
+                "user_question_id": 1,
                 "options": "",
                 "lang_id": "de",
                 "question": "",
             },
             "en": {
                 "options_json": "",
-                "question_id": 1,
+                "user_question_id": 1,
                 "options": "",
                 "lang_id": "en",
                 "question": "",
             },
             "fr": {
                 "options_json": "",
-                "question_id": 1,
+                "user_question_id": 1,
                 "options": "",
                 "lang_id": "fr",
                 "question": "",
@@ -378,21 +378,21 @@ def test_create_child_question_works(admin_client: TestClient):
         "text": {
             "de": {
                 "options_json": "",
-                "question_id": 3,
+                "child_question_id": 3,
                 "options": "",
                 "lang_id": "de",
                 "question": "",
             },
             "en": {
                 "options_json": "",
-                "question_id": 3,
+                "child_question_id": 3,
                 "options": "",
                 "lang_id": "en",
                 "question": "",
             },
             "fr": {
                 "options_json": "",
-                "question_id": 3,
+                "child_question_id": 3,
                 "options": "",
                 "lang_id": "fr",
                 "question": "",
