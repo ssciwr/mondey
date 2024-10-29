@@ -1,24 +1,24 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
+	import { createLanguage, deleteLanguage } from '$lib/client/services.gen';
+	import AddButton from '$lib/components/Admin/AddButton.svelte';
+	import DeleteButton from '$lib/components/Admin/DeleteButton.svelte';
+	import DeleteModal from '$lib/components/Admin/DeleteModal.svelte';
+	import { getTranslations } from '$lib/i18n';
+	import type { SelectOptionType } from 'flowbite-svelte';
 	import {
+		Card,
+		Select,
 		Table,
 		TableBody,
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell,
-		Card,
-		Select
+		TableHeadCell
 	} from 'flowbite-svelte';
 	import ISO6391 from 'iso-639-1';
 	import { _, locales } from 'svelte-i18n';
-	import type { SelectOptionType } from 'flowbite-svelte';
-	import { getTranslations } from '$lib/i18n';
-	import DeleteModal from '$lib/components/Admin/DeleteModal.svelte';
-	import AddButton from '$lib/components/Admin/AddButton.svelte';
-	import DeleteButton from '$lib/components/Admin/DeleteButton.svelte';
-	import { createLanguage, deleteLanguage } from '$lib/client/services.gen';
 
 	const langCodes = ISO6391.getAllCodes();
 	const langNames = ISO6391.getAllNativeNames();

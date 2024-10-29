@@ -7,18 +7,18 @@
 	import { Button, Heading, Popover } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { get } from 'svelte/store';
 	import AlertMessage from './AlertMessage.svelte';
 
-	export let triggeredBy = '';
+	let { triggeredBy = '' } = $props();
+	let showAlert: boolean = $state(false);
+	let alertMessage: string = $state($_('login.alertMessageError'));
+	let userData: UserRead | null = $state(null);
 
-	let userData: UserRead | null = get(currentUser);
-	let showAlert: boolean = false;
-	let alertMessage: string = $_('login.alertMessageError');
-
-	const unsubscribe = currentUser.subscribe((data) => {
-		userData = data;
+	const unsubscribe = currentUser.subscribe((value) => {
+		userData = value;
 	});
+
+	onDestroy(unsubscribe);
 
 	async function logout(): Promise<void> {
 		const response = await authCookieLogout();
@@ -27,15 +27,11 @@
 			showAlert = true;
 			alertMessage += ': ' + response.error.detail;
 		} else {
-			console.log('Successful logout of user ', userData.email, response.response.status);
+			console.log('Successful logout of user ', userData?.email, response.response.status);
 			userData = null;
 			goto(`/${base}`);
 		}
 	}
-
-	onDestroy(unsubscribe);
-
-	$: console.log('userData in profile: ', userData);
 </script>
 
 <Popover {triggeredBy} class="text-gray-700 dark:text-gray-400">
@@ -50,7 +46,7 @@
 	{/if}
 	{#if userData !== null}
 		<div class="mx-auto mb-6 flex flex-col items-center justify-center space-y-6">
-			<p class="m-2 w-full rounded-lg p-2 font-semibold">{userData.email}</p>
+			<p class="m-2 w-full rounded-lg p-2 font-semibold">{userData?.email}</p>
 			<Button class="m-2 w-full" on:click={logout} size="lg"
 				>{$_('login.profileButtonLabelLogout')}</Button
 			>

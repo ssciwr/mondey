@@ -66,7 +66,8 @@
 				type: 'email',
 				placeholder: $_('login.usernameLabel'),
 				required: true,
-				id: 'username'
+				id: 'username',
+				autocomplete: 'username'
 			}
 		},
 		{
@@ -77,7 +78,8 @@
 				type: 'password',
 				placeholder: $_('login.passwordLabel'),
 				required: true,
-				id: 'password'
+				id: 'password',
+				autocomplete: 'password'
 			}
 		}
 	];

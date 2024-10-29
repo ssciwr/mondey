@@ -168,7 +168,7 @@ export type MilestoneTextPublic = {
 export type UserAnswerPublic = {
 	answer: string;
 	question_id: number;
-	non_standard: boolean;
+	additional_answer: string | null;
 };
 
 export type UserCreate = {
@@ -183,19 +183,23 @@ export type UserCreate = {
 export type UserQuestionAdmin = {
 	id: number;
 	order: number;
-	input: string;
+	component?: string;
+	type?: string;
 	options: string;
 	text?: {
 		[key: string]: UserQuestionText;
 	};
+	additional_option?: string;
 };
 
 export type UserQuestionPublic = {
 	id: number;
-	input: string;
+	component?: string;
+	type?: string;
 	text?: {
 		[key: string]: UserQuestionTextPublic;
 	};
+	additional_option?: string;
 };
 
 export type UserQuestionText = {

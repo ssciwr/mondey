@@ -16,12 +16,16 @@
 		"autonext": "Automatisch weiter"
 	},
 	"admin": {
+		"title": "Administration",
 		"languages": "Sprachen",
 		"milestones": "Meilensteine",
 		"milestone-groups": "Meilensteingruppen",
 		"translations": "Übersetzungen",
 		"user-questions": "Benutzerfragen",
 		"question": "Frage",
+		"selectOptions": "Optionen",
+		"actions": "Aktionen",
+		"selectPlaceholder": "Erstens,Zweitens,Drittens;",
 		"add": "Hinzufügen",
 		"edit": "Bearbeiten",
 		"delete": "Löschen",
@@ -30,11 +34,17 @@
 		"no-cancel": "Nein, abbrechen",
 		"save-changes": "Änderungen speichern",
 		"cancel": "Abbrechen",
-		"title": "Titel",
 		"desc": "Beschreibung",
 		"obs": "Beobachtungshinweise",
 		"help": "Förderhilfen",
 		"image": "Bild",
+		"images": "Bilder",
+		"min-age-months": "Mindestalter in Monaten",
+		"max-age-months": "Höchstalter in Monaten",
+		"editUserQuestionTitle": "Frage an Benutzer editieren"
+	},
+	"researcher": {
+		"title": "Wissenschaft",
 		"images": "Bilder"
 	},
 	"registration": {
@@ -62,6 +72,7 @@
 		"alertMessageTitle": "Fehler",
 		"badCredentials": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
 		"badActiveUser": "Der Benutzer konnte nicht gefunden werden",
+		"notLoggedIn": "Bitte melden sie sich erneut an",
 		"unauthorized": "Zugang verweigert",
 		"usernameLabel": "Benutzerkennung",
 		"passwordLabel": "Passwort",

@@ -1,5 +1,5 @@
-import { init, addMessages } from 'svelte-i18n';
 import { getLanguages } from '$lib/client';
+import { addMessages, init } from 'svelte-i18n';
 import de from '../locales/de.json';
 
 export async function getI18nJson(lang_id: string) {

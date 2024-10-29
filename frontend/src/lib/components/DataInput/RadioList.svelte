@@ -17,7 +17,7 @@
 	}
 	export let value: any;
 	export let disabled: boolean = false;
-	export let required: boolean = false;
+	export let required: boolean = true;
 	let windowWidth = 1920;
 	$: smallScreen = windowWidth < 800;
 </script>

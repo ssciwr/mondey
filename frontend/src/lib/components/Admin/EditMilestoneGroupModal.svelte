@@ -1,14 +1,14 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-	import { InputAddon, Textarea, Label, ButtonGroup, Fileupload, Modal } from 'flowbite-svelte';
-	import { _, locales } from 'svelte-i18n';
-	import { onMount } from 'svelte';
-	import type { MilestoneGroupAdmin } from '$lib/client/types.gen';
-	import { updateMilestoneGroupAdmin, uploadMilestoneGroupImage } from '$lib/client/services.gen';
 	import { milestoneGroupImageUrl, refreshMilestoneGroups } from '$lib/admin.svelte';
-	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
+	import { updateMilestoneGroupAdmin, uploadMilestoneGroupImage } from '$lib/client/services.gen';
+	import type { MilestoneGroupAdmin } from '$lib/client/types.gen';
 	import CancelButton from '$lib/components/Admin/CancelButton.svelte';
+	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
+	import { ButtonGroup, Fileupload, InputAddon, Label, Modal, Textarea } from 'flowbite-svelte';
+	import { onMount } from 'svelte';
+	import { _, locales } from 'svelte-i18n';
 
 	let {
 		open = $bindable(false),
