@@ -19,8 +19,8 @@
 
 <Navbar>
 	<NavBrand href={base}>
-		<img src={logo_light} class="block mt-6 h-12 dark:hidden" alt="MONDEY Logo" />
-		<img src={logo_dark} class="hidden mt-6 h-12 dark:block" alt="MONDEY Logo" />
+		<img src={logo_light} class="mt-6 block h-12 dark:hidden" alt="MONDEY Logo" />
+		<img src={logo_dark} class="mt-6 hidden h-12 dark:block" alt="MONDEY Logo" />
 	</NavBrand>
 	<NavHamburger />
 	<NavUl ulClass="flex items-center mt-8 space-x-14 text-lg ">
