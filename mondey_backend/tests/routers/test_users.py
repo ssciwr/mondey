@@ -193,8 +193,8 @@ def test_get_current_user_answers_works(user_client: TestClient):
     response = user_client.get("/users/user-answers/")
     assert response.status_code == 200
     assert response.json() == [
-        {"answer": "lorem ipsum", "non_standard": False, "question_id": 1},
-        {"answer": "dolor sit", "non_standard": True, "question_id": 2},
+        {"answer": "lorem ipsum", "additional_answer": None, "question_id": 1},
+        {"answer": "other", "additional_answer": "dolor sit", "question_id": 2},
     ]
 
 
@@ -208,14 +208,14 @@ def test_update_current_answers_prexisting(user_client: TestClient):
         "/users/user-answers/",
         json=[
             {
-                "answer": "dolor",
+                "answer": "other",
                 "question_id": 1,
-                "non_standard": True,
+                "additional_answer": "dolor",
             },
             {
                 "answer": "amet",
                 "question_id": 2,
-                "non_standard": False,
+                "additional_answer": None,
             },
         ],
     )
@@ -223,14 +223,14 @@ def test_update_current_answers_prexisting(user_client: TestClient):
     assert response.status_code == 200
     assert response.json() == [
         {
-            "answer": "dolor",
+            "answer": "other",
             "question_id": 1,
-            "non_standard": True,
+            "additional_answer": "dolor",
         },
         {
             "answer": "amet",
             "question_id": 2,
-            "non_standard": False,
+            "additional_answer": None,
         },
     ]
 
@@ -238,14 +238,14 @@ def test_update_current_answers_prexisting(user_client: TestClient):
     assert response.status_code == 200
     assert response.json() == [
         {
-            "answer": "dolor",
+            "answer": "other",
             "question_id": 1,
-            "non_standard": True,
+            "additional_answer": "dolor",
         },
         {
             "answer": "amet",
             "question_id": 2,
-            "non_standard": False,
+            "additional_answer": None,
         },
     ]
 
@@ -255,14 +255,14 @@ def test_update_current_answers_no_prexisting(second_user_client: TestClient):
         "/users/user-answers/",
         json=[
             {
-                "answer": "dolor",
+                "answer": "other",
                 "question_id": 1,
-                "non_standard": True,
+                "additional_answer": "dolor",
             },
             {
                 "answer": "amet",
                 "question_id": 2,
-                "non_standard": False,
+                "additional_answer": None,
             },
         ],
     )
@@ -270,14 +270,14 @@ def test_update_current_answers_no_prexisting(second_user_client: TestClient):
     assert response.status_code == 200
     assert response.json() == [
         {
-            "answer": "dolor",
+            "answer": "other",
             "question_id": 1,
-            "non_standard": True,
+            "additional_answer": "dolor",
         },
         {
             "answer": "amet",
             "question_id": 2,
-            "non_standard": False,
+            "additional_answer": None,
         },
     ]
 
@@ -285,13 +285,13 @@ def test_update_current_answers_no_prexisting(second_user_client: TestClient):
     assert response.status_code == 200
     assert response.json() == [
         {
-            "answer": "dolor",
+            "answer": "other",
             "question_id": 1,
-            "non_standard": True,
+            "additional_answer": "dolor",
         },
         {
             "answer": "amet",
             "question_id": 2,
-            "non_standard": False,
+            "additional_answer": None,
         },
     ]

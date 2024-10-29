@@ -3,25 +3,20 @@
 <script lang="ts">
 	import { adminUser } from '$lib/admin.svelte';
 	import Languages from '$lib/components/Admin/Languages.svelte';
-	import Translations from '$lib/components/Admin/Translations.svelte';
 	import MilestoneGroups from '$lib/components/Admin/MilestoneGroups.svelte';
+	import Translations from '$lib/components/Admin/Translations.svelte';
 	import Questions from '$lib/components/Admin/UserQuestions.svelte';
-	import Login from '$lib/components/Admin/Login.svelte';
-	import { _ } from 'svelte-i18n';
+	import { TabItem, Tabs } from 'flowbite-svelte';
+	import { BadgeCheckOutline, ClipboardListOutline, LanguageOutline } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
-	import { Tabs, TabItem } from 'flowbite-svelte';
-	import { LanguageOutline, BadgeCheckOutline, ClipboardListOutline } from 'flowbite-svelte-icons';
+	import { _ } from 'svelte-i18n';
 
 	onMount(async () => {
 		adminUser.refresh();
 	});
 </script>
 
-{#if !adminUser.value || !adminUser.value.is_superuser}
-	<div class="flex w-full flex-col items-center justify-center">
-		<Login />
-	</div>
-{:else}
+<Tabs tabStyle="underline" class="w-full">
 	<Tabs tabStyle="underline">
 		<TabItem open>
 			<div slot="title" class="flex items-center gap-2">
@@ -52,4 +47,4 @@
 			<Languages />
 		</TabItem>
 	</Tabs>
-{/if}
+</Tabs>

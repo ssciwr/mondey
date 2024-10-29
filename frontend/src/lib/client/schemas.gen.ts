@@ -615,13 +615,20 @@ export const UserAnswerPublicSchema = {
 			type: 'integer',
 			title: 'Question Id'
 		},
-		non_standard: {
-			type: 'boolean',
-			title: 'Non Standard'
+		additional_answer: {
+			anyOf: [
+				{
+					type: 'string'
+				},
+				{
+					type: 'null'
+				}
+			],
+			title: 'Additional Answer'
 		}
 	},
 	type: 'object',
-	required: ['answer', 'question_id', 'non_standard'],
+	required: ['answer', 'question_id', 'additional_answer'],
 	title: 'UserAnswerPublic',
 	description: `External data model for UserAnswers
 
@@ -705,9 +712,15 @@ export const UserQuestionAdminSchema = {
 			type: 'integer',
 			title: 'Order'
 		},
-		input: {
+		component: {
 			type: 'string',
-			title: 'Input'
+			title: 'Component',
+			default: 'select'
+		},
+		type: {
+			type: 'string',
+			title: 'Type',
+			default: 'text'
 		},
 		options: {
 			type: 'string',
@@ -720,10 +733,15 @@ export const UserQuestionAdminSchema = {
 			type: 'object',
 			title: 'Text',
 			default: {}
+		},
+		additional_option: {
+			type: 'string',
+			title: 'Additional Option',
+			default: ''
 		}
 	},
 	type: 'object',
-	required: ['id', 'order', 'input', 'options'],
+	required: ['id', 'order', 'options'],
 	title: 'UserQuestionAdmin'
 } as const;
 
@@ -733,9 +751,15 @@ export const UserQuestionPublicSchema = {
 			type: 'integer',
 			title: 'Id'
 		},
-		input: {
+		component: {
 			type: 'string',
-			title: 'Input'
+			title: 'Component',
+			default: 'select'
+		},
+		type: {
+			type: 'string',
+			title: 'Type',
+			default: 'text'
 		},
 		text: {
 			additionalProperties: {
@@ -744,10 +768,15 @@ export const UserQuestionPublicSchema = {
 			type: 'object',
 			title: 'Text',
 			default: {}
+		},
+		additional_option: {
+			type: 'string',
+			title: 'Additional Option',
+			default: ''
 		}
 	},
 	type: 'object',
-	required: ['id', 'input'],
+	required: ['id'],
 	title: 'UserQuestionPublic'
 } as const;
 

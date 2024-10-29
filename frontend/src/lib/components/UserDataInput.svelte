@@ -1,3 +1,5 @@
+<svelte:options runes={true} />
+
 <script lang="ts">
 	import {
 		getCurrentUserAnswers,
@@ -8,56 +10,73 @@
 	import { type GetUserQuestionsResponse, type UserAnswerPublic } from '$lib/client/types.gen';
 	import AlertMessage from '$lib/components/AlertMessage.svelte';
 	import DataInput from '$lib/components/DataInput/DataInput.svelte';
+	import { componentTable } from '$lib/stores/componentStore';
 	import { preventDefault } from '$lib/util';
 	import { Button, Card, Heading } from 'flowbite-svelte';
-	import { onMount } from 'svelte';
-	import { _ } from 'svelte-i18n';
+	import { onMount, type Component } from 'svelte';
+	import { _, locale } from 'svelte-i18n';
 
-	function convertQuestions(questionnaire: GetUserQuestionsResponse): GetUserQuestionsResponse {
-		// TODO: once questions come from the database we can do this with the questionnaire
-		// different algorithm that makes use of the component lookup table in '$lib/stores' is needed here then.
-		return questionnaire;
+	type QuestionaireProps = {
+		label: string;
+		type: string;
+		required: Boolean;
+		disabled: Boolean;
+		items: any[];
+		textTrigger: string | undefined;
+	};
+
+	type QuestionaireElement = {
+		component: Component;
+		value: String | null;
+		additionalValue: String | null;
+		props: QuestionaireProps;
+	};
+
+	function convertQuestions(questionaire: GetUserQuestionsResponse): QuestionaireElement[] {
+		return questionaire.map((element) => {
+			// TODO: this should be simplified into something that uses
+			// as little additional structure as possible compared to UserQuestionPublic
+
+			return {
+				component: componentTable[element.component],
+				value: null,
+				additionalValue: null,
+				props: {
+					items: JSON.parse(element.text[$locale].options_json),
+					label: element.text[$locale].question,
+					type: 'text',
+					required: true,
+					disabled: false,
+					textTrigger: element.additional_option
+				}
+			};
+		});
 	}
 
-	function convertAnswers(questionnaire: GetUserQuestionsResponse | undefined): UserAnswerPublic[] {
-		// TODO: once questions come from the database we can do this with the actual questionnaire
-		// this version is temporary until the underlying datastructure has been changed to accommodate
-		// the backend models
-
-		return data.map((e, index) => {
-			console.log(
-				'condition: ',
-				e.additionalValue !== '',
-				e.additionalValue !== null,
-				e.value === e.textTrigger,
-				e.value,
-				e.additionalValue,
-				e.props.textTrigger
-			);
+	function convertAnswers(questionaire: QuestionaireElement[]): UserAnswerPublic[] {
+		return questionaire.map((e, index) => {
 			if (
 				e.additionalValue !== '' &&
 				e.additionalValue !== null &&
 				e.value === e.props.textTrigger
 			) {
-				console.log('with additional: ', e);
-				return {
-					question_id: index,
-					answer: String(e.additionalValue),
-					non_standard: true
-				} as UserAnswerPublic;
-			} else {
-				console.log('with normal', e);
 				return {
 					question_id: index,
 					answer: String(e.value),
-					non_standard: false
+					additional_answer: String(e.additionalValue)
+				} as UserAnswerPublic;
+			} else {
+				return {
+					question_id: index,
+					answer: String(e.value),
+					additional_answer: ''
 				} as UserAnswerPublic;
 			}
 		});
 	}
 
 	async function submitData() {
-		const answers = convertAnswers(questionnaire);
+		const answers = convertAnswers(questionaire);
 		const currentUser = await usersCurrentUser();
 		if (currentUser.error) {
 			showAlert = true;
@@ -66,7 +85,6 @@
 
 		const response = await updateCurrentUserAnswers({
 			body: answers
-			// query: { session_id: currentUser?.data?.id }
 		});
 
 		if (response.error) {
@@ -78,32 +96,28 @@
 			console.log('answers sent: ', answers);
 			console.log(
 				'original answers: ',
-				data.map((e) => {
+				questionaire.map((e) => {
 					return [e.value, e.additionalValue];
 				})
 			);
 
 			// disable all elements to make editing a conscious choice
-			for (let element of data) {
+			for (let element of questionaire) {
 				element.props.disabled = true;
 			}
 			dataIsCurrent = true;
-			data = [...data]; // TODO: forces a rerender. need a better way to do this
 		}
 	}
 
-	// this can, but does not have to, come from a database later.
-	export let data: any[];
-
 	// this is the data that will be used in the end
-	let questionnaire: GetUserQuestionsResponse | undefined = [];
+	let questionaire: any[] = $state([]);
 
 	// flags for enabling and disabling visual hints
-	let showAlert: boolean = false;
-	let dataIsCurrent: boolean = false;
+	let showAlert: boolean = $state(false);
+	let dataIsCurrent: boolean = $state(false);
 
 	// what is shown in the alert if showAlert === true
-	let alertMessage: string = $_('userData.alertMessageMissing');
+	let alertMessage: string = $state($_('userData.alertMessageMissing'));
 
 	// load questions and current answers from server and put them into the data
 	// structure that the UserDataInput component understands
@@ -111,18 +125,20 @@
 		console.log('onmount');
 
 		const userQuestions = await getUserQuestions();
+		console.log('userquestions from backend', userQuestions);
 
 		if (userQuestions.error) {
 			showAlert = true;
 			alertMessage = $_('userData.alertMessageError');
 			console.log('questions could not be retrieved.', userQuestions?.error);
 		} else {
-			questionnaire = convertQuestions(userQuestions?.data as GetUserQuestionsResponse);
-			console.log('data from backend: ', 'questionnaire: ', questionnaire);
+			questionaire = convertQuestions(userQuestions?.data as GetUserQuestionsResponse);
+			console.log('data from backend: ', 'questionaire: ', questionaire);
 		}
 
 		// get current answers.
 		let currentAnswers = await getCurrentUserAnswers();
+		console.log('user answers from backend', currentAnswers);
 
 		if (currentAnswers?.error) {
 			showAlert = true;
@@ -131,22 +147,23 @@
 		} else if (currentAnswers?.data.length === 0) {
 			console.log('currently no answers'); // debug output. Can go later
 		} else {
-			console.log('data from backend: ', 'currentAnswers: ', currentAnswers?.data);
+			for (let i = 0; i < currentAnswers?.data.length; i++) {
+				if (
+					currentAnswers?.data[i].additional_answer !== null &&
+					currentAnswers?.data[i].additional_answer !== undefined &&
+					currentAnswers?.data[i].additional_answer !== ''
+				) {
+					questionaire[i].additionalValue = currentAnswers.data[i].additional_answer;
 
-			for (let i = 0; i < data.length; i++) {
-				if (currentAnswers?.data[i].non_standard === true) {
-					data[i].additionalValue = currentAnswers.data[i].answer;
-					data[i].value = data[i].props.textTrigger;
-					data[i].showTextField = true;
+					questionaire[i].value = questionaire[i].props.items.slice(-1)[0].value; // FIXME: there needs to be a better way to do this. relies on ordering being such that the trigger for a textfield is at the end
 				} else {
-					data[i].value = currentAnswers.data[i].answer;
+					questionaire[i].value = currentAnswers.data[i].answer;
 				}
-				data[i].props.disabled = true;
+				questionaire[i].props.disabled = true;
 				dataIsCurrent = true;
-				data = [...data]; // TODO: forces a rerender. need a better way to do this
 			}
 		}
-		console.log('onmount done: ', data);
+		console.log('onmount done: ', questionaire);
 	});
 </script>
 
@@ -171,7 +188,7 @@
 		>
 
 		<form class="m-1 mx-auto w-full flex-col space-y-6" onsubmit={preventDefault(submitData)}>
-			{#each data as element, i}
+			{#each questionaire as element, i}
 				<DataInput
 					component={element.component}
 					bind:value={element.value}
@@ -197,12 +214,12 @@
 					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
 					on:click={() => {
 						console.log('dataiscurrent click');
-						for (let element of data) {
+						for (let element of questionaire) {
 							element.props.disabled = false;
 						}
 
 						// README: this forces a rerender. It is necessary because svelte does not react to nested references being changed. There must be a better solution to this? Svelte 5 runes would be one that comes to mind.
-						data = [...data];
+						questionaire = [...questionaire];
 
 						dataIsCurrent = false;
 					}}

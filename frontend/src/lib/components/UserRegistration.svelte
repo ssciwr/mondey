@@ -4,10 +4,10 @@
 	import { type RegisterRegisterData } from '$lib/client/types.gen';
 	import AlertMessage from '$lib/components/AlertMessage.svelte';
 	import DataInput from '$lib/components/DataInput/DataInput.svelte';
+	import UserVerify from '$lib/components/UserVerify.svelte';
 	import { preventDefault } from '$lib/util';
 	import { Button, Card, Heading, Input, Select } from 'flowbite-svelte';
 	import { _ } from 'svelte-i18n';
-	import UserVerify from './UserVerify.svelte';
 
 	async function submitData(): Promise<void> {
 		const equalPW = data[1].value !== '' && data[2].value === data[1].value;
