@@ -41,8 +41,9 @@
 			return;
 		}
 		const values = userQuestion.options.split(';');
-		for (const lang_id in $locales) {
+		for (const lang_id of $locales) {
 			const items = userQuestion.text[lang_id].options.split(';');
+			console.log('items: ', items);
 			userQuestion.text[lang_id].options_json = JSON.stringify(
 				values.map(function (value, index) {
 					return { value: value, name: items[index] };
@@ -109,6 +110,7 @@
 							</ButtonGroup>
 						</div>
 						{#each Object.values(userQuestion.text) as text}
+							{console.log('text: ', text)}
 							<div class="mb-1">
 								<ButtonGroup class="w-full">
 									<InputAddon>{text.lang_id}</InputAddon>
