@@ -8,34 +8,32 @@ from .utils import dict_relationship
 from .utils import fixed_length_string_field
 
 
-# Base model for all questions text elements
+# Base model classes for all questions text elements. Does not define any tables itself, but only the basic structure. These are not intended for direct use!
+# Create derived models that implemenet proper key relations with descriptive names instead and use those in your endpoints
 class QuestionTextBase(SQLModel):
     question: str = ""
     options_json: str = ""
 
 
 class QuestionText(QuestionTextBase):
-    question_id: int | None = Field(
-        default=None, foreign_key="userquestion.id", primary_key=True
-    )
+    question_id: int | None
     lang_id: str | None = fixed_length_string_field(
         max_length=2, default=None, foreign_key="language.id", primary_key=True
     )
     options: str = ""
 
 
-class QuestionTextPublic(QuestionTextBase):
-    pass
-
-
-class Question(SQLModel, table=True):
+class Question(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
     order: int = 0
     component: str = "select"
     type: str = "text"
     options: str = ""
-    text: Mapped[dict[str, QuestionText]] = dict_relationship(key="lang_id")
     additional_option: str = ""
+
+
+class QuestionTextPublic(QuestionTextBase):
+    pass
 
 
 class QuestionPublic(SQLModel):
@@ -56,23 +54,37 @@ class QuestionAdmin(SQLModel):
     additional_option: str = ""
 
 
+# User Question classes
+class UserQuestionText(QuestionText, table=True):
+    question_id: int | None = Field(
+        default=None, foreign_key="userquestion.id", primary_key=True
+    )
+
+
+class ChildQuestionText(QuestionText, table=True):
+    question_id: int | None = Field(
+        default=None, foreign_key="childquestion.id", primary_key=True
+    )
+
+
 class UserQuestion(Question, table=True):
-    pass
+    text: Mapped[dict[str, UserQuestionText]] = dict_relationship(key="lang_id")
 
 
 class UserQuestionPublic(QuestionPublic):
     pass
 
 
-class UserQuestionAdmin(QuestionAdmin):
-    pass
-
-
+# Child question classes
 class ChildQuestion(Question, table=True):
-    pass
+    text: Mapped[dict[str, ChildQuestionText]] = dict_relationship(key="lang_id")
 
 
 class ChildQuestionPublic(QuestionPublic):
+    pass
+
+
+class UserQuestionAdmin(QuestionAdmin):
     pass
 
 
