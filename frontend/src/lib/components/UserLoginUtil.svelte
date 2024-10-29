@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { base } from '$app/paths';
-	import { Checkbox } from 'flowbite-svelte';
-	export let cls: string = '';
-	export let checked: boolean = false;
-	export let onchecked = (event) => {};
-	export let onchange = (event) => {};
+import { base } from "$app/paths";
+import { Checkbox } from "flowbite-svelte";
+export let cls = "";
+export let checked = false;
+export let onchecked = (event) => {};
+export let onchange = (event) => {};
 </script>
 
 <div class={'container mx-auto flex w-full max-w-md items-start' + cls}>

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Dropdown, DropdownItem } from 'flowbite-svelte';
-	import { ChevronDownOutline } from 'flowbite-svelte-icons';
-	import { locale, locales } from 'svelte-i18n';
+import { Dropdown, DropdownItem } from "flowbite-svelte";
+import { ChevronDownOutline } from "flowbite-svelte-icons";
+import { locale, locales } from "svelte-i18n";
 
-	let dropdownOpen = false;
+let dropdownOpen = false;
 </script>
 
 <div class="flex">

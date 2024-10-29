@@ -1,56 +1,58 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-	import { createLanguage, deleteLanguage } from '$lib/client/services.gen';
-	import AddButton from '$lib/components/Admin/AddButton.svelte';
-	import DeleteButton from '$lib/components/Admin/DeleteButton.svelte';
-	import DeleteModal from '$lib/components/Admin/DeleteModal.svelte';
-	import { getTranslations } from '$lib/i18n';
-	import type { SelectOptionType } from 'flowbite-svelte';
-	import {
-		Card,
-		Select,
-		Table,
-		TableBody,
-		TableBodyCell,
-		TableBodyRow,
-		TableHead,
-		TableHeadCell
-	} from 'flowbite-svelte';
-	import ISO6391 from 'iso-639-1';
-	import { _, locales } from 'svelte-i18n';
+import { createLanguage, deleteLanguage } from "$lib/client/services.gen";
+import AddButton from "$lib/components/Admin/AddButton.svelte";
+import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
+import DeleteModal from "$lib/components/Admin/DeleteModal.svelte";
+import { getTranslations } from "$lib/i18n";
+import type { SelectOptionType } from "flowbite-svelte";
+import {
+	Card,
+	Select,
+	Table,
+	TableBody,
+	TableBodyCell,
+	TableBodyRow,
+	TableHead,
+	TableHeadCell,
+} from "flowbite-svelte";
+import ISO6391 from "iso-639-1";
+import { _, locales } from "svelte-i18n";
 
-	const langCodes = ISO6391.getAllCodes();
-	const langNames = ISO6391.getAllNativeNames();
-	const langItems = langCodes.map((k, i) => {
-		return { value: k, name: langNames[i] };
-	}) as SelectOptionType<string>[];
+const langCodes = ISO6391.getAllCodes();
+const langNames = ISO6391.getAllNativeNames();
+const langItems = langCodes.map((k, i) => {
+	return { value: k, name: langNames[i] };
+}) as SelectOptionType<string>[];
 
-	let selectedLangId: string = $state('');
-	let currentLanguageId: string = $state('');
-	let showDeleteModal: boolean = $state(false);
+let selectedLangId: string = $state("");
+let currentLanguageId: string = $state("");
+let showDeleteModal: boolean = $state(false);
 
-	async function createLanguageAndUpdateLanguages() {
-		const { data, error } = await createLanguage({ body: { id: selectedLangId } });
-		if (error) {
-			console.log(error);
-		} else {
-			console.log(data);
-			await getTranslations();
-		}
+async function createLanguageAndUpdateLanguages() {
+	const { data, error } = await createLanguage({
+		body: { id: selectedLangId },
+	});
+	if (error) {
+		console.log(error);
+	} else {
+		console.log(data);
+		await getTranslations();
 	}
+}
 
-	async function deleteLanguageAndUpdateLanguages() {
-		const { data, error } = await deleteLanguage({
-			path: { language_id: currentLanguageId }
-		});
-		if (error) {
-			console.log(error);
-		} else {
-			console.log(data);
-			await getTranslations();
-		}
+async function deleteLanguageAndUpdateLanguages() {
+	const { data, error } = await deleteLanguage({
+		path: { language_id: currentLanguageId },
+	});
+	if (error) {
+		console.log(error);
+	} else {
+		console.log(data);
+		await getTranslations();
 	}
+}
 </script>
 
 <Card size="xl" class="m-5">

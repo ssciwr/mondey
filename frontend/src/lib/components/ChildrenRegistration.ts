@@ -1,16 +1,16 @@
-import { Input, MultiSelect, Select, Textarea } from 'flowbite-svelte';
+import { Input, MultiSelect, Select, Textarea } from "flowbite-svelte";
 
-import Fileupload from '$lib/components/DataInput/Fileupload.svelte';
-import RadioList from '$lib/components/DataInput/RadioList.svelte';
+import Fileupload from "$lib/components/DataInput/Fileupload.svelte";
+import RadioList from "$lib/components/DataInput/RadioList.svelte";
 
 import {
+	type ChildData,
 	children,
 	createDummyCurrent,
 	createDummySummary,
 	generateChildID,
-	type ChildData
-} from '$lib/stores/childrenStore';
-import { users } from '$lib/stores/userStore';
+} from "$lib/stores/childrenStore";
+import { users } from "$lib/stores/userStore";
 
 /**
  * Here the data is defined that tells the DataInput Component how to set up the necessary components for giving data about children.
@@ -22,151 +22,166 @@ const data = [
 		component: Input,
 		value: null,
 		props: {
-			type: 'text',
+			type: "text",
 
-			label: 'Name',
-			placeholder: 'Bitte eintragen',
-			key: 'name',
-			required: true
-		}
+			label: "Name",
+			placeholder: "Bitte eintragen",
+			key: "name",
+			required: true,
+		},
 	},
 	{
 		component: Input,
 		value: null,
 		props: {
-			type: 'date',
+			type: "date",
 
-			label: 'Geburtsdatum',
-			placeholder: 'Bitte eintragen',
-			key: 'dateOfBirth',
-			required: true
-		}
+			label: "Geburtsdatum",
+			placeholder: "Bitte eintragen",
+			key: "dateOfBirth",
+			required: true,
+		},
 	},
 	{
 		component: RadioList,
 		value: null,
 		additionalValue: null,
 		props: {
-			label: 'Frühgeburt',
-			items: ['nein', '0-2 Monate', '2-4 Monate', '4-6 Monate', 'Anderes'].map((v) => {
-				return { label: String(v), value: v };
-			}),
-			placeholder: 'Bitte auswählen',
-			key: 'bornEarly',
+			label: "Frühgeburt",
+			items: ["nein", "0-2 Monate", "2-4 Monate", "4-6 Monate", "Anderes"].map(
+				(v) => {
+					return { label: String(v), value: v };
+				},
+			),
+			placeholder: "Bitte auswählen",
+			key: "bornEarly",
 			required: true,
 			unique: true,
-			textTrigger: 'Anderes',
-			selected: [false, false, false, false]
-		}
+			textTrigger: "Anderes",
+			selected: [false, false, false, false],
+		},
 	},
 	{
 		component: RadioList,
 		value: null,
 		additionalValue: null,
 		props: {
-			label: 'Geschlecht',
-			items: ['männlich', 'weiblich'].map((v) => {
+			label: "Geschlecht",
+			items: ["männlich", "weiblich"].map((v) => {
 				return { label: String(v), value: v };
 			}),
-			placeholder: 'Bitte auswählen',
-			key: 'gender',
+			placeholder: "Bitte auswählen",
+			key: "gender",
 			required: true,
 			unique: true,
-			selected: [false, false]
-		}
+			selected: [false, false],
+		},
 	},
 	{
 		component: MultiSelect,
 		value: [],
 		additionalValue: null,
 		props: {
-			label: 'Nationalität',
-			items: ['Andere', 'Deutschland', 'Grossbritannien', 'USA', 'China'].map((v) => {
-				return { name: String(v), value: v };
-			}),
-			placeholder: 'Bitte auswählen',
-			key: 'nationality',
-			required: true,
-			textTrigger: 'Andere'
-		}
-	},
-	{
-		component: MultiSelect,
-		value: [],
-		additionalValue: null,
-		props: {
-			label: 'Sprache',
-			items: ['Andere', 'Deutsch', 'Englisch (UK)', 'Englisch (Us)', 'Mandarin', 'Arabisch'].map(
+			label: "Nationalität",
+			items: ["Andere", "Deutschland", "Grossbritannien", "USA", "China"].map(
 				(v) => {
 					return { name: String(v), value: v };
-				}
+				},
 			),
-			placeholder: 'Bitte auswählen',
-			key: 'language',
+			placeholder: "Bitte auswählen",
+			key: "nationality",
 			required: true,
-			textTrigger: 'Andere'
-		}
+			textTrigger: "Andere",
+		},
+	},
+	{
+		component: MultiSelect,
+		value: [],
+		additionalValue: null,
+		props: {
+			label: "Sprache",
+			items: [
+				"Andere",
+				"Deutsch",
+				"Englisch (UK)",
+				"Englisch (Us)",
+				"Mandarin",
+				"Arabisch",
+			].map((v) => {
+				return { name: String(v), value: v };
+			}),
+			placeholder: "Bitte auswählen",
+			key: "language",
+			required: true,
+			textTrigger: "Andere",
+		},
 	},
 	{
 		component: Select,
 		value: null,
 		additionalValue: null,
 		props: {
-			label: 'Verhältnis zum Kind',
-			key: 'relationship',
+			label: "Verhältnis zum Kind",
+			key: "relationship",
 			items: [
-				'Anderes',
-				'Kind',
-				'Enkelkind',
-				'Neffe/Nichte',
-				'Pflegekind',
-				'Adoptivkind',
-				'Betreuung extern',
-				'Betreuung zu Hause'
+				"Anderes",
+				"Kind",
+				"Enkelkind",
+				"Neffe/Nichte",
+				"Pflegekind",
+				"Adoptivkind",
+				"Betreuung extern",
+				"Betreuung zu Hause",
 			].map((v) => {
 				return { name: String(v), value: v };
 			}),
-			placeholder: 'Bitte auswählen',
+			placeholder: "Bitte auswählen",
 			required: true,
-			textTrigger: 'Anderes'
-		}
+			textTrigger: "Anderes",
+		},
 	},
 	{
 		component: MultiSelect,
 		value: [],
 		additionalValue: null,
 		props: {
-			label: 'Entwicklungsauffälligkeiten',
-			items: ['keine', 'Hörprobleme', 'Fehlsichtigkeit', 'Sprachfehler', 'Andere'].map((v) => {
+			label: "Entwicklungsauffälligkeiten",
+			items: [
+				"keine",
+				"Hörprobleme",
+				"Fehlsichtigkeit",
+				"Sprachfehler",
+				"Andere",
+			].map((v) => {
 				return { name: String(v), value: v };
 			}),
-			placeholder: 'Bitte auswählen',
-			key: 'developmentalIssues',
+			placeholder: "Bitte auswählen",
+			key: "developmentalIssues",
 			required: true,
-			textTrigger: 'Andere'
-		}
+			textTrigger: "Andere",
+		},
 	},
 	{
 		component: Textarea,
 		value: null,
 		props: {
-			label: 'Anmerkungen',
-			placeholder: 'Weitere Bemerkungen',
-			key: 'remarks',
-			required: false
-		}
+			label: "Anmerkungen",
+			placeholder: "Weitere Bemerkungen",
+			key: "remarks",
+			required: false,
+		},
 	},
 	{
 		component: Fileupload,
 		value: null,
 		props: {
-			label: 'Foto',
-			placeholder: 'Bitte wählen sie ein Bild aus falls gewünscht',
-			key: 'image',
+			label: "Foto",
+			placeholder: "Bitte wählen sie ein Bild aus falls gewünscht",
+			key: "image",
 			required: false,
-			accept: ['png', 'jpg', 'svg', 'webp']
-		}
-	}
+			accept: ["png", "jpg", "svg", "webp"],
+		},
+	},
 ];
 
 export function getData() {
@@ -182,7 +197,7 @@ export async function setUpOnMount() {
 	await children.load();
 	await users.load();
 
-	const loggedInUser = await users.fetch('loggedIn');
+	const loggedInUser = await users.fetch("loggedIn");
 
 	if (!children.get()[loggedInUser as string]) {
 		await children.addUser(loggedInUser as string);
@@ -208,7 +223,7 @@ export function buildDataToSend(data: any[]): ChildData {
 		dict[curr.props.key] = curr.value;
 
 		if (curr.additionalValue !== null) {
-			dict[curr.props.key + '_additional'] = curr.additionalValue;
+			dict[curr.props.key + "_additional"] = curr.additionalValue;
 		}
 		return dict;
 	}, {});
@@ -230,9 +245,14 @@ export function buildMissingValues(childData: any, required: any): boolean[] {
 	});
 }
 
-export async function verifyInput(childData: ChildData, required: any): Promise<boolean> {
+export async function verifyInput(
+	childData: ChildData,
+	required: any,
+): Promise<boolean> {
 	const test = Object.entries(childData).every((kv) =>
-		required[kv[0]] ? kv[1] !== undefined && kv[1] !== null && kv[1] !== '' : true
+		required[kv[0]]
+			? kv[1] !== undefined && kv[1] !== null && kv[1] !== ""
+			: true,
 	);
 
 	return test;
@@ -250,7 +270,7 @@ export async function submitData(data: any[]): Promise<void> {
 		user: userID,
 		id: childID,
 		summary: await createDummySummary(),
-		current: await createDummyCurrent()
+		current: await createDummyCurrent(),
 	});
 
 	await children.save();

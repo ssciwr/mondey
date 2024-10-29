@@ -1,118 +1,129 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-	import { updateMilestoneAnswer } from '$lib/client/services.gen';
-	import type {
-		MilestoneAnswerSessionPublic,
-		MilestoneGroupPublic,
-		MilestonePublic
-	} from '$lib/client/types.gen';
-	import MilestoneButton from '$lib/components/MilestoneButton.svelte';
-	import {
-		Accordion,
-		AccordionItem,
-		Breadcrumb,
-		BreadcrumbItem,
-		Button,
-		Checkbox,
-		P
-	} from 'flowbite-svelte';
-	import {
-		ArrowLeftOutline,
-		ArrowRightOutline,
-		InfoCircleSolid,
-		QuestionCircleSolid
-	} from 'flowbite-svelte-icons';
-	import { onMount } from 'svelte';
-	import { _, locale } from 'svelte-i18n';
+import { updateMilestoneAnswer } from "$lib/client/services.gen";
+import type {
+	MilestoneAnswerSessionPublic,
+	MilestoneGroupPublic,
+	MilestonePublic,
+} from "$lib/client/types.gen";
+import MilestoneButton from "$lib/components/MilestoneButton.svelte";
+import {
+	Accordion,
+	AccordionItem,
+	Breadcrumb,
+	BreadcrumbItem,
+	Button,
+	Checkbox,
+	P,
+} from "flowbite-svelte";
+import {
+	ArrowLeftOutline,
+	ArrowRightOutline,
+	InfoCircleSolid,
+	QuestionCircleSolid,
+} from "flowbite-svelte-icons";
+import { onMount } from "svelte";
+import { _, locale } from "svelte-i18n";
 
-	let {
-		milestoneGroup = undefined,
-		milestoneAnswerSession = undefined
-	}: {
-		milestoneGroup?: MilestoneGroupPublic;
-		milestoneAnswerSession?: MilestoneAnswerSessionPublic;
-	} = $props();
+let {
+	milestoneGroup = undefined,
+	milestoneAnswerSession = undefined,
+}: {
+	milestoneGroup?: MilestoneGroupPublic;
+	milestoneAnswerSession?: MilestoneAnswerSessionPublic;
+} = $props();
 
-	let currentMilestoneIndex = $state(0);
-	let currentMilestone = $state(undefined as MilestonePublic | undefined);
-	let selectedAnswer = $derived(
-		milestoneAnswerSession?.answers?.[`${currentMilestone?.id}`]?.answer
-	);
-	let autoGoToNextMilestone = $state(false);
-	let currentImageIndex = $state(0);
+let currentMilestoneIndex = $state(0);
+let currentMilestone = $state(undefined as MilestonePublic | undefined);
+let selectedAnswer = $derived(
+	milestoneAnswerSession?.answers?.[`${currentMilestone?.id}`]?.answer,
+);
+let autoGoToNextMilestone = $state(false);
+let currentImageIndex = $state(0);
 
-	onMount(() => {
-		console.log(milestoneGroup);
-		if (milestoneGroup && milestoneGroup.milestones) {
-			currentMilestone = milestoneGroup.milestones[currentMilestoneIndex];
-		}
+onMount(() => {
+	console.log(milestoneGroup);
+	if (milestoneGroup && milestoneGroup.milestones) {
+		currentMilestone = milestoneGroup.milestones[currentMilestoneIndex];
+	}
+});
+
+const imageInterval = 5000;
+setInterval(() => {
+	if (
+		currentMilestone &&
+		currentMilestone.images &&
+		currentMilestone.images.length > 0
+	) {
+		currentImageIndex =
+			(currentImageIndex + 1) % currentMilestone.images.length;
+	}
+}, imageInterval);
+
+function prevMilestone() {
+	if (
+		!milestoneGroup ||
+		!milestoneGroup.milestones ||
+		currentMilestoneIndex === 0
+	) {
+		return;
+	}
+	currentMilestoneIndex -= 1;
+	currentImageIndex = 0;
+	currentMilestone = milestoneGroup.milestones[currentMilestoneIndex];
+}
+
+async function nextMilestone() {
+	if (
+		!milestoneGroup ||
+		!milestoneGroup.milestones ||
+		!currentMilestone ||
+		selectedAnswer === undefined ||
+		!milestoneAnswerSession
+	) {
+		return;
+	}
+	const { data, error } = await updateMilestoneAnswer({
+		body: { milestone_id: currentMilestone.id, answer: selectedAnswer },
+		path: {
+			milestone_answer_session_id: milestoneAnswerSession.id,
+		},
 	});
-
-	const imageInterval = 5000;
-	setInterval(() => {
-		if (currentMilestone && currentMilestone.images && currentMilestone.images.length > 0) {
-			currentImageIndex = (currentImageIndex + 1) % currentMilestone.images.length;
-		}
-	}, imageInterval);
-
-	function prevMilestone() {
-		if (!milestoneGroup || !milestoneGroup.milestones || currentMilestoneIndex === 0) {
-			return;
-		}
-		currentMilestoneIndex -= 1;
-		currentImageIndex = 0;
-		currentMilestone = milestoneGroup.milestones[currentMilestoneIndex];
+	if (error) {
+		console.log(error);
+		return;
 	}
-
-	async function nextMilestone() {
-		if (
-			!milestoneGroup ||
-			!milestoneGroup.milestones ||
-			!currentMilestone ||
-			selectedAnswer === undefined ||
-			!milestoneAnswerSession
-		) {
-			return;
-		}
-		const { data, error } = await updateMilestoneAnswer({
-			body: { milestone_id: currentMilestone.id, answer: selectedAnswer },
-			path: {
-				milestone_answer_session_id: milestoneAnswerSession.id
-			}
-		});
-		if (error) {
-			console.log(error);
-			return;
-		}
-		milestoneAnswerSession.answers[`${currentMilestone.id}`] = data;
-		if (currentMilestoneIndex + 1 == milestoneGroup.milestones.length) {
-			console.log(`TODO: redirect to next milestone group or back to group overview`);
-			// todo: redirect to bereichuebersicht? or go to next set of milestones?
-			return;
-		}
-		currentMilestoneIndex += 1;
-		currentImageIndex = 0;
-		currentMilestone = milestoneGroup.milestones[currentMilestoneIndex];
+	milestoneAnswerSession.answers[`${currentMilestone.id}`] = data;
+	if (currentMilestoneIndex + 1 == milestoneGroup.milestones.length) {
+		console.log(
+			`TODO: redirect to next milestone group or back to group overview`,
+		);
+		// todo: redirect to bereichuebersicht? or go to next set of milestones?
+		return;
 	}
+	currentMilestoneIndex += 1;
+	currentImageIndex = 0;
+	currentMilestone = milestoneGroup.milestones[currentMilestoneIndex];
+}
 
-	function selectAnswer(answer: number | undefined) {
-		if (!currentMilestone) {
-			console.log('selectAnswer: missing currentMilestone');
-			return;
-		}
-		if (!milestoneAnswerSession) {
-			console.log('selectAnswer: missing milestoneAnswerSession');
-			return;
-		}
-		milestoneAnswerSession.answers[`${currentMilestone.id}`] = {
-			milestone_id: currentMilestone.id,
-			answer: answer
-		};
-		if (selectedAnswer !== undefined && autoGoToNextMilestone) {
-			nextMilestone();
-		}
+function selectAnswer(answer: number | undefined) {
+	if (!currentMilestone) {
+		console.log("selectAnswer: missing currentMilestone");
+		return;
 	}
+	if (!milestoneAnswerSession) {
+		console.log("selectAnswer: missing milestoneAnswerSession");
+		return;
+	}
+	milestoneAnswerSession.answers[`${currentMilestone.id}`] = {
+		milestone_id: currentMilestone.id,
+		answer: answer,
+	};
+	if (selectedAnswer !== undefined && autoGoToNextMilestone) {
+		nextMilestone();
+	}
+}
 </script>
 
 <div

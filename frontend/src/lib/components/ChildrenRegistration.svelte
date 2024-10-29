@@ -1,82 +1,82 @@
 <script lang="ts">
-	import { base } from '$app/paths';
-	import AlertMessage from '$lib/components/AlertMessage.svelte';
-	import {
-		buildDataToSend,
-		buildMissingValues,
-		buildRequired,
-		getData,
-		setUpDynamic,
-		setUpOnMount,
-		submitData,
-		tearDown,
-		verifyInput
-	} from '$lib/components/ChildrenRegistration';
-	import DataInput from '$lib/components/DataInput/DataInput.svelte';
-	import Breadcrumbs from '$lib/components/Navigation/Breadcrumbs.svelte';
-	import NavigationButtons from '$lib/components/Navigation/NavigationButtons.svelte';
-	import { activeTabChildren } from '$lib/stores/componentStore';
-	import { Card, Heading } from 'flowbite-svelte';
-	import { onDestroy, onMount } from 'svelte';
+import { base } from "$app/paths";
+import AlertMessage from "$lib/components/AlertMessage.svelte";
+import {
+	buildDataToSend,
+	buildMissingValues,
+	buildRequired,
+	getData,
+	setUpDynamic,
+	setUpOnMount,
+	submitData,
+	tearDown,
+	verifyInput,
+} from "$lib/components/ChildrenRegistration";
+import DataInput from "$lib/components/DataInput/DataInput.svelte";
+import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
+import NavigationButtons from "$lib/components/Navigation/NavigationButtons.svelte";
+import { activeTabChildren } from "$lib/stores/componentStore";
+import { Card, Heading } from "flowbite-svelte";
+import { onDestroy, onMount } from "svelte";
 
-	// get data to fill in
-	const data = getData();
+// get data to fill in
+const data = getData();
 
-	const breadcrumbdata = [
-		{
-			label: 'Kinderübersicht',
-			onclick: () => {
-				activeTabChildren.update((value) => {
-					return 'childrenGallery';
+const breadcrumbdata = [
+	{
+		label: "Kinderübersicht",
+		onclick: () => {
+			activeTabChildren.update((value) => {
+				return "childrenGallery";
+			});
+		},
+	},
+	{
+		label: "Neues Kind registrieren",
+	},
+];
+
+// use component lifecycle to make sure data is written and read persistently
+
+onMount(setUpOnMount);
+
+onDestroy(async () => {
+	await tearDown(unsubscribe);
+});
+
+// data to display -> will later be fetched from the server
+const heading = "Neues Kind registrieren";
+
+// data
+let unsubscribe: unknown = setUpDynamic();
+
+// rerender page if missing values or showAlert changes
+let missingValues = [];
+$: showAlert = false;
+$: showCheckMessage = true;
+
+const buttons = [
+	{
+		label: "Abschließen",
+		onclick: async () => {
+			const childData = buildDataToSend(data);
+			const required = buildRequired(data);
+			const verified = await verifyInput(childData, required);
+			if (verified) {
+				console.log("good");
+				showAlert = false;
+				await submitData(data);
+				activeTabChildren.update((v) => {
+					return "childrenGallery";
 				});
+			} else {
+				console.log("not good");
+				missingValues = buildMissingValues(childData, required);
+				showAlert = true;
 			}
 		},
-		{
-			label: 'Neues Kind registrieren'
-		}
-	];
-
-	// use component lifecycle to make sure data is written and read persistently
-
-	onMount(setUpOnMount);
-
-	onDestroy(async () => {
-		await tearDown(unsubscribe);
-	});
-
-	// data to display -> will later be fetched from the server
-	const heading = 'Neues Kind registrieren';
-
-	// data
-	let unsubscribe: unknown = setUpDynamic();
-
-	// rerender page if missing values or showAlert changes
-	let missingValues = [];
-	$: showAlert = false;
-	$: showCheckMessage = true;
-
-	const buttons = [
-		{
-			label: 'Abschließen',
-			onclick: async () => {
-				const childData = buildDataToSend(data);
-				const required = buildRequired(data);
-				const verified = await verifyInput(childData, required);
-				if (verified) {
-					console.log('good');
-					showAlert = false;
-					await submitData(data);
-					activeTabChildren.update((v) => {
-						return 'childrenGallery';
-					});
-				} else {
-					console.log('not good');
-					missingValues = buildMissingValues(childData, required);
-					showAlert = true;
-				}
-			}
-		}
-	];
+	},
+];
 </script>
 
 <div

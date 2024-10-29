@@ -1,49 +1,52 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { base } from '$app/paths';
+import { goto } from "$app/navigation";
+import { base } from "$app/paths";
 
-	import { type ResetForgotPasswordData } from '$lib/client';
-	import { resetForgotPassword } from '$lib/client/services.gen';
-	import { preventDefault } from '$lib/util';
+import { type ResetForgotPasswordData } from "$lib/client";
+import { resetForgotPassword } from "$lib/client/services.gen";
+import { preventDefault } from "$lib/util";
 
-	import AlertMessage from '$lib/components/AlertMessage.svelte';
-	import DataInput from '$lib/components/DataInput/DataInput.svelte';
-	import { Button, Card, Heading, Input } from 'flowbite-svelte';
-	import { _ } from 'svelte-i18n';
+import AlertMessage from "$lib/components/AlertMessage.svelte";
+import DataInput from "$lib/components/DataInput/DataInput.svelte";
+import { Button, Card, Heading, Input } from "flowbite-svelte";
+import { _ } from "svelte-i18n";
 
-	const maildata = {
-		component: Input,
-		type: 'email',
-		value: '',
-		props: {
-			placeholder: $_('forgotPw.placeholder'),
-			id: 'email',
-			required: true
-		}
+const maildata = {
+	component: Input,
+	type: "email",
+	value: "",
+	props: {
+		placeholder: $_("forgotPw.placeholder"),
+		id: "email",
+		required: true,
+	},
+};
+
+let alertMessage: string = $_("forgotPw.formatError");
+let showAlert: boolean;
+let showSuccess = false;
+
+async function submitData(): Promise<void> {
+	const data: ResetForgotPasswordData = {
+		body: {
+			email: maildata.value,
+		},
 	};
 
-	let alertMessage: string = $_('forgotPw.formatError');
-	let showAlert: boolean;
-	let showSuccess: boolean = false;
+	const result = await resetForgotPassword(data);
 
-	async function submitData(): Promise<void> {
-		const data: ResetForgotPasswordData = {
-			body: {
-				email: maildata.value
-			}
-		};
-
-		const result = await resetForgotPassword(data);
-
-		if (result.error) {
-			console.log('error: ', result.error);
-			showAlert = true;
-			alertMessage = $_('forgotPw.sendError');
-		} else {
-			console.log('successful transmission, response status: ', result.response.status);
-			showSuccess = true;
-		}
+	if (result.error) {
+		console.log("error: ", result.error);
+		showAlert = true;
+		alertMessage = $_("forgotPw.sendError");
+	} else {
+		console.log(
+			"successful transmission, response status: ",
+			result.response.status,
+		);
+		showSuccess = true;
 	}
+}
 </script>
 
 {#if showAlert}

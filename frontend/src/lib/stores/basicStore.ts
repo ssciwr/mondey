@@ -1,5 +1,5 @@
-import { browser } from '$app/environment';
-import { get, type Subscriber, writable, type Writable } from 'svelte/store';
+import { browser } from "$app/environment";
+import { type Subscriber, type Writable, get, writable } from "svelte/store";
 
 /**
  *

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Breadcrumb, BreadcrumbItem } from 'flowbite-svelte';
-	export let data: any[] = [];
+import { Breadcrumb, BreadcrumbItem } from "flowbite-svelte";
+export let data: any[] = [];
 </script>
 
 <Breadcrumb
