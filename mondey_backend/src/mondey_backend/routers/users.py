@@ -18,6 +18,8 @@ from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneAnswerSessionPublic
+from ..models.questions import ChildAnswer
+from ..models.questions import ChildAnswerPublic
 from ..models.questions import UserAnswer
 from ..models.questions import UserAnswerPublic
 from ..models.users import UserRead
@@ -177,6 +179,42 @@ def create_router() -> APIRouter:
 
             if current_answer is None:
                 current_answer = UserAnswer.model_validate(
+                    new_answer, update={"user_id": current_active_user.id}
+                )
+                add(session, current_answer)
+            else:
+                for key, value in new_answer.model_dump().items():
+                    setattr(current_answer, key, value)
+
+        session.commit()
+        return new_answers
+
+    # Endpoints for answers to child question
+    @router.get("/children-answers/", response_model=list[ChildAnswerPublic])
+    def get_current_children_answers(
+        session: SessionDep, current_active_user: CurrentActiveUserDep
+    ):
+        answers = session.exec(
+            select(ChildAnswer).where(
+                col(ChildAnswer.user_id) == current_active_user.id
+            )
+        ).all()
+
+        return answers
+
+    @router.put("/children-answers/", response_model=list[ChildAnswerPublic])
+    def update_current_children_answers(
+        session: SessionDep,
+        current_active_user: CurrentActiveUserDep,
+        new_answers: list[ChildAnswerPublic],
+    ):
+        for new_answer in new_answers:
+            current_answer = session.get(
+                ChildAnswer, (current_active_user.id, new_answer.question_id)
+            )
+
+            if current_answer is None:
+                current_answer = ChildAnswer.model_validate(
                     new_answer, update={"user_id": current_active_user.id}
                 )
                 add(session, current_answer)

@@ -165,6 +165,7 @@ def create_router() -> APIRouter:
         session.refresh(milestone_image)
         return milestone_image
 
+    # User question CRUD endpoints
     @router.get("/user-questions/", response_model=list[UserQuestionAdmin])
     def get_user_questions_admin(session: SessionDep):
         user_questions = session.exec(
@@ -201,6 +202,7 @@ def create_router() -> APIRouter:
         session.commit()
         return {"ok": True}
 
+    # Child question CRUD endpoints
     @router.get("/child-questions/", response_model=list[ChildQuestionAdmin])
     def get_child_questions_admin(session: SessionDep):
         user_questions = session.exec(

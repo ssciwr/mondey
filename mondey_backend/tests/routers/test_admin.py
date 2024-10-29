@@ -248,3 +248,92 @@ def test_post_milestone_image(
     assert len(admin_client.get("/milestones/3").json()["images"]) == 1
     assert len(admin_client.get("/milestones/4").json()["images"]) == 1
     assert len(admin_client.get("/milestones/5").json()["images"]) == 1
+
+
+# tests for user questions
+def test_get_user_question_admin_works():
+    assert 3 == 5
+
+
+def test_get_user_question_admin_userid_not_there():
+    assert 3 == 5
+
+
+def test_create_user_question_works():
+    assert 3 == 5
+
+
+def test_create_user_question_id_exists():
+    assert 3 == 5
+
+
+def test_create_user_question_id_database_error():
+    assert 3 == 5
+
+
+def test_update_user_question_works():
+    assert 3 == 5
+
+
+def test_update_user_question_id_not_there():
+    assert 3 == 5
+
+
+def test_update_user_question_database_error():
+    assert 3 == 5
+
+
+def test_delete_user_question_works():
+    assert 3 == 5
+
+
+def test_delete_user_question_id_not_there():
+    assert 3 == 5
+
+
+def test_delete_user_question_database_error():
+    assert 3 == 5
+
+
+def test_get_child_question_admin_works():
+    assert 3 == 5
+
+
+def test_get_child_question_admin_userid_not_there():
+    assert 3 == 5
+
+
+def test_create_child_question_works():
+    assert 3 == 5
+
+
+def test_create_child_question_id_exists():
+    assert 3 == 5
+
+
+def test_create_child_question_id_database_error():
+    assert 3 == 5
+
+
+def test_update_child_question_works():
+    assert 3 == 5
+
+
+def test_update_child_question_id_not_there():
+    assert 3 == 5
+
+
+def test_update_child_question_database_error():
+    assert 3 == 5
+
+
+def test_delete_child_question_works():
+    assert 3 == 5
+
+
+def test_delete_child_question_id_not_there():
+    assert 3 == 5
+
+
+def test_delete_child_question_database_error():
+    assert 3 == 5
