@@ -15,7 +15,7 @@ class QuestionTextBase(SQLModel):
 
 
 class QuestionText(QuestionTextBase):
-    user_question_id: int | None = Field(
+    question_id: int | None = Field(
         default=None, foreign_key="userquestion.id", primary_key=True
     )
     lang_id: str | None = fixed_length_string_field(
