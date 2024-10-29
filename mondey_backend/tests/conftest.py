@@ -26,7 +26,11 @@ from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.models.milestones import MilestoneGroupText
 from mondey_backend.models.milestones import MilestoneImage
 from mondey_backend.models.milestones import MilestoneText
+from mondey_backend.models.questions import ChildQuestion
+from mondey_backend.models.questions import ChildQuestionText
 from mondey_backend.models.questions import UserAnswer
+from mondey_backend.models.questions import UserQuestion
+from mondey_backend.models.questions import UserQuestionText
 from mondey_backend.models.users import UserRead
 
 
@@ -175,6 +179,72 @@ def session():
         )
         session.add(MilestoneAnswer(answer_session_id=3, milestone_id=7, answer=2))
 
+        # add user questions for user 1
+        session.add(
+            UserQuestion(
+                id=1,
+                order=0,
+                options="[a,b,c,other]",
+                additional_option="",
+                text={
+                    "de": UserQuestionText(question_id=1, lang_id=1, options="[x,y,z]"),
+                    "en": UserQuestionText(question_id=1, lang_id=2, options="[1,2,3]"),
+                },
+            )
+        )
+
+        session.add(
+            UserQuestion(
+                id=2,
+                order=1,
+                options="[a2,b2,c2,other]",
+                additional_option="other",
+                text={
+                    "de": UserQuestionText(
+                        question_id=2, lang_id=1, options="[x2,y2,z2]"
+                    ),
+                    "en": UserQuestionText(
+                        question_id=2, lang_id=2, options="[12,22,32]"
+                    ),
+                },
+            )
+        )
+
+        # add child questions for user 1
+        session.add(
+            ChildQuestion(
+                id=1,
+                order=0,
+                options="[a,b,c,other]",
+                additional_option="",
+                text={
+                    "de": ChildQuestionText(
+                        question_id=1, lang_id=1, options="[x,y,z]"
+                    ),
+                    "en": ChildQuestionText(
+                        question_id=1, lang_id=2, options="[1,2,3]"
+                    ),
+                },
+            )
+        )
+
+        session.add(
+            ChildQuestion(
+                id=2,
+                order=1,
+                options="[a2,b2,c2,other]",
+                additional_option="other",
+                text={
+                    "de": ChildQuestionText(
+                        question_id=2, lang_id=1, options="[x2,y2,z2]"
+                    ),
+                    "en": ChildQuestionText(
+                        question_id=2, lang_id=2, options="[12,22,32]"
+                    ),
+                },
+            )
+        )
+
         # add user answers for user 1
         session.add(
             UserAnswer(
@@ -194,6 +264,8 @@ def session():
                 additional_answer="dolor sit",
             )
         )
+
+        # add child answers for user 1
 
         yield session
 
