@@ -8,12 +8,13 @@ from .utils import dict_relationship
 from .utils import fixed_length_string_field
 
 
-class UserQuestionTextBase(SQLModel):
+# Base model for all questions text elements
+class QuestionTextBase(SQLModel):
     question: str = ""
     options_json: str = ""
 
 
-class UserQuestionText(UserQuestionTextBase, table=True):
+class QuestionText(QuestionTextBase):
     user_question_id: int | None = Field(
         default=None, foreign_key="userquestion.id", primary_key=True
     )
@@ -23,51 +24,69 @@ class UserQuestionText(UserQuestionTextBase, table=True):
     options: str = ""
 
 
-class UserQuestionTextPublic(UserQuestionTextBase):
+class QuestionTextPublic(QuestionTextBase):
     pass
 
 
-class UserQuestion(SQLModel, table=True):
+class Question(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     order: int = 0
     component: str = "select"
     type: str = "text"
     options: str = ""
-    text: Mapped[dict[str, UserQuestionText]] = dict_relationship(key="lang_id")
+    text: Mapped[dict[str, QuestionText]] = dict_relationship(key="lang_id")
     additional_option: str = ""
 
 
-class UserQuestionPublic(SQLModel):
+class QuestionPublic(SQLModel):
     id: int
     component: str = "select"
     type: str = "text"
-    text: dict[str, UserQuestionTextPublic] = {}
+    text: dict[str, QuestionTextPublic] = {}
     additional_option: str = ""
 
 
-class UserQuestionAdmin(SQLModel):
+class QuestionAdmin(SQLModel):
     id: int
     order: int
     component: str = "select"
     type: str = "text"
     options: str
-    text: dict[str, UserQuestionText] = {}
+    text: dict[str, QuestionText] = {}
     additional_option: str = ""
 
 
-# Answers to user questions. Internal model and 'public' model exposed to the forntend app
+class UserQuestion(Question, table=True):
+    pass
+
+
+class UserQuestionPublic(QuestionPublic):
+    pass
+
+
+class UserQuestionAdmin(QuestionAdmin):
+    pass
+
+
+class ChildQuestion(Question, table=True):
+    pass
+
+
+class ChildQuestionPublic(QuestionPublic):
+    pass
+
+
+class ChildQuestionAdmin(QuestionAdmin):
+    pass
 
 
 class Answer(SQLModel):
     """
-    Internal model for user answers.
+    Base Answer model for all internal data that holds answers to questions.
 
     Parameters
     ----------
-    UserAnswerBase : Base type for all UserAnswer models
-
-    table : bool, True
-        Makes sure this is created as a table in the database, by default True
+    SQLModel: Makes this into a pydantic model for an SQL table entry.
     """
 
     user_id: int = Field(default=None, primary_key=True)
@@ -79,19 +98,34 @@ class Answer(SQLModel):
 
 
 class UserAnswer(Answer, table=True):
+    """
+    Internal model for UserAnswer with the same content as the base `Answer` type.
+
+    Parameters
+    ----------
+    Answer : Base Answer model for all internal data that holds answers to questions.
+    table : bool, optional
+        Makes this a SQL table
+    """
+
     pass
 
 
 class ChildAnswer(Answer, table=True):
-    child_id: int = Field(
-        default=None,
-        primary_key=True,
-    )
+    """
+    Internal model for child answer data which adds the child ID.
+
+    Parameters
+    ----------
+    AnswerPublic : Basic Model for all Answers to questions in Mondey
+    """
+
+    child_id: int = Field(default=None, primary_key=True, foreign_key="child.id")
 
 
 class AnswerPublic(SQLModel):
     """
-    External data model for UserAnswers
+    Internal data model for UserAnswers
 
     Parameters
     ----------
@@ -104,8 +138,24 @@ class AnswerPublic(SQLModel):
 
 
 class UserAnswerPublic(AnswerPublic):
+    """
+    Model for public user answer data with the same content as AnswerPublic
+
+    Parameters
+    ----------
+    AnswerPublic : Basic Model for all Answers to questions in Mondey
+    """
+
     pass
 
 
 class ChildAnswerPublic(AnswerPublic):
+    """
+    Model for public child answer data which adds the child ID.
+
+    Parameters
+    ----------
+    AnswerPublic : Basic Model for all Answers to questions in Mondey
+    """
+
     child_id: int
