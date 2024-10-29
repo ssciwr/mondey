@@ -70,7 +70,7 @@
 		<div class="flex flex-row items-center">
 			<div class="mr-5 grow">
 				<div class="mb-5">
-					<Label class="mb-2">Question</Label>
+					<Label class="mb-2">{$_('admin.question')}</Label>
 					{#each Object.values(userQuestion.text) as text}
 						<div class="mb-1">
 							<ButtonGroup class="w-full">
