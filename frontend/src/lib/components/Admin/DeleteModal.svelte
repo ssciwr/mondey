@@ -1,11 +1,14 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-	import { Button, Modal } from 'flowbite-svelte';
-	import ExclamationCircleOutline from 'flowbite-svelte-icons/ExclamationCircleOutline.svelte';
-	import { _ } from 'svelte-i18n';
+import { Button, Modal } from "flowbite-svelte";
+import ExclamationCircleOutline from "flowbite-svelte-icons/ExclamationCircleOutline.svelte";
+import { _ } from "svelte-i18n";
 
-	let { open = $bindable(false), onclick }: { open: boolean; onclick: () => void } = $props();
+let {
+	open = $bindable(false),
+	onclick,
+}: { open: boolean; onclick: () => void } = $props();
 </script>
 
 <Modal bind:open size="xs" autoclose>

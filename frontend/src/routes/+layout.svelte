@@ -1,20 +1,28 @@
 <script lang="ts">
-	import '$lib/i18n';
-	import logo_dark from '$lib/assets/mondey_dark.svg';
-	import logo_light from '$lib/assets/mondey_light.svg';
-	import FunctionalIcon from '$lib/components/Navigation/FunctionalIcon.svelte';
-	import UserProfile from '$lib/components/UserProfile.svelte';
-	import LocaleChooser from '$lib/components/LocaleChooser.svelte';
-	import { Avatar, DarkMode, Navbar, NavBrand, NavHamburger, NavLi, NavUl } from 'flowbite-svelte';
-	import { MoonSolid, SunSolid } from 'flowbite-svelte-icons';
-	import '../app.css';
-	import { base } from '$app/paths';
-	import { onMount } from 'svelte';
-	import { getTranslations } from '$lib/i18n';
+import "$lib/i18n";
+import logo_dark from "$lib/assets/mondey_dark.svg";
+import logo_light from "$lib/assets/mondey_light.svg";
+import LocaleChooser from "$lib/components/LocaleChooser.svelte";
+import FunctionalIcon from "$lib/components/Navigation/FunctionalIcon.svelte";
+import UserProfile from "$lib/components/UserProfile.svelte";
+import {
+	Avatar,
+	DarkMode,
+	NavBrand,
+	NavHamburger,
+	NavLi,
+	NavUl,
+	Navbar,
+} from "flowbite-svelte";
+import { MoonSolid, SunSolid } from "flowbite-svelte-icons";
+import "../app.css";
+import { base } from "$app/paths";
+import { getTranslations } from "$lib/i18n";
+import { onMount } from "svelte";
 
-	onMount(() => {
-		getTranslations();
-	});
+onMount(() => {
+	getTranslations();
+});
 </script>
 
 <Navbar>

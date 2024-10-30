@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Button } from 'flowbite-svelte';
-	import { CheckCircleOutline } from 'flowbite-svelte-icons';
-	import { _ } from 'svelte-i18n';
+import { Button } from "flowbite-svelte";
+import { CheckCircleOutline } from "flowbite-svelte-icons";
+import { _ } from "svelte-i18n";
 </script>
 
 <div

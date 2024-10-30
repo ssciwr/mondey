@@ -1,25 +1,25 @@
 <script lang="ts">
-	import { Radio, RadioButton } from 'flowbite-svelte';
-	import { createEventDispatcher } from 'svelte';
+import { Radio, RadioButton } from "flowbite-svelte";
+import { createEventDispatcher } from "svelte";
 
-	const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
-	function handleChange(event) {
-		dispatch('change', { value: event.target.value });
-	}
+function handleChange(event) {
+	dispatch("change", { value: event.target.value });
+}
 
-	function handleBlur(event) {
-		dispatch('blur', { value: event.target.value });
-	}
+function handleBlur(event) {
+	dispatch("blur", { value: event.target.value });
+}
 
-	function handleClick(event) {
-		dispatch('click', { value: event.target.value });
-	}
-	export let value: any;
-	export let disabled: boolean = false;
-	export let required: boolean = true;
-	let windowWidth = 1920;
-	$: smallScreen = windowWidth < 800;
+function handleClick(event) {
+	dispatch("click", { value: event.target.value });
+}
+export let value: any;
+export let disabled = false;
+export let required = true;
+let windowWidth = 1920;
+$: smallScreen = windowWidth < 800;
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />

@@ -1,92 +1,92 @@
 <script lang="ts">
-	import { base } from '$app/paths';
+import { base } from "$app/paths";
 
-	import UserLoginUtil from '$lib/components//UserLoginUtil.svelte';
-	import AlertMessage from '$lib/components/AlertMessage.svelte';
-	import DataInput from '$lib/components/DataInput/DataInput.svelte';
+import UserLoginUtil from "$lib/components//UserLoginUtil.svelte";
+import AlertMessage from "$lib/components/AlertMessage.svelte";
+import DataInput from "$lib/components/DataInput/DataInput.svelte";
 
-	import { goto } from '$app/navigation';
-	import { authCookieLogin, usersCurrentUser } from '$lib/client/services.gen';
-	import { type AuthCookieLoginData, type UserRead } from '$lib/client/types.gen';
-	import { currentUser } from '$lib/stores/userStore';
-	import { preventDefault } from '$lib/util';
-	import { Button, Card, Heading, Input } from 'flowbite-svelte';
-	import { _ } from 'svelte-i18n';
+import { goto } from "$app/navigation";
+import { authCookieLogin, usersCurrentUser } from "$lib/client/services.gen";
+import { type AuthCookieLoginData, type UserRead } from "$lib/client/types.gen";
+import { currentUser } from "$lib/stores/userStore";
+import { preventDefault } from "$lib/util";
+import { Button, Card, Heading, Input } from "flowbite-svelte";
+import { _ } from "svelte-i18n";
 
-	async function refresh(): Promise<string> {
-		const returned = await usersCurrentUser();
-		if (returned.error) {
-			console.log('Error getting current user: ', returned.error.detail);
-			currentUser.set(null);
-			return returned.error.detail;
-		} else {
-			console.log('Successfully retrieved active user');
-			currentUser.set(returned.data as UserRead);
-			return 'success';
-		}
+async function refresh(): Promise<string> {
+	const returned = await usersCurrentUser();
+	if (returned.error) {
+		console.log("Error getting current user: ", returned.error.detail);
+		currentUser.set(null);
+		return returned.error.detail;
+	} else {
+		console.log("Successfully retrieved active user");
+		currentUser.set(returned.data as UserRead);
+		return "success";
 	}
+}
 
-	// functionality
-	async function submitData(): Promise<void> {
-		const loginData: AuthCookieLoginData = {
-			body: {
-				username: formData[0].value,
-				password: formData[1].value
-			}
-		};
-
-		const authReturn = await authCookieLogin(loginData);
-
-		// forget user data again to not have a plain text password lying around in memory somewhere
-		// any longer than needed
-
-		if (authReturn.error) {
-			showAlert = true;
-		} else {
-			const status: string = await refresh();
-
-			if (status !== 'success') {
-				console.log('error during retrieving active users: ', status);
-				showAlert = true;
-				alertMessage = $_('login.unauthorized') + ': ' + status;
-			} else {
-				console.log('login and user retrieval successful');
-				goto('/userLand/userLandingpage');
-			}
-		}
-	}
-
-	// form data and variables
-	let formData = [
-		{
-			component: Input,
-			value: '',
-			props: {
-				label: $_('login.usernameLabel'),
-				type: 'email',
-				placeholder: $_('login.usernameLabel'),
-				required: true,
-				id: 'username',
-				autocomplete: 'username'
-			}
+// functionality
+async function submitData(): Promise<void> {
+	const loginData: AuthCookieLoginData = {
+		body: {
+			username: formData[0].value,
+			password: formData[1].value,
 		},
-		{
-			component: Input,
-			value: '',
-			props: {
-				label: $_('login.passwordLabel'),
-				type: 'password',
-				placeholder: $_('login.passwordLabel'),
-				required: true,
-				id: 'password',
-				autocomplete: 'password'
-			}
-		}
-	];
+	};
 
-	let remember: boolean = false;
-	let showAlert: boolean = false;
-	let alertMessage: string = $_('login.badCredentials');
+	const authReturn = await authCookieLogin(loginData);
+
+	// forget user data again to not have a plain text password lying around in memory somewhere
+	// any longer than needed
+
+	if (authReturn.error) {
+		showAlert = true;
+	} else {
+		const status: string = await refresh();
+
+		if (status !== "success") {
+			console.log("error during retrieving active users: ", status);
+			showAlert = true;
+			alertMessage = $_("login.unauthorized") + ": " + status;
+		} else {
+			console.log("login and user retrieval successful");
+			goto("/userLand/userLandingpage");
+		}
+	}
+}
+
+// form data and variables
+let formData = [
+	{
+		component: Input,
+		value: "",
+		props: {
+			label: $_("login.usernameLabel"),
+			type: "email",
+			placeholder: $_("login.usernameLabel"),
+			required: true,
+			id: "username",
+			autocomplete: "username",
+		},
+	},
+	{
+		component: Input,
+		value: "",
+		props: {
+			label: $_("login.passwordLabel"),
+			type: "password",
+			placeholder: $_("login.passwordLabel"),
+			required: true,
+			id: "password",
+			autocomplete: "password",
+		},
+	},
+];
+
+let remember = false;
+let showAlert = false;
+let alertMessage: string = $_("login.badCredentials");
 </script>
 
 {#if showAlert}

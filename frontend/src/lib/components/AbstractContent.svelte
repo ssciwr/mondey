@@ -1,18 +1,22 @@
 <script>
-	import { BottomNav } from 'flowbite-svelte';
+import { BottomNav } from "flowbite-svelte";
 
-	import { CaretLeftSolid, CaretRightSolid, LightbulbSolid } from 'flowbite-svelte-icons';
-	// logo
-	import BottomNavElement from '$lib/components/Navigation/BottomNavElement.svelte';
+// logo
+import BottomNavElement from "$lib/components/Navigation/BottomNavElement.svelte";
+import {
+	CaretLeftSolid,
+	CaretRightSolid,
+	LightbulbSolid,
+} from "flowbite-svelte-icons";
 
-	// variables for showing or hiding elements
-	export let showBottomNavbar = true;
+// variables for showing or hiding elements
+export let showBottomNavbar = true;
 
-	// variables for communication upon hitting the page
-	// FIXME: these are placeholders and must later be changed using contexts or other better mechanisms for inter component comunication
-	export let lastpage = null;
-	export let nextpage = null;
-	export let infopage = null;
+// variables for communication upon hitting the page
+// FIXME: these are placeholders and must later be changed using contexts or other better mechanisms for inter component comunication
+export let lastpage = null;
+export let nextpage = null;
+export let infopage = null;
 </script>
 
 <!-- Top element: basic navigation-->

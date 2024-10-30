@@ -1,63 +1,78 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-	import { milestoneGroupImageUrl, refreshMilestoneGroups } from '$lib/admin.svelte';
-	import { updateMilestoneGroupAdmin, uploadMilestoneGroupImage } from '$lib/client/services.gen';
-	import type { MilestoneGroupAdmin } from '$lib/client/types.gen';
-	import CancelButton from '$lib/components/Admin/CancelButton.svelte';
-	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
-	import { ButtonGroup, Fileupload, InputAddon, Label, Modal, Textarea } from 'flowbite-svelte';
-	import { onMount } from 'svelte';
-	import { _, locales } from 'svelte-i18n';
+import {
+	milestoneGroupImageUrl,
+	refreshMilestoneGroups,
+} from "$lib/admin.svelte";
+import {
+	updateMilestoneGroupAdmin,
+	uploadMilestoneGroupImage,
+} from "$lib/client/services.gen";
+import type { MilestoneGroupAdmin } from "$lib/client/types.gen";
+import CancelButton from "$lib/components/Admin/CancelButton.svelte";
+import SaveButton from "$lib/components/Admin/SaveButton.svelte";
+import {
+	ButtonGroup,
+	Fileupload,
+	InputAddon,
+	Label,
+	Modal,
+	Textarea,
+} from "flowbite-svelte";
+import { onMount } from "svelte";
+import { _, locales } from "svelte-i18n";
 
-	let {
-		open = $bindable(false),
-		milestoneGroup
-	}: { open: boolean; milestoneGroup: MilestoneGroupAdmin | null } = $props();
-	let files: FileList | undefined = $state(undefined);
-	let image: string = $state('');
+let {
+	open = $bindable(false),
+	milestoneGroup,
+}: { open: boolean; milestoneGroup: MilestoneGroupAdmin | null } = $props();
+let files: FileList | undefined = $state(undefined);
+let image: string = $state("");
 
-	const textKeys = ['title', 'desc'];
+const textKeys = ["title", "desc"];
 
-	onMount(() => {
-		if (milestoneGroup) {
-			image = milestoneGroupImageUrl(milestoneGroup.id);
-		}
+onMount(() => {
+	if (milestoneGroup) {
+		image = milestoneGroupImageUrl(milestoneGroup.id);
+	}
+});
+
+function updateImageToUpload(event: Event) {
+	const target = event.target as HTMLInputElement;
+	if (target.files && target.files.length > 0) {
+		image = URL.createObjectURL(target.files[0]);
+	}
+}
+
+async function reloadImg(url: string) {
+	await fetch(url, { cache: "reload", mode: "no-cors" });
+	document.body
+		.querySelectorAll(`img[src='${url}']`)
+		.forEach((img) => ((img as HTMLImageElement).src = url));
+}
+
+export async function saveChanges() {
+	if (!milestoneGroup) {
+		return;
+	}
+	const { data, error } = await updateMilestoneGroupAdmin({
+		body: milestoneGroup,
 	});
-
-	function updateImageToUpload(event: Event) {
-		const target = event.target as HTMLInputElement;
-		if (target.files && target.files.length > 0) {
-			image = URL.createObjectURL(target.files[0]);
+	if (error) {
+		console.log(error);
+	} else {
+		console.log(data);
+		if (files && files.length > 0) {
+			await uploadMilestoneGroupImage({
+				body: { file: files[0] },
+				path: { milestone_group_id: milestoneGroup.id },
+			});
+			await reloadImg(milestoneGroupImageUrl(milestoneGroup.id));
 		}
+		await refreshMilestoneGroups();
 	}
-
-	async function reloadImg(url: string) {
-		await fetch(url, { cache: 'reload', mode: 'no-cors' });
-		document.body
-			.querySelectorAll(`img[src='${url}']`)
-			.forEach((img) => ((img as HTMLImageElement).src = url));
-	}
-
-	export async function saveChanges() {
-		if (!milestoneGroup) {
-			return;
-		}
-		const { data, error } = await updateMilestoneGroupAdmin({ body: milestoneGroup });
-		if (error) {
-			console.log(error);
-		} else {
-			console.log(data);
-			if (files && files.length > 0) {
-				await uploadMilestoneGroupImage({
-					body: { file: files[0] },
-					path: { milestone_group_id: milestoneGroup.id }
-				});
-				await reloadImg(milestoneGroupImageUrl(milestoneGroup.id));
-			}
-			await refreshMilestoneGroups();
-		}
-	}
+}
 </script>
 
 <Modal title={$_('admin.edit')} bind:open autoclose size="xl">

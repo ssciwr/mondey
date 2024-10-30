@@ -1,52 +1,52 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-	import { updateI18N } from '$lib/client/services.gen';
-	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
-	import { getI18nJson, getTranslations } from '$lib/i18n';
-	import {
-		Accordion,
-		AccordionItem,
-		ButtonGroup,
-		Card,
-		Input,
-		InputAddon,
-		Label
-	} from 'flowbite-svelte';
-	import { onMount } from 'svelte';
-	import { _, locales } from 'svelte-i18n';
-	import de from '../../../locales/de.json';
+import { updateI18N } from "$lib/client/services.gen";
+import SaveButton from "$lib/components/Admin/SaveButton.svelte";
+import { getI18nJson, getTranslations } from "$lib/i18n";
+import {
+	Accordion,
+	AccordionItem,
+	ButtonGroup,
+	Card,
+	Input,
+	InputAddon,
+	Label,
+} from "flowbite-svelte";
+import { onMount } from "svelte";
+import { _, locales } from "svelte-i18n";
+import de from "../../../locales/de.json";
 
-	type Translation = Record<string, Record<string, string>>;
-	let translations = $state({} as Record<string, Translation>);
+type Translation = Record<string, Record<string, string>>;
+let translations = $state({} as Record<string, Translation>);
 
-	async function refreshTranslations() {
-		for (const lang_id of $locales) {
-			if (lang_id !== 'de') {
-				translations[lang_id] = await getI18nJson(lang_id);
-			}
+async function refreshTranslations() {
+	for (const lang_id of $locales) {
+		if (lang_id !== "de") {
+			translations[lang_id] = await getI18nJson(lang_id);
 		}
 	}
+}
 
-	async function saveChanges() {
-		for (const lang_id of Object.keys(translations)) {
-			const { data, error } = await updateI18N({
-				body: translations[lang_id],
-				path: {
-					language_id: lang_id
-				}
-			});
-			if (error) {
-				console.log(error);
-				return;
-			} else {
-				console.log(data);
-			}
+async function saveChanges() {
+	for (const lang_id of Object.keys(translations)) {
+		const { data, error } = await updateI18N({
+			body: translations[lang_id],
+			path: {
+				language_id: lang_id,
+			},
+		});
+		if (error) {
+			console.log(error);
+			return;
+		} else {
+			console.log(data);
 		}
-		await getTranslations();
 	}
+	await getTranslations();
+}
 
-	onMount(() => refreshTranslations());
+onMount(() => refreshTranslations());
 </script>
 
 <Card size="xl" class="m-5">
