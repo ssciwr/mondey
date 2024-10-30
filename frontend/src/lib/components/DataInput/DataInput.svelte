@@ -1,58 +1,64 @@
 <script lang="ts">
-	// README: wrt event handlers: in svelte 5 there is a better solution to this, but since we don´t have this yet and
-	// the svelte 4 solution requires a lot of boilerplate code (https://github.com/sveltejs/svelte/issues/2837#issuecomment-1848225140)
-	// currently there are some hardcoded event handlers
+// README: wrt event handlers: in svelte 5 there is a better solution to this, but since we don´t have this yet and
+// the svelte 4 solution requires a lot of boilerplate code (https://github.com/sveltejs/svelte/issues/2837#issuecomment-1848225140)
+// currently there are some hardcoded event handlers
 
-	import { Label, Textarea } from 'flowbite-svelte';
+import { Label, Textarea } from "flowbite-svelte";
 
-	// variables
-	export let component: any;
-	export let value: any;
-	export let label: string | null = null;
-	export let componentClass: string = '';
-	export let textTrigger: string = 'noAdditionalText';
-	export let showTextField: boolean = false;
-	export let additionalInput: any = null;
+// variables
+export let component: any;
+export let value: any;
+export let label: string | null = null;
+export let componentClass = "";
+export let textTrigger = "noAdditionalText";
+export let showTextField = false;
+export let additionalInput: any = null;
 
-	// data to display and event handlers for dynamcis.
-	export let properties: any = {};
+// data to display and event handlers for dynamcis.
+export let properties: any = {};
 
-	interface EventHandler {
-		[key: string]: (event: Event) => void | Promise<void>;
+interface EventHandler {
+	[key: string]: (event: Event) => void | Promise<void>;
+}
+
+// README: This structure is not necessary here yet, as the events could be exposed directly,
+// but will afais be useful later in svelte5
+export let eventHandlers: EventHandler = {};
+export let additionalEventHandlers: EventHandler = {};
+
+// custom valid checker that can optionally be supplied
+export let checkValid = (_) => {
+	return true;
+};
+
+// functionality for showing the textfield when the trigger is selected
+function checkShowTextfield(v: any): boolean {
+	if (v instanceof Array) {
+		return v.includes(textTrigger);
+	} else {
+		return v === textTrigger;
+	}
+}
+
+function evalValid(v: any): boolean {
+	let result = true;
+	if (Array.isArray(v)) {
+		result = v.length > 0;
 	}
 
-	// README: This structure is not necessary here yet, as the events could be exposed directly,
-	// but will afais be useful later in svelte5
-	export let eventHandlers: EventHandler = {};
-	export let additionalEventHandlers: EventHandler = {};
+	return (
+		result &&
+		value !== undefined &&
+		value !== null &&
+		value !== "" &&
+		checkValid()
+	);
+}
 
-	// custom valid checker that can optionally be supplied
-	export let checkValid = (_) => {
-		return true;
-	};
-
-	// functionality for showing the textfield when the trigger is selected
-	function checkShowTextfield(v: any): boolean {
-		if (v instanceof Array) {
-			return v.includes(textTrigger);
-		} else {
-			return v === textTrigger;
-		}
-	}
-
-	function evalValid(v: any): boolean {
-		let result = true;
-		if (Array.isArray(v)) {
-			result = v.length > 0;
-		}
-
-		return result && value !== undefined && value !== null && value !== '' && checkValid();
-	}
-
-	// reactive statement that makes sure 'valid' updates the page
-	$: valid = evalValid(value);
-	$: highlight = !valid && properties.required === true;
-	$: showTextField = checkShowTextfield(value);
+// reactive statement that makes sure 'valid' updates the page
+$: valid = evalValid(value);
+$: highlight = !valid && properties.required === true;
+$: showTextField = checkShowTextfield(value);
 </script>
 
 {#if label}

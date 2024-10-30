@@ -1,50 +1,62 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-	import { refreshMilestoneGroups } from '$lib/admin.svelte';
-	import { updateMilestone, uploadMilestoneImage } from '$lib/client/services.gen';
-	import type { MilestoneAdmin } from '$lib/client/types.gen';
-	import CancelButton from '$lib/components/Admin/CancelButton.svelte';
-	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
-	import { ButtonGroup, Fileupload, InputAddon, Label, Modal, Textarea } from 'flowbite-svelte';
-	import { _, locales } from 'svelte-i18n';
+import { refreshMilestoneGroups } from "$lib/admin.svelte";
+import {
+	updateMilestone,
+	uploadMilestoneImage,
+} from "$lib/client/services.gen";
+import type { MilestoneAdmin } from "$lib/client/types.gen";
+import CancelButton from "$lib/components/Admin/CancelButton.svelte";
+import SaveButton from "$lib/components/Admin/SaveButton.svelte";
+import {
+	ButtonGroup,
+	Fileupload,
+	InputAddon,
+	Label,
+	Modal,
+	Textarea,
+} from "flowbite-svelte";
+import { _, locales } from "svelte-i18n";
 
-	let { open = $bindable(false), milestone }: { open: boolean; milestone: MilestoneAdmin | null } =
-		$props();
-	let files: FileList | undefined = $state(undefined);
-	let images: Array<string> = $state([]);
+let {
+	open = $bindable(false),
+	milestone,
+}: { open: boolean; milestone: MilestoneAdmin | null } = $props();
+let files: FileList | undefined = $state(undefined);
+let images: Array<string> = $state([]);
 
-	const textKeys = ['title', 'desc', 'obs', 'help'];
+const textKeys = ["title", "desc", "obs", "help"];
 
-	function updateImagesToUpload(event: Event) {
-		const target = event.target as HTMLInputElement;
-		if (target.files) {
-			images = Array.from(target.files).map((f) => URL.createObjectURL(f));
-		} else {
-			images = [];
-		}
+function updateImagesToUpload(event: Event) {
+	const target = event.target as HTMLInputElement;
+	if (target.files) {
+		images = Array.from(target.files).map((f) => URL.createObjectURL(f));
+	} else {
+		images = [];
 	}
+}
 
-	export async function saveChanges() {
-		if (!milestone) {
-			return;
-		}
-		const { data, error } = await updateMilestone({ body: milestone });
-		if (error) {
-			console.log(error);
-		} else {
-			console.log(data);
-			if (files && files.length > 0) {
-				for (const file of files) {
-					await uploadMilestoneImage({
-						body: { file: file },
-						path: { milestone_id: milestone.id }
-					});
-				}
+export async function saveChanges() {
+	if (!milestone) {
+		return;
+	}
+	const { data, error } = await updateMilestone({ body: milestone });
+	if (error) {
+		console.log(error);
+	} else {
+		console.log(data);
+		if (files && files.length > 0) {
+			for (const file of files) {
+				await uploadMilestoneImage({
+					body: { file: file },
+					path: { milestone_id: milestone.id },
+				});
 			}
-			await refreshMilestoneGroups();
 		}
+		await refreshMilestoneGroups();
 	}
+}
 </script>
 
 <Modal title={$_('admin.edit')} bind:open autoclose size="xl">

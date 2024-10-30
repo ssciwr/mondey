@@ -1,25 +1,25 @@
 <script>
-	import { Button, Card, Progressbar, Tooltip } from 'flowbite-svelte';
-	import { ArrowRightOutline } from 'flowbite-svelte-icons';
-	export let data = {
-		header: undefined,
-		summary: undefined,
-		button: undefined,
-		href: undefined,
-		image: undefined,
-		progress: undefined,
-		events: undefined
-	};
+import { Button, Card, Progressbar, Tooltip } from "flowbite-svelte";
+import { ArrowRightOutline } from "flowbite-svelte-icons";
+export let data = {
+	header: undefined,
+	summary: undefined,
+	button: undefined,
+	href: undefined,
+	image: undefined,
+	progress: undefined,
+	events: undefined,
+};
 
-	export let styleProps = {
-		card: {},
-		header: {},
-		summary: {},
-		button: {},
-		progress: {}
-	};
+export let styleProps = {
+	card: {},
+	header: {},
+	summary: {},
+	button: {},
+	progress: {},
+};
 
-	// TODO: generalize event passing. currently only the on:click event is exposed
+// TODO: generalize event passing. currently only the on:click event is exposed
 </script>
 
 <Card

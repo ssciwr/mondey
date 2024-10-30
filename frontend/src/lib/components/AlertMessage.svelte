@@ -1,13 +1,13 @@
 <script>
-	import { Alert, Button } from 'flowbite-svelte';
-	import { EyeSolid, InfoCircleSolid } from 'flowbite-svelte-icons';
+import { Alert, Button } from "flowbite-svelte";
+import { EyeSolid, InfoCircleSolid } from "flowbite-svelte-icons";
 
-	export let message = '';
-	export let title = '';
-	export let infotitle = '';
-	export let lastpage = '';
-	export let infopage = '';
-	export let onclick = () => {};
+export let message = "";
+export let title = "";
+export let infotitle = "";
+export let lastpage = "";
+export let infopage = "";
+export let onclick = () => {};
 </script>
 
 <Alert class="m-4 p-4">

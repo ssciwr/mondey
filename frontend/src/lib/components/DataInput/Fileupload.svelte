@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Fileupload } from 'flowbite-svelte';
+import { Fileupload } from "flowbite-svelte";
 
-	export let value;
+export let value;
 </script>
 
 <Fileupload

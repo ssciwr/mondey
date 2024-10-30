@@ -1,17 +1,17 @@
-import { milestoneGroups, userQuestions } from '$lib/stores/adminStore';
 import {
 	authCookieLogin,
 	getMilestoneGroupsAdmin,
 	getUserQuestionsAdmin,
-	usersCurrentUser
-} from '$lib/client/services.gen';
+	usersCurrentUser,
+} from "$lib/client/services.gen";
 import type {
+	Body_auth_cookie_login_auth_login_post,
 	GetLanguagesResponse,
 	MilestoneGroupAdmin,
 	UserQuestionAdmin,
 	UserRead,
-	Body_auth_cookie_login_auth_login_post
-} from '$lib/client/types.gen';
+} from "$lib/client/types.gen";
+import { milestoneGroups, userQuestions } from "$lib/stores/adminStore";
 
 function AdminUser() {
 	let user = $state(null as UserRead | null);
@@ -26,30 +26,30 @@ function AdminUser() {
 			} else {
 				await this.refresh();
 				if (!user || !user.is_superuser) {
-					return 'Admin account required';
+					return "Admin account required";
 				}
-				return '';
+				return "";
 			}
 		},
-		refresh: async function () {
+		refresh: async () => {
 			const { data, error } = await usersCurrentUser();
 			if (error || data === undefined) {
-				console.log('Failed to get current User');
+				console.log("Failed to get current User");
 				user = null;
 			} else {
 				user = data;
 			}
-		}
+		},
 	};
 }
 
 export const adminUser = AdminUser();
 
 export async function refreshMilestoneGroups() {
-	console.log('refreshMilestoneGroups...');
+	console.log("refreshMilestoneGroups...");
 	const { data, error } = await getMilestoneGroupsAdmin();
 	if (error || data == undefined) {
-		console.log('Failed to get MilestoneGroups');
+		console.log("Failed to get MilestoneGroups");
 		milestoneGroups.set([]);
 	} else {
 		milestoneGroups.set(data);
@@ -61,10 +61,10 @@ export function milestoneGroupImageUrl(id: number) {
 }
 
 export async function refreshUserQuestions() {
-	console.log('refreshQuestions...');
+	console.log("refreshQuestions...");
 	const { data, error } = await getUserQuestionsAdmin();
 	if (error || data === undefined) {
-		console.log('Failed to get UserQuestions');
+		console.log("Failed to get UserQuestions");
 		userQuestions.set([]);
 	} else {
 		userQuestions.set(data);

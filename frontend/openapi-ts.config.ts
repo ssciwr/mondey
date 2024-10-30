@@ -1,10 +1,10 @@
-import { defineConfig } from '@hey-api/openapi-ts';
+import { defineConfig } from "@hey-api/openapi-ts";
 
 export default defineConfig({
-	client: '@hey-api/client-fetch',
-	input: '../mondey_backend/openapi.json',
+	client: "@hey-api/client-fetch",
+	input: "../mondey_backend/openapi.json",
 	output: {
-		path: 'src/lib/client',
-		format: 'prettier'
-	}
+		path: "src/lib/client",
+		format: "prettier",
+	},
 });

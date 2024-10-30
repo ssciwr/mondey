@@ -1,0 +1,39 @@
+{
+	"overrides": [
+		{
+			"include": ["*.svelte", "*.astro", "*.vue"],
+			"linter": {
+				"rules": {
+					"style": {
+						"useConst": "off",
+						"useImportType": "off"
+					}
+				}
+			}
+		}
+	],
+	"linter": {
+		"rules": {
+			"suspicious": {
+				"noDoubleEquals": "off",
+				"noConsoleLog": "off",
+				"noExplicitAny": "off",
+				"noImplicitAnyLet": "off",
+				"noAssignInExpressions": "off",
+				"noConfusingVoidType": "off",
+				"useIsArray": "off"
+			},
+			"style": {
+				"noUselessElse": "off",
+				"noUnusedTemplateLiteral": "off",
+				"useTemplate": "off"
+			},
+			"complexity": {
+				"useOptionalChain": "off",
+				"noUselessTernary": "off",
+				"noForEach": "off",
+				"useLiteralKeys": "off"
+			}
+		}
+	}
+}

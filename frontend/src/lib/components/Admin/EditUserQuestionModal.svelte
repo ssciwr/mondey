@@ -1,68 +1,66 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-	import { refreshUserQuestions } from '$lib/admin.svelte';
-	import { updateUserQuestion } from '$lib/client/services.gen';
-	import type { UserQuestionAdmin } from '$lib/client/types.gen';
-	import CancelButton from '$lib/components/Admin/CancelButton.svelte';
-	import InputPreview from '$lib/components/Admin/InputPreview.svelte';
-	import SaveButton from '$lib/components/Admin/SaveButton.svelte';
-	import {
-		Badge,
-		Button,
-		ButtonGroup,
-		Card,
-		Input,
-		InputAddon,
-		Label,
-		Modal,
-		Select,
-		Textarea,
-		type SelectOptionType
-	} from 'flowbite-svelte';
-	import { _, locales } from 'svelte-i18n';
+import { refreshUserQuestions } from "$lib/admin.svelte";
+import { updateUserQuestion } from "$lib/client/services.gen";
+import type { UserQuestionAdmin } from "$lib/client/types.gen";
+import CancelButton from "$lib/components/Admin/CancelButton.svelte";
+import InputPreview from "$lib/components/Admin/InputPreview.svelte";
+import SaveButton from "$lib/components/Admin/SaveButton.svelte";
+import {
+	Badge,
+	Button,
+	ButtonGroup,
+	Card,
+	Input,
+	InputAddon,
+	Label,
+	Modal,
+	Select,
+	type SelectOptionType,
+	Textarea,
+} from "flowbite-svelte";
+import { _, locales } from "svelte-i18n";
 
-	let {
-		open = $bindable(false),
-		userQuestion
-	}: { open: boolean; userQuestion: UserQuestionAdmin | undefined } = $props();
+let {
+	open = $bindable(false),
+	userQuestion,
+}: { open: boolean; userQuestion: UserQuestionAdmin | undefined } = $props();
 
-	let preview_lang = $state('de');
-	let preview_answer = $state('');
+let preview_lang = $state("de");
+let preview_answer = $state("");
 
-	// FIXME: use the componentTable here
-	const inputTypes: Array<SelectOptionType<string>> = [
-		{ value: 'text', name: 'text' },
-		{ value: 'select', name: 'select' }
-	];
+// FIXME: use the componentTable here
+const inputTypes: Array<SelectOptionType<string>> = [
+	{ value: "text", name: "text" },
+	{ value: "select", name: "select" },
+];
 
-	function updateOptionsJson() {
-		if (!userQuestion) {
-			return;
-		}
-		const values = userQuestion.options.split(';');
-		for (const lang_id of $locales) {
-			const items = userQuestion.text[lang_id].options.split(';');
-			userQuestion.text[lang_id].options_json = JSON.stringify(
-				values.map(function (value, index) {
-					return { value: value, name: items[index] };
-				})
-			);
-		}
+function updateOptionsJson() {
+	if (!userQuestion) {
+		return;
 	}
-
-	async function saveChanges() {
-		if (!userQuestion) {
-			return;
-		}
-		const { data, error } = await updateUserQuestion({ body: userQuestion });
-		if (error) {
-			console.log(error);
-		} else {
-			console.log(data);
-			await refreshUserQuestions();
-		}
+	const values = userQuestion.options.split(";");
+	for (const lang_id of $locales) {
+		const items = userQuestion.text[lang_id].options.split(";");
+		userQuestion.text[lang_id].options_json = JSON.stringify(
+			values.map((value, index) => ({ value: value, name: items[index] })),
+		);
 	}
+}
+
+async function saveChanges() {
+	if (!userQuestion) {
+		return;
+	}
+	const { data, error } = await updateUserQuestion({ body: userQuestion });
+	if (error) {
+		console.log(error);
+	} else {
+		console.log(data);
+		await refreshUserQuestions();
+	}
+}
 </script>
 
 <Modal title="Edit user question" bind:open autoclose size="xl">

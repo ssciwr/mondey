@@ -1,19 +1,23 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-	import { adminUser } from '$lib/admin.svelte';
-	import Languages from '$lib/components/Admin/Languages.svelte';
-	import MilestoneGroups from '$lib/components/Admin/MilestoneGroups.svelte';
-	import Translations from '$lib/components/Admin/Translations.svelte';
-	import Questions from '$lib/components/Admin/UserQuestions.svelte';
-	import { TabItem, Tabs } from 'flowbite-svelte';
-	import { BadgeCheckOutline, ClipboardListOutline, LanguageOutline } from 'flowbite-svelte-icons';
-	import { onMount } from 'svelte';
-	import { _ } from 'svelte-i18n';
+import { adminUser } from "$lib/admin.svelte";
+import Languages from "$lib/components/Admin/Languages.svelte";
+import MilestoneGroups from "$lib/components/Admin/MilestoneGroups.svelte";
+import Translations from "$lib/components/Admin/Translations.svelte";
+import Questions from "$lib/components/Admin/UserQuestions.svelte";
+import { TabItem, Tabs } from "flowbite-svelte";
+import {
+	BadgeCheckOutline,
+	ClipboardListOutline,
+	LanguageOutline,
+} from "flowbite-svelte-icons";
+import { onMount } from "svelte";
+import { _ } from "svelte-i18n";
 
-	onMount(async () => {
-		adminUser.refresh();
-	});
+onMount(async () => {
+	adminUser.refresh();
+});
 </script>
 
 <Tabs tabStyle="underline" class="w-full">
