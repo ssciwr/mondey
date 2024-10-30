@@ -8,7 +8,6 @@ import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input, Label, Select } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
 
-// FIXME: try and simplify this further
 async function submitData(): Promise<void> {
 	const equalPW = password !== "" && password === passwordconfirm;
 
@@ -36,10 +35,11 @@ async function submitData(): Promise<void> {
 			console.log("successful transmission: ", result.response.status);
 			success = true;
 		}
-	} else console.log("passwords not equal: ");
-	showAlert = true;
-	showAlert = true;
-	alertMessage = $_("registration.alertMessagePasswords");
+	} else {
+		console.log("passwords not equal: ");
+		showAlert = true;
+		alertMessage = $_("registration.alertMessagePasswords");
+	}
 }
 
 let email = "";
@@ -117,7 +117,7 @@ let alertMessage = $_("registration.alertMessageMissing");
 					bind:value={passwordconfirm}
 					required
 					type="password"
-					id="password"
+					id="passwordconfirm"
 					placeholder={$_("registration.passwordConfirmLabel")}
 				/>
 			</div>
