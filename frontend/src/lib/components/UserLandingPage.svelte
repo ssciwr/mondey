@@ -1,18 +1,23 @@
 <script lang="ts">
-	import UserVerify from '$lib/components/UserVerify.svelte';
-	import { componentTable } from '$lib/stores/componentStore';
-	import { currentUser, refreshUser } from '$lib/stores/userStore';
-	import { Button, TabItem, Tabs } from 'flowbite-svelte';
-	import { AtomOutline, CogSolid, GridPlusSolid, ProfileCardSolid } from 'flowbite-svelte-icons';
-	import { onMount } from 'svelte';
-	import { _ } from 'svelte-i18n';
-	import { get } from 'svelte/store';
+import UserVerify from "$lib/components/UserVerify.svelte";
+import { componentTable } from "$lib/stores/componentStore";
+import { currentUser, refreshUser } from "$lib/stores/userStore";
+import { Button, TabItem, Tabs } from "flowbite-svelte";
+import {
+	AtomOutline,
+	CogSolid,
+	GridPlusSolid,
+	ProfileCardSolid,
+} from "flowbite-svelte-icons";
+import { onMount } from "svelte";
+import { _ } from "svelte-i18n";
+import { get } from "svelte/store";
 
-	console.log('user: ', get(currentUser));
+console.log("user: ", get(currentUser));
 
-	onMount(async () => {
-		await refreshUser();
-	});
+onMount(async () => {
+	await refreshUser();
+});
 </script>
 
 {#if get(currentUser)}

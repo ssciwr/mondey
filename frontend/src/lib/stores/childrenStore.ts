@@ -1,5 +1,5 @@
-import { BasicStore } from '$lib/stores/basicStore';
-import { get } from 'svelte/store';
+import { BasicStore } from "$lib/stores/basicStore";
+import { get } from "svelte/store";
 // README: this API is experimental and not by any means a final design
 
 // Types: create interfaces for the elements that are stored and are expected to be returned from the 'backend' (or its mockup at the moment)
@@ -56,11 +56,13 @@ class ChildrenStore extends BasicStore<ChildrenList> {
 	 *
 	 * @param name
 	 */
-	constructor(name: string = 'children') {
+	constructor(name = "children") {
 		if (ChildrenStore._instance) {
-			throw new Error('Singleton classes cannot be instantiated more than once.');
+			throw new Error(
+				"Singleton classes cannot be instantiated more than once.",
+			);
 		} else {
-			super(name, 'children');
+			super(name, "children");
 			ChildrenStore._instance = this;
 		}
 	}
@@ -87,7 +89,11 @@ class ChildrenStore extends BasicStore<ChildrenList> {
 	 * @param childtoken Child identifier to add the child to
 	 * @param data data of the child to add
 	 */
-	public async addChildData(usertoken: string, childtoken: string, data: ChildData) {
+	public async addChildData(
+		usertoken: string,
+		childtoken: string,
+		data: ChildData,
+	) {
 		// /API calls/ fetch requests could go here.
 
 		this.store.update((childrenlist) => {
@@ -96,10 +102,15 @@ class ChildrenStore extends BasicStore<ChildrenList> {
 			}
 
 			if (childtoken in childrenlist[usertoken as keyof typeof childrenlist]) {
-				throw new Error(`Child token ${childtoken} already exists for user token ${usertoken}`);
+				throw new Error(
+					`Child token ${childtoken} already exists for user token ${usertoken}`,
+				);
 			}
 
-			childrenlist[usertoken][childtoken] = { childData: data, observationData: null };
+			childrenlist[usertoken][childtoken] = {
+				childData: data,
+				observationData: null,
+			};
 
 			return childrenlist;
 		});
@@ -115,19 +126,24 @@ class ChildrenStore extends BasicStore<ChildrenList> {
 	public async addChildObservation(
 		usertoken: string,
 		childtoken: string,
-		observationData: ObservationData
+		observationData: ObservationData,
 	) {
 		this.store.update((childrenlist) => {
 			if (!(usertoken in childrenlist)) {
 				throw new Error(`User token ${usertoken} not found`);
 			}
 
-			if (!(childtoken in childrenlist[usertoken as keyof typeof childrenlist])) {
-				throw new Error(`Child token ${childtoken} does not exist for user token ${usertoken}`);
+			if (
+				!(childtoken in childrenlist[usertoken as keyof typeof childrenlist])
+			) {
+				throw new Error(
+					`Child token ${childtoken} does not exist for user token ${usertoken}`,
+				);
 			}
 
-			childrenlist[usertoken as keyof typeof childrenlist][childtoken].observationData =
-				observationData;
+			childrenlist[usertoken as keyof typeof childrenlist][
+				childtoken
+			].observationData = observationData;
 
 			return childrenlist;
 		});
@@ -146,8 +162,12 @@ class ChildrenStore extends BasicStore<ChildrenList> {
 				throw new Error(`User token ${usertoken} not found`);
 			}
 
-			if (!(childtoken in childrenlist[usertoken as keyof typeof childrenlist])) {
-				throw new Error(`Child token ${childtoken} not found for user token ${usertoken}`);
+			if (
+				!(childtoken in childrenlist[usertoken as keyof typeof childrenlist])
+			) {
+				throw new Error(
+					`Child token ${childtoken} not found for user token ${usertoken}`,
+				);
 			}
 
 			delete childrenlist[usertoken as keyof typeof childrenlist][childtoken];
@@ -167,11 +187,13 @@ class ChildrenStore extends BasicStore<ChildrenList> {
 		const contentData = get(this.store);
 
 		if (!(usertoken in contentData)) {
-			throw new Error('No such user in the childrenstore');
+			throw new Error("No such user in the childrenstore");
 		}
 
 		if (!(childtoken in contentData[usertoken])) {
-			throw new Error('No such child in the childrenstore for user ' + usertoken);
+			throw new Error(
+				"No such child in the childrenstore for user " + usertoken,
+			);
 		}
 
 		return contentData[usertoken][childtoken].childData;
@@ -188,14 +210,17 @@ class ChildrenStore extends BasicStore<ChildrenList> {
 		const contentData = get(this.store);
 
 		if (!(usertoken in contentData)) {
-			throw new Error('No such user in the childrenstore');
+			throw new Error("No such user in the childrenstore");
 		}
 
 		if (!(childtoken in contentData[usertoken as keyof typeof contentData])) {
-			throw new Error('No such child in the childrenstore for user ' + usertoken);
+			throw new Error(
+				"No such child in the childrenstore for user " + usertoken,
+			);
 		}
 
-		return contentData[usertoken as keyof typeof contentData][childtoken].observationData;
+		return contentData[usertoken as keyof typeof contentData][childtoken]
+			.observationData;
 	}
 
 	/**
@@ -207,13 +232,14 @@ class ChildrenStore extends BasicStore<ChildrenList> {
 		const contentData = get(this.store);
 
 		if (!(usertoken in contentData)) {
-			throw new Error('No such user in the childrenstore');
+			throw new Error("No such user in the childrenstore");
 		}
 
 		// sort them alphabetically
 		return Object.keys(contentData[usertoken as keyof typeof contentData])
 			.map((child) => {
-				return contentData[usertoken as keyof typeof contentData][child].childData;
+				return contentData[usertoken as keyof typeof contentData][child]
+					.childData;
 			})
 			.sort((a, b) => a.name.localeCompare(b.name));
 	}
@@ -227,12 +253,18 @@ class ChildrenStore extends BasicStore<ChildrenList> {
 		const contentData = get(this.store);
 
 		if (!(usertoken in contentData)) {
-			throw new Error('No such user in the childrenstore');
+			throw new Error("No such user in the childrenstore");
 		}
 
-		return Object.keys(contentData[usertoken as keyof typeof contentData]).map((child) => {
-			return [child, contentData[usertoken as keyof typeof contentData][child].observationData];
-		});
+		return Object.keys(contentData[usertoken as keyof typeof contentData]).map(
+			(child) => {
+				return [
+					child,
+					contentData[usertoken as keyof typeof contentData][child]
+						.observationData,
+				];
+			},
+		);
 	}
 }
 
@@ -243,9 +275,9 @@ class ChildrenStore extends BasicStore<ChildrenList> {
  */
 export function generateChildID(childname: string): string {
 	return childname
-		.split('')
+		.split("")
 		.map((char) => char.charCodeAt(0))
-		.reduce((acc, num) => acc + num.toString(), '')
+		.reduce((acc, num) => acc + num.toString(), "")
 		.toLowerCase();
 }
 
@@ -277,19 +309,25 @@ function chooseRandom(values: string[]) {
  * @returns
  */
 async function createDummySummary() {
-	const values = ['good', 'warn', 'bad'];
+	const values = ["good", "warn", "bad"];
 	const dates = [
-		'05-11-2017',
-		'08-05-2016',
-		'22-07-2012',
-		'11-11-2020',
-		'30-03-2019',
-		'01-06-2022',
-		'30-12-2021',
-		'30-11-2021',
-		'30-10-2021'
+		"05-11-2017",
+		"08-05-2016",
+		"22-07-2012",
+		"11-11-2020",
+		"30-03-2019",
+		"01-06-2022",
+		"30-12-2021",
+		"30-11-2021",
+		"30-10-2021",
 	];
-	const surveys: string[] = ['surveyA', 'surveyB', 'surveyC', 'surveyD', 'surveyE'];
+	const surveys: string[] = [
+		"surveyA",
+		"surveyB",
+		"surveyC",
+		"surveyD",
+		"surveyE",
+	];
 
 	interface SummaryElement {
 		name: string;
@@ -311,17 +349,29 @@ async function createDummySummary() {
 
 async function createDummyCurrent() {
 	const current: { [survey: string]: { name: string; status: string }[] } = {};
-	const surveys: string[] = ['surveyA', 'surveyB', 'surveyC', 'surveyD', 'surveyE'];
+	const surveys: string[] = [
+		"surveyA",
+		"surveyB",
+		"surveyC",
+		"surveyD",
+		"surveyE",
+	];
 
-	const milestones = ['milestoneA', 'milestoneB', 'milestoneC', 'milestoneD', 'milestoneE'];
-	const completionValues = ['done', 'open', 'incomplete'];
+	const milestones = [
+		"milestoneA",
+		"milestoneB",
+		"milestoneC",
+		"milestoneD",
+		"milestoneE",
+	];
+	const completionValues = ["done", "open", "incomplete"];
 
 	for (const survey of surveys) {
 		current[survey] = [];
 		for (const milestone of milestones) {
 			current[survey].push({
 				name: milestone,
-				status: chooseRandom(completionValues)
+				status: chooseRandom(completionValues),
 			});
 		}
 	}
@@ -337,5 +387,5 @@ export {
 	type ChildData,
 	type ChildObject,
 	type ChildrenList,
-	type ObservationData
+	type ObservationData,
 };

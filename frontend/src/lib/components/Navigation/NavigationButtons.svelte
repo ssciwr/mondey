@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Button, ButtonGroup } from 'flowbite-svelte';
+import { Button, ButtonGroup } from "flowbite-svelte";
 
-	export let buttons: unknown = [];
+export let buttons: unknown = [];
 </script>
 
 <ButtonGroup class="mt-6 flex justify-center">

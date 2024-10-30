@@ -1,11 +1,11 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-	import Button from 'flowbite-svelte/Button.svelte';
-	import CheckOutline from 'flowbite-svelte-icons/CheckOutline.svelte';
-	import { _ } from 'svelte-i18n';
+import CheckOutline from "flowbite-svelte-icons/CheckOutline.svelte";
+import Button from "flowbite-svelte/Button.svelte";
+import { _ } from "svelte-i18n";
 
-	let { onclick }: { onclick: () => void } = $props();
+let { onclick }: { onclick: () => void } = $props();
 </script>
 
 <Button color="green" {onclick}

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Tooltip } from 'flowbite-svelte';
+import { Tooltip } from "flowbite-svelte";
 
-	export let selected: boolean = false;
-	export let index: number;
-	export let tooltip: string = '';
-	export let onClick: () => void;
+export let selected = false;
+export let index: number;
+export let tooltip = "";
+export let onClick: () => void;
 
-	let bg_color = `bg-milestone-answer-${index}`;
+let bg_color = `bg-milestone-answer-${index}`;
 </script>
 
 <button
