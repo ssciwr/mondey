@@ -149,31 +149,31 @@ export const Body_verify_verify_auth_verify_postSchema = {
 } as const;
 
 export const ChildAnswerPublicSchema = {
-	properties: {
-		answer: {
-			type: 'string',
-			title: 'Answer'
-		},
-		question_id: {
-			type: 'integer',
-			title: 'Question Id'
-		},
-		additional_answer: {
-			anyOf: [
-				{
-					type: 'string'
-				},
-				{
-					type: 'null'
-				}
-			],
-			title: 'Additional Answer'
-		}
-	},
-	type: 'object',
-	required: ['answer', 'question_id', 'additional_answer'],
-	title: 'ChildAnswerPublic',
-	description: `External data model for UserAnswers
+    properties: {
+        answer: {
+            type: 'string',
+            title: 'Answer'
+        },
+        question_id: {
+            type: 'integer',
+            title: 'Question Id'
+        },
+        additional_answer: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Additional Answer'
+        }
+    },
+    type: 'object',
+    required: ['answer', 'question_id', 'additional_answer'],
+    title: 'ChildAnswerPublic',
+    description: `External data model for UserAnswers
 
 Parameters
 ----------
@@ -231,143 +231,143 @@ export const ChildPublicSchema = {
 } as const;
 
 export const ChildQuestionAdminSchema = {
-	properties: {
-		id: {
-			type: 'integer',
-			title: 'Id'
-		},
-		order: {
-			type: 'integer',
-			title: 'Order'
-		},
-		component: {
-			type: 'string',
-			title: 'Component',
-			default: 'select'
-		},
-		type: {
-			type: 'string',
-			title: 'Type',
-			default: 'text'
-		},
-		options: {
-			type: 'string',
-			title: 'Options'
-		},
-		text: {
-			additionalProperties: {
-				$ref: '#/components/schemas/ChildQuestionText'
-			},
-			type: 'object',
-			title: 'Text',
-			default: {}
-		},
-		additional_option: {
-			type: 'string',
-			title: 'Additional Option',
-			default: ''
-		}
-	},
-	type: 'object',
-	required: ['id', 'order', 'options'],
-	title: 'ChildQuestionAdmin'
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        order: {
+            type: 'integer',
+            title: 'Order'
+        },
+        component: {
+            type: 'string',
+            title: 'Component',
+            default: 'select'
+        },
+        type: {
+            type: 'string',
+            title: 'Type',
+            default: 'text'
+        },
+        options: {
+            type: 'string',
+            title: 'Options'
+        },
+        text: {
+            additionalProperties: {
+                '$ref': '#/components/schemas/ChildQuestionText'
+            },
+            type: 'object',
+            title: 'Text',
+            default: {}
+        },
+        additional_option: {
+            type: 'string',
+            title: 'Additional Option',
+            default: ''
+        }
+    },
+    type: 'object',
+    required: ['id', 'order', 'options'],
+    title: 'ChildQuestionAdmin'
 } as const;
 
 export const ChildQuestionPublicSchema = {
-	properties: {
-		id: {
-			type: 'integer',
-			title: 'Id'
-		},
-		component: {
-			type: 'string',
-			title: 'Component',
-			default: 'select'
-		},
-		type: {
-			type: 'string',
-			title: 'Type',
-			default: 'text'
-		},
-		text: {
-			additionalProperties: {
-				$ref: '#/components/schemas/ChildQuestionTextPublic'
-			},
-			type: 'object',
-			title: 'Text',
-			default: {}
-		},
-		additional_option: {
-			type: 'string',
-			title: 'Additional Option',
-			default: ''
-		}
-	},
-	type: 'object',
-	required: ['id'],
-	title: 'ChildQuestionPublic'
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        component: {
+            type: 'string',
+            title: 'Component',
+            default: 'select'
+        },
+        type: {
+            type: 'string',
+            title: 'Type',
+            default: 'text'
+        },
+        text: {
+            additionalProperties: {
+                '$ref': '#/components/schemas/ChildQuestionTextPublic'
+            },
+            type: 'object',
+            title: 'Text',
+            default: {}
+        },
+        additional_option: {
+            type: 'string',
+            title: 'Additional Option',
+            default: ''
+        }
+    },
+    type: 'object',
+    required: ['id'],
+    title: 'ChildQuestionPublic'
 } as const;
 
 export const ChildQuestionTextSchema = {
-	properties: {
-		question: {
-			type: 'string',
-			title: 'Question',
-			default: ''
-		},
-		options_json: {
-			type: 'string',
-			title: 'Options Json',
-			default: ''
-		},
-		child_question_id: {
-			anyOf: [
-				{
-					type: 'integer'
-				},
-				{
-					type: 'null'
-				}
-			],
-			title: 'Child Question Id'
-		},
-		lang_id: {
-			anyOf: [
-				{
-					type: 'string',
-					maxLength: 2
-				},
-				{
-					type: 'null'
-				}
-			],
-			title: 'Lang Id'
-		},
-		options: {
-			type: 'string',
-			title: 'Options',
-			default: ''
-		}
-	},
-	type: 'object',
-	title: 'ChildQuestionText'
+    properties: {
+        question: {
+            type: 'string',
+            title: 'Question',
+            default: ''
+        },
+        options_json: {
+            type: 'string',
+            title: 'Options Json',
+            default: ''
+        },
+        child_question_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Child Question Id'
+        },
+        lang_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 2
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Lang Id'
+        },
+        options: {
+            type: 'string',
+            title: 'Options',
+            default: ''
+        }
+    },
+    type: 'object',
+    title: 'ChildQuestionText'
 } as const;
 
 export const ChildQuestionTextPublicSchema = {
-	properties: {
-		question: {
-			type: 'string',
-			title: 'Question',
-			default: ''
-		},
-		options_json: {
-			type: 'string',
-			title: 'Options Json',
-			default: ''
-		}
-	},
-	type: 'object',
-	title: 'ChildQuestionTextPublic'
+    properties: {
+        question: {
+            type: 'string',
+            title: 'Question',
+            default: ''
+        },
+        options_json: {
+            type: 'string',
+            title: 'Options Json',
+            default: ''
+        }
+    },
+    type: 'object',
+    title: 'ChildQuestionTextPublic'
 } as const;
 
 export const ErrorModelSchema = {
