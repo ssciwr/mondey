@@ -1,30 +1,29 @@
+<svelte:options runes={true} />
+
 <script lang="ts">
 import { base } from "$app/paths";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
 import {
-	buildDataToSend,
-	buildMissingValues,
-	buildRequired,
-	getData,
-	setUpDynamic,
-	setUpOnMount,
-	submitData,
-	tearDown,
-	verifyInput,
-} from "$lib/components/ChildrenRegistration";
+	getChildQuestions,
+	getCurrentChildrenAnswers,
+	updateCurrentChildrenAnswers,
+} from "$lib/client";
+import {
+	type ChildAnswerPublic,
+	type GetChildQuestionsResponse,
+} from "$lib/client/types.gen";
+import AlertMessage from "$lib/components/AlertMessage.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
-import NavigationButtons from "$lib/components/Navigation/NavigationButtons.svelte";
-import { activeTabChildren } from "$lib/stores/componentStore";
-import { Card, Heading } from "flowbite-svelte";
-import { onDestroy, onMount } from "svelte";
+import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
+import { preventDefault } from "$lib/util";
+import { Button, Card, Heading } from "flowbite-svelte";
+import { _ } from "svelte-i18n";
 
 // get data to fill in
-const data = getData();
 
 const breadcrumbdata = [
 	{
-		label: "Kinderübersicht",
+		label: $_("childData.overviewLabel"),
 		onclick: () => {
 			activeTabChildren.update((value) => {
 				return "childrenGallery";
@@ -32,106 +31,168 @@ const breadcrumbdata = [
 		},
 	},
 	{
-		label: "Neues Kind registrieren",
+		label: $_("childData.newChildLabel"),
 	},
 ];
-
-// use component lifecycle to make sure data is written and read persistently
-
-onMount(setUpOnMount);
-
-onDestroy(async () => {
-	await tearDown(unsubscribe);
-});
 
 // data to display -> will later be fetched from the server
-const heading = "Neues Kind registrieren";
+const heading = $_("childData.newChildLabel");
+let questionnaire: GetChildQuestionsResponse = $state(
+	[] as GetChildQuestionsResponse,
+);
+let answers: { [k: string]: ChildAnswerPublic } = $state({});
+let disableEdit: boolean = $state(false);
+let alertMessage: string = $state($_("childData.alertMessageMissing"));
+let promise = $state(setup());
+let showAlert = $state(false);
 
-// data
-let unsubscribe: unknown = setUpDynamic();
+async function setup(): Promise<{
+	questionnaire: GetChildQuestionsResponse;
+	answers: { [k: string]: ChildAnswerPublic };
+}> {
+	// get questions
+	const questions = await getChildQuestions();
+	if (questions.error || questions.data === undefined) {
+		console.log("Error when getting userquestions: ", questions.error.detail);
+		showAlert = true;
+		alertMessage = $_("childData.alertMessageError");
+	} else {
+		questionnaire = questions.data as GetChildQuestionsResponse;
+	}
 
-// rerender page if missing values or showAlert changes
-let missingValues = [];
-$: showAlert = false;
-$: showCheckMessage = true;
+	// get existing answers
+	let currentAnswers = await getCurrentChildrenAnswers();
+	if (currentAnswers?.error || currentAnswers.data === undefined) {
+		console.log(
+			"Error when getting current answers for child: ",
+			currentAnswers.error.detail,
+		);
 
-const buttons = [
-	{
-		label: "Abschließen",
-		onclick: async () => {
-			const childData = buildDataToSend(data);
-			const required = buildRequired(data);
-			const verified = await verifyInput(childData, required);
-			if (verified) {
-				console.log("good");
-				showAlert = false;
-				await submitData(data);
-				activeTabChildren.update((v) => {
-					return "childrenGallery";
-				});
-			} else {
-				console.log("not good");
-				missingValues = buildMissingValues(childData, required);
+		showAlert = true;
+		alertMessage = $_("childData.alertMessageError");
+	} else {
+		answers = Object.fromEntries(
+			currentAnswers.data.map((existing_answer) => [
+				existing_answer.question_id,
+				existing_answer as ChildAnswerPublic,
+			]),
+		);
+		disableEdit = true;
+
+		// add nonexisting answers
+		questionnaire.map((question) => {
+			if (!(question.id in answers)) {
+				answers[question.id] = {
+					question_id: question.id,
+					answer: "",
+					additional_answer: "",
+				} as ChildAnswerPublic;
+
+				disableEdit = false;
 				showAlert = true;
+				alertMessage = $_("childData.alertMessageUpdate");
 			}
-		},
-	},
-];
+		});
+	}
+
+	return { questionnaire: questionnaire, answers: answers };
+}
+
+async function submitData(): Promise<void> {
+	const response = await updateCurrentChildrenAnswers({
+		body: Object.values(answers),
+	});
+
+	if (response.error) {
+		console.log(
+			"Error when sending user question answers: ",
+			response.error.detail,
+		);
+		alertMessage = $_("childData.alertMessageError");
+		showAlert = true;
+	} else {
+		// disable all elements to make editing a conscious choice
+		disableEdit = true;
+	}
+}
 </script>
 
-<div
-	class="container m-2 mx-auto w-full border border-gray-200 pb-4 md:rounded-t-lg dark:border-gray-700"
->
-	<Breadcrumbs data={breadcrumbdata} />
-	<!-- Show big alert message when something is missing -->
-	{#if showAlert}
-		<AlertMessage
-			title="Fehler"
-			message="Bitte füllen Sie mindestens die benötigten Felder (hervorgehoben) aus."
-			infopage="{base}/info"
-			infotitle="Was passiert mit den Daten"
-			onclick={() => {
-				showAlert = false;
-				missingValues = [];
-			}}
-		/>
-	{/if}
-
-	{#if showCheckMessage}
-		<AlertMessage
-			title="Bevor es weitergeht"
-			message="Bitte überprüfen sie ihre eingaben nochmals genau bevor sie weiter gehen"
-			infopage="{base}/info"
-			infotitle="Was passiert mit den Daten?"
-			onclick={() => {
-				showCheckMessage = false;
-			}}
-		/>
-	{/if}
-
-	<!-- The actual content -->
-
-	<Card class="container m-1 mx-auto w-full max-w-xl">
-		{#if heading}
-			<Heading
-				tag="h3"
-				class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-				>{heading}</Heading
-			>
+<Breadcrumbs data={breadcrumbdata} />
+{#await promise}
+	<p>{$_("childData.loadingMessage")}</p>
+{:then { questionnaire, answers }}
+	<div
+		class="container m-2 mx-auto w-full border border-gray-200 pb-4 md:rounded-t-lg dark:border-gray-700"
+	>
+		{#if showAlert}
+			<AlertMessage
+				title="Fehler"
+				message="Bitte füllen Sie mindestens die benötigten Felder (hervorgehoben) aus."
+				infopage="{base}/info"
+				infotitle="Was passiert mit den Daten"
+				onclick={() => {
+					showAlert = false;
+				}}
+			/>
 		{/if}
 
-		<form class="m-1 mx-auto w-full flex-col space-y-6">
-			{#each data as element}
-				<DataInput
-					component={element.component}
-					bind:value={element.value}
-					bind:additionalValue={element.additionalValue}
-					label={element.props.label}
-					properties={element.props}
-					textTrigger={element.props.textTrigger}
-				/>
-			{/each}
-		</form>
-		<NavigationButtons {buttons} />
-	</Card>
-</div>
+		<!-- The actual content -->
+		<Card class="container m-1 mx-auto w-full max-w-xl">
+			{#if heading}
+				<Heading
+					tag="h3"
+					class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
+					>{heading}</Heading
+				>
+			{/if}
+
+			<form
+				class="m-1 mx-auto w-full flex-col space-y-6"
+				onsubmit={preventDefault(submitData)}
+			>
+				{#each questionnaire as element}
+					<DataInput
+						component={componentTable[element.component]}
+						bind:value={answers[element.id].answer}
+						bind:additionalValue={answers[element.id]
+							.additional_answer}
+						label={element?.text[$locale].question}
+						textTrigger={element.additional_option}
+						required={true}
+						additionalRequired={true}
+						id={"input_" + String(i)}
+						items={JSON.parse(element.text[$locale].options_json)}
+						disabled={disableEdit}
+					/>
+				{/each}
+				{#if disableEdit === true}
+					<Button
+						type="button"
+						class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+						on:click={() => {
+							disableEdit = false;
+						}}
+					>
+						<div class="flex items-center justify-center">
+							{$_("childData.changeData")}
+						</div>
+					</Button>
+				{:else}
+					<Button
+						class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+						type="submit"
+						>{$_("childData.submitButtonLabel")}</Button
+					>
+				{/if}
+			</form>
+		</Card>
+	</div>
+{:catch error}
+	<AlertMessage
+		title={$_("childData.alertMessageTitle")}
+		message={error.message}
+		onclick={() => {
+			showAlert = false;
+		}}
+	/>
+{/await}

@@ -54,7 +54,7 @@ async function setup() {
 
 	if (currentAnswers?.error || currentAnswers.data === undefined) {
 		console.log(
-			"Error when getting current answers: ",
+			"Error when getting current answers for users: ",
 			currentAnswers.error.detail,
 		);
 
@@ -121,7 +121,6 @@ let promise = $state(setup());
 				class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
 				>{$_("userData.heading")}</Heading
 			>
-
 			<form
 				class="m-1 mx-auto w-full flex-col space-y-6"
 				onsubmit={preventDefault(submitData)}
