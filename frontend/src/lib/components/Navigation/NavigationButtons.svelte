@@ -9,7 +9,7 @@
 		<Button
 			href={bprops.href}
 			disabled={bprops.disabled}
-			class="dark:bg-primay-700 hidden group-hover:flex flex-col w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+			class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
 			{...bprops.props}
 			on:click={bprops.onclick}
 			>{bprops.label}
