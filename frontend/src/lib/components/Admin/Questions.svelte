@@ -38,7 +38,7 @@ let currentQuestion = $state(
 let currentQuestionId = $state(null as number | null);
 let showEditQuestionModal = $state(false);
 let showDeleteModal = $state(false);
-let kind: string = $props();
+let { kind }: { kind: string } = $props();
 let create: any;
 let doDelete: any;
 let refresh: any;
@@ -69,7 +69,7 @@ if (kind === "user") {
 	};
 	questions = childQuestions;
 } else {
-	console.log("Error, kind must be 'user' or 'child'");
+	console.log("Error, kind must be 'user' or 'child', currently is", kind);
 }
 
 async function addQuestion() {
@@ -128,6 +128,7 @@ onMount(async () => {
 					<TableBodyCell>
 						<EditButton
 							onclick={() => {
+								console.log("questions: ", $questions);
 								currentQuestion = $questions[groupIndex];
 								showEditQuestionModal = true;
 							}}

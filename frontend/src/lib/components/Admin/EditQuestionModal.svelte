@@ -49,7 +49,10 @@ if (kind === "user") {
 	update = updateChildQuestion;
 	refresh = refreshChildQuestions;
 } else {
-	console.log("Error, kind must be either 'user' or 'child'");
+	console.log(
+		"Error, kind must be either 'user' or 'child', currently is: ",
+		kind,
+	);
 }
 
 const inputTypes: Array<SelectOptionType<string>> = [

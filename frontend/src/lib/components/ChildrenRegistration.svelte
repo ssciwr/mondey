@@ -17,10 +17,9 @@ import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading } from "flowbite-svelte";
-import { _ } from "svelte-i18n";
+import { _, locale } from "svelte-i18n";
 
 // get data to fill in
-
 const breadcrumbdata = [
 	{
 		label: $_("childData.overviewLabel"),
