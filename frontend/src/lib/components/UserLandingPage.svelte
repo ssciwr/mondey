@@ -1,5 +1,6 @@
 <script lang="ts">
 import UserVerify from "$lib/components/UserVerify.svelte";
+import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
 import { currentUser, refreshUser } from "$lib/stores/userStore";
 import { Button, Card, TabItem, Tabs } from "flowbite-svelte";
 import {
@@ -12,7 +13,6 @@ import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 import { get } from "svelte/store";
 import AdminPage from "./AdminPage.svelte";
-import ChildrenGallery from "./ChildrenGallery.svelte";
 import UserDataInput from "./UserDataInput.svelte";
 
 onMount(async () => {
@@ -36,7 +36,9 @@ onMount(async () => {
 						<GridPlusSolid size="lg" />
 						Kinder
 					</div>
-					<svelte:component this={ChildrenGallery} />
+					<svelte:component
+						this={componentTable[$activeTabChildren]}
+					/>
 				</TabItem>
 
 				{#if get(currentUser)?.is_superuser}

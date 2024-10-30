@@ -1,7 +1,6 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { base } from "$app/paths";
 import {
 	getChildQuestions,
 	getCurrentChildrenAnswers,
@@ -61,6 +60,10 @@ async function setup(): Promise<{
 
 	// get existing answers
 	let currentAnswers = await getCurrentChildrenAnswers();
+
+	console.log("questionnaire: ", questionnaire);
+	console.log("currentAnswers: ", currentAnswers);
+
 	if (currentAnswers?.error || currentAnswers.data === undefined) {
 		console.log(
 			"Error when getting current answers for child: ",
@@ -76,11 +79,16 @@ async function setup(): Promise<{
 				existing_answer as ChildAnswerPublic,
 			]),
 		);
+
+		console.log("answers initial: ", answers);
+
 		disableEdit = true;
 
 		// add nonexisting answers
-		questionnaire.map((question) => {
+		questionnaire.forEach((question) => {
+			console.log("question: ", question);
 			if (!(question.id in answers)) {
+				console.log(" adding default question");
 				answers[question.id] = {
 					question_id: question.id,
 					answer: "",
@@ -93,6 +101,7 @@ async function setup(): Promise<{
 			}
 		});
 	}
+	console.log("answers: ", answers);
 
 	return { questionnaire: questionnaire, answers: answers };
 }
@@ -111,6 +120,7 @@ async function submitData(): Promise<void> {
 		showAlert = true;
 	} else {
 		// disable all elements to make editing a conscious choice
+		console.log("submission of child data successful.");
 		disableEdit = true;
 	}
 }
@@ -120,72 +130,83 @@ async function submitData(): Promise<void> {
 {#await promise}
 	<p>{$_("childData.loadingMessage")}</p>
 {:then { questionnaire, answers }}
-	<div
-		class="container m-2 mx-auto w-full border border-gray-200 pb-4 md:rounded-t-lg dark:border-gray-700"
-	>
-		{#if showAlert}
-			<AlertMessage
-				title="Fehler"
-				message="Bitte füllen Sie mindestens die benötigten Felder (hervorgehoben) aus."
-				infopage="{base}/info"
-				infotitle="Was passiert mit den Daten"
-				onclick={() => {
-					showAlert = false;
-				}}
-			/>
-		{/if}
-
-		<!-- The actual content -->
-		<Card class="container m-1 mx-auto w-full max-w-xl">
-			{#if heading}
+	{#if showAlert}
+		<AlertMessage
+			title={$_("childData.alertMessageTitle")}
+			message={alertMessage}
+			onclick={() => {
+				showAlert = false;
+			}}
+		/>
+	{:else}
+		<div
+			class="container m-2 mx-auto w-full border border-gray-200 pb-4 md:rounded-t-lg dark:border-gray-700"
+		>
+			<Card class="container m-1 mx-auto w-full max-w-xl">
 				<Heading
 					tag="h3"
 					class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
 					>{heading}</Heading
 				>
-			{/if}
-
-			<form
-				class="m-1 mx-auto w-full flex-col space-y-6"
-				onsubmit={preventDefault(submitData)}
-			>
-				{#each questionnaire as element}
-					<DataInput
-						component={componentTable[element.component]}
-						bind:value={answers[element.id].answer}
-						bind:additionalValue={answers[element.id]
-							.additional_answer}
-						label={element?.text[$locale].question}
-						textTrigger={element.additional_option}
-						required={true}
-						additionalRequired={true}
-						id={"input_" + String(i)}
-						items={JSON.parse(element.text[$locale].options_json)}
-						disabled={disableEdit}
-					/>
-				{/each}
-				{#if disableEdit === true}
-					<Button
-						type="button"
-						class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
-						on:click={() => {
-							disableEdit = false;
+				{#if showAlert}
+					<AlertMessage
+						title="Fehler"
+						message="Bitte füllen Sie mindestens die benötigten Felder (hervorgehoben) aus."
+						infopage="{base}/info"
+						infotitle="Was passiert mit den Daten"
+						onclick={() => {
+							showAlert = false;
 						}}
-					>
-						<div class="flex items-center justify-center">
-							{$_("childData.changeData")}
-						</div>
-					</Button>
-				{:else}
-					<Button
-						class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
-						type="submit"
-						>{$_("childData.submitButtonLabel")}</Button
-					>
+					/>
 				{/if}
-			</form>
-		</Card>
-	</div>
+
+				<form
+					class="m-1 mx-auto w-full flex-col space-y-6"
+					onsubmit={preventDefault(submitData)}
+				>
+					{#each questionnaire as element, i}
+						{console.log(" question: ", element)}
+						<DataInput
+							component={componentTable[element.component]}
+							bind:value={answers[element.id].answer}
+							bind:additionalValue={answers[element.id]
+								.additional_answer}
+							label={element?.text[$locale].question}
+							textTrigger={element.additional_option}
+							required={true}
+							additionalRequired={true}
+							id={"input_" + String(i)}
+							items={element.text[$locale].options_json === ""
+								? undefined
+								: JSON.parse(
+										element.text[$locale].options_json,
+									)}
+							disabled={disableEdit}
+						/>
+					{/each}
+					{#if disableEdit === true}
+						<Button
+							type="button"
+							class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+							on:click={() => {
+								disableEdit = false;
+							}}
+						>
+							<div class="flex items-center justify-center">
+								{$_("childData.changeData")}
+							</div>
+						</Button>
+					{:else}
+						<Button
+							class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+							type="submit"
+							>{$_("childData.submitButtonLabel")}</Button
+						>
+					{/if}
+				</form>
+			</Card>
+		</div>
+	{/if}
 {:catch error}
 	<AlertMessage
 		title={$_("childData.alertMessageTitle")}

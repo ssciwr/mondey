@@ -107,7 +107,8 @@
 		"alertMessageUpdate": "Bitte aktualisieren sie ihre Eingaben",
 		"submitButtonLabel": "Abschließen",
 		"changeData": "Daten vollständig, zum bearbeiten klicken",
-		"loadingMessage": "Daten werden geladen"
+		"loadingMessage": "Daten werden geladen",
+		"alertMessageTitle": "Fehler"
 	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",
