@@ -23,7 +23,7 @@
 		<img src={logo_dark} class="mt-6 hidden h-12 dark:block" alt="MONDEY Logo" />
 	</NavBrand>
 	<NavHamburger />
-	<NavUl ulClass="flex items-center mt-8 space-x-14 text-lg ">
+	<NavUl ulClass="hidden flex min-[320px]:flex-col sm:flex-col md:flex-row items-center lg:mt-8 lg:space-x-14 md:mt-8 md:space-x-7 text-lg ">
 		<NavLi href={base}>Aktuelles</NavLi>
 		<NavLi href={base}>Downloads</NavLi>
 		<NavLi href={base}>Kontakt</NavLi>
@@ -45,7 +45,7 @@
 </Navbar>
 
 <div
-	class="flex-auto items-center justify-center overflow-y-auto pb-20 md:mx-[max(10vw,2rem)] md:my-[max(2vw,2rem)]"
+	class="flex-auto  items-center justify-center overflow-y-auto pb-20 md:mx-[max(10vw,2rem)] md:my-[max(2vw,2rem)]"
 >
 	<slot></slot>
 </div>
