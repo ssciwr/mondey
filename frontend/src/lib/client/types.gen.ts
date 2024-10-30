@@ -49,6 +49,7 @@ export type ChildAnswerPublic = {
     answer: string;
     question_id: number;
     additional_answer: (string | null);
+    child_id: number;
 };
 
 export type ChildCreate = {
@@ -612,17 +613,26 @@ export type UpdateCurrentUserAnswersResponse = (Array<UserAnswerPublic>);
 
 export type UpdateCurrentUserAnswersError = (HTTPValidationError);
 
-export type GetCurrentChildrenAnswersResponse = (Array<ChildAnswerPublic>);
-
-export type GetCurrentChildrenAnswersError = unknown;
-
-export type UpdateCurrentChildrenAnswersData = {
-    body: Array<ChildAnswerPublic>;
+export type GetCurrentChildrenAnswersData = {
+    path: {
+        child_id: number;
+    };
 };
 
-export type UpdateCurrentChildrenAnswersResponse = (Array<ChildAnswerPublic>);
+export type GetCurrentChildrenAnswersResponse = (Array<ChildAnswerPublic>);
 
-export type UpdateCurrentChildrenAnswersError = (HTTPValidationError);
+export type GetCurrentChildrenAnswersError = (HTTPValidationError);
+
+export type UpdateCurrentChildAnswersData = {
+    body: Array<ChildAnswerPublic>;
+    path: {
+        child_id: number;
+    };
+};
+
+export type UpdateCurrentChildAnswersResponse = (Array<ChildAnswerPublic>);
+
+export type UpdateCurrentChildAnswersError = (HTTPValidationError);
 
 export type AuthCookieLoginData = {
     body: Body_auth_cookie_login_auth_login_post;
