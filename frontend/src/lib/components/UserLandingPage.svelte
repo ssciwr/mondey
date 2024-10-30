@@ -1,8 +1,7 @@
 <script lang="ts">
 import UserVerify from "$lib/components/UserVerify.svelte";
-import { componentTable } from "$lib/stores/componentStore";
 import { currentUser, refreshUser } from "$lib/stores/userStore";
-import { Button, TabItem, Tabs } from "flowbite-svelte";
+import { Button, Card, TabItem, Tabs } from "flowbite-svelte";
 import {
 	AtomOutline,
 	CogSolid,
@@ -12,8 +11,9 @@ import {
 import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 import { get } from "svelte/store";
-
-console.log("user: ", get(currentUser));
+import AdminPage from "./AdminPage.svelte";
+import ChildrenGallery from "./ChildrenGallery.svelte";
+import UserDataInput from "./UserDataInput.svelte";
 
 onMount(async () => {
 	await refreshUser();
@@ -29,32 +29,38 @@ onMount(async () => {
 						<ProfileCardSolid size="lg" />
 						Persönliche Daten
 					</div>
-					<svelte:component this={componentTable['userDataInput']} />
+					<svelte:component this={UserDataInput} />
 				</TabItem>
 				<TabItem>
 					<div slot="title" class="flex items-center gap-2 text-lg">
 						<GridPlusSolid size="lg" />
 						Kinder
 					</div>
-					<svelte:component this={componentTable['childrenGallery']} />
+					<svelte:component this={ChildrenGallery} />
 				</TabItem>
 
 				{#if get(currentUser)?.is_superuser}
 					<TabItem>
-						<div slot="title" class="flex items-center gap-2 text-lg">
+						<div
+							slot="title"
+							class="flex items-center gap-2 text-lg"
+						>
 							<CogSolid size="lg" />
-							{$_('admin.title')}
+							{$_("admin.title")}
 						</div>
-						<svelte:component this={componentTable['adminPage']} />
+						<svelte:component this={AdminPage} />
 					</TabItem>
 				{/if}
 				{#if get(currentUser)?.is_researcher}
 					<TabItem>
-						<div slot="title" class="flex items-center gap-2 text-lg">
+						<div
+							slot="title"
+							class="flex items-center gap-2 text-lg"
+						>
 							<AtomOutline size="lg" />
-							{$_('researcher.title')}
+							{$_("researcher.title")}
 						</div>
-						<svelte:component this={componentTable['researchPage']} />
+						<svelte:component this={Card} />
 					</TabItem>
 				{/if}
 			</Tabs>
@@ -67,7 +73,7 @@ onMount(async () => {
 		class="m-2 mx-auto flex w-full items-center justify-center p-2 text-gray-700 dark:text-gray-400"
 	>
 		<div class="m-2 p-2">
-			{$_('login.notLoggedIn')}
+			{$_("login.notLoggedIn")}
 		</div>
 	</div>
 	<Button
@@ -75,6 +81,6 @@ onMount(async () => {
 		class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
 		href="/"
 	>
-		{$_('registration.goHome')}
+		{$_("registration.goHome")}
 	</Button>
 {/if}

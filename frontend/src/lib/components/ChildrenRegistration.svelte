@@ -125,15 +125,10 @@ const buttons = [
 				<DataInput
 					component={element.component}
 					bind:value={element.value}
-					bind:additionalInput={element.additionalValue}
+					bind:additionalValue={element.additionalValue}
 					label={element.props.label}
 					properties={element.props}
 					textTrigger={element.props.textTrigger}
-					eventHandlers={{
-						'on:change': element.onchange,
-						'on:blur': element.onblur,
-						'on:click': element.onclick
-					}}
 				/>
 			{/each}
 		</form>

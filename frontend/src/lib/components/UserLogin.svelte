@@ -13,7 +13,6 @@ import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
 
 // TODO: make the remember thing functional again
-
 // FIXME: make use of the logic of the AdminUser structure and get rid of the UserStore
 async function refresh(): Promise<string> {
 	const returned = await usersCurrentUser();
@@ -63,7 +62,7 @@ async function submitData(): Promise<void> {
 let username = "";
 let password = "";
 let remember = false;
-let showAlert = false;
+let showAlert = $state(false);
 let alertMessage: string = $_("login.badCredentials");
 </script>
 
