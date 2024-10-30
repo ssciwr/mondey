@@ -154,6 +154,7 @@ class ChildAnswer(SQLModel, table=True):
     """
 
     user_id: int = Field(default=None, primary_key=True)
+    child_id: int = Field(default=None, primary_key=True)
     question_id: int = Field(
         default=None, primary_key=True, foreign_key="childquestion.id"
     )
@@ -173,3 +174,4 @@ class ChildAnswerPublic(SQLModel):
     answer: str
     question_id: int
     additional_answer: str | None
+    child_id: int

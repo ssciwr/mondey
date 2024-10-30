@@ -190,32 +190,40 @@ def create_router() -> APIRouter:
         return new_answers
 
     # Endpoints for answers to child question
-    @router.get("/children-answers/", response_model=list[ChildAnswerPublic])
+    @router.get("/children-answers/{child_id}", response_model=list[ChildAnswerPublic])
     def get_current_children_answers(
-        session: SessionDep, current_active_user: CurrentActiveUserDep
+        session: SessionDep, child_id: int, current_active_user: CurrentActiveUserDep
     ):
         answers = session.exec(
             select(ChildAnswer).where(
-                col(ChildAnswer.user_id) == current_active_user.id
+                col(ChildAnswer.user_id)
+                == current_active_user.id & col(ChildAnswer.child_id)
+                == child_id
             )
         ).all()
 
         return answers
 
-    @router.put("/children-answers/", response_model=list[ChildAnswerPublic])
-    def update_current_children_answers(
+    @router.put("/children-answers/{child_id}", response_model=list[ChildAnswerPublic])
+    def update_current_child_answers(
         session: SessionDep,
+        child_id: int,
         current_active_user: CurrentActiveUserDep,
         new_answers: list[ChildAnswerPublic],
     ):
         for new_answer in new_answers:
             current_answer = session.get(
-                ChildAnswer, (current_active_user.id, new_answer.question_id)
+                ChildAnswer, (current_active_user.id, child_id, new_answer.question_id)
             )
 
             if current_answer is None:
                 current_answer = ChildAnswer.model_validate(
-                    new_answer, update={"user_id": current_active_user.id}
+                    new_answer,
+                    update={
+                        "user_id": current_active_user.id,
+                        "child_id": child_id,
+                        "question_id": new_answer.question_id,
+                    },
                 )
                 add(session, current_answer)
             else:
