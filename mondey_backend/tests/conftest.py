@@ -629,6 +629,7 @@ def children():
             "id": 1,
             "name": "child1",
             "has_image": False,
+            "remark": "",
         },
         {
             "birth_month": 12,
@@ -636,6 +637,7 @@ def children():
             "id": 2,
             "name": "child2",
             "has_image": True,
+            "remark": "",
         },
         {
             "birth_month": 7,
@@ -643,6 +645,7 @@ def children():
             "id": 3,
             "name": "child3",
             "has_image": True,
+            "remark": "",
         },
     ]
 
