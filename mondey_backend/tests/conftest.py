@@ -157,6 +157,17 @@ def session():
                 has_image=True,
             )
         )
+
+        # add child for user 2
+        session.add(
+            Child(
+                user_id=2,
+                name="child2",
+                birth_year=today.year - 4,
+                birth_month=12,
+                has_image=True,
+            )
+        )
         # add an (expired) milestone answer session for child 1 / user 1 with no answers
         session.add(
             MilestoneAnswerSession(
@@ -260,19 +271,19 @@ def session():
                         child_question_id=1,
                         lang_id="de",
                         question="was?",
-                        options="[x,y,z, andere]",
+                        options="[x,y,z,andere]",
                     ),
                     "en": ChildQuestionText(
                         child_question_id=1,
                         lang_id="en",
                         question="what?",
-                        options="[1,2,3, other]",
+                        options="[1,2,3,other]",
                     ),
                     "fr": ChildQuestionText(
                         child_question_id=1,
                         lang_id="fr",
                         question="french...",
-                        options="[1,2,3, autre]",
+                        options="[1,2,3,autre]",
                     ),
                 },
             ),
@@ -286,19 +297,19 @@ def session():
                         child_question_id=2,
                         lang_id="de",
                         question="Wo?",
-                        options="[x2,y2,z2, andere]",
+                        options="[x2,y2,z2,andere]",
                     ),
                     "en": ChildQuestionText(
                         child_question_id=2,
                         lang_id="en",
                         question="Where?",
-                        options="[12,22,32, ohter]",
+                        options="[12,22,32,other]",
                     ),
                     "fr": ChildQuestionText(
                         child_question_id=2,
                         lang_id="fr",
                         question="french...",
-                        options="[12,22,32, autre]",
+                        options="[12,22,32,autre]",
                     ),
                 },
             ),
@@ -436,14 +447,14 @@ def child_questions():
                 "de": {
                     "child_question_id": 1,
                     "lang_id": "de",
-                    "options": "[x,y,z]",
+                    "options": "[x,y,z,andere]",
                     "options_json": "",
                     "question": "was?",
                 },
                 "en": {
                     "child_question_id": 1,
                     "lang_id": "en",
-                    "options": "[1,2,3]",
+                    "options": "[1,2,3,other]",
                     "question": "what?",
                     "options_json": "",
                 },
@@ -451,7 +462,7 @@ def child_questions():
                     "child_question_id": 1,
                     "lang_id": "fr",
                     "question": "french...",
-                    "options": "[1,2,3]",
+                    "options": "[1,2,3,autre]",
                     "options_json": "",
                 },
             },
@@ -467,14 +478,14 @@ def child_questions():
                 "de": {
                     "child_question_id": 2,
                     "lang_id": "de",
-                    "options": "[x2,y2,z2]",
+                    "options": "[x2,y2,z2,andere]",
                     "options_json": "",
                     "question": "Wo?",
                 },
                 "en": {
                     "child_question_id": 2,
                     "lang_id": "en",
-                    "options": "[12,22,32]",
+                    "options": "[12,22,32,other]",
                     "question": "Where?",
                     "options_json": "",
                 },
@@ -482,7 +493,7 @@ def child_questions():
                     "child_question_id": 2,
                     "lang_id": "fr",
                     "question": "french...",
-                    "options": "[12,22,32]",
+                    "options": "[12,22,32,autre]",
                     "options_json": "",
                 },
             },

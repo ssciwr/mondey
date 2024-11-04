@@ -58,7 +58,7 @@ def test_create_update_and_delete_child(user_client: TestClient):
     )
     assert response_create.status_code == 200
     assert response_create.json() == {
-        "id": 4,
+        "id": 5,
         "name": "child1",
         "birth_year": 2021,
         "birth_month": 3,
@@ -68,7 +68,7 @@ def test_create_update_and_delete_child(user_client: TestClient):
     response_update = user_client.put(
         "/users/children/",
         json={
-            "id": 4,
+            "id": 5,
             "name": "c",
             "birth_year": 2020,
             "birth_month": 9,
@@ -77,14 +77,14 @@ def test_create_update_and_delete_child(user_client: TestClient):
     )
     assert response_update.status_code == 200
     assert response_update.json() == {
-        "id": 4,
+        "id": 5,
         "name": "c",
         "birth_year": 2020,
         "birth_month": 9,
         "has_image": False,
     }
     assert len(user_client.get("/users/children/").json()) == 3
-    response_delete = user_client.delete("/users/children/4")
+    response_delete = user_client.delete("/users/children/5")
     assert response_delete.status_code == 200
     assert len(user_client.get("/users/children/").json()) == 2
 
@@ -369,7 +369,7 @@ def test_update_current_child_answers_no_prexisting(second_user_client: TestClie
     ]
 
     response = second_user_client.put(
-        "/users/children-answers/2",
+        "/users/children-answers/4",
         json=new_public_answers,
     )
     assert response.status_code == 200
@@ -377,6 +377,6 @@ def test_update_current_child_answers_no_prexisting(second_user_client: TestClie
     assert response.json() == new_public_answers
 
     response = second_user_client.get(
-        "/users/children-answers/2",
+        "/users/children-answers/4",
     )
     assert response.json() == new_public_answers
