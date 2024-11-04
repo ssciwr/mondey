@@ -54,26 +54,28 @@ async function setup(): Promise<any> {
 		console.log("Error when retrieving child data");
 		showAlert = true;
 		alertMessage = childrendata.error.detail;
-	}
-
-	for (let i = 0; i < childrendata.length; i++) {
-		data.push({
-			header: childrendata[i].name,
-			summary: childrendata[i].summary,
-			image: null,
-			events: {
-				onclick: () => {
-					currentChild.set(childrendata[i].id);
+	} else {
+		console.log("children: ", childrendata);
+		for (let i = 0; i < childrendata.data.length; i++) {
+			data.push({
+				header: childrendata.data[i].name,
+				summary: childrendata.data[i].remark,
+				image: null,
+				events: {
+					onclick: () => {
+						currentChild.set(childrendata.data[i].id);
+					},
 				},
-			},
-		});
-		if (childrendata[i].has_image) {
-			const childimage = await getChildImage(
-				`/users/children-images/${childrendata[i].id}`,
-			);
-			data[i + 1].image = childimage.path;
+			});
+			if (childrendata.data[i].has_image) {
+				const childimage = await getChildImage(
+					`/users/children-images/${childrendata.data[i].id}`,
+				);
+				data[i + 1].image = childimage.path;
+			}
 		}
 	}
+	console.log("final data: ", data);
 	return data;
 }
 

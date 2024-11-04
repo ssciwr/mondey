@@ -1,7 +1,7 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { Label, Textarea } from "flowbite-svelte";
+import { Input, Label, Textarea } from "flowbite-svelte";
 import { type Component } from "svelte";
 
 // variables
@@ -33,10 +33,17 @@ let {
 
 // functionality for showing the textfield when the trigger is selected
 function checkShowTextfield(v: any): boolean {
+	let basic =
+		value !== undefined &&
+		value !== null &&
+		value !== "" &&
+		textTrigger !== undefined &&
+		textTrigger !== null &&
+		textTrigger !== "";
 	if (v instanceof Array) {
-		return v.includes(textTrigger);
+		return v.includes(textTrigger) && basic;
 	} else {
-		return v === textTrigger;
+		return v === textTrigger && basic;
 	}
 }
 
@@ -58,17 +65,30 @@ $effect(() => {
 {/if}
 
 <div class="space-y-4">
-	<svelte:component
-		this={component}
-		class={highlight
-			? "rounded border-2 border-primary-600 dark:border-primary-600 " +
-				componentClass
-			: componentClass}
-		bind:value
-		{items}
-		{required}
-		{disabled}
-	/>
+	{#if component === Input}
+		<svelte:component
+			this={component}
+			class={highlight
+				? "rounded border-2 border-primary-600 dark:border-primary-600 " +
+					componentClass
+				: componentClass}
+			bind:value
+			{items}
+			{required}
+			{disabled}
+		/>
+	{:else}
+		<svelte:component
+			this={component}
+			class={highlight
+				? "rounded border-2 border-primary-600 dark:border-primary-600 " +
+					componentClass
+				: componentClass}
+			bind:value
+			{required}
+			{disabled}
+		/>
+	{/if}
 
 	{#if showTextField === true}
 		<Textarea

@@ -71,7 +71,7 @@ async function setup(): Promise<{
 		});
 
 		console.log("questionnaire: ", questionnaire);
-		console.log("currentAnswers: ", currentAnswers);
+		console.log("currentAnswers: ", currentAnswers.data);
 
 		if (currentAnswers?.error || currentAnswers.data === undefined) {
 			console.log(

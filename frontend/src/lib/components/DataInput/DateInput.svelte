@@ -4,7 +4,7 @@
 import { Input } from "flowbite-svelte";
 
 let {
-	value = null,
+	value = $bindable(null),
 	outerClass = "space-y-4",
 	innerClass = null,
 	disabled = false,
@@ -19,5 +19,5 @@ let {
 </script>
 
 <div class={outerClass}>
-    <Input type="date" bind:value class={innerClass} {required} {disabled} />
+	<Input type="date" bind:value class={innerClass} {required} {disabled} />
 </div>
