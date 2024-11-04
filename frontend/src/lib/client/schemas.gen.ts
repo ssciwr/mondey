@@ -168,14 +168,10 @@ export const ChildAnswerPublicSchema = {
                 }
             ],
             title: 'Additional Answer'
-        },
-        child_id: {
-            type: 'integer',
-            title: 'Child Id'
         }
     },
     type: 'object',
-    required: ['answer', 'question_id', 'additional_answer', 'child_id'],
+    required: ['answer', 'question_id', 'additional_answer'],
     title: 'ChildAnswerPublic',
     description: `External data model for UserAnswers
 

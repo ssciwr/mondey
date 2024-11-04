@@ -49,7 +49,6 @@ export type ChildAnswerPublic = {
     answer: string;
     question_id: number;
     additional_answer: (string | null);
-    child_id: number;
 };
 
 export type ChildCreate = {
@@ -613,15 +612,15 @@ export type UpdateCurrentUserAnswersResponse = (Array<UserAnswerPublic>);
 
 export type UpdateCurrentUserAnswersError = (HTTPValidationError);
 
-export type GetCurrentChildrenAnswersData = {
+export type GetCurrentChildAnswersData = {
     path: {
         child_id: number;
     };
 };
 
-export type GetCurrentChildrenAnswersResponse = (Array<ChildAnswerPublic>);
+export type GetCurrentChildAnswersResponse = (Array<ChildAnswerPublic>);
 
-export type GetCurrentChildrenAnswersError = (HTTPValidationError);
+export type GetCurrentChildAnswersError = (HTTPValidationError);
 
 export type UpdateCurrentChildAnswersData = {
     body: Array<ChildAnswerPublic>;
