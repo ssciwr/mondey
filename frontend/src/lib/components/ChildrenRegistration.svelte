@@ -3,8 +3,8 @@
 <script lang="ts">
 import {
 	getChildQuestions,
-	getCurrentChildrenAnswers,
-	updateCurrentChildrenAnswers,
+	getCurrentChildAnswers,
+	updateCurrentChildAnswers,
 } from "$lib/client";
 import {
 	type ChildAnswerPublic,
@@ -13,12 +13,12 @@ import {
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
+import { currentChild } from "$lib/stores/childrenStore";
 import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading } from "flowbite-svelte";
 import { _, locale } from "svelte-i18n";
 
-// get data to fill in
 const breadcrumbdata = [
 	{
 		label: $_("childData.overviewLabel"),
@@ -32,17 +32,14 @@ const breadcrumbdata = [
 		label: $_("childData.newChildLabel"),
 	},
 ];
-
-// data to display -> will later be fetched from the server
-const heading = $_("childData.newChildLabel");
 let questionnaire: GetChildQuestionsResponse = $state(
 	[] as GetChildQuestionsResponse,
 );
 let answers: { [k: string]: ChildAnswerPublic } = $state({});
 let disableEdit: boolean = $state(false);
 let alertMessage: string = $state($_("childData.alertMessageMissing"));
-let promise = $state(setup());
 let showAlert = $state(false);
+let promise = $state(setup());
 
 async function setup(): Promise<{
 	questionnaire: GetChildQuestionsResponse;
@@ -58,57 +55,72 @@ async function setup(): Promise<{
 		questionnaire = questions.data as GetChildQuestionsResponse;
 	}
 
-	// get existing answers
-	let currentAnswers = await getCurrentChildrenAnswers();
+	// get current child
+	console.log("current child: ", $currentChild);
 
-	console.log("questionnaire: ", questionnaire);
-	console.log("currentAnswers: ", currentAnswers);
-
-	if (currentAnswers?.error || currentAnswers.data === undefined) {
+	if ($currentChild !== null) {
+		// get existing answers
 		console.log(
-			"Error when getting current answers for child: ",
-			currentAnswers.error.detail,
+			"input for backend function: ",
+			`/users/children-answers/${$currentChild}/`,
 		);
-
-		showAlert = true;
-		alertMessage = $_("childData.alertMessageError");
-	} else {
-		answers = Object.fromEntries(
-			currentAnswers.data.map((existing_answer) => [
-				existing_answer.question_id,
-				existing_answer as ChildAnswerPublic,
-			]),
-		);
-
-		console.log("answers initial: ", answers);
-
-		disableEdit = true;
-
-		// add nonexisting answers
-		questionnaire.forEach((question) => {
-			console.log("question: ", question);
-			if (!(question.id in answers)) {
-				console.log(" adding default question");
-				answers[question.id] = {
-					question_id: question.id,
-					answer: "",
-					additional_answer: "",
-				} as ChildAnswerPublic;
-
-				disableEdit = false;
-				showAlert = true;
-				alertMessage = $_("childData.alertMessageUpdate");
-			}
+		let currentAnswers = await getCurrentChildAnswers({
+			path: {
+				child_id: $currentChild,
+			},
 		});
-	}
-	console.log("answers: ", answers);
 
+		console.log("questionnaire: ", questionnaire);
+		console.log("currentAnswers: ", currentAnswers);
+
+		if (currentAnswers?.error || currentAnswers.data === undefined) {
+			console.log(
+				"Error when getting current answers for child: ",
+				currentAnswers.error.detail,
+			);
+
+			showAlert = true;
+			alertMessage = $_("childData.alertMessageError");
+		} else {
+			answers = Object.fromEntries(
+				currentAnswers.data.map((existing_answer: ChildAnswerPublic) => [
+					existing_answer.question_id,
+					existing_answer as ChildAnswerPublic,
+				]),
+			);
+
+			console.log("answers initial: ", answers);
+
+			disableEdit = true;
+		}
+	}
+	// add nonexisting answers
+	questionnaire.forEach((question) => {
+		console.log("question: ", question, "condition: ", question.id in answers);
+		if (!(question.id in answers)) {
+			console.log(" adding default question");
+			answers[question.id] = {
+				question_id: question.id,
+				answer: "",
+				additional_answer: "",
+			} as ChildAnswerPublic;
+
+			disableEdit = false;
+			showAlert = true;
+			alertMessage = $_("childData.alertMessageUpdate");
+		}
+	});
+	console.log("questionnaire: ", questionnaire);
+	console.log("answers: ", answers);
 	return { questionnaire: questionnaire, answers: answers };
 }
 
 async function submitData(): Promise<void> {
-	const response = await updateCurrentChildrenAnswers({
+	const response = await updateCurrentChildAnswers({
 		body: Object.values(answers),
+		path: {
+			child_id: $currentChild,
+		},
 	});
 
 	if (response.error) {
@@ -146,7 +158,7 @@ async function submitData(): Promise<void> {
 				<Heading
 					tag="h3"
 					class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-					>{heading}</Heading
+					>{$_("childData.newChildLabel")}</Heading
 				>
 				{#if showAlert}
 					<AlertMessage

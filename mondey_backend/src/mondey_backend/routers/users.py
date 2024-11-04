@@ -221,9 +221,7 @@ def create_router() -> APIRouter:
             Child,
             child_id,
         )
-        print("user id: ", current_active_user.id)
-        print("all children: ", session.exec(select(Child)).all())
-        print("children for current user: ", child)
+
         if child is None or child.user_id != current_active_user.id:
             raise HTTPException(404, detail="child not found for user")
         for new_answer in new_answers:

@@ -58,6 +58,7 @@ if (kind === "user") {
 const inputTypes: Array<SelectOptionType<string>> = [
 	{ value: "text", name: "text" },
 	{ value: "select", name: "select" },
+	{ value: "date", name: "date" },
 ];
 
 function updateOptionsJson() {

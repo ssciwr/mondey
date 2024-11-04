@@ -85,7 +85,8 @@
 		"selectPlaceholder": "Bitte auswählen",
 		"profileButtonLabelDefault": "Einloggen oder Registrieren",
 		"profileButtonLabelLogout": "Logout",
-		"profileTitleDefault": "Willkommen!"
+		"profileTitleDefault": "Willkommen!",
+		"profileAccess": "Ihr Profil"
 	},
 	"userData": {
 		"heading": "Benutzerdaten eingeben",

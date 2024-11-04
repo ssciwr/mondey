@@ -1,5 +1,5 @@
 <script lang="ts">
-import UserLandingPage from "$lib/components/UserLandingPage.svelte";
+import UserOverview from "$lib/components/UserOverview.svelte";
 </script>
 
-<UserLandingPage />
+<UserOverview />
