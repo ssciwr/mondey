@@ -16,6 +16,7 @@ def test_get_children(
 ):
     response = user_client.get("/users/children/")
     assert response.status_code == 200
+    print("response: ", response.json())
     assert response.json() == [children[0], children[1]]
 
 
@@ -203,7 +204,7 @@ def test_get_current_user_answers_invalid_user(public_client: TestClient):
     assert response.status_code == 401
 
 
-def test_update_current_answers_prexisting(user_client: TestClient):
+def test_update_current_user_answers_prexisting(user_client: TestClient):
     response = user_client.put(
         "/users/user-answers/",
         json=[
@@ -250,7 +251,7 @@ def test_update_current_answers_prexisting(user_client: TestClient):
     ]
 
 
-def test_update_current_answers_no_prexisting(second_user_client: TestClient):
+def test_update_current_user_answers_no_prexisting(second_user_client: TestClient):
     response = second_user_client.put(
         "/users/user-answers/",
         json=[
@@ -295,3 +296,87 @@ def test_update_current_answers_no_prexisting(second_user_client: TestClient):
             "additional_answer": None,
         },
     ]
+
+
+def test_get_current_child_answers_works(user_client: TestClient):
+    response = user_client.get("/users/children-answers/1")
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "answer": "a",
+            "question_id": 1,
+            "additional_answer": None,
+        },
+        {
+            "answer": "other",
+            "question_id": 2,
+            "additional_answer": "dolor sit",
+        },
+    ]
+
+
+def test_get_current_child_answers_invalid_child(user_client: TestClient):
+    response = user_client.get("/users/children-answers/5")
+    assert response.status_code == 404
+
+
+def test_get_current_child_answers_invalid_user(public_client: TestClient):
+    response = public_client.get("/users/children-answers/1")
+    assert response.status_code == 401
+
+
+def test_update_current_child_answers_prexisting(user_client: TestClient):
+    new_public_answers = [
+        {
+            "answer": "other",
+            "question_id": 1,
+            "additional_answer": "sit amet",
+        },
+        {
+            "answer": "b2",
+            "question_id": 2,
+            "additional_answer": None,
+        },
+    ]
+
+    response = user_client.put(
+        "/users/children-answers/1",
+        json=new_public_answers,
+    )
+
+    assert response.status_code == 200
+
+    assert response.json() == new_public_answers
+
+    response = user_client.get(
+        "/users/children-answers/1",
+    )
+    assert response.json() == new_public_answers
+
+
+def test_update_current_child_answers_no_prexisting(second_user_client: TestClient):
+    new_public_answers = [
+        {
+            "answer": "other",
+            "question_id": 1,
+            "additional_answer": "sit amet",
+        },
+        {
+            "answer": "b2",
+            "question_id": 2,
+            "additional_answer": None,
+        },
+    ]
+
+    response = second_user_client.put(
+        "/users/children-answers/2",
+        json=new_public_answers,
+    )
+    assert response.status_code == 200
+
+    assert response.json() == new_public_answers
+
+    response = second_user_client.get(
+        "/users/children-answers/2",
+    )
+    assert response.json() == new_public_answers

@@ -191,14 +191,20 @@ def create_router() -> APIRouter:
 
     # Endpoints for answers to child question
     @router.get("/children-answers/{child_id}", response_model=list[ChildAnswerPublic])
-    def get_current_children_answers(
+    def get_current_child_answers(
         session: SessionDep, child_id: int, current_active_user: CurrentActiveUserDep
     ):
+        child = session.get(
+            Child,
+            child_id,
+        )
+
+        if child is None or child.user_id != current_active_user.id:
+            raise HTTPException(404, detail="child not found for user")
         answers = session.exec(
             select(ChildAnswer).where(
-                col(ChildAnswer.user_id)
-                == current_active_user.id & col(ChildAnswer.child_id)
-                == child_id
+                (col(ChildAnswer.user_id) == current_active_user.id)
+                & (col(ChildAnswer.child_id) == child_id)
             )
         ).all()
 
@@ -211,12 +217,22 @@ def create_router() -> APIRouter:
         current_active_user: CurrentActiveUserDep,
         new_answers: list[ChildAnswerPublic],
     ):
+        child = session.get(
+            Child,
+            child_id,
+        )
+        print("user id: ", current_active_user.id)
+        print("all children: ", session.exec(select(Child)).all())
+        print("children for current user: ", child)
+        if child is None or child.user_id != current_active_user.id:
+            raise HTTPException(404, detail="child not found for user")
         for new_answer in new_answers:
             current_answer = session.get(
                 ChildAnswer, (current_active_user.id, child_id, new_answer.question_id)
             )
 
             if current_answer is None:
+                print("answer does not exist")
                 current_answer = ChildAnswer.model_validate(
                     new_answer,
                     update={
@@ -225,12 +241,14 @@ def create_router() -> APIRouter:
                         "question_id": new_answer.question_id,
                     },
                 )
-                add(session, current_answer)
+                print(" new current answer ", current_answer)
             else:
                 for key, value in new_answer.model_dump().items():
                     setattr(current_answer, key, value)
 
+            add(session, current_answer)
         session.commit()
+
         return new_answers
 
     return router

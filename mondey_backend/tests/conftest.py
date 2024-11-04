@@ -26,6 +26,7 @@ from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.models.milestones import MilestoneGroupText
 from mondey_backend.models.milestones import MilestoneImage
 from mondey_backend.models.milestones import MilestoneText
+from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import ChildQuestionText
 from mondey_backend.models.questions import UserAnswer
@@ -247,7 +248,7 @@ def session():
             for lang in user_question.text:
                 session.add(user_question.text[lang])
 
-        # add child questions for user 1
+        # add child questions
         child_questions = [
             ChildQuestion(
                 id=1,
@@ -259,19 +260,19 @@ def session():
                         child_question_id=1,
                         lang_id="de",
                         question="was?",
-                        options="[x,y,z]",
+                        options="[x,y,z, andere]",
                     ),
                     "en": ChildQuestionText(
                         child_question_id=1,
                         lang_id="en",
                         question="what?",
-                        options="[1,2,3]",
+                        options="[1,2,3, other]",
                     ),
                     "fr": ChildQuestionText(
                         child_question_id=1,
                         lang_id="fr",
                         question="french...",
-                        options="[1,2,3]",
+                        options="[1,2,3, autre]",
                     ),
                 },
             ),
@@ -285,19 +286,19 @@ def session():
                         child_question_id=2,
                         lang_id="de",
                         question="Wo?",
-                        options="[x2,y2,z2]",
+                        options="[x2,y2,z2, andere]",
                     ),
                     "en": ChildQuestionText(
                         child_question_id=2,
                         lang_id="en",
                         question="Where?",
-                        options="[12,22,32]",
+                        options="[12,22,32, ohter]",
                     ),
                     "fr": ChildQuestionText(
                         child_question_id=2,
                         lang_id="fr",
                         question="french...",
-                        options="[12,22,32]",
+                        options="[12,22,32, autre]",
                     ),
                 },
             ),
@@ -327,10 +328,29 @@ def session():
                 additional_answer="dolor sit",
             )
         )
-        session.commit()
 
         # add child answers for user 1
-
+        session.add(
+            ChildAnswer(
+                id=1,
+                question_id=1,
+                user_id=1,
+                child_id=1,
+                answer="a",
+                additional_answer=None,
+            )
+        )
+        session.add(
+            ChildAnswer(
+                id=2,
+                question_id=2,
+                user_id=1,
+                child_id=1,
+                answer="other",
+                additional_answer="dolor sit",
+            )
+        )
+        session.commit()
         yield session
 
 
@@ -485,7 +505,7 @@ def active_admin_user():
 @pytest.fixture
 def active_research_user():
     return UserRead(
-        id=2,
+        id=7,
         email="research@mondey.de",
         is_active=True,
         is_superuser=False,

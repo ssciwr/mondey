@@ -174,4 +174,3 @@ class ChildAnswerPublic(SQLModel):
     answer: str
     question_id: int
     additional_answer: str | None
-    child_id: int
