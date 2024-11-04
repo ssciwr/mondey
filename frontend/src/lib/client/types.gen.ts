@@ -70,6 +70,7 @@ export type MilestoneAdmin = {
     id: number;
     group_id: number;
     order: number;
+    expected_age_months: number;
     text?: {
         [key: string]: MilestoneText;
     };
@@ -133,6 +134,7 @@ export type MilestoneImagePublic = {
 
 export type MilestonePublic = {
     id: number;
+    expected_age_months: number;
     text?: {
         [key: string]: MilestoneTextPublic;
     };

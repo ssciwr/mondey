@@ -165,6 +165,7 @@ def test_post_milestone(admin_client: TestClient):
         "id": 6,
         "group_id": 2,
         "order": 0,
+        "expected_age_months": 12,
         "text": {
             "de": {
                 "milestone_id": 6,
@@ -198,6 +199,7 @@ def test_post_milestone(admin_client: TestClient):
 def test_put_milestone(admin_client: TestClient, milestone_group_admin1: dict):
     milestone = milestone_group_admin1["milestones"][0]
     milestone["order"] = 6
+    milestone["expected_age_months"] = 11
     milestone["text"]["de"]["title"] = "asdsd"
     milestone["text"]["de"]["desc"] = "12xzascdasdf"
     milestone["text"]["de"]["obs"] = "asdrgf"

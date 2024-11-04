@@ -261,6 +261,10 @@ export const MilestoneAdminSchema = {
             type: 'integer',
             title: 'Order'
         },
+        expected_age_months: {
+            type: 'integer',
+            title: 'Expected Age Months'
+        },
         text: {
             additionalProperties: {
                 '$ref': '#/components/schemas/MilestoneText'
@@ -279,7 +283,7 @@ export const MilestoneAdminSchema = {
         }
     },
     type: 'object',
-    required: ['id', 'group_id', 'order'],
+    required: ['id', 'group_id', 'order', 'expected_age_months'],
     title: 'MilestoneAdmin'
 } as const;
 
@@ -505,6 +509,10 @@ export const MilestonePublicSchema = {
             type: 'integer',
             title: 'Id'
         },
+        expected_age_months: {
+            type: 'integer',
+            title: 'Expected Age Months'
+        },
         text: {
             additionalProperties: {
                 '$ref': '#/components/schemas/MilestoneTextPublic'
@@ -523,7 +531,7 @@ export const MilestonePublicSchema = {
         }
     },
     type: 'object',
-    required: ['id'],
+    required: ['id', 'expected_age_months'],
     title: 'MilestonePublic'
 } as const;
 
