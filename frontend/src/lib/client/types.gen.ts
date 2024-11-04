@@ -256,19 +256,15 @@ export type GetMilestoneResponse = (MilestonePublic);
 
 export type GetMilestoneError = (HTTPValidationError);
 
-export type GetMilestoneGroupsResponse = (Array<MilestoneGroupPublic>);
-
-export type GetMilestoneGroupsError = unknown;
-
-export type GetMilestoneGroupData = {
+export type GetMilestoneGroupsData = {
     path: {
-        milestone_group_id: number;
+        child_id: number;
     };
 };
 
-export type GetMilestoneGroupResponse = (MilestoneGroupPublic);
+export type GetMilestoneGroupsResponse = (Array<MilestoneGroupPublic>);
 
-export type GetMilestoneGroupError = (HTTPValidationError);
+export type GetMilestoneGroupsError = (HTTPValidationError);
 
 export type GetUserQuestionsResponse = (Array<UserQuestionPublic>);
 
