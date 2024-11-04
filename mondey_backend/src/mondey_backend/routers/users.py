@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib
+from datetime import datetime
 
 from fastapi import APIRouter
 from fastapi import HTTPException
@@ -222,15 +223,28 @@ def create_router() -> APIRouter:
             child_id,
         )
 
+        # because child and childanswers have overlap, we need to keep both in sync
+
         if child is None or child.user_id != current_active_user.id:
             raise HTTPException(404, detail="child not found for user")
         for new_answer in new_answers:
+            # FIXME: this must go away
+            if new_answer.question_id == 1:  # name
+                child.name = new_answer.answer
+            if new_answer.question_id == 2:  # date
+                date = datetime.strptime(new_answer.answer, "%Y-%m-%d")
+                child.birth_month = date.month
+                child.birth_year = date.year
+            if new_answer.question_id == 3:  # remarks
+                child.remark = new_answer.answer
+            if new_answer.question_id == 4:  # image
+                child.has_image = True
+
             current_answer = session.get(
                 ChildAnswer, (current_active_user.id, child_id, new_answer.question_id)
             )
 
             if current_answer is None:
-                print("answer does not exist")
                 current_answer = ChildAnswer.model_validate(
                     new_answer,
                     update={
@@ -239,12 +253,12 @@ def create_router() -> APIRouter:
                         "question_id": new_answer.question_id,
                     },
                 )
-                print(" new current answer ", current_answer)
             else:
                 for key, value in new_answer.model_dump().items():
                     setattr(current_answer, key, value)
 
             add(session, current_answer)
+        add(session, child)
         session.commit()
 
         return new_answers

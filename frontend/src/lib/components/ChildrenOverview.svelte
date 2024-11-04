@@ -64,6 +64,9 @@ async function setup(): Promise<any> {
 				events: {
 					onclick: () => {
 						currentChild.set(childrendata.data[i].id);
+						activeTabChildren.update((value: string) => {
+							return "childrenRegistration";
+						});
 					},
 				},
 			});
@@ -108,11 +111,12 @@ function createStyle(data: any[]) {
 }
 
 function searchName(data: any[], key: string): any[] {
+	console.log("data: ", data);
 	if (key === "") {
 		return data;
 	} else {
 		const res = data.filter((item) => {
-			return item.heading.toLowerCase().includes(key.toLowerCase());
+			return item.header.toLowerCase().includes(key.toLowerCase());
 		});
 		return res;
 	}

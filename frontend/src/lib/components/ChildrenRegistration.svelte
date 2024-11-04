@@ -18,7 +18,6 @@ import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading } from "flowbite-svelte";
 import { _, locale } from "svelte-i18n";
-
 const breadcrumbdata = [
 	{
 		label: $_("childData.overviewLabel"),
@@ -30,6 +29,12 @@ const breadcrumbdata = [
 	},
 	{
 		label: $_("childData.newChildLabel"),
+	},
+	{
+		label: $_("milestone.milestones"),
+		onclick: () => {
+			activeTabChildren.set("milestoneOverview");
+		},
 	},
 ];
 let questionnaire: GetChildQuestionsResponse = $state(
@@ -60,10 +65,6 @@ async function setup(): Promise<{
 
 	if ($currentChild !== null) {
 		// get existing answers
-		console.log(
-			"input for backend function: ",
-			`/users/children-answers/${$currentChild}/`,
-		);
 		let currentAnswers = await getCurrentChildAnswers({
 			path: {
 				child_id: $currentChild,
@@ -96,7 +97,6 @@ async function setup(): Promise<{
 	}
 	// add nonexisting answers
 	questionnaire.forEach((question) => {
-		console.log("question: ", question, "condition: ", question.id in answers);
 		if (!(question.id in answers)) {
 			console.log(" adding default question");
 			answers[question.id] = {
@@ -151,9 +151,7 @@ async function submitData(): Promise<void> {
 			}}
 		/>
 	{:else}
-		<div
-			class="container m-2 mx-auto w-full border border-gray-200 pb-4 md:rounded-t-lg dark:border-gray-700"
-		>
+		<div class="container m-2 mx-auto w-full pb-4">
 			<Card class="container m-1 mx-auto w-full max-w-xl">
 				<Heading
 					tag="h3"
@@ -162,10 +160,8 @@ async function submitData(): Promise<void> {
 				>
 				{#if showAlert}
 					<AlertMessage
-						title="Fehler"
-						message="Bitte füllen Sie mindestens die benötigten Felder (hervorgehoben) aus."
-						infopage="{base}/info"
-						infotitle="Was passiert mit den Daten"
+						title={$_("childData.alertMessageTitle")}
+						message={alertMessage}
 						onclick={() => {
 							showAlert = false;
 						}}
@@ -177,7 +173,6 @@ async function submitData(): Promise<void> {
 					onsubmit={preventDefault(submitData)}
 				>
 					{#each questionnaire as element, i}
-						{console.log(" question: ", element)}
 						<DataInput
 							component={componentTable[element.component]}
 							bind:value={answers[element.id].answer}
