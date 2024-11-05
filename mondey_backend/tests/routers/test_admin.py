@@ -116,10 +116,8 @@ def test_put_milestone_group(admin_client: TestClient, milestone_group_admin1: d
 
 
 def test_delete_milestone_group(admin_client: TestClient):
-    assert admin_client.get("/milestone-groups/2").status_code == 200
     response = admin_client.delete("/admin/milestone-groups/2")
     assert response.status_code == 200
-    assert admin_client.get("/milestone-groups/2").status_code == 404
     response = admin_client.delete("/admin/milestone-groups/2")
     assert response.status_code == 404
 

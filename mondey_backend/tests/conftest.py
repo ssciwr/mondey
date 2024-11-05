@@ -55,7 +55,40 @@ def private_dir(tmp_path_factory: pytest.TempPathFactory):
 
 
 @pytest.fixture
-def session():
+def children():
+    today = datetime.datetime.today()
+    nine_months_ago = today - datetime.timedelta(days=9 * 30)
+    twenty_months_ago = today - datetime.timedelta(days=20 * 30)
+    return [
+        # ~9month old child for user 1
+        {
+            "id": 1,
+            "name": "child1",
+            "birth_year": nine_months_ago.year,
+            "birth_month": nine_months_ago.month,
+            "has_image": False,
+        },
+        # ~20month old child for user 1
+        {
+            "id": 2,
+            "name": "child2",
+            "birth_year": twenty_months_ago.year,
+            "birth_month": twenty_months_ago.month,
+            "has_image": True,
+        },
+        # ~5 year old child for user 3
+        {
+            "birth_month": 7,
+            "birth_year": today.year - 5,
+            "id": 3,
+            "name": "child3",
+            "has_image": True,
+        },
+    ]
+
+
+@pytest.fixture
+def session(children: list[dict]):
     # use a new in-memory SQLite database for each test
     engine = create_engine(
         "sqlite://",
@@ -125,37 +158,9 @@ def session():
         session.add(MilestoneImage(milestone_id=1, filename="m2.jpg", approved=True))
         session.add(MilestoneImage(milestone_id=2, filename="m3.jpg", approved=True))
         session.commit()
-        # add a ~1 yr old child for user 1
+        for child, user_id in zip(children, [1, 1, 3], strict=False):
+            session.add(Child.model_validate(child, update={"user_id": user_id}))
         today = datetime.datetime.today()
-        session.add(
-            Child(
-                user_id=1,
-                name="child1",
-                birth_year=today.year - 1,
-                birth_month=today.month,
-                has_image=False,
-            )
-        )
-        # add a ~4 yr old child for user 2
-        session.add(
-            Child(
-                user_id=1,
-                name="child2",
-                birth_year=today.year - 4,
-                birth_month=12,
-                has_image=True,
-            )
-        )
-        # add a ~5 year old child for user 3
-        session.add(
-            Child(
-                user_id=3,
-                name="child3",
-                birth_year=today.year - 5,
-                birth_month=7,
-                has_image=True,
-            )
-        )
         # add an (expired) milestone answer session for child 1 / user 1 with no answers
         session.add(
             MilestoneAnswerSession(
@@ -318,34 +323,6 @@ def jpg_file(tmp_path: pathlib.Path):
     with jpg_path.open("w") as f:
         f.write("test")
     return jpg_path
-
-
-@pytest.fixture
-def children():
-    today = datetime.datetime.today()
-    return [
-        {
-            "birth_month": today.month,
-            "birth_year": today.year - 1,
-            "id": 1,
-            "name": "child1",
-            "has_image": False,
-        },
-        {
-            "birth_month": 12,
-            "birth_year": today.year - 4,
-            "id": 2,
-            "name": "child2",
-            "has_image": True,
-        },
-        {
-            "birth_month": 7,
-            "birth_year": today.year - 5,
-            "id": 3,
-            "name": "child3",
-            "has_image": True,
-        },
-    ]
 
 
 @pytest.fixture
