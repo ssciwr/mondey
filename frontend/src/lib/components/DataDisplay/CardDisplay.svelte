@@ -1,25 +1,26 @@
-<script>
+<svelte:options runes={true} />
+<script lang="ts">
 import { Button, Card, Progressbar, Tooltip } from "flowbite-svelte";
 import { ArrowRightOutline } from "flowbite-svelte-icons";
-export let data = {
-	header: undefined,
-	summary: undefined,
-	button: undefined,
-	href: undefined,
-	image: undefined,
-	progress: undefined,
-	events: undefined,
-};
-
-export let styleProps = {
-	card: {},
-	header: {},
-	summary: {},
-	button: {},
-	progress: {},
-};
-
-// TODO: generalize event passing. currently only the on:click event is exposed
+let {
+	data = {
+		header: undefined,
+		summary: undefined,
+		button: undefined,
+		href: undefined,
+		image: undefined,
+		progress: undefined,
+		events: undefined,
+	},
+	styleProps = {
+		card: {},
+		header: {},
+		summary: {},
+		button: {},
+		progress: {},
+	},
+}: { data: any; styleProps: any } = $props();
+console.log("header:", data.header, "image: ", data.image, "data: ", data);
 </script>
 
 <Card
