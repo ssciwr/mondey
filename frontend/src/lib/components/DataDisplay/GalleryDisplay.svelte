@@ -54,7 +54,7 @@ $: filteredComponentProps = filteredItems.map((item) => {
 	{#if header !== null}
 		<Heading
 			tag="h1"
-			class="m-2 mt-4 flex w-full gap-2 p-2 tracking-tight "
+			class="m-2 mt-4 flex w-full gap-2 p-2 tracking-tight"
 			customSize="text-2xl"
 			color="text-gray-800 dark:text-white"
 		>
@@ -108,7 +108,7 @@ $: filteredComponentProps = filteredItems.map((item) => {
 	{/if}
 
 	<Gallery
-		class="grid w-full grid-cols-1 justify-center gap-8 p-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+		class="justify-items-center w-full"
 	>
 		{#each filteredItems as item, index}
 			<svelte:component
