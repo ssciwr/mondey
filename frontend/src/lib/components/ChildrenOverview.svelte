@@ -12,13 +12,14 @@ import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { currentChild } from "$lib/stores/childrenStore";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { Heading } from "flowbite-svelte";
+import { _ } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
 async function setup(): Promise<any> {
 	data = [
 		{
-			header: "Neu",
-			summary: "Ein neues Kind anmelden",
+			header: $_("childData.newChildHeading"),
+			summary: $_("childData.newChildSummary"),
 			events: {
 				onclick: async () => {
 					const new_child = await createChild({
@@ -32,13 +33,10 @@ async function setup(): Promise<any> {
 
 					if (new_child.error) {
 						showAlert = true;
-						alertMessage = new_child.error.detail;
+						alertMessage = $_("childData.alertMessageCreate") + new_child.error.detail;
 					} else {
 						currentChild.set(new_child.data.id);
-
-						activeTabChildren.update((value: string) => {
-							return "childrenRegistration";
-						});
+						activeTabChildren.set("childrenRegistration");
 					}
 				},
 			},
@@ -51,7 +49,7 @@ async function setup(): Promise<any> {
 	if (children.error) {
 		console.log("Error when retrieving child data");
 		showAlert = true;
-		alertMessage = children.error.detail;
+		alertMessage = $_("childData.alertMessageRetrieving") + children.error.detail;
 	} else {
 		for (const child of children.data) {
 			data.push({
@@ -61,9 +59,7 @@ async function setup(): Promise<any> {
 				events: {
 					onclick: () => {
 						currentChild.set(child.id);
-						activeTabChildren.update((value: string) => {
-							return "childrenRegistration";
-						});
+						activeTabChildren.set("childrenRegistration");
 					},
 				},
 			});
@@ -76,7 +72,7 @@ async function setup(): Promise<any> {
 				if (childimage.error) {
 					console.log("Error when retrieving child image");
 					showAlert = true;
-					alertMessage = childimage.error.detail;
+					alertMessage = $_("childData.alertMessageImage") + childimage.error.detail;
 				} else {
 					const reader = new FileReader();
 					// FIXME: This is a hack to get the image into the data array. It should go into a function, but this interfers with the async stuff and causes the image not to show up as it should
@@ -95,7 +91,7 @@ async function setup(): Promise<any> {
 function createStyle(data: any[]) {
 	return data.map((item) => ({
 		card:
-			item.header === "Neu"
+			item.header === $_("childData.newChildHeading")
 				? {
 						class:
 							"hover:cursor-pointer m-2 max-w-prose bg-primary-700 dark:bg-primary-600 hover:bg-primary-800 dark:hover:bg-primary-700",
@@ -103,14 +99,14 @@ function createStyle(data: any[]) {
 					}
 				: { horizontal: false },
 		header:
-			item.header == "Neu"
+			item.header == $_("childData.newChildHeading")
 				? {
 						class:
 							"mb-2 text-2xl font-bold tracking-tight text-white dark:text-white",
 					}
 				: null,
 		summary:
-			item.header == "Neu"
+			item.header == $_("childData.newChildHeading")
 				? {
 						class:
 							"mb-3 flex font-normal leading-tight text-white dark:text-white",
@@ -148,24 +144,24 @@ function searchAll(data: any[], key: string) {
 
 let { breadcrumbdata = null }: { breadcrumbdata: any[] | null } = $props();
 let showAlert = $state(false);
-let alertMessage = "Error";
+let alertMessage = $_("childData.alertMessageError");
 let data: any[]  = $state([]);
 
 const promise = $state(setup());
 const searchData = [
 	{
-		label: "Alle",
-		placeholder: "Alle Kategorien durchsuchen",
+		label: $_("childData.searchAllLabel"),
+		placeholder: $_("childData.searchAllPlaceholder"),
 		filterFunction: searchAll,
 	},
 	{
-		label: "Name",
-		placeholder: "Kinder nach Namen durchsuchen",
+		label: $_("childData.searchNameLabel"),
+		placeholder: $_("childData.searchNamePlaceholder"),
 		filterFunction: searchName,
 	},
 	{
-		label: "Bemerkung",
-		placeholder: "Bemerkungen zu Kindern durchsuchen",
+		label: $_("childData.searchRemarkLabel"),
+		placeholder: $_("childData.searchRemarkPlaceholder"),
 		filterFunction: searchRemarks,
 	},
 ];
@@ -182,13 +178,12 @@ const searchData = [
 		<Heading
 			tag="h1"
 			class="m-2 mb-2 p-4 "
-			color="text-gray-700 dark:text-gray-400">Übersicht</Heading
+			color="text-gray-700 dark:text-gray-400">{$_("childData.overviewLabel")}</Heading
 		>
 
 		<div class="cols-1 grid w-full gap-y-8 p-2">
 			<p class="w-auto p-2 text-lg text-gray-700 dark:text-gray-400">
-				Wählen sie ein Kind zur Beobachtung aus oder legen melden sie
-				ein neues Kind an.
+				{$_("childData.overviewSummary")}
 			</p>
 			<GalleryDisplay
 				{data}
