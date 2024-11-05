@@ -78,7 +78,8 @@ async function setup(): Promise<any> {
 					showAlert = true;
 					alertMessage = childimage.error.detail;
 				} else {
-					const reader = new FileReader(); 
+					const reader = new FileReader();
+					// FIXME: This is a hack to get the image into the data array. It should go into a function, but this interfers with the async stuff and causes the image not to show up as it should
 					reader.onloadend = function(e) {
 						const index = data.findIndex(item => item.header === child.name); 
 						data[index].image = e.target.result;

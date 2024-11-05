@@ -20,7 +20,6 @@ let {
 		progress: {},
 	},
 }: { data: any; styleProps: any } = $props();
-console.log("header:", data.header, "image: ", data.image, "data: ", data);
 </script>
 
 <Card
