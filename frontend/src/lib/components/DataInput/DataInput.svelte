@@ -1,7 +1,7 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { Input, Label, Textarea } from "flowbite-svelte";
+import { Label, Textarea } from "flowbite-svelte";
 import { type Component } from "svelte";
 
 // variables
@@ -65,32 +65,20 @@ $effect(() => {
 {/if}
 
 <div class="space-y-4">
-	{#if component === Input}
-		<svelte:component
-			this={component}
-			class={highlight
-				? "rounded border-2 border-primary-600 dark:border-primary-600 " +
-					componentClass
-				: componentClass}
-			bind:value
-			{items}
-			{required}
-			{disabled}
-		/>
-	{:else}
-		<svelte:component
-			this={component}
-			class={highlight
-				? "rounded border-2 border-primary-600 dark:border-primary-600 " +
-					componentClass
-				: componentClass}
-			bind:value
-			{required}
-			{disabled}
-		/>
-	{/if}
+	<svelte:component
+		this={component}
+		class={highlight
+			? "rounded border-2 border-primary-600 dark:border-primary-600 " +
+				componentClass
+			: componentClass}
+		bind:value
+		{items}
+		{required}
+		{disabled}
+	/>
 
 	{#if showTextField === true}
+		{console.log("showTextfield true")}
 		<Textarea
 			bind:value={additionalValue}
 			required={additionalRequired}
