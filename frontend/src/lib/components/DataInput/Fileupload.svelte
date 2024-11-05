@@ -1,12 +1,18 @@
+<svelte:options runes={true} />
 <script lang="ts">
 import { Fileupload } from "flowbite-svelte";
 
-export let value;
+let {
+	value = $bindable(),
+	accept = ".jpg, .jpeg, .png",
+	innerClass = "",
+}: { value: any; innerClass: string | null; accept: string } = $props();
 </script>
 
 <Fileupload
-	class={$$props.class}
-	accept={$$props.accept}
+	class={innerClass}
+	accept={accept}
+	id="img_upload"
 	on:change={(event) => {
 		if (!(event.target === null)) {
 			const image = event.target.files[0];
