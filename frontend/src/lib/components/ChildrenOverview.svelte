@@ -48,33 +48,37 @@ async function setup(): Promise<any> {
 		},
 	];
 
-	const childrendata = await getChildren();
+	const children = await getChildren();
 
-	if (childrendata.error) {
+	if (children.error) {
 		console.log("Error when retrieving child data");
 		showAlert = true;
-		alertMessage = childrendata.error.detail;
+		alertMessage = children.error.detail;
 	} else {
-		console.log("children: ", childrendata);
-		for (let i = 0; i < childrendata.data.length; i++) {
+		console.log("children: ", children.data);
+		for (const child of children.data) {
 			data.push({
-				header: childrendata.data[i].name,
-				summary: childrendata.data[i].remark,
+				header: child.name,
+				summary: child.remark,
 				image: null,
 				events: {
 					onclick: () => {
-						currentChild.set(childrendata.data[i].id);
+						currentChild.set(child.id);
 						activeTabChildren.update((value: string) => {
 							return "childrenRegistration";
 						});
 					},
 				},
 			});
-			if (childrendata.data[i].has_image) {
-				const childimage = await getChildImage(
-					`/users/children-images/${childrendata.data[i].id}`,
-				);
-				data[i + 1].image = childimage.path;
+			if (child.has_image) {
+				console.log("child image loading: ", child.id, typeof child.id);
+				const childimage = await getChildImage({
+					path: {
+						child_id: child.id,
+					},
+				});
+				console.log("childimage: ", childimage);
+				data[data.length - 1].image = childimage.path;
 			}
 		}
 	}

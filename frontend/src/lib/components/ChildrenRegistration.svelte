@@ -5,6 +5,7 @@ import {
 	getChildQuestions,
 	getCurrentChildAnswers,
 	updateCurrentChildAnswers,
+	uploadChildImage,
 } from "$lib/client";
 import {
 	type ChildAnswerPublic,
@@ -116,6 +117,28 @@ async function setup(): Promise<{
 }
 
 async function submitData(): Promise<void> {
+	console.log("current child: ", $currentChild, "answers to submit: ", answers);
+	// index 4 is the image upload
+	if (answers[4].answer && answers[4].answer !== "") {
+		console.log("image exists");
+		const uploadResponse = await uploadChildImage({
+			body: {
+				file: answers[4].answer,
+			},
+			path: {
+				child_id: $currentChild,
+			},
+		});
+
+		if (uploadResponse.error) {
+			console.log("error during file upload: ", uploadResponse.error.detail);
+			showAlert = true;
+			alertMessage = uploadResponse.error.detail;
+		}
+
+		answers[4].answer = answers[4].answer.name;
+	}
+
 	const response = await updateCurrentChildAnswers({
 		body: Object.values(answers),
 		path: {

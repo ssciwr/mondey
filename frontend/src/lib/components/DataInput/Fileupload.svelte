@@ -3,25 +3,39 @@
 import { Fileupload } from "flowbite-svelte";
 
 let {
-	value = $bindable(),
+	value = $bindable(null),
 	accept = ".jpg, .jpeg, .png",
-	innerClass = "",
-}: { value: any; innerClass: string | null; accept: string } = $props();
+	innerClass = "mb-2 flex-grow-0",
+	required = false,
+	disabled = false,
+}: {
+	value: File | null;
+	innerClass: string | null;
+	accept: string;
+	required: boolean;
+	disabled: boolean;
+} = $props();
+
+let files: FileList | undefined = $state(undefined);
+
+function updateImagesToUpload(event: Event) {
+	const target = event.target as HTMLInputElement;
+	console.log("target.files: ", target.files);
+	if (target.files) {
+		value = target.files[0];
+	} else {
+		value = null;
+	}
+}
 </script>
 
+
 <Fileupload
-	class={innerClass}
+	class = {innerClass}
+	bind:files
+	on:change={updateImagesToUpload}
 	accept={accept}
 	id="img_upload"
-	on:change={(event) => {
-		if (!(event.target === null)) {
-			const image = event.target.files[0];
-			// use https://svelte.dev/repl/b17c13d4f1bb40799ccf09e0841ddd90?version=4.2.19
-			let reader = new FileReader();
-			reader.readAsDataURL(image);
-			reader.onload = (e) => {
-				value = e.target.result;
-			};
-		}
-	}}
+	required={required}
+	disabled={disabled}
 />
