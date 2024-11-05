@@ -55,7 +55,40 @@ def private_dir(tmp_path_factory: pytest.TempPathFactory):
 
 
 @pytest.fixture
-def session():
+def children():
+    today = datetime.datetime.today()
+    nine_months_ago = today - datetime.timedelta(days=9 * 30)
+    twenty_months_ago = today - datetime.timedelta(days=20 * 30)
+    return [
+        # ~9month old child for user 1
+        {
+            "id": 1,
+            "name": "child1",
+            "birth_year": nine_months_ago.year,
+            "birth_month": nine_months_ago.month,
+            "has_image": False,
+        },
+        # ~20month old child for user 1
+        {
+            "id": 2,
+            "name": "child2",
+            "birth_year": twenty_months_ago.year,
+            "birth_month": twenty_months_ago.month,
+            "has_image": True,
+        },
+        # ~5 year old child for user 3
+        {
+            "birth_month": 7,
+            "birth_year": today.year - 5,
+            "id": 3,
+            "name": "child3",
+            "has_image": True,
+        },
+    ]
+
+
+@pytest.fixture
+def session(children: list[dict]):
     # use a new in-memory SQLite database for each test
     engine = create_engine(
         "sqlite://",
@@ -80,7 +113,9 @@ def session():
                 )
             )
         for milestone_id in [1, 2, 3]:
-            session.add(Milestone(order=0, group_id=1))
+            session.add(
+                Milestone(order=0, group_id=1, expected_age_months=milestone_id * 6)
+            )
             for lang_id in lang_ids:
                 lbl = f"m{milestone_id}_{lang_id}"
                 session.add(
@@ -103,7 +138,9 @@ def session():
                 )
             )
         for milestone_id in [4, 5]:
-            session.add(Milestone(order=0, group_id=2))
+            session.add(
+                Milestone(order=0, group_id=2, expected_age_months=milestone_id * 6)
+            )
             for lang_id in lang_ids:
                 lbl = f"m{milestone_id}_{lang_id}"
                 session.add(
@@ -121,37 +158,9 @@ def session():
         session.add(MilestoneImage(milestone_id=1, filename="m2.jpg", approved=True))
         session.add(MilestoneImage(milestone_id=2, filename="m3.jpg", approved=True))
         session.commit()
-        # add a ~1 yr old child for user 1
+        for child, user_id in zip(children, [1, 1, 3], strict=False):
+            session.add(Child.model_validate(child, update={"user_id": user_id}))
         today = datetime.datetime.today()
-        session.add(
-            Child(
-                user_id=1,
-                name="child1",
-                birth_year=today.year - 1,
-                birth_month=today.month,
-                has_image=False,
-            )
-        )
-        # add a ~4 yr old child for user 2
-        session.add(
-            Child(
-                user_id=1,
-                name="child2",
-                birth_year=today.year - 4,
-                birth_month=12,
-                has_image=True,
-            )
-        )
-        # add a ~5 year old child for user 3
-        session.add(
-            Child(
-                user_id=3,
-                name="child3",
-                birth_year=today.year - 5,
-                birth_month=7,
-                has_image=True,
-            )
-        )
         # add an (expired) milestone answer session for child 1 / user 1 with no answers
         session.add(
             MilestoneAnswerSession(
@@ -317,34 +326,6 @@ def jpg_file(tmp_path: pathlib.Path):
 
 
 @pytest.fixture
-def children():
-    today = datetime.datetime.today()
-    return [
-        {
-            "birth_month": today.month,
-            "birth_year": today.year - 1,
-            "id": 1,
-            "name": "child1",
-            "has_image": False,
-        },
-        {
-            "birth_month": 12,
-            "birth_year": today.year - 4,
-            "id": 2,
-            "name": "child2",
-            "has_image": True,
-        },
-        {
-            "birth_month": 7,
-            "birth_year": today.year - 5,
-            "id": 3,
-            "name": "child3",
-            "has_image": True,
-        },
-    ]
-
-
-@pytest.fixture
 def milestone_group1():
     return {
         "id": 1,
@@ -356,6 +337,7 @@ def milestone_group1():
         "milestones": [
             {
                 "id": 1,
+                "expected_age_months": 6,
                 "text": {
                     "de": {
                         "title": "m1_de_t",
@@ -383,6 +365,7 @@ def milestone_group1():
             },
             {
                 "id": 2,
+                "expected_age_months": 12,
                 "text": {
                     "de": {
                         "title": "m2_de_t",
@@ -407,6 +390,7 @@ def milestone_group1():
             },
             {
                 "id": 3,
+                "expected_age_months": 18,
                 "text": {
                     "de": {
                         "title": "m3_de_t",
@@ -463,6 +447,7 @@ def milestone_group_admin1():
                 "group_id": 1,
                 "order": 0,
                 "id": 1,
+                "expected_age_months": 6,
                 "images": [
                     {
                         "id": 1,
@@ -508,6 +493,7 @@ def milestone_group_admin1():
                 "group_id": 1,
                 "order": 0,
                 "id": 2,
+                "expected_age_months": 12,
                 "images": [
                     {
                         "id": 3,
@@ -547,6 +533,7 @@ def milestone_group_admin1():
                 "group_id": 1,
                 "order": 0,
                 "id": 3,
+                "expected_age_months": 18,
                 "images": [],
                 "text": {
                     "de": {
@@ -591,6 +578,7 @@ def milestone_group2():
         "milestones": [
             {
                 "id": 4,
+                "expected_age_months": 24,
                 "images": [],
                 "text": {
                     "de": {
@@ -615,6 +603,7 @@ def milestone_group2():
             },
             {
                 "id": 5,
+                "expected_age_months": 30,
                 "images": [],
                 "text": {
                     "de": {
@@ -671,6 +660,7 @@ def milestone_group_admin2():
                 "group_id": 2,
                 "order": 0,
                 "id": 4,
+                "expected_age_months": 24,
                 "images": [],
                 "text": {
                     "de": {
@@ -703,6 +693,7 @@ def milestone_group_admin2():
                 "group_id": 2,
                 "order": 0,
                 "id": 5,
+                "expected_age_months": 30,
                 "images": [],
                 "text": {
                     "de": {

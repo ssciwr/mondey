@@ -20,7 +20,12 @@ let milestoneAnswerSession = $state(
 let childId = $state(undefined as number | undefined);
 
 async function updateMilestoneGroups() {
-	const { data, error } = await getMilestoneGroups();
+	if (childId === undefined) {
+		return;
+	}
+	const { data, error } = await getMilestoneGroups({
+		path: { child_id: childId },
+	});
 	if (error || data === undefined) {
 		console.log(error);
 	} else {
@@ -40,7 +45,6 @@ async function updateChildId() {
 }
 
 async function updateMilestoneAnswerSession() {
-	await updateChildId();
 	if (childId === undefined) {
 		return;
 	}
@@ -57,6 +61,7 @@ async function updateMilestoneAnswerSession() {
 }
 
 onMount(async () => {
+	await updateChildId();
 	await updateMilestoneGroups();
 	await updateMilestoneAnswerSession();
 });

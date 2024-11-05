@@ -15,6 +15,7 @@ import {
 	InputAddon,
 	Label,
 	Modal,
+	Range,
 	Textarea,
 } from "flowbite-svelte";
 import { _, locales } from "svelte-i18n";
@@ -75,6 +76,10 @@ export async function saveChanges() {
 				{/each}
 			</div>
 		{/each}
+		<div class="mb-5">
+		<Label>{`${$_("admin.expected-age")}: ${milestone.expected_age_months}m`}</Label>
+		<Range id="expected-age-months" min="1" max="72" bind:value={milestone.expected_age_months} />
+		</div>
 		<div class="mb-5">
 			<Label for="img_upload" class="pb-2">{$_('admin.images')}</Label>
 			<div class="flex flex-row">

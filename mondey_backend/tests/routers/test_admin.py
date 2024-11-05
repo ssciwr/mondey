@@ -116,10 +116,8 @@ def test_put_milestone_group(admin_client: TestClient, milestone_group_admin1: d
 
 
 def test_delete_milestone_group(admin_client: TestClient):
-    assert admin_client.get("/milestone-groups/2").status_code == 200
     response = admin_client.delete("/admin/milestone-groups/2")
     assert response.status_code == 200
-    assert admin_client.get("/milestone-groups/2").status_code == 404
     response = admin_client.delete("/admin/milestone-groups/2")
     assert response.status_code == 404
 
@@ -165,6 +163,7 @@ def test_post_milestone(admin_client: TestClient):
         "id": 6,
         "group_id": 2,
         "order": 0,
+        "expected_age_months": 12,
         "text": {
             "de": {
                 "milestone_id": 6,
@@ -198,6 +197,7 @@ def test_post_milestone(admin_client: TestClient):
 def test_put_milestone(admin_client: TestClient, milestone_group_admin1: dict):
     milestone = milestone_group_admin1["milestones"][0]
     milestone["order"] = 6
+    milestone["expected_age_months"] = 11
     milestone["text"]["de"]["title"] = "asdsd"
     milestone["text"]["de"]["desc"] = "12xzascdasdf"
     milestone["text"]["de"]["obs"] = "asdrgf"
