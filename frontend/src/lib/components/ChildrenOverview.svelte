@@ -2,9 +2,9 @@
 
 <script lang="ts">
 import {
-	createChild,
-	getChildImage,
-	getChildren,
+    createChild,
+    getChildImage,
+    getChildren,
 } from "$lib/client/services.gen";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
@@ -15,7 +15,7 @@ import { Heading } from "flowbite-svelte";
 import AlertMessage from "./AlertMessage.svelte";
 
 async function setup(): Promise<any> {
-	let data = [
+	data = [
 		{
 			header: "Neu",
 			summary: "Ein neues Kind anmelden",
@@ -34,8 +34,6 @@ async function setup(): Promise<any> {
 						showAlert = true;
 						alertMessage = new_child.error.detail;
 					} else {
-						console.log("new child: ", new_child);
-
 						currentChild.set(new_child.data.id);
 
 						activeTabChildren.update((value: string) => {
@@ -55,7 +53,6 @@ async function setup(): Promise<any> {
 		showAlert = true;
 		alertMessage = children.error.detail;
 	} else {
-		console.log("children: ", children.data);
 		for (const child of children.data) {
 			data.push({
 				header: child.name,
@@ -71,18 +68,26 @@ async function setup(): Promise<any> {
 				},
 			});
 			if (child.has_image) {
-				console.log("child image loading: ", child.id, typeof child.id);
 				const childimage = await getChildImage({
 					path: {
 						child_id: child.id,
 					},
 				});
-				console.log("childimage: ", childimage);
-				data[data.length - 1].image = childimage.path;
+				if (childimage.error) {
+					console.log("Error when retrieving child image");
+					showAlert = true;
+					alertMessage = childimage.error.detail;
+				} else {
+					const reader = new FileReader(); 
+					reader.onloadend = function(e) {
+						const index = data.findIndex(item => item.header === child.name); 
+						data[index].image = e.target.result;
+					};
+					reader.readAsDataURL(childimage.data);
+				}
 			}
 		}
 	}
-	console.log("final data: ", data);
 	return data;
 }
 
@@ -115,7 +120,6 @@ function createStyle(data: any[]) {
 }
 
 function searchName(data: any[], key: string): any[] {
-	console.log("data: ", data);
 	if (key === "") {
 		return data;
 	} else {
@@ -144,6 +148,7 @@ function searchAll(data: any[], key: string) {
 let { breadcrumbdata = null }: { breadcrumbdata: any[] | null } = $props();
 let showAlert = $state(false);
 let alertMessage = "Error";
+let data: any[]  = $state([]);
 
 const promise = $state(setup());
 const searchData = [
