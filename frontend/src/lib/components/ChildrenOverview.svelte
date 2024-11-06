@@ -53,40 +53,42 @@ async function setup(): Promise<any> {
 		alertMessage =
 			$_("childData.alertMessageRetrieving") + children.error.detail;
 	} else {
-		for (const child of children.data) {
-			data.push({
-				header: child.name,
-				summary: child.remark,
-				image: null,
-				events: {
-					onclick: () => {
-						currentChild.set(child.id);
-						activeTabChildren.set("childrenRegistration");
-					},
-				},
-			});
-			if (child.has_image) {
-				const childimage = await getChildImage({
-					path: {
-						child_id: child.id,
-					},
-				});
-				if (childimage.error) {
-					console.log("Error when retrieving child image");
-					showAlert = true;
-					alertMessage =
-						$_("childData.alertMessageImage") + childimage.error.detail;
-				} else {
-					const reader = new FileReader();
-					// FIXME: This is a hack to get the image into the data array. It should go into a function, but this interfers with the async stuff and causes the image not to show up as it should
-					reader.onloadend = (e): void => {
-						const index = data.findIndex((item) => item.header === child.name);
-						data[index].image = e.target.result;
-					};
-					reader.readAsDataURL(childimage.data);
+		const childrenData = await Promise.all(
+			children.data.map(async (child) => {
+				let image = null;
+				if (child.has_image) {
+					const childImageResponse = await getChildImage({
+						path: { child_id: child.id },
+					});
+					if (childImageResponse.error) {
+						console.log("Error when retrieving child image");
+						showAlert = true;
+						alertMessage =
+							$_("childData.alertMessageImage") +
+							childImageResponse.error.detail;
+					} else {
+						const reader = new FileReader();
+						reader.readAsDataURL(childImageResponse.data);
+						image = await new Promise((resolve) => {
+							reader.onloadend = () => resolve(reader.result as string);
+						});
+					}
 				}
-			}
-		}
+				return {
+					header: child.name,
+					summary: child.remark,
+					image,
+					events: {
+						onclick: () => {
+							currentChild.set(child.id);
+							activeTabChildren.set("childrenRegistration");
+						},
+					},
+				};
+			}),
+		);
+
+		data = [...data, ...childrenData];
 	}
 	return data;
 }
