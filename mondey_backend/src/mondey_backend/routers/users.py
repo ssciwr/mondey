@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pathlib
-from datetime import datetime
 
 from fastapi import APIRouter
 from fastapi import HTTPException
@@ -237,21 +236,6 @@ def create_router() -> APIRouter:
             raise HTTPException(404, detail="child not found for user")
 
         for new_answer in new_answers:
-            if new_answer.question_id == 1:  # name
-                child.name = new_answer.answer
-            if new_answer.question_id == 2:  # date
-                date = datetime.strptime(new_answer.answer, "%Y-%m-%d")
-                child.birth_month = date.month
-                child.birth_year = date.year
-            if new_answer.question_id == 3:  # remarks
-                child.remark = new_answer.answer
-            if (
-                new_answer.question_id == 4
-                and new_answer.answer is not None
-                and new_answer.answer != ""
-            ):  # image
-                child.has_image = True
-
             current_answer = session.get(
                 ChildAnswer, (current_active_user.id, child_id, new_answer.question_id)
             )
