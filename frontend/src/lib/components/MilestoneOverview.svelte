@@ -125,7 +125,7 @@ const breadcrumbdata: any[] = [
 		label: "Meike",
 		onclick: () => {
 			activeTabChildren.update((value) => {
-				return "childrenRegistration";
+				return "childrenDataInput";
 			});
 		},
 	},

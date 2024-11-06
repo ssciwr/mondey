@@ -1,6 +1,6 @@
 import AdminPage from "$lib/components/AdminPage.svelte";
+import ChildrenDataInput from "$lib/components/ChildrenDataInput.svelte";
 import ChildrenGallery from "$lib/components/ChildrenGallery.svelte";
-import ChildrenRegistration from "$lib/components/ChildrenRegistration.svelte";
 import DateInput from "$lib/components/DataInput/DateInput.svelte";
 import Fileupload from "$lib/components/DataInput/Fileupload.svelte";
 import RadioList from "$lib/components/DataInput/RadioList.svelte";
@@ -20,7 +20,7 @@ interface ComponentTable {
 export const componentTable: ComponentTable = {
 	userDataInput: UserDataInput,
 	childrenGallery: ChildrenGallery,
-	childrenRegistration: ChildrenRegistration,
+	childrenDataInput: ChildrenDataInput,
 	milestoneGroup: MilestoneGroup,
 	milestoneOverview: MilestoneOverview,
 	milestone: Milestone,

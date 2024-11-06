@@ -2,6 +2,8 @@
 
 <script lang="ts">
 import {
+	createChild,
+	deleteChild,
 	getChildQuestions,
 	getCurrentChildAnswers,
 	updateCurrentChildAnswers,
@@ -109,6 +111,26 @@ async function setup(): Promise<{
 }
 
 async function submitData(): Promise<void> {
+	// make new child if we don´t have one already
+	if ($currentChild === null) {
+		const new_child = await createChild({
+			body: {
+				name: "",
+				birth_year: 0,
+				birth_month: 0,
+				remark: "",
+			},
+		});
+
+		if (new_child.error) {
+			showAlert = true;
+			alertMessage =
+				$_("childData.alertMessageCreate") + new_child.error.detail;
+		} else {
+			currentChild.set(new_child.data.id);
+		}
+	}
+
 	// index 4 is the image upload
 	if (answers[4].answer && answers[4].answer instanceof File) {
 		console.log("image exists", answers[4].answer);
@@ -152,7 +174,7 @@ async function submitData(): Promise<void> {
 }
 
 $effect(() => {
-	console.log("showAlert: ", showAlert);
+	console.log("currentChild: ", $currentChild);
 });
 </script>
 
@@ -226,6 +248,33 @@ $effect(() => {
 							class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
 							type="submit"
 							>{$_("childData.submitButtonLabel")}</Button
+						>
+					{/if}
+					{#if $currentChild !== null}
+						<Button
+							class=" w-full text-center text-sm text-white"
+							type="button"
+							color="red"
+							on:click={async () => {
+								const response = await deleteChild({
+									path: {
+										child_id: $currentChild,
+									}
+								});
+
+								if (response.error) {
+									console.log("Error when deleting child");
+									showAlert = true;
+									alertMessage=$_("childData.alertMessageError") + response.error.detail;
+								}
+								else {
+									activeTabChildren.update((value) => {
+										return "childrenGallery";
+									});
+									currentChild.set(null);
+								}
+							}}
+							>{$_("childData.deleteButtonLabel")}</Button
 						>
 					{/if}
 				</form>

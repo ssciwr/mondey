@@ -113,6 +113,7 @@
 		"alertMessageImage": "Fehler beim Bild download",
 		"alertMessageTitle": "Fehler",
 		"submitButtonLabel": "Abschließen",
+		"deleteButtonLabel": "Kind löschen",
 		"changeData": "Daten vollständig, zum bearbeiten klicken",
 		"loadingMessage": "Daten werden geladen",
 		"searchAllLabel": "Alle",

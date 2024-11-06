@@ -1,11 +1,7 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import {
-	createChild,
-	getChildImage,
-	getChildren,
-} from "$lib/client/services.gen";
+import { getChildImage, getChildren } from "$lib/client/services.gen";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import { currentChild } from "$lib/stores/childrenStore";
@@ -21,23 +17,7 @@ async function setup(): Promise<any> {
 			summary: $_("childData.newChildHeadingLong"),
 			events: {
 				onclick: async () => {
-					const new_child = await createChild({
-						body: {
-							name: "",
-							birth_year: 0,
-							birth_month: 0,
-							remark: "",
-						},
-					});
-
-					if (new_child.error) {
-						showAlert = true;
-						alertMessage =
-							$_("childData.alertMessageCreate") + new_child.error.detail;
-					} else {
-						currentChild.set(new_child.data.id);
-						activeTabChildren.set("childrenRegistration");
-					}
+					activeTabChildren.set("childrenDataInput");
 				},
 			},
 			image: null,
@@ -80,7 +60,7 @@ async function setup(): Promise<any> {
 					events: {
 						onclick: () => {
 							currentChild.set(child.id);
-							activeTabChildren.set("childrenRegistration");
+							activeTabChildren.set("childrenDataInput");
 						},
 					},
 				};
