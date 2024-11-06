@@ -66,9 +66,6 @@ async function setup(): Promise<{
 		questionnaire = questions.data as GetChildQuestionsResponse;
 	}
 
-	// get current child
-	console.log("current child: ", $currentChild);
-
 	if ($currentChild !== null) {
 		// get existing answers
 		let currentAnswers = await getCurrentChildAnswers({
@@ -122,10 +119,9 @@ async function setup(): Promise<{
 }
 
 async function submitData(): Promise<void> {
-	console.log("current child: ", $currentChild, "answers to submit: ", answers);
 	// index 4 is the image upload
-	if (answers[4].answer && answers[4].answer !== "") {
-		console.log("image exists");
+	if (answers[4].answer && answers[4].answer instanceof File) {
+		console.log("image exists", answers[4].answer);
 		const uploadResponse = await uploadChildImage({
 			body: {
 				file: answers[4].answer,
@@ -164,6 +160,10 @@ async function submitData(): Promise<void> {
 		disableEdit = true;
 	}
 }
+
+$effect(() => {
+	console.log("showAlert: ", showAlert);
+});
 </script>
 
 <Breadcrumbs data={breadcrumbdata} />
@@ -208,7 +208,7 @@ async function submitData(): Promise<void> {
 								.additional_answer}
 							label={element?.text[$locale].question}
 							textTrigger={element.additional_option}
-							required={true}
+							required={element.component === 'fileupload' ? false : true}
 							additionalRequired={true}
 							id={"input_" + String(i)}
 							items={element.text[$locale].options_json === ""
