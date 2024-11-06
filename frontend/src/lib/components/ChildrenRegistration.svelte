@@ -109,8 +109,6 @@ async function setup(): Promise<{
 			} as ChildAnswerPublic;
 
 			disableEdit = false;
-			showAlert = true;
-			alertMessage = $_("childData.alertMessageUpdate");
 		}
 	});
 	console.log("questionnaire: ", questionnaire);

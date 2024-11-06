@@ -172,8 +172,6 @@ def create_router() -> APIRouter:
         user_questions = session.exec(
             select(UserQuestion).order_by(col(UserQuestion.order))
         ).all()
-
-        print("user questions retrieved from database: ", user_questions)
         return user_questions
 
     @router.post("/user-questions/", response_model=UserQuestionAdmin)
@@ -194,7 +192,6 @@ def create_router() -> APIRouter:
         user_question: UserQuestionAdmin,
     ):
         db_user_question = get(session, UserQuestion, user_question.id)
-
         for key, value in user_question.model_dump(exclude={"text"}).items():
             setattr(db_user_question, key, value)
         update_user_question_text(session, user_question)

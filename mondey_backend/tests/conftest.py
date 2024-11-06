@@ -574,7 +574,7 @@ def active_admin_user():
 @pytest.fixture
 def active_research_user():
     return UserRead(
-        id=7,
+        id=2,
         email="research@mondey.de",
         is_active=True,
         is_superuser=False,
