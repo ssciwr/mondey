@@ -189,11 +189,6 @@ export const ChildCreateSchema = {
         birth_month: {
             type: 'integer',
             title: 'Birth Month'
-        },
-        remark: {
-            type: 'string',
-            title: 'Remark',
-            default: ''
         }
     },
     type: 'object',
@@ -215,11 +210,6 @@ export const ChildPublicSchema = {
         birth_month: {
             type: 'integer',
             title: 'Birth Month'
-        },
-        remark: {
-            type: 'string',
-            title: 'Remark',
-            default: ''
         },
         id: {
             type: 'integer',

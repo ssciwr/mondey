@@ -48,14 +48,12 @@ export type ChildCreate = {
     name?: string;
     birth_year: number;
     birth_month: number;
-    remark?: string;
 };
 
 export type ChildPublic = {
     name?: string;
     birth_year: number;
     birth_month: number;
-    remark?: string;
     id: number;
     has_image: boolean;
 };
