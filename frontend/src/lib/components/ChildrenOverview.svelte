@@ -8,7 +8,6 @@ import {
 } from "$lib/client/services.gen";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
-import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { currentChild } from "$lib/stores/childrenStore";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { Heading } from "flowbite-svelte";
@@ -147,7 +146,6 @@ function searchAll(data: any[], key: string) {
 	return [...new Set([...searchName(data, key), ...searchRemarks(data, key)])];
 }
 
-let { breadcrumbdata = null }: { breadcrumbdata: any[] | null } = $props();
 let showAlert = $state(false);
 let alertMessage = $_("childData.alertMessageError");
 let data: any[] = $state([]);
@@ -176,9 +174,6 @@ const searchData = [
 	<p>{"Waiting for server response"}</p>
 {:then data}
 	<div class="container m-2 mx-auto w-full pb-4 md:rounded-t-lg">
-		{#if breadcrumbdata}
-			<Breadcrumbs data={breadcrumbdata} />
-		{/if}
 
 		<Heading
 			tag="h1"
