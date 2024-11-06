@@ -8,7 +8,6 @@ class ChildBase(SQLModel):
     name: str = ""
     birth_year: int
     birth_month: int
-    remark: str = ""
 
 
 class Child(ChildBase, table=True):
