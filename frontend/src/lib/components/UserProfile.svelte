@@ -45,7 +45,7 @@ async function logout(): Promise<void> {
 <Popover {triggeredBy} class="text-gray-700 dark:text-gray-400">
 	{#if showAlert}
 		<AlertMessage
-			title={$_('login.alertMessageTitle')}
+			title={$_("login.alertMessageTitle")}
 			message={alertMessage}
 			onclick={() => {
 				showAlert = false;
@@ -53,19 +53,35 @@ async function logout(): Promise<void> {
 		/>
 	{/if}
 	{#if userData !== null}
-		<div class="mx-auto mb-6 flex flex-col items-center justify-center space-y-6">
-			<p class="m-2 w-full rounded-lg p-2 font-semibold">{userData?.email}</p>
-			<Button class="m-2 w-full" on:click={logout} size="lg"
-				>{$_('login.profileButtonLabelLogout')}</Button
+		<div
+			class="mx-auto mb-6 flex flex-col items-center justify-center space-y-6"
+		>
+			<p class="m-2 w-full rounded-lg p-2 font-semibold">
+				{userData?.email}
+			</p>
+			<Button
+				class="m-2 w-full"
+				size="lg"
+				type="button"
+				href="{base}/userLand/userLandingpage"
+				>{$_("login.profileAccess")}</Button
+			>
+			<Button class="m-2 w-full" on:click={logout} size="lg" type="button"
+				>{$_("login.profileButtonLabelLogout")}</Button
 			>
 		</div>
 	{:else}
-		<div class="mx-auto mb-6 flex flex-col items-center justify-center space-y-6">
+		<div
+			class="mx-auto mb-6 flex flex-col items-center justify-center space-y-6"
+		>
 			<Heading tag="h3" class="mx-auto flex w-full justify-center"
-				>{$_('login.profileTitleDefault')}</Heading
+				>{$_("login.profileTitleDefault")}</Heading
 			>
-			<Button class="m-2 w-full" href="{base}/userLand/userLogin" size="lg"
-				>{$_('login.profileButtonLabelDefault')}</Button
+			<Button
+				type="button"
+				class="m-2 w-full"
+				href="{base}/userLand/userLogin"
+				size="lg">{$_("login.profileButtonLabelDefault")}</Button
 			>
 		</div>
 	{/if}
