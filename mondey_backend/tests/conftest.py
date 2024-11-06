@@ -72,7 +72,6 @@ def children():
             "birth_year": nine_months_ago.year,
             "birth_month": nine_months_ago.month,
             "has_image": False,
-            "remark": "",
         },
         # ~20month old child for user 1
         {
@@ -81,7 +80,6 @@ def children():
             "birth_year": twenty_months_ago.year,
             "birth_month": twenty_months_ago.month,
             "has_image": True,
-            "remark": "",
         },
         # ~5 year old child for user 3
         {
@@ -90,7 +88,6 @@ def children():
             "id": 3,
             "name": "child3",
             "has_image": True,
-            "remark": "",
         },
     ]
 
