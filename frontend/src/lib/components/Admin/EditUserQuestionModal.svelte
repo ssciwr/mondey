@@ -38,13 +38,15 @@ function updateOptionsJson() {
 	if (!userQuestion) {
 		return;
 	}
-	console.log("userQuestion: ", userQuestion);
+
 	const values = userQuestion.options.split(";");
-	console.log("values: ", values);
+
 	for (const lang_id in $locales) {
 		const items = userQuestion.text[lang_id].options.split(";");
 		userQuestion.text[lang_id].options_json = JSON.stringify(
-			values.map((value, index) => ({ value: value, name: items[index] })),
+			values.map((value, index) => {
+				return { value: value, name: items[index] };
+			}),
 		);
 	}
 }

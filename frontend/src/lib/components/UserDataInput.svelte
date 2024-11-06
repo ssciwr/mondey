@@ -136,7 +136,7 @@ let promise = $state(setup());
 						required={true}
 						additionalRequired={true}
 						id={"input_" + String(i)}
-						items={JSON.parse(element.text[$locale].options_json)}
+						items={element.text[$locale].options_json === "" ? null : JSON.parse(element.text[$locale].options_json)}
 						disabled={disableEdit}
 					/>
 				{/each}

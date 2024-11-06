@@ -5,6 +5,7 @@ services:
     volumes:
       - ${STATIC_FILES_PATH:-./static}:/app/static
       - ${DATABASE_PATH:-./db}:/app/db
+      - ${PRIVATE_FILES_PATH:-./private}:/app/private
     environment:
       - SECRET=${SECRET:-}
       - STATIC_FILES_PATH=/app/static

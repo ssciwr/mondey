@@ -100,17 +100,28 @@
 		"loadingMessage": "Daten werden geladen"
 	},
 	"childData": {
-		"newChildLabel": "Neues Kind registrieren",
+		"newChildHeading": "Neu", 
+		"newChildSummary": "Neues Kind registrieren",
 		"overviewLabel": "Kinderübersicht",
+		"overviewSummary": "Wählen sie ein Kind zur Beobachtung aus oder legen melden sie ein neues Kind an.",
 		"alertMessageMissing": "Bitte füllen Sie die benötigten Felder (hervorgehoben) aus.",
 		"alertMessageUserNotFound": "Kein aktiver Benutzer. Bitte loggen sie sich erneut ein",
 		"alertMessageError": "Ein Fehler ist aufgetreten. Bitte versuchen sie es später erneut.",
 		"alertMessageUpdate": "Bitte aktualisieren sie ihre Eingaben",
+		"alertMessageCreate": "Fehler beim Anlegen des Kindes",
+		"alertMessageRetrieving": "Fehler beim Anlegen des Kindes",
+		"alertMessageImage": "Fehler beim Bild download",
+		"alertMessageTitle": "Fehler",
 		"submitButtonLabel": "Abschließen",
 		"changeData": "Daten vollständig, zum bearbeiten klicken",
-		"loadingMessage": "Daten werden geladen",
-		"alertMessageTitle": "Fehler"
-	},
+		"loadingMessage": "Daten werden geladen", 
+		"searchAllLabel": "Alle",
+		"searchAllPlaceholder": "Alle Kategorien durchsuchen",
+		"searchNameLabel": "Name",
+		"searchNamePlaceholder": "Kinder nach Namen durchsuchen",
+		"searchRemarkLabel": "Bemerkung",
+		"searchRemarkPlaceholder": "Bemerkungen zu Kindern durchsuchen"
+		},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",
 		"placeholder": "Bitte geben sie eine E-mail Adresse an um ihr Passwort zu erneuern",
