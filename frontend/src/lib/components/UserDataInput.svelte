@@ -47,7 +47,7 @@ async function setup() {
 		showAlert = true;
 		alertMessage = $_("userData.alertMessageError");
 	} else {
-		questionnaire = userQuestions.data as GetUserQuestionsResponse;
+		questionnaire = userQuestions.data;
 	}
 	// get current answers.
 	let currentAnswers = await getCurrentUserAnswers();
