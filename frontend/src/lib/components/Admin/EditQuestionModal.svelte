@@ -58,8 +58,8 @@ if (kind === "user") {
 const inputTypes: Array<SelectOptionType<string>> = [
 	{ value: "textarea", name: "text" },
 	{ value: "select", name: "select" },
-	{ value: "date", name: "date" },
 	{ value: "fileupload", name: "fileupload" },
+	{ value: "date", name: "date" },
 ];
 
 function updateOptionsJson() {

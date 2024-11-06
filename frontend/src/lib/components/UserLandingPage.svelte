@@ -48,9 +48,9 @@ onMount(async () => {
 							class="flex items-center gap-2 text-lg"
 						>
 							<CogSolid size="lg" />
-							{$_('admin.heading')}
+							{$_("admin.heading")}
 						</div>
-						<svelte:component this={AdminPage} />
+						<AdminPage />
 					</TabItem>
 				{/if}
 				{#if get(currentUser)?.is_researcher}
