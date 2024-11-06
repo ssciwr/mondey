@@ -47,6 +47,15 @@ def create_router() -> APIRouter:
             ).all()
         ]
 
+    @router.get("/children/{child_id}", response_model=ChildPublic)
+    def get_child(
+        session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
+    ):
+        child = get(session, Child, child_id)
+        if child.user_id != current_active_user.id:
+            raise HTTPException(401)
+        return child
+
     @router.post("/children/", response_model=ChildPublic)
     def create_child(
         session: SessionDep,
