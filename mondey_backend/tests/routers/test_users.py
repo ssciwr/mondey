@@ -213,24 +213,7 @@ def test_get_current_user_answers_invalid_user(public_client: TestClient):
 
 
 def test_update_current_user_answers_prexisting(user_client: TestClient):
-    response = user_client.put(
-        "/users/user-answers/",
-        json=[
-            {
-                "answer": "other",
-                "question_id": 1,
-                "additional_answer": "dolor",
-            },
-            {
-                "answer": "amet",
-                "question_id": 2,
-                "additional_answer": None,
-            },
-        ],
-    )
-
-    assert response.status_code == 200
-    assert response.json() == [
+    publicanswers = [
         {
             "answer": "other",
             "question_id": 1,
@@ -242,68 +225,44 @@ def test_update_current_user_answers_prexisting(user_client: TestClient):
             "additional_answer": None,
         },
     ]
+
+    response = user_client.put(
+        "/users/user-answers/",
+        json=publicanswers,
+    )
+    assert response.status_code == 200
+    assert response.json() == publicanswers
 
     response = user_client.get("/users/user-answers/")
     assert response.status_code == 200
-    assert response.json() == [
-        {
-            "answer": "other",
-            "question_id": 1,
-            "additional_answer": "dolor",
-        },
-        {
-            "answer": "amet",
-            "question_id": 2,
-            "additional_answer": None,
-        },
-    ]
+    assert response.json() == publicanswers
 
 
 def test_update_current_user_answers_no_prexisting(second_user_client: TestClient):
+    publicanswers = [
+        {
+            "answer": "other",
+            "question_id": 1,
+            "additional_answer": "dolor",
+        },
+        {
+            "answer": "amet",
+            "question_id": 2,
+            "additional_answer": None,
+        },
+    ]
+
     response = second_user_client.put(
         "/users/user-answers/",
-        json=[
-            {
-                "answer": "other",
-                "question_id": 1,
-                "additional_answer": "dolor",
-            },
-            {
-                "answer": "amet",
-                "question_id": 2,
-                "additional_answer": None,
-            },
-        ],
+        json=publicanswers,
     )
 
     assert response.status_code == 200
-    assert response.json() == [
-        {
-            "answer": "other",
-            "question_id": 1,
-            "additional_answer": "dolor",
-        },
-        {
-            "answer": "amet",
-            "question_id": 2,
-            "additional_answer": None,
-        },
-    ]
+    assert response.json() == publicanswers
 
     response = second_user_client.get("/users/user-answers/")
     assert response.status_code == 200
-    assert response.json() == [
-        {
-            "answer": "other",
-            "question_id": 1,
-            "additional_answer": "dolor",
-        },
-        {
-            "answer": "amet",
-            "question_id": 2,
-            "additional_answer": None,
-        },
-    ]
+    assert response.json() == publicanswers
 
 
 def test_get_current_child_answers_works(user_client: TestClient):

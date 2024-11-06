@@ -74,15 +74,11 @@ async function setup(): Promise<{
 			},
 		});
 
-		console.log("questionnaire: ", questionnaire);
-		console.log("currentAnswers: ", currentAnswers.data);
-
 		if (currentAnswers?.error || currentAnswers.data === undefined) {
 			console.log(
 				"Error when getting current answers for child: ",
 				currentAnswers.error.detail,
 			);
-
 			showAlert = true;
 			alertMessage = $_("childData.alertMessageError");
 		} else {
@@ -92,9 +88,6 @@ async function setup(): Promise<{
 					existing_answer as ChildAnswerPublic,
 				]),
 			);
-
-			console.log("answers initial: ", answers);
-
 			disableEdit = true;
 		}
 	}
@@ -111,8 +104,7 @@ async function setup(): Promise<{
 			disableEdit = false;
 		}
 	});
-	console.log("questionnaire: ", questionnaire);
-	console.log("answers: ", answers);
+
 	return { questionnaire: questionnaire, answers: answers };
 }
 
