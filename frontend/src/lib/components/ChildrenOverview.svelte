@@ -2,9 +2,9 @@
 
 <script lang="ts">
 import {
-    createChild,
-    getChildImage,
-    getChildren,
+	createChild,
+	getChildImage,
+	getChildren,
 } from "$lib/client/services.gen";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
@@ -19,7 +19,7 @@ async function setup(): Promise<any> {
 	data = [
 		{
 			header: $_("childData.newChildHeading"),
-			summary: $_("childData.newChildSummary"),
+			summary: $_("childData.newChildHeadingLong"),
 			events: {
 				onclick: async () => {
 					const new_child = await createChild({
@@ -33,7 +33,8 @@ async function setup(): Promise<any> {
 
 					if (new_child.error) {
 						showAlert = true;
-						alertMessage = $_("childData.alertMessageCreate") + new_child.error.detail;
+						alertMessage =
+							$_("childData.alertMessageCreate") + new_child.error.detail;
 					} else {
 						currentChild.set(new_child.data.id);
 						activeTabChildren.set("childrenRegistration");
@@ -49,7 +50,8 @@ async function setup(): Promise<any> {
 	if (children.error) {
 		console.log("Error when retrieving child data");
 		showAlert = true;
-		alertMessage = $_("childData.alertMessageRetrieving") + children.error.detail;
+		alertMessage =
+			$_("childData.alertMessageRetrieving") + children.error.detail;
 	} else {
 		for (const child of children.data) {
 			data.push({
@@ -72,12 +74,13 @@ async function setup(): Promise<any> {
 				if (childimage.error) {
 					console.log("Error when retrieving child image");
 					showAlert = true;
-					alertMessage = $_("childData.alertMessageImage") + childimage.error.detail;
+					alertMessage =
+						$_("childData.alertMessageImage") + childimage.error.detail;
 				} else {
 					const reader = new FileReader();
 					// FIXME: This is a hack to get the image into the data array. It should go into a function, but this interfers with the async stuff and causes the image not to show up as it should
-					reader.onloadend = function(e) {
-						const index = data.findIndex(item => item.header === child.name); 
+					reader.onloadend = (e): void => {
+						const index = data.findIndex((item) => item.header === child.name);
 						data[index].image = e.target.result;
 					};
 					reader.readAsDataURL(childimage.data);
@@ -145,7 +148,7 @@ function searchAll(data: any[], key: string) {
 let { breadcrumbdata = null }: { breadcrumbdata: any[] | null } = $props();
 let showAlert = $state(false);
 let alertMessage = $_("childData.alertMessageError");
-let data: any[]  = $state([]);
+let data: any[] = $state([]);
 
 const promise = $state(setup());
 const searchData = [

@@ -19,7 +19,20 @@ import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading } from "flowbite-svelte";
 import { _, locale } from "svelte-i18n";
-const breadcrumbdata = [
+
+let questionnaire: GetChildQuestionsResponse = $state(
+	[] as GetChildQuestionsResponse,
+);
+let answers: { [k: string]: ChildAnswerPublic } = $state({});
+let disableEdit: boolean = $state(false);
+let alertMessage: string = $state($_("childData.alertMessageMissing"));
+let showAlert = $state(false);
+let promise = $state(setup());
+let childLabel = $derived(
+	answers[1]?.answer ? answers[1].answer : $_("childData.newChildHeadingLong"),
+);
+
+let breadcrumbdata = $derived([
 	{
 		label: $_("childData.overviewLabel"),
 		onclick: () => {
@@ -29,7 +42,7 @@ const breadcrumbdata = [
 		},
 	},
 	{
-		label: $_("childData.newChildLabel"),
+		label: childLabel,
 	},
 	{
 		label: $_("milestone.milestones"),
@@ -37,15 +50,7 @@ const breadcrumbdata = [
 			activeTabChildren.set("milestoneOverview");
 		},
 	},
-];
-let questionnaire: GetChildQuestionsResponse = $state(
-	[] as GetChildQuestionsResponse,
-);
-let answers: { [k: string]: ChildAnswerPublic } = $state({});
-let disableEdit: boolean = $state(false);
-let alertMessage: string = $state($_("childData.alertMessageMissing"));
-let showAlert = $state(false);
-let promise = $state(setup());
+]);
 
 async function setup(): Promise<{
 	questionnaire: GetChildQuestionsResponse;
@@ -179,7 +184,7 @@ async function submitData(): Promise<void> {
 				<Heading
 					tag="h3"
 					class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-					>{$_("childData.newChildLabel")}</Heading
+					>{childLabel}</Heading
 				>
 				{#if showAlert}
 					<AlertMessage

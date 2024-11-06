@@ -100,8 +100,8 @@
 		"loadingMessage": "Daten werden geladen"
 	},
 	"childData": {
-		"newChildHeading": "Neu", 
-		"newChildSummary": "Neues Kind registrieren",
+		"newChildHeading": "Neu",
+		"newChildHeadingLong": "Neues Kind registrieren",
 		"overviewLabel": "Kinderübersicht",
 		"overviewSummary": "Wählen sie ein Kind zur Beobachtung aus oder legen melden sie ein neues Kind an.",
 		"alertMessageMissing": "Bitte füllen Sie die benötigten Felder (hervorgehoben) aus.",
@@ -114,14 +114,14 @@
 		"alertMessageTitle": "Fehler",
 		"submitButtonLabel": "Abschließen",
 		"changeData": "Daten vollständig, zum bearbeiten klicken",
-		"loadingMessage": "Daten werden geladen", 
+		"loadingMessage": "Daten werden geladen",
 		"searchAllLabel": "Alle",
 		"searchAllPlaceholder": "Alle Kategorien durchsuchen",
 		"searchNameLabel": "Name",
 		"searchNamePlaceholder": "Kinder nach Namen durchsuchen",
 		"searchRemarkLabel": "Bemerkung",
 		"searchRemarkPlaceholder": "Bemerkungen zu Kindern durchsuchen"
-		},
+	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",
 		"placeholder": "Bitte geben sie eine E-mail Adresse an um ihr Passwort zu erneuern",
