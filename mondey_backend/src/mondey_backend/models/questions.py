@@ -9,51 +9,81 @@ from .utils import fixed_length_string_field
 
 
 # user questions
-class UserQuestionTextBase(SQLModel):
+class QuestionTextBase(SQLModel):
     question: str = ""
     options_json: str = ""
+    options: str = ""
 
 
-class UserQuestionText(UserQuestionTextBase, table=True):
+class Question(SQLModel):
+    order: int = 0
+    component: str = "select"
+    type: str = "text"
+    options: str = ""
+    additional_option: str = ""
+
+
+class QuestionAdmin(Question):
+    id: int
+
+
+class QuestionTextPublic(QuestionTextBase):
+    pass
+
+
+class QuestionPublic(SQLModel):
+    id: int
+    component: str = "select"
+    type: str = "text"
+    text: dict[str, QuestionTextPublic] = {}
+    additional_option: str = ""
+
+
+class UserQuestionText(QuestionTextBase, table=True):
     user_question_id: int | None = Field(
         default=None, foreign_key="userquestion.id", primary_key=True
     )
     lang_id: str | None = fixed_length_string_field(
         max_length=2, default=None, foreign_key="language.id", primary_key=True
     )
-    options: str = ""
 
 
-class UserQuestionTextPublic(UserQuestionTextBase):
+class UserQuestion(Question, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    text: Mapped[dict[str, UserQuestionText]] = dict_relationship(key="lang_id")
+
+
+class UserQuestionPublic(QuestionPublic):
     pass
 
 
-class UserQuestion(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    order: int = 0
-    component: str = "select"
-    type: str = "text"
-    options: str = ""
-    text: Mapped[dict[str, UserQuestionText]] = dict_relationship(key="lang_id")
-    additional_option: str = ""
-
-
-class UserQuestionPublic(SQLModel):
-    id: int
-    component: str = "select"
-    type: str = "text"
-    text: dict[str, UserQuestionTextPublic] = {}
-    additional_option: str = ""
-
-
-class UserQuestionAdmin(SQLModel):
-    id: int
-    order: int
-    component: str = "select"
-    type: str = "text"
-    options: str
+class UserQuestionAdmin(QuestionAdmin):
     text: dict[str, UserQuestionText] = {}
-    additional_option: str = ""
+
+
+# child questions
+
+
+class ChildQuestionText(QuestionTextBase, table=True):
+    child_question_id: int | None = Field(
+        default=None, foreign_key="childquestion.id", primary_key=True
+    )
+    lang_id: str | None = fixed_length_string_field(
+        max_length=2, default=None, foreign_key="language.id", primary_key=True
+    )
+
+
+class ChildQuestion(Question, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    text: Mapped[dict[str, ChildQuestionText]] = dict_relationship(key="lang_id")
+
+
+class ChildQuestionPublic(QuestionPublic):
+    pass
+
+
+class ChildQuestionAdmin(QuestionAdmin):
+    text: dict[str, ChildQuestionText] = {}
 
 
 # child questions
@@ -62,115 +92,38 @@ class ChildQuestionTextBase(SQLModel):
     options_json: str = ""
 
 
-class ChildQuestionText(ChildQuestionTextBase, table=True):
-    child_question_id: int | None = Field(
-        default=None, foreign_key="childquestion.id", primary_key=True
-    )
-    lang_id: str | None = fixed_length_string_field(
-        max_length=2, default=None, foreign_key="language.id", primary_key=True
-    )
-    options: str = ""
-
-
 class ChildQuestionTextPublic(ChildQuestionTextBase):
     pass
 
 
-class ChildQuestion(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    order: int = 0
-    component: str = "select"
-    type: str = "text"
-    options: str = ""
-    text: Mapped[dict[str, ChildQuestionText]] = dict_relationship(key="lang_id")
-    additional_option: str = ""
-
-
-class ChildQuestionPublic(SQLModel):
-    id: int
-    component: str = "select"
-    type: str = "text"
-    text: dict[str, ChildQuestionTextPublic] = {}
-    additional_option: str = ""
-
-
-class ChildQuestionAdmin(SQLModel):
-    id: int
-    order: int
-    component: str = "select"
-    type: str = "text"
-    options: str
-    text: dict[str, ChildQuestionText] = {}
-    additional_option: str = ""
-
-
 # Answers to user questions. Internal model and 'public' model exposed to the forntend app
+class AnswerBase(SQLModel):
+    answer: str
+    additional_answer: str | None
 
 
-class UserAnswer(SQLModel, table=True):
-    """
-    Internal model for user answers.
+class AnswerPublicBase(AnswerBase):
+    question_id: int
 
-    Parameters
-    ----------
-    SQLModel : Pydantic model  basic sqlmodel pydantic type
 
-    table : bool, True
-        Makes sure this is created as a table in the database, by default True
-    """
-
+class UserAnswer(AnswerBase, table=True):
     user_id: int = Field(default=None, primary_key=True)
     question_id: int = Field(
         default=None, primary_key=True, foreign_key="userquestion.id"
     )
-    answer: str
-    additional_answer: str | None
 
 
-class UserAnswerPublic(SQLModel):
-    """
-    External data model for UserAnswers
-
-    Parameters
-    ----------
-    SQLModel : Pydantic model  basic sqlmodel pydantic type
-    """
-
-    answer: str
-    question_id: int
-    additional_answer: str | None
+class UserAnswerPublic(AnswerPublicBase):
+    pass
 
 
-class ChildAnswer(SQLModel, table=True):
-    """
-    Internal model for user answers.
-
-    Parameters
-    ----------
-    SQLModel : Pydantic model  basic sqlmodel pydantic type
-
-    table : bool, True
-        Makes sure this is created as a table in the database, by default True
-    """
-
+class ChildAnswer(AnswerBase, table=True):
     user_id: int = Field(default=None, primary_key=True)
     child_id: int = Field(default=None, primary_key=True)
     question_id: int = Field(
         default=None, primary_key=True, foreign_key="childquestion.id"
     )
-    answer: str
-    additional_answer: str | None
 
 
-class ChildAnswerPublic(SQLModel):
-    """
-    External data model for UserAnswers
-
-    Parameters
-    ----------
-    SQLModel : Pydantic model  basic sqlmodel pydantic type
-    """
-
-    answer: str
-    question_id: int
-    additional_answer: str | None
+class ChildAnswerPublic(AnswerPublicBase):
+    pass

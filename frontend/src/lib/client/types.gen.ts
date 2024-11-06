@@ -38,17 +38,10 @@ export type Body_verify_verify_auth_verify_post = {
     token: string;
 };
 
-/**
- * External data model for UserAnswers
- *
- * Parameters
- * ----------
- * SQLModel : Pydantic model  basic sqlmodel pydantic type
- */
 export type ChildAnswerPublic = {
     answer: string;
-    question_id: number;
     additional_answer: (string | null);
+    question_id: number;
 };
 
 export type ChildCreate = {
@@ -68,15 +61,15 @@ export type ChildPublic = {
 };
 
 export type ChildQuestionAdmin = {
-    id: number;
-    order: number;
+    order?: number;
     component?: string;
     type?: string;
-    options: string;
+    options?: string;
+    additional_option?: string;
+    id: number;
     text?: {
         [key: string]: ChildQuestionText;
     };
-    additional_option?: string;
 };
 
 export type ChildQuestionPublic = {
@@ -84,7 +77,7 @@ export type ChildQuestionPublic = {
     component?: string;
     type?: string;
     text?: {
-        [key: string]: ChildQuestionTextPublic;
+        [key: string]: QuestionTextPublic;
     };
     additional_option?: string;
 };
@@ -92,14 +85,9 @@ export type ChildQuestionPublic = {
 export type ChildQuestionText = {
     question?: string;
     options_json?: string;
+    options?: string;
     child_question_id?: (number | null);
     lang_id?: (string | null);
-    options?: string;
-};
-
-export type ChildQuestionTextPublic = {
-    question?: string;
-    options_json?: string;
 };
 
 export type ErrorModel = {
@@ -207,17 +195,16 @@ export type MilestoneTextPublic = {
     help?: string;
 };
 
-/**
- * External data model for UserAnswers
- *
- * Parameters
- * ----------
- * SQLModel : Pydantic model  basic sqlmodel pydantic type
- */
+export type QuestionTextPublic = {
+    question?: string;
+    options_json?: string;
+    options?: string;
+};
+
 export type UserAnswerPublic = {
     answer: string;
-    question_id: number;
     additional_answer: (string | null);
+    question_id: number;
 };
 
 export type UserCreate = {
@@ -230,15 +217,15 @@ export type UserCreate = {
 };
 
 export type UserQuestionAdmin = {
-    id: number;
-    order: number;
+    order?: number;
     component?: string;
     type?: string;
-    options: string;
+    options?: string;
+    additional_option?: string;
+    id: number;
     text?: {
         [key: string]: UserQuestionText;
     };
-    additional_option?: string;
 };
 
 export type UserQuestionPublic = {
@@ -246,7 +233,7 @@ export type UserQuestionPublic = {
     component?: string;
     type?: string;
     text?: {
-        [key: string]: UserQuestionTextPublic;
+        [key: string]: QuestionTextPublic;
     };
     additional_option?: string;
 };
@@ -254,14 +241,9 @@ export type UserQuestionPublic = {
 export type UserQuestionText = {
     question?: string;
     options_json?: string;
+    options?: string;
     user_question_id?: (number | null);
     lang_id?: (string | null);
-    options?: string;
-};
-
-export type UserQuestionTextPublic = {
-    question?: string;
-    options_json?: string;
 };
 
 export type UserRead = {
@@ -547,6 +529,16 @@ export type CreateChildData = {
 export type CreateChildResponse = (ChildPublic);
 
 export type CreateChildError = (HTTPValidationError);
+
+export type GetChildData = {
+    path: {
+        child_id: number;
+    };
+};
+
+export type GetChildResponse = (ChildPublic);
+
+export type GetChildError = (HTTPValidationError);
 
 export type DeleteChildData = {
     path: {

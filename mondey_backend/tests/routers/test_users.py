@@ -11,6 +11,21 @@ def _is_approx_now(iso_date_string: str, delta=datetime.timedelta(hours=1)) -> b
     )
 
 
+def test_get_child(
+    user_client: TestClient, children: list[dict[str, str | bool | int]]
+):
+    response = user_client.get("/users/children/1")
+    assert response.status_code == 200
+    assert response.json() == children[0]
+
+
+def test_get_child_fail(
+    user_client: TestClient, children: list[dict[str, str | bool | int]]
+):
+    response = user_client.get("/users/children/605")
+    assert response.status_code == 404
+
+
 def test_get_children(
     user_client: TestClient, children: list[dict[str, str | bool | int]]
 ):
