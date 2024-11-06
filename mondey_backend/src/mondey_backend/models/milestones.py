@@ -98,6 +98,7 @@ class Milestone(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     group_id: int | None = Field(default=None, foreign_key="milestonegroup.id")
     order: int = 0
+    expected_age_months: int = 12
     group: MilestoneGroup | None = back_populates("milestones")
     text: Mapped[dict[str, MilestoneText]] = dict_relationship(key="lang_id")
     images: Mapped[list[MilestoneImage]] = back_populates("milestone")
@@ -105,6 +106,7 @@ class Milestone(SQLModel, table=True):
 
 class MilestonePublic(SQLModel):
     id: int
+    expected_age_months: int
     text: dict[str, MilestoneTextPublic] = {}
     images: list[MilestoneImagePublic] = []
 
@@ -113,6 +115,7 @@ class MilestoneAdmin(SQLModel):
     id: int
     group_id: int
     order: int
+    expected_age_months: int
     text: dict[str, MilestoneText] = {}
     images: list[MilestoneImage] = []
 

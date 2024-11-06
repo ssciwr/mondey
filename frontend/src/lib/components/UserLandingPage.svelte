@@ -48,7 +48,7 @@ onMount(async () => {
 							class="flex items-center gap-2 text-lg"
 						>
 							<CogSolid size="lg" />
-							{$_("admin.title")}
+							{$_('admin.heading')}
 						</div>
 						<svelte:component this={AdminPage} />
 					</TabItem>

@@ -21,7 +21,6 @@ onMount(async () => {
 </script>
 
 <Tabs tabStyle="underline" class="w-full">
-	<Tabs tabStyle="underline">
 		<TabItem open>
 			<div slot="title" class="flex items-center gap-2">
 				<BadgeCheckOutline size="md" />
@@ -57,5 +56,4 @@ onMount(async () => {
 			</div>
 			<Languages />
 		</TabItem>
-	</Tabs>
 </Tabs>

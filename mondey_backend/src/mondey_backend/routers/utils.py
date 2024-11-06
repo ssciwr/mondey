@@ -4,6 +4,7 @@ import datetime
 import logging
 import pathlib
 from collections.abc import Iterable
+from typing import TypeVar
 
 from fastapi import HTTPException
 from fastapi import UploadFile
@@ -41,7 +42,10 @@ def write_file(file: UploadFile, filename: str):
         file.file.close()
 
 
-def get(session: SessionDep, entity: type, ident: int | str):
+Entity = TypeVar("Entity")
+
+
+def get(session: SessionDep, entity: type[Entity], ident: int | str) -> Entity:
     instance = session.get(entity, ident)
     if not instance:
         raise HTTPException(
@@ -103,7 +107,7 @@ def _session_has_expired(milestone_answer_session: MilestoneAnswerSession) -> bo
 
 def get_or_create_current_milestone_answer_session(
     session: SessionDep, current_active_user: User, child_id: int
-):
+) -> MilestoneAnswerSession:
     child = session.get(Child, child_id)
     if child is None or child.user_id != current_active_user.id:
         raise HTTPException(401)
@@ -125,3 +129,8 @@ def get_or_create_current_milestone_answer_session(
         )
         add(session, milestone_answer_session)
     return milestone_answer_session
+
+
+def get_child_age_in_months(child: Child) -> int:
+    today = datetime.date.today()
+    return (today.year - child.birth_year) * 12 + (today.month - child.birth_month)

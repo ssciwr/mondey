@@ -16,7 +16,8 @@
 		"autonext": "Automatisch weiter"
 	},
 	"admin": {
-		"title": "Administration",
+		"heading": "Administration",
+		"title": "Titel",
 		"languages": "Sprachen",
 		"milestones": "Meilensteine",
 		"milestone-groups": "Meilensteingruppen",
@@ -40,8 +41,7 @@
 		"help": "Förderhilfen",
 		"image": "Bild",
 		"images": "Bilder",
-		"min-age-months": "Mindestalter in Monaten",
-		"max-age-months": "Höchstalter in Monaten",
+		"expected-age": "Voraussichtliches Alter",
 		"editUserQuestionTitle": "Frage an Benutzer editieren"
 	},
 	"researcher": {
