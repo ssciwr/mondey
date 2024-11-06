@@ -5,7 +5,6 @@ import {
 	getCurrentUserAnswers,
 	getUserQuestions,
 	updateCurrentUserAnswers,
-	usersCurrentUser,
 } from "$lib/client/services.gen";
 import {
 	type GetUserQuestionsResponse,
@@ -16,174 +15,92 @@ import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import { componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading } from "flowbite-svelte";
-import { type Component, onMount } from "svelte";
 import { _, locale } from "svelte-i18n";
 
-type QuestionaireProps = {
-	label: string;
-	type: string;
-	required: boolean;
-	disabled: boolean;
-	items: any[];
-	textTrigger: string | undefined;
-};
-
-type QuestionaireElement = {
-	component: Component;
-	value: string | null;
-	additionalValue: string | null;
-	props: QuestionaireProps;
-};
-
-function convertQuestions(
-	questionaire: GetUserQuestionsResponse,
-): QuestionaireElement[] {
-	return questionaire.map((element) => {
-		// TODO: this should be simplified into something that uses
-		// as little additional structure as possible compared to UserQuestionPublic
-
-		return {
-			component: componentTable[element.component],
-			value: null,
-			additionalValue: null,
-			props: {
-				items: JSON.parse(element.text[$locale].options_json),
-				label: element.text[$locale].question,
-				type: "text",
-				required: true,
-				disabled: false,
-				textTrigger: element.additional_option,
-			},
-		};
-	});
-}
-
-function convertAnswers(
-	questionaire: QuestionaireElement[],
-): UserAnswerPublic[] {
-	return questionaire.map((e, index) => {
-		if (
-			e.additionalValue !== "" &&
-			e.additionalValue !== null &&
-			e.value === e.props.textTrigger
-		) {
-			return {
-				question_id: index,
-				answer: String(e.value),
-				additional_answer: String(e.additionalValue),
-			} as UserAnswerPublic;
-		} else {
-			return {
-				question_id: index,
-				answer: String(e.value),
-				additional_answer: "",
-			} as UserAnswerPublic;
-		}
-	});
-}
-
 async function submitData() {
-	const answers = convertAnswers(questionaire);
-	const currentUser = await usersCurrentUser();
-	if (currentUser.error) {
-		showAlert = true;
-		alertMessage = $_("userData.alertMessageUserNotFound");
-	}
-
 	const response = await updateCurrentUserAnswers({
-		body: answers,
+		body: Object.values(answers),
 	});
 
 	if (response.error) {
 		console.log(
-			"Error happened when sending user question answers: ",
-			response.error,
+			"Error when sending user question answers: ",
+			response.error.detail,
 		);
 		alertMessage = $_("userData.alertMessageError");
 		showAlert = true;
 	} else {
-		console.log("successfully sent data to backend, yay!");
-		console.log("answers sent: ", answers);
-		console.log(
-			"original answers: ",
-			questionaire.map((e) => {
-				return [e.value, e.additionalValue];
-			}),
-		);
-
 		// disable all elements to make editing a conscious choice
-		for (let element of questionaire) {
-			element.props.disabled = true;
-		}
-		dataIsCurrent = true;
+		disableEdit = true;
 	}
 }
 
-// this is the data that will be used in the end
-let questionaire: any[] = $state([]);
-
-// flags for enabling and disabling visual hints
-let showAlert: boolean = $state(false);
-let dataIsCurrent: boolean = $state(false);
-
-// what is shown in the alert if showAlert === true
-let alertMessage: string = $state($_("userData.alertMessageMissing"));
-
-// load questions and current answers from server and put them into the data
-// structure that the UserDataInput component understands
-onMount(async () => {
-	console.log("onmount");
-
+async function setup() {
 	const userQuestions = await getUserQuestions();
-	console.log("userquestions from backend", userQuestions);
 
-	if (userQuestions.error) {
+	// get questions
+	if (userQuestions.error || userQuestions.data === undefined) {
+		console.log(
+			"Error when getting userquestions: ",
+			userQuestions.error.detail,
+		);
 		showAlert = true;
 		alertMessage = $_("userData.alertMessageError");
-		console.log("questions could not be retrieved.", userQuestions?.error);
 	} else {
-		questionaire = convertQuestions(
-			userQuestions?.data as GetUserQuestionsResponse,
-		);
-		console.log("data from backend: ", "questionaire: ", questionaire);
+		questionnaire = userQuestions.data as GetUserQuestionsResponse;
 	}
-
 	// get current answers.
 	let currentAnswers = await getCurrentUserAnswers();
-	console.log("user answers from backend", currentAnswers);
 
-	if (currentAnswers?.error) {
+	if (currentAnswers?.error || currentAnswers.data === undefined) {
+		console.log(
+			"Error when getting current answers for users: ",
+			currentAnswers.error.detail,
+		);
+
 		showAlert = true;
-		console.log("answers could not be retrieved.", currentAnswers?.error);
 		alertMessage = $_("userData.alertMessageError");
-	} else if (currentAnswers?.data.length === 0) {
-		console.log("currently no answers"); // debug output. Can go later
 	} else {
-		for (let i = 0; i < currentAnswers?.data.length; i++) {
-			if (
-				currentAnswers?.data[i].additional_answer !== null &&
-				currentAnswers?.data[i].additional_answer !== undefined &&
-				currentAnswers?.data[i].additional_answer !== ""
-			) {
-				questionaire[i].additionalValue =
-					currentAnswers.data[i].additional_answer;
+		// make map of question_id => answer. Don´t rely on questions and
+		// answers being aligned
+		answers = Object.fromEntries(
+			currentAnswers.data.map((existing_answer) => [
+				existing_answer.question_id,
+				existing_answer as UserAnswerPublic,
+			]),
+		);
+		disableEdit = true;
 
-				questionaire[i].value = questionaire[i].props.items.slice(-1)[0].value; // FIXME: there needs to be a better way to do this. relies on ordering being such that the trigger for a textfield is at the end
-			} else {
-				questionaire[i].value = currentAnswers.data[i].answer;
+		// add nonexisting answers
+		questionnaire.map((question) => {
+			if (!(question.id in answers)) {
+				answers[question.id] = {
+					question_id: question.id,
+					answer: "",
+					additional_answer: "",
+				} as UserAnswerPublic;
+
+				disableEdit = false;
 			}
-			questionaire[i].props.disabled = true;
-			dataIsCurrent = true;
-		}
+		});
 	}
-	console.log("onmount done: ", questionaire);
-});
+	return { questionnaire: questionnaire, answers: answers };
+}
+
+let questionnaire: GetUserQuestionsResponse = $state(
+	[] as GetUserQuestionsResponse,
+);
+let answers: { [k: string]: UserAnswerPublic } = $state({});
+let showAlert: boolean = $state(false);
+let disableEdit: boolean = $state(false);
+let alertMessage: string = $state($_("userData.alertMessageMissing"));
+let promise = $state(setup());
 </script>
 
 <!-- Show big alert message when something is missing -->
 {#if showAlert}
 	<AlertMessage
-		title={$_('userData.alertMessageTitle')}
+		title={$_("userData.alertMessageTitle")}
 		message={alertMessage}
 		onclick={() => {
 			showAlert = false;
@@ -192,59 +109,62 @@ onMount(async () => {
 {/if}
 
 <!-- The actual content -->
-<div class="container m-1 mx-auto w-full max-w-xl">
-	<Card class="container m-1 mx-auto w-full max-w-xl">
-		<Heading
-			tag="h3"
-			class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-			>{$_('userData.heading')}</Heading
-		>
-
-		<form class="m-1 mx-auto w-full flex-col space-y-6" onsubmit={preventDefault(submitData)}>
-			{#each questionaire as element, i}
-				<DataInput
-					component={element.component}
-					bind:value={element.value}
-					bind:additionalInput={element.additionalValue}
-					label={element.props.label}
-					properties={element.props}
-					textTrigger={element.props.textTrigger}
-					eventHandlers={{
-						'on:change': element.onchange,
-						'on:blur': element.onblur,
-						'on:click': element.onclick
-					}}
-					additionalEventHandlers={{
-						'on:change': element.onchange,
-						'on:blur': element.onblur,
-						'on:click': element.onclick
-					}}
-				/>
-			{/each}
-			{#if dataIsCurrent === true}
-				<Button
-					type="button"
-					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
-					on:click={() => {
-						console.log('dataiscurrent click');
-						for (let element of questionaire) {
-							element.props.disabled = false;
-						}
-
-						// README: this forces a rerender. It is necessary because svelte does not react to nested references being changed. There must be a better solution to this? Svelte 5 runes would be one that comes to mind.
-						questionaire = [...questionaire];
-
-						dataIsCurrent = false;
-					}}
-				>
-					<div class="flex items-center justify-center">{$_('userData.changeData')}</div>
-				</Button>
-			{:else}
-				<Button
-					class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
-					type="submit">{$_('userData.submitButtonLabel')}</Button
-				>
-			{/if}
-		</form>
-	</Card>
-</div>
+{#await promise}
+	<p>{$_("userData.loadingMessage")}</p>
+{:then { questionnaire, answers }}
+	<div class="container m-1 mx-auto w-full max-w-xl">
+		<Card class="container m-1 mx-auto w-full max-w-xl">
+			<Heading
+				tag="h3"
+				class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
+				>{$_("userData.heading")}</Heading
+			>
+			<form
+				class="m-1 mx-auto w-full flex-col space-y-6"
+				onsubmit={preventDefault(submitData)}
+			>
+				{#each questionnaire as element, i}
+					<DataInput
+						component={componentTable[element.component]}
+						bind:value={answers[element.id].answer}
+						bind:additionalValue={answers[element.id]
+							.additional_answer}
+						label={element?.text[$locale].question}
+						textTrigger={element.additional_option}
+						required={true}
+						additionalRequired={true}
+						id={"input_" + String(i)}
+						items={element.text[$locale].options_json === "" ? null : JSON.parse(element.text[$locale].options_json)}
+						disabled={disableEdit}
+					/>
+				{/each}
+				{#if disableEdit === true}
+					<Button
+						type="button"
+						class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+						on:click={() => {
+							disableEdit = false;
+						}}
+					>
+						<div class="flex items-center justify-center">
+							{$_("userData.changeData")}
+						</div>
+					</Button>
+				{:else}
+					<Button
+						class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+						type="submit">{$_("userData.submitButtonLabel")}</Button
+					>
+				{/if}
+			</form>
+		</Card>
+	</div>
+{:catch error}
+	<AlertMessage
+		title={$_("userData.alertMessageTitle")}
+		message={error.message}
+		onclick={() => {
+			showAlert = false;
+		}}
+	/>
+{/await}

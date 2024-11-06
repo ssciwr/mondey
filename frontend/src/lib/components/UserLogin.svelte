@@ -3,16 +3,17 @@ import { base } from "$app/paths";
 
 import UserLoginUtil from "$lib/components//UserLoginUtil.svelte";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
-import DataInput from "$lib/components/DataInput/DataInput.svelte";
 
 import { goto } from "$app/navigation";
 import { authCookieLogin, usersCurrentUser } from "$lib/client/services.gen";
 import { type AuthCookieLoginData, type UserRead } from "$lib/client/types.gen";
 import { currentUser } from "$lib/stores/userStore";
 import { preventDefault } from "$lib/util";
-import { Button, Card, Heading, Input } from "flowbite-svelte";
+import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
 
+// TODO: make the remember thing functional again
+// FIXME: make use of the logic of the AdminUser structure and get rid of the UserStore
 async function refresh(): Promise<string> {
 	const returned = await usersCurrentUser();
 	if (returned.error) {
@@ -30,8 +31,8 @@ async function refresh(): Promise<string> {
 async function submitData(): Promise<void> {
 	const loginData: AuthCookieLoginData = {
 		body: {
-			username: formData[0].value,
-			password: formData[1].value,
+			username: username,
+			password: password,
 		},
 	};
 
@@ -57,41 +58,17 @@ async function submitData(): Promise<void> {
 }
 
 // form data and variables
-let formData = [
-	{
-		component: Input,
-		value: "",
-		props: {
-			label: $_("login.usernameLabel"),
-			type: "email",
-			placeholder: $_("login.usernameLabel"),
-			required: true,
-			id: "username",
-			autocomplete: "username",
-		},
-	},
-	{
-		component: Input,
-		value: "",
-		props: {
-			label: $_("login.passwordLabel"),
-			type: "password",
-			placeholder: $_("login.passwordLabel"),
-			required: true,
-			id: "password",
-			autocomplete: "password",
-		},
-	},
-];
 
+let username = "";
+let password = "";
 let remember = false;
-let showAlert = false;
+let showAlert = $state(false);
 let alertMessage: string = $_("login.badCredentials");
 </script>
 
 {#if showAlert}
 	<AlertMessage
-		title={$_('login.alertMessageTitle')}
+		title={$_("login.alertMessageTitle")}
 		message={alertMessage}
 		lastpage={`${base}/userLand/userLogin`}
 		onclick={() => {
@@ -105,34 +82,56 @@ let alertMessage: string = $_("login.badCredentials");
 		<Heading
 			tag="h3"
 			class="m-2 mb-3 p-2 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-			>{$_('login.heading')}</Heading
+			>{$_("login.heading")}</Heading
 		>
 
-		<form onsubmit={preventDefault(submitData)} class="m-2 mx-auto w-full flex-col space-y-6">
-			{#each formData as element}
-				<DataInput
-					component={element.component}
-					label={element.props.label}
-					bind:value={element.value}
-					properties={element.props}
-					eventHandlers={{
-						'on:change': element.onchange,
-						'on:blur': element.onblur,
-						'on:click': element.onclick
-					}}
+		<form
+			onsubmit={preventDefault(submitData)}
+			class="m-2 mx-auto w-full flex-col space-y-6"
+		>
+			<div class="space-y-4">
+				<Label
+					for={"username"}
+					class="font-semibold text-gray-700 dark:text-gray-400"
+					>{$_("login.usernameLabel")}</Label
+				>
+				<Input
+					type="email"
+					bind:value={username}
+					autocomplete="username"
+					id="username"
+					placeholder={$_("login.usernameLabel")}
+					required
 				/>
-			{/each}
+			</div>
+			<div class="space-y-4">
+				<Label
+					for={"password"}
+					class="font-semibold text-gray-700 dark:text-gray-400"
+					>{$_("login.passwordLabel")}</Label
+				>
+				<Input
+					type="password"
+					bind:value={password}
+					autocomplete="current-password"
+					id="password"
+					placeholder={$_("login.passwordLabel")}
+					required
+				/>
+			</div>
 
 			<UserLoginUtil cls="p-6 mb-3" bind:checked={remember} />
 
 			<Button
 				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
-				type="submit">{$_('login.submitButtonLabel')}</Button
+				type="submit">{$_("login.submitButtonLabel")}</Button
 			>
 		</form>
 	</Card>
 
-	<span class="container mx-auto w-full text-gray-700 dark:text-gray-400">Not registered?</span>
+	<span class="container mx-auto w-full text-gray-700 dark:text-gray-400"
+		>Not registered?</span
+	>
 	<a
 		href={`${base}/userLand/userRegistration`}
 		class="text-primary-700 hover:underline dark:text-primary-500"

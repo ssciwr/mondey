@@ -32,8 +32,10 @@ let preview_answer = $state("");
 
 // FIXME: use the componentTable here
 const inputTypes: Array<SelectOptionType<string>> = [
-	{ value: "text", name: "text" },
+	{ value: "textarea", name: "text" },
 	{ value: "select", name: "select" },
+	{ value: "fileupload", name: "fileupload" },
+	{ value: "date", name: "date" },
 ];
 
 function updateOptionsJson() {

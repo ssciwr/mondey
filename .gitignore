@@ -173,3 +173,6 @@ mondey_backend/static/*.jpg
 
 # ssl keys
 *.pem
+
+# project specific
+private
