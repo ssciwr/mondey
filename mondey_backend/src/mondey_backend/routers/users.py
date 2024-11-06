@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib
+from datetime import datetime
 
 from fastapi import APIRouter
 from fastapi import HTTPException
@@ -18,6 +19,8 @@ from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneAnswerSessionPublic
+from ..models.questions import ChildAnswer
+from ..models.questions import ChildAnswerPublic
 from ..models.questions import UserAnswer
 from ..models.questions import UserAnswerPublic
 from ..models.users import UserRead
@@ -185,6 +188,82 @@ def create_router() -> APIRouter:
                     setattr(current_answer, key, value)
 
         session.commit()
+        return new_answers
+
+    # Endpoints for answers to child question
+    @router.get("/children-answers/{child_id}", response_model=list[ChildAnswerPublic])
+    def get_current_child_answers(
+        session: SessionDep, child_id: int, current_active_user: CurrentActiveUserDep
+    ):
+        child = session.get(
+            Child,
+            child_id,
+        )
+
+        if child is None or child.user_id != current_active_user.id:
+            raise HTTPException(404, detail="child not found for user")
+        answers = session.exec(
+            select(ChildAnswer).where(
+                (col(ChildAnswer.user_id) == current_active_user.id)
+                & (col(ChildAnswer.child_id) == child_id)
+            )
+        ).all()
+
+        return answers
+
+    @router.put("/children-answers/{child_id}", response_model=list[ChildAnswerPublic])
+    def update_current_child_answers(
+        session: SessionDep,
+        child_id: int,
+        current_active_user: CurrentActiveUserDep,
+        new_answers: list[ChildAnswerPublic],
+    ):
+        child = session.get(
+            Child,
+            child_id,
+        )
+
+        # because child and childanswers have overlap, we need to keep both in sync
+        if child is None or child.user_id != current_active_user.id:
+            raise HTTPException(404, detail="child not found for user")
+
+        for new_answer in new_answers:
+            if new_answer.question_id == 1:  # name
+                child.name = new_answer.answer
+            if new_answer.question_id == 2:  # date
+                date = datetime.strptime(new_answer.answer, "%Y-%m-%d")
+                child.birth_month = date.month
+                child.birth_year = date.year
+            if new_answer.question_id == 3:  # remarks
+                child.remark = new_answer.answer
+            if (
+                new_answer.question_id == 4
+                and new_answer.answer is not None
+                and new_answer.answer != ""
+            ):  # image
+                child.has_image = True
+
+            current_answer = session.get(
+                ChildAnswer, (current_active_user.id, child_id, new_answer.question_id)
+            )
+
+            if current_answer is None:
+                current_answer = ChildAnswer.model_validate(
+                    new_answer,
+                    update={
+                        "user_id": current_active_user.id,
+                        "child_id": child_id,
+                        "question_id": new_answer.question_id,
+                    },
+                )
+            else:
+                for key, value in new_answer.model_dump().items():
+                    setattr(current_answer, key, value)
+
+            add(session, current_answer)
+        add(session, child)
+        session.commit()
+
         return new_answers
 
     return router

@@ -19,12 +19,16 @@ from ..models.milestones import MilestoneGroupAdmin
 from ..models.milestones import MilestoneGroupText
 from ..models.milestones import MilestoneImage
 from ..models.milestones import MilestoneText
+from ..models.questions import ChildQuestion
+from ..models.questions import ChildQuestionAdmin
+from ..models.questions import ChildQuestionText
 from ..models.questions import UserQuestion
 from ..models.questions import UserQuestionAdmin
 from ..models.questions import UserQuestionText
 from ..settings import app_settings
 from .utils import add
 from .utils import get
+from .utils import update_child_question_text
 from .utils import update_milestone_group_text
 from .utils import update_milestone_text
 from .utils import update_user_question_text
@@ -162,6 +166,7 @@ def create_router() -> APIRouter:
         session.refresh(milestone_image)
         return milestone_image
 
+    # User question CRUD endpoints
     @router.get("/user-questions/", response_model=list[UserQuestionAdmin])
     def get_user_questions_admin(session: SessionDep):
         user_questions = session.exec(
@@ -196,6 +201,50 @@ def create_router() -> APIRouter:
     @router.delete("/user-questions/{user_question_id}")
     def delete_user_question(session: SessionDep, user_question_id: int):
         question = get(session, UserQuestion, user_question_id)
+        session.delete(question)
+        session.commit()
+        return {"ok": True}
+
+    # Child question CRUD endpoints
+    @router.get("/child-questions/", response_model=list[ChildQuestionAdmin])
+    def get_child_questions_admin(session: SessionDep):
+        user_questions = session.exec(
+            select(ChildQuestion).order_by(col(ChildQuestion.order))
+        ).all()
+        return user_questions
+
+    @router.post("/child-questions/", response_model=ChildQuestionAdmin)
+    def create_child_question(
+        session: SessionDep,
+    ):
+        child_question = ChildQuestion()
+        add(session, child_question)
+        for language in session.exec(select(Language)).all():
+            session.add(
+                ChildQuestionText(
+                    child_question_id=child_question.id, lang_id=language.id
+                )
+            )
+        session.commit()
+        session.refresh(child_question)
+        return child_question
+
+    @router.put("/child-questions/", response_model=ChildQuestionAdmin)
+    def update_child_question(
+        session: SessionDep,
+        child_question: ChildQuestionAdmin,
+    ):
+        db_child_question = get(session, ChildQuestion, child_question.id)
+
+        for key, value in child_question.model_dump(exclude={"text"}).items():
+            setattr(db_child_question, key, value)
+        update_child_question_text(session, child_question)
+        add(session, db_child_question)
+        return db_child_question
+
+    @router.delete("/child-questions/{child_question_id}")
+    def delete_child_question(session: SessionDep, child_question_id: int):
+        question = get(session, ChildQuestion, child_question_id)
         session.delete(question)
         session.commit()
         return {"ok": True}
