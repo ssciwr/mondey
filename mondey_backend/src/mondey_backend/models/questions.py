@@ -9,12 +9,12 @@ from .utils import fixed_length_string_field
 
 
 # user questions
-class UserQuestionTextBase(SQLModel):
+class QuestionTextBase(SQLModel):
     question: str = ""
     options_json: str = ""
 
 
-class UserQuestionText(UserQuestionTextBase, table=True):
+class UserQuestionText(QuestionTextBase, table=True):
     user_question_id: int | None = Field(
         default=None, foreign_key="userquestion.id", primary_key=True
     )
@@ -24,8 +24,16 @@ class UserQuestionText(UserQuestionTextBase, table=True):
     options: str = ""
 
 
-class UserQuestionTextPublic(UserQuestionTextBase):
+class QuestionTextPublic(QuestionTextBase):
     pass
+
+
+class QuestionPublic(SQLModel):
+    id: int
+    component: str = "select"
+    type: str = "text"
+    text: dict[str, QuestionTextPublic] = {}
+    additional_option: str = ""
 
 
 class UserQuestion(SQLModel, table=True):
@@ -38,12 +46,8 @@ class UserQuestion(SQLModel, table=True):
     additional_option: str = ""
 
 
-class UserQuestionPublic(SQLModel):
-    id: int
-    component: str = "select"
-    type: str = "text"
-    text: dict[str, UserQuestionTextPublic] = {}
-    additional_option: str = ""
+class UserQuestionPublic(QuestionPublic):
+    pass
 
 
 class UserQuestionAdmin(SQLModel):
@@ -57,12 +61,9 @@ class UserQuestionAdmin(SQLModel):
 
 
 # child questions
-class ChildQuestionTextBase(SQLModel):
-    question: str = ""
-    options_json: str = ""
 
 
-class ChildQuestionText(ChildQuestionTextBase, table=True):
+class ChildQuestionText(QuestionTextBase, table=True):
     child_question_id: int | None = Field(
         default=None, foreign_key="childquestion.id", primary_key=True
     )
@@ -70,10 +71,6 @@ class ChildQuestionText(ChildQuestionTextBase, table=True):
         max_length=2, default=None, foreign_key="language.id", primary_key=True
     )
     options: str = ""
-
-
-class ChildQuestionTextPublic(ChildQuestionTextBase):
-    pass
 
 
 class ChildQuestion(SQLModel, table=True):
@@ -86,12 +83,8 @@ class ChildQuestion(SQLModel, table=True):
     additional_option: str = ""
 
 
-class ChildQuestionPublic(SQLModel):
-    id: int
-    component: str = "select"
-    type: str = "text"
-    text: dict[str, ChildQuestionTextPublic] = {}
-    additional_option: str = ""
+class ChildQuestionPublic(QuestionPublic):
+    pass
 
 
 class ChildQuestionAdmin(SQLModel):
