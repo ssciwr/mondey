@@ -548,6 +548,16 @@ export type CreateChildResponse = (ChildPublic);
 
 export type CreateChildError = (HTTPValidationError);
 
+export type GetChildData = {
+    path: {
+        child_id: number;
+    };
+};
+
+export type GetChildResponse = (ChildPublic);
+
+export type GetChildError = (HTTPValidationError);
+
 export type DeleteChildData = {
     path: {
         child_id: number;
