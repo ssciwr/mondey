@@ -38,18 +38,68 @@ export type Body_verify_verify_auth_verify_post = {
     token: string;
 };
 
+/**
+ * External data model for UserAnswers
+ *
+ * Parameters
+ * ----------
+ * SQLModel : Pydantic model  basic sqlmodel pydantic type
+ */
+export type ChildAnswerPublic = {
+    answer: string;
+    question_id: number;
+    additional_answer: (string | null);
+};
+
 export type ChildCreate = {
     name?: string;
     birth_year: number;
     birth_month: number;
+    remark?: string;
 };
 
 export type ChildPublic = {
     name?: string;
     birth_year: number;
     birth_month: number;
+    remark?: string;
     id: number;
     has_image: boolean;
+};
+
+export type ChildQuestionAdmin = {
+    id: number;
+    order: number;
+    component?: string;
+    type?: string;
+    options: string;
+    text?: {
+        [key: string]: ChildQuestionText;
+    };
+    additional_option?: string;
+};
+
+export type ChildQuestionPublic = {
+    id: number;
+    component?: string;
+    type?: string;
+    text?: {
+        [key: string]: ChildQuestionTextPublic;
+    };
+    additional_option?: string;
+};
+
+export type ChildQuestionText = {
+    question?: string;
+    options_json?: string;
+    child_question_id?: (number | null);
+    lang_id?: (string | null);
+    options?: string;
+};
+
+export type ChildQuestionTextPublic = {
+    question?: string;
+    options_json?: string;
 };
 
 export type ErrorModel = {
@@ -270,6 +320,10 @@ export type GetUserQuestionsResponse = (Array<UserQuestionPublic>);
 
 export type GetUserQuestionsError = unknown;
 
+export type GetChildQuestionsResponse = (Array<ChildQuestionPublic>);
+
+export type GetChildQuestionsError = unknown;
+
 export type CreateLanguageData = {
     body: Language;
 };
@@ -405,6 +459,32 @@ export type DeleteUserQuestionResponse = (unknown);
 
 export type DeleteUserQuestionError = (HTTPValidationError);
 
+export type GetChildQuestionsAdminResponse = (Array<ChildQuestionAdmin>);
+
+export type GetChildQuestionsAdminError = unknown;
+
+export type UpdateChildQuestionData = {
+    body: ChildQuestionAdmin;
+};
+
+export type UpdateChildQuestionResponse = (ChildQuestionAdmin);
+
+export type UpdateChildQuestionError = (HTTPValidationError);
+
+export type CreateChildQuestionResponse = (ChildQuestionAdmin);
+
+export type CreateChildQuestionError = unknown;
+
+export type DeleteChildQuestionData = {
+    path: {
+        child_question_id: number;
+    };
+};
+
+export type DeleteChildQuestionResponse = (unknown);
+
+export type DeleteChildQuestionError = (HTTPValidationError);
+
 export type UsersCurrentUserResponse = (UserRead);
 
 export type UsersCurrentUserError = (unknown);
@@ -531,6 +611,27 @@ export type UpdateCurrentUserAnswersData = {
 export type UpdateCurrentUserAnswersResponse = (Array<UserAnswerPublic>);
 
 export type UpdateCurrentUserAnswersError = (HTTPValidationError);
+
+export type GetCurrentChildAnswersData = {
+    path: {
+        child_id: number;
+    };
+};
+
+export type GetCurrentChildAnswersResponse = (Array<ChildAnswerPublic>);
+
+export type GetCurrentChildAnswersError = (HTTPValidationError);
+
+export type UpdateCurrentChildAnswersData = {
+    body: Array<ChildAnswerPublic>;
+    path: {
+        child_id: number;
+    };
+};
+
+export type UpdateCurrentChildAnswersResponse = (Array<ChildAnswerPublic>);
+
+export type UpdateCurrentChildAnswersError = (HTTPValidationError);
 
 export type AuthCookieLoginData = {
     body: Body_auth_cookie_login_auth_login_post;
