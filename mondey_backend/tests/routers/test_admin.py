@@ -302,74 +302,16 @@ def test_create_user_question_works(admin_client: TestClient):
     }
 
 
-def test_update_user_question_works(admin_client: TestClient):
-    user_question_admin = {
-        "id": 1,
-        "component": "textarea",
-        "type": "other_thing",
-        "order": 0,
-        "options": "some_options",
-        "text": {
-            "de": {
-                "options_json": "",
-                "user_question_id": 1,
-                "options": "",
-                "lang_id": "de",
-                "question": "",
-            },
-            "en": {
-                "options_json": "",
-                "user_question_id": 1,
-                "options": "",
-                "lang_id": "en",
-                "question": "",
-            },
-            "fr": {
-                "options_json": "",
-                "user_question_id": 1,
-                "options": "",
-                "lang_id": "fr",
-                "question": "",
-            },
-        },
-        "additional_option": "nothing",
-    }
-
-    response = admin_client.put("/admin/user-questions/", json=user_question_admin)
+def test_update_user_question_works(
+    admin_client: TestClient, default_user_question_admin
+):
+    response = admin_client.put(
+        "/admin/user-questions/", json=default_user_question_admin
+    )
 
     assert response.status_code == 200
 
-    assert response.json() == {
-        "id": 1,
-        "component": "textarea",
-        "type": "other_thing",
-        "order": 0,
-        "options": "some_options",
-        "text": {
-            "de": {
-                "options_json": "",
-                "user_question_id": 1,
-                "options": "",
-                "lang_id": "de",
-                "question": "",
-            },
-            "en": {
-                "options_json": "",
-                "user_question_id": 1,
-                "options": "",
-                "lang_id": "en",
-                "question": "",
-            },
-            "fr": {
-                "options_json": "",
-                "user_question_id": 1,
-                "options": "",
-                "lang_id": "fr",
-                "question": "",
-            },
-        },
-        "additional_option": "nothing",
-    }
+    assert response.json() == default_user_question_admin
 
 
 def test_update_user_question_id_not_there(admin_client: TestClient):

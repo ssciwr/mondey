@@ -525,6 +525,41 @@ def child_answers():
 
 
 @pytest.fixture
+def default_user_question_admin():
+    return {
+        "id": 1,
+        "component": "textarea",
+        "type": "other_thing",
+        "order": 0,
+        "options": "some_options",
+        "text": {
+            "de": {
+                "options_json": "",
+                "user_question_id": 1,
+                "options": "",
+                "lang_id": "de",
+                "question": "",
+            },
+            "en": {
+                "options_json": "",
+                "user_question_id": 1,
+                "options": "",
+                "lang_id": "en",
+                "question": "",
+            },
+            "fr": {
+                "options_json": "",
+                "user_question_id": 1,
+                "options": "",
+                "lang_id": "fr",
+                "question": "",
+            },
+        },
+        "additional_option": "nothing",
+    }
+
+
+@pytest.fixture
 def active_admin_user():
     return UserRead(
         id=3,
