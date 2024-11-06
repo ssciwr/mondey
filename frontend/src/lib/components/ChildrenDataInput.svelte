@@ -65,7 +65,9 @@ async function setup(): Promise<{
 		showAlert = true;
 		alertMessage = $_("childData.alertMessageError");
 	} else {
-		questionnaire = questions.data as GetChildQuestionsResponse;
+		questionnaire = questions.data.sort(
+			(first, second) => first.id - second.id,
+		);
 	}
 
 	if ($currentChild !== null) {
@@ -113,12 +115,13 @@ async function setup(): Promise<{
 async function submitData(): Promise<void> {
 	// make new child if we don´t have one already
 	if ($currentChild === null) {
+		const date = new Date(answers[2].answer);
+
 		const new_child = await createChild({
 			body: {
-				name: "",
-				birth_year: 0,
-				birth_month: 0,
-				remark: "",
+				name: answers[1].answer,
+				birth_year: date.getFullYear(),
+				birth_month: date.getMonth(),
 			},
 		});
 
@@ -131,7 +134,7 @@ async function submitData(): Promise<void> {
 		}
 	}
 
-	// index 4 is the image upload
+	// id=4 is the image upload
 	if (answers[4].answer && answers[4].answer instanceof File) {
 		console.log("image exists", answers[4].answer);
 		const uploadResponse = await uploadChildImage({
@@ -213,6 +216,7 @@ $effect(() => {
 					onsubmit={preventDefault(submitData)}
 				>
 					{#each questionnaire as element, i}
+						{console.log('element', element.id, 'disabled', disableEdit || (element.id in [1,2]), disableEdit,  (element.id in [1,2]))}
 						<DataInput
 							component={componentTable[element.component]}
 							bind:value={answers[element.id].answer}
@@ -228,7 +232,7 @@ $effect(() => {
 								: JSON.parse(
 										element.text[$locale].options_json,
 									)}
-							disabled={disableEdit}
+							disabled={disableEdit || (element.id in [1,2])}
 						/>
 					{/each}
 					{#if disableEdit === true}
