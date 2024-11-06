@@ -224,11 +224,10 @@ def create_router() -> APIRouter:
         )
 
         # because child and childanswers have overlap, we need to keep both in sync
-
         if child is None or child.user_id != current_active_user.id:
             raise HTTPException(404, detail="child not found for user")
+
         for new_answer in new_answers:
-            # FIXME: this must go away
             if new_answer.question_id == 1:  # name
                 child.name = new_answer.answer
             if new_answer.question_id == 2:  # date
@@ -237,7 +236,11 @@ def create_router() -> APIRouter:
                 child.birth_year = date.year
             if new_answer.question_id == 3:  # remarks
                 child.remark = new_answer.answer
-            if new_answer.question_id == 4:  # image
+            if (
+                new_answer.question_id == 4
+                and new_answer.answer is not None
+                and new_answer.answer != ""
+            ):  # image
                 child.has_image = True
 
             current_answer = session.get(

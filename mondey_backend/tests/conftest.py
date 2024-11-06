@@ -503,6 +503,28 @@ def child_questions():
 
 
 @pytest.fixture
+def child_answers():
+    return [
+        # name
+        {
+            "answer": "other",
+            "question_id": 1,
+            "additional_answer": "sit amet",
+        },
+        # date
+        {
+            "answer": "2024-03-02",
+            "question_id": 2,
+            "additional_answer": None,
+        },
+        # remark
+        {"answer": "some remark", "question_id": 3, "additional_answer": None},
+        # file upload
+        {"answer": "file.jpg", "question_id": 4, "additional_answer": None},
+    ]
+
+
+@pytest.fixture
 def active_admin_user():
     return UserRead(
         id=3,
