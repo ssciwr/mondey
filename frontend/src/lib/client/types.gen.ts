@@ -38,6 +38,12 @@ export type Body_verify_verify_auth_verify_post = {
     token: string;
 };
 
+export type ChildAnswerPublic = {
+    answer: string;
+    additional_answer: (string | null);
+    question_id: number;
+};
+
 export type ChildCreate = {
     name?: string;
     birth_year: number;
@@ -50,6 +56,36 @@ export type ChildPublic = {
     birth_month: number;
     id: number;
     has_image: boolean;
+};
+
+export type ChildQuestionAdmin = {
+    order?: number;
+    component?: string;
+    type?: string;
+    options?: string;
+    additional_option?: string;
+    id: number;
+    text?: {
+        [key: string]: ChildQuestionText;
+    };
+};
+
+export type ChildQuestionPublic = {
+    id: number;
+    component?: string;
+    type?: string;
+    text?: {
+        [key: string]: QuestionTextPublic;
+    };
+    additional_option?: string;
+};
+
+export type ChildQuestionText = {
+    question?: string;
+    options_json?: string;
+    options?: string;
+    child_question_id?: (number | null);
+    lang_id?: (string | null);
 };
 
 export type ErrorModel = {
@@ -157,17 +193,16 @@ export type MilestoneTextPublic = {
     help?: string;
 };
 
-/**
- * External data model for UserAnswers
- *
- * Parameters
- * ----------
- * SQLModel : Pydantic model  basic sqlmodel pydantic type
- */
+export type QuestionTextPublic = {
+    question?: string;
+    options_json?: string;
+    options?: string;
+};
+
 export type UserAnswerPublic = {
     answer: string;
-    question_id: number;
     additional_answer: (string | null);
+    question_id: number;
 };
 
 export type UserCreate = {
@@ -180,15 +215,15 @@ export type UserCreate = {
 };
 
 export type UserQuestionAdmin = {
-    id: number;
-    order: number;
+    order?: number;
     component?: string;
     type?: string;
-    options: string;
+    options?: string;
+    additional_option?: string;
+    id: number;
     text?: {
         [key: string]: UserQuestionText;
     };
-    additional_option?: string;
 };
 
 export type UserQuestionPublic = {
@@ -196,7 +231,7 @@ export type UserQuestionPublic = {
     component?: string;
     type?: string;
     text?: {
-        [key: string]: UserQuestionTextPublic;
+        [key: string]: QuestionTextPublic;
     };
     additional_option?: string;
 };
@@ -204,14 +239,9 @@ export type UserQuestionPublic = {
 export type UserQuestionText = {
     question?: string;
     options_json?: string;
+    options?: string;
     user_question_id?: (number | null);
     lang_id?: (string | null);
-    options?: string;
-};
-
-export type UserQuestionTextPublic = {
-    question?: string;
-    options_json?: string;
 };
 
 export type UserRead = {
@@ -269,6 +299,10 @@ export type GetMilestoneGroupsError = (HTTPValidationError);
 export type GetUserQuestionsResponse = (Array<UserQuestionPublic>);
 
 export type GetUserQuestionsError = unknown;
+
+export type GetChildQuestionsResponse = (Array<ChildQuestionPublic>);
+
+export type GetChildQuestionsError = unknown;
 
 export type CreateLanguageData = {
     body: Language;
@@ -405,6 +439,32 @@ export type DeleteUserQuestionResponse = (unknown);
 
 export type DeleteUserQuestionError = (HTTPValidationError);
 
+export type GetChildQuestionsAdminResponse = (Array<ChildQuestionAdmin>);
+
+export type GetChildQuestionsAdminError = unknown;
+
+export type UpdateChildQuestionData = {
+    body: ChildQuestionAdmin;
+};
+
+export type UpdateChildQuestionResponse = (ChildQuestionAdmin);
+
+export type UpdateChildQuestionError = (HTTPValidationError);
+
+export type CreateChildQuestionResponse = (ChildQuestionAdmin);
+
+export type CreateChildQuestionError = unknown;
+
+export type DeleteChildQuestionData = {
+    path: {
+        child_question_id: number;
+    };
+};
+
+export type DeleteChildQuestionResponse = (unknown);
+
+export type DeleteChildQuestionError = (HTTPValidationError);
+
 export type UsersCurrentUserResponse = (UserRead);
 
 export type UsersCurrentUserError = (unknown);
@@ -467,6 +527,16 @@ export type CreateChildData = {
 export type CreateChildResponse = (ChildPublic);
 
 export type CreateChildError = (HTTPValidationError);
+
+export type GetChildData = {
+    path: {
+        child_id: number;
+    };
+};
+
+export type GetChildResponse = (ChildPublic);
+
+export type GetChildError = (HTTPValidationError);
 
 export type DeleteChildData = {
     path: {
@@ -531,6 +601,27 @@ export type UpdateCurrentUserAnswersData = {
 export type UpdateCurrentUserAnswersResponse = (Array<UserAnswerPublic>);
 
 export type UpdateCurrentUserAnswersError = (HTTPValidationError);
+
+export type GetCurrentChildAnswersData = {
+    path: {
+        child_id: number;
+    };
+};
+
+export type GetCurrentChildAnswersResponse = (Array<ChildAnswerPublic>);
+
+export type GetCurrentChildAnswersError = (HTTPValidationError);
+
+export type UpdateCurrentChildAnswersData = {
+    body: Array<ChildAnswerPublic>;
+    path: {
+        child_id: number;
+    };
+};
+
+export type UpdateCurrentChildAnswersResponse = (unknown);
+
+export type UpdateCurrentChildAnswersError = (HTTPValidationError);
 
 export type AuthCookieLoginData = {
     body: Body_auth_cookie_login_auth_login_post;

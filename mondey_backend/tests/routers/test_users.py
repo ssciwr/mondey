@@ -11,11 +11,27 @@ def _is_approx_now(iso_date_string: str, delta=datetime.timedelta(hours=1)) -> b
     )
 
 
+def test_get_child(
+    user_client: TestClient, children: list[dict[str, str | bool | int]]
+):
+    response = user_client.get("/users/children/1")
+    assert response.status_code == 200
+    assert response.json() == children[0]
+
+
+def test_get_child_fail(
+    user_client: TestClient, children: list[dict[str, str | bool | int]]
+):
+    response = user_client.get("/users/children/605")
+    assert response.status_code == 404
+
+
 def test_get_children(
     user_client: TestClient, children: list[dict[str, str | bool | int]]
 ):
     response = user_client.get("/users/children/")
     assert response.status_code == 200
+    print("response: ", response.json())
     assert response.json() == [children[0], children[1]]
 
 
@@ -53,7 +69,11 @@ def test_create_update_and_delete_child(user_client: TestClient):
     assert len(user_client.get("/users/children/").json()) == 2
     response_create = user_client.post(
         "/users/children/",
-        json={"name": "child1", "birth_year": 2021, "birth_month": 3},
+        json={
+            "name": "child1",
+            "birth_year": 2021,
+            "birth_month": 3,
+        },
     )
     assert response_create.status_code == 200
     assert response_create.json() == {
@@ -111,12 +131,12 @@ def test_upload_child_image(
 
 def test_get_milestone_answers_child1_user_does_not_own_child(admin_client: TestClient):
     response = admin_client.get("/users/milestone-answers/1")
-    assert response.status_code == 401
+    assert response.status_code == 404
 
 
 def test_get_milestone_answers_child8_child_does_not_exist(admin_client: TestClient):
     response = admin_client.get("/users/milestone-answers/8")
-    assert response.status_code == 401
+    assert response.status_code == 404
 
 
 def test_get_milestone_answers_child3_no_current_answer_session(
@@ -203,25 +223,8 @@ def test_get_current_user_answers_invalid_user(public_client: TestClient):
     assert response.status_code == 401
 
 
-def test_update_current_answers_prexisting(user_client: TestClient):
-    response = user_client.put(
-        "/users/user-answers/",
-        json=[
-            {
-                "answer": "other",
-                "question_id": 1,
-                "additional_answer": "dolor",
-            },
-            {
-                "answer": "amet",
-                "question_id": 2,
-                "additional_answer": None,
-            },
-        ],
-    )
-
-    assert response.status_code == 200
-    assert response.json() == [
+def test_update_current_user_answers_prexisting(user_client: TestClient):
+    publicanswers = [
         {
             "answer": "other",
             "question_id": 1,
@@ -233,10 +236,21 @@ def test_update_current_answers_prexisting(user_client: TestClient):
             "additional_answer": None,
         },
     ]
+
+    response = user_client.put(
+        "/users/user-answers/",
+        json=publicanswers,
+    )
+    assert response.status_code == 200
+    assert response.json() == publicanswers
 
     response = user_client.get("/users/user-answers/")
     assert response.status_code == 200
-    assert response.json() == [
+    assert response.json() == publicanswers
+
+
+def test_update_current_user_answers_no_prexisting(second_user_client: TestClient):
+    publicanswers = [
         {
             "answer": "other",
             "question_id": 1,
@@ -249,49 +263,69 @@ def test_update_current_answers_prexisting(user_client: TestClient):
         },
     ]
 
-
-def test_update_current_answers_no_prexisting(second_user_client: TestClient):
     response = second_user_client.put(
         "/users/user-answers/",
-        json=[
-            {
-                "answer": "other",
-                "question_id": 1,
-                "additional_answer": "dolor",
-            },
-            {
-                "answer": "amet",
-                "question_id": 2,
-                "additional_answer": None,
-            },
-        ],
+        json=publicanswers,
     )
 
     assert response.status_code == 200
-    assert response.json() == [
-        {
-            "answer": "other",
-            "question_id": 1,
-            "additional_answer": "dolor",
-        },
-        {
-            "answer": "amet",
-            "question_id": 2,
-            "additional_answer": None,
-        },
-    ]
+    assert response.json() == publicanswers
 
     response = second_user_client.get("/users/user-answers/")
     assert response.status_code == 200
+    assert response.json() == publicanswers
+
+
+def test_get_current_child_answers_works(user_client: TestClient):
+    response = user_client.get("/users/children-answers/1")
+    assert response.status_code == 200
     assert response.json() == [
         {
-            "answer": "other",
+            "answer": "a",
             "question_id": 1,
-            "additional_answer": "dolor",
-        },
-        {
-            "answer": "amet",
-            "question_id": 2,
             "additional_answer": None,
         },
+        {
+            "answer": "other",
+            "question_id": 2,
+            "additional_answer": "dolor sit",
+        },
     ]
+
+
+def test_get_current_child_answers_invalid_child(user_client: TestClient):
+    response = user_client.get("/users/children-answers/5")
+    assert response.status_code == 404
+
+
+def test_get_current_child_answers_invalid_user(public_client: TestClient):
+    response = public_client.get("/users/children-answers/1")
+    assert response.status_code == 401
+
+
+def test_update_current_child_answers_prexisting(
+    user_client: TestClient, child_answers: list[dict[str, str | int | None]]
+):
+    response = user_client.put(
+        "/users/children-answers/1",
+        json=child_answers,
+    )
+
+    assert response.status_code == 200
+
+    assert response.json() == {"ok": True}
+
+    response = user_client.get(
+        "/users/children-answers/1",
+    )
+    assert response.json() == child_answers
+
+
+def test_update_current_child_answers_no_prexisting(
+    second_user_client: TestClient, child_answers: list[dict[str, str | int | None]]
+):
+    response = second_user_client.put(
+        "/users/children-answers/2",
+        json=child_answers,
+    )
+    assert response.status_code == 404

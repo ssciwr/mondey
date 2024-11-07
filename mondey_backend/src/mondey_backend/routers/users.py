@@ -18,6 +18,8 @@ from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneAnswerSessionPublic
+from ..models.questions import ChildAnswer
+from ..models.questions import ChildAnswerPublic
 from ..models.questions import UserAnswer
 from ..models.questions import UserAnswerPublic
 from ..models.users import UserRead
@@ -26,6 +28,7 @@ from ..settings import app_settings
 from ..users import fastapi_users
 from .utils import add
 from .utils import get
+from .utils import get_db_child
 from .utils import get_or_create_current_milestone_answer_session
 from .utils import write_file
 
@@ -43,6 +46,13 @@ def create_router() -> APIRouter:
                 select(Child).where(col(Child.user_id) == current_active_user.id)
             ).all()
         ]
+
+    @router.get("/children/{child_id}", response_model=ChildPublic)
+    def get_child(
+        session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
+    ):
+        child = get_db_child(session, current_active_user, child_id)
+        return child
 
     @router.post("/children/", response_model=ChildPublic)
     def create_child(
@@ -74,9 +84,7 @@ def create_router() -> APIRouter:
     def delete_child(
         session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
     ):
-        child = get(session, Child, child_id)
-        if child.user_id != current_active_user.id:
-            raise HTTPException(401)
+        child = get_db_child(session, current_active_user, child_id)
         session.delete(child)
         session.commit()
         return {"ok": True}
@@ -87,9 +95,7 @@ def create_router() -> APIRouter:
         current_active_user: CurrentActiveUserDep,
         child_id: int,
     ):
-        child = get(session, Child, child_id)
-        if child.user_id != current_active_user.id:
-            raise HTTPException(401)
+        child = child = get_db_child(session, current_active_user, child_id)
         image_path = pathlib.Path(
             f"{app_settings.PRIVATE_FILES_PATH}/children/{child.id}.jpg"
         )
@@ -104,9 +110,7 @@ def create_router() -> APIRouter:
         child_id: int,
         file: UploadFile,
     ):
-        child = get(session, Child, child_id)
-        if child.user_id != current_active_user.id:
-            raise HTTPException(401)
+        child = get_db_child(session, current_active_user, child_id)
         child.has_image = True
         session.commit()
         filename = f"{app_settings.PRIVATE_FILES_PATH}/children/{child.id}.jpg"
@@ -186,5 +190,46 @@ def create_router() -> APIRouter:
 
         session.commit()
         return new_answers
+
+    # Endpoints for answers to child question
+    @router.get("/children-answers/{child_id}", response_model=list[ChildAnswerPublic])
+    def get_current_child_answers(
+        session: SessionDep, child_id: int, current_active_user: CurrentActiveUserDep
+    ):
+        get_db_child(session, current_active_user, child_id)
+        answers = session.exec(
+            select(ChildAnswer).where(col(ChildAnswer.child_id) == child_id)
+        ).all()
+
+        return answers
+
+    @router.put("/children-answers/{child_id}")
+    def update_current_child_answers(
+        session: SessionDep,
+        child_id: int,
+        current_active_user: CurrentActiveUserDep,
+        new_answers: list[ChildAnswerPublic],
+    ):
+        get_db_child(session, current_active_user, child_id)
+        for new_answer in new_answers:
+            current_answer = session.get(
+                ChildAnswer, (child_id, new_answer.question_id)
+            )
+
+            if current_answer is None:
+                current_answer = ChildAnswer.model_validate(
+                    new_answer,
+                    update={
+                        "child_id": child_id,
+                    },
+                )
+            else:
+                for key, value in new_answer.model_dump().items():
+                    setattr(current_answer, key, value)
+
+            add(session, current_answer)
+        session.commit()
+
+        return {"ok": True}
 
     return router

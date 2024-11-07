@@ -5,6 +5,8 @@ from sqlmodel import col
 from sqlmodel import select
 
 from ..dependencies import SessionDep
+from ..models.questions import ChildQuestion
+from ..models.questions import ChildQuestionPublic
 from ..models.questions import UserQuestion
 from ..models.questions import UserQuestionPublic
 
@@ -21,5 +23,12 @@ def create_router() -> APIRouter:
         ).all()
 
         return user_questions
+
+    @router.get("/child-questions/", response_model=list[ChildQuestionPublic])
+    def get_child_questions(session: SessionDep):
+        child_questions = session.exec(
+            select(ChildQuestion).order_by(col(ChildQuestion.order))
+        ).all()
+        return child_questions
 
     return router

@@ -26,7 +26,12 @@ from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.models.milestones import MilestoneGroupText
 from mondey_backend.models.milestones import MilestoneImage
 from mondey_backend.models.milestones import MilestoneText
+from mondey_backend.models.questions import ChildAnswer
+from mondey_backend.models.questions import ChildQuestion
+from mondey_backend.models.questions import ChildQuestionText
 from mondey_backend.models.questions import UserAnswer
+from mondey_backend.models.questions import UserQuestion
+from mondey_backend.models.questions import UserQuestionText
 from mondey_backend.models.users import UserRead
 
 
@@ -184,6 +189,135 @@ def session(children: list[dict]):
         )
         session.add(MilestoneAnswer(answer_session_id=3, milestone_id=7, answer=2))
 
+        # add user questions for admin
+        user_questions = [
+            UserQuestion(
+                id=1,
+                order=1,
+                options="[a,b,c,other]",
+                additional_option="other",
+                component="select",
+                text={
+                    "de": UserQuestionText(
+                        user_question_id=1,
+                        lang_id="de",
+                        options="[x,y,z]",
+                        question="Wo sonst?",
+                        options_json="",
+                    ),
+                    "en": UserQuestionText(
+                        user_question_id=1,
+                        lang_id="en",
+                        options="[1,2,3]",
+                        question="Where else?",
+                        options_json="",
+                    ),
+                    "fr": UserQuestionText(
+                        user_question_id=1,
+                        lang_id="fr",
+                        options="[1,2,3]",
+                        question="french words",
+                        options_json="",
+                    ),
+                },
+            ),
+            UserQuestion(
+                id=2,
+                order=2,
+                component="textarea",
+                options="[a2,b2,c2,other]",
+                additional_option="other",
+                text={
+                    "de": UserQuestionText(
+                        user_question_id=2,
+                        lang_id="de",
+                        options="[x2,y2,z2]",
+                        question="Was noch?",
+                        options_json="",
+                    ),
+                    "en": UserQuestionText(
+                        user_question_id=2,
+                        lang_id="en",
+                        options="[12,22,32]",
+                        question="What else?",
+                        options_json="",
+                    ),
+                    "fr": UserQuestionText(
+                        user_question_id=2,
+                        lang_id="fr",
+                        options="[12,22,32]",
+                        question="french words",
+                        options_json="",
+                    ),
+                },
+            ),
+        ]
+        for user_question in user_questions:
+            session.add(user_question)
+            for lang in user_question.text:
+                session.add(user_question.text[lang])
+
+        # add child questions
+        child_questions = [
+            ChildQuestion(
+                id=1,
+                order=0,
+                options="[a,b,c,other]",
+                additional_option="other",
+                text={
+                    "de": ChildQuestionText(
+                        child_question_id=1,
+                        lang_id="de",
+                        question="was?",
+                        options="[x,y,z,andere]",
+                    ),
+                    "en": ChildQuestionText(
+                        child_question_id=1,
+                        lang_id="en",
+                        question="what?",
+                        options="[1,2,3,other]",
+                    ),
+                    "fr": ChildQuestionText(
+                        child_question_id=1,
+                        lang_id="fr",
+                        question="french...",
+                        options="[1,2,3,autre]",
+                    ),
+                },
+            ),
+            ChildQuestion(
+                id=2,
+                order=1,
+                options="[a2,b2,c2,other]",
+                additional_option="other",
+                text={
+                    "de": ChildQuestionText(
+                        child_question_id=2,
+                        lang_id="de",
+                        question="Wo?",
+                        options="[x2,y2,z2,andere]",
+                    ),
+                    "en": ChildQuestionText(
+                        child_question_id=2,
+                        lang_id="en",
+                        question="Where?",
+                        options="[12,22,32,other]",
+                    ),
+                    "fr": ChildQuestionText(
+                        child_question_id=2,
+                        lang_id="fr",
+                        question="french...",
+                        options="[12,22,32,autre]",
+                    ),
+                },
+            ),
+        ]
+
+        for child_question in child_questions:
+            session.add(child_question)
+            for lang in child_question.text:
+                session.add(child_question.text[lang])
+
         # add user answers for user 1
         session.add(
             UserAnswer(
@@ -204,7 +338,222 @@ def session(children: list[dict]):
             )
         )
 
+        # add child answers for user 1
+        session.add(
+            ChildAnswer(
+                id=1,
+                question_id=1,
+                user_id=1,
+                child_id=1,
+                answer="a",
+                additional_answer=None,
+            )
+        )
+        session.add(
+            ChildAnswer(
+                id=2,
+                question_id=2,
+                user_id=1,
+                child_id=1,
+                answer="other",
+                additional_answer="dolor sit",
+            )
+        )
+        session.commit()
         yield session
+
+
+@pytest.fixture
+def user_questions():
+    return [
+        {
+            "id": 1,
+            "order": 1,
+            "component": "select",
+            "options": "[a,b,c,other]",
+            "additional_option": "other",
+            "type": "text",
+            "text": {
+                "de": {
+                    "user_question_id": 1,
+                    "lang_id": "de",
+                    "options": "[x,y,z]",
+                    "options_json": "",
+                    "question": "Wo sonst?",
+                },
+                "en": {
+                    "user_question_id": 1,
+                    "lang_id": "en",
+                    "options": "[1,2,3]",
+                    "question": "Where else?",
+                    "options_json": "",
+                },
+                "fr": {
+                    "user_question_id": 1,
+                    "lang_id": "fr",
+                    "options": "[1,2,3]",
+                    "question": "french words",
+                    "options_json": "",
+                },
+            },
+        },
+        {
+            "id": 2,
+            "order": 2,
+            "component": "textarea",
+            "options": "[a2,b2,c2,other]",
+            "additional_option": "other",
+            "type": "text",
+            "text": {
+                "de": {
+                    "user_question_id": 2,
+                    "lang_id": "de",
+                    "options": "[x2,y2,z2]",
+                    "options_json": "",
+                    "question": "Was noch?",
+                },
+                "en": {
+                    "user_question_id": 2,
+                    "lang_id": "en",
+                    "options": "[12,22,32]",
+                    "question": "What else?",
+                    "options_json": "",
+                },
+                "fr": {
+                    "user_question_id": 2,
+                    "lang_id": "fr",
+                    "options": "[12,22,32]",
+                    "question": "french words",
+                    "options_json": "",
+                },
+            },
+        },
+    ]
+
+
+@pytest.fixture
+def child_questions():
+    return [
+        {
+            "id": 1,
+            "order": 0,
+            "component": "select",
+            "options": "[a,b,c,other]",
+            "additional_option": "other",
+            "type": "text",
+            "text": {
+                "de": {
+                    "child_question_id": 1,
+                    "lang_id": "de",
+                    "options": "[x,y,z,andere]",
+                    "options_json": "",
+                    "question": "was?",
+                },
+                "en": {
+                    "child_question_id": 1,
+                    "lang_id": "en",
+                    "options": "[1,2,3,other]",
+                    "question": "what?",
+                    "options_json": "",
+                },
+                "fr": {
+                    "child_question_id": 1,
+                    "lang_id": "fr",
+                    "question": "french...",
+                    "options": "[1,2,3,autre]",
+                    "options_json": "",
+                },
+            },
+        },
+        {
+            "id": 2,
+            "order": 1,
+            "component": "select",
+            "options": "[a2,b2,c2,other]",
+            "additional_option": "other",
+            "type": "text",
+            "text": {
+                "de": {
+                    "child_question_id": 2,
+                    "lang_id": "de",
+                    "options": "[x2,y2,z2,andere]",
+                    "options_json": "",
+                    "question": "Wo?",
+                },
+                "en": {
+                    "child_question_id": 2,
+                    "lang_id": "en",
+                    "options": "[12,22,32,other]",
+                    "question": "Where?",
+                    "options_json": "",
+                },
+                "fr": {
+                    "child_question_id": 2,
+                    "lang_id": "fr",
+                    "question": "french...",
+                    "options": "[12,22,32,autre]",
+                    "options_json": "",
+                },
+            },
+        },
+    ]
+
+
+@pytest.fixture
+def child_answers():
+    return [
+        # name
+        {
+            "answer": "other",
+            "question_id": 1,
+            "additional_answer": "sit amet",
+        },
+        # date
+        {
+            "answer": "2024-03-02",
+            "question_id": 2,
+            "additional_answer": None,
+        },
+        # remark
+        {"answer": "some remark", "question_id": 3, "additional_answer": None},
+        # file upload
+        {"answer": "file.jpg", "question_id": 4, "additional_answer": None},
+    ]
+
+
+@pytest.fixture
+def default_user_question_admin():
+    return {
+        "id": 1,
+        "component": "textarea",
+        "type": "other_thing",
+        "order": 0,
+        "options": "some_options",
+        "text": {
+            "de": {
+                "options_json": "",
+                "user_question_id": 1,
+                "options": "",
+                "lang_id": "de",
+                "question": "",
+            },
+            "en": {
+                "options_json": "",
+                "user_question_id": 1,
+                "options": "",
+                "lang_id": "en",
+                "question": "",
+            },
+            "fr": {
+                "options_json": "",
+                "user_question_id": 1,
+                "options": "",
+                "lang_id": "fr",
+                "question": "",
+            },
+        },
+        "additional_option": "nothing",
+    }
 
 
 @pytest.fixture

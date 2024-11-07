@@ -55,7 +55,7 @@ def test_get_milestone_groups_child_doesnt_belong_to_user(
     research_client: TestClient,
 ):
     response = research_client.get("/milestone-groups/1")
-    assert response.status_code == 401
+    assert response.status_code == 404
 
 
 def test_get_milestone_groups_invalid_child_id(

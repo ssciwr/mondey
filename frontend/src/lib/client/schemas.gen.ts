@@ -148,6 +148,33 @@ export const Body_verify_verify_auth_verify_postSchema = {
     title: 'Body_verify_verify_auth_verify_post'
 } as const;
 
+export const ChildAnswerPublicSchema = {
+    properties: {
+        answer: {
+            type: 'string',
+            title: 'Answer'
+        },
+        additional_answer: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Additional Answer'
+        },
+        question_id: {
+            type: 'integer',
+            title: 'Question Id'
+        }
+    },
+    type: 'object',
+    required: ['answer', 'additional_answer', 'question_id'],
+    title: 'ChildAnswerPublic'
+} as const;
+
 export const ChildCreateSchema = {
     properties: {
         name: {
@@ -196,6 +223,131 @@ export const ChildPublicSchema = {
     type: 'object',
     required: ['birth_year', 'birth_month', 'id', 'has_image'],
     title: 'ChildPublic'
+} as const;
+
+export const ChildQuestionAdminSchema = {
+    properties: {
+        order: {
+            type: 'integer',
+            title: 'Order',
+            default: 0
+        },
+        component: {
+            type: 'string',
+            title: 'Component',
+            default: 'select'
+        },
+        type: {
+            type: 'string',
+            title: 'Type',
+            default: 'text'
+        },
+        options: {
+            type: 'string',
+            title: 'Options',
+            default: ''
+        },
+        additional_option: {
+            type: 'string',
+            title: 'Additional Option',
+            default: ''
+        },
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        text: {
+            additionalProperties: {
+                '$ref': '#/components/schemas/ChildQuestionText'
+            },
+            type: 'object',
+            title: 'Text',
+            default: {}
+        }
+    },
+    type: 'object',
+    required: ['id'],
+    title: 'ChildQuestionAdmin'
+} as const;
+
+export const ChildQuestionPublicSchema = {
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        component: {
+            type: 'string',
+            title: 'Component',
+            default: 'select'
+        },
+        type: {
+            type: 'string',
+            title: 'Type',
+            default: 'text'
+        },
+        text: {
+            additionalProperties: {
+                '$ref': '#/components/schemas/QuestionTextPublic'
+            },
+            type: 'object',
+            title: 'Text',
+            default: {}
+        },
+        additional_option: {
+            type: 'string',
+            title: 'Additional Option',
+            default: ''
+        }
+    },
+    type: 'object',
+    required: ['id'],
+    title: 'ChildQuestionPublic'
+} as const;
+
+export const ChildQuestionTextSchema = {
+    properties: {
+        question: {
+            type: 'string',
+            title: 'Question',
+            default: ''
+        },
+        options_json: {
+            type: 'string',
+            title: 'Options Json',
+            default: ''
+        },
+        options: {
+            type: 'string',
+            title: 'Options',
+            default: ''
+        },
+        child_question_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Child Question Id'
+        },
+        lang_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 2
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Lang Id'
+        }
+    },
+    type: 'object',
+    title: 'ChildQuestionText'
 } as const;
 
 export const ErrorModelSchema = {
@@ -612,15 +764,33 @@ export const MilestoneTextPublicSchema = {
     title: 'MilestoneTextPublic'
 } as const;
 
+export const QuestionTextPublicSchema = {
+    properties: {
+        question: {
+            type: 'string',
+            title: 'Question',
+            default: ''
+        },
+        options_json: {
+            type: 'string',
+            title: 'Options Json',
+            default: ''
+        },
+        options: {
+            type: 'string',
+            title: 'Options',
+            default: ''
+        }
+    },
+    type: 'object',
+    title: 'QuestionTextPublic'
+} as const;
+
 export const UserAnswerPublicSchema = {
     properties: {
         answer: {
             type: 'string',
             title: 'Answer'
-        },
-        question_id: {
-            type: 'integer',
-            title: 'Question Id'
         },
         additional_answer: {
             anyOf: [
@@ -632,16 +802,15 @@ export const UserAnswerPublicSchema = {
                 }
             ],
             title: 'Additional Answer'
+        },
+        question_id: {
+            type: 'integer',
+            title: 'Question Id'
         }
     },
     type: 'object',
-    required: ['answer', 'question_id', 'additional_answer'],
-    title: 'UserAnswerPublic',
-    description: `External data model for UserAnswers
-
-Parameters
-----------
-SQLModel : Pydantic model  basic sqlmodel pydantic type`
+    required: ['answer', 'additional_answer', 'question_id'],
+    title: 'UserAnswerPublic'
 } as const;
 
 export const UserCreateSchema = {
@@ -711,13 +880,10 @@ export const UserCreateSchema = {
 
 export const UserQuestionAdminSchema = {
     properties: {
-        id: {
-            type: 'integer',
-            title: 'Id'
-        },
         order: {
             type: 'integer',
-            title: 'Order'
+            title: 'Order',
+            default: 0
         },
         component: {
             type: 'string',
@@ -731,7 +897,17 @@ export const UserQuestionAdminSchema = {
         },
         options: {
             type: 'string',
-            title: 'Options'
+            title: 'Options',
+            default: ''
+        },
+        additional_option: {
+            type: 'string',
+            title: 'Additional Option',
+            default: ''
+        },
+        id: {
+            type: 'integer',
+            title: 'Id'
         },
         text: {
             additionalProperties: {
@@ -740,15 +916,10 @@ export const UserQuestionAdminSchema = {
             type: 'object',
             title: 'Text',
             default: {}
-        },
-        additional_option: {
-            type: 'string',
-            title: 'Additional Option',
-            default: ''
         }
     },
     type: 'object',
-    required: ['id', 'order', 'options'],
+    required: ['id'],
     title: 'UserQuestionAdmin'
 } as const;
 
@@ -770,7 +941,7 @@ export const UserQuestionPublicSchema = {
         },
         text: {
             additionalProperties: {
-                '$ref': '#/components/schemas/UserQuestionTextPublic'
+                '$ref': '#/components/schemas/QuestionTextPublic'
             },
             type: 'object',
             title: 'Text',
@@ -799,6 +970,11 @@ export const UserQuestionTextSchema = {
             title: 'Options Json',
             default: ''
         },
+        options: {
+            type: 'string',
+            title: 'Options',
+            default: ''
+        },
         user_question_id: {
             anyOf: [
                 {
@@ -821,32 +997,10 @@ export const UserQuestionTextSchema = {
                 }
             ],
             title: 'Lang Id'
-        },
-        options: {
-            type: 'string',
-            title: 'Options',
-            default: ''
         }
     },
     type: 'object',
     title: 'UserQuestionText'
-} as const;
-
-export const UserQuestionTextPublicSchema = {
-    properties: {
-        question: {
-            type: 'string',
-            title: 'Question',
-            default: ''
-        },
-        options_json: {
-            type: 'string',
-            title: 'Options Json',
-            default: ''
-        }
-    },
-    type: 'object',
-    title: 'UserQuestionTextPublic'
 } as const;
 
 export const UserReadSchema = {

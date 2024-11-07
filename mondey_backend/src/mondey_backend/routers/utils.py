@@ -19,11 +19,13 @@ from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneGroupAdmin
 from ..models.milestones import MilestoneGroupText
 from ..models.milestones import MilestoneText
+from ..models.questions import ChildQuestionAdmin
+from ..models.questions import ChildQuestionText
 from ..models.questions import UserQuestionAdmin
 from ..models.questions import UserQuestionText
 from ..users import User
 
-Text = MilestoneText | MilestoneGroupText | UserQuestionText
+Text = MilestoneText | MilestoneGroupText | UserQuestionText | ChildQuestionText
 
 
 def write_file(file: UploadFile, filename: str):
@@ -89,6 +91,12 @@ def update_user_question_text(session: SessionDep, user_question: UserQuestionAd
     )
 
 
+def update_child_question_text(session: SessionDep, child_question: ChildQuestionAdmin):
+    _update_text(
+        session, ChildQuestionText, child_question.text.values(), child_question.id
+    )
+
+
 def _session_has_expired(milestone_answer_session: MilestoneAnswerSession) -> bool:
     session_lifetime_days = 7
     return (
@@ -100,9 +108,7 @@ def _session_has_expired(milestone_answer_session: MilestoneAnswerSession) -> bo
 def get_or_create_current_milestone_answer_session(
     session: SessionDep, current_active_user: User, child_id: int
 ) -> MilestoneAnswerSession:
-    child = session.get(Child, child_id)
-    if child is None or child.user_id != current_active_user.id:
-        raise HTTPException(401)
+    get_db_child(session, current_active_user, child_id)
     milestone_answer_session = session.exec(
         select(MilestoneAnswerSession)
         .where(
@@ -126,3 +132,14 @@ def get_or_create_current_milestone_answer_session(
 def get_child_age_in_months(child: Child) -> int:
     today = datetime.date.today()
     return (today.year - child.birth_year) * 12 + (today.month - child.birth_month)
+
+
+def get_db_child(
+    session: SessionDep, current_active_user: User, child_id: int
+) -> Child:
+    child = get(session, Child, child_id)
+    if child is None or child.user_id != current_active_user.id:
+        raise HTTPException(
+            404, detail=f"Child with id {child_id} not found or wrong user"
+        )
+    return child
