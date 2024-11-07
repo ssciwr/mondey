@@ -211,10 +211,7 @@ def create_router() -> APIRouter:
         if child is None or child.user_id != current_active_user.id:
             raise HTTPException(404, detail="child not found for user")
         answers = session.exec(
-            select(ChildAnswer).where(
-                (col(ChildAnswer.user_id) == current_active_user.id)
-                & (col(ChildAnswer.child_id) == child_id)
-            )
+            select(ChildAnswer).where(col(ChildAnswer.child_id) == child_id)
         ).all()
 
         return answers
@@ -237,16 +234,14 @@ def create_router() -> APIRouter:
 
         for new_answer in new_answers:
             current_answer = session.get(
-                ChildAnswer, (current_active_user.id, child_id, new_answer.question_id)
+                ChildAnswer, (child_id, new_answer.question_id)
             )
 
             if current_answer is None:
                 current_answer = ChildAnswer.model_validate(
                     new_answer,
                     update={
-                        "user_id": current_active_user.id,
                         "child_id": child_id,
-                        "question_id": new_answer.question_id,
                     },
                 )
             else:
@@ -254,9 +249,8 @@ def create_router() -> APIRouter:
                     setattr(current_answer, key, value)
 
             add(session, current_answer)
-        add(session, child)
         session.commit()
 
-        return new_answers
+        return {"ok": True}
 
     return router

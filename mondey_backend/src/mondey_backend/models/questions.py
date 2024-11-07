@@ -108,7 +108,6 @@ class UserAnswerPublic(AnswerPublicBase):
 
 
 class ChildAnswer(AnswerBase, table=True):
-    user_id: int = Field(default=None, primary_key=True)
     child_id: int = Field(default=None, primary_key=True)
     question_id: int = Field(
         default=None, primary_key=True, foreign_key="childquestion.id"
