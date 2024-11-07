@@ -9,6 +9,7 @@ import {
 	getChild,
 	getChildQuestions,
 	getCurrentChildAnswers,
+	updateChild,
 	updateCurrentChildAnswers,
 	uploadChildImage,
 } from "$lib/client";
@@ -151,8 +152,21 @@ async function submitData(): Promise<void> {
 		} else {
 			currentChild.set(new_child.data.id);
 		}
+	} else {
+		const response = await updateChild({
+			body: {
+				name: name,
+				birth_year: birthyear,
+				birth_month: birthmonth,
+				has_image: image !== null,
+			},
+		});
+
+		if (response.error) {
+			showAlert = true;
+			alertMessage = $_("childData.alertMessageUpdate") + response.error.detail;
+		}
 	}
-	console.log("currentChild: ", $currentChild, typeof $currentChild);
 
 	// id=4 is the image upload
 	if (image instanceof File || image instanceof Blob) {
