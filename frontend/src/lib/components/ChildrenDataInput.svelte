@@ -25,13 +25,15 @@ import { _, locale } from "svelte-i18n";
 let questionnaire: GetChildQuestionsResponse = $state(
 	[] as GetChildQuestionsResponse,
 );
-let answers: { [k: string]: ChildAnswerPublic } = $state({});
+let answers: { [k: number]: ChildAnswerPublic } = $state({});
 let disableEdit: boolean = $state(false);
 let alertMessage: string = $state($_("childData.alertMessageMissing"));
 let showAlert = $state(false);
 let promise = $state(setup());
 let childLabel = $derived(
-	answers[1]?.answer ? answers[1].answer : $_("childData.newChildHeadingLong"),
+	answers[1] && answers[1]?.answer
+		? answers[1].answer
+		: $_("childData.newChildHeadingLong"),
 );
 
 let breadcrumbdata = $derived([
@@ -58,6 +60,7 @@ async function setup(): Promise<{
 	questionnaire: GetChildQuestionsResponse;
 	answers: { [k: string]: ChildAnswerPublic };
 }> {
+	console.log("setup");
 	// get questions
 	const questions = await getChildQuestions();
 	if (questions.error || questions.data === undefined) {
@@ -65,9 +68,7 @@ async function setup(): Promise<{
 		showAlert = true;
 		alertMessage = $_("childData.alertMessageError");
 	} else {
-		questionnaire = questions.data.sort(
-			(first, second) => first.id - second.id,
-		);
+		questionnaire = questions.data;
 	}
 
 	if ($currentChild !== null) {
@@ -86,28 +87,24 @@ async function setup(): Promise<{
 			showAlert = true;
 			alertMessage = $_("childData.alertMessageError");
 		} else {
-			answers = Object.fromEntries(
-				currentAnswers.data.map((existing_answer: ChildAnswerPublic) => [
-					existing_answer.question_id,
-					existing_answer as ChildAnswerPublic,
-				]),
-			);
+			answers = currentAnswers.data;
 			disableEdit = true;
 		}
+	} else {
+		// create empty answers when creating a new child
+		answers = questionnaire.reduce(
+			(acc, question) => {
+				acc[question.id] = {
+					question_id: question.id,
+					answer: "",
+					additional_answer: "",
+				};
+				return acc;
+			},
+			{} as { [k: number]: ChildAnswerPublic },
+		);
 	}
-	// add nonexisting answers
-	questionnaire.forEach((question) => {
-		if (!(question.id in answers)) {
-			console.log(" adding default question");
-			answers[question.id] = {
-				question_id: question.id,
-				answer: "",
-				additional_answer: "",
-			} as ChildAnswerPublic;
-
-			disableEdit = false;
-		}
-	});
+	console.log("setup done");
 
 	return { questionnaire: questionnaire, answers: answers };
 }
@@ -175,10 +172,6 @@ async function submitData(): Promise<void> {
 		disableEdit = true;
 	}
 }
-
-$effect(() => {
-	console.log("currentChild: ", $currentChild);
-});
 </script>
 
 <Breadcrumbs data={breadcrumbdata} />
@@ -216,7 +209,6 @@ $effect(() => {
 					onsubmit={preventDefault(submitData)}
 				>
 					{#each questionnaire as element, i}
-						{console.log('element', element.id, 'disabled', disableEdit || (element.id in [1,2]), disableEdit,  (element.id in [1,2]))}
 						<DataInput
 							component={componentTable[element.component]}
 							bind:value={answers[element.id].answer}
@@ -232,7 +224,7 @@ $effect(() => {
 								: JSON.parse(
 										element.text[$locale].options_json,
 									)}
-							disabled={disableEdit || (element.id in [1,2])}
+							disabled={disableEdit}
 						/>
 					{/each}
 					{#if disableEdit === true}

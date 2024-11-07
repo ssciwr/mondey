@@ -17,6 +17,7 @@ async function setup(): Promise<any> {
 			summary: $_("childData.newChildHeadingLong"),
 			events: {
 				onclick: async () => {
+					currentChild.set(null);
 					activeTabChildren.set("childrenDataInput");
 				},
 			},
@@ -55,7 +56,6 @@ async function setup(): Promise<any> {
 				}
 				return {
 					header: child.name,
-					summary: child.remark,
 					image,
 					events: {
 						onclick: () => {
@@ -111,21 +111,6 @@ function searchName(data: any[], key: string): any[] {
 	}
 }
 
-function searchRemarks(data: any[], key: string): any[] {
-	if (key === "") {
-		return data;
-	} else {
-		const res = data.filter((item) => {
-			return item.summary.toLowerCase().includes(key.toLowerCase());
-		});
-		return res;
-	}
-}
-
-function searchAll(data: any[], key: string) {
-	return [...new Set([...searchName(data, key), ...searchRemarks(data, key)])];
-}
-
 let showAlert = $state(false);
 let alertMessage = $_("childData.alertMessageError");
 let data: any[] = $state([]);
@@ -133,19 +118,9 @@ let data: any[] = $state([]);
 const promise = $state(setup());
 const searchData = [
 	{
-		label: $_("childData.searchAllLabel"),
-		placeholder: $_("childData.searchAllPlaceholder"),
-		filterFunction: searchAll,
-	},
-	{
 		label: $_("childData.searchNameLabel"),
 		placeholder: $_("childData.searchNamePlaceholder"),
 		filterFunction: searchName,
-	},
-	{
-		label: $_("childData.searchRemarkLabel"),
-		placeholder: $_("childData.searchRemarkPlaceholder"),
-		filterFunction: searchRemarks,
 	},
 ];
 </script>

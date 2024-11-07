@@ -106,9 +106,6 @@ async function saveChanges() {
 								<InputAddon>{text.lang_id}</InputAddon>
 								<Input
 									bind:value={text.question}
-									on:input={() => {
-										question = question;
-									}}
 									placeholder={$_("admin.placeholder")}
 								/>
 							</ButtonGroup>

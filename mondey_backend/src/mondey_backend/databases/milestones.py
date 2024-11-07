@@ -29,7 +29,7 @@ def create_database():
             session.add(
                 ChildQuestion(
                     id=1,
-                    order=0,
+                    order=1,
                     component="textarea",
                     type="text",
                     text={
@@ -51,7 +51,7 @@ def create_database():
             session.add(
                 ChildQuestion(
                     id=2,
-                    order=1,
+                    order=2,
                     component="date",
                     type="input",
                     text={
@@ -73,7 +73,7 @@ def create_database():
             session.add(
                 ChildQuestion(
                     id=3,
-                    order=2,
+                    order=3,
                     component="textarea",
                     type="text",
                     text={
@@ -95,7 +95,7 @@ def create_database():
             session.add(
                 ChildQuestion(
                     id=4,
-                    order=3,
+                    order=4,
                     component="fileupload",
                     type="input",
                     text={

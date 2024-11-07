@@ -20,6 +20,7 @@ from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneAnswerSessionPublic
 from ..models.questions import ChildAnswer
 from ..models.questions import ChildAnswerPublic
+from ..models.questions import ChildQuestion
 from ..models.questions import UserAnswer
 from ..models.questions import UserAnswerPublic
 from ..models.users import UserRead
@@ -199,7 +200,9 @@ def create_router() -> APIRouter:
         return new_answers
 
     # Endpoints for answers to child question
-    @router.get("/children-answers/{child_id}", response_model=list[ChildAnswerPublic])
+    @router.get(
+        "/children-answers/{child_id}", response_model=dict[int, ChildAnswerPublic]
+    )
     def get_current_child_answers(
         session: SessionDep, child_id: int, current_active_user: CurrentActiveUserDep
     ):
@@ -210,14 +213,35 @@ def create_router() -> APIRouter:
 
         if child is None or child.user_id != current_active_user.id:
             raise HTTPException(404, detail="child not found for user")
-        answers = session.exec(
-            select(ChildAnswer).where(
-                (col(ChildAnswer.user_id) == current_active_user.id)
-                & (col(ChildAnswer.child_id) == child_id)
-            )
-        ).all()
 
-        return answers
+        answers: list[ChildAnswer] = []
+
+        if child is not None:
+            answers = list(
+                session.exec(
+                    select(ChildAnswer).where(
+                        (col(ChildAnswer.user_id) == current_active_user.id)
+                        & (col(ChildAnswer.child_id) == child_id)
+                    )
+                ).all()
+            )
+
+        # get questions and add non-existant answers for questions that
+        # might have been added since the last editing of the answers.
+        questions = session.exec(select(ChildQuestion)).all()
+
+        for question in questions:
+            if not any(answer.question_id == question.id for answer in answers):
+                answers.append(
+                    ChildAnswer(
+                        user_id=current_active_user.id,
+                        child_id=child_id,
+                        question_id=question.id,
+                        answer="",
+                        additional_answer="",
+                    )
+                )
+        return {answer.question_id: answer for answer in answers}
 
     @router.put("/children-answers/{child_id}", response_model=list[ChildAnswerPublic])
     def update_current_child_answers(
@@ -254,6 +278,7 @@ def create_router() -> APIRouter:
                     setattr(current_answer, key, value)
 
             add(session, current_answer)
+
         add(session, child)
         session.commit()
 
