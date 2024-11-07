@@ -127,14 +127,12 @@ onMount(async () => {
 					</TableBodyCell>
 					<TableBodyCell>
 						<EditButton
-							disabled = {kind === "child" && question.id <=4}
 							onclick={() => {
 								currentQuestion = $questions[groupIndex];
 								showEditQuestionModal = true;
 							}}
 						/>
 						<DeleteButton
-							disabled = {kind === "child" && question.id <=4}
 							onclick={() => {
 								currentQuestionId = question.id;
 								showDeleteModal = true;

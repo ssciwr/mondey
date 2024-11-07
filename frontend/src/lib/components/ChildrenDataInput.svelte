@@ -2,17 +2,16 @@
 
 <script lang="ts">
 import {
+	type ChildAnswerPublic,
+	type GetChildQuestionsResponse,
 	createChild,
 	deleteChild,
+	getChild,
 	getChildQuestions,
 	getCurrentChildAnswers,
 	updateCurrentChildAnswers,
 	uploadChildImage,
 } from "$lib/client";
-import {
-	type ChildAnswerPublic,
-	type GetChildQuestionsResponse,
-} from "$lib/client/types.gen";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
@@ -35,7 +34,7 @@ let {
 	birthyear = $bindable(null),
 	birthmonth = $bindable(null),
 }: {
-	name: string | null;
+	name: string | null | undefined;
 	image: File | null;
 	birthyear: string | null;
 	birthmonth: string | null;
@@ -46,11 +45,7 @@ let disableEdit: boolean = $state(false);
 let alertMessage: string = $state($_("childData.alertMessageMissing"));
 let showAlert = $state(false);
 let promise = $state(setup());
-let childLabel = $derived(
-	answers[1] && answers[1]?.answer
-		? answers[1].answer
-		: $_("childData.newChildHeadingLong"),
-);
+let childLabel = $derived(name ? name : $_("childData.newChildHeadingLong"));
 
 let breadcrumbdata = $derived([
 	{
@@ -88,6 +83,18 @@ async function setup(): Promise<{
 	}
 
 	if ($currentChild !== null) {
+		const child = await getChild({ path: { child_id: $currentChild } });
+
+		if (child.error) {
+			console.log("Error when getting child: ", child.error.detail);
+			showAlert = true;
+			alertMessage = $_("childData.alertMessageError");
+		} else {
+			name = child.data.name;
+			birthyear = String(child.data.birth_year);
+			birthmonth = String(child.data.birth_month);
+		}
+
 		// get existing answers
 		let currentAnswers = await getCurrentChildAnswers({
 			path: {
@@ -128,13 +135,11 @@ async function setup(): Promise<{
 async function submitData(): Promise<void> {
 	// make new child if we don´t have one already
 	if ($currentChild === null) {
-		const date = new Date(answers[2].answer);
-
 		const new_child = await createChild({
 			body: {
 				name: name,
-				birth_year: date.getFullYear(),
-				birth_month: date.getMonth(),
+				birth_year: birthyear,
+				birth_month: birthmonth,
 				has_image: image !== null,
 			},
 		});
@@ -147,6 +152,7 @@ async function submitData(): Promise<void> {
 			currentChild.set(new_child.data.id);
 		}
 	}
+	console.log("currentChild: ", $currentChild, typeof $currentChild);
 
 	// id=4 is the image upload
 	if (image instanceof File || image instanceof Blob) {
@@ -166,24 +172,27 @@ async function submitData(): Promise<void> {
 		}
 	}
 
-	const response = await updateCurrentChildAnswers({
-		body: Object.values(answers),
-		path: {
-			child_id: $currentChild,
-		},
-	});
+	if ($currentChild) {
+		// send answers to changeable questions
+		const response = await updateCurrentChildAnswers({
+			body: Object.values(answers),
+			path: {
+				child_id: $currentChild,
+			},
+		});
 
-	if (response.error) {
-		console.log(
-			"Error when sending user question answers: ",
-			response.error.detail,
-		);
-		alertMessage = $_("childData.alertMessageError");
-		showAlert = true;
-	} else {
-		// disable all elements to make editing a conscious choice
-		console.log("submission of child data successful.");
-		disableEdit = true;
+		if (response.error) {
+			console.log(
+				"Error when sending user question answers: ",
+				response.error.detail,
+			);
+			alertMessage = $_("childData.alertMessageError");
+			showAlert = true;
+		} else {
+			// disable all elements to make editing a conscious choice
+			console.log("submission of child data successful.");
+			disableEdit = true;
+		}
 	}
 }
 </script>

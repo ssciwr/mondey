@@ -135,7 +135,6 @@ async function saveChanges() {
 							</ButtonGroup>
 						</div>
 						{#each Object.values(question.text) as text}
-							{console.log("text: ", text)}
 							<div class="mb-1">
 								<ButtonGroup class="w-full">
 									<InputAddon>{text.lang_id}</InputAddon>
