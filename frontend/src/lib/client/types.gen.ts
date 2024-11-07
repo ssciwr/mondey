@@ -619,7 +619,7 @@ export type UpdateCurrentChildAnswersData = {
     };
 };
 
-export type UpdateCurrentChildAnswersResponse = (Array<ChildAnswerPublic>);
+export type UpdateCurrentChildAnswersResponse = (unknown);
 
 export type UpdateCurrentChildAnswersError = (HTTPValidationError);
 
