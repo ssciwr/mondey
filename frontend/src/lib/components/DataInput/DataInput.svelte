@@ -17,6 +17,8 @@ let {
 	additionalRequired = false,
 	id = undefined,
 	items = [],
+	placeholder = undefined,
+	kwargs = {},
 }: {
 	component?: Component | null;
 	value?: any;
@@ -29,6 +31,8 @@ let {
 	disabled: boolean;
 	id: string | undefined;
 	items: any[];
+	placeholder: string | undefined;
+	kwargs: any;
 } = $props();
 
 // functionality for showing the textfield when the trigger is selected
@@ -72,9 +76,11 @@ $effect(() => {
 				componentClass
 			: componentClass}
 		bind:value
+		{placeholder}
 		{items}
 		{required}
 		{disabled}
+		{...kwargs}
 	/>
 
 	{#if showTextField === true}

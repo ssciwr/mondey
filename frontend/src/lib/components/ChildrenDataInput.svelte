@@ -22,10 +22,26 @@ import { preventDefault } from "$lib/util";
 import { Button, Card, Heading } from "flowbite-svelte";
 import { _, locale } from "svelte-i18n";
 
+// questions and answers about child that are not part of the child object
 let questionnaire: GetChildQuestionsResponse = $state(
 	[] as GetChildQuestionsResponse,
 );
 let answers: { [k: number]: ChildAnswerPublic } = $state({});
+
+// data for the child object
+let {
+	name = $bindable(null),
+	image = $bindable(null),
+	birthyear = $bindable(null),
+	birthmonth = $bindable(null),
+}: {
+	name: string | null;
+	image: File | null;
+	birthyear: string | null;
+	birthmonth: string | null;
+} = $props();
+
+// functionality
 let disableEdit: boolean = $state(false);
 let alertMessage: string = $state($_("childData.alertMessageMissing"));
 let showAlert = $state(false);
@@ -116,9 +132,10 @@ async function submitData(): Promise<void> {
 
 		const new_child = await createChild({
 			body: {
-				name: answers[1].answer,
+				name: name,
 				birth_year: date.getFullYear(),
 				birth_month: date.getMonth(),
+				has_image: image !== null,
 			},
 		});
 
@@ -132,11 +149,10 @@ async function submitData(): Promise<void> {
 	}
 
 	// id=4 is the image upload
-	if (answers[4].answer && answers[4].answer instanceof File) {
-		console.log("image exists", answers[4].answer);
+	if (image instanceof File || image instanceof Blob) {
 		const uploadResponse = await uploadChildImage({
 			body: {
-				file: answers[4].answer,
+				file: image,
 			},
 			path: {
 				child_id: $currentChild,
@@ -148,8 +164,6 @@ async function submitData(): Promise<void> {
 			showAlert = true;
 			alertMessage = uploadResponse.error.detail;
 		}
-
-		answers[4].answer = answers[4].answer.name;
 	}
 
 	const response = await updateCurrentChildAnswers({
@@ -203,11 +217,47 @@ async function submitData(): Promise<void> {
 						}}
 					/>
 				{/if}
-
 				<form
 					class="m-1 mx-auto w-full flex-col space-y-6"
 					onsubmit={preventDefault(submitData)}
 				>
+					<DataInput
+						component={componentTable["input"]}
+						bind:value={name}
+						label={$_("childData.childName")}
+						required={true}
+						placeholder={$_("childData.pleaseEnter")}
+						disabled={disableEdit}
+						kwargs = {{type: "text"}}
+						/>
+					<DataInput
+						component={componentTable["input"]}
+						bind:value={birthmonth}
+						label={$_("childData.childBirthMonth")}
+						required={true}
+						placeholder={$_("childData.pleaseEnterNumber")}
+						disabled={disableEdit}
+						kwargs = {{type: "number", min: 0, max:12, step: '1'}}
+						/>
+					<DataInput
+						component={componentTable["input"]}
+						bind:value={birthyear}
+						label={$_("childData.childBirthYear")}
+						required={true}
+						placeholder={$_("childData.pleaseEnterNumber")}
+						disabled={disableEdit}
+						kwargs = {{type: "number", min: 2007, step: '1'}}
+						/>
+
+					<DataInput
+						component={componentTable["fileupload"]}
+						bind:value={image}
+						label={$_("childData.imageOfChild")}
+						required={true}
+						placeholder={$_("childData.noFileChosen")}
+						disabled={disableEdit}
+						kwargs = {{accpet: ".jpg, .jpeg, .png"}}
+						/>
 					{#each questionnaire as element, i}
 						<DataInput
 							component={componentTable[element.component]}
@@ -225,6 +275,7 @@ async function submitData(): Promise<void> {
 										element.text[$locale].options_json,
 									)}
 							disabled={disableEdit}
+							placeholder={element.text[$locale].placeholder}
 						/>
 					{/each}
 					{#if disableEdit === true}

@@ -121,7 +121,14 @@
 		"searchNameLabel": "Name",
 		"searchNamePlaceholder": "Kinder nach Namen durchsuchen",
 		"searchRemarkLabel": "Bemerkung",
-		"searchRemarkPlaceholder": "Bemerkungen zu Kindern durchsuchen"
+		"searchRemarkPlaceholder": "Bemerkungen zu Kindern durchsuchen",
+		"pleaseEnter": "Bitte eintragen",
+		"pleaseEnterNumber": "Bitte als Zahl eintragen",
+		"childName": "Name des Kindes?",
+		"childBirthYear": "Geburtsjahr des Kindes?",
+		"childBirthMonth": "Geburtsmonat des Kindes?",
+		"imageOfChild": "Bild des Kindes hochlagen (optional)",
+		"noFileChosen": "Keine Datei ausgewählt"
 	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",

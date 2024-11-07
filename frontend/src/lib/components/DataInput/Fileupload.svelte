@@ -10,8 +10,8 @@ let {
 	disabled = false,
 }: {
 	value: File | null;
-	innerClass: string | null;
 	accept: string;
+	innerClass: string | null;
 	required: boolean;
 	disabled: boolean;
 } = $props();
