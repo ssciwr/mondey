@@ -131,12 +131,12 @@ def test_upload_child_image(
 
 def test_get_milestone_answers_child1_user_does_not_own_child(admin_client: TestClient):
     response = admin_client.get("/users/milestone-answers/1")
-    assert response.status_code == 401
+    assert response.status_code == 404
 
 
 def test_get_milestone_answers_child8_child_does_not_exist(admin_client: TestClient):
     response = admin_client.get("/users/milestone-answers/8")
-    assert response.status_code == 401
+    assert response.status_code == 404
 
 
 def test_get_milestone_answers_child3_no_current_answer_session(

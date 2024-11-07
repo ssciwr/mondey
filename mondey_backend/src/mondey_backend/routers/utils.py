@@ -108,9 +108,7 @@ def _session_has_expired(milestone_answer_session: MilestoneAnswerSession) -> bo
 def get_or_create_current_milestone_answer_session(
     session: SessionDep, current_active_user: User, child_id: int
 ) -> MilestoneAnswerSession:
-    child = session.get(Child, child_id)
-    if child is None or child.user_id != current_active_user.id:
-        raise HTTPException(401)
+    get_db_child(session, current_active_user, child_id)
     milestone_answer_session = session.exec(
         select(MilestoneAnswerSession)
         .where(
@@ -134,3 +132,14 @@ def get_or_create_current_milestone_answer_session(
 def get_child_age_in_months(child: Child) -> int:
     today = datetime.date.today()
     return (today.year - child.birth_year) * 12 + (today.month - child.birth_month)
+
+
+def get_db_child(
+    session: SessionDep, current_active_user: User, child_id: int
+) -> Child:
+    child = get(session, Child, child_id)
+    if child is None or child.user_id != current_active_user.id:
+        raise HTTPException(
+            404, detail=f"Child with id {child_id} not found or wrong user"
+        )
+    return child

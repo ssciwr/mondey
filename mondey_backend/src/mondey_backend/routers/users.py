@@ -28,6 +28,7 @@ from ..settings import app_settings
 from ..users import fastapi_users
 from .utils import add
 from .utils import get
+from .utils import get_db_child
 from .utils import get_or_create_current_milestone_answer_session
 from .utils import write_file
 
@@ -50,9 +51,7 @@ def create_router() -> APIRouter:
     def get_child(
         session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
     ):
-        child = get(session, Child, child_id)
-        if child.user_id != current_active_user.id:
-            raise HTTPException(401)
+        child = get_db_child(session, current_active_user, child_id)
         return child
 
     @router.post("/children/", response_model=ChildPublic)
@@ -85,9 +84,7 @@ def create_router() -> APIRouter:
     def delete_child(
         session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
     ):
-        child = get(session, Child, child_id)
-        if child.user_id != current_active_user.id:
-            raise HTTPException(401)
+        child = get_db_child(session, current_active_user, child_id)
         session.delete(child)
         session.commit()
         return {"ok": True}
@@ -98,9 +95,7 @@ def create_router() -> APIRouter:
         current_active_user: CurrentActiveUserDep,
         child_id: int,
     ):
-        child = get(session, Child, child_id)
-        if child.user_id != current_active_user.id:
-            raise HTTPException(401)
+        child = child = get_db_child(session, current_active_user, child_id)
         image_path = pathlib.Path(
             f"{app_settings.PRIVATE_FILES_PATH}/children/{child.id}.jpg"
         )
@@ -115,9 +110,7 @@ def create_router() -> APIRouter:
         child_id: int,
         file: UploadFile,
     ):
-        child = get(session, Child, child_id)
-        if child.user_id != current_active_user.id:
-            raise HTTPException(401)
+        child = get_db_child(session, current_active_user, child_id)
         child.has_image = True
         session.commit()
         filename = f"{app_settings.PRIVATE_FILES_PATH}/children/{child.id}.jpg"
@@ -203,13 +196,7 @@ def create_router() -> APIRouter:
     def get_current_child_answers(
         session: SessionDep, child_id: int, current_active_user: CurrentActiveUserDep
     ):
-        child = session.get(
-            Child,
-            child_id,
-        )
-
-        if child is None or child.user_id != current_active_user.id:
-            raise HTTPException(404, detail="child not found for user")
+        get_db_child(session, current_active_user, child_id)
         answers = session.exec(
             select(ChildAnswer).where(col(ChildAnswer.child_id) == child_id)
         ).all()
@@ -223,15 +210,7 @@ def create_router() -> APIRouter:
         current_active_user: CurrentActiveUserDep,
         new_answers: list[ChildAnswerPublic],
     ):
-        child = session.get(
-            Child,
-            child_id,
-        )
-
-        # because child and childanswers have overlap, we need to keep both in sync
-        if child is None or child.user_id != current_active_user.id:
-            raise HTTPException(404, detail="child not found for user")
-
+        get_db_child(session, current_active_user, child_id)
         for new_answer in new_answers:
             current_answer = session.get(
                 ChildAnswer, (child_id, new_answer.question_id)
