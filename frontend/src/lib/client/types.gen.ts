@@ -608,9 +608,7 @@ export type GetCurrentChildAnswersData = {
     };
 };
 
-export type GetCurrentChildAnswersResponse = ({
-    [key: string]: ChildAnswerPublic;
-});
+export type GetCurrentChildAnswersResponse = (Array<ChildAnswerPublic>);
 
 export type GetCurrentChildAnswersError = (HTTPValidationError);
 
@@ -621,7 +619,7 @@ export type UpdateCurrentChildAnswersData = {
     };
 };
 
-export type UpdateCurrentChildAnswersResponse = (Array<ChildAnswerPublic>);
+export type UpdateCurrentChildAnswersResponse = (unknown);
 
 export type UpdateCurrentChildAnswersError = (HTTPValidationError);
 

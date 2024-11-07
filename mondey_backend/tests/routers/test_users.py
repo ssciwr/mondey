@@ -131,12 +131,12 @@ def test_upload_child_image(
 
 def test_get_milestone_answers_child1_user_does_not_own_child(admin_client: TestClient):
     response = admin_client.get("/users/milestone-answers/1")
-    assert response.status_code == 401
+    assert response.status_code == 404
 
 
 def test_get_milestone_answers_child8_child_does_not_exist(admin_client: TestClient):
     response = admin_client.get("/users/milestone-answers/8")
-    assert response.status_code == 401
+    assert response.status_code == 404
 
 
 def test_get_milestone_answers_child3_no_current_answer_session(
@@ -304,16 +304,16 @@ def test_get_current_child_answers_invalid_user(public_client: TestClient):
 
 
 def test_update_current_child_answers_prexisting(
-    user_client: TestClient, child_answers: dict[str, dict[str, str | int | None]]
+    user_client: TestClient, child_answers: dict[str, str | int | None]
 ):
     response = user_client.put(
         "/users/children-answers/1",
-        json=list(child_answers.values()),
+        json=child_answers,
     )
 
     assert response.status_code == 200
 
-    assert response.json() == list(child_answers.values())
+    assert response.json() == {"ok": True}
 
     response = user_client.get(
         "/users/children-answers/1",
@@ -322,11 +322,10 @@ def test_update_current_child_answers_prexisting(
 
 
 def test_update_current_child_answers_no_prexisting(
-    second_user_client: TestClient,
-    child_answers: dict[str, dict[str, str | int | None]],
+    second_user_client: TestClient, child_answers: dict[str, str | int | None]
 ):
     response = second_user_client.put(
         "/users/children-answers/2",
-        json=list(child_answers.values()),
+        json=child_answers,
     )
     assert response.status_code == 404

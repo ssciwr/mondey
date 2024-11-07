@@ -86,16 +86,6 @@ class ChildQuestionAdmin(QuestionAdmin):
     text: dict[str, ChildQuestionText] = {}
 
 
-# child questions
-class ChildQuestionTextBase(SQLModel):
-    question: str = ""
-    options_json: str = ""
-
-
-class ChildQuestionTextPublic(ChildQuestionTextBase):
-    pass
-
-
 # Answers to user questions. Internal model and 'public' model exposed to the forntend app
 class AnswerBase(SQLModel):
     answer: str
@@ -118,7 +108,6 @@ class UserAnswerPublic(AnswerPublicBase):
 
 
 class ChildAnswer(AnswerBase, table=True):
-    user_id: int = Field(default=None, primary_key=True)
     child_id: int = Field(default=None, primary_key=True)
     question_id: int = Field(
         default=None, primary_key=True, foreign_key="childquestion.id"
