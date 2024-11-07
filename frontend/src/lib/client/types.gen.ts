@@ -608,12 +608,16 @@ export type GetCurrentChildAnswersData = {
     };
 };
 
-export type GetCurrentChildAnswersResponse = (Array<ChildAnswerPublic>);
+export type GetCurrentChildAnswersResponse = ({
+    [key: string]: ChildAnswerPublic;
+});
 
 export type GetCurrentChildAnswersError = (HTTPValidationError);
 
 export type UpdateCurrentChildAnswersData = {
-    body: Array<ChildAnswerPublic>;
+    body: {
+        [key: string]: ChildAnswerPublic;
+    };
     path: {
         child_id: number;
     };
