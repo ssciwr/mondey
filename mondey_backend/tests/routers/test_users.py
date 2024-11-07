@@ -313,7 +313,7 @@ def test_update_current_child_answers_prexisting(
 
     assert response.status_code == 200
 
-    assert response.json() == child_answers
+    assert response.json() == {"ok": True}
 
     response = user_client.get(
         "/users/children-answers/1",

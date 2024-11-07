@@ -216,7 +216,7 @@ def create_router() -> APIRouter:
 
         return answers
 
-    @router.put("/children-answers/{child_id}", response_model=list[ChildAnswerPublic])
+    @router.put("/children-answers/{child_id}")
     def update_current_child_answers(
         session: SessionDep,
         child_id: int,
