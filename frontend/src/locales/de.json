@@ -13,7 +13,9 @@
 		"help": "Förderhilfen",
 		"next": "Weiter",
 		"prev": "Zurück",
-		"autonext": "Automatisch weiter"
+		"autonext": "Automatisch weiter",
+		"groupOverviewLabel": "Bereichsübersicht",
+		"alertMessageRetrieving": "Fehler beim Abrufen der Meilensteine"
 	},
 	"admin": {
 		"heading": "Administration",

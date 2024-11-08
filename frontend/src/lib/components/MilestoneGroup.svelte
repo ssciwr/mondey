@@ -1,23 +1,46 @@
 <script lang="ts">
+import { getMilestoneGroups } from "$lib/client";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import { createStyle, surveyData } from "$lib/components/MilestoneGroup";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
+import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
+import { _ } from "svelte-i18n";
 
 const data: any[] = surveyData;
+let showAlert = $state(false);
+let alertMessage = $state("");
+let promise = $state(setup());
+
+async function setup(): Promise<any> {
+	await currentChild.data();
+	const milestonegroup = await getMilestoneGroups({
+		path: { child_id: currentChild.id },
+	});
+
+	if (milestonegroup.error) {
+		console.log("Error when retrieving milestone group data");
+		showAlert = true;
+		alertMessage =
+			$_("milestone.alertMessageRetrieving") + milestonegroup.error.detail;
+	} else {
+		console.log(
+			"Milestone group data retrieved successfully",
+			milestonegroup.data,
+		);
+	}
+}
 
 const breadcrumbdata: any[] = [
 	{
-		label: "Kinderübersicht",
+		label: $_("childData.overviewLabel"),
 		onclick: () => {
-			activeTabChildren.update((value) => {
-				return "childrenGallery";
-			});
+			activeTabChildren.set("childrenGallery");
 		},
 	},
 	{
-		label: "Meike",
+		label: currentChild.data.name,
 		onclick: () => {
 			activeTabChildren.update((value) => {
 				return "childrenRegistration";
@@ -25,11 +48,9 @@ const breadcrumbdata: any[] = [
 		},
 	},
 	{
-		label: "Bereichsübersicht",
+		label: $_("milestone.groupOverviewLabel"),
 		onclick: () => {
-			activeTabChildren.update((value) => {
-				return "milestoneGroup";
-			});
+			activeTabChildren.set("milestoneGroup");
 		},
 	},
 ];
@@ -144,6 +165,9 @@ const searchData: any[] = [
 ];
 </script>
 
+{#await promise}
+<p>{"Waiting for setup to finish"}</p>
+{:then milestonedata}
 <div class="flex flex-col border border-gray-200 md:rounded-t-lg dark:border-gray-700">
 	<Breadcrumbs data={breadcrumbdata} />
 	<div class="grid gap-y-8">
@@ -156,3 +180,5 @@ const searchData: any[] = [
 		/>
 	</div>
 </div>
+{:catch error}
+{/await}

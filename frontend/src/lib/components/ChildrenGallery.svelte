@@ -4,7 +4,7 @@
 import { getChildImage, getChildren } from "$lib/client/services.gen";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
-import { currentChild } from "$lib/stores/childrenStore";
+import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { Heading } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
@@ -45,7 +45,7 @@ async function setup(): Promise<any> {
 					image,
 					events: {
 						onclick: () => {
-							currentChild.set(child.id);
+							currentChild.id = child.id;
 							activeTabChildren.set("childrenRegistration");
 						},
 					},
@@ -60,7 +60,7 @@ async function setup(): Promise<any> {
 				summary: $_("childData.newChildHeadingLong"),
 				events: {
 					onclick: async () => {
-						currentChild.set(null);
+						currentChild.id = null;
 						activeTabChildren.set("childrenRegistration");
 					},
 				},
