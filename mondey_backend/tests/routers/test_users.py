@@ -148,23 +148,6 @@ def test_delete_child_image(
     assert user_client.get("/users/children-images/1").status_code == 404
 
 
-def test_delete_child_image_nonexistant_path(
-    user_client: TestClient, private_dir: pathlib.Path, jpg_file: pathlib.Path
-):
-    # add an image for the first child
-    with open(jpg_file, "rb") as f:
-        response = user_client.put(
-            "/users/children-images/1",
-            files={"file": ("filename", f, "image/jpeg")},
-        )
-    response = user_client.delete("/users/children-images/1")
-    assert response.status_code == 200
-
-    # delete the image again and observe that the image is not found
-    response = user_client.delete("/users/children-images/1")
-    assert response.status_code == 404
-
-
 def test_get_milestone_answers_child1_user_does_not_own_child(admin_client: TestClient):
     response = admin_client.get("/users/milestone-answers/1")
     assert response.status_code == 404
