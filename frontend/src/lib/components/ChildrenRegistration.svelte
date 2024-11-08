@@ -165,7 +165,7 @@ async function submitChildData(): Promise<void> {
 		}
 	} else {
 		// update existing child
-		const responseChild = await updateChild({
+		const response = await updateChild({
 			body: {
 				name: name,
 				birth_year: birthyear,
@@ -175,10 +175,10 @@ async function submitChildData(): Promise<void> {
 			} as ChildPublic,
 		});
 
-		if (responseChild.error) {
+		if (response.error) {
 			showAlert = true;
 			alertMessage =
-				$_("childData.alertMessageUpdate") + " " + responseChild.error.detail;
+				$_("childData.alertMessageUpdate") + " " + response.error.detail;
 			return;
 		}
 	}
