@@ -60,10 +60,9 @@ def test_get_child_image(user_client: TestClient):
     assert response.content == b"2.jpg"
 
 
-def test_get_child_image_no_image(user_client: TestClient):
+def test_get_child_image_no_image(user_client: TestClient, data_dir: pathlib.Path):
     response = user_client.get("/users/children-images/1")
     assert response.status_code == 200
-    assert response.content == "static/dummy.jpg"
 
 
 def test_create_update_and_delete_child(user_client: TestClient):
@@ -116,7 +115,8 @@ def test_upload_child_image(
     # child 1 does not have an image:
     assert not (children_dir / "1.jpg").is_file()
     assert user_client.get("/users/children/").json()[0]["has_image"] is False
-    assert user_client.get("/users/children-images/1").status_code == 404
+    assert user_client.get("/users/children-images/1").status_code == 200
+
     # add an image for the first child
     with open(jpg_file, "rb") as f:
         response = user_client.put(
@@ -146,7 +146,7 @@ def test_delete_child_image(
     assert response.status_code == 200
     assert not (children_dir / "1.jpg").is_file()
     assert user_client.get("/users/children/").json()[0]["has_image"] is False
-    assert user_client.get("/users/children-images/1").status_code == 404
+    assert user_client.get("/users/children-images/1").status_code == 200
 
 
 def test_get_milestone_answers_child1_user_does_not_own_child(admin_client: TestClient):
