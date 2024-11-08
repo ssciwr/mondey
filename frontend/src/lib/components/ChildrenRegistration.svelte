@@ -115,7 +115,8 @@ async function setup(): Promise<{
 			answers = currentAnswers.data;
 			disableEdit = true;
 		}
-	} else {
+	}
+	if (Object.keys(answers).length === 0) {
 		// create empty answers when creating a new child
 		answers = questionnaire.reduce(
 			(empty_answers, question) => {
@@ -128,6 +129,7 @@ async function setup(): Promise<{
 			},
 			{} as { [k: number]: ChildAnswerPublic },
 		);
+		disableEdit = false; // enable editing for new child when there are no existing answers
 	}
 	console.log("setup done");
 
@@ -277,7 +279,7 @@ async function submitData(): Promise<void> {
 						component={componentTable["fileupload"]}
 						bind:value={image}
 						label={$_("childData.imageOfChild")}
-						required={true}
+						required={false}
 						placeholder={$_("childData.noFileChosen")}
 						disabled={disableEdit}
 						kwargs = {{accpet: ".jpg, .jpeg, .png"}}
