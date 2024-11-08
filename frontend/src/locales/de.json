@@ -113,6 +113,7 @@
 		"alertMessageImage": "Fehler beim Bild download",
 		"alertMessageTitle": "Fehler",
 		"submitButtonLabel": "Abschließen",
+		"deleteButtonLabel": "Kind löschen",
 		"changeData": "Daten vollständig, zum bearbeiten klicken",
 		"loadingMessage": "Daten werden geladen",
 		"searchAllLabel": "Alle",
@@ -120,7 +121,17 @@
 		"searchNameLabel": "Name",
 		"searchNamePlaceholder": "Kinder nach Namen durchsuchen",
 		"searchRemarkLabel": "Bemerkung",
-		"searchRemarkPlaceholder": "Bemerkungen zu Kindern durchsuchen"
+		"searchRemarkPlaceholder": "Bemerkungen zu Kindern durchsuchen",
+		"pleaseEnter": "Bitte eintragen",
+		"pleaseEnterNumber": "Bitte als Zahl eintragen",
+		"childName": "Name des Kindes?",
+		"childBirthYear": "Geburtsjahr des Kindes?",
+		"childBirthMonth": "Geburtsmonat des Kindes?",
+		"imageOfChildNew": "Neues Bild des Kindes hochladen (optional)",
+		"imageOfChildChange": "Bild des Kindes ändern (optional)",
+		"imageOfChildChangeDelete": "Das aktuelle Bild wurde gelöscht",
+		"noFileChosen": "Keine Datei ausgewählt",
+		"deleteImageButton": "Bild löschen"
 	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",

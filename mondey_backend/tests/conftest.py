@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import pathlib
+import shutil
 
 import pytest
 from fastapi import FastAPI
@@ -57,6 +58,16 @@ def private_dir(tmp_path_factory: pytest.TempPathFactory):
         with (children_dir / filename).open("w") as f:
             f.write(filename)
     return private_dir
+
+
+@pytest.fixture(scope="session")
+def data_dir(tmp_path_factory: pytest.TempPathFactory):
+    # use the same single temporary directory in all tests for private files
+    data_dir = tmp_path_factory.mktemp("data")
+    original_dummy_path = pathlib.Path(__file__).parent.parent / "data" / "dummy.jpg"
+    data_dir.mkdir(exist_ok=True)
+    shutil.copy(original_dummy_path, data_dir / "dummy.jpg")
+    return data_dir
 
 
 @pytest.fixture
@@ -501,24 +512,24 @@ def child_questions():
 
 @pytest.fixture
 def child_answers():
-    return [
+    return {
         # name
-        {
+        "1": {
             "answer": "other",
             "question_id": 1,
             "additional_answer": "sit amet",
         },
         # date
-        {
+        "2": {
             "answer": "2024-03-02",
             "question_id": 2,
             "additional_answer": None,
         },
         # remark
-        {"answer": "some remark", "question_id": 3, "additional_answer": None},
+        "3": {"answer": "some remark", "question_id": 3, "additional_answer": None},
         # file upload
-        {"answer": "file.jpg", "question_id": 4, "additional_answer": None},
-    ]
+        "4": {"answer": "file.jpg", "question_id": 4, "additional_answer": None},
+    }
 
 
 @pytest.fixture
@@ -605,9 +616,10 @@ def second_active_user():
 
 
 @pytest.fixture(scope="session")
-def app(static_dir: pathlib.Path, private_dir: pathlib.Path):
+def app(static_dir: pathlib.Path, private_dir: pathlib.Path, data_dir: pathlib.Path):
     settings.app_settings.STATIC_FILES_PATH = str(static_dir)
     settings.app_settings.PRIVATE_FILES_PATH = str(private_dir)
+    settings.app_settings.DATA_FILES_PATH = str(data_dir)
     app = create_app()
     return app
 

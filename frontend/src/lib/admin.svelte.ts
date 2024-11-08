@@ -1,17 +1,19 @@
 import {
 	authCookieLogin,
+	getChildQuestionsAdmin,
 	getMilestoneGroupsAdmin,
 	getUserQuestionsAdmin,
 	usersCurrentUser,
 } from "$lib/client/services.gen";
 import type {
 	Body_auth_cookie_login_auth_login_post,
-	GetLanguagesResponse,
-	MilestoneGroupAdmin,
-	UserQuestionAdmin,
 	UserRead,
 } from "$lib/client/types.gen";
-import { milestoneGroups, userQuestions } from "$lib/stores/adminStore";
+import {
+	childQuestions,
+	milestoneGroups,
+	userQuestions,
+} from "$lib/stores/adminStore";
 
 function AdminUser() {
 	let user = $state(null as UserRead | null);
@@ -68,5 +70,16 @@ export async function refreshUserQuestions() {
 		userQuestions.set([]);
 	} else {
 		userQuestions.set(data);
+	}
+}
+
+export async function refreshChildQuestions() {
+	console.log("refreshQuestions...");
+	const { data, error } = await getChildQuestionsAdmin();
+	if (error || data === undefined) {
+		console.log("Failed to get child questions");
+		childQuestions.set([]);
+	} else {
+		childQuestions.set(data);
 	}
 }
