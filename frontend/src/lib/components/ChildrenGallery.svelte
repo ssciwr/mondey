@@ -11,20 +11,6 @@ import { _ } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
 async function setup(): Promise<any> {
-	data = [
-		{
-			header: $_("childData.newChildHeading"),
-			summary: $_("childData.newChildHeadingLong"),
-			events: {
-				onclick: async () => {
-					currentChild.set(null);
-					activeTabChildren.set("childrenDataInput");
-				},
-			},
-			image: null,
-		},
-	];
-
 	const children = await getChildren();
 
 	if (children.error) {
@@ -67,7 +53,21 @@ async function setup(): Promise<any> {
 			}),
 		);
 
-		data = [...data, ...childrenData];
+		// add the 'new child' card as the first element
+		data = [
+			{
+				header: $_("childData.newChildHeading"),
+				summary: $_("childData.newChildHeadingLong"),
+				events: {
+					onclick: async () => {
+						currentChild.set(null);
+						activeTabChildren.set("childrenDataInput");
+					},
+				},
+				image: null,
+			},
+			...childrenData,
+		];
 	}
 	return data;
 }

@@ -176,11 +176,7 @@ async function saveChanges() {
 							</ButtonGroup>
 						</div>
 						<Card class="mb-4 bg-blue-300">
-							<InputPreview
-								data={question}
-								lang={preview_lang}
-								bind:answer={preview_answer}
-							/>
+							<InputPreview data={question} lang={preview_lang} bind:answer={preview_answer} />
 						</Card>
 						<Label class="mb-2">Generated answer:</Label>
 						<Badge large border color="dark">{preview_answer}</Badge
