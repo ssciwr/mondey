@@ -42,7 +42,7 @@ let {
 	birthmonth = $bindable(null),
 }: {
 	name: string | null | undefined;
-	image: File | string | null;
+	image: File | boolean | null;
 	birthyear: number | null;
 	birthmonth: number | null;
 } = $props();
@@ -102,7 +102,7 @@ async function setup(): Promise<{
 			name = child.data.name ?? null;
 			birthyear = child.data.birth_year;
 			birthmonth = child.data.birth_month;
-			image = child.data.has_image ? "an image exists already" : null;
+			image = child.data.has_image ? true : null;
 		}
 
 		// get existing answers
