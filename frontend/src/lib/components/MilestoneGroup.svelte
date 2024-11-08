@@ -20,7 +20,7 @@ const breadcrumbdata: any[] = [
 		label: "Meike",
 		onclick: () => {
 			activeTabChildren.update((value) => {
-				return "childrenDataInput";
+				return "childrenRegistration";
 			});
 		},
 	},

@@ -22,17 +22,17 @@ let {
 }: {
 	component?: Component | null;
 	value?: any;
-	additionalRequired: boolean;
+	additionalRequired?: boolean;
 	label?: string | null;
 	componentClass?: string;
 	textTrigger?: string;
 	additionalValue?: any;
-	required: boolean;
-	disabled: boolean;
-	id: string | undefined;
-	items: any[];
-	placeholder: string | undefined;
-	kwargs: any;
+	required?: boolean;
+	disabled?: boolean;
+	id?: string | undefined;
+	items?: any[];
+	placeholder?: string | undefined;
+	kwargs?: any;
 } = $props();
 
 // functionality for showing the textfield when the trigger is selected

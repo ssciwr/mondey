@@ -60,7 +60,7 @@ async function setup(): Promise<any> {
 					events: {
 						onclick: () => {
 							currentChild.set(child.id);
-							activeTabChildren.set("childrenDataInput");
+							activeTabChildren.set("childrenRegistration");
 						},
 					},
 				};

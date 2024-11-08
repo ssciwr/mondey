@@ -82,6 +82,7 @@ async function setup(): Promise<{
 	} else {
 		questionnaire = questions.data;
 	}
+	console.log("questionaire: ", questionnaire);
 
 	if ($currentChild !== null) {
 		const child = await getChild({ path: { child_id: $currentChild } });
@@ -117,13 +118,13 @@ async function setup(): Promise<{
 	} else {
 		// create empty answers when creating a new child
 		answers = questionnaire.reduce(
-			(acc, question) => {
-				acc[question.id] = {
+			(empty_answers, question) => {
+				empty_answers[question.id] = {
 					question_id: question.id,
 					answer: "",
 					additional_answer: "",
 				};
-				return acc;
+				return empty_answers;
 			},
 			{} as { [k: number]: ChildAnswerPublic },
 		);
@@ -168,8 +169,7 @@ async function submitData(): Promise<void> {
 		}
 	}
 
-	// id=4 is the image upload
-	if (image instanceof File || image instanceof Blob) {
+	if (image !== null) {
 		const uploadResponse = await uploadChildImage({
 			body: {
 				file: image,
@@ -182,7 +182,8 @@ async function submitData(): Promise<void> {
 		if (uploadResponse.error) {
 			console.log("error during file upload: ", uploadResponse.error.detail);
 			showAlert = true;
-			alertMessage = uploadResponse.error.detail;
+			alertMessage =
+				$_("childData.alertMessageError") + uploadResponse.error.detail;
 		}
 	}
 
@@ -283,7 +284,7 @@ async function submitData(): Promise<void> {
 						/>
 					{#each questionnaire as element, i}
 						<DataInput
-							component={componentTable[element.component]}
+							component={element.component ? componentTable[element.component] : undefined}
 							bind:value={answers[element.id].answer}
 							bind:additionalValue={answers[element.id]
 								.additional_answer}
