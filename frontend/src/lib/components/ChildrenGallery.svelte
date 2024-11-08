@@ -22,23 +22,23 @@ async function setup(): Promise<any> {
 		const childrenData = await Promise.all(
 			children.data.map(async (child) => {
 				let image = null;
-				if (child.has_image) {
-					const childImageResponse = await getChildImage({
-						path: { child_id: child.id },
+				const childImageResponse = await getChildImage({
+					path: { child_id: child.id },
+				});
+				console.log("childImageResponse", childImageResponse);
+				if (childImageResponse.error) {
+					console.log("Error when retrieving child image");
+					showAlert = true;
+					alertMessage =
+						$_("childData.alertMessageImage") +
+						" " +
+						childImageResponse.error.detail;
+				} else {
+					const reader = new FileReader();
+					reader.readAsDataURL(childImageResponse.data);
+					image = await new Promise((resolve) => {
+						reader.onloadend = () => resolve(reader.result as string);
 					});
-					if (childImageResponse.error) {
-						console.log("Error when retrieving child image");
-						showAlert = true;
-						alertMessage =
-							$_("childData.alertMessageImage") +
-							childImageResponse.error.detail;
-					} else {
-						const reader = new FileReader();
-						reader.readAsDataURL(childImageResponse.data);
-						image = await new Promise((resolve) => {
-							reader.onloadend = () => resolve(reader.result as string);
-						});
-					}
 				}
 				return {
 					header: child.name,
@@ -128,6 +128,16 @@ const searchData = [
 {#await promise}
 	<p>{"Waiting for server response"}</p>
 {:then data}
+	{#if showAlert}
+		<AlertMessage
+			title={$_("childData.alertMessageTitle")}
+			message={alertMessage}
+			onclick={() => {
+				showAlert = false;
+			}}
+		/>
+	{/if}
+
 	<div class="container m-2 mx-auto w-full pb-4 md:rounded-t-lg">
 
 		<Heading

@@ -62,7 +62,8 @@ def test_get_child_image(user_client: TestClient):
 
 def test_get_child_image_no_image(user_client: TestClient):
     response = user_client.get("/users/children-images/1")
-    assert response.status_code == 404
+    assert response.status_code == 200
+    assert response.content == "static/dummy.jpg"
 
 
 def test_create_update_and_delete_child(user_client: TestClient):

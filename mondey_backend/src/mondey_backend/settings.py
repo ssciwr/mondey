@@ -9,6 +9,7 @@ class AppSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
     # these defaults are for local development and are used if the environment variables are not set
     SECRET: str = "abc123"
+    DATA_FILES_PATH: str = "data"
     DATABASE_PATH: str = "db"
     STATIC_FILES_PATH: str = "static"
     PRIVATE_FILES_PATH: str = "private"
