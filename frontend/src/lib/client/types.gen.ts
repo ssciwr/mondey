@@ -413,6 +413,16 @@ export type UploadMilestoneImageResponse = (MilestoneImage);
 
 export type UploadMilestoneImageError = (HTTPValidationError);
 
+export type DeleteMilestoneImageData = {
+    path: {
+        milestone_image_id: number;
+    };
+};
+
+export type DeleteMilestoneImageResponse = (unknown);
+
+export type DeleteMilestoneImageError = (HTTPValidationError);
+
 export type GetUserQuestionsAdminResponse = (Array<UserQuestionAdmin>);
 
 export type GetUserQuestionsAdminError = unknown;
