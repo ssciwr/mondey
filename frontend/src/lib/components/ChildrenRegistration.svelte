@@ -3,6 +3,8 @@
 <script lang="ts">
 import {
 	type ChildAnswerPublic,
+	type ChildCreate,
+	type ChildPublic,
 	type GetChildQuestionsResponse,
 	createChild,
 	deleteChild,
@@ -36,9 +38,9 @@ let {
 	birthmonth = $bindable(null),
 }: {
 	name: string | null | undefined;
-	image: File | null;
-	birthyear: string | null;
-	birthmonth: string | null;
+	image: File | string | null;
+	birthyear: number | null;
+	birthmonth: number | null;
 } = $props();
 
 // functionality
@@ -92,9 +94,10 @@ async function setup(): Promise<{
 			showAlert = true;
 			alertMessage = $_("childData.alertMessageError");
 		} else {
-			name = child.data.name;
-			birthyear = String(child.data.birth_year);
-			birthmonth = String(child.data.birth_month);
+			name = child.data.name ?? null;
+			birthyear = child.data.birth_year;
+			birthmonth = child.data.birth_month;
+			image = child.data.has_image ? "an image exists already" : null;
 		}
 
 		// get existing answers
@@ -116,23 +119,22 @@ async function setup(): Promise<{
 			disableEdit = true;
 		}
 	}
-	if (Object.keys(answers).length === 0) {
-		// create empty answers when creating a new child
-		answers = questionnaire.reduce(
-			(empty_answers, question) => {
-				empty_answers[question.id] = {
-					question_id: question.id,
-					answer: "",
-					additional_answer: "",
-				};
-				return empty_answers;
-			},
-			{} as { [k: number]: ChildAnswerPublic },
-		);
-		disableEdit = false; // enable editing for new child when there are no existing answers
-	}
+	// when we have no answers for existing questions, we need to create empty
+	// ones to bind to the form. this might not be necessary in the final
+	// version b/c it only can happen when the admin changes questions on the
+	// fly in the database. doing so should not be done without database
+	// migration though, which should assure consistency
+	questionnaire.forEach((question) => {
+		if (answers[question.id] === undefined) {
+			answers[question.id] = {
+				question_id: question.id,
+				answer: "",
+				additional_answer: "",
+			};
+		}
+	});
+	disableEdit = false; // enable editing for new child when there are no existing answers
 	console.log("setup done");
-
 	return { questionnaire: questionnaire, answers: answers };
 }
 
@@ -145,7 +147,7 @@ async function submitData(): Promise<void> {
 				birth_year: birthyear,
 				birth_month: birthmonth,
 				has_image: image !== null,
-			},
+			} as ChildCreate,
 		});
 
 		if (new_child.error) {
@@ -161,8 +163,9 @@ async function submitData(): Promise<void> {
 				name: name,
 				birth_year: birthyear,
 				birth_month: birthmonth,
+				id: $currentChild,
 				has_image: image !== null,
-			},
+			} as ChildPublic,
 		});
 
 		if (response.error) {
@@ -171,7 +174,7 @@ async function submitData(): Promise<void> {
 		}
 	}
 
-	if (image !== null) {
+	if (image instanceof File) {
 		const uploadResponse = await uploadChildImage({
 			body: {
 				file: image,
@@ -192,7 +195,7 @@ async function submitData(): Promise<void> {
 	if ($currentChild) {
 		// send answers to changeable questions
 		const response = await updateCurrentChildAnswers({
-			body: Object.values(answers),
+			body: answers,
 			path: {
 				child_id: $currentChild,
 			},
@@ -282,7 +285,7 @@ async function submitData(): Promise<void> {
 						required={false}
 						placeholder={$_("childData.noFileChosen")}
 						disabled={disableEdit}
-						kwargs = {{accpet: ".jpg, .jpeg, .png"}}
+						kwargs = {{accept: ".jpg, .jpeg, .png", clearable: true}}
 						/>
 					{#each questionnaire as element, i}
 						<DataInput
