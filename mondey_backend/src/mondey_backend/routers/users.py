@@ -95,12 +95,14 @@ def create_router() -> APIRouter:
         current_active_user: CurrentActiveUserDep,
         child_id: int,
     ):
-        child = child = get_db_child(session, current_active_user, child_id)
+        child = get_db_child(session, current_active_user, child_id)
         image_path = pathlib.Path(
             f"{app_settings.PRIVATE_FILES_PATH}/children/{child.id}.jpg"
         )
         if not image_path.exists():
-            raise HTTPException(404)
+            raise HTTPException(404, detail="Image not found")
+        if child.has_image is False:
+            raise HTTPException(404, detail="Child does not have an image")
         return image_path
 
     @router.put("/children-images/{child_id}")
@@ -116,6 +118,22 @@ def create_router() -> APIRouter:
         filename = f"{app_settings.PRIVATE_FILES_PATH}/children/{child.id}.jpg"
         write_file(file, filename)
         return {"ok": True}
+
+    @router.delete("/children-images/{child_id}")
+    async def delete_child_image(
+        session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
+    ):
+        child = get_db_child(session, current_active_user, child_id)
+        image_path = pathlib.Path(
+            f"{app_settings.PRIVATE_FILES_PATH}/children/{child.id}.jpg"
+        )
+        if not image_path.exists():
+            raise HTTPException(404, detail="Image not found")
+        else:
+            child.has_image = False
+            session.commit()
+            image_path.unlink()
+            return {"ok": True}
 
     # milestone endpoints
     @router.get(

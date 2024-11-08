@@ -569,6 +569,16 @@ export type UploadChildImageResponse = (unknown);
 
 export type UploadChildImageError = (HTTPValidationError);
 
+export type DeleteChildImageData = {
+    path: {
+        child_id: number;
+    };
+};
+
+export type DeleteChildImageResponse = (unknown);
+
+export type DeleteChildImageError = (HTTPValidationError);
+
 export type GetCurrentMilestoneAnswerSessionData = {
     path: {
         child_id: number;

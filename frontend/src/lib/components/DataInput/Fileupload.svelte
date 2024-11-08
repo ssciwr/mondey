@@ -11,11 +11,11 @@ let {
 	clearable = false,
 }: {
 	value: File | string | null;
-	accept: string;
-	innerClass: string | null;
-	required: boolean;
-	disabled: boolean;
-	clearable: boolean;
+	accept?: string;
+	innerClass?: string | null;
+	required?: boolean;
+	disabled?: boolean;
+	clearable?: boolean;
 } = $props();
 
 let files: FileList | undefined = $state(undefined);

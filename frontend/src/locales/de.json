@@ -127,8 +127,11 @@
 		"childName": "Name des Kindes?",
 		"childBirthYear": "Geburtsjahr des Kindes?",
 		"childBirthMonth": "Geburtsmonat des Kindes?",
-		"imageOfChild": "Bild des Kindes hochlagen (optional)",
-		"noFileChosen": "Keine Datei ausgewählt"
+		"imageOfChildNew": "Neues Bild des Kindes hochladen (optional)",
+		"imageOfChildChange": "Bild des Kindes ändern (optional)",
+		"imageOfChildChangeDelete": "Das aktuelle Bild wurde gelöscht",
+		"noFileChosen": "Keine Datei ausgewählt",
+		"deleteImageButton": "Bild löschen"
 	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",

@@ -61,7 +61,7 @@ async function setup(): Promise<any> {
 				events: {
 					onclick: async () => {
 						currentChild.set(null);
-						activeTabChildren.set("childrenDataInput");
+						activeTabChildren.set("childrenRegistration");
 					},
 				},
 				image: null,

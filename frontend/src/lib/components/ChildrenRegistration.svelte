@@ -8,6 +8,7 @@ import {
 	type GetChildQuestionsResponse,
 	createChild,
 	deleteChild,
+	deleteChildImage,
 	getChild,
 	getChildQuestions,
 	getCurrentChildAnswers,
@@ -22,7 +23,10 @@ import { currentChild } from "$lib/stores/childrenStore";
 import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading } from "flowbite-svelte";
+import { CheckCircleOutline, TrashBinOutline } from "flowbite-svelte-icons";
 import { _, locale } from "svelte-i18n";
+
+console.log("ChildrenRegistration");
 
 // questions and answers about child that are not part of the child object
 let questionnaire: GetChildQuestionsResponse = $state(
@@ -45,11 +49,11 @@ let {
 
 // functionality
 let disableEdit: boolean = $state(false);
+let disableImageDelete: boolean = $state(false);
+let imageDeleted: boolean = $state(false);
 let alertMessage: string = $state($_("childData.alertMessageMissing"));
 let showAlert = $state(false);
-let promise = $state(setup());
 let childLabel = $derived(name ? name : $_("childData.newChildHeadingLong"));
-
 let breadcrumbdata = $derived([
 	{
 		label: $_("childData.overviewLabel"),
@@ -69,6 +73,7 @@ let breadcrumbdata = $derived([
 		},
 	},
 ]);
+let promise = $state(setup());
 
 async function setup(): Promise<{
 	questionnaire: GetChildQuestionsResponse;
@@ -119,6 +124,7 @@ async function setup(): Promise<{
 			disableEdit = true;
 		}
 	}
+
 	// when we have no answers for existing questions, we need to create empty
 	// ones to bind to the form. this might not be necessary in the final
 	// version b/c it only can happen when the admin changes questions on the
@@ -133,14 +139,13 @@ async function setup(): Promise<{
 			};
 		}
 	});
-	disableEdit = false; // enable editing for new child when there are no existing answers
 	console.log("setup done");
 	return { questionnaire: questionnaire, answers: answers };
 }
 
-async function submitData(): Promise<void> {
-	// make new child if we don´t have one already
+async function submitChildData(): Promise<void> {
 	if ($currentChild === null) {
+		// make new child if we don´t have one already
 		const new_child = await createChild({
 			body: {
 				name: name,
@@ -154,11 +159,13 @@ async function submitData(): Promise<void> {
 			showAlert = true;
 			alertMessage =
 				$_("childData.alertMessageCreate") + new_child.error.detail;
+			return;
 		} else {
 			currentChild.set(new_child.data.id);
 		}
 	} else {
-		const response = await updateChild({
+		// update existing child
+		const responseChild = await updateChild({
 			body: {
 				name: name,
 				birth_year: birthyear,
@@ -168,14 +175,51 @@ async function submitData(): Promise<void> {
 			} as ChildPublic,
 		});
 
-		if (response.error) {
+		if (responseChild.error) {
 			showAlert = true;
-			alertMessage = $_("childData.alertMessageUpdate") + response.error.detail;
+			alertMessage =
+				$_("childData.alertMessageUpdate") + " " + responseChild.error.detail;
+			return;
 		}
 	}
 
-	if (image instanceof File) {
-		const uploadResponse = await uploadChildImage({
+	// send answers to changeable questions
+	const response = await updateCurrentChildAnswers({
+		body: answers,
+		path: {
+			child_id: $currentChild,
+		},
+	});
+
+	if (response.error) {
+		console.log(
+			"Error when sending user question answers: ",
+			response.error.detail,
+		);
+		alertMessage =
+			$_("childData.alertMessageError") + " " + response.error.detail;
+		showAlert = true;
+		return;
+	}
+}
+
+async function submitImageData(): Promise<void> {
+	if (imageDeleted === true) {
+		const response = await deleteChildImage({
+			path: {
+				child_id: $currentChild,
+			},
+		});
+
+		if (response.error) {
+			console.log("error during file delete: ", response.error.detail);
+			showAlert = true;
+			alertMessage =
+				$_("childData.alertMessageUpdate") + " " + response.error.detail;
+			return;
+		}
+	} else if (image instanceof File) {
+		const response = await uploadChildImage({
 			body: {
 				file: image,
 			},
@@ -184,36 +228,28 @@ async function submitData(): Promise<void> {
 			},
 		});
 
-		if (uploadResponse.error) {
-			console.log("error during file upload: ", uploadResponse.error.detail);
+		if (response.error) {
+			console.log("error during file upload: ", response.error.detail);
 			showAlert = true;
 			alertMessage =
-				$_("childData.alertMessageError") + uploadResponse.error.detail;
+				$_("childData.alertMessageError") + " " + response.error.detail;
+			return;
 		}
+	} else {
+		console.log("do nothing with image: ", imageDeleted, image, typeof image);
 	}
+}
 
-	if ($currentChild) {
-		// send answers to changeable questions
-		const response = await updateCurrentChildAnswers({
-			body: answers,
-			path: {
-				child_id: $currentChild,
-			},
-		});
+async function submitData(): Promise<void> {
+	// handle image data
+	await submitImageData();
 
-		if (response.error) {
-			console.log(
-				"Error when sending user question answers: ",
-				response.error.detail,
-			);
-			alertMessage = $_("childData.alertMessageError");
-			showAlert = true;
-		} else {
-			// disable all elements to make editing a conscious choice
-			console.log("submission of child data successful.");
-			disableEdit = true;
-		}
-	}
+	// submit child data
+	await submitChildData();
+
+	// disable all elements to make editing a conscious choice
+	console.log("submission of child data successful.");
+	disableEdit = true;
 }
 </script>
 
@@ -281,12 +317,35 @@ async function submitData(): Promise<void> {
 					<DataInput
 						component={componentTable["fileupload"]}
 						bind:value={image}
-						label={$_("childData.imageOfChild")}
+						label={image !== null ? $_("childData.imageOfChildChange") : $_("childData.imageOfChildNew")}
 						required={false}
 						placeholder={$_("childData.noFileChosen")}
 						disabled={disableEdit}
 						kwargs = {{accept: ".jpg, .jpeg, .png", clearable: true}}
 						/>
+
+					{#if image !== null && disableEdit === false}
+						<Button
+							type="button"
+							class="w-full text-center text-sm text-white"
+							color={"red"}
+							disabled={disableImageDelete}
+							on:click={() => {
+								image = null;
+								disableImageDelete = true;
+								imageDeleted = true;
+							}}
+						>
+							<div class="flex items-center justify-center">
+								<TrashBinOutline size='md'/> {$_("childData.deleteImageButton")}
+							</div>
+						</Button>
+					{:else if disableImageDelete === true}
+						<p class="text-center text-sm text-gray-700 dark:text-gray-400 flex items-center justify-center">
+							<CheckCircleOutline size="lg" color="green"/> {$_("childData.imageOfChildChangeDelete")}
+						</p>
+					{/if}
+
 					{#each questionnaire as element, i}
 						<DataInput
 							component={element.component ? componentTable[element.component] : undefined}
@@ -350,7 +409,7 @@ async function submitData(): Promise<void> {
 									currentChild.set(null);
 								}
 							}}
-							>{$_("childData.deleteButtonLabel")}</Button
+							><TrashBinOutline size='sm'/> {$_("childData.deleteButtonLabel")}</Button
 						>
 					{/if}
 				</form>
