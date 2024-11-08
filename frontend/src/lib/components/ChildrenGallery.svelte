@@ -55,6 +55,7 @@ async function setup(): Promise<any> {
 
 		// add the 'new child' card as the first element
 		data = [
+			...childrenData,
 			{
 				header: $_("childData.newChildHeading"),
 				summary: $_("childData.newChildHeadingLong"),
@@ -66,7 +67,6 @@ async function setup(): Promise<any> {
 				},
 				image: null,
 			},
-			...childrenData,
 		];
 	}
 	return data;

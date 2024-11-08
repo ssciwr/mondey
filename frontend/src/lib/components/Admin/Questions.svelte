@@ -28,7 +28,7 @@ import DeleteModal from "$lib/components/Admin/DeleteModal.svelte";
 import EditButton from "$lib/components/Admin/EditButton.svelte";
 import EditQuestionModal from "$lib/components/Admin/EditQuestionModal.svelte";
 import { childQuestions, userQuestions } from "$lib/stores/adminStore";
-import { type Component, onMount } from "svelte";
+import { onMount } from "svelte";
 import { _, locale } from "svelte-i18n";
 import type { Writable } from "svelte/store";
 
@@ -43,7 +43,6 @@ let create: any;
 let doDelete: any;
 let refresh: any;
 let build: any;
-let component: Component<any, any, string> = EditQuestionModal;
 let questions:
 	| Writable<Array<UserQuestionAdmin>>
 	| Writable<Array<ChildQuestionAdmin>>
@@ -155,8 +154,7 @@ onMount(async () => {
 </Card>
 
 {#key showEditQuestionModal}
-	<svelte:component
-		this={component}
+	<EditQuestionModal
 		{kind}
 		bind:open={showEditQuestionModal}
 		question={currentQuestion}

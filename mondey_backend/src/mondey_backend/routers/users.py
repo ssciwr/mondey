@@ -127,13 +127,10 @@ def create_router() -> APIRouter:
         image_path = pathlib.Path(
             f"{app_settings.PRIVATE_FILES_PATH}/children/{child.id}.jpg"
         )
-        if not image_path.exists():
-            raise HTTPException(404, detail="Image not found")
-        else:
-            child.has_image = False
-            session.commit()
-            image_path.unlink()
-            return {"ok": True}
+        child.has_image = False
+        session.commit()
+        image_path.unlink(missing_ok=True)
+        return {"ok": True}
 
     # milestone endpoints
     @router.get(
