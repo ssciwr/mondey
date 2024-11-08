@@ -125,10 +125,11 @@ async function setup(): Promise<{
 		}
 	}
 
-	// when we have no answers for existing questions, we need to create empty
-	// ones to bind to the form. this might not be necessary in the final
+	// DEBUG/TEMPORARY: when we have no answers for existing questions,
+	// we need to create empty
+	// ones that bind to the form. this might not be necessary in the final
 	// version b/c it only can happen when the admin changes questions on the
-	// fly in the database. doing so should not be done without database
+	// fly in the database. Doing so should eventually elicit database
 	// migration though, which should assure consistency
 	questionnaire.forEach((question) => {
 		if (answers[question.id] === undefined) {
@@ -171,7 +172,7 @@ async function submitChildData(): Promise<void> {
 				birth_year: birthyear,
 				birth_month: birthmonth,
 				id: $currentChild,
-				has_image: image !== null,
+				has_image: image !== null && imageDeleted === false,
 			} as ChildPublic,
 		});
 
@@ -218,7 +219,7 @@ async function submitImageData(): Promise<void> {
 				$_("childData.alertMessageUpdate") + " " + response.error.detail;
 			return;
 		}
-	} else if (image instanceof File) {
+	} else if (image instanceof File && imageDeleted === false) {
 		const response = await uploadChildImage({
 			body: {
 				file: image,
@@ -236,6 +237,7 @@ async function submitImageData(): Promise<void> {
 			return;
 		}
 	} else {
+		// DEBUG/TEMPORARY: this should never happen in the final version
 		console.log("do nothing with image: ", imageDeleted, image, typeof image);
 	}
 }
@@ -247,9 +249,9 @@ async function submitData(): Promise<void> {
 	// submit child data
 	await submitChildData();
 
-	// disable all elements to make editing a conscious choice
+	// disable all elements to make editing a conscious choice amd go back to childrenGallery
 	console.log("submission of child data successful.");
-	disableEdit = true;
+	activeTabChildren.set("childrenGallery");
 }
 </script>
 

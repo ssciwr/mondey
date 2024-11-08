@@ -43,10 +43,11 @@ let create: any;
 let doDelete: any;
 let refresh: any;
 let build: any;
-let component: Component = EditQuestionModal;
+let component: Component<any, any, string> = EditQuestionModal;
 let questions:
 	| Writable<Array<UserQuestionAdmin>>
-	| Writable<Array<ChildQuestionAdmin>> = $state();
+	| Writable<Array<ChildQuestionAdmin>>
+	| undefined = $state();
 
 if (kind === "user") {
 	create = createUserQuestion;
