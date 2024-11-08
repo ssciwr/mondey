@@ -9,14 +9,12 @@ import MilestoneGroup from "$lib/components/MilestoneGroup.svelte";
 import MilestoneOverview from "$lib/components/MilestoneOverview.svelte";
 import UserDataInput from "$lib/components/UserDataInput.svelte";
 import { Card, Input, MultiSelect, Select, Textarea } from "flowbite-svelte";
-import type { Component } from "svelte";
 import { writable } from "svelte/store";
 
 interface ComponentTable {
-	[key: string]: Component;
+	[key: string]: any; // README: flowbite components are not yet svelte5 => 'Component' type which should be used instead of 'any' here throws errors for flowbite components.
 }
 
-// put all the components here. can be an expanding list
 export const componentTable: ComponentTable = {
 	userDataInput: UserDataInput,
 	childrenGallery: ChildrenGallery,
@@ -34,5 +32,7 @@ export const componentTable: ComponentTable = {
 	adminPage: AdminPage,
 	researchPage: Card,
 };
+
+// used in userlandingpage to make it single page
 export const activeTabPersonal = writable("userDataInput");
 export const activeTabChildren = writable("childrenGallery");

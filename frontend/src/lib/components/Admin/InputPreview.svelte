@@ -6,7 +6,7 @@ import { Input, Label, Select, type SelectOptionType } from "flowbite-svelte";
 let {
 	data,
 	lang,
-	answer,
+	answer = $bindable(),
 }: { data: UserQuestionAdmin; lang: string; answer: string } = $props();
 let items: Array<SelectOptionType<string>> = $derived(parse_options_json());
 

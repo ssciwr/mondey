@@ -1,16 +1,104 @@
+<svelte:options runes={true} />
+
 <script lang="ts">
+import { getChildImage, getChildren } from "$lib/client/services.gen";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
-import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
-import { type ChildData, children } from "$lib/stores/childrenStore";
-
-import { createStyle, init } from "$lib/components/ChildrenGallery";
+import { currentChild } from "$lib/stores/childrenStore";
+import { activeTabChildren } from "$lib/stores/componentStore";
 import { Heading } from "flowbite-svelte";
-import { onDestroy, onMount } from "svelte";
+import { _ } from "svelte-i18n";
+import AlertMessage from "./AlertMessage.svelte";
 
-let data: ChildData[] = [];
+async function setup(): Promise<any> {
+	const children = await getChildren();
 
-export let breadcrumbdata: any[] | null = null;
+	if (children.error) {
+		console.log("Error when retrieving child data");
+		showAlert = true;
+		alertMessage =
+			$_("childData.alertMessageRetrieving") + children.error.detail;
+	} else {
+		const childrenData = await Promise.all(
+			children.data.map(async (child) => {
+				let image = null;
+				if (child.has_image) {
+					const childImageResponse = await getChildImage({
+						path: { child_id: child.id },
+					});
+					if (childImageResponse.error) {
+						console.log("Error when retrieving child image");
+						showAlert = true;
+						alertMessage =
+							$_("childData.alertMessageImage") +
+							childImageResponse.error.detail;
+					} else {
+						const reader = new FileReader();
+						reader.readAsDataURL(childImageResponse.data);
+						image = await new Promise((resolve) => {
+							reader.onloadend = () => resolve(reader.result as string);
+						});
+					}
+				}
+				return {
+					header: child.name,
+					image,
+					events: {
+						onclick: () => {
+							currentChild.set(child.id);
+							activeTabChildren.set("childrenRegistration");
+						},
+					},
+				};
+			}),
+		);
+
+		// add the 'new child' card as the first element
+		data = [
+			{
+				header: $_("childData.newChildHeading"),
+				summary: $_("childData.newChildHeadingLong"),
+				events: {
+					onclick: async () => {
+						currentChild.set(null);
+						activeTabChildren.set("childrenRegistration");
+					},
+				},
+				image: null,
+			},
+			...childrenData,
+		];
+	}
+	return data;
+}
+
+function createStyle(data: any[]) {
+	return data.map((item) => ({
+		card:
+			item.header === $_("childData.newChildHeading")
+				? {
+						class:
+							"hover:cursor-pointer m-2 max-w-prose bg-primary-700 dark:bg-primary-600 hover:bg-primary-800 dark:hover:bg-primary-700",
+						horizontal: false,
+					}
+				: { horizontal: false },
+		header:
+			item.header == $_("childData.newChildHeading")
+				? {
+						class:
+							"mb-2 text-2xl font-bold tracking-tight text-white dark:text-white",
+					}
+				: null,
+		summary:
+			item.header == $_("childData.newChildHeading")
+				? {
+						class:
+							"mb-3 flex font-normal leading-tight text-white dark:text-white",
+					}
+				: null,
+		button: null,
+	}));
+}
 
 function searchName(data: any[], key: string): any[] {
 	if (key === "") {
@@ -23,67 +111,49 @@ function searchName(data: any[], key: string): any[] {
 	}
 }
 
-function searchRemarks(data: any[], key: string): any[] {
-	if (key === "") {
-		return data;
-	} else {
-		const res = data.filter((item) => {
-			return item.summary.toLowerCase().includes(key.toLowerCase());
-		});
-		return res;
-	}
-}
+let showAlert = $state(false);
+let alertMessage = $_("childData.alertMessageError");
+let data: any[] = $state([]);
 
-function searchAll(data: any[], key: string) {
-	return [...new Set([...searchName(data, key), ...searchRemarks(data, key)])];
-}
-
+const promise = $state(setup());
 const searchData = [
 	{
-		label: "Alle",
-		placeholder: "Alle Kategorien durchsuchen",
-		filterFunction: searchAll,
-	},
-	{
-		label: "Name",
-		placeholder: "Kinder nach Namen durchsuchen",
+		label: $_("childData.searchNameLabel"),
+		placeholder: $_("childData.searchNamePlaceholder"),
 		filterFunction: searchName,
 	},
-	{
-		label: "Bemerkung",
-		placeholder: "Bemerkungen zu Kindern durchsuchen",
-		filterFunction: searchRemarks,
-	},
 ];
-
-// this fetches dummy child data for the dummy user whenever the component is mounted into the dom
-// it is conceptualized as emulating an API call that would normally fetch this from the server.
-onMount(async () => {
-	data = await init();
-});
-onDestroy(async () => {
-	children.save();
-});
 </script>
 
-<div class="container m-2 mx-auto w-full pb-4 md:rounded-t-lg">
-	{#if breadcrumbdata}
-		<Breadcrumbs data={breadcrumbdata} />
-	{/if}
+{#await promise}
+	<p>{"Waiting for server response"}</p>
+{:then data}
+	<div class="container m-2 mx-auto w-full pb-4 md:rounded-t-lg">
 
-	<Heading tag="h1" class="m-2 mb-2 p-4 " color="text-gray-700 dark:text-gray-400"
-		>Übersicht</Heading
-	>
+		<Heading
+			tag="h1"
+			class="m-2 mb-2 p-4 "
+			color="text-gray-700 dark:text-gray-400">{$_("childData.overviewLabel")}</Heading
+		>
 
-	<div class="cols-1 grid w-full gap-y-8 p-2">
-		<p class="w-auto p-2 text-lg text-gray-700 dark:text-gray-400">
-			Wählen sie ein Kind zur Beobachtung aus oder legen melden sie ein neues Kind an.
-		</p>
-		<GalleryDisplay
-			{data}
-			itemComponent={CardDisplay}
-			componentProps={createStyle(data)}
-			{searchData}
-		/>
+		<div class="cols-1 grid w-full gap-y-8 p-2">
+			<p class="w-auto p-2 text-lg text-gray-700 dark:text-gray-400">
+				{$_("childData.overviewSummary")}
+			</p>
+			<GalleryDisplay
+				{data}
+				itemComponent={CardDisplay}
+				componentProps={createStyle(data)}
+				{searchData}
+			/>
+		</div>
 	</div>
-</div>
+{:catch error}
+	<AlertMessage
+		title={"Error in server request"}
+		message={error.message}
+		onclick={() => {
+			showAlert = false;
+		}}
+	/>
+{/await}

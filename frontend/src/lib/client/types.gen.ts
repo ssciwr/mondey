@@ -569,6 +569,16 @@ export type UploadChildImageResponse = (unknown);
 
 export type UploadChildImageError = (HTTPValidationError);
 
+export type DeleteChildImageData = {
+    path: {
+        child_id: number;
+    };
+};
+
+export type DeleteChildImageResponse = (unknown);
+
+export type DeleteChildImageError = (HTTPValidationError);
+
 export type GetCurrentMilestoneAnswerSessionData = {
     path: {
         child_id: number;
@@ -608,12 +618,16 @@ export type GetCurrentChildAnswersData = {
     };
 };
 
-export type GetCurrentChildAnswersResponse = (Array<ChildAnswerPublic>);
+export type GetCurrentChildAnswersResponse = ({
+    [key: string]: ChildAnswerPublic;
+});
 
 export type GetCurrentChildAnswersError = (HTTPValidationError);
 
 export type UpdateCurrentChildAnswersData = {
-    body: Array<ChildAnswerPublic>;
+    body: {
+        [key: string]: ChildAnswerPublic;
+    };
     path: {
         child_id: number;
     };

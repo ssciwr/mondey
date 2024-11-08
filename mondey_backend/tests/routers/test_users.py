@@ -129,6 +129,42 @@ def test_upload_child_image(
     (children_dir / "1.jpg").unlink()
 
 
+def test_delete_child_image(
+    user_client: TestClient, private_dir: pathlib.Path, jpg_file: pathlib.Path
+):
+    children_dir = private_dir / "children"
+    # add an image for the first child
+    with open(jpg_file, "rb") as f:
+        response = user_client.put(
+            "/users/children-images/1",
+            files={"file": ("filename", f, "image/jpeg")},
+        )
+
+    # delete the image
+    response = user_client.delete("/users/children-images/1")
+    assert response.status_code == 200
+    assert not (children_dir / "1.jpg").is_file()
+    assert user_client.get("/users/children/").json()[0]["has_image"] is False
+    assert user_client.get("/users/children-images/1").status_code == 404
+
+
+def test_delete_child_image_nonexistant_path(
+    user_client: TestClient, private_dir: pathlib.Path, jpg_file: pathlib.Path
+):
+    # add an image for the first child
+    with open(jpg_file, "rb") as f:
+        response = user_client.put(
+            "/users/children-images/1",
+            files={"file": ("filename", f, "image/jpeg")},
+        )
+    response = user_client.delete("/users/children-images/1")
+    assert response.status_code == 200
+
+    # delete the image again and observe that the image is not found
+    response = user_client.delete("/users/children-images/1")
+    assert response.status_code == 404
+
+
 def test_get_milestone_answers_child1_user_does_not_own_child(admin_client: TestClient):
     response = admin_client.get("/users/milestone-answers/1")
     assert response.status_code == 404
@@ -279,18 +315,18 @@ def test_update_current_user_answers_no_prexisting(second_user_client: TestClien
 def test_get_current_child_answers_works(user_client: TestClient):
     response = user_client.get("/users/children-answers/1")
     assert response.status_code == 200
-    assert response.json() == [
-        {
+    assert response.json() == {
+        "1": {
             "answer": "a",
             "question_id": 1,
             "additional_answer": None,
         },
-        {
+        "2": {
             "answer": "other",
             "question_id": 2,
             "additional_answer": "dolor sit",
         },
-    ]
+    }
 
 
 def test_get_current_child_answers_invalid_child(user_client: TestClient):
@@ -304,7 +340,7 @@ def test_get_current_child_answers_invalid_user(public_client: TestClient):
 
 
 def test_update_current_child_answers_prexisting(
-    user_client: TestClient, child_answers: list[dict[str, str | int | None]]
+    user_client: TestClient, child_answers: dict[str, str | int | None]
 ):
     response = user_client.put(
         "/users/children-answers/1",
@@ -322,7 +358,7 @@ def test_update_current_child_answers_prexisting(
 
 
 def test_update_current_child_answers_no_prexisting(
-    second_user_client: TestClient, child_answers: list[dict[str, str | int | None]]
+    second_user_client: TestClient, child_answers: dict[str, str | int | None]
 ):
     response = second_user_client.put(
         "/users/children-answers/2",
