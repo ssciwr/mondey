@@ -14,7 +14,7 @@ let alertMessage = $state("");
 let promise = $state(setup());
 
 async function setup(): Promise<any> {
-	await currentChild.data();
+	await currentChild.load_data();
 	const milestonegroup = await getMilestoneGroups({
 		path: { child_id: currentChild.id },
 	});
@@ -40,11 +40,9 @@ const breadcrumbdata: any[] = [
 		},
 	},
 	{
-		label: currentChild.data.name,
+		label: currentChild.name,
 		onclick: () => {
-			activeTabChildren.update((value) => {
-				return "childrenRegistration";
-			});
+			activeTabChildren.set("childrenRegistration");
 		},
 	},
 	{

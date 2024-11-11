@@ -44,8 +44,9 @@ async function setup(): Promise<any> {
 					header: child.name,
 					image,
 					events: {
-						onclick: () => {
+						onclick: async () => {
 							currentChild.id = child.id;
+							await currentChild.load_data();
 							activeTabChildren.set("childrenRegistration");
 						},
 					},

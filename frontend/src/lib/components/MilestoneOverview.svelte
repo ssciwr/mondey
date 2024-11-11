@@ -1,11 +1,15 @@
+<svelte:options runes={true} />
 <script lang="ts">
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import { convertData, data } from "$lib/components/MilestoneOverview";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
+import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
+import { _ } from "svelte-i18n";
+import AlertMessage from "./AlertMessage.svelte";
 
-export let milestones = data.milestones;
+let milestones = $state(data.milestones);
 
 interface MilestoneData {
 	header: string;
@@ -22,9 +26,9 @@ function searchStatus(data: MilestoneData[], key: string): MilestoneData[] {
 	} else {
 		return data.filter((item) => {
 			// button label contains info about completion status => use for search
-			if (key === "fertig") {
+			if (key === $_("milestone.complete")) {
 				return item.complete === true;
-			} else if (key === "unfertig") {
+			} else if (key === $_("milestone.incomplete")) {
 				return item.complete === false;
 			}
 		});
@@ -94,7 +98,7 @@ const searchData = [
 	},
 	{
 		label: "Titel",
-		placeholder: "Nach Meilenstein durchsuchen",
+		placeholder: "Nach Titel durchsuchen",
 		filterFunction: searchTitle,
 	},
 	{
@@ -106,35 +110,21 @@ const searchData = [
 
 const breadcrumbdata: any[] = [
 	{
-		label: "Benutzer",
+		label: $_("childData.overviewLabel"),
 		onclick: () => {
-			activeTabChildren.update((_) => {
-				return "";
-			});
+			activeTabChildren.set("childrenGallery");
 		},
 	},
 	{
-		label: "Kinderübersicht",
+		label: currentChild.name,
 		onclick: () => {
-			activeTabChildren.update((value) => {
-				return "childrenGallery";
-			});
+			activeTabChildren.set("childrenRegistration");
 		},
 	},
 	{
-		label: "Meike",
+		label: $_("milestone.groupOverviewLabel"),
 		onclick: () => {
-			activeTabChildren.update((value) => {
-				return "childrenRegistration";
-			});
-		},
-	},
-	{
-		label: "Bereichsübersicht",
-		onclick: () => {
-			activeTabChildren.update((value) => {
-				return "milestoneGroup";
-			});
+			activeTabChildren.set("milestoneGroup");
 		},
 	},
 	{
@@ -148,9 +138,19 @@ const breadcrumbdata: any[] = [
 	},
 ];
 
-const rawdata = convertData(milestones).sort((a, b) => a.complete - b.complete); // FIXME: the convert step should not be here and will be handeled backend-side
-</script>
+async function setup(): Promise<void> {
+	console.log("setup overview");
+	await currentChild.load_data();
+	console.log("done");
+}
 
+const rawdata = convertData(milestones).sort((a, b) => a.complete - b.complete); // FIXME: the convert step should not be here and will be handeled backend-side
+
+const promise = setup();
+</script>
+{#await promise}
+<p>Loading...</p>
+{:then}
 <div class="mx-auto flex flex-col border border-gray-200 p-4 md:rounded-t-lg dark:border-gray-700">
 	<Breadcrumbs data={breadcrumbdata} />
 	<div class="grid gap-y-4 p-4">
@@ -174,3 +174,6 @@ const rawdata = convertData(milestones).sort((a, b) => a.complete - b.complete);
 		/>
 	</div>
 </div>
+{:catch error}
+<AlertMessage message={error} />
+{/await}
