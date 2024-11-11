@@ -244,11 +244,11 @@ async function submitImageData(): Promise<void> {
 }
 
 async function submitData(): Promise<void> {
-	// handle image data
-	await submitImageData();
-
 	// submit child data
 	await submitChildData();
+
+	// handle image data
+	await submitImageData();
 
 	// disable all elements to make editing a conscious choice amd go back to childrenGallery
 	console.log("submission of child data successful.");

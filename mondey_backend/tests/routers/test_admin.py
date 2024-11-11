@@ -232,11 +232,11 @@ def test_post_milestone_image(
     assert len(admin_client.get("/milestones/4").json()["images"]) == 0
     assert len(admin_client.get("/milestones/5").json()["images"]) == 0
     # image ids are sequential
-    image_id = 3
+    milestone_image_id = 3
     # add an image to each milestone
     for milestone_id in [1, 2, 3, 4, 5]:
-        image_id += 1
-        filename = f"m{image_id}.jpg"
+        milestone_image_id += 1
+        filename = f"m{milestone_image_id}.jpg"
         static_dir_jpg = static_dir / filename
         assert not static_dir_jpg.is_file()
         with open(jpg_file, "rb") as f:
@@ -252,6 +252,23 @@ def test_post_milestone_image(
     assert len(admin_client.get("/milestones/3").json()["images"]) == 1
     assert len(admin_client.get("/milestones/4").json()["images"]) == 1
     assert len(admin_client.get("/milestones/5").json()["images"]) == 1
+    # remove added images
+    for milestone_image_id in range(4, 9):
+        filename = f"m{milestone_image_id}.jpg"
+        static_dir_jpg = static_dir / filename
+        assert static_dir_jpg.is_file()
+        assert (
+            admin_client.delete(
+                f"/admin/milestone-images/{milestone_image_id}"
+            ).status_code
+            == 200
+        )
+        assert not static_dir_jpg.is_file()
+    assert len(admin_client.get("/milestones/1").json()["images"]) == 2
+    assert len(admin_client.get("/milestones/2").json()["images"]) == 1
+    assert len(admin_client.get("/milestones/3").json()["images"]) == 0
+    assert len(admin_client.get("/milestones/4").json()["images"]) == 0
+    assert len(admin_client.get("/milestones/5").json()["images"]) == 0
 
 
 # tests for user questions
