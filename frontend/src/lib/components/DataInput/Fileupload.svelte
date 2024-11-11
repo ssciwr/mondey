@@ -8,12 +8,14 @@ let {
 	innerClass = "mb-2 flex-grow-0",
 	required = false,
 	disabled = false,
+	clearable = false,
 }: {
-	value: File | null;
-	innerClass: string | null;
-	accept: string;
-	required: boolean;
-	disabled: boolean;
+	value: File | string | null;
+	accept?: string;
+	innerClass?: string | null;
+	required?: boolean;
+	disabled?: boolean;
+	clearable?: boolean;
 } = $props();
 
 let files: FileList | undefined = $state(undefined);
@@ -38,4 +40,5 @@ function updateImagesToUpload(event: Event) {
 	id="img_upload"
 	required={required}
 	disabled={disabled}
+	clearable = {clearable}
 />

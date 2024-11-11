@@ -95,12 +95,12 @@ def create_router() -> APIRouter:
         current_active_user: CurrentActiveUserDep,
         child_id: int,
     ):
-        child = child = get_db_child(session, current_active_user, child_id)
+        child = get_db_child(session, current_active_user, child_id)
         image_path = pathlib.Path(
             f"{app_settings.PRIVATE_FILES_PATH}/children/{child.id}.jpg"
         )
         if not image_path.exists():
-            raise HTTPException(404)
+            image_path = pathlib.Path(f"{app_settings.DATA_FILES_PATH}/dummy.jpg")
         return image_path
 
     @router.put("/children-images/{child_id}")
@@ -115,6 +115,19 @@ def create_router() -> APIRouter:
         session.commit()
         filename = f"{app_settings.PRIVATE_FILES_PATH}/children/{child.id}.jpg"
         write_file(file, filename)
+        return {"ok": True}
+
+    @router.delete("/children-images/{child_id}")
+    async def delete_child_image(
+        session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
+    ):
+        child = get_db_child(session, current_active_user, child_id)
+        image_path = pathlib.Path(
+            f"{app_settings.PRIVATE_FILES_PATH}/children/{child.id}.jpg"
+        )
+        child.has_image = False
+        session.commit()
+        image_path.unlink(missing_ok=True)
         return {"ok": True}
 
     # milestone endpoints
@@ -192,7 +205,9 @@ def create_router() -> APIRouter:
         return new_answers
 
     # Endpoints for answers to child question
-    @router.get("/children-answers/{child_id}", response_model=list[ChildAnswerPublic])
+    @router.get(
+        "/children-answers/{child_id}", response_model=dict[int, ChildAnswerPublic]
+    )
     def get_current_child_answers(
         session: SessionDep, child_id: int, current_active_user: CurrentActiveUserDep
     ):
@@ -201,17 +216,18 @@ def create_router() -> APIRouter:
             select(ChildAnswer).where(col(ChildAnswer.child_id) == child_id)
         ).all()
 
-        return answers
+        return {answer.question_id: answer for answer in answers}
 
     @router.put("/children-answers/{child_id}")
     def update_current_child_answers(
         session: SessionDep,
         child_id: int,
         current_active_user: CurrentActiveUserDep,
-        new_answers: list[ChildAnswerPublic],
+        new_answers: dict[int, ChildAnswerPublic],
     ):
         get_db_child(session, current_active_user, child_id)
-        for new_answer in new_answers:
+
+        for new_answer in new_answers.values():
             current_answer = session.get(
                 ChildAnswer, (child_id, new_answer.question_id)
             )
