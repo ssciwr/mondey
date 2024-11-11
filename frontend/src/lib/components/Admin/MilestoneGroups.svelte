@@ -251,7 +251,7 @@ onMount(async () => {
 ></DeleteModal>
 
 {#key showEditMilestoneModal}
-	<EditMilestoneModal bind:open={showEditMilestoneModal} milestone={currentMilestone}
+	<EditMilestoneModal bind:open={showEditMilestoneModal} bind:milestone={currentMilestone}
 	></EditMilestoneModal>
 {/key}
 <DeleteModal bind:open={showDeleteMilestoneModal} onclick={doDeleteMilestone}></DeleteModal>

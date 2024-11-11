@@ -3,12 +3,17 @@
 <script lang="ts">
 import { refreshMilestoneGroups } from "$lib/admin.svelte";
 import {
+	deleteLanguage,
+	deleteMilestoneImage,
 	updateMilestone,
 	uploadMilestoneImage,
 } from "$lib/client/services.gen";
 import type { MilestoneAdmin } from "$lib/client/types.gen";
 import CancelButton from "$lib/components/Admin/CancelButton.svelte";
+import DeleteModal from "$lib/components/Admin/DeleteModal.svelte";
+import EditImage from "$lib/components/Admin/EditImage.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
+import { getTranslations } from "$lib/i18n";
 import {
 	ButtonGroup,
 	Fileupload,
@@ -22,10 +27,12 @@ import { _, locales } from "svelte-i18n";
 
 let {
 	open = $bindable(false),
-	milestone,
+	milestone = $bindable(null),
 }: { open: boolean; milestone: MilestoneAdmin | null } = $props();
 let files: FileList | undefined = $state(undefined);
 let images: Array<string> = $state([]);
+let currentMilestoneImageId: number | null = $state(null as number | null);
+let showDeleteMilestoneImageModal: boolean = $state(false);
 
 const textKeys = ["title", "desc", "obs", "help"];
 
@@ -38,7 +45,7 @@ function updateImagesToUpload(event: Event) {
 	}
 }
 
-export async function saveChanges() {
+async function saveChanges() {
 	if (!milestone) {
 		return;
 	}
@@ -58,9 +65,27 @@ export async function saveChanges() {
 		await refreshMilestoneGroups();
 	}
 }
+
+async function deleteMilestoneImageAndUpdate() {
+	if (!currentMilestoneImageId) {
+		return;
+	}
+	const { data, error } = await deleteMilestoneImage({
+		path: { milestone_image_id: currentMilestoneImageId },
+	});
+	if (error) {
+		console.log(error);
+	} else {
+		console.log(data);
+		milestone.images = milestone.images.filter(
+			(e) => e.id !== currentMilestoneImageId,
+		);
+		await refreshMilestoneGroups();
+	}
+}
 </script>
 
-<Modal title={$_('admin.edit')} bind:open autoclose size="xl">
+<Modal title={$_('admin.edit')} bind:open size="xl" outsideclose>
 	{#if milestone}
 		{#each textKeys as textKey}
 			{@const title = $_(`admin.${textKey}`)}
@@ -83,17 +108,17 @@ export async function saveChanges() {
 		<div class="mb-5">
 			<Label for="img_upload" class="pb-2">{$_('admin.images')}</Label>
 			<div class="flex flex-row">
-				{#each milestone.images as milestoneImage, milestoneImageId (milestoneImage.id)}
-					<img
-						src={`${import.meta.env.VITE_MONDEY_API_URL}/static/${milestoneImage.filename}`}
-						width="48"
-						height="48"
-						alt={`${milestoneImageId}`}
-						class="m-2"
+				{#each milestone.images as milestoneImage (milestoneImage.id)}
+					<EditImage
+						filename={milestoneImage.filename}
+						ondelete={() => {
+						currentMilestoneImageId = milestoneImage.id;
+						showDeleteMilestoneImageModal = true;
+				}}
 					/>
 				{/each}
 				{#each images as image}
-					<img src={image} width="48" height="48" alt="milestone" class="m-2" />
+					<img src={image} width="96" height="96" alt="milestone" class="w-24 h-24 m-2" />
 				{/each}
 			</div>
 			<Fileupload
@@ -107,7 +132,9 @@ export async function saveChanges() {
 		</div>
 	{/if}
 	<svelte:fragment slot="footer">
-		<SaveButton onclick={saveChanges} />
-		<CancelButton />
+		<SaveButton onclick={() => {open = false; saveChanges()}} />
+		<CancelButton onclick={() => {open = false;}} />
 	</svelte:fragment>
 </Modal>
+
+<DeleteModal bind:open={showDeleteMilestoneImageModal} onclick={deleteMilestoneImageAndUpdate}></DeleteModal>

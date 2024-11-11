@@ -166,6 +166,16 @@ def create_router() -> APIRouter:
         session.refresh(milestone_image)
         return milestone_image
 
+    @router.delete("/milestone-images/{milestone_image_id}")
+    async def delete_milestone_image(session: SessionDep, milestone_image_id: int):
+        milestone_image = get(session, MilestoneImage, milestone_image_id)
+        pathlib.Path(
+            f"{app_settings.STATIC_FILES_PATH}/m{milestone_image.id}.jpg"
+        ).unlink(missing_ok=True)
+        session.delete(milestone_image)
+        session.commit()
+        return {"ok": True}
+
     # User question CRUD endpoints
     @router.get("/user-questions/", response_model=list[UserQuestionAdmin])
     def get_user_questions_admin(session: SessionDep):
