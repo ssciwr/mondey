@@ -1,18 +1,18 @@
 <svelte:options runes={true} />
 <script lang="ts">
-import { getMilestoneGroups } from "$lib/client";
+import type { MilestonePublic } from "$lib/client";
+import AlertMessage from "$lib/components/AlertMessage.svelte";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
-import { convertData, data } from "$lib/components/MilestoneOverview";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
-import { _ } from "svelte-i18n";
-import AlertMessage from "./AlertMessage.svelte";
-
-let milestones = $state(data.milestones);
-let showAlert = $state(false);
-let alertMessage = $state($_("milestoneGroup.alertMessageError"));
+import { contentStore } from "$lib/stores/contentStore.svelte";
+import {
+	CheckCircleSolid,
+	ExclamationCircleSolid,
+} from "flowbite-svelte-icons";
+import { _, locale } from "svelte-i18n";
 
 function searchStatus(data: any[], key: string): any[] {
 	if (key === "") {
@@ -21,9 +21,7 @@ function searchStatus(data: any[], key: string): any[] {
 		return data.filter((item) => {
 			// button label contains info about completion status => use for search
 			if (key === $_("milestone.complete")) {
-				return item.complete === true;
 			} else if (key === $_("milestone.incomplete")) {
-				return item.complete === false;
 			}
 		});
 	}
@@ -71,30 +69,86 @@ function searchAll(data: any[], key: string): any[] {
 		]),
 	];
 }
+
+async function setup(): Promise<void> {
+	console.log("setup overview");
+	await currentChild.load_data();
+	if (
+		!contentStore.milestoneGroupData.milestones ||
+		contentStore.milestoneGroupData.milestones.length === 0
+	) {
+		console.log("Error when retrieving milestone groups");
+		showAlert = true;
+		alertMessage =
+			$_("milestoneGroup.alertMessageRetrieving") + " " + response.error.detail;
+	} else {
+		data = contentStore.milestoneGroupData.milestones.map(
+			(item: MilestonePublic) => {
+				return {
+					header: item?.text?.[$locale]?.title ?? "",
+					complete: false, // TODO: implement this in backend?
+					summary: item?.text?.[$locale]?.desc ?? "",
+					events: {
+						onclick: () => {
+							activeTabChildren.set("milestone");
+							contentStore.milestone = item.id;
+							contentStore.milestoneData = item;
+						},
+					},
+					auxilliary:
+						item.answer !== null ? CheckCircleSolid : ExclamationCircleSolid, // FIXME: always will be false
+				};
+			},
+		);
+	}
+
+	console.log("done");
+}
+
+function createStyle(data: any[]) {
+	return data.map((item) => {
+		return {
+			card: {
+				class: "text-gray-700 hover:bg-gray-100",
+			},
+
+			auxilliary: {
+				class: "w-14 h-14",
+				color: item.complete === true ? "#4ade80" : "#EB4F27",
+			},
+		};
+	});
+}
+
+let showAlert = $state(false);
+let alertMessage = $state($_("milestoneGroup.alertMessageError"));
+const promise = setup();
+let data = $state([]);
+
 const searchData = [
 	{
-		label: "Alle",
-		placeholder: "Alle Kategorien durchsuchen",
+		label: $_("search.allLabel"),
+		placeholder: $_("search.allPlaceholder"),
 		filterFunction: searchAll,
 	},
 	{
-		label: "Status",
-		placeholder: "Nach Status durchsuchen",
+		label: $_("search.statusLabel"),
+		placeholder: $_("search.statusPlaceholder"),
 		filterFunction: searchStatus,
 	},
 	{
-		label: "Anwort",
-		placeholder: "Nach Antwort durchsuchen",
+		label: $_("search.answerLabel"),
+		placeholder: $_("search.answerPlaceholder"),
 		filterFunction: searchAnswer,
 	},
 	{
-		label: "Titel",
-		placeholder: "Nach Titel durchsuchen",
+		label: $_("search.nameLabel"),
+		placeholder: $_("search.namePlaceholder"),
 		filterFunction: searchTitle,
 	},
 	{
-		label: "Beschreibung",
-		placeholder: "Beschreibungen durchsuchen",
+		label: $_("search.descriptionLabel"),
+		placeholder: $_("search.descriptionPlaceholder"),
 		filterFunction: searchDescription,
 	},
 ];
@@ -119,65 +173,33 @@ const breadcrumbdata: any[] = [
 		},
 	},
 	{
-		label: `Grobmotorik`,
+		label: contentStore.milestoneGroupData.text[$locale].title,
 		onclick: () => {
-			activeTabChildren.update((value) => {
-				return "milestone";
-			});
+			activeTabChildren.set("milestoneOverview");
 		},
 	},
 ];
-
-async function setup(): Promise<void> {
-	console.log("setup overview");
-	await currentChild.load_data();
-	const response = await getMilestoneGroups({
-		path: {
-			child_id: currentChild.id,
-		},
-	});
-	if (response.error) {
-		console.log("Error when retrieving milestone groups");
-		showAlert = true;
-		alertMessage =
-			$_("milestoneGroup.alertMessageRetrieving") + " " + response.error.detail;
-	} else {
-		console.log("milsetone groups", response.data);
-	}
-
-	console.log("done");
-}
-
-const rawdata = convertData(milestones).sort((a, b) => a.complete - b.complete); // FIXME: the convert step should not be here and will be handeled backend-side
-
-const promise = setup();
 </script>
-{#await promise}
-<p>Loading...</p>
-{:then}
-<div class="mx-auto flex flex-col border border-gray-200 p-4 md:rounded-t-lg dark:border-gray-700">
-	<Breadcrumbs data={breadcrumbdata} />
-	<div class="grid gap-y-4 p-4">
-		<GalleryDisplay
-			data={rawdata}
-			itemComponent={CardDisplay}
-			componentProps={rawdata.map((item) => {
-				return {
-					card: {
-						class: 'text-gray-700 hover:bg-gray-100'
-					},
 
-					auxilliary: {
-						class: 'w-14 h-14',
-						color: item.complete === true ? '#4ade80' : '#EB4F27'
-					}
-				};
-			})}
-			withSearch={true}
-			{searchData}
-		/>
-	</div>
-</div>
+{#await promise}
+	<p>{$_("userData.loadingMessage")}</p>
+{:then}
+	{#if showAlert}
+		<AlertMessage message={alertMessage} />
+	{:else}
+		<div class="mx-auto flex flex-col border border-gray-200 p-4 md:rounded-t-lg dark:border-gray-700">
+			<Breadcrumbs data={breadcrumbdata} />
+			<div class="grid gap-y-4 p-4">
+				<GalleryDisplay
+					data={data}
+					itemComponent={CardDisplay}
+					componentProps={createStyle(data)}
+					withSearch={true}
+					{searchData}
+				/>
+			</div>
+		</div>
+	{/if}
 {:catch error}
 <AlertMessage message={error} />
 {/await}

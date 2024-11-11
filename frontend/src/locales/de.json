@@ -31,7 +31,7 @@
 		"statusLabel": "Status",
 		"statusPlaceholder": "Nach Status suchen",
 		"milestoneLabel": "Meilenstein",
-		"milestonePlaceholder": "Nach Meilenstein suchen (fertig/unfertig)",
+		"milestonePlaceholder": "Nach enthaltenem Meilenstein durchsuchen",
 		"complete": "fertig",
 		"incomplete": "unfertig"
 	},

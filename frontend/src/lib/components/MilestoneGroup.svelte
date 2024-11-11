@@ -1,41 +1,57 @@
 <svelte:options runes={true} />
 <script lang="ts">
-import { type MilestoneGroupPublic, getMilestoneGroups } from "$lib/client";
+import { getMilestoneGroups } from "$lib/client";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
+import { contentStore } from "$lib/stores/contentStore.svelte";
 import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
 let showAlert = $state(false);
 let alertMessage = $state("");
 let promise = $state(setup());
-let data: MilestoneGroupPublic[] = $state([]);
+let data: any[] = $state([]);
 
 async function setup(): Promise<any> {
 	await currentChild.load_data();
-	const milestonegroup = await getMilestoneGroups({
+	const milestonegroups = await getMilestoneGroups({
 		path: { child_id: currentChild.id },
 	});
 
-	if (milestonegroup.error) {
+	if (milestonegroups.error) {
 		console.log("Error when retrieving milestone group data");
 		showAlert = true;
 		alertMessage =
-			$_("milestone.alertMessageRetrieving") + milestonegroup.error.detail;
+			$_("milestone.alertMessageRetrieving") + milestonegroups.error.detail;
 
 		data = [];
 		return data;
 	} else {
 		console.log(
 			"Milestone group data retrieved successfully",
-			milestonegroup.data,
+			milestonegroups.data,
 		);
-		data = milestonegroup.data.map((item) => {
-			return item;
+
+		data = milestonegroups.data.map((item) => {
+			const res = {
+				header: item.text[$locale].title,
+				summary: item.text[$locale].desc,
+				image: null,
+				progress: 0.5,
+				events: {
+					onclick: () => {
+						activeTabChildren.set("milestoneOverview");
+						contentStore.milestoneGroup = item.id;
+						contentStore.milestoneGroupData = item;
+					},
+				},
+			};
+			return res;
 		});
+
 		return data;
 	}
 }
@@ -69,10 +85,8 @@ function searchByStatus(data: any[], key: string): any[] {
 			// button label contains info about completion status => use for search
 			if (key === $_("search.complete")) {
 				return item.progress === 1;
-			} else if (key === $_("search.incomplete")) {
-				return item.progress < 1;
 			} else {
-				return item.header.toLowerCase().includes(key.toLowerCase());
+				return item.progress < 1;
 			}
 		});
 	}
@@ -104,7 +118,7 @@ function searchByMilestone(data: any[], key: string): any[] {
 		return data;
 	} else {
 		return data.filter((item) => {
-			return true; // todo
+			return true; // TODO: implement search by milestone
 		});
 	}
 }
@@ -177,17 +191,7 @@ export function createStyle(data: any[]) {
 	<Breadcrumbs data={breadcrumbdata} />
 	<div class="grid gap-y-8">
 		<GalleryDisplay
-			data={data.map((item) => {
-				console.log("item", item);
-				const res= {
-					header: item.text[$locale].title,
-					summary: item.text[$locale].desc,
-					image: null,
-					progress: 0.5
-				}
-				console.log("res", res);
-				return res;
-			})}
+			data={data}
 			itemComponent={CardDisplay}
 			componentProps={createStyle(data)}
 			withSearch={true}
