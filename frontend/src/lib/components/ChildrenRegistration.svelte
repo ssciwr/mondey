@@ -67,9 +67,9 @@ let breadcrumbdata = $derived([
 		label: childLabel,
 	},
 	{
-		label: $_("milestone.milestones"),
+		label: $_("milestone.groupOverviewLabel"),
 		onclick: () => {
-			activeTabChildren.set("milestoneOverview");
+			activeTabChildren.set("milestoneGroup");
 		},
 	},
 ]);
