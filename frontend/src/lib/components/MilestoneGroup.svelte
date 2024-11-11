@@ -176,7 +176,7 @@ export function createStyle(data: any[]) {
 				labelInsideClass: "h-4 rounded-full text-xs text-center text-white",
 				size: "h-4",
 				divClass: `h-full rounded-full w-${100 * item.progress}`,
-				color: "primary",
+				color: "red",
 				completeColor: "green",
 			},
 		};

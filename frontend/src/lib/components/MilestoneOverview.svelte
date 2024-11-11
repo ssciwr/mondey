@@ -95,8 +95,7 @@ async function setup(): Promise<void> {
 							contentStore.milestoneData = item;
 						},
 					},
-					auxilliary:
-						item.answer !== null ? CheckCircleSolid : ExclamationCircleSolid, // FIXME: always will be false
+					auxilliary: item.answer ? CheckCircleSolid : ExclamationCircleSolid,
 				};
 			},
 		);
@@ -187,7 +186,7 @@ const breadcrumbdata: any[] = [
 	{#if showAlert}
 		<AlertMessage message={alertMessage} />
 	{:else}
-		<div class="mx-auto flex flex-col border border-gray-200 p-4 md:rounded-t-lg dark:border-gray-700">
+		<div class="mx-auto flex flex-col p-4 md:rounded-t-lg">
 			<Breadcrumbs data={breadcrumbdata} />
 			<div class="grid gap-y-4 p-4">
 				<GalleryDisplay

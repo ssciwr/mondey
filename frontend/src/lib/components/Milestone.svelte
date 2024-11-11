@@ -1,22 +1,16 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { updateMilestoneAnswer } from "$lib/client/services.gen";
-import type {
-	MilestoneAnswerSessionPublic,
-	MilestoneGroupPublic,
-	MilestonePublic,
-} from "$lib/client/types.gen";
-import MilestoneButton from "$lib/components/MilestoneButton.svelte";
 import {
-	Accordion,
-	AccordionItem,
-	Breadcrumb,
-	BreadcrumbItem,
-	Button,
-	Checkbox,
-	P,
-} from "flowbite-svelte";
+	getCurrentMilestoneAnswerSession,
+	updateMilestoneAnswer,
+} from "$lib/client/services.gen";
+import type { MilestonePublic } from "$lib/client/types.gen";
+import MilestoneButton from "$lib/components/MilestoneButton.svelte";
+import { currentChild } from "$lib/stores/childrenStore.svelte";
+import { activeTabChildren } from "$lib/stores/componentStore";
+import { contentStore } from "$lib/stores/contentStore.svelte";
+import { Accordion, AccordionItem, Button, Checkbox } from "flowbite-svelte";
 import {
 	ArrowLeftOutline,
 	ArrowRightOutline,
@@ -25,27 +19,28 @@ import {
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 import { _, locale } from "svelte-i18n";
+import AlertMessage from "./AlertMessage.svelte";
+import Breadcrumbs from "./Navigation/Breadcrumbs.svelte";
 
-let {
-	milestoneGroup = undefined,
-	milestoneAnswerSession = undefined,
-}: {
-	milestoneGroup?: MilestoneGroupPublic;
-	milestoneAnswerSession?: MilestoneAnswerSessionPublic;
-} = $props();
-
+let milestoneAnswerSession = $state(null);
 let currentMilestoneIndex = $state(0);
 let currentMilestone = $state(undefined as MilestonePublic | undefined);
 let selectedAnswer = $derived(
 	milestoneAnswerSession?.answers?.[`${currentMilestone?.id}`]?.answer,
 );
+let showAlert = $state(false);
+let alertMessage = $state("");
 let autoGoToNextMilestone = $state(false);
 let currentImageIndex = $state(0);
 
 onMount(() => {
-	console.log(milestoneGroup);
-	if (milestoneGroup && milestoneGroup.milestones) {
-		currentMilestone = milestoneGroup.milestones[currentMilestoneIndex];
+	console.log("onmount milestonegroup: ", contentStore.milestoneGroupData);
+	if (
+		contentStore.milestoneGroupData &&
+		contentStore.milestoneGroupData.milestones
+	) {
+		currentMilestone =
+			contentStore.milestoneGroupData.milestones[currentMilestoneIndex];
 	}
 });
 
@@ -63,21 +58,22 @@ setInterval(() => {
 
 function prevMilestone() {
 	if (
-		!milestoneGroup ||
-		!milestoneGroup.milestones ||
+		!contentStore.milestoneGroupData ||
+		!contentStore.milestoneGroupData.milestones ||
 		currentMilestoneIndex === 0
 	) {
 		return;
 	}
 	currentMilestoneIndex -= 1;
 	currentImageIndex = 0;
-	currentMilestone = milestoneGroup.milestones[currentMilestoneIndex];
+	currentMilestone =
+		contentStore.milestoneGroupData.milestones[currentMilestoneIndex];
 }
 
 async function nextMilestone() {
 	if (
-		!milestoneGroup ||
-		!milestoneGroup.milestones ||
+		!contentStore.milestoneGroupData ||
+		!contentStore.milestoneGroupData.milestones ||
 		!currentMilestone ||
 		selectedAnswer === undefined ||
 		!milestoneAnswerSession
@@ -95,7 +91,10 @@ async function nextMilestone() {
 		return;
 	}
 	milestoneAnswerSession.answers[`${currentMilestone.id}`] = data;
-	if (currentMilestoneIndex + 1 == milestoneGroup.milestones.length) {
+	if (
+		currentMilestoneIndex + 1 ==
+		contentStore.milestoneGroupData.milestones.length
+	) {
 		console.log(
 			`TODO: redirect to next milestone group or back to group overview`,
 		);
@@ -104,7 +103,8 @@ async function nextMilestone() {
 	}
 	currentMilestoneIndex += 1;
 	currentImageIndex = 0;
-	currentMilestone = milestoneGroup.milestones[currentMilestoneIndex];
+	currentMilestone =
+		contentStore.milestoneGroupData.milestones[currentMilestoneIndex];
 }
 
 function selectAnswer(answer: number | undefined) {
@@ -124,105 +124,148 @@ function selectAnswer(answer: number | undefined) {
 		nextMilestone();
 	}
 }
+
+async function setup() {
+	const response = await getCurrentMilestoneAnswerSession({
+		path: { child_id: currentChild.id },
+	});
+
+	if (response.error) {
+		console.log("Error when retrieving milestone answer session");
+		showAlert = true;
+		alertMessage =
+			$_("milestone.alertMessageRetrieving") + " " + response.error.detail;
+		milestoneAnswerSession = undefined;
+	} else {
+		milestoneAnswerSession = response.data;
+	}
+}
+
+const promise = setup();
+// FIXME: this is a ridiculous hack to circumvent 'state referenced in its own scope will never update error'. Maybe get rid of this and use breadcrumbs directly in the markup
+const breadcrumbdata = () => {
+	return [
+		{
+			label: $_("childData.overviewLabel"),
+			onclick: () => {
+				activeTabChildren.set("childrenGallery");
+			},
+		},
+		{
+			label: currentChild.name,
+			onclick: () => {
+				activeTabChildren.set("childrenRegistration");
+			},
+		},
+		{
+			label: $_("milestone.groupOverviewLabel"),
+			onclick: () => {
+				activeTabChildren.set("milestoneGroup");
+			},
+		},
+		{
+			label: contentStore.milestoneGroupData.text[$locale].title,
+			onclick: () => {
+				activeTabChildren.set("milestoneOverview");
+			},
+		},
+		{
+			label:
+				String(currentMilestoneIndex + 1) +
+				"/" +
+				String(contentStore.milestoneGroupData.milestones.length),
+		},
+	];
+};
 </script>
 
+{#await promise}
+<p>{$_("userData.loadingMessage")}</p>
+{:then data}
 <div
-	class="border-1 flex flex-col border border-gray-200 bg-white shadow md:max-w-7xl md:rounded-lg dark:border-gray-700 dark:bg-gray-800"
+	class="mx-auto flex flex-col p-4 md:rounded-t-lg"
 >
-	{#if $locale && milestoneGroup && milestoneGroup.text && milestoneGroup.milestones && currentMilestone && currentMilestone.text && currentMilestone.images}
-		<div class="bg-gray-100 md:rounded-t-lg dark:bg-gray-600">
-			<Breadcrumb
-				olClass="inline-flex items-center space-x-1 rtl:space-x-reverse md:space-x-3 rtl:space-x-reverse flex-wrap"
-				navClass="m-2"
-			>
-				<BreadcrumbItem href="#" home>Start</BreadcrumbItem>
-				<BreadcrumbItem href="#">MEIKE</BreadcrumbItem>
-				<BreadcrumbItem href="#">{$_('milestone.milestones')}</BreadcrumbItem>
-				<!-- reload below is a temporary hack for demo purposes -->
-				<BreadcrumbItem href="javascript:window.location.reload(true)"
-					>{milestoneGroup.text[$locale].title}</BreadcrumbItem
-				>
-				<BreadcrumbItem
-					>{currentMilestoneIndex + 1} / {milestoneGroup.milestones.length}</BreadcrumbItem
-				>
-			</Breadcrumb>
-		</div>
-		<div>
-			<div class="flex w-full flex-col md:flex-row">
-				<div>
-					{#each currentMilestone.images as image, imageIndex}
-						<img
-							class={`absolute h-48 w-full object-cover transition duration-1000 ease-in-out md:h-96 md:w-48 md:rounded-bl-lg lg:w-72 xl:w-96 ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
-							src={`${import.meta.env.VITE_MONDEY_API_URL}/static/${image.filename}`}
-							alt=""
-						/>
-					{/each}
-					<div class="h-48 w-full md:h-96 md:w-48 md:rounded-bl-lg lg:w-72 xl:w-96"></div>
+	{#if $locale && contentStore.milestoneGroupData && contentStore.milestoneGroupData.text && contentStore.milestoneGroupData.milestones && currentMilestone && currentMilestone.text && currentMilestone.images}
+
+		<Breadcrumbs data={breadcrumbdata()} />
+
+		<div class="flex w-full flex-col md:flex-row">
+			<div>
+				{#each currentMilestone.images as image, imageIndex}
+					<img
+						class={`absolute h-48 w-full object-cover transition duration-1000 ease-in-out md:h-96 md:w-48 md:rounded-bl-lg lg:w-72 xl:w-96 ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
+						src={`${import.meta.env.VITE_MONDEY_API_URL}/static/${image.filename}`}
+						alt=""
+					/>
+				{/each}
+				<div class="h-48 w-full md:h-96 md:w-48 md:rounded-bl-lg lg:w-72 xl:w-96"></div>
+			</div>
+			<div class="m-2 md:m-4">
+				<h2 class="mb-2 text-2xl font-bold text-gray-700 dark:text-gray-400">
+					{currentMilestone.text[$locale].title}
+				</h2>
+				<p>{currentMilestone.text[$locale].desc}</p>
+				<Accordion flush>
+					<AccordionItem>
+						<span slot="header" class="flex gap-2 text-base">
+							<InfoCircleSolid class="mt-0.5" />
+							<span>{$_('milestone.observation')}</span>
+						</span>
+						<p>
+							{currentMilestone.text[$locale].obs}
+						</p>
+					</AccordionItem>
+					<AccordionItem>
+						<span slot="header" class="flex gap-2 text-base">
+							<QuestionCircleSolid class="mt-0.5" />
+							<span>{$_('milestone.help')}</span>
+						</span>
+						<p>
+							{currentMilestone.text[$locale].help}
+						</p>
+					</AccordionItem>
+				</Accordion>
+			</div>
+			<div class="m-1 flex flex-col justify-items-stretch rounded-lg">
+				{#each [0, 1, 2, 3] as answerIndex}
+					<MilestoneButton
+						index={answerIndex}
+						selected={selectedAnswer === answerIndex}
+						onClick={() => {
+							selectAnswer(answerIndex);
+						}}
+						tooltip={$_(`milestone.answer${answerIndex}-desc`)}
+					>
+						{$_(`milestone.answer${answerIndex}-text`)}
+					</MilestoneButton>
+				{/each}
+				<div class="flex flex-row justify-center">
+					<Button
+						color="light"
+						disabled={currentMilestoneIndex === 0}
+						on:click={prevMilestone}
+						class="m-1 mt-4"
+					>
+						<ArrowLeftOutline class="me-2 h-5 w-5" />
+						{$_('milestone.prev')}
+					</Button>
+					<Button
+						color="light"
+						disabled={selectedAnswer === undefined}
+						on:click={nextMilestone}
+						class="m-1 mt-4"
+					>
+						{$_('milestone.next')}
+						<ArrowRightOutline class="ms-2 h-5 w-5" />
+					</Button>
 				</div>
-				<div class="m-2 md:m-4">
-					<h2 class="mb-2 text-2xl font-bold text-gray-700 dark:text-gray-400">
-						{currentMilestone.text[$locale].title}
-					</h2>
-					<P>{currentMilestone.text[$locale].desc}</P>
-					<Accordion flush>
-						<AccordionItem>
-							<span slot="header" class="flex gap-2 text-base">
-								<InfoCircleSolid class="mt-0.5" />
-								<span>{$_('milestone.observation')}</span>
-							</span>
-							<P>
-								{currentMilestone.text[$locale].obs}
-							</P>
-						</AccordionItem>
-						<AccordionItem>
-							<span slot="header" class="flex gap-2 text-base">
-								<QuestionCircleSolid class="mt-0.5" />
-								<span>{$_('milestone.help')}</span>
-							</span>
-							<P>
-								{currentMilestone.text[$locale].help}
-							</P>
-						</AccordionItem>
-					</Accordion>
-				</div>
-				<div class="m-1 flex flex-col justify-items-stretch rounded-lg">
-					{#each [0, 1, 2, 3] as answerIndex}
-						<MilestoneButton
-							index={answerIndex}
-							selected={selectedAnswer === answerIndex}
-							onClick={() => {
-								selectAnswer(answerIndex);
-							}}
-							tooltip={$_(`milestone.answer${answerIndex}-desc`)}
-						>
-							{$_(`milestone.answer${answerIndex}-text`)}
-						</MilestoneButton>
-					{/each}
-					<div class="flex flex-row justify-center">
-						<Button
-							color="light"
-							disabled={currentMilestoneIndex === 0}
-							on:click={prevMilestone}
-							class="m-1 mt-4"
-						>
-							<ArrowLeftOutline class="me-2 h-5 w-5" />
-							{$_('milestone.prev')}
-						</Button>
-						<Button
-							color="light"
-							disabled={selectedAnswer === undefined}
-							on:click={nextMilestone}
-							class="m-1 mt-4"
-						>
-							{$_('milestone.next')}
-							<ArrowRightOutline class="ms-2 h-5 w-5" />
-						</Button>
-					</div>
-					<Checkbox class="m-1 justify-center" bind:checked={autoGoToNextMilestone}>
-						<P class="text-xs">{$_('milestone.autonext')}</P>
-					</Checkbox>
-				</div>
+				<Checkbox class="m-1 justify-center" bind:checked={autoGoToNextMilestone}>
+					<p class="text-xs">{$_('milestone.autonext')}</p>
+				</Checkbox>
 			</div>
 		</div>
 	{/if}
 </div>
+{:catch error}
+<AlertMessage message={error} />
+{/await}
