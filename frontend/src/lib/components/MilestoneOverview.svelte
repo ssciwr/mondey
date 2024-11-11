@@ -1,5 +1,6 @@
 <svelte:options runes={true} />
 <script lang="ts">
+import { getMilestoneGroups } from "$lib/client";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import { convertData, data } from "$lib/components/MilestoneOverview";
@@ -10,17 +11,10 @@ import { _ } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
 let milestones = $state(data.milestones);
+let showAlert = $state(false);
+let alertMessage = $state($_("milestoneGroup.alertMessageError"));
 
-interface MilestoneData {
-	header: string;
-	href: string;
-	summary: string;
-	auxilliary: string;
-	complete: boolean;
-	answer: string;
-}
-
-function searchStatus(data: MilestoneData[], key: string): MilestoneData[] {
+function searchStatus(data: any[], key: string): any[] {
 	if (key === "") {
 		return data;
 	} else {
@@ -35,10 +29,7 @@ function searchStatus(data: MilestoneData[], key: string): MilestoneData[] {
 	}
 }
 
-function searchDescription(
-	data: MilestoneData[],
-	key: string,
-): MilestoneData[] {
+function searchDescription(data: any[], key: string): any[] {
 	if (key === "") {
 		return data;
 	} else {
@@ -48,7 +39,7 @@ function searchDescription(
 	}
 }
 
-function searchTitle(data: MilestoneData[], key: string): MilestoneData[] {
+function searchTitle(data: any[], key: string): any[] {
 	if (key === "") {
 		return data;
 	} else {
@@ -58,7 +49,7 @@ function searchTitle(data: MilestoneData[], key: string): MilestoneData[] {
 	}
 }
 
-function searchAnswer(data: MilestoneData[], key: string): MilestoneData[] {
+function searchAnswer(data: any[], key: string): any[] {
 	if (key === "") {
 		return data;
 	} else {
@@ -70,7 +61,7 @@ function searchAnswer(data: MilestoneData[], key: string): MilestoneData[] {
 	}
 }
 
-function searchAll(data: MilestoneData[], key: string): MilestoneData[] {
+function searchAll(data: any[], key: string): any[] {
 	return [
 		...new Set([
 			...searchDescription(data, key),
@@ -129,7 +120,6 @@ const breadcrumbdata: any[] = [
 	},
 	{
 		label: `Grobmotorik`,
-		// href: `${base}/milestone`,
 		onclick: () => {
 			activeTabChildren.update((value) => {
 				return "milestone";
@@ -141,6 +131,20 @@ const breadcrumbdata: any[] = [
 async function setup(): Promise<void> {
 	console.log("setup overview");
 	await currentChild.load_data();
+	const response = await getMilestoneGroups({
+		path: {
+			child_id: currentChild.id,
+		},
+	});
+	if (response.error) {
+		console.log("Error when retrieving milestone groups");
+		showAlert = true;
+		alertMessage =
+			$_("milestoneGroup.alertMessageRetrieving") + " " + response.error.detail;
+	} else {
+		console.log("milsetone groups", response.data);
+	}
+
 	console.log("done");
 }
 
