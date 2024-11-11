@@ -12,6 +12,7 @@ requires-python = ">=3.10"
 dependencies = [
     "fastapi[standard]",
     "fastapi-users[sqlalchemy]",
+    "numpy",
     "uvicorn",
     "sqlmodel",
     "aiosqlite",

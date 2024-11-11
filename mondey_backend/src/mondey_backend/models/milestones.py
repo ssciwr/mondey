@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 
+from pydantic import BaseModel
 from sqlalchemy.orm import Mapped
 from sqlmodel import Field
 from sqlmodel import SQLModel
@@ -57,15 +58,15 @@ class MilestoneGroup(SQLModel, table=True):
 
 class MilestoneGroupPublic(SQLModel):
     id: int
-    text: dict[str, MilestoneGroupTextPublic] = {}
-    milestones: list[MilestonePublic] = []
+    text: dict[str, MilestoneGroupTextPublic]
+    milestones: list[MilestonePublic]
 
 
 class MilestoneGroupAdmin(SQLModel):
     id: int
     order: int
-    text: dict[str, MilestoneGroupText] = {}
-    milestones: list[MilestoneAdmin] = []
+    text: dict[str, MilestoneGroupText]
+    milestones: list[MilestoneAdmin]
 
 
 ## MilestoneText
@@ -99,7 +100,7 @@ class Milestone(SQLModel, table=True):
     group_id: int | None = Field(default=None, foreign_key="milestonegroup.id")
     order: int = 0
     expected_age_months: int = 12
-    group: MilestoneGroup | None = back_populates("milestones")
+    group: MilestoneGroup = back_populates("milestones")
     text: Mapped[dict[str, MilestoneText]] = dict_relationship(key="lang_id")
     images: Mapped[list[MilestoneImage]] = back_populates("milestone")
 
@@ -107,8 +108,8 @@ class Milestone(SQLModel, table=True):
 class MilestonePublic(SQLModel):
     id: int
     expected_age_months: int
-    text: dict[str, MilestoneTextPublic] = {}
-    images: list[MilestoneImagePublic] = []
+    text: dict[str, MilestoneTextPublic]
+    images: list[MilestoneImagePublic]
 
 
 class MilestoneAdmin(SQLModel):
@@ -116,8 +117,8 @@ class MilestoneAdmin(SQLModel):
     group_id: int
     order: int
     expected_age_months: int
-    text: dict[str, MilestoneText] = {}
-    images: list[MilestoneImage] = []
+    text: dict[str, MilestoneText]
+    images: list[MilestoneImage]
 
 
 ## MilestoneImage
@@ -128,7 +129,7 @@ class MilestoneImage(SQLModel, table=True):
     milestone_id: int | None = Field(default=None, foreign_key="milestone.id")
     filename: str = ""
     approved: bool = False
-    milestone: Milestone | None = back_populates("images")
+    milestone: Milestone = back_populates("images")
 
 
 class MilestoneImagePublic(SQLModel):
@@ -171,3 +172,14 @@ class MilestoneAnswerSessionPublic(SQLModel):
     child_id: int
     created_at: datetime.datetime
     answers: dict[int, MilestoneAnswerPublic]
+
+
+class MilestoneAgeScore(BaseModel):
+    age_months: int
+    avg_score: float
+    expected_score: float
+
+
+class MilestoneAgeScores(BaseModel):
+    scores: list[MilestoneAgeScore]
+    expected_age: int
