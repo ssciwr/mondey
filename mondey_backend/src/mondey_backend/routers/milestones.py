@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter
 from sqlalchemy.orm import lazyload
 from sqlmodel import col
@@ -9,12 +11,14 @@ from ..dependencies import CurrentActiveUserDep
 from ..dependencies import SessionDep
 from ..models.milestones import Language
 from ..models.milestones import Milestone
+from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupPublic
 from ..models.milestones import MilestonePublic
 from .utils import get
 from .utils import get_child_age_in_months
 from .utils import get_db_child
+from .utils import get_or_create_current_milestone_answer_session
 
 
 def create_router() -> APIRouter:
@@ -43,7 +47,8 @@ def create_router() -> APIRouter:
         "/milestone-groups/{child_id}", response_model=list[MilestoneGroupPublic]
     )
     def get_milestone_groups(
-        session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
+        session: SessionDep, current_active_user: CurrentActiveUserDep, 
+        child_id: int, 
     ):
         delta_months = 6
         child = get_db_child(session, current_active_user, child_id)
@@ -67,6 +72,53 @@ def create_router() -> APIRouter:
                 )
             )
         ).all()
-        return milestone_groups
+
+        # compute progress from milestone answers. While this is not 
+        # the most efficient way, it is the least intrusive and concentrates 
+        # progress reporting in the least amount of code - this function and the
+        # MilestonAnswerPublic model.
+        answer_session  = (
+            get_or_create_current_milestone_answer_session(
+                session, current_active_user, child_id
+            )
+        )
+        all_answers = session.exec(
+            select(MilestoneAnswer).where(
+                MilestoneAnswer.answer_session_id == answer_session.id
+            )
+        ).all()
+
+        # FIXME: this needs to be done better, as it contains a cumbersome 
+        # type conversion that should be avoided. 
+        # when fixing: -make sure pydantic is still as much in effect as possible 
+        # - check if we need it at all. certainly a nice thing
+        milestone_groups_public = []
+        for mgroup in milestone_groups: 
+            p = 0.0
+            mgroup_public = MilestoneGroupPublic(
+                id=mgroup.id,
+                order=mgroup.order,
+                text=mgroup.text,
+                milestones=mgroup.milestones
+            )
+            for milestone in mgroup.milestones: 
+                answer = next((answer for answer in all_answers if answer.milestone_id == milestone.id), None)
+
+                logging.getLogger("mondey-frontend-prototype-backend-1").info(answer)
+                logging.getLogger("mondey-frontend-prototype-backend-1").info(
+                    [
+                        answer
+                        for answer in all_answers
+                        if answer.milestone_id == milestone.id
+                    ]
+                )
+
+                if answer is not None and answer != "":
+                    p += 1.0 
+
+            mgroup_public.progress = p / len(mgroup.milestones)  
+            milestone_groups_public.append(mgroup_public)
+
+        return milestone_groups_public
 
     return router

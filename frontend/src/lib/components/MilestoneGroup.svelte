@@ -40,7 +40,7 @@ async function setup(): Promise<any> {
 				header: item.text[$locale].title,
 				summary: item.text[$locale].desc,
 				image: null,
-				progress: 0.5,
+				progress: item.progress < 0.01 ?  0.01 : item.progress,
 				events: {
 					onclick: () => {
 						activeTabChildren.set("milestoneOverview");
@@ -171,7 +171,7 @@ export function createStyle(data: any[]) {
 					"m-2 max-w-prose dark:text-white text-gray-700 hover:cursor-pointer bg-primary-700 dark:bg-primary-900 hover:bg-primary-800 dark:hover:bg-primary-700",
 			},
 			progress: {
-				labelInsideClass: "h-4 rounded-full text-xs text-center text-white",
+				labelInside: true,
 				size: "h-4",
 				divClass: `h-full rounded-full w-${100 * item.progress}`,
 				color: "red",
