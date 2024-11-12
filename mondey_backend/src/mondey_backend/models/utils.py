@@ -7,10 +7,10 @@ from sqlmodel import Field
 from sqlmodel import Relationship
 
 
-def back_populates(name: str):
+def back_populates(name: str, **kwargs):
     # Workaround for "please state the generic argument using an annotation" sqlalchemy error
     # https://github.com/fastapi/sqlmodel/discussions/771#discussioncomment-10326074
-    return Relationship(sa_relationship=relationship(back_populates=name))
+    return Relationship(sa_relationship=relationship(back_populates=name, **kwargs))
 
 
 def dict_relationship(key: str):
