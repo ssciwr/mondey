@@ -193,12 +193,11 @@ const breadcrumbdata = () => {
 			<div>
 				{#each currentMilestone.images as image, imageIndex}
 					<img
-						class={`absolute h-48 w-full object-cover transition duration-1000 ease-in-out md:h-96 md:w-48 md:rounded-bl-lg lg:w-72 xl:w-96 ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
+						class={`h-48 w-full object-cover transition pb-4 mb-4 duration-1000 ease-in-out md:h-96 md:w-48 md:rounded-bl-lg lg:w-72 xl:w-96 ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
 						src={`${import.meta.env.VITE_MONDEY_API_URL}/static/${image.filename}`}
 						alt=""
 					/>
 				{/each}
-				<div class="h-48 w-full md:h-96 md:w-48 md:rounded-bl-lg lg:w-72 xl:w-96"></div>
 			</div>
 			<div class="m-2 md:m-4">
 				<h2 class="mb-2 text-2xl font-bold text-gray-700 dark:text-gray-400">
