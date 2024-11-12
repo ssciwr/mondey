@@ -2,27 +2,27 @@
 
 <script lang="ts">
 import {
-	getCurrentMilestoneAnswerSession,
-	updateMilestoneAnswer,
+    getCurrentMilestoneAnswerSession,
+    updateMilestoneAnswer,
 } from "$lib/client/services.gen";
-import type { MilestonePublic } from "$lib/client/types.gen";
+import type { MilestoneAnswerSessionPublic, MilestonePublic } from "$lib/client/types.gen";
 import MilestoneButton from "$lib/components/MilestoneButton.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
 import { Accordion, AccordionItem, Button, Checkbox } from "flowbite-svelte";
 import {
-	ArrowLeftOutline,
-	ArrowRightOutline,
-	InfoCircleSolid,
-	QuestionCircleSolid,
+    ArrowLeftOutline,
+    ArrowRightOutline,
+    InfoCircleSolid,
+    QuestionCircleSolid,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 import Breadcrumbs from "./Navigation/Breadcrumbs.svelte";
 
-let milestoneAnswerSession = $state(null);
+let milestoneAnswerSession = $state(null as MilestoneAnswerSessionPublic | null | undefined);
 let currentMilestoneIndex = $state(0);
 let currentMilestone = $state(undefined as MilestonePublic | undefined);
 let selectedAnswer = $derived(

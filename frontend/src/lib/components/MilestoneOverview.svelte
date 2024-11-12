@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 <script lang="ts">
-import type { MilestonePublic } from "$lib/client";
+import { getCurrentMilestoneAnswerSession, type MilestonePublic } from "$lib/client";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
@@ -81,11 +81,32 @@ async function setup(): Promise<void> {
 		showAlert = true;
 		alertMessage = $_("milestoneGroup.alertMessageRetrieving");
 	} else {
+
+		let milestoneAnswerSession = undefined;
+		const response = await getCurrentMilestoneAnswerSession({
+			path: { child_id: currentChild.id },
+		});
+
+		if (response.error) {
+			console.log("Error when retrieving milestone answer session");
+			showAlert = true;
+			alertMessage =
+				$_("milestone.alertMessageRetrieving") + " " + response.error.detail;
+				return
+		} else {
+			milestoneAnswerSession = response.data;
+		}
+		console.log("milestoneAnswerSession", milestoneAnswerSession);
+
 		data = contentStore.milestoneGroupData.milestones.map(
 			(item: MilestonePublic) => {
+
+				const answer = milestoneAnswerSession.answers[`${item.id}`];
+				const complete: boolean = answer && answer.answer !== null && answer.answer !== undefined && answer.answer > 0;
+				console.log("answer", answer);
 				return {
 					header: item?.text?.[$locale]?.title ?? "",
-					complete: false, // TODO: implement this in backend?
+					complete: complete,
 					summary: item?.text?.[$locale]?.desc ?? "",
 					events: {
 						onclick: () => {
@@ -94,7 +115,7 @@ async function setup(): Promise<void> {
 							contentStore.milestoneData = item;
 						},
 					},
-					auxilliary: item.answer ? CheckCircleSolid : ExclamationCircleSolid,
+					auxilliary: complete ? CheckCircleSolid : ExclamationCircleSolid,
 				};
 			},
 		);
@@ -107,7 +128,7 @@ function createStyle(data: any[]) {
 	return data.map((item) => {
 		return {
 			card: {
-				class:"m-2 max-w-prose dark:text-white text-gray-700 hover:cursor-pointer bg-primary-700 dark:bg-primary-900 hover:bg-primary-800 dark:hover:bg-primary-700",
+				class:"m-2 max-w-prose dark:text-white text-white hover:cursor-pointer bg-primary-700 dark:bg-primary-900 hover:bg-primary-800 dark:hover:bg-primary-700",
 			},
 			auxilliary: {
 				class: "w-14 h-14",

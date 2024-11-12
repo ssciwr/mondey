@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import logging
-
 from fastapi import APIRouter
 from sqlalchemy.orm import lazyload
 from sqlmodel import col
@@ -11,7 +9,6 @@ from ..dependencies import CurrentActiveUserDep
 from ..dependencies import SessionDep
 from ..models.milestones import Language
 from ..models.milestones import Milestone
-from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupPublic
 from ..models.milestones import MilestonePublic
@@ -82,12 +79,6 @@ def create_router() -> APIRouter:
                 session, current_active_user, child_id
             )
         )
-        all_answers = session.exec(
-            select(MilestoneAnswer).where(
-                MilestoneAnswer.answer_session_id == answer_session.id
-            )
-        ).all()
-
         # FIXME: this needs to be done better, as it contains a cumbersome 
         # type conversion that should be avoided. 
         # when fixing: -make sure pydantic is still as much in effect as possible 
@@ -102,18 +93,9 @@ def create_router() -> APIRouter:
                 milestones=mgroup.milestones
             )
             for milestone in mgroup.milestones: 
-                answer = next((answer for answer in all_answers if answer.milestone_id == milestone.id), None)
+                answer = answer_session.answers.get(milestone.id)
 
-                logging.getLogger("mondey-frontend-prototype-backend-1").info(answer)
-                logging.getLogger("mondey-frontend-prototype-backend-1").info(
-                    [
-                        answer
-                        for answer in all_answers
-                        if answer.milestone_id == milestone.id
-                    ]
-                )
-
-                if answer is not None and answer != "":
+                if answer is not None and answer.answer > 0:
                     p += 1.0 
 
             mgroup_public.progress = p / len(mgroup.milestones)  
