@@ -9,8 +9,8 @@ import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
 import {
-	CheckCircleSolid,
-	ExclamationCircleSolid,
+    CheckCircleSolid,
+    ExclamationCircleSolid,
 } from "flowbite-svelte-icons";
 import { _, locale } from "svelte-i18n";
 
@@ -79,8 +79,7 @@ async function setup(): Promise<void> {
 	) {
 		console.log("Error when retrieving milestone groups");
 		showAlert = true;
-		alertMessage =
-			$_("milestoneGroup.alertMessageRetrieving") + " " + response.error.detail;
+		alertMessage = $_("milestoneGroup.alertMessageRetrieving");
 	} else {
 		data = contentStore.milestoneGroupData.milestones.map(
 			(item: MilestonePublic) => {
@@ -108,9 +107,8 @@ function createStyle(data: any[]) {
 	return data.map((item) => {
 		return {
 			card: {
-				class: "text-gray-700 hover:bg-gray-100",
+				class:"m-2 max-w-prose dark:text-white text-gray-700 hover:cursor-pointer bg-primary-700 dark:bg-primary-900 hover:bg-primary-800 dark:hover:bg-primary-700",
 			},
-
 			auxilliary: {
 				class: "w-14 h-14",
 				color: item.complete === true ? "#4ade80" : "#EB4F27",

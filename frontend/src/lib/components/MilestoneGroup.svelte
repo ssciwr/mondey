@@ -168,10 +168,8 @@ export function createStyle(data: any[]) {
 		return {
 			card: {
 				class:
-					"m-2 max-w-prose dark:text-white text-gray-700 hover:cursor-pointer ",
+					"m-2 max-w-prose dark:text-white text-gray-700 hover:cursor-pointer bg-primary-700 dark:bg-primary-900 hover:bg-primary-800 dark:hover:bg-primary-700",
 			},
-			header: null,
-			summary: null,
 			progress: {
 				labelInsideClass: "h-4 rounded-full text-xs text-center text-white",
 				size: "h-4",
