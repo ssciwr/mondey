@@ -719,3 +719,7 @@ export type VerifyVerifyData = {
 export type VerifyVerifyResponse = (UserRead);
 
 export type VerifyVerifyError = (ErrorModel | HTTPValidationError);
+
+export type AuthResponse = (unknown);
+
+export type AuthError = unknown;
