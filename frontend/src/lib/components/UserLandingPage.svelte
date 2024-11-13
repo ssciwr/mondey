@@ -20,8 +20,8 @@ onMount(async () => {
 });
 </script>
 
-{#if get(currentUser)}
-	{#if get(currentUser)?.is_verified === true}
+{#if $currentUser}
+	{#if $currentUser?.is_verified === true}
 		<div class="m-2 p-2">
 			<Tabs tabStyle="pill">
 				<TabItem open={true}>

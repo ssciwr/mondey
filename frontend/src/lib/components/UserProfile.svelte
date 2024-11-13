@@ -1,24 +1,22 @@
+<svelte:options runes={true} />
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { base } from "$app/paths";
 import { authCookieLogout } from "$lib/client/services.gen";
-import { type UserRead } from "$lib/client/types.gen";
-import { currentUser } from "$lib/stores/userStore";
+import { currentChild } from "$lib/stores/childrenStore";
+import { currentUser, refreshUser } from "$lib/stores/userStore";
 import { Button, Heading, Popover } from "flowbite-svelte";
-import { onDestroy } from "svelte";
+import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
 let { triggeredBy = "" } = $props();
 let showAlert: boolean = $state(false);
 let alertMessage: string = $state($_("login.alertMessageError"));
-let userData: UserRead | null = $state(null);
 
-const unsubscribe = currentUser.subscribe((value) => {
-	userData = value;
+onMount(async () => {
+	await refreshUser();
 });
-
-onDestroy(unsubscribe);
 
 async function logout(): Promise<void> {
 	const response = await authCookieLogout();
@@ -33,10 +31,11 @@ async function logout(): Promise<void> {
 	} else {
 		console.log(
 			"Successful logout of user ",
-			userData?.email,
+			$currentUser?.email,
 			response.response.status,
 		);
-		userData = null;
+		currentUser.set(null);
+		currentChild.set(null);
 		goto(`/${base}`);
 	}
 }
@@ -52,12 +51,12 @@ async function logout(): Promise<void> {
 			}}
 		/>
 	{/if}
-	{#if userData !== null}
+	{#if $currentUser !== null}
 		<div
 			class="mx-auto mb-6 flex flex-col items-center justify-center space-y-6"
 		>
 			<p class="m-2 w-full rounded-lg p-2 font-semibold">
-				{userData?.email}
+				{$currentUser?.email}
 			</p>
 			<Button
 				class="m-2 w-full"
