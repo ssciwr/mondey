@@ -52,7 +52,9 @@ class MilestoneGroup(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     order: int = 0
     text: Mapped[dict[str, MilestoneGroupText]] = dict_relationship(key="lang_id")
-    milestones: Mapped[list[Milestone]] = back_populates("group")
+    milestones: Mapped[list[Milestone]] = back_populates(
+        "group", order_by="asc(Milestone.order)"
+    )
 
 
 class MilestoneGroupPublic(SQLModel):
