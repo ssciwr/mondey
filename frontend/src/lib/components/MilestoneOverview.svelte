@@ -1,6 +1,9 @@
 <svelte:options runes={true} />
 <script lang="ts">
-import { getCurrentMilestoneAnswerSession, type MilestonePublic } from "$lib/client";
+import {
+	type MilestonePublic,
+	getCurrentMilestoneAnswerSession,
+} from "$lib/client";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
@@ -9,8 +12,11 @@ import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
 import {
-    CheckCircleSolid,
-    ExclamationCircleSolid,
+	CheckCircleSolid,
+	EditOutline,
+	ExclamationCircleSolid,
+	RectangleListOutline,
+	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import { _, locale } from "svelte-i18n";
 
@@ -81,7 +87,6 @@ async function setup(): Promise<void> {
 		showAlert = true;
 		alertMessage = $_("milestoneGroup.alertMessageRetrieving");
 	} else {
-
 		let milestoneAnswerSession = undefined;
 		const response = await getCurrentMilestoneAnswerSession({
 			path: { child_id: currentChild.id },
@@ -92,7 +97,7 @@ async function setup(): Promise<void> {
 			showAlert = true;
 			alertMessage =
 				$_("milestone.alertMessageRetrieving") + " " + response.error.detail;
-				return
+			return;
 		} else {
 			milestoneAnswerSession = response.data;
 		}
@@ -100,9 +105,12 @@ async function setup(): Promise<void> {
 
 		data = contentStore.milestoneGroupData.milestones.map(
 			(item: MilestonePublic) => {
-
 				const answer = milestoneAnswerSession.answers[`${item.id}`];
-				const complete: boolean = answer && answer.answer !== null && answer.answer !== undefined && answer.answer > 0;
+				const complete: boolean =
+					answer &&
+					answer.answer !== null &&
+					answer.answer !== undefined &&
+					answer.answer > 0;
 				console.log("answer", answer);
 				return {
 					header: item?.text?.[$locale]?.title ?? "",
@@ -128,11 +136,12 @@ function createStyle(data: any[]) {
 	return data.map((item) => {
 		return {
 			card: {
-				class:"m-2 max-w-prose dark:text-white text-white hover:cursor-pointer bg-primary-700 dark:bg-primary-900 hover:bg-primary-800 dark:hover:bg-primary-700",
+				class:
+					"m-2 max-w-prose dark:text-white text-white hover:cursor-pointer bg-primary-700 dark:bg-primary-900 hover:bg-primary-800 dark:hover:bg-primary-700",
 			},
 			auxilliary: {
 				class: "w-14 h-14",
-				color: item.complete === true ? "#4ade80" : "#EB4F27",
+				color: item.complete === true ? "green" : "red",
 			},
 		};
 	});
@@ -173,28 +182,25 @@ const searchData = [
 
 const breadcrumbdata: any[] = [
 	{
-		label: $_("childData.overviewLabel"),
-		onclick: () => {
-			activeTabChildren.set("childrenGallery");
-		},
-	},
-	{
 		label: currentChild.name,
 		onclick: () => {
 			activeTabChildren.set("childrenRegistration");
 		},
+		symbol: UserSettingsOutline,
 	},
 	{
 		label: $_("milestone.groupOverviewLabel"),
 		onclick: () => {
 			activeTabChildren.set("milestoneGroup");
 		},
+		symbol: RectangleListOutline,
 	},
 	{
 		label: contentStore.milestoneGroupData.text[$locale].title,
 		onclick: () => {
 			activeTabChildren.set("milestoneOverview");
 		},
+		symbol: EditOutline,
 	},
 ];
 </script>

@@ -22,8 +22,13 @@ import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
-import { Button, Card, Heading } from "flowbite-svelte";
-import { CheckCircleOutline, TrashBinOutline } from "flowbite-svelte-icons";
+import { Button, Card, Heading, Hr } from "flowbite-svelte";
+import {
+	CheckCircleOutline,
+	PlayOutline,
+	TrashBinOutline,
+	UserSettingsOutline,
+} from "flowbite-svelte-icons";
 import { _, locale } from "svelte-i18n";
 
 console.log("ChildrenRegistration");
@@ -56,23 +61,11 @@ let showAlert = $state(false);
 let childLabel = $derived(name ? name : $_("childData.newChildHeadingLong"));
 let breadcrumbdata = $derived([
 	{
-		label: $_("childData.overviewLabel"),
-		onclick: () => {
-			activeTabChildren.update((value) => {
-				return "childrenGallery";
-			});
-		},
-	},
-	{
 		label: childLabel,
-	},
-	{
-		label: $_("milestone.groupOverviewLabel"),
-		onclick: () => {
-			activeTabChildren.set("milestoneGroup");
-		},
+		symbol: UserSettingsOutline,
 	},
 ]);
+
 let promise = $state(setup());
 
 async function setup(): Promise<{
@@ -80,6 +73,8 @@ async function setup(): Promise<{
 	answers: { [k: string]: ChildAnswerPublic };
 }> {
 	console.log("setup");
+	await currentChild.load_data();
+
 	// get questions
 	const questions = await getChildQuestions();
 	if (questions.error || questions.data === undefined) {
@@ -389,6 +384,18 @@ async function submitData(): Promise<void> {
 						>
 					{/if}
 					{#if currentChild.id !== null}
+						<Button
+							class=" w-full text-center text-sm text-white"
+							type="button"
+							color="green"
+							on:click={() => {
+								activeTabChildren.set("milestoneGroup");
+							}}
+							>
+							<PlayOutline size='sm'/>
+							{$_("childData.nextButtonLabel")}
+						</Button>
+						<Hr hrClass="my-8"/>
 						<Button
 							class=" w-full text-center text-sm text-white"
 							type="button"

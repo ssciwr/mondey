@@ -7,6 +7,10 @@ import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
+import {
+	RectangleListOutline,
+	UserSettingsOutline,
+} from "flowbite-svelte-icons";
 import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
@@ -17,6 +21,8 @@ let data: any[] = $state([]);
 
 async function setup(): Promise<any> {
 	await currentChild.load_data();
+	console.log("currentChild", currentChild);
+	console.log("child data: ", currentChild.name);
 	const milestonegroups = await getMilestoneGroups({
 		path: { child_id: currentChild.id },
 	});
@@ -40,7 +46,7 @@ async function setup(): Promise<any> {
 				header: item.text[$locale].title,
 				summary: item.text[$locale].desc,
 				image: null,
-				progress: item.progress < 0.01 ?  0.01 : item.progress,
+				progress: item.progress < 0.01 ? 0.01 : item.progress,
 				events: {
 					onclick: () => {
 						activeTabChildren.set("milestoneOverview");
@@ -58,22 +64,15 @@ async function setup(): Promise<any> {
 
 const breadcrumbdata: any[] = [
 	{
-		label: $_("childData.overviewLabel"),
-		onclick: () => {
-			activeTabChildren.set("childrenGallery");
-		},
-	},
-	{
 		label: currentChild.name,
+		symbol: UserSettingsOutline,
 		onclick: () => {
 			activeTabChildren.set("childrenRegistration");
 		},
 	},
 	{
 		label: $_("milestone.groupOverviewLabel"),
-		onclick: () => {
-			activeTabChildren.set("milestoneGroup");
-		},
+		symbol: RectangleListOutline,
 	},
 ];
 

@@ -2,36 +2,26 @@
 
 <script lang="ts">
 import {
-    getCurrentMilestoneAnswerSession,
-    updateMilestoneAnswer,
-} from "$lib/client/services.gen";
-import type { MilestoneAnswerSessionPublic, MilestonePublic } from "$lib/client/types.gen";
+	type MilestoneAnswerSessionPublic,
+	type MilestonePublic,
+	getCurrentMilestoneAnswerSession,
+	updateMilestoneAnswer,
+} from "$lib/client";
 import MilestoneButton from "$lib/components/MilestoneButton.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
 import { Accordion, AccordionItem, Button, Checkbox } from "flowbite-svelte";
 import {
-    ArrowLeftOutline,
-    ArrowRightOutline,
-    InfoCircleSolid,
-    QuestionCircleSolid,
+	ArrowLeftOutline,
+	ArrowRightOutline,
+	InfoCircleSolid,
+	QuestionCircleSolid,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 import Breadcrumbs from "./Navigation/Breadcrumbs.svelte";
-
-let milestoneAnswerSession = $state(null as MilestoneAnswerSessionPublic | null | undefined);
-let currentMilestoneIndex = $state(0);
-let currentMilestone = $state(undefined as MilestonePublic | undefined);
-let selectedAnswer = $derived(
-	milestoneAnswerSession?.answers?.[`${currentMilestone?.id}`]?.answer,
-);
-let showAlert = $state(false);
-let alertMessage = $state("");
-let autoGoToNextMilestone = $state(false);
-let currentImageIndex = $state(0);
 
 onMount(() => {
 	console.log("onmount milestonegroup: ", contentStore.milestoneGroupData);
@@ -95,10 +85,7 @@ async function nextMilestone() {
 		currentMilestoneIndex + 1 ==
 		contentStore.milestoneGroupData.milestones.length
 	) {
-		console.log(
-			`TODO: redirect to next milestone group or back to group overview`,
-		);
-		// todo: redirect to bereichuebersicht? or go to next set of milestones?
+		activeTabChildren.set("milestoneOverview");
 		return;
 	}
 	currentMilestoneIndex += 1;
@@ -107,7 +94,7 @@ async function nextMilestone() {
 		contentStore.milestoneGroupData.milestones[currentMilestoneIndex];
 }
 
-function selectAnswer(answer: number | undefined) {
+function selectAnswer(answer: number) {
 	if (!currentMilestone) {
 		console.log("selectAnswer: missing currentMilestone");
 		return;
@@ -141,53 +128,62 @@ async function setup() {
 	}
 }
 
+let milestoneAnswerSession = $state(
+	null as MilestoneAnswerSessionPublic | null | undefined,
+);
+let currentMilestoneIndex = $state(0);
+let currentMilestone = $state(undefined as MilestonePublic | undefined);
+let selectedAnswer = $derived(
+	milestoneAnswerSession?.answers?.[`${currentMilestone?.id}`]?.answer,
+);
+let showAlert = $state(false);
+let alertMessage = $state("");
+let autoGoToNextMilestone = $state(false);
+let currentImageIndex = $state(0);
 const promise = setup();
-// FIXME: this is a ridiculous hack to circumvent 'state referenced in its own scope will never update error'. Maybe get rid of this and use breadcrumbs directly in the markup
-const breadcrumbdata = () => {
-	return [
-		{
-			label: $_("childData.overviewLabel"),
-			onclick: () => {
-				activeTabChildren.set("childrenGallery");
-			},
+const breadcrumbdata = $derived([
+	{
+		label: $_("childData.overviewLabel"),
+		onclick: () => {
+			activeTabChildren.set("childrenGallery");
 		},
-		{
-			label: currentChild.name,
-			onclick: () => {
-				activeTabChildren.set("childrenRegistration");
-			},
+	},
+	{
+		label: currentChild.name,
+		onclick: () => {
+			activeTabChildren.set("childrenRegistration");
 		},
-		{
-			label: $_("milestone.groupOverviewLabel"),
-			onclick: () => {
-				activeTabChildren.set("milestoneGroup");
-			},
+	},
+	{
+		label: $_("milestone.groupOverviewLabel"),
+		onclick: () => {
+			activeTabChildren.set("milestoneGroup");
 		},
-		{
-			label: contentStore.milestoneGroupData.text[$locale].title,
-			onclick: () => {
-				activeTabChildren.set("milestoneOverview");
-			},
+	},
+	{
+		label: contentStore.milestoneGroupData.text[$locale].title,
+		onclick: () => {
+			activeTabChildren.set("milestoneOverview");
 		},
-		{
-			label:
-				String(currentMilestoneIndex + 1) +
-				"/" +
-				String(contentStore.milestoneGroupData.milestones.length),
-		},
-	];
-};
+	},
+	{
+		label:
+			String(currentMilestoneIndex + 1) +
+			"/" +
+			String(contentStore.milestoneGroupData.milestones.length),
+	},
+]);
 </script>
 
 {#await promise}
 <p>{$_("userData.loadingMessage")}</p>
-{:then data}
+{:then}
 <div
 	class="mx-auto flex flex-col p-4 md:rounded-t-lg"
 >
 	{#if $locale && contentStore.milestoneGroupData && contentStore.milestoneGroupData.text && contentStore.milestoneGroupData.milestones && currentMilestone && currentMilestone.text && currentMilestone.images}
 
-		<Breadcrumbs data={breadcrumbdata()} />
+		<Breadcrumbs data={breadcrumbdata} />
 
 		<div class="flex w-full flex-col md:flex-row">
 			<div>
@@ -266,5 +262,5 @@ const breadcrumbdata = () => {
 	{/if}
 </div>
 {:catch error}
-<AlertMessage message={error} />
+<AlertMessage message={$_("milestone.alertMessageError") + ": "+ error} />
 {/await}

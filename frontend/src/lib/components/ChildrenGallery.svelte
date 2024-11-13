@@ -25,7 +25,6 @@ async function setup(): Promise<any> {
 				const childImageResponse = await getChildImage({
 					path: { child_id: child.id },
 				});
-				console.log("childImageResponse", childImageResponse);
 				if (childImageResponse.error) {
 					console.log("Error when retrieving child image");
 					showAlert = true;

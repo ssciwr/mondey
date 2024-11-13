@@ -19,6 +19,9 @@ function createCurrentChild() {
 		set id(value: number | null) {
 			currentChild = value;
 		},
+		get data() {
+			return childdata;
+		},
 		async load_data() {
 			if (currentChild === null) {
 				return null;

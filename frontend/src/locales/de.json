@@ -15,7 +15,8 @@
 		"prev": "Zurück",
 		"autonext": "Automatisch weiter",
 		"groupOverviewLabel": "Übersicht Meilensteingruppen",
-		"alertMessageRetrieving": "Fehler beim Abrufen der Meilensteine"
+		"alertMessageRetrieving": "Fehler beim Abrufen der Meilensteine",
+		"alertMessageError": "Ein Fehler ist aufgetreten"
 	},
 	"search": {
 		"allLabel": "Alle",
@@ -36,7 +37,7 @@
 		"incomplete": "unfertig"
 	},
 	"admin": {
-		"heading": "Administration",
+		"label": "Administration",
 		"title": "Titel",
 		"languages": "Sprachen",
 		"milestones": "Meilensteine",
@@ -65,7 +66,7 @@
 		"editUserQuestionTitle": "Frage an Benutzer editieren"
 	},
 	"researcher": {
-		"title": "Wissenschaft",
+		"label": "Wissenschaft",
 		"images": "Bilder"
 	},
 	"registration": {
@@ -109,6 +110,7 @@
 		"profileAccess": "Ihr Profil"
 	},
 	"userData": {
+		"label": "Persönliche Daten",
 		"heading": "Benutzerdaten eingeben",
 		"alertMessageTitle": "Fehler",
 		"alertMessageMissing": "Bitte füllen Sie die benötigten Felder (hervorgehoben) aus.",
@@ -122,7 +124,7 @@
 	"childData": {
 		"newChildHeading": "Neu",
 		"newChildHeadingLong": "Neues Kind registrieren",
-		"overviewLabel": "Kinderübersicht",
+		"overviewLabel": "Kinder",
 		"overviewSummary": "Wählen sie ein Kind zur Beobachtung aus oder legen melden sie ein neues Kind an.",
 		"alertMessageMissing": "Bitte füllen Sie die benötigten Felder (hervorgehoben) aus.",
 		"alertMessageUserNotFound": "Kein aktiver Benutzer. Bitte loggen sie sich erneut ein",
@@ -151,7 +153,8 @@
 		"imageOfChildChange": "Bild des Kindes ändern (optional)",
 		"imageOfChildChangeDelete": "Das aktuelle Bild wurde gelöscht",
 		"noFileChosen": "Keine Datei ausgewählt",
-		"deleteImageButton": "Bild löschen"
+		"deleteImageButton": "Bild löschen",
+		"nextButtonLabel": "Weiter zu Meilensteinen"
 	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",
