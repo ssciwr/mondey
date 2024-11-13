@@ -4,8 +4,10 @@ import datetime
 import logging
 import pathlib
 from collections.abc import Iterable
+from collections.abc import Sequence
 from typing import TypeVar
 
+import numpy as np
 from fastapi import HTTPException
 from fastapi import UploadFile
 from sqlmodel import SQLModel
@@ -15,6 +17,9 @@ from sqlmodel import select
 from ..dependencies import SessionDep
 from ..models.children import Child
 from ..models.milestones import MilestoneAdmin
+from ..models.milestones import MilestoneAgeScore
+from ..models.milestones import MilestoneAgeScores
+from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneGroupAdmin
 from ..models.milestones import MilestoneGroupText
@@ -129,9 +134,10 @@ def get_or_create_current_milestone_answer_session(
     return milestone_answer_session
 
 
-def get_child_age_in_months(child: Child) -> int:
-    today = datetime.date.today()
-    return (today.year - child.birth_year) * 12 + (today.month - child.birth_month)
+def get_child_age_in_months(child: Child, date: datetime.date | None = None) -> int:
+    if date is None:
+        date = datetime.date.today()
+    return (date.year - child.birth_year) * 12 + (date.month - child.birth_month)
 
 
 def get_db_child(
@@ -143,3 +149,59 @@ def get_db_child(
             404, detail=f"Child with id {child_id} not found or wrong user"
         )
     return child
+
+
+def _get_answer_session_child_ages_in_months(session: SessionDep) -> dict[int, int]:
+    answer_sessions = session.exec(select(MilestoneAnswerSession)).all()
+    return {
+        answer_session.id: get_child_age_in_months(  # type: ignore
+            get(session, Child, answer_session.child_id), answer_session.created_at
+        )
+        for answer_session in answer_sessions
+    }
+
+
+def _get_expected_age_from_scores(scores: np.ndarray) -> int:
+    # placeholder algorithm: returns first age with avg score > 3
+    return np.argmax(scores >= 3.0)
+
+
+def _get_average_scores_by_age(
+    answers: Sequence[MilestoneAnswer], child_ages: dict[int, int]
+) -> np.ndarray:
+    max_age_months = 72
+    scores = np.zeros(max_age_months + 1)
+    counts = np.zeros_like(scores)
+    for answer in answers:
+        age = child_ages[answer.answer_session_id]  # type: ignore
+        # convert 0-3 answer index to 1-4 score
+        scores[age] += answer.answer + 1
+        counts[age] += 1
+    # divide each score by the number of answers
+    with np.errstate(invalid="ignore"):
+        scores /= counts
+    # replace NaNs (due to zero counts) with zeros
+    scores = np.nan_to_num(scores)
+    return scores
+
+
+def calculate_milestone_age_scores(
+    session: SessionDep, milestone_id: int
+) -> MilestoneAgeScores:
+    child_ages = _get_answer_session_child_ages_in_months(session)
+    answers = session.exec(
+        select(MilestoneAnswer).where(col(MilestoneAnswer.milestone_id) == milestone_id)
+    ).all()
+    scores = _get_average_scores_by_age(answers, child_ages)
+    expected_age = _get_expected_age_from_scores(scores)
+    return MilestoneAgeScores(
+        expected_age=expected_age,
+        scores=[
+            MilestoneAgeScore(
+                age_months=age,
+                avg_score=score,
+                expected_score=(4 if age >= expected_age else 1),
+            )
+            for age, score in enumerate(scores)
+        ],
+    )

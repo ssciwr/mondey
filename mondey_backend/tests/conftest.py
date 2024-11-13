@@ -183,19 +183,24 @@ def session(children: list[dict]):
         for child, user_id in zip(children, [1, 1, 3], strict=False):
             session.add(Child.model_validate(child, update={"user_id": user_id}))
         today = datetime.datetime.today()
-        # add an (expired) milestone answer session for child 1 / user 1 with no answers
+        last_month = today - datetime.timedelta(days=30)
+        # add an (expired) milestone answer session for child 1 / user 1 with 2 answers
         session.add(
             MilestoneAnswerSession(
                 child_id=1,
                 user_id=1,
-                created_at=datetime.datetime(today.year - 1, 1, 1),
+                created_at=datetime.datetime(
+                    last_month.year, last_month.month, last_month.day
+                ),
             )
         )
-        # add another (current) milestone answer session for child 1 / user 1 with 2 answers
+        session.add(MilestoneAnswer(answer_session_id=1, milestone_id=1, answer=1))
+        session.add(MilestoneAnswer(answer_session_id=1, milestone_id=2, answer=0))
+        # add another (current) milestone answer session for child 1 / user 1 with 2 answers to the same questions
         session.add(MilestoneAnswerSession(child_id=1, user_id=1, created_at=today))
         # add two milestone answers
-        session.add(MilestoneAnswer(answer_session_id=2, milestone_id=1, answer=0))
-        session.add(MilestoneAnswer(answer_session_id=2, milestone_id=2, answer=3))
+        session.add(MilestoneAnswer(answer_session_id=2, milestone_id=1, answer=3))
+        session.add(MilestoneAnswer(answer_session_id=2, milestone_id=2, answer=2))
         # add an (expired) milestone answer session for child 3 / user 3 with 1 answer
         session.add(
             MilestoneAnswerSession(

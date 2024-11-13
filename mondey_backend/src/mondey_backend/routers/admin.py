@@ -14,6 +14,7 @@ from ..dependencies import SessionDep
 from ..models.milestones import Language
 from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAdmin
+from ..models.milestones import MilestoneAgeScores
 from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupAdmin
 from ..models.milestones import MilestoneGroupText
@@ -27,6 +28,7 @@ from ..models.questions import UserQuestionAdmin
 from ..models.questions import UserQuestionText
 from ..settings import app_settings
 from .utils import add
+from .utils import calculate_milestone_age_scores
 from .utils import get
 from .utils import update_child_question_text
 from .utils import update_milestone_group_text
@@ -175,6 +177,12 @@ def create_router() -> APIRouter:
         session.delete(milestone_image)
         session.commit()
         return {"ok": True}
+
+    @router.get("/milestone-age-scores/{milestone_id}")
+    def get_milestone_age_scores(
+        session: SessionDep, milestone_id: int
+    ) -> MilestoneAgeScores:
+        return calculate_milestone_age_scores(session, milestone_id)
 
     # User question CRUD endpoints
     @router.get("/user-questions/", response_model=list[UserQuestionAdmin])

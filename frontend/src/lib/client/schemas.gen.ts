@@ -422,21 +422,58 @@ export const MilestoneAdminSchema = {
                 '$ref': '#/components/schemas/MilestoneText'
             },
             type: 'object',
-            title: 'Text',
-            default: {}
+            title: 'Text'
         },
         images: {
             items: {
                 '$ref': '#/components/schemas/MilestoneImage'
             },
             type: 'array',
-            title: 'Images',
-            default: []
+            title: 'Images'
         }
     },
     type: 'object',
-    required: ['id', 'group_id', 'order', 'expected_age_months'],
+    required: ['id', 'group_id', 'order', 'expected_age_months', 'text', 'images'],
     title: 'MilestoneAdmin'
+} as const;
+
+export const MilestoneAgeScoreSchema = {
+    properties: {
+        age_months: {
+            type: 'integer',
+            title: 'Age Months'
+        },
+        avg_score: {
+            type: 'number',
+            title: 'Avg Score'
+        },
+        expected_score: {
+            type: 'number',
+            title: 'Expected Score'
+        }
+    },
+    type: 'object',
+    required: ['age_months', 'avg_score', 'expected_score'],
+    title: 'MilestoneAgeScore'
+} as const;
+
+export const MilestoneAgeScoresSchema = {
+    properties: {
+        scores: {
+            items: {
+                '$ref': '#/components/schemas/MilestoneAgeScore'
+            },
+            type: 'array',
+            title: 'Scores'
+        },
+        expected_age: {
+            type: 'integer',
+            title: 'Expected Age'
+        }
+    },
+    type: 'object',
+    required: ['scores', 'expected_age'],
+    title: 'MilestoneAgeScores'
 } as const;
 
 export const MilestoneAnswerPublicSchema = {
@@ -498,20 +535,18 @@ export const MilestoneGroupAdminSchema = {
                 '$ref': '#/components/schemas/MilestoneGroupText'
             },
             type: 'object',
-            title: 'Text',
-            default: {}
+            title: 'Text'
         },
         milestones: {
             items: {
                 '$ref': '#/components/schemas/MilestoneAdmin'
             },
             type: 'array',
-            title: 'Milestones',
-            default: []
+            title: 'Milestones'
         }
     },
     type: 'object',
-    required: ['id', 'order'],
+    required: ['id', 'order', 'text', 'milestones'],
     title: 'MilestoneGroupAdmin'
 } as const;
 
@@ -526,20 +561,18 @@ export const MilestoneGroupPublicSchema = {
                 '$ref': '#/components/schemas/MilestoneGroupTextPublic'
             },
             type: 'object',
-            title: 'Text',
-            default: {}
+            title: 'Text'
         },
         milestones: {
             items: {
                 '$ref': '#/components/schemas/MilestonePublic'
             },
             type: 'array',
-            title: 'Milestones',
-            default: []
+            title: 'Milestones'
         }
     },
     type: 'object',
-    required: ['id'],
+    required: ['id', 'text', 'milestones'],
     title: 'MilestoneGroupPublic'
 } as const;
 
@@ -670,20 +703,18 @@ export const MilestonePublicSchema = {
                 '$ref': '#/components/schemas/MilestoneTextPublic'
             },
             type: 'object',
-            title: 'Text',
-            default: {}
+            title: 'Text'
         },
         images: {
             items: {
                 '$ref': '#/components/schemas/MilestoneImagePublic'
             },
             type: 'array',
-            title: 'Images',
-            default: []
+            title: 'Images'
         }
     },
     type: 'object',
-    required: ['id', 'expected_age_months'],
+    required: ['id', 'expected_age_months', 'text', 'images'],
     title: 'MilestonePublic'
 } as const;
 
