@@ -75,11 +75,13 @@ def create_router() -> APIRouter:
         # the most efficient way, it is the least intrusive and concentrates
         # progress reporting in the least amount of code - this function and the
         # MilestonAnswerPublic model.
+        # The actual database does not need to know about progress - it's
+        # a derived value only for being displayed to the user.
+
         answer_session = get_or_create_current_milestone_answer_session(
             session, current_active_user, child_id
         )
 
-        # README: this contains a cumbersome type conversion to the public type, but avoids having the answering progress in the backend database entries, where they are not needed
         milestone_groups_public = []
         for mgroup in milestone_groups:
             mgroup_public = MilestoneGroupPublic(
@@ -89,15 +91,15 @@ def create_router() -> APIRouter:
                 milestones=mgroup.milestones,
             )
             mgroup_public.progress = 0.0
-            if len(mgroup.milestones) == 0:
-                continue
-            else:
+
+            if len(mgroup.milestones) > 0:
                 for milestone in mgroup.milestones:
                     if milestone.id is None:
                         continue
-                    answer = answer_session.answers[milestone.id]
 
-                    if answer is not None and answer.answer > 0:
+                    answer = answer_session.answers.get(milestone.id)
+
+                    if answer is not None and answer.answer >= 0:
                         mgroup_public.progress += 1.0
 
                 mgroup_public.progress /= len(mgroup.milestones)
