@@ -112,7 +112,7 @@ function searchName(data: any[], key: string): any[] {
 }
 
 let showAlert = $state(false);
-let alertMessage = $_("childData.alertMessageError");
+let alertMessage = $state($_("childData.alertMessageError"));
 let data: any[] = $state([]);
 
 const promise = $state(setup());

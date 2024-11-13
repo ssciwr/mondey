@@ -215,7 +215,6 @@ async function submitImageData(): Promise<void> {
 			return;
 		}
 	} else if (image instanceof File && imageDeleted === false) {
-		console.log("uploading image", image);
 		const response = await uploadChildImage({
 			body: {
 				file: image,
