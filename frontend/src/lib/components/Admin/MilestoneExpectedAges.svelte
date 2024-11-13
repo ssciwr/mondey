@@ -53,9 +53,9 @@ async function getNewExpectedAges() {
 		if (group.milestones) {
 			for (const milestone of group.milestones) {
 				await getNewExpectedAge(milestone.id);
-				calculateProgress += delta;
 			}
 		}
+		calculateProgress += delta;
 	}
 	calculateProgress = 100;
 }
@@ -73,9 +73,9 @@ async function saveNewExpectedAges() {
 					console.log(error);
 					return;
 				}
-				saveProgress += delta;
 			}
 		}
+		saveProgress += delta;
 	}
 	saveProgress = 100;
 	await refreshMilestoneGroups();
