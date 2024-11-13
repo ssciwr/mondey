@@ -54,6 +54,7 @@ class MilestoneGroup(SQLModel, table=True):
     text: Mapped[dict[str, MilestoneGroupText]] = dict_relationship(key="lang_id")
     milestones: Mapped[list[Milestone]] = back_populates("group")
 
+
 class MilestoneGroupPublic(SQLModel):
     id: int
     text: dict[str, MilestoneGroupTextPublic] = {}
@@ -103,11 +104,13 @@ class Milestone(SQLModel, table=True):
     text: Mapped[dict[str, MilestoneText]] = dict_relationship(key="lang_id")
     images: Mapped[list[MilestoneImage]] = back_populates("milestone")
 
+
 class MilestonePublic(SQLModel):
     id: int
     expected_age_months: int
     text: dict[str, MilestoneTextPublic] = {}
     images: list[MilestoneImagePublic] = []
+
 
 class MilestoneAdmin(SQLModel):
     id: int
@@ -116,6 +119,7 @@ class MilestoneAdmin(SQLModel):
     expected_age_months: int
     text: dict[str, MilestoneText] = {}
     images: list[MilestoneImage] = []
+
 
 ## MilestoneImage
 

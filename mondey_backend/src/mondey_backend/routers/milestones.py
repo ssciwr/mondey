@@ -44,8 +44,9 @@ def create_router() -> APIRouter:
         "/milestone-groups/{child_id}", response_model=list[MilestoneGroupPublic]
     )
     def get_milestone_groups(
-        session: SessionDep, current_active_user: CurrentActiveUserDep, 
-        child_id: int, 
+        session: SessionDep,
+        current_active_user: CurrentActiveUserDep,
+        child_id: int,
     ):
         delta_months = 6
         child = get_db_child(session, current_active_user, child_id)
@@ -70,35 +71,33 @@ def create_router() -> APIRouter:
             )
         ).all()
 
-        # compute progress from milestone answers. While this is not 
-        # the most efficient way, it is the least intrusive and concentrates 
+        # compute progress from milestone answers. While this is not
+        # the most efficient way, it is the least intrusive and concentrates
         # progress reporting in the least amount of code - this function and the
         # MilestonAnswerPublic model.
-        answer_session  = (
-            get_or_create_current_milestone_answer_session(
-                session, current_active_user, child_id
-            )
+        answer_session = get_or_create_current_milestone_answer_session(
+            session, current_active_user, child_id
         )
-        # FIXME: this needs to be done better, as it contains a cumbersome 
-        # type conversion that should be avoided. 
-        # when fixing: -make sure pydantic is still as much in effect as possible 
+        # FIXME: this needs to be done better, as it contains a cumbersome
+        # type conversion that should be avoided.
+        # when fixing: -make sure pydantic is still as much in effect as possible
         # - check if we need it at all. certainly a nice thing
         milestone_groups_public = []
-        for mgroup in milestone_groups: 
+        for mgroup in milestone_groups:
             p = 0.0
             mgroup_public = MilestoneGroupPublic(
                 id=mgroup.id,
                 order=mgroup.order,
                 text=mgroup.text,
-                milestones=mgroup.milestones
+                milestones=mgroup.milestones,
             )
-            for milestone in mgroup.milestones: 
+            for milestone in mgroup.milestones:
                 answer = answer_session.answers.get(milestone.id)
 
                 if answer is not None and answer.answer > 0:
-                    p += 1.0 
+                    p += 1.0
 
-            mgroup_public.progress = p / len(mgroup.milestones)  
+            mgroup_public.progress = p / len(mgroup.milestones)
             milestone_groups_public.append(mgroup_public)
 
         return milestone_groups_public
