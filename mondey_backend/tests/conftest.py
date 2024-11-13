@@ -130,7 +130,11 @@ def session(children: list[dict]):
             )
         for milestone_id in [1, 2, 3]:
             session.add(
-                Milestone(order=0, group_id=1, expected_age_months=milestone_id * 6)
+                Milestone(
+                    order=4 - milestone_id,
+                    group_id=1,
+                    expected_age_months=milestone_id * 6,
+                )
             )
             for lang_id in lang_ids:
                 lbl = f"m{milestone_id}_{lang_id}"
@@ -155,7 +159,9 @@ def session(children: list[dict]):
             )
         for milestone_id in [4, 5]:
             session.add(
-                Milestone(order=0, group_id=2, expected_age_months=milestone_id * 6)
+                Milestone(
+                    order=milestone_id, group_id=2, expected_age_months=milestone_id * 6
+                )
             )
             for lang_id in lang_ids:
                 lbl = f"m{milestone_id}_{lang_id}"
@@ -177,19 +183,24 @@ def session(children: list[dict]):
         for child, user_id in zip(children, [1, 1, 3], strict=False):
             session.add(Child.model_validate(child, update={"user_id": user_id}))
         today = datetime.datetime.today()
-        # add an (expired) milestone answer session for child 1 / user 1 with no answers
+        last_month = today - datetime.timedelta(days=30)
+        # add an (expired) milestone answer session for child 1 / user 1 with 2 answers
         session.add(
             MilestoneAnswerSession(
                 child_id=1,
                 user_id=1,
-                created_at=datetime.datetime(today.year - 1, 1, 1),
+                created_at=datetime.datetime(
+                    last_month.year, last_month.month, last_month.day
+                ),
             )
         )
-        # add another (current) milestone answer session for child 1 / user 1 with 2 answers
+        session.add(MilestoneAnswer(answer_session_id=1, milestone_id=1, answer=1))
+        session.add(MilestoneAnswer(answer_session_id=1, milestone_id=2, answer=0))
+        # add another (current) milestone answer session for child 1 / user 1 with 2 answers to the same questions
         session.add(MilestoneAnswerSession(child_id=1, user_id=1, created_at=today))
         # add two milestone answers
-        session.add(MilestoneAnswer(answer_session_id=2, milestone_id=1, answer=0))
-        session.add(MilestoneAnswer(answer_session_id=2, milestone_id=2, answer=3))
+        session.add(MilestoneAnswer(answer_session_id=2, milestone_id=1, answer=3))
+        session.add(MilestoneAnswer(answer_session_id=2, milestone_id=2, answer=2))
         # add an (expired) milestone answer session for child 3 / user 3 with 1 answer
         session.add(
             MilestoneAnswerSession(
@@ -698,32 +709,29 @@ def milestone_group1():
         },
         "milestones": [
             {
-                "id": 1,
-                "expected_age_months": 6,
+                "id": 3,
+                "expected_age_months": 18,
                 "text": {
                     "de": {
-                        "title": "m1_de_t",
-                        "desc": "m1_de_d",
-                        "obs": "m1_de_o",
-                        "help": "m1_de_h",
+                        "title": "m3_de_t",
+                        "desc": "m3_de_d",
+                        "obs": "m3_de_o",
+                        "help": "m3_de_h",
                     },
                     "en": {
-                        "title": "m1_en_t",
-                        "desc": "m1_en_d",
-                        "obs": "m1_en_o",
-                        "help": "m1_en_h",
+                        "title": "m3_en_t",
+                        "desc": "m3_en_d",
+                        "obs": "m3_en_o",
+                        "help": "m3_en_h",
                     },
                     "fr": {
-                        "title": "m1_fr_t",
-                        "desc": "m1_fr_d",
-                        "obs": "m1_fr_o",
-                        "help": "m1_fr_h",
+                        "title": "m3_fr_t",
+                        "desc": "m3_fr_d",
+                        "obs": "m3_fr_o",
+                        "help": "m3_fr_h",
                     },
                 },
-                "images": [
-                    {"filename": "m1.jpg", "approved": True},
-                    {"filename": "m2.jpg", "approved": True},
-                ],
+                "images": [],
             },
             {
                 "id": 2,
@@ -751,29 +759,32 @@ def milestone_group1():
                 "images": [{"filename": "m3.jpg", "approved": True}],
             },
             {
-                "id": 3,
-                "expected_age_months": 18,
+                "id": 1,
+                "expected_age_months": 6,
                 "text": {
                     "de": {
-                        "title": "m3_de_t",
-                        "desc": "m3_de_d",
-                        "obs": "m3_de_o",
-                        "help": "m3_de_h",
+                        "title": "m1_de_t",
+                        "desc": "m1_de_d",
+                        "obs": "m1_de_o",
+                        "help": "m1_de_h",
                     },
                     "en": {
-                        "title": "m3_en_t",
-                        "desc": "m3_en_d",
-                        "obs": "m3_en_o",
-                        "help": "m3_en_h",
+                        "title": "m1_en_t",
+                        "desc": "m1_en_d",
+                        "obs": "m1_en_o",
+                        "help": "m1_en_h",
                     },
                     "fr": {
-                        "title": "m3_fr_t",
-                        "desc": "m3_fr_d",
-                        "obs": "m3_fr_o",
-                        "help": "m3_fr_h",
+                        "title": "m1_fr_t",
+                        "desc": "m1_fr_d",
+                        "obs": "m1_fr_o",
+                        "help": "m1_fr_h",
                     },
                 },
-                "images": [],
+                "images": [
+                    {"filename": "m1.jpg", "approved": True},
+                    {"filename": "m2.jpg", "approved": True},
+                ],
             },
         ],
     }
@@ -807,53 +818,40 @@ def milestone_group_admin1():
         "milestones": [
             {
                 "group_id": 1,
-                "order": 0,
-                "id": 1,
-                "expected_age_months": 6,
-                "images": [
-                    {
-                        "id": 1,
-                        "milestone_id": 1,
-                        "filename": "m1.jpg",
-                        "approved": True,
-                    },
-                    {
-                        "id": 2,
-                        "milestone_id": 1,
-                        "filename": "m2.jpg",
-                        "approved": True,
-                    },
-                ],
+                "order": 1,
+                "id": 3,
+                "expected_age_months": 18,
+                "images": [],
                 "text": {
                     "de": {
-                        "obs": "m1_de_o",
-                        "help": "m1_de_h",
-                        "title": "m1_de_t",
-                        "desc": "m1_de_d",
-                        "milestone_id": 1,
+                        "obs": "m3_de_o",
+                        "help": "m3_de_h",
+                        "title": "m3_de_t",
+                        "desc": "m3_de_d",
+                        "milestone_id": 3,
                         "lang_id": "de",
                     },
                     "en": {
-                        "obs": "m1_en_o",
-                        "help": "m1_en_h",
-                        "title": "m1_en_t",
-                        "desc": "m1_en_d",
-                        "milestone_id": 1,
+                        "obs": "m3_en_o",
+                        "help": "m3_en_h",
+                        "title": "m3_en_t",
+                        "desc": "m3_en_d",
+                        "milestone_id": 3,
                         "lang_id": "en",
                     },
                     "fr": {
-                        "obs": "m1_fr_o",
-                        "help": "m1_fr_h",
-                        "title": "m1_fr_t",
-                        "desc": "m1_fr_d",
-                        "milestone_id": 1,
+                        "obs": "m3_fr_o",
+                        "help": "m3_fr_h",
+                        "title": "m3_fr_t",
+                        "desc": "m3_fr_d",
+                        "milestone_id": 3,
                         "lang_id": "fr",
                     },
                 },
             },
             {
                 "group_id": 1,
-                "order": 0,
+                "order": 2,
                 "id": 2,
                 "expected_age_months": 12,
                 "images": [
@@ -893,33 +891,46 @@ def milestone_group_admin1():
             },
             {
                 "group_id": 1,
-                "order": 0,
-                "id": 3,
-                "expected_age_months": 18,
-                "images": [],
+                "order": 3,
+                "id": 1,
+                "expected_age_months": 6,
+                "images": [
+                    {
+                        "id": 1,
+                        "milestone_id": 1,
+                        "filename": "m1.jpg",
+                        "approved": True,
+                    },
+                    {
+                        "id": 2,
+                        "milestone_id": 1,
+                        "filename": "m2.jpg",
+                        "approved": True,
+                    },
+                ],
                 "text": {
                     "de": {
-                        "obs": "m3_de_o",
-                        "help": "m3_de_h",
-                        "title": "m3_de_t",
-                        "desc": "m3_de_d",
-                        "milestone_id": 3,
+                        "obs": "m1_de_o",
+                        "help": "m1_de_h",
+                        "title": "m1_de_t",
+                        "desc": "m1_de_d",
+                        "milestone_id": 1,
                         "lang_id": "de",
                     },
                     "en": {
-                        "obs": "m3_en_o",
-                        "help": "m3_en_h",
-                        "title": "m3_en_t",
-                        "desc": "m3_en_d",
-                        "milestone_id": 3,
+                        "obs": "m1_en_o",
+                        "help": "m1_en_h",
+                        "title": "m1_en_t",
+                        "desc": "m1_en_d",
+                        "milestone_id": 1,
                         "lang_id": "en",
                     },
                     "fr": {
-                        "obs": "m3_fr_o",
-                        "help": "m3_fr_h",
-                        "title": "m3_fr_t",
-                        "desc": "m3_fr_d",
-                        "milestone_id": 3,
+                        "obs": "m1_fr_o",
+                        "help": "m1_fr_h",
+                        "title": "m1_fr_t",
+                        "desc": "m1_fr_d",
+                        "milestone_id": 1,
                         "lang_id": "fr",
                     },
                 },
@@ -1021,7 +1032,7 @@ def milestone_group_admin2():
         "milestones": [
             {
                 "group_id": 2,
-                "order": 0,
+                "order": 4,
                 "id": 4,
                 "expected_age_months": 24,
                 "images": [],
@@ -1054,7 +1065,7 @@ def milestone_group_admin2():
             },
             {
                 "group_id": 2,
-                "order": 0,
+                "order": 5,
                 "id": 5,
                 "expected_age_months": 30,
                 "images": [],

@@ -116,10 +116,6 @@ async function doDeleteMilestone() {
 		await refreshMilestoneGroups();
 	}
 }
-
-onMount(async () => {
-	await refreshMilestoneGroups();
-});
 </script>
 
 <Card size="xl" class="m-5">

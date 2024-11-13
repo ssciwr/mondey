@@ -31,7 +31,6 @@ def test_get_children(
 ):
     response = user_client.get("/users/children/")
     assert response.status_code == 200
-    print("response: ", response.json())
     assert response.json() == [children[0], children[1]]
 
 
@@ -176,8 +175,8 @@ def test_get_milestone_answers_child1_current_answer_session(user_client: TestCl
     assert response.json()["id"] == 2
     assert response.json()["child_id"] == 1
     assert response.json()["answers"] == {
-        "1": {"milestone_id": 1, "answer": 0},
-        "2": {"milestone_id": 2, "answer": 3},
+        "1": {"milestone_id": 1, "answer": 3},
+        "2": {"milestone_id": 2, "answer": 2},
     }
     assert _is_approx_now(response.json()["created_at"])
 
@@ -202,7 +201,7 @@ def test_update_milestone_answer_current_answer_session_no_answer_session(
 
 def test_update_milestone_answer_update_existing_answer(user_client: TestClient):
     current_answer_session = user_client.get("/users/milestone-answers/1").json()
-    assert current_answer_session["answers"]["1"] == {"milestone_id": 1, "answer": 0}
+    assert current_answer_session["answers"]["1"] == {"milestone_id": 1, "answer": 3}
     new_answer = {"milestone_id": 1, "answer": 2}
     response = user_client.put(
         f"/users/milestone-answers/{current_answer_session['id']}", json=new_answer

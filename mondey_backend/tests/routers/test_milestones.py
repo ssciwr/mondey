@@ -20,8 +20,8 @@ def test_get_milestone_groups_child1(
     assert len(response.json()) == 2
     # child 1 age is ~9 months old, so no milestones from group2
     milestone_group2["milestones"] = []
-    # and only the first two milestones (6m, 12m) from group1:
-    milestone_group1["milestones"] = milestone_group1["milestones"][0:2]
+    # and only last two milestones (6m, 12m) from group1:
+    milestone_group1["milestones"] = milestone_group1["milestones"][1:]
     assert response.json() == [milestone_group2, milestone_group1]
 
 

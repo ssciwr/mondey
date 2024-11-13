@@ -107,10 +107,21 @@ export type MilestoneAdmin = {
     group_id: number;
     order: number;
     expected_age_months: number;
-    text?: {
+    text: {
         [key: string]: MilestoneText;
     };
-    images?: Array<MilestoneImage>;
+    images: Array<MilestoneImage>;
+};
+
+export type MilestoneAgeScore = {
+    age_months: number;
+    avg_score: number;
+    expected_score: number;
+};
+
+export type MilestoneAgeScores = {
+    scores: Array<MilestoneAgeScore>;
+    expected_age: number;
 };
 
 export type MilestoneAnswerPublic = {
@@ -130,15 +141,15 @@ export type MilestoneAnswerSessionPublic = {
 export type MilestoneGroupAdmin = {
     id: number;
     order: number;
-    text?: {
+    text: {
         [key: string]: MilestoneGroupText;
     };
-    milestones?: Array<MilestoneAdmin>;
+    milestones: Array<MilestoneAdmin>;
 };
 
 export type MilestoneGroupPublic = {
     id: number;
-    text?: {
+    text: {
         [key: string]: MilestoneGroupTextPublic;
     };
     milestones?: Array<MilestonePublic>;
@@ -172,10 +183,10 @@ export type MilestoneImagePublic = {
 export type MilestonePublic = {
     id: number;
     expected_age_months: number;
-    text?: {
+    text: {
         [key: string]: MilestoneTextPublic;
     };
-    images?: Array<MilestoneImagePublic>;
+    images: Array<MilestoneImagePublic>;
 };
 
 export type MilestoneText = {
@@ -423,6 +434,16 @@ export type DeleteMilestoneImageData = {
 export type DeleteMilestoneImageResponse = (unknown);
 
 export type DeleteMilestoneImageError = (HTTPValidationError);
+
+export type GetMilestoneAgeScoresData = {
+    path: {
+        milestone_id: number;
+    };
+};
+
+export type GetMilestoneAgeScoresResponse = (MilestoneAgeScores);
+
+export type GetMilestoneAgeScoresError = (HTTPValidationError);
 
 export type GetUserQuestionsAdminResponse = (Array<UserQuestionAdmin>);
 

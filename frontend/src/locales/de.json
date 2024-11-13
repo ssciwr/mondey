@@ -62,8 +62,14 @@
 		"help": "Förderhilfen",
 		"image": "Bild",
 		"images": "Bilder",
+		"age": "Alter",
+		"average-score": "Durchschnittspunktzahl",
+		"view-data": "Daten anzeigen",
 		"expected-age": "Voraussichtliches Alter",
-		"editUserQuestionTitle": "Frage an Benutzer editieren"
+		"recalculate-expected-age": "Voraussichtliches Alter neu berechnen",
+		"new-expected-age": "Neues Voraussichtliches Alter",
+		"editUserQuestionTitle": "Frage an Benutzer editieren",
+		"expected-age-data": "Voraussichtliches Alter Daten"
 	},
 	"researcher": {
 		"label": "Wissenschaft",
