@@ -536,6 +536,11 @@ export const MilestoneGroupPublicSchema = {
             type: 'array',
             title: 'Milestones',
             default: []
+        },
+        progress: {
+            type: 'number',
+            title: 'Progress',
+            default: 0
         }
     },
     type: 'object',
