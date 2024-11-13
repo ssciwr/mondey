@@ -690,6 +690,7 @@ def jpg_file(tmp_path: pathlib.Path):
 def milestone_group1():
     return {
         "id": 1,
+        "progress": 0.0,
         "text": {
             "de": {"title": "g1_de_t", "desc": "g1_de_d"},
             "en": {"title": "g1_en_t", "desc": "g1_en_d"},
@@ -931,6 +932,7 @@ def milestone_group_admin1():
 def milestone_group2():
     return {
         "id": 2,
+        "progress": 0.0,
         "text": {
             "de": {"title": "g1_de_t", "desc": "g1_de_d"},
             "en": {"title": "g1_en_t", "desc": "g1_en_d"},
