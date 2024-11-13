@@ -13,8 +13,8 @@ import { activeTabChildren } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
 import {
 	CheckCircleSolid,
-	EditOutline,
 	ExclamationCircleSolid,
+	GridOutline,
 	RectangleListOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
@@ -104,14 +104,13 @@ async function setup(): Promise<void> {
 		console.log("milestoneAnswerSession", milestoneAnswerSession);
 
 		data = contentStore.milestoneGroupData.milestones.map(
-			(item: MilestonePublic) => {
+			(item: MilestonePublic, idx) => {
 				const answer = milestoneAnswerSession.answers[`${item.id}`];
 				const complete: boolean =
 					answer &&
 					answer.answer !== null &&
 					answer.answer !== undefined &&
 					answer.answer > 0;
-				console.log("answer", answer);
 				return {
 					header: item?.text?.[$locale]?.title ?? "",
 					complete: complete,
@@ -121,6 +120,7 @@ async function setup(): Promise<void> {
 							activeTabChildren.set("milestone");
 							contentStore.milestone = item.id;
 							contentStore.milestoneData = item;
+							contentStore.milestoneIndex = idx;
 						},
 					},
 					auxilliary: complete ? CheckCircleSolid : ExclamationCircleSolid,
@@ -200,7 +200,7 @@ const breadcrumbdata: any[] = [
 		onclick: () => {
 			activeTabChildren.set("milestoneOverview");
 		},
-		symbol: EditOutline,
+		symbol: GridOutline,
 	},
 ];
 </script>

@@ -15,8 +15,12 @@ import { Accordion, AccordionItem, Button, Checkbox } from "flowbite-svelte";
 import {
 	ArrowLeftOutline,
 	ArrowRightOutline,
+	EditOutline,
+	GridOutline,
 	InfoCircleSolid,
 	QuestionCircleSolid,
+	RectangleListOutline,
+	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 import { _, locale } from "svelte-i18n";
@@ -24,7 +28,6 @@ import AlertMessage from "./AlertMessage.svelte";
 import Breadcrumbs from "./Navigation/Breadcrumbs.svelte";
 
 onMount(() => {
-	console.log("onmount milestonegroup: ", contentStore.milestoneGroupData);
 	if (
 		contentStore.milestoneGroupData &&
 		contentStore.milestoneGroupData.milestones
@@ -131,7 +134,7 @@ async function setup() {
 let milestoneAnswerSession = $state(
 	null as MilestoneAnswerSessionPublic | null | undefined,
 );
-let currentMilestoneIndex = $state(0);
+let currentMilestoneIndex = $state(contentStore.milestoneIndex);
 let currentMilestone = $state(undefined as MilestonePublic | undefined);
 let selectedAnswer = $derived(
 	milestoneAnswerSession?.answers?.[`${currentMilestone?.id}`]?.answer,
@@ -143,34 +146,32 @@ let currentImageIndex = $state(0);
 const promise = setup();
 const breadcrumbdata = $derived([
 	{
-		label: $_("childData.overviewLabel"),
-		onclick: () => {
-			activeTabChildren.set("childrenGallery");
-		},
-	},
-	{
 		label: currentChild.name,
 		onclick: () => {
 			activeTabChildren.set("childrenRegistration");
 		},
+		symbol: UserSettingsOutline,
 	},
 	{
 		label: $_("milestone.groupOverviewLabel"),
 		onclick: () => {
 			activeTabChildren.set("milestoneGroup");
 		},
+		symbol: RectangleListOutline,
 	},
 	{
 		label: contentStore.milestoneGroupData.text[$locale].title,
 		onclick: () => {
 			activeTabChildren.set("milestoneOverview");
 		},
+		symbol: GridOutline,
 	},
 	{
 		label:
 			String(currentMilestoneIndex + 1) +
 			"/" +
 			String(contentStore.milestoneGroupData.milestones.length),
+		symbol: EditOutline,
 	},
 ]);
 </script>
@@ -199,10 +200,10 @@ const breadcrumbdata = $derived([
 				<h2 class="mb-2 text-2xl font-bold text-gray-700 dark:text-gray-400">
 					{currentMilestone.text[$locale].title}
 				</h2>
-				<p>{currentMilestone.text[$locale].desc}</p>
+				<p class="mb-2 text-base">{currentMilestone.text[$locale].desc}</p>
 				<Accordion flush>
 					<AccordionItem>
-						<span slot="header" class="flex gap-2 text-base">
+						<span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
 							<InfoCircleSolid class="mt-0.5" />
 							<span>{$_('milestone.observation')}</span>
 						</span>
@@ -211,7 +212,7 @@ const breadcrumbdata = $derived([
 						</p>
 					</AccordionItem>
 					<AccordionItem>
-						<span slot="header" class="flex gap-2 text-base">
+						<span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
 							<QuestionCircleSolid class="mt-0.5" />
 							<span>{$_('milestone.help')}</span>
 						</span>
@@ -234,24 +235,24 @@ const breadcrumbdata = $derived([
 						{$_(`milestone.answer${answerIndex}-text`)}
 					</MilestoneButton>
 				{/each}
-				<div class="flex flex-row justify-center">
+				<div class="flex flex-row justify-center ">
 					<Button
 						color="light"
 						disabled={currentMilestoneIndex === 0}
 						on:click={prevMilestone}
-						class="m-1 mt-4"
+						class="m-1 mt-4 text-gray-700 dark:text-gray-400"
 					>
-						<ArrowLeftOutline class="me-2 h-5 w-5" />
+						<ArrowLeftOutline class="me-2 h-5 w-5 text-gray-700 dark:text-gray-400" />
 						{$_('milestone.prev')}
 					</Button>
 					<Button
 						color="light"
 						disabled={selectedAnswer === undefined}
 						on:click={nextMilestone}
-						class="m-1 mt-4"
+						class="m-1 mt-4 text-gray-700 dark:text-gray-400"
 					>
 						{$_('milestone.next')}
-						<ArrowRightOutline class="ms-2 h-5 w-5" />
+						<ArrowRightOutline class="ms-2 h-5 w-5 text-gray-700 dark:text-gray-400" />
 					</Button>
 				</div>
 				<Checkbox class="m-1 justify-center" bind:checked={autoGoToNextMilestone}>

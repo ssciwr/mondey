@@ -18,7 +18,7 @@ let smallScreen = $derived(windowWidth < 800);
 	{#each data as item}
 		<BreadcrumbItem
 			href={item.href}
-			linkClass="ms-1 text-lg font-medium text-gray-500 hover:text-gray-900 md:ms-2 dark:text-gray-400  hover:text-white dark:hover:text-white"
+			linkClass="ms-1 text-lg font-medium text-gray-700 hover:text-gray-900 md:ms-2 dark:text-gray-400  hover:text-white dark:hover:text-white"
 		>
 		<div class="flex items-center justify-center">
 			{#if item.href}
@@ -29,7 +29,7 @@ let smallScreen = $derived(windowWidth < 800);
 				{/if}
 			{:else}
 				<button
-					class="text-lg ms-1 font-medium text-gray-500 hover:text-gray-900 md:ms-2 dark:text-gray-400  dark:hover:text-white"
+					class="text-lg ms-1 font-medium text-gray-700 hover:text-gray-900 md:ms-2 dark:text-gray-400  dark:hover:text-white"
 					onclick={item.onclick}
 					>
 					<div class="flex items-center justify-center">

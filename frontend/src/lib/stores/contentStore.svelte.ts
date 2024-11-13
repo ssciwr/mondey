@@ -12,6 +12,12 @@ function createContent() {
 		set milestone(value: number) {
 			content.milestone = value;
 		},
+		set milestoneIndex(value: number) {
+			content.milestoneIndex = value;
+		},
+		get milestoneIndex() {
+			return content.milestoneIndex;
+		},
 		get milestone() {
 			return content.milestone;
 		},
