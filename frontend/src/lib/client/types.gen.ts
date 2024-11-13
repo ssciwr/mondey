@@ -149,7 +149,7 @@ export type MilestoneGroupAdmin = {
 
 export type MilestoneGroupPublic = {
     id: number;
-    text: {
+    text?: {
         [key: string]: MilestoneGroupTextPublic;
     };
     milestones?: Array<MilestonePublic>;

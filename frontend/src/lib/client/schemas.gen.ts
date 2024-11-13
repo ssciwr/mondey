@@ -561,7 +561,8 @@ export const MilestoneGroupPublicSchema = {
                 '$ref': '#/components/schemas/MilestoneGroupTextPublic'
             },
             type: 'object',
-            title: 'Text'
+            title: 'Text',
+            default: {}
         },
         milestones: {
             items: {
@@ -578,7 +579,7 @@ export const MilestoneGroupPublicSchema = {
         }
     },
     type: 'object',
-    required: ['id', 'text', 'milestones'],
+    required: ['id'],
     title: 'MilestoneGroupPublic'
 } as const;
 
