@@ -10,6 +10,8 @@ import {
 	createMilestoneGroupAdmin,
 	deleteMilestone,
 	deleteMilestoneGroupAdmin,
+	orderMilestoneGroupsAdmin,
+	orderMilestonesAdmin,
 } from "$lib/client/services.gen";
 import type {
 	MilestoneAdmin,
@@ -21,6 +23,8 @@ import DeleteModal from "$lib/components/Admin/DeleteModal.svelte";
 import EditButton from "$lib/components/Admin/EditButton.svelte";
 import EditMilestoneGroupModal from "$lib/components/Admin/EditMilestoneGroupModal.svelte";
 import EditMilestoneModal from "$lib/components/Admin/EditMilestoneModal.svelte";
+import OrderItemsModal from "$lib/components/Admin/OrderItemsModal.svelte";
+import ReorderButton from "$lib/components/Admin/ReorderButton.svelte";
 import { milestoneGroups } from "$lib/stores/adminStore";
 import {
 	Card,
@@ -33,7 +37,6 @@ import {
 } from "flowbite-svelte";
 import ChevronDownOutline from "flowbite-svelte-icons/ChevronDownOutline.svelte";
 import ChevronUpOutline from "flowbite-svelte-icons/ChevronUpOutline.svelte";
-import { onMount } from "svelte";
 import { _, locale } from "svelte-i18n";
 
 let currentMilestoneGroup = $state(null as MilestoneGroupAdmin | null);
@@ -44,6 +47,10 @@ let showDeleteMilestoneGroupModal = $state(false);
 let currentMilestone = $state(null as MilestoneAdmin | null);
 let showEditMilestoneModal = $state(false);
 let showDeleteMilestoneModal = $state(false);
+
+let currentOrderEndpoint = $state(orderMilestonesAdmin);
+let currentOrderItems = $state([] as Array<{ id: number; text: string }>);
+let showOrderItemsModal = $state(false);
 
 function toggleOpenGroupIndex(index: number) {
 	if (openMilestoneGroupIndex == index) {
@@ -216,6 +223,13 @@ async function doDeleteMilestone() {
 											<TableBodyCell></TableBodyCell>
 											<TableBodyCell>
 												<AddButton onclick={() => addMilestone(milestoneGroup.id)} />
+												<ReorderButton
+														onclick={(event: Event) => {
+															event.stopPropagation();
+															currentOrderEndpoint = orderMilestonesAdmin;
+															currentOrderItems = milestoneGroup.milestones.map((milestone) => {return {id: milestone.id, text: milestone.text[$locale]?.title};});
+															showOrderItemsModal = true;
+														}} />
 											</TableBodyCell>
 										</TableBodyRow>
 									</TableBody>
@@ -230,6 +244,13 @@ async function doDeleteMilestone() {
 					<TableBodyCell></TableBodyCell>
 					<TableBodyCell>
 						<AddButton onclick={addMilestoneGroup} />
+						<ReorderButton
+								onclick={(event: Event) => {
+									event.stopPropagation();
+									currentOrderEndpoint = orderMilestoneGroupsAdmin;
+									currentOrderItems = $milestoneGroups.map((milestoneGroup) => {return {id: milestoneGroup.id, text: milestoneGroup.text[$locale]?.title};});
+									showOrderItemsModal = true;
+								}} />
 					</TableBodyCell>
 				</TableBodyRow>
 			</TableBody>
@@ -251,3 +272,5 @@ async function doDeleteMilestone() {
 	></EditMilestoneModal>
 {/key}
 <DeleteModal bind:open={showDeleteMilestoneModal} onclick={doDeleteMilestone}></DeleteModal>
+
+<OrderItemsModal bind:open={showOrderItemsModal} items={currentOrderItems} endpoint={currentOrderEndpoint} callback={refreshMilestoneGroups}  />

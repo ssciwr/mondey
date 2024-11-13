@@ -148,8 +148,10 @@ def test_delete_child_image(
     assert user_client.get("/users/children-images/1").status_code == 200
 
 
-def test_get_milestone_answers_child1_user_does_not_own_child(admin_client: TestClient):
-    response = admin_client.get("/users/milestone-answers/1")
+def test_get_milestone_answers_child1_user_does_not_own_child(
+    second_user_client: TestClient,
+):
+    response = second_user_client.get("/users/milestone-answers/1")
     assert response.status_code == 404
 
 

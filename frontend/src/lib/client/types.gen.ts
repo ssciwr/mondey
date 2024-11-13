@@ -98,6 +98,11 @@ export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
 
+export type ItemOrder = {
+    id: number;
+    order: number;
+};
+
 export type Language = {
     id: string;
 };
@@ -374,6 +379,14 @@ export type DeleteMilestoneGroupAdminResponse = (unknown);
 
 export type DeleteMilestoneGroupAdminError = (HTTPValidationError);
 
+export type OrderMilestoneGroupsAdminData = {
+    body: Array<ItemOrder>;
+};
+
+export type OrderMilestoneGroupsAdminResponse = (unknown);
+
+export type OrderMilestoneGroupsAdminError = (HTTPValidationError);
+
 export type UploadMilestoneGroupImageData = {
     body: Body_upload_milestone_group_image_admin_milestone_group_images__milestone_group_id__put;
     path: {
@@ -412,6 +425,14 @@ export type DeleteMilestoneData = {
 export type DeleteMilestoneResponse = (unknown);
 
 export type DeleteMilestoneError = (HTTPValidationError);
+
+export type OrderMilestonesAdminData = {
+    body: Array<ItemOrder>;
+};
+
+export type OrderMilestonesAdminResponse = (unknown);
+
+export type OrderMilestonesAdminError = (HTTPValidationError);
 
 export type UploadMilestoneImageData = {
     body: Body_upload_milestone_image_admin_milestone_images__milestone_id__post;
@@ -470,6 +491,14 @@ export type DeleteUserQuestionResponse = (unknown);
 
 export type DeleteUserQuestionError = (HTTPValidationError);
 
+export type OrderUserQuestionsAdminData = {
+    body: Array<ItemOrder>;
+};
+
+export type OrderUserQuestionsAdminResponse = (unknown);
+
+export type OrderUserQuestionsAdminError = (HTTPValidationError);
+
 export type GetChildQuestionsAdminResponse = (Array<ChildQuestionAdmin>);
 
 export type GetChildQuestionsAdminError = unknown;
@@ -495,6 +524,14 @@ export type DeleteChildQuestionData = {
 export type DeleteChildQuestionResponse = (unknown);
 
 export type DeleteChildQuestionError = (HTTPValidationError);
+
+export type OrderChildQuestionsAdminData = {
+    body: Array<ItemOrder>;
+};
+
+export type OrderChildQuestionsAdminResponse = (unknown);
+
+export type OrderChildQuestionsAdminError = (HTTPValidationError);
 
 export type UsersCurrentUserResponse = (UserRead);
 

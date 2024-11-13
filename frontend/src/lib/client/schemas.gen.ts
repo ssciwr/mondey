@@ -386,6 +386,22 @@ export const HTTPValidationErrorSchema = {
     title: 'HTTPValidationError'
 } as const;
 
+export const ItemOrderSchema = {
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        order: {
+            type: 'integer',
+            title: 'Order'
+        }
+    },
+    type: 'object',
+    required: ['id', 'order'],
+    title: 'ItemOrder'
+} as const;
+
 export const LanguageSchema = {
     properties: {
         id: {

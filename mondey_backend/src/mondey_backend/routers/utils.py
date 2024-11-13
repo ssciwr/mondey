@@ -16,21 +16,27 @@ from sqlmodel import select
 
 from ..dependencies import SessionDep
 from ..models.children import Child
+from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAdmin
 from ..models.milestones import MilestoneAgeScore
 from ..models.milestones import MilestoneAgeScores
 from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerSession
+from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupAdmin
 from ..models.milestones import MilestoneGroupText
 from ..models.milestones import MilestoneText
+from ..models.questions import ChildQuestion
 from ..models.questions import ChildQuestionAdmin
 from ..models.questions import ChildQuestionText
+from ..models.questions import UserQuestion
 from ..models.questions import UserQuestionAdmin
 from ..models.questions import UserQuestionText
+from ..models.utils import ItemOrder
 from ..users import User
 
 Text = MilestoneText | MilestoneGroupText | UserQuestionText | ChildQuestionText
+OrderedItem = Milestone | MilestoneGroup | UserQuestion | ChildQuestion
 
 
 def write_file(file: UploadFile, filename: str):
@@ -63,6 +69,15 @@ def add(session: SessionDep, instance: SQLModel):
     session.add(instance)
     session.commit()
     session.refresh(instance)
+
+
+def update_item_orders(
+    session: SessionDep, entity: type[OrderedItem], item_orders: Iterable[ItemOrder]
+):
+    for item_order in item_orders:
+        db_item = get(session, entity, item_order.id)
+        db_item.order = item_order.order
+    session.commit()
 
 
 def _update_text(
@@ -144,9 +159,9 @@ def get_db_child(
     session: SessionDep, current_active_user: User, child_id: int
 ) -> Child:
     child = get(session, Child, child_id)
-    if child is None or child.user_id != current_active_user.id:
+    if child.user_id != current_active_user.id and not current_active_user.is_superuser:
         raise HTTPException(
-            404, detail=f"Child with id {child_id} not found or wrong user"
+            404, detail=f"User does not have access to Child with id {child_id}"
         )
     return child
 

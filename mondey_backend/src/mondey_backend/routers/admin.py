@@ -26,11 +26,13 @@ from ..models.questions import ChildQuestionText
 from ..models.questions import UserQuestion
 from ..models.questions import UserQuestionAdmin
 from ..models.questions import UserQuestionText
+from ..models.utils import ItemOrder
 from ..settings import app_settings
 from .utils import add
 from .utils import calculate_milestone_age_scores
 from .utils import get
 from .utils import update_child_question_text
+from .utils import update_item_orders
 from .utils import update_milestone_group_text
 from .utils import update_milestone_text
 from .utils import update_user_question_text
@@ -114,6 +116,11 @@ def create_router() -> APIRouter:
         session.commit()
         return {"ok": True}
 
+    @router.post("/milestone-groups/order/")
+    def order_milestone_groups_admin(session: SessionDep, item_orders: list[ItemOrder]):
+        update_item_orders(session, MilestoneGroup, item_orders)
+        return {"ok": True}
+
     @router.put("/milestone-group-images/{milestone_group_id}")
     async def upload_milestone_group_image(
         session: SessionDep, milestone_group_id: int, file: UploadFile
@@ -152,6 +159,11 @@ def create_router() -> APIRouter:
         milestone = get(session, Milestone, milestone_id)
         session.delete(milestone)
         session.commit()
+        return {"ok": True}
+
+    @router.post("/milestones/order/")
+    def order_milestones_admin(session: SessionDep, item_orders: list[ItemOrder]):
+        update_item_orders(session, Milestone, item_orders)
         return {"ok": True}
 
     @router.post("/milestone-images/{milestone_id}", response_model=MilestoneImage)
@@ -223,6 +235,11 @@ def create_router() -> APIRouter:
         session.commit()
         return {"ok": True}
 
+    @router.post("/user-questions/order/")
+    def order_user_questions_admin(session: SessionDep, item_orders: list[ItemOrder]):
+        update_item_orders(session, UserQuestion, item_orders)
+        return {"ok": True}
+
     # Child question CRUD endpoints
     @router.get("/child-questions/", response_model=list[ChildQuestionAdmin])
     def get_child_questions_admin(session: SessionDep):
@@ -265,6 +282,11 @@ def create_router() -> APIRouter:
         question = get(session, ChildQuestion, child_question_id)
         session.delete(question)
         session.commit()
+        return {"ok": True}
+
+    @router.post("/child-questions/order/")
+    def order_child_questions_admin(session: SessionDep, item_orders: list[ItemOrder]):
+        update_item_orders(session, ChildQuestion, item_orders)
         return {"ok": True}
 
     return router

@@ -52,6 +52,7 @@
 		"add": "Hinzufügen",
 		"edit": "Bearbeiten",
 		"delete": "Löschen",
+		"reorder": "Neu ordnen",
 		"delete-are-you-sure": "Möchten Sie dies wirklich löschen?",
 		"yes-sure": "Ja, ich bin sicher",
 		"no-cancel": "Nein, abbrechen",
