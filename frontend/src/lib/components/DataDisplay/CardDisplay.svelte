@@ -51,7 +51,7 @@ let {
 			>{data.button}
 
 			{#if data.buttonIcon}
-				<data.buttonIcon class="ms-2 h-6 w-6 text-white" />
+				<svelte:component this={data.buttonIcon} class="ms-2 h-6 w-6 text-white" />
 			{:else}
 				<ArrowRightOutline class="ms-2 h-6 w-6 text-white" />
 			{/if}
@@ -74,7 +74,7 @@ let {
 	<!-- This will be generalized to replace button and progressbar later  -->
 	{#if data.auxilliary}
 		<div class="mb-4 mt-auto flex w-full justify-center">
-			<data.auxilliary {...styleProps.auxilliary} />
+			<svelte:component this={data.auxilliary} {...styleProps.auxilliary} />
 		</div>
 	{/if}
 </Card>
