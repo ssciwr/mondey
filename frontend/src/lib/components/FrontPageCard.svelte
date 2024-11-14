@@ -1,8 +1,8 @@
 <script>
-import { Button, Card, Tooltip } from "flowbite-svelte";
-import { _ } from "svelte-i18n";
-</script>
-
+    import { Card, Button, Tooltip } from 'flowbite-svelte';
+    import { _ } from "svelte-i18n";
+  </script>
+  
   <Card class="flex justify-center mr-4 text-center max-w-prose bg-additional-color min-w-full">
     <h5 class="mb-2 mt-4 text-2xl font-bold text-gray-700 dark:text-white tracking-wide">{$_("frontpage.heading")}</h5>
     <p class="mb-5 text-base text-gray-600 sm:text-lg dark:text-gray-400">{$_("frontpage.summary")}</p>
