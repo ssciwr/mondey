@@ -1,3 +1,4 @@
+<svelte:options runes={true} />
 <script lang="ts">
 import {
 	Button,
@@ -7,46 +8,52 @@ import {
 	Search,
 } from "flowbite-svelte";
 import { ChevronDownOutline } from "flowbite-svelte-icons";
-import { tick } from "svelte";
+import { Component, tick } from "svelte";
 
-export let data;
-export let header: string | null = null;
-export let itemComponent;
-export let withSearch = true;
-export let componentProps;
-
-export let searchData = [
-	{
-		label: "Alle",
-		placeholder: "Durchsuchen",
-		filterFunction: (data: any[], searchTerm: string): any[] => {
-			if (searchTerm === "") {
+let {
+	data = [],
+	header = null,
+	itemComponent = null,
+	withSearch = true,
+	componentProps = {},
+	searchData = [
+		{
+			label: "Alle",
+			placeholder: "Durchsuchen",
+			filterFunction: (data: any[], searchTerm: string): any[] => {
 				return data;
-			} else {
-				return data.filter((item) =>
-					Object.values(item).some((element) => {
-						return element.toLowerCase().includes(searchTerm.toLowerCase());
-					}),
-				);
-			}
+			},
 		},
-	},
-];
+	],
+}: {
+	data?: any[];
+	header?: string | null;
+	itemComponent?: Component | null;
+	withSearch?: boolean;
+	componentProps?: any;
+	searchData?: {
+		label: string;
+		placeholder: string;
+		filterFunction: (data: any[], searchTerm: string) => any[];
+	}[];
+} = $props();
 
-let searchCategory: string = searchData[0].label;
-let searchPlaceHolder: string = searchData[0].placeholder;
 let filterData = searchData[0].filterFunction;
-let dropdownOpen = false;
-
-// dynamic statements
-let searchTerm = "";
-$: filteredItems = withSearch === true ? filterData(data, searchTerm) : data;
+let searchCategory: string = $state(searchData[0].label);
+let searchPlaceHolder: string = $state(searchData[0].placeholder);
+let dropdownOpen = $state(false);
+let searchTerm = $state("");
+let filteredItems = $derived(
+	withSearch === true ? filterData(data, searchTerm) : data,
+);
 
 // Create a new array of componentProps that matches the filtered data
-$: filteredComponentProps = filteredItems.map((item) => {
-	const index = data.indexOf(item);
-	return componentProps[index];
-});
+let filteredComponentProps = $derived(
+	filteredItems.map((item) => {
+		const index = data.indexOf(item);
+		return componentProps[index];
+	}),
+);
 </script>
 
 <div class="mx-auto p-4">
@@ -110,11 +117,11 @@ $: filteredComponentProps = filteredItems.map((item) => {
 		class="grid w-full grid-cols-1 justify-center gap-8 p-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
 	>
 		{#each filteredItems as item, index}
-			<svelte:component
-				this={itemComponent}
+			{#FIXME: this doesn´t work currently, which might be because of bindings or some other svelte 5 stuff}
+			<itemComponent
 				data={item}
 				styleProps={filteredComponentProps[index]}
-			/>
+			></itemComponent>
 		{/each}
 	</div>
 </div>
