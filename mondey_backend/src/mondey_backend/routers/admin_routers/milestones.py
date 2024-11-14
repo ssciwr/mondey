@@ -16,13 +16,13 @@ from ...models.milestones import MilestoneGroup
 from ...models.milestones import MilestoneGroupAdmin
 from ...models.milestones import MilestoneGroupText
 from ...models.milestones import MilestoneImage
-from ...models.utils import ItemOrder
 from ...models.milestones import MilestoneText
+from ...models.utils import ItemOrder
 from ...settings import app_settings
 from ..utils import add
-from ..utils import update_item_orders
 from ..utils import calculate_milestone_age_scores
 from ..utils import get
+from ..utils import update_item_orders
 from ..utils import update_milestone_group_text
 from ..utils import update_milestone_text
 from ..utils import write_file

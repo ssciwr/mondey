@@ -1,5 +1,5 @@
-from fastapi.testclient import TestClient
 import pytest
+from fastapi.testclient import TestClient
 
 
 def test_get_child_questions(user_client: TestClient):
@@ -12,6 +12,7 @@ def test_get_user_questions(user_client: TestClient):
     response = user_client.get("/user-questions/")
     assert response.status_code == 200
     assert len(response.json()) == 2
+
 
 @pytest.mark.parametrize("entity", ["child-questions", "user-questions"])
 @pytest.mark.parametrize(
