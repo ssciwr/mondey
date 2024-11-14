@@ -24,8 +24,6 @@ function computeProgress(
 	milestones: MilestonePublic[],
 	answerSession: MilestoneAnswerSessionPublic,
 ): number {
-	console.log("milestones", milestones);
-	console.log("answerSession", answerSession.answers);
 	if (milestones.length === 0) {
 		return 0;
 	} else {
@@ -45,7 +43,6 @@ function computeProgress(
 				return p;
 			}
 		}, 0.0);
-		console.log("final progress: ", progress);
 		if (progress < 0.01) {
 			return 0.01;
 		} else {
