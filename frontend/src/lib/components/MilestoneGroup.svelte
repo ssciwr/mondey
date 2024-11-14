@@ -27,22 +27,12 @@ function computeProgress(
 	if (milestones.length === 0) {
 		return 0;
 	} else {
-		const progress = milestones.reduce((p, item) => {
-			if (
-				answerSession.answers[item.id] !== undefined &&
-				answerSession.answers[item.id].answer !== null &&
+		const progress = milestones.filter((item) => {
+			return (
+				item.id in answerSession.answers &&
 				answerSession.answers[item.id].answer >= 0
-			) {
-				console.log(
-					"  found answer: ",
-					item.id,
-					answerSession.answers[item.id].answer,
-				);
-				return p + 1.0;
-			} else {
-				return p;
-			}
-		}, 0.0);
+			);
+		}).length;
 		if (progress < 0.01) {
 			return 0.01;
 		} else {
