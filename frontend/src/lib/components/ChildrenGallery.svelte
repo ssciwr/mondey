@@ -6,7 +6,7 @@ import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
-import { Heading } from "flowbite-svelte";
+import { Heading, Spinner } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
@@ -126,7 +126,7 @@ const searchData = [
 </script>
 
 {#await promise}
-	<p>{"Waiting for server response"}</p>
+	<Spinner /> <p>{$_("userData.loadingMessage")}</p>
 {:then data}
 	{#if showAlert}
 		<AlertMessage

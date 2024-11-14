@@ -27,7 +27,7 @@ onMount(async () => {
 				<TabItem open={true}>
 					<div slot="title" class="flex items-center gap-2 text-lg">
 						<ProfileCardSolid size="lg" />
-						<span class="invisible md:visible">{$_("userData.label")}</span>
+						<span class="hidden md:inline">{$_("userData.label")}</span>
 					</div>
 					<svelte:component this={UserDataInput} />
 				</TabItem>
@@ -36,7 +36,7 @@ onMount(async () => {
 				}}>
 					<div slot="title" class="flex items-center gap-2 text-lg">
 						<GridPlusSolid size="lg" />
-						<span class="invisible md:visible">x{$_("childData.overviewLabel")}</span>
+						<span class="hidden md:inline">{$_("childData.overviewLabel")}</span>
 					</div>
 					<svelte:component
 						this={componentTable[$activeTabChildren]}
@@ -50,7 +50,7 @@ onMount(async () => {
 							class="flex items-center gap-2 text-lg"
 						>
 							<CogSolid size="lg" />
-							<span class="invisible md:visible">{$_("admin.label")}</span>
+							<span class="hidden md:inline">{$_("admin.label")}</span>
 						</div>
 						<AdminPage />
 					</TabItem>
@@ -62,7 +62,7 @@ onMount(async () => {
 							class="flex items-center gap-2 text-lg"
 						>
 							<AtomOutline size="lg" />
-							<span class="invisible md:visible">{$_("researcher.label")}</span>
+							<span class="hidden md:inline">{$_("researcher.label")}</span>
 						</div>
 						<svelte:component this={Card} />
 					</TabItem>

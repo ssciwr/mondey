@@ -85,9 +85,12 @@ async function setup(): Promise<void> {
 		!contentStore.milestoneGroupData.milestones ||
 		contentStore.milestoneGroupData.milestones.length === 0
 	) {
-		console.log("Error when retrieving milestone groups");
+		console.log(
+			"Error when retrieving milestone groups ",
+			contentStore.milestoneGroupData,
+		);
 		showAlert = true;
-		alertMessage = $_("milestoneGroup.alertMessageRetrieving");
+		alertMessage = $_("milestone.alertMessageRetrieving");
 	} else {
 		let milestoneAnswerSession = undefined;
 		const response = await getCurrentMilestoneAnswerSession({

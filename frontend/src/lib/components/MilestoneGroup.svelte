@@ -7,13 +7,13 @@ import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
+import { Spinner } from "flowbite-svelte";
 import {
 	RectangleListOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
-
 let showAlert = $state(false);
 let alertMessage = $state("");
 let promise = $state(setup());
@@ -112,23 +112,12 @@ function searchBySurveyTitle(data: any[], key: string): any[] {
 	}
 }
 
-function searchByMilestone(data: any[], key: string): any[] {
-	if (key === "") {
-		return data;
-	} else {
-		return data.filter((item) => {
-			return true; // TODO: implement search by milestone
-		});
-	}
-}
-
 // README: this is slow and quite a bit of work because a lot of text has to be searched. Kill it?
 function searchAll(data: any[], key: string): any[] {
 	return [
 		...new Set([
 			...searchByStatus(data, key),
 			...searchBySurveyTitle(data, key),
-			...searchByMilestone(data, key),
 			...searchBySurveyDescription(data, key),
 		]),
 	];
@@ -182,7 +171,7 @@ export function createStyle(data: any[]) {
 </script>
 
 {#await promise}
-<p>{"Waiting for setup to finish"}</p>
+<Spinner /> <p>{$_("userData.loadingMessage")}</p>
 {:then data}
 <div class="flex flex-col md:rounded-t-lg">
 	<Breadcrumbs data={breadcrumbdata} />
