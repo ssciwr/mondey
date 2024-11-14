@@ -32,6 +32,9 @@ export default {
 					800: "#4D5B8B",
 					900: "#46537E",
 				},
+
+				"additional-color": "#a4d2d0",
+
 				"milestone-answer": {
 					0: "#f2e8cf",
 					1: "#cdd993",
