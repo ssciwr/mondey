@@ -3,7 +3,6 @@ import {
 	Button,
 	Dropdown,
 	DropdownItem,
-	Gallery,
 	Heading,
 	Search,
 } from "flowbite-svelte";
@@ -107,7 +106,7 @@ $: filteredComponentProps = filteredItems.map((item) => {
 		</form>
 	{/if}
 
-	<Gallery
+	<div
 		class="grid w-full grid-cols-1 justify-center gap-8 p-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
 	>
 		{#each filteredItems as item, index}
@@ -117,5 +116,5 @@ $: filteredComponentProps = filteredItems.map((item) => {
 				styleProps={filteredComponentProps[index]}
 			/>
 		{/each}
-	</Gallery>
+	</div>
 </div>
