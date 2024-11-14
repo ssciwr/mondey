@@ -529,3 +529,53 @@ def test_delete_child_question_works(session, admin_client: TestClient):
 def test_delete_child_question_id_not_there(admin_client: TestClient):
     response = admin_client.delete("/admin/child-questions/12")
     assert response.status_code == 404
+
+
+@pytest.mark.parametrize("entity", ["child-questions", "user-questions", "milestones"])
+@pytest.mark.parametrize(
+    ("order_items", "ids_in_order"),
+    [([(1, 1), (2, 2)], [1, 2]), ([(1, 2), (2, 1)], [2, 1])],
+)
+def test_order_items(
+    admin_client: TestClient,
+    entity: str,
+    order_items: list[tuple[int, int]],
+    ids_in_order: list[int],
+):
+    order = [{"id": item_id, "order": order} for item_id, order in order_items]
+    response = admin_client.post(f"/admin/{entity}/order/", json=order)
+    assert response.status_code == 200
+    items = admin_client.get(f"/{entity}/").json()
+    for idx, item_id in enumerate(ids_in_order):
+        assert items[idx]["id"] == item_id
+
+
+def test_order_milestones_and_milestone_groups_child1(
+    admin_client: TestClient, milestone_group1: dict, milestone_group2: dict
+):
+    milestone_groups = admin_client.get("/milestone-groups/1").json()
+    # initial milestone group order:
+    assert milestone_groups[0]["id"] == 2
+    assert milestone_groups[1]["id"] == 1
+    # initial milestone order within group1:
+    assert milestone_groups[1]["milestones"][0]["id"] == 2
+    assert milestone_groups[1]["milestones"][1]["id"] == 1
+    # re-order milestone groups
+    response = admin_client.post(
+        "/admin/milestone-groups/order/",
+        json=[{"id": 1, "order": 0}, {"id": 2, "order": 1}],
+    )
+    assert response.status_code == 200
+    # re-order milestones
+    response = admin_client.post(
+        "/admin/milestones/order/",
+        json=[{"id": 2, "order": 1}, {"id": 1, "order": 0}, {"id": 3, "order": 2}],
+    )
+    assert response.status_code == 200
+    milestone_groups = admin_client.get("/milestone-groups/1").json()
+    # new milestone group order:
+    assert milestone_groups[0]["id"] == 1
+    assert milestone_groups[1]["id"] == 2
+    # new milestone order within group1:
+    assert milestone_groups[0]["milestones"][0]["id"] == 1
+    assert milestone_groups[0]["milestones"][1]["id"] == 2

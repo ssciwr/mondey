@@ -131,7 +131,7 @@ def session(children: list[dict]):
         for milestone_id in [1, 2, 3]:
             session.add(
                 Milestone(
-                    order=4 - milestone_id,
+                    order=14 - milestone_id,
                     group_id=1,
                     expected_age_months=milestone_id * 6,
                 )
@@ -817,7 +817,7 @@ def milestone_group_admin1():
         "milestones": [
             {
                 "group_id": 1,
-                "order": 1,
+                "order": 11,
                 "id": 3,
                 "expected_age_months": 18,
                 "images": [],
@@ -850,7 +850,7 @@ def milestone_group_admin1():
             },
             {
                 "group_id": 1,
-                "order": 2,
+                "order": 12,
                 "id": 2,
                 "expected_age_months": 12,
                 "images": [
@@ -890,7 +890,7 @@ def milestone_group_admin1():
             },
             {
                 "group_id": 1,
-                "order": 3,
+                "order": 13,
                 "id": 1,
                 "expected_age_months": 6,
                 "images": [
