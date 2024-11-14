@@ -180,17 +180,17 @@ const breadcrumbdata = $derived([
 <p>{$_("userData.loadingMessage")}</p>
 {:then}
 <div
-	class="mx-auto flex flex-col p-4 md:rounded-t-lg"
+	class="border-1 flex flex-col border border-gray-200 bg-white shadow md:max-w-7xl md:rounded-lg dark:border-gray-700 dark:bg-gray-800"
 >
 	{#if $locale && contentStore.milestoneGroupData && contentStore.milestoneGroupData.text && contentStore.milestoneGroupData.milestones && currentMilestone && currentMilestone.text && currentMilestone.images}
 
 		<Breadcrumbs data={breadcrumbdata} />
 
 		<div class="flex w-full flex-col md:flex-row">
-			<div>
+			<div class = "relative w-full h-48 md:h-96 md:w-48 lg:w-72 xl:w-96 overflow-hidden">
 				{#each currentMilestone.images as image, imageIndex}
 					<img
-						class={`h-48 w-full object-cover transition pb-4 mb-4 duration-1000 ease-in-out md:h-96 md:w-48 md:rounded-bl-lg lg:w-72 xl:w-96 ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
+						class={`absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
 						src={`${import.meta.env.VITE_MONDEY_API_URL}/static/${image.filename}`}
 						alt=""
 					/>
