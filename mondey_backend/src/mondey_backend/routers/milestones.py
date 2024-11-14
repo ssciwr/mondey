@@ -15,6 +15,7 @@ from ..models.milestones import MilestonePublic
 from .utils import get
 from .utils import get_child_age_in_months
 from .utils import get_db_child
+from .utils import get_or_create_current_milestone_answer_session
 
 
 def create_router() -> APIRouter:
@@ -43,7 +44,9 @@ def create_router() -> APIRouter:
         "/milestone-groups/{child_id}", response_model=list[MilestoneGroupPublic]
     )
     def get_milestone_groups(
-        session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
+        session: SessionDep,
+        current_active_user: CurrentActiveUserDep,
+        child_id: int,
     ):
         delta_months = 6
         child = get_db_child(session, current_active_user, child_id)
@@ -67,6 +70,42 @@ def create_router() -> APIRouter:
                 )
             )
         ).all()
-        return milestone_groups
+
+        # compute progress from milestone answers. While this is not
+        # the most efficient way, it is the least intrusive and concentrates
+        # progress reporting in the least amount of code - this function and the
+        # MilestonAnswerPublic model.
+        # The actual database does not need to know about progress - it's
+        # a derived value only for being displayed to the user.
+
+        answer_session = get_or_create_current_milestone_answer_session(
+            session, current_active_user, child_id
+        )
+
+        milestone_groups_public = []
+        for mgroup in milestone_groups:
+            mgroup_public = MilestoneGroupPublic(
+                id=mgroup.id,
+                order=mgroup.order,
+                text=mgroup.text,
+                milestones=mgroup.milestones,
+            )
+            mgroup_public.progress = 0.0
+
+            if len(mgroup.milestones) > 0:
+                for milestone in mgroup.milestones:
+                    if milestone.id is None:
+                        continue
+
+                    answer = answer_session.answers.get(milestone.id)
+
+                    if answer is not None and answer.answer >= 0:
+                        mgroup_public.progress += 1.0
+
+                mgroup_public.progress /= len(mgroup.milestones)
+
+            milestone_groups_public.append(mgroup_public)
+
+        return milestone_groups_public
 
     return router

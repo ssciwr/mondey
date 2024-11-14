@@ -1,87 +1,97 @@
+<svelte:options runes={true} />
 <script lang="ts">
+import { getMilestoneGroups } from "$lib/client";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
-import { createStyle, surveyData } from "$lib/components/MilestoneGroup";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
+import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
+import { contentStore } from "$lib/stores/contentStore.svelte";
+import {
+	RectangleListOutline,
+	UserSettingsOutline,
+} from "flowbite-svelte-icons";
+import { _, locale } from "svelte-i18n";
+import AlertMessage from "./AlertMessage.svelte";
 
-const data: any[] = surveyData;
+let showAlert = $state(false);
+let alertMessage = $state("");
+let promise = $state(setup());
+let data: any[] = $state([]);
+
+async function setup(): Promise<any> {
+	await currentChild.load_data();
+	console.log("currentChild", currentChild);
+	console.log("child data: ", currentChild.name);
+	const milestonegroups = await getMilestoneGroups({
+		path: { child_id: currentChild.id },
+	});
+
+	if (milestonegroups.error) {
+		console.log("Error when retrieving milestone group data");
+		showAlert = true;
+		alertMessage =
+			$_("milestone.alertMessageRetrieving") + milestonegroups.error.detail;
+
+		data = [];
+		return data;
+	} else {
+		console.log(
+			"Milestone group data retrieved successfully",
+			milestonegroups.data,
+		);
+
+		data = milestonegroups.data.map((item) => {
+			const res = {
+				header: item.text[$locale].title,
+				summary: item.text[$locale].desc,
+				image: null,
+				progress: item.progress < 0.01 ? 0.01 : item.progress,
+				events: {
+					onclick: () => {
+						activeTabChildren.set("milestoneOverview");
+						contentStore.milestoneGroup = item.id;
+						contentStore.milestoneGroupData = item;
+					},
+				},
+			};
+			return res;
+		});
+
+		return data;
+	}
+}
 
 const breadcrumbdata: any[] = [
 	{
-		label: "Kinderübersicht",
+		label: currentChild.name,
+		symbol: UserSettingsOutline,
 		onclick: () => {
-			activeTabChildren.update((value) => {
-				return "childrenGallery";
-			});
+			activeTabChildren.set("childrenRegistration");
 		},
 	},
 	{
-		label: "Meike",
-		onclick: () => {
-			activeTabChildren.update((value) => {
-				return "childrenRegistration";
-			});
-		},
-	},
-	{
-		label: "Bereichsübersicht",
-		onclick: () => {
-			activeTabChildren.update((value) => {
-				return "milestoneGroup";
-			});
-		},
+		label: $_("milestone.groupOverviewLabel"),
+		symbol: RectangleListOutline,
 	},
 ];
 
-interface MilestoneData {
-	number: 4;
-	title: string;
-	desc: string;
-	observation: string;
-	help: string;
-	answer: string;
-}
-
-interface DataElement {
-	header: string;
-	summary: string;
-	milestoneData: any;
-	progress: number;
-	[key: string]: any;
-}
-
-function searchByStatus(data: DataElement[], key: string): DataElement[] {
+function searchByStatus(data: any[], key: string): any[] {
 	if (key === "") {
 		return data;
 	} else {
 		return data.filter((item) => {
 			// button label contains info about completion status => use for search
-			if (key === "fertig") {
+			if (key === $_("search.complete")) {
 				return item.progress === 1;
-			} else if (key === "unfertig") {
-				return item.progress < 1;
 			} else {
-				return item.header.toLowerCase().includes(key.toLowerCase());
+				return item.progress < 1;
 			}
 		});
 	}
 }
 
-function searchBySurvey(data: DataElement[], key: string): DataElement[] {
-	if (key === "") {
-		return data;
-	} else {
-		return data.filter((item) => {
-			return item.header.toLowerCase().includes(key.toLowerCase());
-		});
-	}
-}
-
-function searchBySurveyDescription(
-	data: DataElement[],
-	key: string,
-): DataElement[] {
+function searchBySurveyDescription(data: any[], key: string): any[] {
 	if (key === "") {
 		return data;
 	} else {
@@ -91,24 +101,33 @@ function searchBySurveyDescription(
 	}
 }
 
-function searchByMilestone(data: DataElement[], key: string): DataElement[] {
+function searchBySurveyTitle(data: any[], key: string): any[] {
+	if (key === "") {
+		return data;
+	} else {
+		const filtered = data.filter((item) => {
+			return item.header.toLowerCase().includes(key.toLowerCase());
+		});
+		return filtered;
+	}
+}
+
+function searchByMilestone(data: any[], key: string): any[] {
 	if (key === "") {
 		return data;
 	} else {
 		return data.filter((item) => {
-			return item.milestoneData.some((element: MilestoneData) =>
-				element.title.toLowerCase().includes(key.toLowerCase()),
-			);
+			return true; // TODO: implement search by milestone
 		});
 	}
 }
 
 // README: this is slow and quite a bit of work because a lot of text has to be searched. Kill it?
-function searchAll(data: DataElement[], key: string): DataElement[] {
+function searchAll(data: any[], key: string): any[] {
 	return [
 		...new Set([
-			...searchBySurvey(data, key),
 			...searchByStatus(data, key),
+			...searchBySurveyTitle(data, key),
 			...searchByMilestone(data, key),
 			...searchBySurveyDescription(data, key),
 		]),
@@ -117,38 +136,59 @@ function searchAll(data: DataElement[], key: string): DataElement[] {
 
 const searchData: any[] = [
 	{
-		label: "Alle",
-		placeholder: "Alle Kategorien durchsuchen",
+		label: $_("search.allLabel"),
+		placeholder: $_("search.allPlaceholder"),
 		filterFunction: searchAll,
 	},
 	{
-		label: "Bereich",
-		placeholder: "Nach Beobachtungsbereich suchen",
-		filterFunction: searchBySurvey,
-	},
-	{
-		label: "Bereichsbeschreibung",
-		placeholder: "Beschreibung von Bereichen durchsuchen",
+		label: $_("search.descriptionLabel"),
+		placeholder: $_("search.descriptionPlaceholder"),
 		filterFunction: searchBySurveyDescription,
 	},
 	{
-		label: "Meilensteine",
-		placeholder: "Nach Meilenstein suchen",
+		label: $_("search.surveyLabel"),
+		placeholder: $_("search.surveyPlaceholder"),
+		filterFunction: searchBySurveyTitle,
+	},
+	{
+		label: $_("search.milestoneLabel"),
+		placeholder: $_("search.milestonePlaceholder"),
 		filterFunction: searchByMilestone,
 	},
 	{
-		label: "Status",
-		placeholder: "Bereiche nach Status durchsuchen (fertig/unfertig)",
+		label: $_("search.statusLabel"),
+		placeholder: $_("search.statusPlaceholder"),
 		filterFunction: searchByStatus,
 	},
 ];
+
+export function createStyle(data: any[]) {
+	return data.map((item) => {
+		return {
+			card: {
+				class:
+					"m-2 max-w-prose dark:text-white text-white hover:cursor-pointer bg-primary-700 dark:bg-primary-900 hover:bg-primary-800 dark:hover:bg-primary-700",
+			},
+			progress: {
+				labelInside: true,
+				size: "h-4",
+				divClass: `h-full rounded-full w-${100 * item.progress}`,
+				color: "red",
+				completeColor: "green",
+			},
+		};
+	});
+}
 </script>
 
-<div class="flex flex-col border border-gray-200 md:rounded-t-lg dark:border-gray-700">
+{#await promise}
+<p>{"Waiting for setup to finish"}</p>
+{:then data}
+<div class="flex flex-col md:rounded-t-lg">
 	<Breadcrumbs data={breadcrumbdata} />
 	<div class="grid gap-y-8">
 		<GalleryDisplay
-			data={data.sort((a, b) => a.progress - b.progress)}
+			data={data}
 			itemComponent={CardDisplay}
 			componentProps={createStyle(data)}
 			withSearch={true}
@@ -156,3 +196,6 @@ const searchData: any[] = [
 		/>
 	</div>
 </div>
+{:catch error}
+<AlertMessage message={$_("milestone.alertMessageError") + " "+ error} />
+{/await}

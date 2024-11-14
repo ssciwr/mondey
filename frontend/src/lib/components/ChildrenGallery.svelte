@@ -4,7 +4,7 @@
 import { getChildImage, getChildren } from "$lib/client/services.gen";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
-import { currentChild } from "$lib/stores/childrenStore";
+import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { Heading } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
@@ -25,7 +25,6 @@ async function setup(): Promise<any> {
 				const childImageResponse = await getChildImage({
 					path: { child_id: child.id },
 				});
-				console.log("childImageResponse", childImageResponse);
 				if (childImageResponse.error) {
 					console.log("Error when retrieving child image");
 					showAlert = true;
@@ -44,8 +43,9 @@ async function setup(): Promise<any> {
 					header: child.name,
 					image,
 					events: {
-						onclick: () => {
-							currentChild.set(child.id);
+						onclick: async () => {
+							currentChild.id = child.id;
+							await currentChild.load_data();
 							activeTabChildren.set("childrenRegistration");
 						},
 					},
@@ -61,7 +61,7 @@ async function setup(): Promise<any> {
 				summary: $_("childData.newChildHeadingLong"),
 				events: {
 					onclick: async () => {
-						currentChild.set(null);
+						currentChild.id = null;
 						activeTabChildren.set("childrenRegistration");
 					},
 				},
@@ -112,7 +112,7 @@ function searchName(data: any[], key: string): any[] {
 }
 
 let showAlert = $state(false);
-let alertMessage = $_("childData.alertMessageError");
+let alertMessage = $state($_("childData.alertMessageError"));
 let data: any[] = $state([]);
 
 const promise = $state(setup());

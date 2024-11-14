@@ -18,23 +18,33 @@ import UserDataInput from "./UserDataInput.svelte";
 onMount(async () => {
 	await refreshUser();
 });
+
+let windowWidth = $state(1920);
+let smallScreen = $derived(windowWidth < 800);
 </script>
+<svelte:window bind:innerWidth={windowWidth} />
 
 {#if $currentUser}
 	{#if $currentUser?.is_verified === true}
 		<div class="m-2 p-2">
-			<Tabs tabStyle="pill">
+			<Tabs tabStyle="underline">
 				<TabItem open={true}>
 					<div slot="title" class="flex items-center gap-2 text-lg">
 						<ProfileCardSolid size="lg" />
-						Persönliche Daten
+						{#if smallScreen === false}
+							{$_("userData.label")}
+						{/if}
 					</div>
 					<svelte:component this={UserDataInput} />
 				</TabItem>
-				<TabItem>
+				<TabItem onclick = {() =>{
+					activeTabChildren.set("childrenGallery");
+				}}>
 					<div slot="title" class="flex items-center gap-2 text-lg">
 						<GridPlusSolid size="lg" />
-						Kinder
+						{#if smallScreen === false}
+							{$_("childData.overviewLabel")}
+						{/if}
 					</div>
 					<svelte:component
 						this={componentTable[$activeTabChildren]}
@@ -48,7 +58,9 @@ onMount(async () => {
 							class="flex items-center gap-2 text-lg"
 						>
 							<CogSolid size="lg" />
-							{$_("admin.heading")}
+							{#if smallScreen === false}
+								{$_("admin.label")}
+							{/if}
 						</div>
 						<AdminPage />
 					</TabItem>
@@ -60,7 +72,9 @@ onMount(async () => {
 							class="flex items-center gap-2 text-lg"
 						>
 							<AtomOutline size="lg" />
-							{$_("researcher.title")}
+							{#if smallScreen === false}
+								{$_("researcher.label")}
+							{/if}
 						</div>
 						<svelte:component this={Card} />
 					</TabItem>
