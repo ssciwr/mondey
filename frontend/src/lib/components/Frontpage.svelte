@@ -14,9 +14,6 @@ const props = {};
 </script>
 
 <Card
-	withSearch={false}
-	itemComponent={Card}
-	componentProps={props}
 />
 
 <GalleryDisplay
