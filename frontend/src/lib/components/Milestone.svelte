@@ -187,10 +187,10 @@ const breadcrumbdata = $derived([
 		<Breadcrumbs data={breadcrumbdata} />
 
 		<div class="flex w-full flex-col md:flex-row">
-			<div>
+			<div class = "relative w-full h-48 md:h-96 md:w-48 lg:w-72 xl:w-96 overflow-hidden">
 				{#each currentMilestone.images as image, imageIndex}
 					<img
-						class={`h-48 w-full object-cover transition pb-4 mb-4 duration-1000 ease-in-out md:h-96 md:w-48 md:rounded-bl-lg lg:w-72 xl:w-96 ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
+						class={`absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
 						src={`${import.meta.env.VITE_MONDEY_API_URL}/static/${image.filename}`}
 						alt=""
 					/>

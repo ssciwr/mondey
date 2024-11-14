@@ -26,8 +26,10 @@ function searchStatus(data: any[], key: string): any[] {
 	} else {
 		return data.filter((item) => {
 			// button label contains info about completion status => use for search
-			if (key === $_("milestone.complete")) {
-			} else if (key === $_("milestone.incomplete")) {
+			if (key === $_("milestone.complete").toLowerCase()) {
+				return item.complete === true;
+			} else {
+				return item.complete === false;
 			}
 		});
 	}
@@ -83,9 +85,12 @@ async function setup(): Promise<void> {
 		!contentStore.milestoneGroupData.milestones ||
 		contentStore.milestoneGroupData.milestones.length === 0
 	) {
-		console.log("Error when retrieving milestone groups");
+		console.log(
+			"Error when retrieving milestone groups ",
+			contentStore.milestoneGroupData,
+		);
 		showAlert = true;
-		alertMessage = $_("milestoneGroup.alertMessageRetrieving");
+		alertMessage = $_("milestone.alertMessageRetrieving");
 	} else {
 		let milestoneAnswerSession = undefined;
 		const response = await getCurrentMilestoneAnswerSession({
