@@ -153,7 +153,6 @@ export type MilestoneGroupPublic = {
         [key: string]: MilestoneGroupTextPublic;
     };
     milestones: Array<MilestonePublic>;
-    progress?: number;
 };
 
 export type MilestoneGroupText = {
