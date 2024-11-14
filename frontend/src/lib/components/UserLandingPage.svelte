@@ -15,6 +15,8 @@ import AdminPage from "./AdminPage.svelte";
 import UserDataInput from "./UserDataInput.svelte";
 
 onMount(user.load);
+
+let childComponent = $state(componentTable["childrenGallery"]);
 </script>
 
 {#if user.data}
@@ -35,9 +37,7 @@ onMount(user.load);
 						<GridPlusSolid size="lg" />
 						<span class="hidden md:inline">{$_("childData.overviewLabel")}</span>
 					</div>
-					<svelte:component
-						this={componentTable[$activeTabChildren]}
-					/>
+					<childComponent></childComponent>
 				</TabItem>
 
 				{#if user.data?.is_superuser}
