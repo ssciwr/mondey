@@ -11,6 +11,7 @@ let {
 		image: undefined,
 		progress: undefined,
 		events: undefined,
+		auxilliary: undefined,
 	},
 	styleProps = {
 		card: {},
@@ -18,6 +19,7 @@ let {
 		summary: {},
 		button: {},
 		progress: {},
+		auxilliary: {},
 	},
 }: { data: any; styleProps: any } = $props();
 </script>
@@ -51,7 +53,7 @@ let {
 			>{data.button}
 
 			{#if data.buttonIcon}
-				<svelte:component this={data.buttonIcon} class="ms-2 h-6 w-6 text-white" />
+				<data.buttonIcon class="ms-2 h-6 w-6 text-white" />
 			{:else}
 				<ArrowRightOutline class="ms-2 h-6 w-6 text-white" />
 			{/if}
@@ -71,10 +73,9 @@ let {
 		/>
 	{/if}
 
-	<!-- This will be generalized to replace button and progressbar later  -->
 	{#if data.auxilliary}
 		<div class="mb-4 mt-auto flex w-full justify-center">
-			<svelte:component this={data.auxilliary} {...styleProps.auxilliary} />
+			<data.auxilliary {...styleProps.auxilliary} />
 		</div>
 	{/if}
 </Card>
