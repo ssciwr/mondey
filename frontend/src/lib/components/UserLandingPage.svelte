@@ -18,11 +18,7 @@ import UserDataInput from "./UserDataInput.svelte";
 onMount(async () => {
 	await refreshUser();
 });
-
-let windowWidth = $state(1920);
-let smallScreen = $derived(windowWidth < 800);
 </script>
-<svelte:window bind:innerWidth={windowWidth} />
 
 {#if get(currentUser)}
 	{#if get(currentUser)?.is_verified === true}
@@ -31,9 +27,7 @@ let smallScreen = $derived(windowWidth < 800);
 				<TabItem open={true}>
 					<div slot="title" class="flex items-center gap-2 text-lg">
 						<ProfileCardSolid size="lg" />
-						{#if smallScreen === false}
-							{$_("userData.label")}
-						{/if}
+						<span class="invisible md:visible">{$_("userData.label")}</span>
 					</div>
 					<svelte:component this={UserDataInput} />
 				</TabItem>
@@ -42,9 +36,7 @@ let smallScreen = $derived(windowWidth < 800);
 				}}>
 					<div slot="title" class="flex items-center gap-2 text-lg">
 						<GridPlusSolid size="lg" />
-						{#if smallScreen === false}
-							{$_("childData.overviewLabel")}
-						{/if}
+						<span class="invisible md:visible">x{$_("childData.overviewLabel")}</span>
 					</div>
 					<svelte:component
 						this={componentTable[$activeTabChildren]}
@@ -58,9 +50,7 @@ let smallScreen = $derived(windowWidth < 800);
 							class="flex items-center gap-2 text-lg"
 						>
 							<CogSolid size="lg" />
-							{#if smallScreen === false}
-								{$_("admin.label")}
-							{/if}
+							<span class="invisible md:visible">{$_("admin.label")}</span>
 						</div>
 						<AdminPage />
 					</TabItem>
@@ -72,9 +62,7 @@ let smallScreen = $derived(windowWidth < 800);
 							class="flex items-center gap-2 text-lg"
 						>
 							<AtomOutline size="lg" />
-							{#if smallScreen === false}
-								{$_("researcher.label")}
-							{/if}
+							<span class="invisible md:visible">{$_("researcher.label")}</span>
 						</div>
 						<svelte:component this={Card} />
 					</TabItem>

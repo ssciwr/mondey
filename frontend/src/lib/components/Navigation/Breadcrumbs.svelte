@@ -3,11 +3,7 @@
 import { Breadcrumb, BreadcrumbItem } from "flowbite-svelte";
 import { PlayOutline } from "flowbite-svelte-icons";
 let { data }: { data: any[] } = $props();
-
-let windowWidth = $state(1920);
-let smallScreen = $derived(windowWidth < 800);
 </script>
-<svelte:window bind:innerWidth={windowWidth} />
 
 <Breadcrumb
 	olClass="inline-flex items-center space-x-1 rtl:space-x-reverse md:space-x-3 rtl:space-x-reverse  flex-wrap "
@@ -22,25 +18,19 @@ let smallScreen = $derived(windowWidth < 800);
 		>
 		<div class="flex items-center justify-center">
 			{#if item.href}
-				{#if smallScreen === true}
-					<svelte:component this = {item?.symbol ?? PlayOutline} size = "xl" />
-				{:else}
-					{item.label}
-				{/if}
+				<svelte:component this = {item?.symbol ?? PlayOutline} size = "xl" />
+				<span class="invisible md:visible">{item.label} </span>
 			{:else}
 				<button
 					class="text-lg ms-1 font-medium text-gray-700 hover:text-gray-900 md:ms-2 dark:text-gray-400  dark:hover:text-white"
 					onclick={item.onclick}
 					>
 					<div class="flex items-center justify-center">
-					{#if smallScreen === true}
 						<svelte:component this = {item?.symbol ?? PlayOutline} size = "xl" />
-					{:else}
-						{item.label}
-					{/if}
+						<span class="invisible md:visible">{item.label}</span>
+					</div>
 				</button>
 			{/if}
-			</div>
 		</BreadcrumbItem>
 	{/each}
 </Breadcrumb>

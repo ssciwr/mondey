@@ -26,8 +26,10 @@ function searchStatus(data: any[], key: string): any[] {
 	} else {
 		return data.filter((item) => {
 			// button label contains info about completion status => use for search
-			if (key === $_("milestone.complete")) {
-			} else if (key === $_("milestone.incomplete")) {
+			if (key === $_("milestone.complete").toLowerCase()) {
+				return item.complete === true;
+			} else {
+				return item.complete === false;
 			}
 		});
 	}
