@@ -4,9 +4,11 @@ from typing import Annotated
 
 from fastapi import Depends
 from fastapi import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import Session
 
 from .databases.milestones import engine as milestones_engine
+from .databases.users import get_async_session
 from .models.users import User
 from .users import fastapi_users
 
@@ -21,6 +23,8 @@ SessionDep = Annotated[Session, Depends(get_session)]
 current_active_user = fastapi_users.current_user(active=True)
 
 CurrentActiveUserDep = Annotated[User, Depends(current_active_user)]
+
+UserAsyncSessionDep = Annotated[AsyncSession, Depends(get_async_session)]
 
 
 def current_active_researcher(

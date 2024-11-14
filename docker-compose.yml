@@ -8,7 +8,6 @@ services:
       - ${PRIVATE_FILES_PATH:-./private}:/app/private
     environment:
       - SECRET=${SECRET:-}
-      - DATA_FILES_PATH=/app/data
       - STATIC_FILES_PATH=/app/static
       - PRIVATE_FILES_PATH=/app/private
       - DATABASE_PATH=/app/db

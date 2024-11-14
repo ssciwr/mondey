@@ -64,3 +64,34 @@ def test_get_milestone_groups_invalid_child_id(
 ):
     response = research_client.get("/milestone-groups/99")
     assert response.status_code == 404
+
+
+def test_order_milestones_and_milestone_groups_child1(
+    admin_client: TestClient, milestone_group1: dict, milestone_group2: dict
+):
+    milestone_groups = admin_client.get("/milestone-groups/1").json()
+    # initial milestone group order:
+    assert milestone_groups[0]["id"] == 2
+    assert milestone_groups[1]["id"] == 1
+    # initial milestone order within group1:
+    assert milestone_groups[1]["milestones"][0]["id"] == 2
+    assert milestone_groups[1]["milestones"][1]["id"] == 1
+    # re-order milestone groups
+    response = admin_client.post(
+        "/admin/milestone-groups/order/",
+        json=[{"id": 1, "order": 0}, {"id": 2, "order": 1}],
+    )
+    assert response.status_code == 200
+    # re-order milestones
+    response = admin_client.post(
+        "/admin/milestones/order/",
+        json=[{"id": 2, "order": 1}, {"id": 1, "order": 0}, {"id": 3, "order": 2}],
+    )
+    assert response.status_code == 200
+    milestone_groups = admin_client.get("/milestone-groups/1").json()
+    # new milestone group order:
+    assert milestone_groups[0]["id"] == 1
+    assert milestone_groups[1]["id"] == 2
+    # new milestone order within group1:
+    assert milestone_groups[0]["milestones"][0]["id"] == 1
+    assert milestone_groups[0]["milestones"][1]["id"] == 2

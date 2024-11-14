@@ -533,6 +533,10 @@ export type OrderChildQuestionsAdminResponse = (unknown);
 
 export type OrderChildQuestionsAdminError = (HTTPValidationError);
 
+export type GetUsersResponse = (Array<UserRead>);
+
+export type GetUsersError = unknown;
+
 export type UsersCurrentUserResponse = (UserRead);
 
 export type UsersCurrentUserError = (unknown);
