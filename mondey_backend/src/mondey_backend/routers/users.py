@@ -100,7 +100,9 @@ def create_router() -> APIRouter:
             f"{app_settings.PRIVATE_FILES_PATH}/children/{child.id}.jpg"
         )
         if not image_path.exists():
-            image_path = pathlib.Path(f"{app_settings.DATA_FILES_PATH}/dummy.jpg")
+            image_path = pathlib.Path(
+                f"{app_settings.STATIC_FILES_PATH}/default_child.jpg"
+            )
         return image_path
 
     @router.put("/children-images/{child_id}")
