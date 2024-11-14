@@ -1,51 +1,13 @@
 import {
-	authCookieLogin,
 	getChildQuestionsAdmin,
 	getMilestoneGroupsAdmin,
 	getUserQuestionsAdmin,
-	usersCurrentUser,
 } from "$lib/client/services.gen";
-import type {
-	Body_auth_cookie_login_auth_login_post,
-	UserRead,
-} from "$lib/client/types.gen";
 import {
 	childQuestions,
 	milestoneGroups,
 	userQuestions,
 } from "$lib/stores/adminStore";
-
-function AdminUser() {
-	let user = $state(null as UserRead | null);
-	return {
-		get value(): UserRead | null {
-			return user;
-		},
-		login: async function (loginData: Body_auth_cookie_login_auth_login_post) {
-			const { data, error } = await authCookieLogin({ body: loginData });
-			if (error) {
-				return error?.detail as string;
-			} else {
-				await this.refresh();
-				if (!user || !user.is_superuser) {
-					return "Admin account required";
-				}
-				return "";
-			}
-		},
-		refresh: async () => {
-			const { data, error } = await usersCurrentUser();
-			if (error || data === undefined) {
-				console.log("Failed to get current User");
-				user = null;
-			} else {
-				user = data;
-			}
-		},
-	};
-}
-
-export const adminUser = AdminUser();
 
 export async function refreshMilestoneGroups() {
 	console.log("refreshMilestoneGroups...");

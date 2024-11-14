@@ -1,7 +1,7 @@
 <script lang="ts">
 import UserVerify from "$lib/components/UserVerify.svelte";
 import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
-import { currentUser, refreshUser } from "$lib/stores/userStore";
+import { user } from "$lib/stores/userStore.svelte";
 import { Button, Card, TabItem, Tabs } from "flowbite-svelte";
 import {
 	AtomOutline,
@@ -11,21 +11,17 @@ import {
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
-import { get } from "svelte/store";
 import AdminPage from "./AdminPage.svelte";
 import UserDataInput from "./UserDataInput.svelte";
 
-onMount(async () => {
-	await refreshUser();
-});
-
+onMount(user.load);
 let windowWidth = $state(1920);
 let smallScreen = $derived(windowWidth < 800);
 </script>
 <svelte:window bind:innerWidth={windowWidth} />
 
-{#if $currentUser}
-	{#if $currentUser?.is_verified === true}
+{#if user.data}
+	{#if user.data?.is_verified === true}
 		<div class="m-2 p-2">
 			<Tabs tabStyle="underline">
 				<TabItem open={true}>
@@ -35,7 +31,7 @@ let smallScreen = $derived(windowWidth < 800);
 							{$_("userData.label")}
 						{/if}
 					</div>
-					<svelte:component this={UserDataInput} />
+					<UserDataInput />
 				</TabItem>
 				<TabItem onclick = {() =>{
 					activeTabChildren.set("childrenGallery");
@@ -51,7 +47,7 @@ let smallScreen = $derived(windowWidth < 800);
 					/>
 				</TabItem>
 
-				{#if get(currentUser)?.is_superuser}
+				{#if user.data?.is_superuser}
 					<TabItem>
 						<div
 							slot="title"
@@ -65,7 +61,7 @@ let smallScreen = $derived(windowWidth < 800);
 						<AdminPage />
 					</TabItem>
 				{/if}
-				{#if get(currentUser)?.is_researcher}
+				{#if user.data?.is_researcher}
 					<TabItem>
 						<div
 							slot="title"
@@ -76,7 +72,7 @@ let smallScreen = $derived(windowWidth < 800);
 								{$_("researcher.label")}
 							{/if}
 						</div>
-						<svelte:component this={Card} />
+						<Card />
 					</TabItem>
 				{/if}
 			</Tabs>

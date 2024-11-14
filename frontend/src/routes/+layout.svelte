@@ -7,7 +7,7 @@ import FunctionalIcon from "$lib/components/Navigation/FunctionalIcon.svelte";
 import UserProfile from "$lib/components/UserProfile.svelte";
 import "$lib/i18n";
 import { getTranslations } from "$lib/i18n";
-import { refreshUser } from "$lib/stores/userStore";
+import { user } from "$lib/stores/userStore.svelte";
 import {
 	Avatar,
 	DarkMode,
@@ -22,7 +22,7 @@ import { onMount } from "svelte";
 import "../app.css";
 
 onMount(async () => {
-	await refreshUser();
+	await user.load();
 	getTranslations();
 });
 </script>

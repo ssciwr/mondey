@@ -2,43 +2,14 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { base } from "$app/paths";
-import { authCookieLogout } from "$lib/client/services.gen";
-import { currentChild } from "$lib/stores/childrenStore";
-import { currentUser, refreshUser } from "$lib/stores/userStore";
+import { currentChild } from "$lib/stores/childrenStore.svelte";
+import { user } from "$lib/stores/userStore.svelte";
 import { Button, Heading, Popover } from "flowbite-svelte";
-import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
-
 let { triggeredBy = "" } = $props();
 let showAlert: boolean = $state(false);
 let alertMessage: string = $state($_("login.alertMessageError"));
-
-onMount(async () => {
-	await refreshUser();
-});
-
-async function logout(): Promise<void> {
-	const response = await authCookieLogout();
-	if (response.error) {
-		console.log(
-			"Error during logout: ",
-			response.response.status,
-			response.error.detail,
-		);
-		showAlert = true;
-		alertMessage += ": " + response.error.detail;
-	} else {
-		console.log(
-			"Successful logout of user ",
-			$currentUser?.email,
-			response.response.status,
-		);
-		currentUser.set(null);
-		currentChild.set(null);
-		goto(`/${base}`);
-	}
-}
 </script>
 
 <Popover {triggeredBy} class="text-gray-700 dark:text-gray-400">
@@ -51,12 +22,12 @@ async function logout(): Promise<void> {
 			}}
 		/>
 	{/if}
-	{#if $currentUser !== null}
+	{#if user.data !== null}
 		<div
 			class="mx-auto mb-6 flex flex-col items-center justify-center space-y-6"
 		>
 			<p class="m-2 w-full rounded-lg p-2 font-semibold">
-				{$currentUser?.email}
+				{user.data?.email}
 			</p>
 			<Button
 				class="m-2 w-full"
@@ -65,7 +36,20 @@ async function logout(): Promise<void> {
 				href="{base}/userLand/userLandingpage"
 				>{$_("login.profileAccess")}</Button
 			>
-			<Button class="m-2 w-full" on:click={logout} size="lg" type="button"
+			<Button class="m-2 w-full" on:click={async () => {
+				const response = await user.logout();
+				if (response.error) {
+					alertMessage = $_("login.alertMessageError");
+					showAlert = true;
+				} else {
+					console.log("Logout successful");
+					user.data = null;
+					currentChild.id = null;
+					currentChild.data = null;
+					goto(`/${base}`);
+				}
+
+			}} size="lg" type="button"
 				>{$_("login.profileButtonLabelLogout")}</Button
 			>
 		</div>
