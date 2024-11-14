@@ -1,6 +1,11 @@
 <svelte:options runes={true} />
 <script lang="ts">
-import { getMilestoneGroups } from "$lib/client";
+import {
+	type MilestoneAnswerSessionPublic,
+	type MilestonePublic,
+	getCurrentMilestoneAnswerSession,
+	getMilestoneGroups,
+} from "$lib/client";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
@@ -14,10 +19,40 @@ import {
 } from "flowbite-svelte-icons";
 import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
-let showAlert = $state(false);
-let alertMessage = $state("");
-let promise = $state(setup());
-let data: any[] = $state([]);
+
+function computeProgress(
+	milestones: MilestonePublic[],
+	answerSession: MilestoneAnswerSessionPublic,
+): number {
+	console.log("milestones", milestones);
+	console.log("answerSession", answerSession.answers);
+	if (milestones.length === 0) {
+		return 0;
+	} else {
+		const progress = milestones.reduce((p, item) => {
+			if (
+				answerSession.answers[item.id] !== undefined &&
+				answerSession.answers[item.id].answer !== null &&
+				answerSession.answers[item.id].answer >= 0
+			) {
+				console.log(
+					"  found answer: ",
+					item.id,
+					answerSession.answers[item.id].answer,
+				);
+				return p + 1.0;
+			} else {
+				return p;
+			}
+		}, 0.0);
+		console.log("final progress: ", progress);
+		if (progress < 0.01) {
+			return 0.01;
+		} else {
+			return progress / milestones.length;
+		}
+	}
+}
 
 async function setup(): Promise<any> {
 	await currentChild.load_data();
@@ -26,6 +61,19 @@ async function setup(): Promise<any> {
 	const milestonegroups = await getMilestoneGroups({
 		path: { child_id: currentChild.id },
 	});
+
+	const answerSession = await getCurrentMilestoneAnswerSession({
+		path: { child_id: currentChild.id },
+	});
+
+	if (answerSession.error) {
+		console.log("Error when retrieving answer data");
+		showAlert = true;
+		alertMessage =
+			$_("milestone.alertMessageRetrieving") + answerSession.error.detail;
+		data = [];
+		return data;
+	}
 
 	if (milestonegroups.error) {
 		console.log("Error when retrieving milestone group data");
@@ -46,7 +94,7 @@ async function setup(): Promise<any> {
 				header: item.text[$locale].title,
 				summary: item.text[$locale].desc,
 				image: null,
-				progress: item.progress < 0.01 ? 0.01 : item.progress,
+				progress: computeProgress(item.milestones, answerSession.data),
 				events: {
 					onclick: () => {
 						activeTabChildren.set("milestoneOverview");
@@ -123,6 +171,28 @@ function searchAll(data: any[], key: string): any[] {
 	];
 }
 
+export function createStyle(data: any[]) {
+	return data.map((item) => {
+		return {
+			card: {
+				class:
+					"m-2 max-w-prose dark:text-white text-white hover:cursor-pointer bg-primary-700 dark:bg-primary-900 hover:bg-primary-800 dark:hover:bg-primary-700",
+			},
+			progress: {
+				labelInside: true,
+				size: "h-4",
+				divClass: `h-full rounded-full w-${100 * item.progress}`,
+				color: "red",
+				completeColor: "green",
+			},
+		};
+	});
+}
+
+let showAlert = $state(false);
+let alertMessage = $state("");
+let promise = $state(setup());
+let data: any[] = $state([]);
 const searchData: any[] = [
 	{
 		label: $_("search.allLabel"),
@@ -145,24 +215,6 @@ const searchData: any[] = [
 		filterFunction: searchByStatus,
 	},
 ];
-
-export function createStyle(data: any[]) {
-	return data.map((item) => {
-		return {
-			card: {
-				class:
-					"m-2 max-w-prose dark:text-white text-white hover:cursor-pointer bg-primary-700 dark:bg-primary-900 hover:bg-primary-800 dark:hover:bg-primary-700",
-			},
-			progress: {
-				labelInside: true,
-				size: "h-4",
-				divClass: `h-full rounded-full w-${100 * item.progress}`,
-				color: "red",
-				completeColor: "green",
-			},
-		};
-	});
-}
 </script>
 
 {#await promise}
