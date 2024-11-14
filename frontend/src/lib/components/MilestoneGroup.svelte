@@ -140,11 +140,6 @@ const searchData: any[] = [
 		filterFunction: searchBySurveyTitle,
 	},
 	{
-		label: $_("search.milestoneLabel"),
-		placeholder: $_("search.milestonePlaceholder"),
-		filterFunction: searchByMilestone,
-	},
-	{
 		label: $_("search.statusLabel"),
 		placeholder: $_("search.statusPlaceholder"),
 		filterFunction: searchByStatus,
