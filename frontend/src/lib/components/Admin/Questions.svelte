@@ -11,12 +11,20 @@ import {
 	TableHeadCell,
 } from "flowbite-svelte";
 
-import { refreshChildQuestions, refreshUserQuestions } from "$lib/admin.svelte";
+import {
+	refreshChildQuestions,
+	refreshMilestoneGroups,
+	refreshUserQuestions,
+} from "$lib/admin.svelte";
 import {
 	createChildQuestion,
 	createUserQuestion,
 	deleteChildQuestion,
 	deleteUserQuestion,
+	orderChildQuestionsAdmin,
+	orderMilestoneGroupsAdmin,
+	orderMilestonesAdmin,
+	orderUserQuestionsAdmin,
 } from "$lib/client/services.gen";
 import type {
 	ChildQuestionAdmin,
@@ -27,6 +35,8 @@ import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
 import DeleteModal from "$lib/components/Admin/DeleteModal.svelte";
 import EditButton from "$lib/components/Admin/EditButton.svelte";
 import EditQuestionModal from "$lib/components/Admin/EditQuestionModal.svelte";
+import OrderItemsModal from "$lib/components/Admin/OrderItemsModal.svelte";
+import ReorderButton from "$lib/components/Admin/ReorderButton.svelte";
 import { childQuestions, userQuestions } from "$lib/stores/adminStore";
 import { onMount } from "svelte";
 import { _, locale } from "svelte-i18n";
@@ -39,10 +49,14 @@ let currentQuestionId = $state(null as number | null);
 let showEditQuestionModal = $state(false);
 let showDeleteModal = $state(false);
 let { kind }: { kind: string } = $props();
+let currentOrderItems = $state([] as Array<{ id: number; text: string }>);
+let showOrderItemsModal = $state(false);
+
 let create: any;
 let doDelete: any;
 let refresh: any;
 let build: any;
+let order: any;
 let questions:
 	| Writable<Array<UserQuestionAdmin>>
 	| Writable<Array<ChildQuestionAdmin>>
@@ -57,6 +71,7 @@ if (kind === "user") {
 			path: { user_question_id: currentQuestionId },
 		};
 	};
+	order = orderUserQuestionsAdmin;
 	questions = userQuestions;
 } else if (kind === "child") {
 	create = createChildQuestion;
@@ -67,6 +82,7 @@ if (kind === "user") {
 			path: { child_question_id: currentQuestionId },
 		};
 	};
+	order = orderChildQuestionsAdmin;
 	questions = childQuestions;
 } else {
 	console.log("Error, kind must be 'user' or 'child', currently is", kind);
@@ -104,7 +120,7 @@ onMount(async () => {
 
 <Card size="xl" class="m-5 w-full">
 	<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">
-		{$_("admin.user-questions")}
+		{$_(`admin.${kind}-questions`)}
 	</h3>
 	<Table>
 		<TableHead>
@@ -147,6 +163,12 @@ onMount(async () => {
 				<TableBodyCell></TableBodyCell>
 				<TableBodyCell>
 					<AddButton onclick={addQuestion} />
+					<ReorderButton
+						onclick={() => {
+							currentOrderItems = $questions.map((question) => {return {id: question.id, text: question.text[$locale]?.question};});
+							showOrderItemsModal = true;
+						}}
+					/>
 				</TableBodyCell>
 			</TableBodyRow>
 		</TableBody>
@@ -161,3 +183,5 @@ onMount(async () => {
 	/>
 {/key}
 <DeleteModal bind:open={showDeleteModal} onclick={doDeleteQuestion} />
+
+<OrderItemsModal bind:open={showOrderItemsModal} items={currentOrderItems} endpoint={order} callback={refresh}/>

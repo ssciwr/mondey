@@ -59,9 +59,10 @@ def test_get_child_image(user_client: TestClient):
     assert response.content == b"2.jpg"
 
 
-def test_get_child_image_no_image(user_client: TestClient, data_dir: pathlib.Path):
+def test_get_child_image_no_image(user_client: TestClient):
     response = user_client.get("/users/children-images/1")
     assert response.status_code == 200
+    assert response.content == b"default_child.jpg"
 
 
 def test_create_update_and_delete_child(user_client: TestClient):
@@ -148,8 +149,8 @@ def test_delete_child_image(
     assert user_client.get("/users/children-images/1").status_code == 200
 
 
-def test_get_milestone_answers_child1_user_does_not_own_child(admin_client: TestClient):
-    response = admin_client.get("/users/milestone-answers/1")
+def test_get_milestone_answers_child1_user_does_not_own_child(user_client2: TestClient):
+    response = user_client2.get("/users/milestone-answers/1")
     assert response.status_code == 404
 
 
@@ -268,7 +269,7 @@ def test_update_current_user_answers_prexisting(user_client: TestClient):
     assert response.json() == publicanswers
 
 
-def test_update_current_user_answers_no_prexisting(second_user_client: TestClient):
+def test_update_current_user_answers_no_prexisting(user_client2: TestClient):
     publicanswers = [
         {
             "answer": "other",
@@ -282,7 +283,7 @@ def test_update_current_user_answers_no_prexisting(second_user_client: TestClien
         },
     ]
 
-    response = second_user_client.put(
+    response = user_client2.put(
         "/users/user-answers/",
         json=publicanswers,
     )
@@ -290,7 +291,7 @@ def test_update_current_user_answers_no_prexisting(second_user_client: TestClien
     assert response.status_code == 200
     assert response.json() == publicanswers
 
-    response = second_user_client.get("/users/user-answers/")
+    response = user_client2.get("/users/user-answers/")
     assert response.status_code == 200
     assert response.json() == publicanswers
 
@@ -341,9 +342,9 @@ def test_update_current_child_answers_prexisting(
 
 
 def test_update_current_child_answers_no_prexisting(
-    second_user_client: TestClient, child_answers: dict[str, str | int | None]
+    user_client2: TestClient, child_answers: dict[str, str | int | None]
 ):
-    response = second_user_client.put(
+    response = user_client2.put(
         "/users/children-answers/2",
         json=child_answers,
     )

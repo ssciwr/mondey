@@ -4,7 +4,6 @@ import { Breadcrumb, BreadcrumbItem } from "flowbite-svelte";
 import { PlayOutline } from "flowbite-svelte-icons";
 let { data }: { data: any[] } = $props();
 </script>
-<svelte:window bind:innerWidth={windowWidth} />
 
 <Breadcrumb
 	olClass="inline-flex items-center space-x-1 rtl:space-x-reverse md:space-x-3 rtl:space-x-reverse  flex-wrap "

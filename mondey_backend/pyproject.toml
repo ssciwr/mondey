@@ -23,7 +23,7 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-tests = ["pytest", "pytest-randomly", "pytest-cov", "pytest-mock"]
+tests = ["pytest", "pytest-randomly", "pytest-cov", "pytest-mock", "pytest-asyncio"]
 
 [project.scripts]
 mondey-backend = "mondey_backend.main:main"
@@ -34,6 +34,7 @@ path = "src/mondey_backend/__init__.py"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.ruff.lint]
 select = [

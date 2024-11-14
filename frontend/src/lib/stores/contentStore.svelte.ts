@@ -15,12 +15,6 @@ function createContent() {
 		set milestoneIndex(value: number) {
 			content.milestoneIndex = value;
 		},
-		set milestoneGroupData(value: any) {
-			content.milestoneGroupData = value;
-		},
-		set milestoneData(value: any) {
-			content.milestoneData = value;
-		},
 		get milestoneIndex() {
 			return content.milestoneIndex;
 		},
@@ -29,6 +23,12 @@ function createContent() {
 		},
 		get milestoneGroup() {
 			return content.milestoneGroup;
+		},
+		set milestoneGroupData(value: any) {
+			content.milestoneGroupData = value;
+		},
+		set milestoneData(value: any) {
+			content.milestoneData = value;
 		},
 		get milestoneGroupData() {
 			return content.milestoneGroupData;

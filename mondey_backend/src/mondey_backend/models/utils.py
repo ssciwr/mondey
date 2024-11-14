@@ -1,10 +1,16 @@
 from __future__ import annotations
 
+from pydantic import BaseModel
 from sqlalchemy import String
 from sqlalchemy.orm import attribute_keyed_dict
 from sqlalchemy.orm import relationship
 from sqlmodel import Field
 from sqlmodel import Relationship
+
+
+class ItemOrder(BaseModel):
+    id: int
+    order: int
 
 
 def back_populates(name: str, **kwargs):

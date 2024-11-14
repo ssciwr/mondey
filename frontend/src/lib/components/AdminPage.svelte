@@ -7,6 +7,7 @@ import MilestoneExpectedAges from "$lib/components/Admin/MilestoneExpectedAges.s
 import MilestoneGroups from "$lib/components/Admin/MilestoneGroups.svelte";
 import Questions from "$lib/components/Admin/Questions.svelte";
 import Translations from "$lib/components/Admin/Translations.svelte";
+import Users from "$lib/components/Admin/Users.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { TabItem, Tabs } from "flowbite-svelte";
 import {
@@ -14,6 +15,7 @@ import {
 	ClipboardListOutline,
 	LanguageOutline,
 	ScaleBalancedOutline,
+	UsersOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
@@ -38,6 +40,13 @@ onMount(async () => {
             {$_("admin.expected-age")}
         </div>
         <MilestoneExpectedAges/>
+    </TabItem>
+    <TabItem>
+        <div slot="title" class="flex items-center gap-2">
+            <UsersOutline size="md"/>
+            {$_("admin.users")}
+        </div>
+        <Users/>
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">
