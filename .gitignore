@@ -176,3 +176,4 @@ mondey_backend/static/*.jpg
 
 # project specific
 private
+static

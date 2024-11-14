@@ -33,6 +33,7 @@ def test_get_milestone_groups_child2(
     assert len(response.json()) == 2
     # child 2 age is 20 months old, so first milestone from group1 (18m):
     milestone_group1["milestones"] = milestone_group1["milestones"][0:1]
+
     # and first milestone from group2 (24m):
     milestone_group2["milestones"] = milestone_group2["milestones"][0:1]
     assert response.json() == [milestone_group2, milestone_group1]

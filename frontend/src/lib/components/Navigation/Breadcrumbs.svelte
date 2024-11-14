@@ -1,6 +1,8 @@
+<svelte:options runes={true} />
 <script lang="ts">
 import { Breadcrumb, BreadcrumbItem } from "flowbite-svelte";
-export let data: any[] = [];
+import { PlayOutline } from "flowbite-svelte-icons";
+let { data }: { data: any[] } = $props();
 </script>
 
 <Breadcrumb
@@ -12,15 +14,21 @@ export let data: any[] = [];
 	{#each data as item}
 		<BreadcrumbItem
 			href={item.href}
-			linkClass="ms-1 text-md font-medium text-gray-700 hover:text-primary-700 md:ms-2 dark:text-gray-400 dark:hover:text-white"
+			linkClass="ms-1 text-lg font-medium text-gray-700 hover:text-gray-900 md:ms-2 dark:text-gray-400  hover:text-white dark:hover:text-white"
 		>
+		<div class="flex items-center justify-center">
 			{#if item.href}
-				{item.label}
+				<svelte:component this = {item?.symbol ?? PlayOutline} size = "xl" />
+				<span class="hidden md:inline">{item.label} </span>
 			{:else}
 				<button
-					class="text-md ms-1 font-medium text-gray-700 hover:text-primary-700 md:ms-2 dark:text-gray-400 dark:hover:text-white"
-					on:click={item.onclick}
-					>{item.label}
+					class="text-lg ms-1 font-medium text-gray-700 hover:text-gray-900 md:ms-2 dark:text-gray-400  dark:hover:text-white"
+					onclick={item.onclick}
+					>
+					<div class="flex items-center justify-center">
+						<svelte:component this = {item?.symbol ?? PlayOutline} size = "xl" />
+						<span class="hidden md:inline">{item.label}</span>
+					</div>
 				</button>
 			{/if}
 		</BreadcrumbItem>

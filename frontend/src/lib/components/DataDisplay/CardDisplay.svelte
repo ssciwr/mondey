@@ -61,7 +61,7 @@ let {
 
 	{#if data.progress}
 		<Progressbar
-			labelInside
+			labelInside ={styleProps.progress?.labelInside}
 			progress={String(100 * data.progress)}
 			animate={true}
 			color={data.progress === 1 ? styleProps.progress?.completeColor : styleProps.progress?.color}

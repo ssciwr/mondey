@@ -43,7 +43,9 @@ def create_router() -> APIRouter:
         "/milestone-groups/{child_id}", response_model=list[MilestoneGroupPublic]
     )
     def get_milestone_groups(
-        session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
+        session: SessionDep,
+        current_active_user: CurrentActiveUserDep,
+        child_id: int,
     ):
         delta_months = 6
         child = get_db_child(session, current_active_user, child_id)
@@ -67,6 +69,7 @@ def create_router() -> APIRouter:
                 )
             )
         ).all()
+
         return milestone_groups
 
     return router
