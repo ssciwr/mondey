@@ -75,7 +75,7 @@ $effect(() => {
 			? "rounded border-2 border-primary-600 dark:border-primary-600 " +
 				componentClass
 			: componentClass}
-		bind:value
+		bind:value = {value}
 		{placeholder}
 		{items}
 		{required}
@@ -84,7 +84,6 @@ $effect(() => {
 	/>
 
 	{#if showTextField === true}
-		{console.log("showTextfield true")}
 		<Textarea
 			bind:value={additionalValue}
 			required={additionalRequired}

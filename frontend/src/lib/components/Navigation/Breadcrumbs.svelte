@@ -18,7 +18,11 @@ let { data }: { data: any[] } = $props();
 		>
 		<div class="flex items-center justify-center">
 			{#if item.href}
-				<svelte:component this = {item?.symbol ?? PlayOutline} size = "xl" />
+				{#if item.symbol !== undefined && item.symbol !== null}
+				<item.symbol  size = "xl" />
+				{:else}
+				<PlayOutline size = "xl" />
+				{/if}
 				<span class="hidden md:inline">{item.label} </span>
 			{:else}
 				<button
@@ -26,7 +30,11 @@ let { data }: { data: any[] } = $props();
 					onclick={item.onclick}
 					>
 					<div class="flex items-center justify-center">
-						<svelte:component this = {item?.symbol ?? PlayOutline} size = "xl" />
+						{#if item.symbol !== undefined && item.symbol !== null}
+						<item.symbol  size = "xl" />
+						{:else}
+						<PlayOutline size = "xl" />
+						{/if}
 						<span class="hidden md:inline">{item.label}</span>
 					</div>
 				</button>

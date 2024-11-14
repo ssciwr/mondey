@@ -1,8 +1,8 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { dndzone } from "svelte-dnd-action";
 import type { DndEvent } from "svelte-dnd-action";
+import { dndzone } from "svelte-dnd-action";
 import { flip } from "svelte/animate";
 
 const flipDurationMs = 100;
@@ -46,7 +46,7 @@ async function post() {
 </script>
 
 <Modal title={$_('admin.reorder')} bind:open autoclose outsideclose size="lg">
-    <section use:dndzone="{{items, flipDurationMs}}" on:consider={handleDnd} on:finalize={handleDnd}>
+    <section use:dndzone="{{items, flipDurationMs}}" onconsider={handleDnd} onfinalize={handleDnd}>
         {#each items as item(item.id)}
             <div animate:flip="{{duration: flipDurationMs}}"
                  class="border border-1 m-2 p-2 px-4 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">

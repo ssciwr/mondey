@@ -11,19 +11,13 @@ import {
 	TableHeadCell,
 } from "flowbite-svelte";
 
-import {
-	refreshChildQuestions,
-	refreshMilestoneGroups,
-	refreshUserQuestions,
-} from "$lib/admin.svelte";
+import { refreshChildQuestions, refreshUserQuestions } from "$lib/admin.svelte";
 import {
 	createChildQuestion,
 	createUserQuestion,
 	deleteChildQuestion,
 	deleteUserQuestion,
 	orderChildQuestionsAdmin,
-	orderMilestoneGroupsAdmin,
-	orderMilestonesAdmin,
 	orderUserQuestionsAdmin,
 } from "$lib/client/services.gen";
 import type {
@@ -54,9 +48,9 @@ let showOrderItemsModal = $state(false);
 
 let create: any;
 let doDelete: any;
-let refresh: any;
+let refresh: any = $state(undefined);
 let build: any;
-let order: any;
+let order: any = $state(undefined);
 let questions:
 	| Writable<Array<UserQuestionAdmin>>
 	| Writable<Array<ChildQuestionAdmin>>
