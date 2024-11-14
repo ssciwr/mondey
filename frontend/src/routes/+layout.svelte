@@ -1,10 +1,13 @@
 <script lang="ts">
-import "$lib/i18n";
+import { base } from "$app/paths";
 import logo_dark from "$lib/assets/mondey_dark.svg";
 import logo_light from "$lib/assets/mondey_light.svg";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import FunctionalIcon from "$lib/components/Navigation/FunctionalIcon.svelte";
 import UserProfile from "$lib/components/UserProfile.svelte";
+import "$lib/i18n";
+import { getTranslations } from "$lib/i18n";
+import { refreshUser } from "$lib/stores/userStore";
 import {
 	Avatar,
 	DarkMode,
@@ -15,12 +18,11 @@ import {
 	Navbar,
 } from "flowbite-svelte";
 import { MoonSolid, SunSolid } from "flowbite-svelte-icons";
-import "../app.css";
-import { base } from "$app/paths";
-import { getTranslations } from "$lib/i18n";
 import { onMount } from "svelte";
+import "../app.css";
 
-onMount(() => {
+onMount(async () => {
+	await refreshUser();
 	getTranslations();
 });
 </script>
