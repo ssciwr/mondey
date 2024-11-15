@@ -15,24 +15,23 @@
 	"linter": {
 		"rules": {
 			"suspicious": {
-				"noDoubleEquals": "off",
-				"noConsoleLog": "off",
-				"noExplicitAny": "off",
-				"noImplicitAnyLet": "off",
-				"noAssignInExpressions": "off",
-				"noConfusingVoidType": "off",
-				"useIsArray": "off"
+				"all": true,
+				"noConsole": "off"
 			},
 			"style": {
-				"noUselessElse": "off",
-				"noUnusedTemplateLiteral": "off",
-				"useTemplate": "off"
+				"recommended": true
 			},
 			"complexity": {
-				"useOptionalChain": "off",
-				"noUselessTernary": "off",
-				"noForEach": "off",
-				"useLiteralKeys": "off"
+				"recommended": true
+			},
+			"correctness": {
+				"recommended": true
+			},
+			"performance": {
+				"recommended": true
+			},
+			"security": {
+				"all": true
 			}
 		}
 	}
