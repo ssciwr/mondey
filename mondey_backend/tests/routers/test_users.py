@@ -60,9 +60,8 @@ def test_get_child_image(user_client: TestClient):
 
 
 def test_get_child_image_no_image(user_client: TestClient):
-    response = user_client.get("/users/children-images/1")
-    assert response.status_code == 200
-    assert response.content == b"default_child.jpg"
+    response = user_client.get("/users/children-images/11")
+    assert response.status_code == 404
 
 
 def test_create_update_and_delete_child(user_client: TestClient):
@@ -111,11 +110,11 @@ def test_create_update_and_delete_child(user_client: TestClient):
 def test_upload_child_image(
     user_client: TestClient, private_dir: pathlib.Path, jpg_file: pathlib.Path
 ):
-    children_dir = private_dir / "children"
+    private_dir_jpg_file = private_dir / "children" / "1.jpg"
     # child 1 does not have an image:
-    assert not (children_dir / "1.jpg").is_file()
+    assert not private_dir_jpg_file.is_file()
     assert user_client.get("/users/children/").json()[0]["has_image"] is False
-    assert user_client.get("/users/children-images/1").status_code == 200
+    assert user_client.get("/users/children-images/1").status_code == 404
 
     # add an image for the first child
     with open(jpg_file, "rb") as f:
@@ -124,10 +123,9 @@ def test_upload_child_image(
             files={"file": ("filename", f, "image/jpeg")},
         )
     assert response.status_code == 200
-    assert (children_dir / "1.jpg").is_file()
+    assert private_dir_jpg_file.is_file()
     assert user_client.get("/users/children/").json()[0]["has_image"] is True
     assert user_client.get("/users/children-images/1").status_code == 200
-    (children_dir / "1.jpg").unlink()
 
 
 def test_delete_child_image(
@@ -146,7 +144,7 @@ def test_delete_child_image(
     assert response.status_code == 200
     assert not (children_dir / "1.jpg").is_file()
     assert user_client.get("/users/children/").json()[0]["has_image"] is False
-    assert user_client.get("/users/children-images/1").status_code == 200
+    assert user_client.get("/users/children-images/1").status_code == 404
 
 
 def test_get_milestone_answers_child1_user_does_not_own_child(user_client2: TestClient):

@@ -2,7 +2,14 @@
 
 <script lang="ts">
 import type { MilestoneAgeScore } from "$lib/client/types.gen";
-import { Axis, Line, Scale, StackedBar, XYContainer } from "@unovis/ts";
+import {
+	Axis,
+	CurveType,
+	Line,
+	Scale,
+	StackedBar,
+	XYContainer,
+} from "@unovis/ts";
 import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 
@@ -24,7 +31,7 @@ onMount(() => {
 					x: (d: MilestoneAgeScore) => d.age_months,
 					y: (d: MilestoneAgeScore) => d.expected_score,
 					lineWidth: 3,
-					curveType: "step",
+					curveType: CurveType.Step,
 					lineDashArray: [5],
 					color: "#000000",
 				}),

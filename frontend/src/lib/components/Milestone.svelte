@@ -185,7 +185,7 @@ const breadcrumbdata = $derived([
 				{#each currentMilestone.images as image, imageIndex}
 					<img
 						class={`absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
-						src={`${import.meta.env.VITE_MONDEY_API_URL}/static/${image.filename}`}
+						src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${image.id}.jpg`}
 						alt=""
 					/>
 				{/each}

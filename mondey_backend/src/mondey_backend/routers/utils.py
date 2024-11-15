@@ -33,13 +33,14 @@ from ..models.questions import UserQuestion
 from ..models.questions import UserQuestionAdmin
 from ..models.questions import UserQuestionText
 from ..models.utils import ItemOrder
+from ..settings import app_settings
 from ..users import User
 
 Text = MilestoneText | MilestoneGroupText | UserQuestionText | ChildQuestionText
 OrderedItem = Milestone | MilestoneGroup | UserQuestion | ChildQuestion
 
 
-def write_file(file: UploadFile, filename: str):
+def write_file(file: UploadFile, filename: pathlib.Path | str):
     logging.warning(f"Saving file {file.filename} to {filename}")
     try:
         pathlib.Path(filename).parent.mkdir(exist_ok=True)
@@ -220,3 +221,19 @@ def calculate_milestone_age_scores(
             for age, score in enumerate(scores)
         ],
     )
+
+
+def child_image_path(child_id: int | None) -> pathlib.Path:
+    return pathlib.Path(f"{app_settings.PRIVATE_FILES_PATH}/children/{child_id}.jpg")
+
+
+def milestone_image_path(milestone_image_id: int | None) -> pathlib.Path:
+    return pathlib.Path(f"{app_settings.STATIC_FILES_PATH}/m/{milestone_image_id}.jpg")
+
+
+def milestone_group_image_path(milestone_group_id: int) -> pathlib.Path:
+    return pathlib.Path(f"{app_settings.STATIC_FILES_PATH}/mg/{milestone_group_id}.jpg")
+
+
+def i18n_language_path(language_id: str) -> pathlib.Path:
+    return pathlib.Path(f"{app_settings.STATIC_FILES_PATH}/i18n/{language_id}.json")

@@ -110,7 +110,7 @@ async function deleteMilestoneImageAndUpdate() {
             <div class="flex flex-row">
                 {#each milestone.images as milestoneImage (milestoneImage.id)}
                     <EditImage
-                            filename={milestoneImage.filename}
+                            filename={`m/${milestoneImage.id}.jpg`}
                             ondelete={() => {
 						currentMilestoneImageId = milestoneImage.id;
 						showDeleteMilestoneImageModal = true;

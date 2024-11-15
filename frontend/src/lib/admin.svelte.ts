@@ -21,7 +21,7 @@ export async function refreshMilestoneGroups() {
 }
 
 export function milestoneGroupImageUrl(id: number) {
-	return `${import.meta.env.VITE_MONDEY_API_URL}/static/mg${id}.jpg`;
+	return `${import.meta.env.VITE_MONDEY_API_URL}/static/mg/${id}.jpg`;
 }
 
 export async function refreshUserQuestions() {
