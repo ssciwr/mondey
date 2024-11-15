@@ -7,7 +7,7 @@ import { _ } from "svelte-i18n";
 
 let {
 	onclick = () => {
-		console.log("onclick");
+		console.log("empty onclick");
 	},
 }: { onclick?: () => void } = $props();
 </script>

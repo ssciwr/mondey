@@ -7,10 +7,10 @@ let {
 	cls = "",
 	checked = false,
 	onchecked = (event) => {
-		console.log("onchecked: ", event);
+		console.log("empty onchecked: ", event);
 	},
 	onchange = (event) => {
-		console.log("onchange: ", event);
+		console.log("empty onchange: ", event);
 	},
 }: {
 	cls?: string;
