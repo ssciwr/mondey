@@ -53,8 +53,7 @@ let build: any;
 let order: any = $state(undefined);
 let questions:
 	| Writable<Array<UserQuestionAdmin>>
-	| Writable<Array<ChildQuestionAdmin>>
-	| undefined = $state();
+	| Writable<Array<ChildQuestionAdmin>> = $state(userQuestions);
 
 if (kind === "user") {
 	create = createUserQuestion;

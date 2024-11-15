@@ -83,11 +83,6 @@ async function setup(): Promise<any> {
 		return data;
 	}
 
-	console.log(
-		"Milestone group data retrieved successfully",
-		milestonegroups.data,
-	);
-
 	data = milestonegroups.data.map((item) => {
 		const res = {
 			header: item.text ? item.text[$locale].title : undefined,

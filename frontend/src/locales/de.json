@@ -179,5 +179,11 @@
 	},
 	"misc": {
 		"understood": "Verstanden"
+	},
+	"frontpage": {
+		"heading": "Möchten Sie die Entwicklung von Kindern begleiten und fördern?",
+		"summary": "Hier sind Sie genau richtig!",
+		"buttonLabel": "Anmeldung",
+		"toolTip": "Anmelden oder ein neues Konto erstellen"
 	}
 }

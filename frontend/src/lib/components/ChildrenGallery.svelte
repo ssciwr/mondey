@@ -41,7 +41,7 @@ async function setup(): Promise<CardElement[]> {
 					image,
 					summary: null,
 					events: {
-						onclick: async (Event) => {
+						onclick: async () => {
 							currentChild.id = child.id;
 							await currentChild.load_data();
 							activeTabChildren.set("childrenRegistration");

@@ -118,6 +118,16 @@ export const orderMilestoneGroupsAdmin = <ThrowOnError extends boolean = false>(
 }); };
 
 /**
+ * Order Milestone Groups Admin
+ */
+export const orderMilestoneGroupsAdmin = <ThrowOnError extends boolean = false>(options: Options<OrderMilestoneGroupsAdminData, ThrowOnError>) => {
+    return (options?.client ?? client).post<OrderMilestoneGroupsAdminResponse, OrderMilestoneGroupsAdminError, ThrowOnError>({
+        ...options,
+        url: '/admin/milestone-groups/order/'
+    });
+};
+
+/**
  * Upload Milestone Group Image
  */
 export const uploadMilestoneGroupImage = <ThrowOnError extends boolean = false>(options: Options<UploadMilestoneGroupImageData, ThrowOnError>) => { return (options?.client ?? client).put<UploadMilestoneGroupImageResponse, UploadMilestoneGroupImageError, ThrowOnError>({
@@ -161,6 +171,16 @@ export const orderMilestonesAdmin = <ThrowOnError extends boolean = false>(optio
     ...options,
     url: '/admin/milestones/order/'
 }); };
+
+/**
+ * Order Milestones Admin
+ */
+export const orderMilestonesAdmin = <ThrowOnError extends boolean = false>(options: Options<OrderMilestonesAdminData, ThrowOnError>) => {
+    return (options?.client ?? client).post<OrderMilestonesAdminResponse, OrderMilestonesAdminError, ThrowOnError>({
+        ...options,
+        url: '/admin/milestones/order/'
+    });
+};
 
 /**
  * Upload Milestone Image
@@ -232,6 +252,16 @@ export const orderUserQuestionsAdmin = <ThrowOnError extends boolean = false>(op
 }); };
 
 /**
+ * Order User Questions Admin
+ */
+export const orderUserQuestionsAdmin = <ThrowOnError extends boolean = false>(options: Options<OrderUserQuestionsAdminData, ThrowOnError>) => {
+    return (options?.client ?? client).post<OrderUserQuestionsAdminResponse, OrderUserQuestionsAdminError, ThrowOnError>({
+        ...options,
+        url: '/admin/user-questions/order/'
+    });
+};
+
+/**
  * Get Child Questions Admin
  */
 export const getChildQuestionsAdmin = <ThrowOnError extends boolean = false>(options?: Options<unknown, ThrowOnError>) => { return (options?.client ?? client).get<GetChildQuestionsAdminResponse, GetChildQuestionsAdminError, ThrowOnError>({
@@ -278,6 +308,26 @@ export const getUsers = <ThrowOnError extends boolean = false>(options?: Options
     ...options,
     url: '/admin/users/'
 }); };
+
+/**
+ * Order Child Questions Admin
+ */
+export const orderChildQuestionsAdmin = <ThrowOnError extends boolean = false>(options: Options<OrderChildQuestionsAdminData, ThrowOnError>) => {
+    return (options?.client ?? client).post<OrderChildQuestionsAdminResponse, OrderChildQuestionsAdminError, ThrowOnError>({
+        ...options,
+        url: '/admin/child-questions/order/'
+    });
+};
+
+/**
+ * Get Users
+ */
+export const getUsers = <ThrowOnError extends boolean = false>(options?: Options<unknown, ThrowOnError>) => {
+    return (options?.client ?? client).get<GetUsersResponse, GetUsersError, ThrowOnError>({
+        ...options,
+        url: '/admin/users/'
+    });
+};
 
 /**
  * Users:Current User
