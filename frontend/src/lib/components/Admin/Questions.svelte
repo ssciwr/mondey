@@ -35,6 +35,7 @@ import { childQuestions, userQuestions } from "$lib/stores/adminStore";
 import { onMount } from "svelte";
 import { _, locale } from "svelte-i18n";
 import type { Writable } from "svelte/store";
+import AlertMessage from "../AlertMessage.svelte";
 
 let currentQuestion = $state(
 	undefined as UserQuestionAdmin | ChildQuestionAdmin | undefined,
@@ -111,6 +112,7 @@ onMount(async () => {
 });
 </script>
 
+{#if $locale}
 <Card size="xl" class="m-5 w-full">
 	<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">
 		{$_(`admin.${kind}-questions`)}
@@ -178,3 +180,6 @@ onMount(async () => {
 <DeleteModal bind:open={showDeleteModal} onclick={doDeleteQuestion} />
 
 <OrderItemsModal bind:open={showOrderItemsModal} items={currentOrderItems} endpoint={order} callback={refresh}/>
+{:else}
+	<AlertMessage title={$_("userData.alertMessageTitle")} message={$_("userData.alertMessageError")} />
+{/if}

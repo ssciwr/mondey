@@ -38,6 +38,7 @@ import {
 import ChevronDownOutline from "flowbite-svelte-icons/ChevronDownOutline.svelte";
 import ChevronUpOutline from "flowbite-svelte-icons/ChevronUpOutline.svelte";
 import { _, locale } from "svelte-i18n";
+import AlertMessage from "../AlertMessage.svelte";
 
 let currentMilestoneGroup = $state(null as MilestoneGroupAdmin | null);
 let openMilestoneGroupIndex = $state(null as number | null);
@@ -125,6 +126,7 @@ async function doDeleteMilestone() {
 }
 </script>
 
+{#if $locale}
 <Card size="xl" class="m-5">
 	{#if milestoneGroups}
 		<Table>
@@ -274,3 +276,6 @@ async function doDeleteMilestone() {
 <DeleteModal bind:open={showDeleteMilestoneModal} onclick={doDeleteMilestone}></DeleteModal>
 
 <OrderItemsModal bind:open={showOrderItemsModal} items={currentOrderItems} endpoint={currentOrderEndpoint} callback={refreshMilestoneGroups}  />
+{:else}
+ <AlertMessage title={$_("userData.alertMessageTitle")} message={$_("userData.alertMessageError")} />
+{/if}
