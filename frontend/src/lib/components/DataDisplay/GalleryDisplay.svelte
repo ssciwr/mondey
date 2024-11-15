@@ -55,12 +55,6 @@ let filteredComponentProps = $derived(
 		return componentProps[index];
 	}),
 );
-
-$effect(() => {
-	console.log("component: ", itemComponent);
-	console.log("data: ", data);
-	console.log("filteredItems: ", filteredItems);
-});
 </script>
 
 <div class="mx-auto p-4">
