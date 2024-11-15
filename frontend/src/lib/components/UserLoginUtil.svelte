@@ -6,8 +6,12 @@ import { Checkbox } from "flowbite-svelte";
 let {
 	cls = "",
 	checked = false,
-	onchecked = (event) => {},
-	onchange = (event) => {},
+	onchecked = (event) => {
+		console.log("onchecked: ", event);
+	},
+	onchange = (event) => {
+		console.log("onchange: ", event);
+	},
 }: {
 	cls?: string;
 	checked?: boolean;

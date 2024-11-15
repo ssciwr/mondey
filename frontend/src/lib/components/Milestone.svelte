@@ -157,7 +157,7 @@ const breadcrumbdata = $derived([
 		symbol: RectangleListOutline,
 	},
 	{
-		label: contentStore.milestoneGroupData.text[$locale].title,
+		label: contentStore.milestoneGroupData.text[$locale ?? "de"].title,
 		onclick: () => {
 			activeTabChildren.set("milestoneOverview");
 		},

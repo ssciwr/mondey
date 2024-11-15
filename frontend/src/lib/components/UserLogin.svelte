@@ -18,11 +18,10 @@ async function refresh(): Promise<string> {
 		user.data = null;
 		console.log("Error getting current user: ", returned.error.detail);
 		return returned.error.detail;
-	} else {
-		console.log("Successfully retrieved active user");
-		user.data = returned.data as UserRead;
-		return "success";
 	}
+	console.log("Successfully retrieved active user");
+	user.data = returned.data as UserRead;
+	return "success";
 }
 
 // functionality
@@ -45,7 +44,7 @@ async function submitData(): Promise<void> {
 		if (status !== "success") {
 			console.log("error during retrieving active users: ", status);
 			showAlert = true;
-			alertMessage = $_("login.unauthorized") + ": " + status;
+			alertMessage = `${$_("login.unauthorized")}: ${status}`;
 		} else {
 			console.log("login and user retrieval successful");
 			goto("/userLand/userLandingpage");

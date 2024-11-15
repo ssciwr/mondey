@@ -351,15 +351,15 @@ async function submitData(): Promise<void> {
 							bind:value={answers[element.id].answer}
 							bind:additionalValue={answers[element.id]
 								.additional_answer}
-							label={element?.text?.[$locale ?? 'de']?.question ?? ''}
+							label={element?.text?.[$locale]?.question ?? ''}
 							textTrigger={element.additional_option}
 							required={element.component === 'fileupload' ? false : true}
 							additionalRequired={true}
 							id={"input_" + String(i)}
-							items={element?.text?.[$locale ?? 'de'].options_json === ""
+							items={element?.text?.[$locale].options_json === ""
 								? undefined
 								: JSON.parse(
-										element?.text?.[$locale ?? 'de'].options_json ?? '',
+										element?.text?.[$locale].options_json ?? '',
 									)}
 							disabled={disableEdit}
 							placeholder=""

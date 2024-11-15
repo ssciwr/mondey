@@ -21,28 +21,39 @@ import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
 function computeProgress(
-	milestones: MilestonePublic[],
+	milestones: MilestonePublic[] | undefined,
 	answerSession: MilestoneAnswerSessionPublic,
 ): number {
+	if (milestones === undefined) {
+		return 0;
+	}
+
 	if (milestones.length === 0) {
 		return 0;
-	} else {
-		const progress = milestones.filter((item) => {
-			return (
-				item.id in answerSession.answers &&
-				answerSession.answers[item.id].answer >= 0
-			);
-		}).length;
-		if (progress < 0.01) {
-			return 0.01;
-		} else {
-			return progress / milestones.length;
-		}
 	}
+	const progress = milestones.filter((item) => {
+		return (
+			item.id in answerSession.answers &&
+			answerSession.answers[item.id].answer >= 0
+		);
+	}).length;
+	if (progress < 0.01) {
+		return 0.01;
+	}
+	return progress / milestones.length;
 }
 
 async function setup(): Promise<any> {
 	await currentChild.load_data();
+
+	if (currentChild.id === null || currentChild.id === undefined) {
+		console.log("Error when retrieving child data");
+		showAlert = true;
+		alertMessage = $_("childData.alertMessageRetrieving");
+		data = [];
+		return data;
+	}
+
 	console.log("currentChild", currentChild);
 	console.log("child data: ", currentChild.name);
 	const milestonegroups = await getMilestoneGroups({
@@ -70,31 +81,31 @@ async function setup(): Promise<any> {
 
 		data = [];
 		return data;
-	} else {
-		console.log(
-			"Milestone group data retrieved successfully",
-			milestonegroups.data,
-		);
-
-		data = milestonegroups.data.map((item) => {
-			const res = {
-				header: item.text[$locale].title,
-				summary: item.text[$locale].desc,
-				image: null,
-				progress: computeProgress(item.milestones, answerSession.data),
-				events: {
-					onclick: () => {
-						activeTabChildren.set("milestoneOverview");
-						contentStore.milestoneGroup = item.id;
-						contentStore.milestoneGroupData = item;
-					},
-				},
-			};
-			return res;
-		});
-
-		return data;
 	}
+
+	console.log(
+		"Milestone group data retrieved successfully",
+		milestonegroups.data,
+	);
+
+	data = milestonegroups.data.map((item) => {
+		const res = {
+			header: item.text ? item.text[$locale].title : undefined,
+			summary: item.text?.[$locale]?.desc ?? undefined,
+			image: null,
+			progress: computeProgress(item.milestones, answerSession.data),
+			events: {
+				onclick: () => {
+					activeTabChildren.set("milestoneOverview");
+					contentStore.milestoneGroup = item.id;
+					contentStore.milestoneGroupData = item;
+				},
+			},
+		};
+		return res;
+	});
+
+	return data;
 }
 
 const breadcrumbdata: any[] = [
@@ -114,37 +125,33 @@ const breadcrumbdata: any[] = [
 function searchByStatus(data: any[], key: string): any[] {
 	if (key === "") {
 		return data;
-	} else {
-		return data.filter((item) => {
-			// button label contains info about completion status => use for search
-			if (key === $_("search.complete")) {
-				return item.progress === 1;
-			} else {
-				return item.progress < 1;
-			}
-		});
 	}
+	return data.filter((item) => {
+		// button label contains info about completion status => use for search
+		if (key === $_("search.complete")) {
+			return item.progress === 1;
+		}
+		return item.progress < 1;
+	});
 }
 
 function searchBySurveyDescription(data: any[], key: string): any[] {
 	if (key === "") {
 		return data;
-	} else {
-		return data.filter((item) => {
-			return item.summary.toLowerCase().includes(key.toLowerCase());
-		});
 	}
+	return data.filter((item) => {
+		return item.summary.toLowerCase().includes(key.toLowerCase());
+	});
 }
 
 function searchBySurveyTitle(data: any[], key: string): any[] {
 	if (key === "") {
 		return data;
-	} else {
-		const filtered = data.filter((item) => {
-			return item.header.toLowerCase().includes(key.toLowerCase());
-		});
-		return filtered;
 	}
+	const filtered = data.filter((item) => {
+		return item.header.toLowerCase().includes(key.toLowerCase());
+	});
+	return filtered;
 }
 
 // README: this is slow and quite a bit of work because a lot of text has to be searched. Kill it?

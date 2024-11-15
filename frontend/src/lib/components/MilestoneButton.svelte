@@ -7,7 +7,9 @@ let {
 	selected = false,
 	index = 0,
 	tooltip = "",
-	onClick = () => {},
+	onClick = () => {
+		console.log("Button clicked");
+	},
 	children,
 }: {
 	selected?: boolean;

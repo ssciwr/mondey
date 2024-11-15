@@ -1,14 +1,24 @@
-<script context="module">
-export function filterItems(data, searchTerm, searchableColumns) {
+<svelte:options runes={true} />
+<script lang="ts">
+import { TableBody, TableBodyRow, TableSearch } from "flowbite-svelte";
+
+import TableCell from "$lib/components/DataDisplay/TableElements/TableCell.svelte";
+import TableHeader from "$lib/components/DataDisplay/TableElements/TableHeader.svelte";
+
+function filterItemsDefault(
+	data: any,
+	searchTerm: string,
+	searchableColumns: string[],
+) {
 	// toString here for generality
-	return data.filter((item) =>
+	return data.filter((item: any) =>
 		searchableColumns.some((column) =>
 			item[column]?.toString().includes(searchTerm),
 		),
 	);
 }
 
-export function makePlaceholderText(data, searchableColumns) {
+function makePlaceholderTextDefault(data: any, searchableColumns: string[]) {
 	const numCols = Object.keys(data[0]).length;
 	let placeholderText = "Filter ";
 
@@ -18,7 +28,7 @@ export function makePlaceholderText(data, searchableColumns) {
 		searchableColumns.length > 1 &&
 		searchableColumns.length <= numCols / 2
 	) {
-		placeholderText = "Filter " + `any of ${searchableColumns.join(", ")}`;
+		placeholderText = `Filter any of ${searchableColumns.join(", ")}`;
 	} else if (
 		searchableColumns.length > numCols / 2 &&
 		searchableColumns.length < numCols
@@ -26,7 +36,7 @@ export function makePlaceholderText(data, searchableColumns) {
 		const difference = Object.keys(data[0]).filter(
 			(key) => !searchableColumns.includes(key),
 		);
-		placeholderText = "Filter all columns except " + `${difference.join(", ")}`;
+		placeholderText = `Filter all columns except ${difference.join(", ")}`;
 	} else if (searchableColumns.length === numCols) {
 		placeholderText = "Filter all columns";
 	} else {
@@ -35,29 +45,39 @@ export function makePlaceholderText(data, searchableColumns) {
 
 	return placeholderText;
 }
-</script>
 
-<script lang="ts">
-	import { TableBody, TableBodyRow, TableSearch } from 'flowbite-svelte';
+let {
+	data = [],
+	celllinks = [],
+	caption = "",
+	statusColumns = [],
+	searchableColumns = [],
+	statusIndicator = {},
+	headerlinks = [],
+	filterItems = filterItemsDefault,
+	makePlaceholderText = makePlaceholderTextDefault,
+}: {
+	data: any[];
+	celllinks: string[][];
+	caption: string;
+	statusColumns: string[];
+	searchableColumns: string[];
+	statusIndicator: Record<string, string>;
+	headerlinks: string[];
+	filterItems: (
+		data: any,
+		searchTerm: string,
+		searchableColumns: string[],
+	) => any[];
+	makePlaceholderText: (data: any, searchableColumns: string[]) => string;
+} = $props();
 
-	import TableCell from '$lib/components/DataDisplay/TableElements/TableCell.svelte';
-	import TableHeader from '$lib/components/DataDisplay/TableElements/TableHeader.svelte';
+// make the placeholdertext for the searchbar dynamic
+const placeholderText = makePlaceholderText(data, searchableColumns);
+let searchTerm = $state("");
 
-	// exported variables
-	export let data: object[] = [];
-	export let celllinks: string[][] = []; // separate datastructure because it is specific to the point in the fronted where it is used but is static once defined.
-	export let caption = '';
-	export let statusColumns: string[] = [];
-	export let searchableColumns: string[] = [];
-	export let statusIndicator;
-	export let headerlinks: string[] = [];
-
-	// make the placeholdertext for the searchbar dynamic
-	const placeholderText = makePlaceholderText(data, searchableColumns);
-	let searchTerm = '';
-
-	// reactive statements
-	$: filteredItems = filterItems(data, searchTerm, searchableColumns);
+// reactive statements
+let filteredItems = $derived(filterItems(data, searchTerm, searchableColumns));
 </script>
 
 <TableSearch
@@ -73,7 +93,7 @@ export function makePlaceholderText(data, searchableColumns) {
 				{#each Object.entries(row) as pair, j}
 					<TableCell
 						key={pair[0]}
-						value={pair[1]}
+						value={pair[1] as string}
 						{statusIndicator}
 						{statusColumns}
 						href={celllinks?.[i]?.[j] || ''}

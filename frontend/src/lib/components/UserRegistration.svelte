@@ -27,8 +27,7 @@ async function submitData(): Promise<void> {
 
 		if (result.error) {
 			console.log("error: ", result.response.status, result.error.detail);
-			alertMessage =
-				$_("registration.alertMessageError") + ": " + result.error.detail;
+			alertMessage = `${$_("registration.alertMessageError")}: ${result.error.detail}`;
 			showAlert = true;
 		} else {
 			console.log("successful transmission: ", result.response.status);
