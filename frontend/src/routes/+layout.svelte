@@ -20,6 +20,8 @@ import {
 } from "flowbite-svelte";
 import { MoonSolid, SunSolid } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
+import { _ } from "svelte-i18n";
+
 import "../app.css";
 
 let { children } = $props();
@@ -37,9 +39,9 @@ onMount(async () => {
 	</NavBrand>
 	<NavHamburger />
 	<NavUl ulClass="hidden flex min-[320px]:flex-col sm:flex-col md:flex-row items-center lg:mt-8 lg:space-x-14 md:mt-8 md:space-x-7 text-lg ">
-		<NavLi href={base}>Aktuelles</NavLi>
-		<NavLi href={base}>Downloads</NavLi>
-		<NavLi href={base}>Kontakt</NavLi>
+		<NavLi class = "hover:cursor-pointer" href={base}>{$_("misc.latest")}</NavLi>
+		<NavLi class = "hover:cursor-pointer" href={base}>{$_("misc.downloads")}</NavLi>
+		<NavLi class = "hover:cursor-pointer" href={base}>{$_("misc.contact")}</NavLi>
 
 		<FunctionalIcon tooltip={'Darkmode ein- oder ausschalten'}>
 			<DarkMode class="apply-icon-style">
@@ -51,6 +53,7 @@ onMount(async () => {
 		<FunctionalIcon>
 			<Avatar rounded class="apply-icon-style" id="avatar" />
 		</FunctionalIcon>
+
 		<UserProfile triggeredBy="#avatar" />
 
 		<LocaleChooser />

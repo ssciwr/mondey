@@ -178,7 +178,10 @@
 		"sendError": "Beim Senden der Daten ist ein Fehler aufgetreten. Bitte versuchen sie es erneut"
 	},
 	"misc": {
-		"understood": "Verstanden"
+		"understood": "Verstanden",
+		"latest": "Aktuelles",
+		"downloads": "Downloads",
+		"contact": "Kontakt"
 	},
 	"frontpage": {
 		"heading": "Möchten Sie die Entwicklung von Kindern begleiten und fördern?",
