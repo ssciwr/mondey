@@ -60,9 +60,8 @@ class MilestoneGroup(SQLModel, table=True):
 
 class MilestoneGroupPublic(SQLModel):
     id: int
-    text: dict[str, MilestoneGroupTextPublic] = {}
-    milestones: list[MilestonePublic] = []
-    progress: float = 0.0
+    text: dict[str, MilestoneGroupTextPublic]
+    milestones: list[MilestonePublic]
 
 
 class MilestoneGroupAdmin(SQLModel):

@@ -49,8 +49,6 @@ def test_get_milestone_groups_child3(
     milestone_group1["milestones"] = []
     # and first last milestone from group2 (24m):
     milestone_group2["milestones"] = []
-    milestone_group2["progress"] = 0.0
-    milestone_group1["progress"] = 0.0
     assert response.json() == [milestone_group2, milestone_group1]
 
 
