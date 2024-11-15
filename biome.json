@@ -16,7 +16,8 @@
 		"rules": {
 			"suspicious": {
 				"all": true,
-				"noConsole": "off"
+				"noConsole": "off",
+				"noExplicitAny": "off"
 			},
 			"style": {
 				"recommended": true
