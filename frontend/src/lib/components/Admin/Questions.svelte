@@ -11,19 +11,13 @@ import {
 	TableHeadCell,
 } from "flowbite-svelte";
 
-import {
-	refreshChildQuestions,
-	refreshMilestoneGroups,
-	refreshUserQuestions,
-} from "$lib/admin.svelte";
+import { refreshChildQuestions, refreshUserQuestions } from "$lib/admin.svelte";
 import {
 	createChildQuestion,
 	createUserQuestion,
 	deleteChildQuestion,
 	deleteUserQuestion,
 	orderChildQuestionsAdmin,
-	orderMilestoneGroupsAdmin,
-	orderMilestonesAdmin,
 	orderUserQuestionsAdmin,
 } from "$lib/client/services.gen";
 import type {
@@ -41,6 +35,7 @@ import { childQuestions, userQuestions } from "$lib/stores/adminStore";
 import { onMount } from "svelte";
 import { _, locale } from "svelte-i18n";
 import type { Writable } from "svelte/store";
+import AlertMessage from "../AlertMessage.svelte";
 
 let currentQuestion = $state(
 	undefined as UserQuestionAdmin | ChildQuestionAdmin | undefined,
@@ -54,13 +49,12 @@ let showOrderItemsModal = $state(false);
 
 let create: any;
 let doDelete: any;
-let refresh: any;
+let refresh: any = $state(undefined);
 let build: any;
-let order: any;
+let order: any = $state(undefined);
 let questions:
 	| Writable<Array<UserQuestionAdmin>>
-	| Writable<Array<ChildQuestionAdmin>>
-	| undefined = $state();
+	| Writable<Array<ChildQuestionAdmin>> = $state(userQuestions);
 
 if (kind === "user") {
 	create = createUserQuestion;
@@ -118,6 +112,7 @@ onMount(async () => {
 });
 </script>
 
+{#if $locale}
 <Card size="xl" class="m-5 w-full">
 	<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">
 		{$_(`admin.${kind}-questions`)}
@@ -185,3 +180,6 @@ onMount(async () => {
 <DeleteModal bind:open={showDeleteModal} onclick={doDeleteQuestion} />
 
 <OrderItemsModal bind:open={showOrderItemsModal} items={currentOrderItems} endpoint={order} callback={refresh}/>
+{:else}
+	<AlertMessage title={$_("userData.alertMessageTitle")} message={$_("userData.alertMessageError")} />
+{/if}

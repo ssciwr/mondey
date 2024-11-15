@@ -1,13 +1,14 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { adminUser, refreshMilestoneGroups } from "$lib/admin.svelte";
+import { refreshMilestoneGroups } from "$lib/admin.svelte";
 import Languages from "$lib/components/Admin/Languages.svelte";
 import MilestoneExpectedAges from "$lib/components/Admin/MilestoneExpectedAges.svelte";
 import MilestoneGroups from "$lib/components/Admin/MilestoneGroups.svelte";
 import Questions from "$lib/components/Admin/Questions.svelte";
 import Translations from "$lib/components/Admin/Translations.svelte";
 import Users from "$lib/components/Admin/Users.svelte";
+import { user } from "$lib/stores/userStore.svelte";
 import { TabItem, Tabs } from "flowbite-svelte";
 import {
 	BadgeCheckOutline,
@@ -20,7 +21,7 @@ import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 
 onMount(async () => {
-	await adminUser.refresh();
+	await user.load();
 	await refreshMilestoneGroups();
 });
 </script>

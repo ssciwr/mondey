@@ -1,30 +1,31 @@
+<svelte:options runes={true} />
 <script lang="ts">
 import { base } from "$app/paths";
 
-import UserLoginUtil from "$lib/components//UserLoginUtil.svelte";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 
 import { goto } from "$app/navigation";
 import { authCookieLogin, usersCurrentUser } from "$lib/client/services.gen";
-import { type AuthCookieLoginData, type UserRead } from "$lib/client/types.gen";
-import { currentUser } from "$lib/stores/userStore";
+import { type AuthCookieLoginData } from "$lib/client/types.gen";
+import { user } from "$lib/stores/userStore.svelte";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
 
-// TODO: make the remember thing functional again
-// FIXME: make use of the logic of the AdminUser structure and get rid of the UserStore
 async function refresh(): Promise<string> {
 	const returned = await usersCurrentUser();
 	if (returned.error) {
+		user.data = null;
 		console.log("Error getting current user: ", returned.error.detail);
-		currentUser.set(null);
 		return returned.error.detail;
-	} else {
-		console.log("Successfully retrieved active user");
-		currentUser.set(returned.data as UserRead);
-		return "success";
 	}
+	console.log("Successfully retrieved active user");
+	if (returned.data === null || returned.data === undefined) {
+		user.data = null;
+		return "no user data";
+	}
+	user.data = returned.data;
+	return "success";
 }
 
 // functionality
@@ -38,18 +39,16 @@ async function submitData(): Promise<void> {
 
 	const authReturn = await authCookieLogin(loginData);
 
-	// forget user data again to not have a plain text password lying around in memory somewhere
-	// any longer than needed
-
 	if (authReturn.error) {
 		showAlert = true;
+		alertMessage = $_("login.badCredentials") + authReturn.error.detail;
+		console.log("error during login ", authReturn.error.detail);
 	} else {
 		const status: string = await refresh();
-
 		if (status !== "success") {
 			console.log("error during retrieving active users: ", status);
 			showAlert = true;
-			alertMessage = $_("login.unauthorized") + ": " + status;
+			alertMessage = `${$_("login.unauthorized")}: ${status}`;
 		} else {
 			console.log("login and user retrieval successful");
 			goto("/userLand/userLandingpage");
@@ -59,11 +58,10 @@ async function submitData(): Promise<void> {
 
 // form data and variables
 
-let username = "";
-let password = "";
-let remember = false;
+let username = $state("");
+let password = $state("");
 let showAlert = $state(false);
-let alertMessage: string = $_("login.badCredentials");
+let alertMessage: string = $state($_("login.badCredentials"));
 </script>
 
 {#if showAlert}
@@ -120,8 +118,6 @@ let alertMessage: string = $_("login.badCredentials");
 				/>
 			</div>
 
-			<UserLoginUtil cls="p-6 mb-3" bind:checked={remember} />
-
 			<Button
 				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
 				type="submit">{$_("login.submitButtonLabel")}</Button
@@ -130,12 +126,12 @@ let alertMessage: string = $_("login.badCredentials");
 	</Card>
 
 	<span class="container mx-auto w-full text-gray-700 dark:text-gray-400"
-		>Not registered?</span
+		>{$_("login.notRegistered")}</span
 	>
 	<a
 		href={`${base}/userLand/userRegistration`}
 		class="text-primary-700 hover:underline dark:text-primary-500"
 	>
-		Create account
+		{$_("login.registerNew")}
 	</a>
 </div>

@@ -9,6 +9,6 @@ export let componentProps = {};
 </script>
 
 <BottomNavItem {href} btnName={description}>
-	<svelte:component this={Icon} {...componentProps} />
+	<Icon {...componentProps} />
 	<Tooltip arrow={false}>{tooltip}</Tooltip>
 </BottomNavItem>

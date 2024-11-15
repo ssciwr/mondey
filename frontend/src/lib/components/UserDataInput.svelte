@@ -55,7 +55,7 @@ async function setup() {
 	if (currentAnswers?.error || currentAnswers.data === undefined) {
 		console.log(
 			"Error when getting current answers for users: ",
-			currentAnswers.error.detail,
+			currentAnswers?.error?.detail,
 		);
 
 		showAlert = true;
@@ -109,62 +109,74 @@ let promise = $state(setup());
 {/if}
 
 <!-- The actual content -->
-{#await promise}
-	<p>{$_("userData.loadingMessage")}</p>
-{:then { questionnaire, answers }}
-	<div class="container m-1 mx-auto w-full max-w-xl">
-		<Card class="container m-1 mx-auto w-full max-w-xl">
-			<Heading
-				tag="h3"
-				class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-				>{$_("userData.heading")}</Heading
-			>
-			<form
-				class="m-1 mx-auto w-full flex-col space-y-6"
-				onsubmit={preventDefault(submitData)}
-			>
-				{#each questionnaire as element, i}
-					<DataInput
-						component={componentTable[element.component]}
-						bind:value={answers[element.id].answer}
-						bind:additionalValue={answers[element.id]
-							.additional_answer}
-						label={element?.text[$locale].question}
-						textTrigger={element.additional_option}
-						required={true}
-						additionalRequired={true}
-						id={"input_" + String(i)}
-						items={element.text[$locale].options_json === "" ? null : JSON.parse(element.text[$locale].options_json)}
-						disabled={disableEdit}
-					/>
-				{/each}
-				{#if disableEdit === true}
-					<Button
-						type="button"
-						class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
-						on:click={() => {
-							disableEdit = false;
-						}}
-					>
-						<div class="flex items-center justify-center">
-							{$_("userData.changeData")}
-						</div>
-					</Button>
-				{:else}
-					<Button
-						class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
-						type="submit">{$_("userData.submitButtonLabel")}</Button
-					>
-				{/if}
-			</form>
-		</Card>
-	</div>
-{:catch error}
+{#if $locale}
+	{#await promise}
+		<p>{$_("userData.loadingMessage")}</p>
+	{:then { questionnaire, answers }}
+		<div class="container m-1 mx-auto w-full max-w-xl">
+			<Card class="container m-1 mx-auto w-full max-w-xl">
+				<Heading
+					tag="h3"
+					class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
+					>{$_("userData.heading")}</Heading
+				>
+				<form
+					class="m-1 mx-auto w-full flex-col space-y-6"
+					onsubmit={preventDefault(submitData)}
+				>
+					{#each questionnaire as element, i}
+						{#if element.text && element.component}
+						<DataInput
+							component={componentTable[element.component]}
+							bind:value={answers[element.id].answer}
+							bind:additionalValue={answers[element.id]
+								.additional_answer}
+							label={element?.text[$locale].question}
+							textTrigger={element.additional_option}
+							required={true}
+							additionalRequired={true}
+							id={"input_" + String(i)}
+							items={element.text[$locale].options_json === "" ? null : JSON.parse(element.text[$locale].options_json)}
+							disabled={disableEdit}
+						/>
+						{/if}
+					{/each}
+					{#if disableEdit === true}
+						<Button
+							type="button"
+							class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+							on:click={() => {
+								disableEdit = false;
+							}}
+						>
+							<div class="flex items-center justify-center">
+								{$_("userData.changeData")}
+							</div>
+						</Button>
+					{:else}
+						<Button
+							class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+							type="submit">{$_("userData.submitButtonLabel")}</Button
+						>
+					{/if}
+				</form>
+			</Card>
+		</div>
+	{:catch error}
+		<AlertMessage
+			title={$_("userData.alertMessageTitle")}
+			message={error.message}
+			onclick={() => {
+				showAlert = false;
+			}}
+		/>
+	{/await}
+{:else}
 	<AlertMessage
 		title={$_("userData.alertMessageTitle")}
-		message={error.message}
+		message={$_("userData.alertMessageError")}
 		onclick={() => {
 			showAlert = false;
 		}}
 	/>
-{/await}
+{/if}

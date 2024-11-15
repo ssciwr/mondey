@@ -47,9 +47,9 @@ function updateImageToUpload(event: Event) {
 
 async function reloadImg(url: string) {
 	await fetch(url, { cache: "reload", mode: "no-cors" });
-	document.body
-		.querySelectorAll(`img[src='${url}']`)
-		.forEach((img) => ((img as HTMLImageElement).src = url));
+	document.body.querySelectorAll(`img[src='${url}']`).forEach((img) => {
+		(img as HTMLImageElement).src = url;
+	});
 }
 
 export async function saveChanges() {
