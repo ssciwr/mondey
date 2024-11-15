@@ -44,6 +44,11 @@ function computeProgress(
 }
 
 async function setup(): Promise<any> {
+	if ($locale === undefined || $locale === null) {
+		console.log("locale not set");
+		return [];
+	}
+
 	await currentChild.load_data();
 
 	if (currentChild.id === null || currentChild.id === undefined) {
@@ -86,7 +91,7 @@ async function setup(): Promise<any> {
 	data = milestonegroups.data.map((item) => {
 		const res = {
 			header: item.text ? item.text[$locale].title : undefined,
-			summary: item.text?.[$locale]?.desc ?? undefined,
+			summary: item.text?.[$locale]?.desc,
 			image: null,
 			progress: computeProgress(item.milestones, answerSession.data),
 			events: {

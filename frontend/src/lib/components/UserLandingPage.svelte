@@ -18,7 +18,7 @@ onMount(user.load);
 </script>
 
 {#if user.data}
-	{#if user.data?.is_verified === true}
+	{#if user.data.is_verified === true}
 		<div class="m-2 p-2">
 			<Tabs tabStyle="underline">
 				<TabItem open={true}>
@@ -39,7 +39,7 @@ onMount(user.load);
 						this={componentTable[$activeTabChildren]}
 					/>
 				</TabItem>
-				{#if user.data?.is_superuser}
+				{#if user.data.is_superuser}
 					<TabItem>
 						<div
 							slot="title"
@@ -51,7 +51,7 @@ onMount(user.load);
 						<AdminPage />
 					</TabItem>
 				{/if}
-				{#if user.data?.is_researcher}
+				{#if user.data.is_researcher}
 					<TabItem>
 						<div
 							slot="title"

@@ -252,6 +252,7 @@ async function submitData(): Promise<void> {
 }
 </script>
 
+{#if $locale}
 <Breadcrumbs data={breadcrumbdata} />
 {#await promise}
 	<p>{$_("childData.loadingMessage")}</p>
@@ -351,7 +352,7 @@ async function submitData(): Promise<void> {
 							bind:value={answers[element.id].answer}
 							bind:additionalValue={answers[element.id]
 								.additional_answer}
-							label={element?.text?.[$locale]?.question ?? ''}
+							label={element?.text?.[$locale].question}
 							textTrigger={element.additional_option}
 							required={element.component === 'fileupload' ? false : true}
 							additionalRequired={true}
@@ -443,3 +444,12 @@ async function submitData(): Promise<void> {
 		}}
 	/>
 {/await}
+{:else}
+	<AlertMessage
+		title={$_("childData.alertMessageTitle")}
+		message={$_("childData.alertMessageError")}
+		onclick={() => {
+			showAlert = false;
+		}}
+	/>
+{/if}

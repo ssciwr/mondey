@@ -12,11 +12,11 @@ let {
 	},
 	children,
 }: {
-	selected?: boolean;
-	index?: number;
-	tooltip?: string;
-	onClick?: () => void;
-	children?: any;
+	selected: boolean;
+	index: number;
+	tooltip: string;
+	onClick: () => void;
+	children: any;
 } = $props();
 
 let bg_color = `bg-milestone-answer-${index}`;

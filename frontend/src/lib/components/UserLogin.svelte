@@ -6,7 +6,7 @@ import AlertMessage from "$lib/components/AlertMessage.svelte";
 
 import { goto } from "$app/navigation";
 import { authCookieLogin, usersCurrentUser } from "$lib/client/services.gen";
-import { type AuthCookieLoginData, type UserRead } from "$lib/client/types.gen";
+import { type AuthCookieLoginData } from "$lib/client/types.gen";
 import { user } from "$lib/stores/userStore.svelte";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
@@ -20,7 +20,11 @@ async function refresh(): Promise<string> {
 		return returned.error.detail;
 	}
 	console.log("Successfully retrieved active user");
-	user.data = returned.data as UserRead;
+	if (returned.data === null || returned.data === undefined) {
+		user.data = null;
+		return "no user data";
+	}
+	user.data = returned.data;
 	return "success";
 }
 

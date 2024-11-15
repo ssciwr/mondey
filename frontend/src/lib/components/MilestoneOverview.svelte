@@ -75,6 +75,14 @@ function searchAll(data: any[], key: string): any[] {
 
 async function setup(): Promise<void> {
 	console.log("setup overview");
+
+	if ($locale === undefined || $locale === null) {
+		showAlert = true;
+		alertMessage = $_("userData.alertMessageError");
+		console.log("No locale");
+		return;
+	}
+
 	await currentChild.load_data();
 	if (
 		!contentStore.milestoneGroupData.milestones ||
