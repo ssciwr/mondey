@@ -6,11 +6,12 @@ import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
+import { type CardElement, type CardStyle } from "$lib/util";
 import { Heading, Spinner } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
-async function setup(): Promise<any> {
+async function setup(): Promise<CardElement[]> {
 	const children = await getChildren();
 
 	if (children.error) {
@@ -19,18 +20,15 @@ async function setup(): Promise<any> {
 		alertMessage = $_("childData.alertMessageRetrieving");
 	} else {
 		const childrenData = await Promise.all(
-			(children.data || []).map(async (child) => {
-				let image = null;
+			(children.data || []).map(async (child): Promise<CardElement> => {
+				let image = undefined as string | undefined;
 				const childImageResponse = await getChildImage({
 					path: { child_id: child.id },
 				});
 				if (childImageResponse.error) {
 					console.log("Error when retrieving child image");
 					showAlert = true;
-					alertMessage =
-						$_("childData.alertMessageImage") +
-						" " +
-						childImageResponse.error.detail;
+					alertMessage = `${$_("childData.alertMessageImage")} ${childImageResponse.error.detail}`;
 				} else {
 					const reader = new FileReader();
 					reader.readAsDataURL(childImageResponse.data as Blob);
@@ -41,8 +39,9 @@ async function setup(): Promise<any> {
 				return {
 					header: child.name,
 					image,
+					summary: null,
 					events: {
-						onclick: async () => {
+						onclick: async (Event) => {
 							currentChild.id = child.id;
 							await currentChild.load_data();
 							activeTabChildren.set("childrenRegistration");
@@ -59,19 +58,18 @@ async function setup(): Promise<any> {
 				header: $_("childData.newChildHeading"),
 				summary: $_("childData.newChildHeadingLong"),
 				events: {
-					onclick: async () => {
+					onclick: () => {
 						currentChild.id = null;
 						activeTabChildren.set("childrenRegistration");
 					},
 				},
-				image: null,
 			},
 		];
 	}
 	return data;
 }
 
-function createStyle(data: any[]) {
+function createStyle(data: CardElement[]): CardStyle[] {
 	return data.map((item) => ({
 		card:
 			item.header === $_("childData.newChildHeading")
@@ -82,37 +80,43 @@ function createStyle(data: any[]) {
 					}
 				: { horizontal: false },
 		header:
-			item.header == $_("childData.newChildHeading")
+			item.header === $_("childData.newChildHeading")
 				? {
 						class:
 							"mb-2 text-2xl font-bold tracking-tight text-white dark:text-white",
 					}
 				: null,
 		summary:
-			item.header == $_("childData.newChildHeading")
+			item.header === $_("childData.newChildHeading")
 				? {
 						class:
 							"mb-3 flex font-normal leading-tight text-white dark:text-white",
 					}
 				: null,
 		button: null,
+		progress: null,
+		auxilliary: null,
 	}));
 }
 
-function searchName(data: any[], key: string): any[] {
+function searchName(data: CardElement[], key: string): CardElement[] {
 	if (key === "") {
 		return data;
-	} else {
-		const res = data.filter((item) => {
-			return item.header.toLowerCase().includes(key.toLowerCase());
-		});
-		return res;
 	}
+
+	const res = data.filter((item) => {
+		if (item.header === null || item.header === undefined) {
+			return false;
+		}
+
+		return item.header.toLowerCase().includes(key.toLowerCase());
+	});
+	return res;
 }
 
 let showAlert = $state(false);
 let alertMessage = $state($_("childData.alertMessageError"));
-let data: any[] = $state([]);
+let data: CardElement[] = $state([]);
 const promise = $state(setup());
 const searchData = [
 	{

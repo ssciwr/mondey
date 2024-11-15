@@ -42,9 +42,8 @@ function createCurrentChild() {
 				if (response.error) {
 					console.log("Error during child retrieval: ", response.error);
 					return null;
-				} else {
-					childdata = response.data;
 				}
+				childdata = response.data;
 			}
 		},
 	};

@@ -2,7 +2,6 @@
 
 <script lang="ts">
 import { Label, Textarea } from "flowbite-svelte";
-import { type Component } from "svelte";
 
 // variables
 let {
@@ -20,7 +19,7 @@ let {
 	placeholder = undefined,
 	kwargs = {},
 }: {
-	component?: Component | null;
+	component?: any;
 	value?: any;
 	additionalRequired?: boolean;
 	label?: string | null;
@@ -44,11 +43,10 @@ function checkShowTextfield(v: any): boolean {
 		textTrigger !== undefined &&
 		textTrigger !== null &&
 		textTrigger !== "";
-	if (v instanceof Array) {
+	if (Array.isArray(v)) {
 		return v.includes(textTrigger) && basic;
-	} else {
-		return v === textTrigger && basic;
 	}
+	return v === textTrigger && basic;
 }
 
 let valid: boolean = $state(false);

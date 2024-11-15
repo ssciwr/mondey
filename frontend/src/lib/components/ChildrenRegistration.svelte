@@ -126,7 +126,7 @@ async function setup(): Promise<{
 	// version b/c it only can happen when the admin changes questions on the
 	// fly in the database. Doing so should eventually elicit database
 	// migration though, which should assure consistency
-	questionnaire.forEach((question) => {
+	for (const question of questionnaire) {
 		if (answers[question.id] === undefined) {
 			answers[question.id] = {
 				question_id: question.id,
@@ -134,7 +134,7 @@ async function setup(): Promise<{
 				additional_answer: "",
 			};
 		}
-	});
+	}
 	console.log("setup done");
 	return { questionnaire: questionnaire, answers: answers };
 }
@@ -156,9 +156,8 @@ async function submitChildData(): Promise<void> {
 			alertMessage =
 				$_("childData.alertMessageCreate") + new_child.error.detail;
 			return;
-		} else {
-			currentChild.id = new_child.data.id;
 		}
+		currentChild.id = new_child.data.id;
 	} else {
 		// update existing child
 		const response = await updateChild({
@@ -173,8 +172,7 @@ async function submitChildData(): Promise<void> {
 
 		if (response.error) {
 			showAlert = true;
-			alertMessage =
-				$_("childData.alertMessageUpdate") + " " + response.error.detail;
+			alertMessage = `${$_("childData.alertMessageUpdate")} ${response.error.detail}`;
 			return;
 		}
 	}
@@ -192,8 +190,7 @@ async function submitChildData(): Promise<void> {
 			"Error when sending user question answers: ",
 			response.error.detail,
 		);
-		alertMessage =
-			$_("childData.alertMessageError") + " " + response.error.detail;
+		alertMessage = `${$_("childData.alertMessageError")} ${response.error.detail}`;
 		showAlert = true;
 		return;
 	}
@@ -217,8 +214,7 @@ async function submitImageData(): Promise<void> {
 		if (response.error) {
 			console.log("error during file delete: ", response.error.detail);
 			showAlert = true;
-			alertMessage =
-				$_("childData.alertMessageUpdate") + " " + response.error.detail;
+			alertMessage = `${$_("childData.alertMessageUpdate")} ${response.error.detail}`;
 			return;
 		}
 	} else if (image instanceof File && imageDeleted === false) {
@@ -234,8 +230,7 @@ async function submitImageData(): Promise<void> {
 		if (response.error) {
 			console.log("error during file upload: ", response.error.detail);
 			showAlert = true;
-			alertMessage =
-				$_("childData.alertMessageError") + " " + response.error.detail;
+			alertMessage = `${$_("childData.alertMessageError")} ${response.error.detail}`;
 			return;
 		}
 	} else {
@@ -356,18 +351,18 @@ async function submitData(): Promise<void> {
 							bind:value={answers[element.id].answer}
 							bind:additionalValue={answers[element.id]
 								.additional_answer}
-							label={element?.text?.[$locale]?.question ?? ''}
+							label={element?.text?.[$locale ?? 'de']?.question ?? ''}
 							textTrigger={element.additional_option}
 							required={element.component === 'fileupload' ? false : true}
 							additionalRequired={true}
 							id={"input_" + String(i)}
-							items={element?.text?.[$locale].options_json === ""
+							items={element?.text?.[$locale ?? 'de'].options_json === ""
 								? undefined
 								: JSON.parse(
-										element?.text?.[$locale].options_json,
+										element?.text?.[$locale ?? 'de'].options_json ?? '',
 									)}
 							disabled={disableEdit}
-							placeholder={element?.text?.[$locale].placeholder}
+							placeholder=""
 						/>
 					{/each}
 					{#if disableEdit === true}

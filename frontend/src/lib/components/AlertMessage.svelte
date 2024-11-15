@@ -10,14 +10,16 @@ let {
 	infotitle = "",
 	lastpage = "",
 	infopage = "",
-	onclick = (event = undefined) => {},
+	onclick = (event = undefined) => {
+		console.log(event);
+	},
 }: {
 	message?: string;
 	title?: string;
 	infotitle?: string;
 	lastpage?: string;
 	infopage?: string;
-	onclick?: (event: Event | undefined) => void;
+	onclick?: (event: Event | undefined) => void | Promise<void>;
 } = $props();
 </script>
 

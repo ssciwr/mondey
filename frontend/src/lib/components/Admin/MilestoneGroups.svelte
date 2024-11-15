@@ -53,7 +53,7 @@ let currentOrderItems = $state([] as Array<{ id: number; text: string }>);
 let showOrderItemsModal = $state(false);
 
 function toggleOpenGroupIndex(index: number) {
-	if (openMilestoneGroupIndex == index) {
+	if (openMilestoneGroupIndex === index) {
 		openMilestoneGroupIndex = null;
 	} else {
 		openMilestoneGroupIndex = index;

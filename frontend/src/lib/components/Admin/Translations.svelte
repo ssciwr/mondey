@@ -39,9 +39,8 @@ async function saveChanges() {
 		if (error) {
 			console.log(error);
 			return;
-		} else {
-			console.log(data);
 		}
+		console.log(data);
 	}
 	await getTranslations();
 }
