@@ -5,6 +5,7 @@ import {
 	type ChildAnswerPublic,
 	type ChildCreate,
 	type ChildPublic,
+	type ErrorModel,
 	type GetChildQuestionsResponse,
 	createChild,
 	deleteChild,
@@ -30,8 +31,6 @@ import {
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import { _, locale } from "svelte-i18n";
-
-console.log("ChildrenRegistration");
 
 // questions and answers about child that are not part of the child object
 let questionnaire: GetChildQuestionsResponse = $state(
@@ -72,19 +71,20 @@ async function setup(): Promise<{
 	questionnaire: GetChildQuestionsResponse;
 	answers: { [k: string]: ChildAnswerPublic };
 }> {
-	console.log("setup");
 	await currentChild.load_data();
 
 	// get questions
 	const questions = await getChildQuestions();
 	if (questions.error || questions.data === undefined) {
-		console.log("Error when getting userquestions: ", questions.error.detail);
+		console.log(
+			"Error when getting userquestions: ",
+			(questions.error as ErrorModel).detail,
+		);
 		showAlert = true;
 		alertMessage = $_("childData.alertMessageError");
 	} else {
 		questionnaire = questions.data;
 	}
-	console.log("questionaire: ", questionnaire);
 
 	if (currentChild.id !== null) {
 		const child = await getChild({ path: { child_id: currentChild.id } });
@@ -126,7 +126,7 @@ async function setup(): Promise<{
 	// version b/c it only can happen when the admin changes questions on the
 	// fly in the database. Doing so should eventually elicit database
 	// migration though, which should assure consistency
-	questionnaire.forEach((question) => {
+	for (const question of questionnaire) {
 		if (answers[question.id] === undefined) {
 			answers[question.id] = {
 				question_id: question.id,
@@ -134,7 +134,7 @@ async function setup(): Promise<{
 				additional_answer: "",
 			};
 		}
-	});
+	}
 	console.log("setup done");
 	return { questionnaire: questionnaire, answers: answers };
 }
@@ -156,9 +156,8 @@ async function submitChildData(): Promise<void> {
 			alertMessage =
 				$_("childData.alertMessageCreate") + new_child.error.detail;
 			return;
-		} else {
-			currentChild.id = new_child.data.id;
 		}
+		currentChild.id = new_child.data.id;
 	} else {
 		// update existing child
 		const response = await updateChild({
@@ -173,8 +172,7 @@ async function submitChildData(): Promise<void> {
 
 		if (response.error) {
 			showAlert = true;
-			alertMessage =
-				$_("childData.alertMessageUpdate") + " " + response.error.detail;
+			alertMessage = `${$_("childData.alertMessageUpdate")} ${response.error.detail}`;
 			return;
 		}
 	}
@@ -192,14 +190,20 @@ async function submitChildData(): Promise<void> {
 			"Error when sending user question answers: ",
 			response.error.detail,
 		);
-		alertMessage =
-			$_("childData.alertMessageError") + " " + response.error.detail;
+		alertMessage = `${$_("childData.alertMessageError")} ${response.error.detail}`;
 		showAlert = true;
 		return;
 	}
 }
 
 async function submitImageData(): Promise<void> {
+	if (currentChild.id === null) {
+		console.log("no child id, no image to upload");
+		showAlert = true;
+		alertMessage = $_("childData.alertMessageError");
+		return;
+	}
+
 	if (imageDeleted === true) {
 		const response = await deleteChildImage({
 			path: {
@@ -210,8 +214,7 @@ async function submitImageData(): Promise<void> {
 		if (response.error) {
 			console.log("error during file delete: ", response.error.detail);
 			showAlert = true;
-			alertMessage =
-				$_("childData.alertMessageUpdate") + " " + response.error.detail;
+			alertMessage = `${$_("childData.alertMessageUpdate")} ${response.error.detail}`;
 			return;
 		}
 	} else if (image instanceof File && imageDeleted === false) {
@@ -227,8 +230,7 @@ async function submitImageData(): Promise<void> {
 		if (response.error) {
 			console.log("error during file upload: ", response.error.detail);
 			showAlert = true;
-			alertMessage =
-				$_("childData.alertMessageError") + " " + response.error.detail;
+			alertMessage = `${$_("childData.alertMessageError")} ${response.error.detail}`;
 			return;
 		}
 	} else {
@@ -250,6 +252,7 @@ async function submitData(): Promise<void> {
 }
 </script>
 
+{#if $locale}
 <Breadcrumbs data={breadcrumbdata} />
 {#await promise}
 	<p>{$_("childData.loadingMessage")}</p>
@@ -349,18 +352,18 @@ async function submitData(): Promise<void> {
 							bind:value={answers[element.id].answer}
 							bind:additionalValue={answers[element.id]
 								.additional_answer}
-							label={element?.text[$locale].question}
+							label={element?.text?.[$locale].question}
 							textTrigger={element.additional_option}
 							required={element.component === 'fileupload' ? false : true}
 							additionalRequired={true}
 							id={"input_" + String(i)}
-							items={element.text[$locale].options_json === ""
+							items={element?.text?.[$locale].options_json === ""
 								? undefined
 								: JSON.parse(
-										element.text[$locale].options_json,
+										element?.text?.[$locale].options_json ?? '',
 									)}
 							disabled={disableEdit}
-							placeholder={element.text[$locale].placeholder}
+							placeholder=""
 						/>
 					{/each}
 					{#if disableEdit === true}
@@ -400,6 +403,13 @@ async function submitData(): Promise<void> {
 							type="button"
 							color="red"
 							on:click={async () => {
+								if (currentChild.id === null) {
+									console.log("no child id, no child to delete");
+									showAlert = true;
+									alertMessage = $_("childData.alertMessageError");
+									return;
+								}
+
 								const response = await deleteChild({
 									path: {
 										child_id: currentChild.id,
@@ -434,3 +444,12 @@ async function submitData(): Promise<void> {
 		}}
 	/>
 {/await}
+{:else}
+	<AlertMessage
+		title={$_("childData.alertMessageTitle")}
+		message={$_("childData.alertMessageError")}
+		onclick={() => {
+			showAlert = false;
+		}}
+	/>
+{/if}

@@ -104,6 +104,7 @@
 		"badActiveUser": "Der Benutzer konnte nicht gefunden werden",
 		"notLoggedIn": "Bitte melden sie sich erneut an",
 		"unauthorized": "Zugang verweigert",
+		"notRegistered": "Noch nicht registriert?",
 		"usernameLabel": "Benutzerkennung",
 		"passwordLabel": "Passwort",
 		"role": "Rolle",
@@ -115,8 +116,10 @@
 		"profileButtonLabelDefault": "Einloggen oder Registrieren",
 		"profileButtonLabelLogout": "Logout",
 		"profileTitleDefault": "Willkommen!",
-		"profileAccess": "Ihr Profil"
+		"profileAccess": "Ihr Profil",
+		"registerNew": "Als neuer Benutzer registrieren"
 	},
+
 	"userData": {
 		"label": "Persönliche Daten",
 		"heading": "Benutzerdaten eingeben",
@@ -173,6 +176,12 @@
 		"formatError": "Die angegebene email Adresse hat ein falsches Format",
 		"mailSentMessage": "Bitte überprüfen sie ihr E-Mail Postfach",
 		"sendError": "Beim Senden der Daten ist ein Fehler aufgetreten. Bitte versuchen sie es erneut"
+	},
+	"misc": {
+		"understood": "Verstanden",
+		"latest": "Aktuelles",
+		"downloads": "Downloads",
+		"contact": "Kontakt"
 	},
 	"frontpage": {
 		"heading": "Möchten Sie die Entwicklung von Kindern begleiten und fördern?",

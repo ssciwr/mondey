@@ -18,10 +18,16 @@ function createCurrentChild() {
 		},
 		set id(value: number | null) {
 			currentChild = value;
+			childdata = null;
+			this.load_data();
 		},
 		get data() {
 			return childdata;
 		},
+		set data(value: ChildPublic | null) {
+			childdata = value;
+		},
+
 		async load_data() {
 			if (currentChild === null) {
 				return null;
@@ -36,9 +42,8 @@ function createCurrentChild() {
 				if (response.error) {
 					console.log("Error during child retrieval: ", response.error);
 					return null;
-				} else {
-					childdata = response.data;
 				}
+				childdata = response.data;
 			}
 		},
 	};

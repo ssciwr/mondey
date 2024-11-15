@@ -23,48 +23,43 @@ import { _, locale } from "svelte-i18n";
 function searchStatus(data: any[], key: string): any[] {
 	if (key === "") {
 		return data;
-	} else {
-		return data.filter((item) => {
-			// button label contains info about completion status => use for search
-			if (key === $_("milestone.complete").toLowerCase()) {
-				return item.complete === true;
-			} else {
-				return item.complete === false;
-			}
-		});
 	}
+	return data.filter((item) => {
+		// button label contains info about completion status => use for search
+		if (key === $_("milestone.complete").toLowerCase()) {
+			return item.complete === true;
+		}
+		return item.complete === false;
+	});
 }
 
 function searchDescription(data: any[], key: string): any[] {
 	if (key === "") {
 		return data;
-	} else {
-		return data.filter((item) => {
-			return item.summary.toLowerCase().includes(key.toLowerCase());
-		});
 	}
+	return data.filter((item) => {
+		return item.summary.toLowerCase().includes(key.toLowerCase());
+	});
 }
 
 function searchTitle(data: any[], key: string): any[] {
 	if (key === "") {
 		return data;
-	} else {
-		return data.filter((item) => {
-			return item.header.toLowerCase().includes(key.toLowerCase());
-		});
 	}
+	return data.filter((item) => {
+		return item.header.toLowerCase().includes(key.toLowerCase());
+	});
 }
 
 function searchAnswer(data: any[], key: string): any[] {
 	if (key === "") {
 		return data;
-	} else {
-		return data.filter((item) => {
-			return item.answer === null
-				? false
-				: item.answer.toLowerCase().includes(key.toLowerCase());
-		});
 	}
+	return data.filter((item) => {
+		return item.answer === null
+			? false
+			: item.answer.toLowerCase().includes(key.toLowerCase());
+	});
 }
 
 function searchAll(data: any[], key: string): any[] {
@@ -80,6 +75,14 @@ function searchAll(data: any[], key: string): any[] {
 
 async function setup(): Promise<void> {
 	console.log("setup overview");
+
+	if ($locale === undefined || $locale === null) {
+		showAlert = true;
+		alertMessage = $_("userData.alertMessageError");
+		console.log("No locale");
+		return;
+	}
+
 	await currentChild.load_data();
 	if (
 		!contentStore.milestoneGroupData.milestones ||
@@ -100,16 +103,16 @@ async function setup(): Promise<void> {
 		if (response.error) {
 			console.log("Error when retrieving milestone answer session");
 			showAlert = true;
-			alertMessage =
-				$_("milestone.alertMessageRetrieving") + " " + response.error.detail;
+			alertMessage = `${$_("milestone.alertMessageRetrieving")} ${response.error.detail}`;
 			return;
-		} else {
-			milestoneAnswerSession = response.data;
 		}
+
+		milestoneAnswerSession = response.data;
+
 		console.log("milestoneAnswerSession", milestoneAnswerSession);
 
 		data = contentStore.milestoneGroupData.milestones.map(
-			(item: MilestonePublic, idx) => {
+			(item: MilestonePublic, idx: number) => {
 				const answer = milestoneAnswerSession.answers[`${item.id}`];
 				const complete: boolean =
 					answer &&
@@ -216,7 +219,7 @@ const breadcrumbdata: any[] = [
 	{#if showAlert}
 		<AlertMessage message={alertMessage} />
 	{:else}
-		<div class="mx-auto flex flex-col p-4 md:rounded-t-lg">
+		<div class="mx-auto flex flex-col md:rounded-t-lg">
 			<Breadcrumbs data={breadcrumbdata} />
 			<div class="grid gap-y-4 p-4">
 				<GalleryDisplay

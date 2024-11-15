@@ -54,7 +54,6 @@ async function saveChanges() {
 	if (error) {
 		console.log(error);
 	} else {
-		console.log(data);
 		if (files && files.length > 0) {
 			for (const file of files) {
 				await uploadMilestoneImage({
@@ -77,7 +76,6 @@ async function deleteMilestoneImageAndUpdate() {
 	if (error) {
 		console.log(error);
 	} else {
-		console.log(data);
 		milestone.images = milestone.images.filter(
 			(e) => e.id !== currentMilestoneImageId,
 		);

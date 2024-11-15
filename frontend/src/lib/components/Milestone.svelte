@@ -28,10 +28,7 @@ import AlertMessage from "./AlertMessage.svelte";
 import Breadcrumbs from "./Navigation/Breadcrumbs.svelte";
 
 onMount(() => {
-	if (
-		contentStore.milestoneGroupData &&
-		contentStore.milestoneGroupData.milestones
-	) {
+	if (contentStore.milestoneGroupData?.milestones) {
 		currentMilestone =
 			contentStore.milestoneGroupData.milestones[currentMilestoneIndex];
 	}
@@ -39,11 +36,7 @@ onMount(() => {
 
 const imageInterval = 5000;
 setInterval(() => {
-	if (
-		currentMilestone &&
-		currentMilestone.images &&
-		currentMilestone.images.length > 0
-	) {
+	if (currentMilestone?.images && currentMilestone.images.length > 0) {
 		currentImageIndex =
 			(currentImageIndex + 1) % currentMilestone.images.length;
 	}
@@ -85,7 +78,7 @@ async function nextMilestone() {
 	}
 	milestoneAnswerSession.answers[`${currentMilestone.id}`] = data;
 	if (
-		currentMilestoneIndex + 1 ==
+		currentMilestoneIndex + 1 ===
 		contentStore.milestoneGroupData.milestones.length
 	) {
 		activeTabChildren.set("milestoneOverview");
@@ -116,6 +109,11 @@ function selectAnswer(answer: number) {
 }
 
 async function setup() {
+	if (currentChild.id === null || currentChild.id === undefined) {
+		console.log("No current child");
+		return;
+	}
+
 	const response = await getCurrentMilestoneAnswerSession({
 		path: { child_id: currentChild.id },
 	});
@@ -123,8 +121,7 @@ async function setup() {
 	if (response.error) {
 		console.log("Error when retrieving milestone answer session");
 		showAlert = true;
-		alertMessage =
-			$_("milestone.alertMessageRetrieving") + " " + response.error.detail;
+		alertMessage = `${$_("milestone.alertMessageRetrieving")} ${response.error.detail}`;
 		milestoneAnswerSession = undefined;
 	} else {
 		milestoneAnswerSession = response.data;
@@ -167,10 +164,7 @@ const breadcrumbdata = $derived([
 		symbol: GridOutline,
 	},
 	{
-		label:
-			String(currentMilestoneIndex + 1) +
-			"/" +
-			String(contentStore.milestoneGroupData.milestones.length),
+		label: `${currentMilestoneIndex + 1}/${contentStore.milestoneGroupData.milestones.length}`,
 		symbol: EditOutline,
 	},
 ]);
@@ -180,7 +174,7 @@ const breadcrumbdata = $derived([
 <p>{$_("userData.loadingMessage")}</p>
 {:then}
 <div
-	class="border-1 flex flex-col border border-gray-200 bg-white shadow md:max-w-7xl md:rounded-lg dark:border-gray-700 dark:bg-gray-800"
+	class="mx-auto flex flex-col p-4 md:rounded-t-lg"
 >
 	{#if $locale && contentStore.milestoneGroupData && contentStore.milestoneGroupData.text && contentStore.milestoneGroupData.milestones && currentMilestone && currentMilestone.text && currentMilestone.images}
 

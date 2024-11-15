@@ -1,7 +1,7 @@
 <script lang="ts">
 import UserVerify from "$lib/components/UserVerify.svelte";
 import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
-import { currentUser, refreshUser } from "$lib/stores/userStore";
+import { user } from "$lib/stores/userStore.svelte";
 import { Button, Card, TabItem, Tabs } from "flowbite-svelte";
 import {
 	AtomOutline,
@@ -11,17 +11,14 @@ import {
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
-import { get } from "svelte/store";
 import AdminPage from "./AdminPage.svelte";
 import UserDataInput from "./UserDataInput.svelte";
 
-onMount(async () => {
-	await refreshUser();
-});
+onMount(user.load);
 </script>
 
-{#if get(currentUser)}
-	{#if get(currentUser)?.is_verified === true}
+{#if user.data}
+	{#if user.data.is_verified === true}
 		<div class="m-2 p-2">
 			<Tabs tabStyle="underline">
 				<TabItem open={true}>
@@ -29,7 +26,7 @@ onMount(async () => {
 						<ProfileCardSolid size="lg" />
 						<span class="hidden md:inline">{$_("userData.label")}</span>
 					</div>
-					<svelte:component this={UserDataInput} />
+					<UserDataInput />
 				</TabItem>
 				<TabItem onclick = {() =>{
 					activeTabChildren.set("childrenGallery");
@@ -42,8 +39,7 @@ onMount(async () => {
 						this={componentTable[$activeTabChildren]}
 					/>
 				</TabItem>
-
-				{#if get(currentUser)?.is_superuser}
+				{#if user.data.is_superuser}
 					<TabItem>
 						<div
 							slot="title"
@@ -55,7 +51,7 @@ onMount(async () => {
 						<AdminPage />
 					</TabItem>
 				{/if}
-				{#if get(currentUser)?.is_researcher}
+				{#if user.data.is_researcher}
 					<TabItem>
 						<div
 							slot="title"
@@ -64,7 +60,7 @@ onMount(async () => {
 							<AtomOutline size="lg" />
 							<span class="hidden md:inline">{$_("researcher.label")}</span>
 						</div>
-						<svelte:component this={Card} />
+						<Card />
 					</TabItem>
 				{/if}
 			</Tabs>

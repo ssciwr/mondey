@@ -72,7 +72,7 @@ async function submitData(): Promise<void> {
 				<DataInput
 					component={maildata.component}
 					bind:value={maildata.value}
-					properties={maildata.props}
+					{...maildata.props}
 				/>
 			</div>
 

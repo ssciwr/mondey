@@ -1,5 +1,4 @@
 <script lang="ts">
-import { base } from "$app/paths";
 import { registerRegister } from "$lib/client/services.gen";
 import { type RegisterRegisterData } from "$lib/client/types.gen";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
@@ -28,8 +27,7 @@ async function submitData(): Promise<void> {
 
 		if (result.error) {
 			console.log("error: ", result.response.status, result.error.detail);
-			alertMessage =
-				$_("registration.alertMessageError") + ": " + result.error.detail;
+			alertMessage = `${$_("registration.alertMessageError")}: ${result.error.detail}`;
 			showAlert = true;
 		} else {
 			console.log("successful transmission: ", result.response.status);
@@ -56,7 +54,6 @@ let alertMessage = $_("registration.alertMessageMissing");
 	<AlertMessage
 		title={$_("registration.alertMessageTitle")}
 		message={alertMessage}
-		infopage="{base}/info"
 		infotitle="Was passiert mit den Daten"
 		onclick={() => {
 			showAlert = false;
