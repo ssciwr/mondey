@@ -12,7 +12,7 @@ import {
 export async function refreshMilestoneGroups() {
 	console.log("refreshMilestoneGroups...");
 	const { data, error } = await getMilestoneGroupsAdmin();
-	if (error || data == undefined) {
+	if (error || data === undefined) {
 		console.log("Failed to get MilestoneGroups");
 		milestoneGroups.set([]);
 	} else {
