@@ -17,13 +17,15 @@
 			"suspicious": {
 				"all": true,
 				"noConsole": "off",
+				"noConsoleLog": "off",
 				"noExplicitAny": "off"
 			},
 			"style": {
 				"recommended": true
 			},
 			"complexity": {
-				"recommended": true
+				"recommended": true,
+				"noForEach": "off"
 			},
 			"correctness": {
 				"recommended": true
