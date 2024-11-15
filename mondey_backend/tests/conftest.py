@@ -45,10 +45,12 @@ from mondey_backend.models.users import UserRead
 @pytest.fixture()
 def static_dir(tmp_path_factory: pytest.TempPathFactory):
     static_dir = tmp_path_factory.mktemp("static")
-    # add some milestone image files & default child image
-    for filename in ["m1.jpg", "m2.jpg", "m3.jpg", "default_child.jpg"]:
-        with (static_dir / filename).open("w") as f:
-            f.write(filename)
+    milestone_images_dir = static_dir / "m"
+    milestone_images_dir.mkdir()
+    # add some milestone image files
+    for milestone_image_id in [1, 2, 3]:
+        with (milestone_images_dir / "f{milestone_image_id}.jpg").open("w") as f:
+            f.write(f"{milestone_image_id}")
     return static_dir
 
 
@@ -779,7 +781,7 @@ def milestone_group1():
                         "help": "m2_fr_h",
                     },
                 },
-                "images": [{"filename": "m3.jpg", "approved": True}],
+                "images": [{"id": 3}],
             },
             {
                 "id": 1,
@@ -804,10 +806,7 @@ def milestone_group1():
                         "help": "m1_fr_h",
                     },
                 },
-                "images": [
-                    {"filename": "m1.jpg", "approved": True},
-                    {"filename": "m2.jpg", "approved": True},
-                ],
+                "images": [{"id": 1}, {"id": 2}],
             },
         ],
     }
@@ -881,8 +880,6 @@ def milestone_group_admin1():
                     {
                         "id": 3,
                         "milestone_id": 2,
-                        "filename": "m3.jpg",
-                        "approved": True,
                     }
                 ],
                 "text": {
@@ -921,14 +918,10 @@ def milestone_group_admin1():
                     {
                         "id": 1,
                         "milestone_id": 1,
-                        "filename": "m1.jpg",
-                        "approved": True,
                     },
                     {
                         "id": 2,
                         "milestone_id": 1,
-                        "filename": "m2.jpg",
-                        "approved": True,
                     },
                 ],
                 "text": {

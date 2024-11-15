@@ -1,16 +1,15 @@
 from __future__ import annotations
 
 import json
-import pathlib
 
 from fastapi import APIRouter
 from fastapi import HTTPException
 
 from ...dependencies import SessionDep
 from ...models.milestones import Language
-from ...settings import app_settings
 from ..utils import add
 from ..utils import get
+from ..utils import i18n_language_path
 
 
 def create_router() -> APIRouter:
@@ -40,11 +39,7 @@ def create_router() -> APIRouter:
         session: SessionDep, language_id: str, i18dict: dict[str, dict[str, str]]
     ):
         language = get(session, Language, language_id)
-        i18json_path = (
-            pathlib.Path(app_settings.STATIC_FILES_PATH)
-            / "i18n"
-            / f"{language.id}.json"
-        )
+        i18json_path = i18n_language_path(language.id)
         i18json_path.parent.mkdir(exist_ok=True)
         with open(i18json_path, "w", encoding="utf-8") as i18json_file:
             json.dump(i18dict, i18json_file, separators=(",", ":"), ensure_ascii=False)

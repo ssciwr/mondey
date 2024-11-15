@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import pathlib
-
 from fastapi import APIRouter
 from fastapi import UploadFile
 from sqlmodel import col
@@ -18,10 +16,11 @@ from ...models.milestones import MilestoneGroupText
 from ...models.milestones import MilestoneImage
 from ...models.milestones import MilestoneText
 from ...models.utils import ItemOrder
-from ...settings import app_settings
 from ..utils import add
 from ..utils import calculate_milestone_age_scores
 from ..utils import get
+from ..utils import milestone_group_image_path
+from ..utils import milestone_image_path
 from ..utils import update_item_orders
 from ..utils import update_milestone_group_text
 from ..utils import update_milestone_text
@@ -80,10 +79,9 @@ def create_router() -> APIRouter:
     async def upload_milestone_group_image(
         session: SessionDep, milestone_group_id: int, file: UploadFile
     ):
-        milestone_group = get(session, MilestoneGroup, milestone_group_id)
-        filename = f"{app_settings.STATIC_FILES_PATH}/mg{milestone_group.id}.jpg"
-        write_file(file, filename)
-        return {"filename": filename}
+        get(session, MilestoneGroup, milestone_group_id)
+        write_file(file, milestone_group_image_path(milestone_group_id))
+        return {"ok": True}
 
     @router.post("/milestones/{milestone_group_id}", response_model=MilestoneAdmin)
     def create_milestone(session: SessionDep, milestone_group_id: int):
@@ -126,21 +124,15 @@ def create_router() -> APIRouter:
         session: SessionDep, milestone_id: int, file: UploadFile
     ):
         milestone = get(session, Milestone, milestone_id)
-        milestone_image = MilestoneImage(milestone_id=milestone.id, approved=True)
+        milestone_image = MilestoneImage(milestone_id=milestone.id)
         add(session, milestone_image)
-        filename = f"m{milestone_image.id}.jpg"
-        milestone_image.filename = filename
-        write_file(file, f"{app_settings.STATIC_FILES_PATH}/{filename}")
-        session.commit()
-        session.refresh(milestone_image)
+        write_file(file, milestone_image_path(milestone_image.id))
         return milestone_image
 
     @router.delete("/milestone-images/{milestone_image_id}")
     async def delete_milestone_image(session: SessionDep, milestone_image_id: int):
         milestone_image = get(session, MilestoneImage, milestone_image_id)
-        pathlib.Path(
-            f"{app_settings.STATIC_FILES_PATH}/m{milestone_image.id}.jpg"
-        ).unlink(missing_ok=True)
+        milestone_image_path(milestone_image_id).unlink(missing_ok=True)
         session.delete(milestone_image)
         session.commit()
         return {"ok": True}

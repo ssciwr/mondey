@@ -25,19 +25,8 @@ async function setup(): Promise<any> {
 				const childImageResponse = await getChildImage({
 					path: { child_id: child.id },
 				});
-				if (childImageResponse.error) {
-					console.log("Error when retrieving child image");
-					showAlert = true;
-					alertMessage =
-						$_("childData.alertMessageImage") +
-						" " +
-						childImageResponse.error.detail;
-				} else {
-					const reader = new FileReader();
-					reader.readAsDataURL(childImageResponse.data);
-					image = await new Promise((resolve) => {
-						reader.onloadend = () => resolve(reader.result as string);
-					});
+				if (!childImageResponse.error) {
+					image = URL.createObjectURL(childImageResponse.data);
 				}
 				return {
 					header: child.name,

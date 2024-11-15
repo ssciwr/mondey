@@ -672,16 +672,6 @@ export const MilestoneImageSchema = {
                 }
             ],
             title: 'Milestone Id'
-        },
-        filename: {
-            type: 'string',
-            title: 'Filename',
-            default: ''
-        },
-        approved: {
-            type: 'boolean',
-            title: 'Approved',
-            default: false
         }
     },
     type: 'object',
@@ -690,17 +680,13 @@ export const MilestoneImageSchema = {
 
 export const MilestoneImagePublicSchema = {
     properties: {
-        filename: {
-            type: 'string',
-            title: 'Filename'
-        },
-        approved: {
-            type: 'boolean',
-            title: 'Approved'
+        id: {
+            type: 'integer',
+            title: 'Id'
         }
     },
     type: 'object',
-    required: ['filename', 'approved'],
+    required: ['id'],
     title: 'MilestoneImagePublic'
 } as const;
 

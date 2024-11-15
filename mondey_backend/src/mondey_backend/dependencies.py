@@ -7,14 +7,14 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import Session
 
-from .databases.milestones import engine as milestones_engine
+from .databases.mondey import engine as mondey_engine
 from .databases.users import get_async_session
 from .models.users import User
 from .users import fastapi_users
 
 
 def get_session():
-    with Session(milestones_engine) as session:
+    with Session(mondey_engine) as session:
         yield session
 
 

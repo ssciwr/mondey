@@ -85,7 +85,7 @@ def test_delete_endpoints_invalid_admin_user(
 def test_put_milestone_group_image(
     admin_client: TestClient, static_dir: pathlib.Path, jpg_file: pathlib.Path
 ):
-    static_dir_jpg = static_dir / "mg1.jpg"
+    static_dir_jpg = static_dir / "mg" / "1.jpg"
     assert not static_dir_jpg.is_file()
     with open(jpg_file, "rb") as f:
         response = admin_client.put(
@@ -172,8 +172,8 @@ def test_post_milestone_image(
     # add an image to each milestone
     for milestone_id in [1, 2, 3, 4, 5]:
         milestone_image_id += 1
-        filename = f"m{milestone_image_id}.jpg"
-        static_dir_jpg = static_dir / filename
+        filename = f"{milestone_image_id}.jpg"
+        static_dir_jpg = static_dir / "m" / filename
         assert not static_dir_jpg.is_file()
         with open(jpg_file, "rb") as f:
             response = admin_client.post(
@@ -181,7 +181,6 @@ def test_post_milestone_image(
                 files={"file": ("filename", f, "image/jpeg")},
             )
         assert response.status_code == 200
-        assert response.json()["filename"] == filename
         assert static_dir_jpg.is_file()
     assert len(admin_client.get("/milestones/1").json()["images"]) == 3
     assert len(admin_client.get("/milestones/2").json()["images"]) == 2
@@ -190,8 +189,8 @@ def test_post_milestone_image(
     assert len(admin_client.get("/milestones/5").json()["images"]) == 1
     # remove added images
     for milestone_image_id in range(4, 9):
-        filename = f"m{milestone_image_id}.jpg"
-        static_dir_jpg = static_dir / filename
+        filename = f"{milestone_image_id}.jpg"
+        static_dir_jpg = static_dir / "m" / filename
         assert static_dir_jpg.is_file()
         assert (
             admin_client.delete(

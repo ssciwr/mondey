@@ -129,14 +129,11 @@ class MilestoneAdmin(SQLModel):
 class MilestoneImage(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     milestone_id: int | None = Field(default=None, foreign_key="milestone.id")
-    filename: str = ""
-    approved: bool = False
     milestone: Milestone = back_populates("images")
 
 
 class MilestoneImagePublic(SQLModel):
-    filename: str
-    approved: bool
+    id: int
 
 
 ## MilestoneAnswer

@@ -175,13 +175,10 @@ export type MilestoneGroupTextPublic = {
 export type MilestoneImage = {
     id?: (number | null);
     milestone_id?: (number | null);
-    filename?: string;
-    approved?: boolean;
 };
 
 export type MilestoneImagePublic = {
-    filename: string;
-    approved: boolean;
+    id: number;
 };
 
 export type MilestonePublic = {

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import pathlib
-
 from fastapi import APIRouter
 from fastapi import HTTPException
 from fastapi import UploadFile
@@ -24,9 +22,9 @@ from ..models.questions import UserAnswer
 from ..models.questions import UserAnswerPublic
 from ..models.users import UserRead
 from ..models.users import UserUpdate
-from ..settings import app_settings
 from ..users import fastapi_users
 from .utils import add
+from .utils import child_image_path
 from .utils import get
 from .utils import get_db_child
 from .utils import get_or_create_current_milestone_answer_session
@@ -40,12 +38,10 @@ def create_router() -> APIRouter:
     # children endpoints
     @router.get("/children/", response_model=list[ChildPublic])
     def get_children(session: SessionDep, current_active_user: CurrentActiveUserDep):
-        return [
-            child
-            for child in session.exec(
-                select(Child).where(col(Child.user_id) == current_active_user.id)
-            ).all()
-        ]
+        children = session.exec(
+            select(Child).where(col(Child.user_id) == current_active_user.id)
+        ).all()
+        return children
 
     @router.get("/children/{child_id}", response_model=ChildPublic)
     def get_child(
@@ -72,12 +68,10 @@ def create_router() -> APIRouter:
         current_active_user: CurrentActiveUserDep,
         child: ChildPublic,
     ):
-        db_child = get(session, Child, child.id)
-        if db_child is None or db_child.user_id != current_active_user.id:
-            raise HTTPException(401)
+        db_child = get_db_child(session, current_active_user, child.id)
         for key, value in child.model_dump().items():
             setattr(db_child, key, value)
-        add(session, db_child)
+        session.commit()
         return db_child
 
     @router.delete("/children/{child_id}")
@@ -96,14 +90,10 @@ def create_router() -> APIRouter:
         child_id: int,
     ):
         child = get_db_child(session, current_active_user, child_id)
-        image_path = pathlib.Path(
-            f"{app_settings.PRIVATE_FILES_PATH}/children/{child.id}.jpg"
-        )
-        if not image_path.exists():
-            image_path = pathlib.Path(
-                f"{app_settings.STATIC_FILES_PATH}/default_child.jpg"
-            )
-        return image_path
+        image_path = child_image_path(child_id)
+        if child.has_image and image_path.exists():
+            return image_path
+        raise HTTPException(404)
 
     @router.put("/children-images/{child_id}")
     async def upload_child_image(
@@ -115,8 +105,7 @@ def create_router() -> APIRouter:
         child = get_db_child(session, current_active_user, child_id)
         child.has_image = True
         session.commit()
-        filename = f"{app_settings.PRIVATE_FILES_PATH}/children/{child.id}.jpg"
-        write_file(file, filename)
+        write_file(file, child_image_path(child_id))
         return {"ok": True}
 
     @router.delete("/children-images/{child_id}")
@@ -124,12 +113,9 @@ def create_router() -> APIRouter:
         session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
     ):
         child = get_db_child(session, current_active_user, child_id)
-        image_path = pathlib.Path(
-            f"{app_settings.PRIVATE_FILES_PATH}/children/{child.id}.jpg"
-        )
         child.has_image = False
         session.commit()
-        image_path.unlink(missing_ok=True)
+        child_image_path(child.id).unlink(missing_ok=True)
         return {"ok": True}
 
     # milestone endpoints
@@ -241,11 +227,10 @@ def create_router() -> APIRouter:
                         "child_id": child_id,
                     },
                 )
+                session.add(current_answer)
             else:
                 for key, value in new_answer.model_dump().items():
                     setattr(current_answer, key, value)
-
-            add(session, current_answer)
         session.commit()
 
         return {"ok": True}

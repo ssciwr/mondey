@@ -9,12 +9,12 @@ from ..models.milestones import Language
 from ..settings import app_settings
 
 engine = create_engine(
-    f"sqlite:///{app_settings.DATABASE_PATH}/milestones.db",
+    f"sqlite:///{app_settings.DATABASE_PATH}/mondey.db",
     connect_args={"check_same_thread": False},
 )
 
 
-def create_database():
+def create_mondey_db_and_tables():
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
         # add "de" and "en" Languages if no languages are present in the database:

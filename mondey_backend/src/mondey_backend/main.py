@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from .databases.milestones import create_database
+from .databases.mondey import create_mondey_db_and_tables
 from .databases.users import create_user_db_and_tables
 from .routers import admin
 from .routers import auth
@@ -22,7 +22,7 @@ from .settings import app_settings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    create_database()
+    create_mondey_db_and_tables()
     await create_user_db_and_tables()
     yield
 
