@@ -1,13 +1,24 @@
-<script>
+<svelte:options runes={true} />
+<script lang='ts'>
 import { Alert, Button } from "flowbite-svelte";
 import { EyeSolid, InfoCircleSolid } from "flowbite-svelte-icons";
+import { _ } from "svelte-i18n";
 
-export let message = "";
-export let title = "";
-export let infotitle = "";
-export let lastpage = "";
-export let infopage = "";
-export let onclick = () => {};
+let {
+	message = "",
+	title = "",
+	infotitle = "",
+	lastpage = "",
+	infopage = "",
+	onclick = (event = undefined) => {},
+}: {
+	message?: string;
+	title?: string;
+	infotitle?: string;
+	lastpage?: string;
+	infopage?: string;
+	onclick?: (event: Event | undefined) => void;
+} = $props();
 </script>
 
 <Alert class="m-4 p-4">
@@ -20,6 +31,6 @@ export let onclick = () => {};
 		{#if infopage != ''}
 			<Button size="md" href={infopage}><EyeSolid class="me-2 h-4 w-4" />{infotitle}</Button>
 		{/if}
-		<Button size="md" outline href={lastpage} on:click={onclick}>Verstanden</Button>
+		<Button size="md" outline href={lastpage} on:click={onclick}>{$_("misc.understood")}</Button>
 	</div>
 </Alert>

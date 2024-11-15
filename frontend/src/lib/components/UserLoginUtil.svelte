@@ -1,10 +1,19 @@
+<svelte:options runes={true} />
 <script lang="ts">
 import { base } from "$app/paths";
 import { Checkbox } from "flowbite-svelte";
-export let cls = "";
-export let checked = false;
-export let onchecked = (event) => {};
-export let onchange = (event) => {};
+
+let {
+	cls = "",
+	checked = false,
+	onchecked = (event) => {},
+	onchange = (event) => {},
+}: {
+	cls?: string;
+	checked?: boolean;
+	onchecked?: (event: Event) => void;
+	onchange?: (event: Event) => void;
+} = $props();
 </script>
 
 <div class={'container mx-auto flex w-full max-w-md items-start' + cls}>

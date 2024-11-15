@@ -16,11 +16,10 @@ async function setup(): Promise<any> {
 	if (children.error) {
 		console.log("Error when retrieving child data");
 		showAlert = true;
-		alertMessage =
-			$_("childData.alertMessageRetrieving") + children.error.detail;
+		alertMessage = $_("childData.alertMessageRetrieving");
 	} else {
 		const childrenData = await Promise.all(
-			children.data.map(async (child) => {
+			(children.data || []).map(async (child) => {
 				let image = null;
 				const childImageResponse = await getChildImage({
 					path: { child_id: child.id },
@@ -34,7 +33,7 @@ async function setup(): Promise<any> {
 						childImageResponse.error.detail;
 				} else {
 					const reader = new FileReader();
-					reader.readAsDataURL(childImageResponse.data);
+					reader.readAsDataURL(childImageResponse.data as Blob);
 					image = await new Promise((resolve) => {
 						reader.onloadend = () => resolve(reader.result as string);
 					});
@@ -114,7 +113,6 @@ function searchName(data: any[], key: string): any[] {
 let showAlert = $state(false);
 let alertMessage = $state($_("childData.alertMessageError"));
 let data: any[] = $state([]);
-
 const promise = $state(setup());
 const searchData = [
 	{

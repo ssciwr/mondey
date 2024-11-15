@@ -37,8 +37,8 @@ onMount(user.load);
 					</div>
 					<svelte:component
 						this={componentTable[$activeTabChildren]}
-					/>				</TabItem>
-
+					/>
+				</TabItem>
 				{#if user.data?.is_superuser}
 					<TabItem>
 						<div

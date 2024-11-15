@@ -1,3 +1,4 @@
+<svelte:options runes={true} />
 <script lang="ts">
 import { base } from "$app/paths";
 import logo_dark from "$lib/assets/mondey_dark.svg";
@@ -20,6 +21,8 @@ import {
 import { MoonSolid, SunSolid } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 import "../app.css";
+
+let { children } = $props();
 
 onMount(async () => {
 	await user.load();
@@ -57,5 +60,5 @@ onMount(async () => {
 <div
 	class="flex-auto  items-center justify-center overflow-y-auto pb-20 md:mx-[max(10vw,2rem)] md:my-[max(2vw,2rem)]"
 >
-	<slot></slot>
+	{@render children?.()}
 </div>

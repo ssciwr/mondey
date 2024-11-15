@@ -109,7 +109,7 @@ async function setup(): Promise<void> {
 		console.log("milestoneAnswerSession", milestoneAnswerSession);
 
 		data = contentStore.milestoneGroupData.milestones.map(
-			(item: MilestonePublic, idx) => {
+			(item: MilestonePublic, idx: number) => {
 				const answer = milestoneAnswerSession.answers[`${item.id}`];
 				const complete: boolean =
 					answer &&
@@ -216,7 +216,7 @@ const breadcrumbdata: any[] = [
 	{#if showAlert}
 		<AlertMessage message={alertMessage} />
 	{:else}
-		<div class="mx-auto flex flex-col p-4 md:rounded-t-lg">
+		<div class="mx-auto flex flex-col md:rounded-t-lg">
 			<Breadcrumbs data={breadcrumbdata} />
 			<div class="grid gap-y-4 p-4">
 				<GalleryDisplay

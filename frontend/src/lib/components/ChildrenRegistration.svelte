@@ -5,6 +5,7 @@ import {
 	type ChildAnswerPublic,
 	type ChildCreate,
 	type ChildPublic,
+	type ErrorModel,
 	type GetChildQuestionsResponse,
 	createChild,
 	deleteChild,
@@ -30,8 +31,6 @@ import {
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import { _, locale } from "svelte-i18n";
-
-console.log("ChildrenRegistration");
 
 // questions and answers about child that are not part of the child object
 let questionnaire: GetChildQuestionsResponse = $state(
@@ -72,19 +71,20 @@ async function setup(): Promise<{
 	questionnaire: GetChildQuestionsResponse;
 	answers: { [k: string]: ChildAnswerPublic };
 }> {
-	console.log("setup");
 	await currentChild.load_data();
 
 	// get questions
 	const questions = await getChildQuestions();
 	if (questions.error || questions.data === undefined) {
-		console.log("Error when getting userquestions: ", questions.error.detail);
+		console.log(
+			"Error when getting userquestions: ",
+			(questions.error as ErrorModel).detail,
+		);
 		showAlert = true;
 		alertMessage = $_("childData.alertMessageError");
 	} else {
 		questionnaire = questions.data;
 	}
-	console.log("questionaire: ", questionnaire);
 
 	if (currentChild.id !== null) {
 		const child = await getChild({ path: { child_id: currentChild.id } });
@@ -200,6 +200,13 @@ async function submitChildData(): Promise<void> {
 }
 
 async function submitImageData(): Promise<void> {
+	if (currentChild.id === null) {
+		console.log("no child id, no image to upload");
+		showAlert = true;
+		alertMessage = $_("childData.alertMessageError");
+		return;
+	}
+
 	if (imageDeleted === true) {
 		const response = await deleteChildImage({
 			path: {
@@ -349,18 +356,18 @@ async function submitData(): Promise<void> {
 							bind:value={answers[element.id].answer}
 							bind:additionalValue={answers[element.id]
 								.additional_answer}
-							label={element?.text[$locale].question}
+							label={element?.text?.[$locale]?.question ?? ''}
 							textTrigger={element.additional_option}
 							required={element.component === 'fileupload' ? false : true}
 							additionalRequired={true}
 							id={"input_" + String(i)}
-							items={element.text[$locale].options_json === ""
+							items={element?.text?.[$locale].options_json === ""
 								? undefined
 								: JSON.parse(
-										element.text[$locale].options_json,
+										element?.text?.[$locale].options_json,
 									)}
 							disabled={disableEdit}
-							placeholder={element.text[$locale].placeholder}
+							placeholder={element?.text?.[$locale].placeholder}
 						/>
 					{/each}
 					{#if disableEdit === true}
@@ -400,6 +407,13 @@ async function submitData(): Promise<void> {
 							type="button"
 							color="red"
 							on:click={async () => {
+								if (currentChild.id === null) {
+									console.log("no child id, no child to delete");
+									showAlert = true;
+									alertMessage = $_("childData.alertMessageError");
+									return;
+								}
+
 								const response = await deleteChild({
 									path: {
 										child_id: currentChild.id,

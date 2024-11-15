@@ -55,7 +55,7 @@ async function setup() {
 	if (currentAnswers?.error || currentAnswers.data === undefined) {
 		console.log(
 			"Error when getting current answers for users: ",
-			currentAnswers.error.detail,
+			currentAnswers?.error?.detail,
 		);
 
 		showAlert = true;

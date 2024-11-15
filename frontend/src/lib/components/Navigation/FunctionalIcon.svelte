@@ -1,10 +1,17 @@
+<svelte:options runes={true} />
 <script lang="ts">
 import { Tooltip } from "flowbite-svelte";
-export let tooltip: string | null = null;
+let {
+	tooltip = null,
+	children,
+}: {
+	tooltip?: string | null;
+	children?: any;
+} = $props();
 </script>
 
 <div class="functional-icon-container">
-	<slot></slot>
+	{@render children?.()}
 	{#if tooltip}
 		<Tooltip arrow={false}>{tooltip}</Tooltip>
 	{/if}
