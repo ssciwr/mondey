@@ -1,29 +1,8 @@
 <svelte:options runes={true} />
 <script lang="ts">
+import { type CardElement, type CardStyle } from "$lib/util";
 import { Button, Card, Progressbar, Tooltip } from "flowbite-svelte";
 import { ArrowRightOutline } from "flowbite-svelte-icons";
-import { type Component } from "svelte";
-
-type Data = {
-	header: string | undefined;
-	summary: string | undefined;
-	button: any | undefined;
-	href: string | undefined;
-	image: string | undefined;
-	progress: number | undefined;
-	events: any | undefined;
-	auxilliary: any | undefined;
-	buttonIcon: Component | undefined;
-};
-
-type StyleProps = {
-	card: { [key: string]: any };
-	header: { [key: string]: any };
-	summary: { [key: string]: any };
-	button: { [key: string]: any };
-	progress: { [key: string]: any };
-	auxilliary: { [key: string]: any };
-};
 
 let {
 	data = {
@@ -42,10 +21,10 @@ let {
 		header: {},
 		summary: {},
 		button: {},
-		progress: {},
+		progress: null,
 		auxilliary: {},
 	},
-}: { data: Data; styleProps: StyleProps } = $props();
+}: { data: CardElement; styleProps: CardStyle } = $props();
 </script>
 
 <Card
@@ -56,7 +35,7 @@ let {
 		? 'm-2 max-w-prose items-center  text-gray-700 dark:text-white'
 		: 'hover:transition-color m-2 max-w-prose cursor-pointer items-center text-gray-700 hover:bg-gray-300 dark:text-white dark:hover:bg-gray-600 '}
 	{...styleProps.card}
-	on:click={data?.events['onclick'] ?? (()=>{})}
+	on:click={data?.events?.['onclick'] ?? (()=>{})}
 >
 	{#if data.header}
 		<h5 class="mb-2 text-2xl font-bold tracking-tight" {...styleProps.header}>
@@ -92,7 +71,7 @@ let {
 			animate={true}
 			color={data.progress === 1 ? styleProps.progress?.completeColor : styleProps.progress?.color}
 			size={styleProps.progress?.size}
-			divClass={styleProps?.progress.divClass}
+			divClass={styleProps.progress?.divClass}
 			labelInsideClass={styleProps.progress?.labelInsideClass}
 		/>
 	{/if}
