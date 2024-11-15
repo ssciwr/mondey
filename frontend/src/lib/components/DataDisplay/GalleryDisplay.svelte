@@ -1,5 +1,6 @@
 <svelte:options runes={true} />
 <script lang="ts">
+import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import {
 	Button,
 	Dropdown,
@@ -8,12 +9,12 @@ import {
 	Search,
 } from "flowbite-svelte";
 import { ChevronDownOutline } from "flowbite-svelte-icons";
-import { Component, tick } from "svelte";
+import { type Component, tick } from "svelte";
 
 let {
 	data = [],
 	header = null,
-	itemComponent = null,
+	itemComponent = CardDisplay,
 	withSearch = true,
 	componentProps = {},
 	searchData = [
@@ -28,7 +29,7 @@ let {
 }: {
 	data?: any[];
 	header?: string | null;
-	itemComponent?: Component | null;
+	itemComponent?: Component<any, Record<string, any>, "">;
 	withSearch?: boolean;
 	componentProps?: any;
 	searchData?: {
@@ -54,6 +55,12 @@ let filteredComponentProps = $derived(
 		return componentProps[index];
 	}),
 );
+
+$effect(() => {
+	console.log("component: ", itemComponent);
+	console.log("data: ", data);
+	console.log("filteredItems: ", filteredItems);
+});
 </script>
 
 <div class="mx-auto p-4">
@@ -117,11 +124,11 @@ let filteredComponentProps = $derived(
 		class="grid w-full grid-cols-1 justify-center gap-8 p-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
 	>
 		{#each filteredItems as item, index}
-			{#FIXME: this doesn´t work currently, which might be because of bindings or some other svelte 5 stuff}
-			<itemComponent
+			<svelte:component
+				this={itemComponent}
 				data={item}
 				styleProps={filteredComponentProps[index]}
-			></itemComponent>
+			/>
 		{/each}
 	</div>
 </div>

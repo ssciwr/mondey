@@ -2,6 +2,29 @@
 <script lang="ts">
 import { Button, Card, Progressbar, Tooltip } from "flowbite-svelte";
 import { ArrowRightOutline } from "flowbite-svelte-icons";
+import { type Component } from "svelte";
+
+type Data = {
+	header: string | undefined;
+	summary: string | undefined;
+	button: any | undefined;
+	href: string | undefined;
+	image: string | undefined;
+	progress: number | undefined;
+	events: any | undefined;
+	auxilliary: any | undefined;
+	buttonIcon: Component | undefined;
+};
+
+type StyleProps = {
+	card: { [key: string]: any };
+	header: { [key: string]: any };
+	summary: { [key: string]: any };
+	button: { [key: string]: any };
+	progress: { [key: string]: any };
+	auxilliary: { [key: string]: any };
+};
+
 let {
 	data = {
 		header: undefined,
@@ -12,6 +35,7 @@ let {
 		progress: undefined,
 		events: undefined,
 		auxilliary: undefined,
+		buttonIcon: undefined,
 	},
 	styleProps = {
 		card: {},
@@ -21,18 +45,18 @@ let {
 		progress: {},
 		auxilliary: {},
 	},
-}: { data: any; styleProps: any } = $props();
+}: { data: Data; styleProps: StyleProps } = $props();
 </script>
 
 <Card
 	img={data.image}
 	imgClass="max-md:hidden object-scale-down"
-	href={data.button ? null : data.href}
+	href={data.button ? undefined : data?.href}
 	class={data.button
 		? 'm-2 max-w-prose items-center  text-gray-700 dark:text-white'
 		: 'hover:transition-color m-2 max-w-prose cursor-pointer items-center text-gray-700 hover:bg-gray-300 dark:text-white dark:hover:bg-gray-600 '}
 	{...styleProps.card}
-	on:click={data.events['onclick']}
+	on:click={data?.events['onclick'] ?? (()=>{})}
 >
 	{#if data.header}
 		<h5 class="mb-2 text-2xl font-bold tracking-tight" {...styleProps.header}>
@@ -49,7 +73,7 @@ let {
 			href={data.href}
 			class="w-fit"
 			{...styleProps.button}
-			on:click={data.button.events.onclick}
+			on:click={data.button?.events.onclick ?? (()=>{})}
 			>{data.button}
 
 			{#if data.buttonIcon}
