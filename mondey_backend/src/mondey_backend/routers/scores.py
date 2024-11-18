@@ -31,14 +31,24 @@ def compute_feedback_simple(
         0 if avg - 2 * sigma < score <= avg - sigma (trafficlight: yellow)
         1 if score > avg - sigma (trafficlight: green)
     """
-    lim_lower = stat.avg_score - 2 * stat.sigma_score
-    lim_upper = stat.avg_score - stat.sigma_score
 
     def leq(val: float, lim: float) -> bool:
         return val < lim or np.isclose(val, lim)
 
     def geq(val: float, lim: float) -> bool:
         return val > lim or np.isclose(val, lim)
+
+    if stat.sigma_score < 1e-2:
+        # README: this relies on the score being, 1,2,3,4 integers
+        # Check again what client wants
+        lim_lower = stat.avg_score - 2
+
+        lim_upper = stat.avg_score - 1
+
+    else:
+        lim_lower = stat.avg_score - 2 * stat.sigma_score
+
+        lim_upper = stat.avg_score - stat.sigma_score
 
     if leq(score, lim_lower):
         return -1  # red
