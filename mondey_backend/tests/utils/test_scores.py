@@ -54,7 +54,7 @@ def test_get_answer_session_child_ages_in_months(session):
     assert child_ages[1] == 8
     assert child_ages[3] == 42
 
-    # TODO: check what can go wrong here
+    # TODO: check edge cases
 
 
 def test_get_average_scores_by_age(session):
@@ -83,6 +83,10 @@ def test_get_average_scores_by_age(session):
             ddof=1,
         )
     )
+
+    # TODO: check edge cases
+    # - no answers
+    # - bad child ages
 
 
 def test_calculate_milestone_age_scores(session):
