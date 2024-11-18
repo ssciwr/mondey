@@ -190,23 +190,28 @@ def _get_average_scores_by_age(
     avg_scores = np.zeros(max_age_months + 1)
     sigma_scores = np.zeros(max_age_months + 1)
     counts = np.zeros_like(avg_scores)
+
     for answer in answers:
         age = child_ages[answer.answer_session_id]  # type: ignore
         # convert 0-3 answer index to 1-4 score
         avg_scores[age] += answer.answer + 1
         counts[age] += 1
 
+    # divide each score by the number of answers
+    with np.errstate(invalid="ignore"):
+        avg_scores /= counts
+
     for answer in answers:
         age = child_ages[answer.answer_session_id]  # type: ignore
         sigma_scores[age] += (answer.answer + 1 - avg_scores[age]) ** 2
 
-    # divide each score by the number of answers
     with np.errstate(invalid="ignore"):
-        avg_scores /= counts
         sigma_scores = np.sqrt(sigma_scores / np.max(counts - 1, 0))
+
     # replace NaNs (due to zero counts) with zeros
     avg = np.nan_to_num(avg_scores)
     sigma = np.nan_to_num(sigma_scores)
+
     return avg, sigma
 
 

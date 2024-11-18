@@ -202,8 +202,10 @@ def session(children: list[dict]):
         session.add(MilestoneImage(milestone_id=1, filename="m2.jpg", approved=True))
         session.add(MilestoneImage(milestone_id=2, filename="m3.jpg", approved=True))
         session.commit()
+
         for child, user_id in zip(children, [3, 3, 1], strict=False):
             session.add(Child.model_validate(child, update={"user_id": user_id}))
+
         today = datetime.datetime.today()
         last_month = today - datetime.timedelta(days=30)
         # add an (expired) milestone answer session for child 1 / user (id 3) with 2 answers
