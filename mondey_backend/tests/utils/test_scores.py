@@ -84,14 +84,23 @@ def test_get_average_scores_by_age(session):
         )
     )
 
-    # TODO: check edge cases
-    # - no answers
-    # - bad child ages
+    child_ages = {}  # no answer sessions ==> empty child ages
+    avg, sigma = _get_average_scores_by_age(answers, child_ages)
+    assert np.all(avg == 0)
+    assert np.all(sigma == 0)
+
+    child_ages = {1: 5, 2: 3, 3: 8}
+    answers = []  # no answers ==> empty answers
+    avg, sigma = _get_average_scores_by_age(answers, child_ages)
+    assert np.all(avg == 0)
+    assert np.all(sigma == 0)
 
 
 def test_calculate_milestone_age_scores(session):
     # calculate_milestone_age_scores
     mscore = calculate_milestone_age_scores(session, 1)
+
+    # only some are filled
     assert mscore.scores[8].avg_score == 2.0
     assert mscore.scores[8].sigma_score == 0.0
     assert mscore.scores[9].avg_score == 4.0
@@ -103,10 +112,10 @@ def test_calculate_milestone_age_scores(session):
             assert score.sigma_score == 0.0
 
 
-# def test_compute_milestonegroup_statistics():
-#     # calculate_milestone_group_age_scores
+def test_calculate_milestone_group_age_scores():
+    # calculate_milestone_group_age_scores
+    assert 3 == 6
 
-#     assert 3 == 6
 
 # def test_compute_milestonegroup_statistics_bad_data():
 #     # calculate_milestone_group_age_scores
