@@ -3,10 +3,12 @@ from sqlalchemy import select
 
 from mondey_backend.models.milestones import MilestoneAgeScore
 from mondey_backend.models.milestones import MilestoneAnswer
+from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.routers.scores import compute_feedback_simple
 from mondey_backend.routers.utils import _get_answer_session_child_ages_in_months
 from mondey_backend.routers.utils import _get_average_scores_by_age
 from mondey_backend.routers.utils import calculate_milestone_age_scores
+from mondey_backend.routers.utils import calculate_milestone_group_age_scores
 
 
 def test_compute_feedback_simple():
@@ -112,8 +114,35 @@ def test_calculate_milestone_age_scores(session):
             assert score.sigma_score == 0.0
 
 
-def test_calculate_milestone_group_age_scores():
+def test_calculate_milestone_group_age_scores(session):
+    age = 8
+    age_lower = 6
+    age_upper = 3
+    milestone_group_id = 1
+
+    milestone_group = session.exec(
+        select(MilestoneGroup).where(MilestoneGroup.id == 1)
+    ).first()
+
     # calculate_milestone_group_age_scores
+    answers = [answer[0] for answer in session.exec(select(MilestoneAnswer)).all()]
+    answers = [
+        answer
+        for answer in answers
+        if answer.milestone_id in milestone_group.milestones
+    ]
+
+    score = calculate_milestone_group_age_scores(
+        session, milestone_group_id, age, age_lower, age_upper
+    )
+
+    assert score.age_months == 8
+    assert score.milestone_group_id == 1
+    assert score.avg_score == 1.5
+    assert score.sigma_score == np.std(
+        [answers.answer],
+        ddof=1,
+    )
     assert 3 == 6
 
 

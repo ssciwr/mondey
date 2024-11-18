@@ -265,7 +265,7 @@ def calculate_milestone_group_age_scores(
         all_answers.extend(answers)
 
     avg_group = np.nan_to_num(np.mean(all_answers))
-    sigma_group = np.nan_to_num(np.std(all_answers))
+    sigma_group = np.nan_to_num(np.std(all_answers, correction=1))
     mg_score = MilestoneGroupAgeScore(
         age_months=age,
         group_id=milestonegroup.id,
