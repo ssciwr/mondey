@@ -222,6 +222,7 @@ def calculate_milestone_age_scores(
     answers = session.exec(
         select(MilestoneAnswer).where(col(MilestoneAnswer.milestone_id) == milestone_id)
     ).all()
+
     avg, sigma = _get_average_scores_by_age(answers, child_ages)
     expected_age = _get_expected_age_from_scores(avg)
     return MilestoneAgeScores(

@@ -71,13 +71,15 @@ def test_get_average_scores_by_age(session):
         [answer.answer + 1 for answer in answers if answer.answer_session_id == 1],
         ddof=1,
     )
+
     assert sigma[3] == np.std(
         [answer.answer + 1 for answer in answers if answer.answer_session_id == 2],
         ddof=1,
     )
+
     assert sigma[8] == np.nan_to_num(
         np.std(
-            [answer.answer + 1 for answer in answers if answer.answer_session_id == 2],
+            [answer.answer + 1 for answer in answers if answer.answer_session_id == 3],
             ddof=1,
         )
     )
@@ -85,13 +87,16 @@ def test_get_average_scores_by_age(session):
 
 def test_calculate_milestone_age_scores(session):
     # calculate_milestone_age_scores
-
     mscore = calculate_milestone_age_scores(session, 1)
+    assert mscore.scores[8].avg_score == 2.0
+    assert mscore.scores[8].sigma_score == 0.0
+    assert mscore.scores[9].avg_score == 4.0
+    assert mscore.scores[9].sigma_score == 0.0
 
-    for m in mscore.scores:
-        print(m)
-
-    assert 3 == 6
+    for score in mscore.scores:
+        if score.age_months not in [8, 9]:
+            assert score.avg_score == 0.0
+            assert score.sigma_score == 0.0
 
 
 # def test_compute_milestonegroup_statistics():
