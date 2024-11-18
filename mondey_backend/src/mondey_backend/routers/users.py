@@ -235,4 +235,17 @@ def create_router() -> APIRouter:
 
         return {"ok": True}
 
+    @router.get(
+        "/feedback/{child_id}/{milestonegroup_id}",
+        response_model=tuple[int, dict[int, int] | None],
+    )
+    def get_feedback_for_milestoneGroup(
+        session: SessionDep,
+        current_active_user: CurrentActiveUserDep,
+        child_id: int,
+        milestonegroup_id: int,
+    ) -> tuple[int, dict[int, int] | None]:
+        # TODO: Implement this endpoint
+        return 0, {0: -1}
+
     return router

@@ -24,6 +24,7 @@ from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupAdmin
+from ..models.milestones import MilestoneGroupAgeScore
 from ..models.milestones import MilestoneGroupText
 from ..models.milestones import MilestoneText
 from ..models.questions import ChildQuestion
@@ -184,21 +185,29 @@ def _get_expected_age_from_scores(scores: np.ndarray) -> int:
 
 def _get_average_scores_by_age(
     answers: Sequence[MilestoneAnswer], child_ages: dict[int, int]
-) -> np.ndarray:
+) -> tuple[np.ndarray, np.ndarray]:
     max_age_months = 72
-    scores = np.zeros(max_age_months + 1)
-    counts = np.zeros_like(scores)
+    avg_scores = np.zeros(max_age_months + 1)
+    sigma_scores = np.zeros(max_age_months + 1)
+    counts = np.zeros_like(avg_scores)
     for answer in answers:
         age = child_ages[answer.answer_session_id]  # type: ignore
         # convert 0-3 answer index to 1-4 score
-        scores[age] += answer.answer + 1
+        avg_scores[age] += answer.answer + 1
         counts[age] += 1
+
+    for answer in answers:
+        age = child_ages[answer.answer_session_id]  # type: ignore
+        sigma_scores[age] += (answer.answer + 1 - avg_scores[age]) ** 2
+
     # divide each score by the number of answers
     with np.errstate(invalid="ignore"):
-        scores /= counts
+        avg_scores /= counts
+        sigma_scores = np.sqrt(sigma_scores / np.max(counts - 1, 0))
     # replace NaNs (due to zero counts) with zeros
-    scores = np.nan_to_num(scores)
-    return scores
+    avg = np.nan_to_num(avg_scores)
+    sigma = np.nan_to_num(sigma_scores)
+    return avg, sigma
 
 
 def calculate_milestone_age_scores(
@@ -208,19 +217,54 @@ def calculate_milestone_age_scores(
     answers = session.exec(
         select(MilestoneAnswer).where(col(MilestoneAnswer.milestone_id) == milestone_id)
     ).all()
-    scores = _get_average_scores_by_age(answers, child_ages)
-    expected_age = _get_expected_age_from_scores(scores)
+    avg, sigma = _get_average_scores_by_age(answers, child_ages)
+    expected_age = _get_expected_age_from_scores(avg)
     return MilestoneAgeScores(
         expected_age=expected_age,
         scores=[
             MilestoneAgeScore(
+                milestone_id=milestone_id,
                 age_months=age,
-                avg_score=score,
+                avg_score=avg[age],
+                sigma_score=sigma[age],
                 expected_score=(4 if age >= expected_age else 1),
             )
-            for age, score in enumerate(scores)
+            for age in range(0, len(avg))
         ],
     )
+
+
+def calculate_milestone_group_age_scores(
+    session: SessionDep,
+    milestone_group_id: int,
+    age: int,
+    age_lower: int,
+    age_upper: int,
+) -> MilestoneGroupAgeScore:
+    milestonegroup = get(session, MilestoneGroup, milestone_group_id)
+
+    all_answers = []
+    for milestone in milestonegroup.milestones:
+        answers = [
+            answer.answer
+            for answer in session.exec(
+                select(MilestoneAnswer).where(
+                    col(MilestoneAnswer.milestone_id) == milestone.id
+                    and age_lower <= milestone.expected_age_months <= age_upper
+                )
+            ).all()
+        ]
+        all_answers.extend(answers)
+
+    avg_group = np.nan_to_num(np.mean(all_answers))
+    sigma_group = np.nan_to_num(np.std(all_answers))
+    mg_score = MilestoneGroupAgeScore(
+        age_months=age,
+        group_id=milestonegroup.id,
+        avg_score=avg_group,
+        sigma_score=sigma_group,
+    )
+    return mg_score
 
 
 def child_image_path(child_id: int | None) -> pathlib.Path:

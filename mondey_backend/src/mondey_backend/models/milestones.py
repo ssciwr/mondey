@@ -174,11 +174,20 @@ class MilestoneAnswerSessionPublic(SQLModel):
 
 
 class MilestoneAgeScore(BaseModel):
+    milestone_id: int
     age_months: int
     avg_score: float
+    sigma_score: float
     expected_score: float
 
 
 class MilestoneAgeScores(BaseModel):
     scores: list[MilestoneAgeScore]
     expected_age: int
+
+
+class MilestoneGroupAgeScore(BaseModel):
+    age_months: int
+    group_id: int | None
+    avg_score: float
+    sigma_score: float
