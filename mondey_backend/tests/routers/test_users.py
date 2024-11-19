@@ -56,7 +56,6 @@ def test_get_children_invalid_user(public_client: TestClient):
 def test_get_child_image(user_client: TestClient):
     response = user_client.get("/users/children-images/2")
     assert response.status_code == 200
-    assert response.content == b"2.jpg"
 
 
 def test_get_child_image_no_image(user_client: TestClient):
@@ -108,35 +107,39 @@ def test_create_update_and_delete_child(user_client: TestClient):
 
 
 def test_upload_child_image(
-    user_client: TestClient, private_dir: pathlib.Path, jpg_file: pathlib.Path
+    user_client: TestClient,
+    private_dir: pathlib.Path,
+    image_file_jpg_1600_1200: pathlib.Path,
 ):
-    private_dir_jpg_file = private_dir / "children" / "1.jpg"
+    private_dir_image_file = private_dir / "children" / "1.webp"
     # child 1 does not have an image:
-    assert not private_dir_jpg_file.is_file()
+    assert not private_dir_image_file.is_file()
     assert user_client.get("/users/children/").json()[0]["has_image"] is False
     assert user_client.get("/users/children-images/1").status_code == 404
 
     # add an image for the first child
-    with open(jpg_file, "rb") as f:
+    with open(image_file_jpg_1600_1200, "rb") as f:
         response = user_client.put(
             "/users/children-images/1",
             files={"file": ("filename", f, "image/jpeg")},
         )
     assert response.status_code == 200
-    assert private_dir_jpg_file.is_file()
+    assert private_dir_image_file.is_file()
     assert user_client.get("/users/children/").json()[0]["has_image"] is True
     assert user_client.get("/users/children-images/1").status_code == 200
 
 
 def test_delete_child_image(
-    user_client: TestClient, private_dir: pathlib.Path, jpg_file: pathlib.Path
+    user_client: TestClient,
+    private_dir: pathlib.Path,
+    image_file_png_1100_1100: pathlib.Path,
 ):
     children_dir = private_dir / "children"
     # add an image for the first child
-    with open(jpg_file, "rb") as f:
+    with open(image_file_png_1100_1100, "rb") as f:
         response = user_client.put(
             "/users/children-images/1",
-            files={"file": ("filename", f, "image/jpeg")},
+            files={"file": ("filename", f, "image/png")},
         )
 
     # delete the image

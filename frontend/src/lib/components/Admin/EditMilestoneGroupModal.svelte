@@ -98,7 +98,7 @@ export async function saveChanges() {
 				<Fileupload
 					bind:files
 					onchange={updateImageToUpload}
-					accept=".jpg, .jpeg"
+					accept=".jpg, .jpeg, .png"
 					id="img_upload"
 					class="mb-2 flex-grow-0"
 				/>

@@ -24,7 +24,7 @@ from ..utils import milestone_image_path
 from ..utils import update_item_orders
 from ..utils import update_milestone_group_text
 from ..utils import update_milestone_text
-from ..utils import write_file
+from ..utils import write_image_file
 
 
 def create_router() -> APIRouter:
@@ -80,7 +80,7 @@ def create_router() -> APIRouter:
         session: SessionDep, milestone_group_id: int, file: UploadFile
     ):
         get(session, MilestoneGroup, milestone_group_id)
-        write_file(file, milestone_group_image_path(milestone_group_id))
+        write_image_file(file, milestone_group_image_path(milestone_group_id))
         return {"ok": True}
 
     @router.post("/milestones/{milestone_group_id}", response_model=MilestoneAdmin)
@@ -126,7 +126,7 @@ def create_router() -> APIRouter:
         milestone = get(session, Milestone, milestone_id)
         milestone_image = MilestoneImage(milestone_id=milestone.id)
         add(session, milestone_image)
-        write_file(file, milestone_image_path(milestone_image.id))
+        write_image_file(file, milestone_image_path(milestone_image.id))
         return milestone_image
 
     @router.delete("/milestone-images/{milestone_image_id}")
