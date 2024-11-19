@@ -12,6 +12,7 @@ from ..dependencies import SessionDep
 from ..models.children import Child
 from ..models.children import ChildCreate
 from ..models.children import ChildPublic
+from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerSession
@@ -257,6 +258,42 @@ def create_router() -> APIRouter:
         session.commit()
 
         return {"ok": True}
+
+    @router.get(
+        "/feedback/milestonegroups/{answersession_id}",
+        response_model=list[int],
+    )
+    def get_milestonegroups_for_session(
+        session: SessionDep,
+        answersession_id: int,
+    ):
+        answersession = get(session, MilestoneAnswerSession, answersession_id)
+
+        milestones = [answer.milestone_id for answer in answersession.answers]
+        milestonegroups = set(
+            [
+                m.group_id
+                for m in session.exec(
+                    select(Milestone).where(Milestone.id.in_(milestones))
+                ).all()
+            ]
+        )
+
+        return milestonegroups
+
+    @router.get(
+        "/detailed_feedback/milestonegroup={milestonegroup_id}/answersession={answersession_id}",
+        response_model=dict[int, int],
+    )
+    def get_detailed_feedback(
+        session: SessionDep,
+        current_active_user: CurrentActiveUserDep,
+        milestonegroup_id: int,
+        answersession_id: int,
+    ) -> dict[int, int]:
+        # answersession = get(session, MilestoneAnswerSession, answersession_id)
+        # TODO: split off the detailed feedback from get_feedback_for_milestonegroup and put it here.
+        return {}
 
     @router.get(
         "/feedback/child={child_id}/milestonegroup={milestonegroup_id}",
