@@ -347,3 +347,28 @@ def test_update_current_child_answers_no_prexisting(
         json=child_answers,
     )
     assert response.status_code == 404
+
+
+def test_get_milestonegroup_feedback(user_client: TestClient):
+    response = user_client.get(
+        "/users/feedback/child=1/milestonegroup=1?with_detailed=true"
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "2024-10-20": [0, {"1": 0, "2": 0}],
+    }
+    response = user_client.get(
+        "/users/feedback/child=1/milestonegroup=1?with_detailed=false"
+    )
+    assert response.status_code == 200
+    assert response.json() == {"2024-10-20": 0}
+
+
+def test_get_milestonegroup_feedback_invalid_user(public_client: TestClient):
+    response = public_client.get("/users/feedback/child=1/milestonegroup=1")
+    assert response.status_code == 401
+
+
+def test_get_milestonegroup_feedback_invalid_milestonegroup(user_client: TestClient):
+    response = user_client.get("/users/feedback/child=1/milestonegroup=5")
+    assert response.status_code == 404

@@ -81,7 +81,7 @@ def compute_feedback_for_milestonegroup(
     age_limit_high: int = 6,
     with_detailed: bool = False,
     mg_score=None,
-) -> tuple[int, dict[int, int]] | tuple[int, None]:
+) -> tuple[int, dict[int, int]] | int:
     """
     Compute trafficlight feedback for milestonegroup.
 
@@ -126,7 +126,7 @@ def compute_feedback_for_milestonegroup(
     }
 
     if answers == {}:
-        return TrafficLight.invalid.value, None
+        return TrafficLight.invalid.value
 
     # compute value for child
     mean_score_child = np.nan_to_num(np.mean([a.answer for a in answers.values()]))
@@ -162,4 +162,4 @@ def compute_feedback_for_milestonegroup(
 
         return total_feedback, detailed_feedback
     else:
-        return total_feedback, None
+        return total_feedback

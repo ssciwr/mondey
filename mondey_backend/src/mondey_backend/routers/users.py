@@ -23,9 +23,13 @@ from ..models.questions import UserAnswerPublic
 from ..models.users import UserRead
 from ..models.users import UserUpdate
 from ..users import fastapi_users
+from .scores import TrafficLight
+from .scores import compute_feedback_for_milestonegroup
+from .utils import _session_has_expired
 from .utils import add
 from .utils import child_image_path
 from .utils import get
+from .utils import get_child_age_in_months
 from .utils import get_db_child
 from .utils import get_or_create_current_milestone_answer_session
 from .utils import write_file
@@ -236,16 +240,50 @@ def create_router() -> APIRouter:
         return {"ok": True}
 
     @router.get(
-        "/feedback/{child_id}/{milestonegroup_id}",
-        response_model=tuple[int, dict[int, int] | None],
+        "/feedback/child={child_id}/milestonegroup={milestonegroup_id}",
+        response_model=dict[str, tuple[int, dict[int, int]] | int],
     )
-    def get_feedback_for_milestoneGroup(
+    def get_feedback_for_milestonegroup(
         session: SessionDep,
         current_active_user: CurrentActiveUserDep,
         child_id: int,
         milestonegroup_id: int,
-    ) -> tuple[int, dict[int, int] | None]:
-        # TODO: Implement this endpoint
-        return 0, {0: -1}
+        with_detailed: bool = False,
+    ) -> dict[str, tuple[int, dict[int, int]] | int]:
+        results: dict[str, tuple[int, dict[int, int]] | int] = {}
+        # get all answer sessions and filter for completed ones
+        answersessions = [
+            a
+            for a in session.exec(
+                select(MilestoneAnswerSession).where(
+                    col(MilestoneAnswerSession.child_id) == child_id
+                    and col(MilestoneAnswerSession.user_id) == current_active_user.id
+                )
+            ).all()
+            if _session_has_expired(a)
+        ]
+        if answersessions == []:
+            return {"unknown": TrafficLight.invalid.value}  # type: ignore
+        else:
+            for answersession in answersessions:
+                child = get_db_child(
+                    session, current_active_user, answersession.child_id
+                )
+                result = compute_feedback_for_milestonegroup(
+                    session,
+                    milestonegroup_id,
+                    answersession,
+                    get_child_age_in_months(child, answersession.created_at),
+                    age_limit_low=6,
+                    age_limit_high=6,
+                    with_detailed=with_detailed,
+                )
+            datestring = answersession.created_at.strftime("%Y-%m-%d")
+            if with_detailed:
+                total, detailed = result  # type: ignore
+                results[datestring] = (total, detailed)
+            else:
+                results[datestring] = result  # type: ignore
+        return results
 
     return router
