@@ -12,9 +12,11 @@ import webp
 from fastapi import HTTPException
 from fastapi import UploadFile
 from PIL import Image
+from PIL import ImageOps
 from sqlmodel import SQLModel
 from sqlmodel import col
 from sqlmodel import select
+from webp import WebPPreset
 
 from ..dependencies import SessionDep
 from ..models.children import Child
@@ -43,19 +45,21 @@ OrderedItem = Milestone | MilestoneGroup | UserQuestion | ChildQuestion
 
 
 def write_image_file(file: UploadFile, filename: pathlib.Path | str):
-    max_image_width = 1024
+    image_max_width = 1024
+    image_max_height = 1024
     image_quality = 90
     try:
         pathlib.Path(filename).parent.mkdir(exist_ok=True)
-        img = Image.open(file.file)
-        if img.width > max_image_width:
-            img = img.resize(
-                (
-                    max_image_width,
-                    int(img.height * max_image_width / img.width),
-                )
+        with Image.open(file.file) as img:
+            # remove EXIF Orientation tag if present
+            ImageOps.exif_transpose(img, in_place=True)
+            # ensure image is not too large
+            if img.width > image_max_width or img.height > image_max_height:
+                img = ImageOps.contain(img, (image_max_width, image_max_height))
+            # save image in webp format: https://developers.google.com/speed/webp/docs/cwebp#options
+            webp.save_image(
+                img, filename, preset=WebPPreset.PHOTO, quality=image_quality
             )
-        webp.save_image(img, filename, quality=image_quality)
     except Exception as e:
         logging.exception(e)
         raise HTTPException(status_code=404, detail="Error saving uploaded file") from e

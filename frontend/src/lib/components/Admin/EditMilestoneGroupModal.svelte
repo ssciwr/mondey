@@ -12,9 +12,9 @@ import {
 import type { MilestoneGroupAdmin } from "$lib/client/types.gen";
 import CancelButton from "$lib/components/Admin/CancelButton.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
+import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";
 import {
 	ButtonGroup,
-	Fileupload,
 	InputAddon,
 	Label,
 	Modal,
@@ -37,13 +37,6 @@ onMount(() => {
 		image = milestoneGroupImageUrl(milestoneGroup.id);
 	}
 });
-
-function updateImageToUpload(event: Event) {
-	const target = event.target as HTMLInputElement;
-	if (target.files && target.files.length > 0) {
-		image = URL.createObjectURL(target.files[0]);
-	}
-}
 
 async function reloadImg(url: string) {
 	await fetch(url, { cache: "reload", mode: "no-cors" });
@@ -95,12 +88,9 @@ export async function saveChanges() {
 			<Label for="img_upload" class="pb-2">{$_('admin.image')}</Label>
 			<div class="flex flex-row">
 				<img src={image} width="48" height="48" alt="MilestoneGroup" class="mx-2" />
-				<Fileupload
+				<ImageFileUpload
 					bind:files
-					onchange={updateImageToUpload}
-					accept=".jpg, .jpeg, .png"
-					id="img_upload"
-					class="mb-2 flex-grow-0"
+					bind:image
 				/>
 			</div>
 		</div>
