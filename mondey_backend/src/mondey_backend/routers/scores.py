@@ -15,6 +15,13 @@ from .utils import get
 
 
 class TrafficLight(Enum):
+    """
+    Enum for the trafficlight feedback.
+    Includes -1 for red, 0 for yellow, and 1 for green.
+    Invalid is -2 and is included for edge cases.
+
+    """
+
     invalid = -2
     red = -1
     yellow = 0
@@ -36,15 +43,15 @@ def compute_feedback_simple(
     Returns
     -------
     int
-        -1 if score <= avg - 2 * sigma (trafficlight: red)
-        0 if avg - 2 * sigma < score <= avg - sigma (trafficlight: yellow)
-        1 if score > avg - sigma (trafficlight: green)
+        -1 if score <= avg - 2 * stddev (trafficlight: red)
+        0 if avg - 2 * stddev < score <= avg - stddev (trafficlight: yellow)
+        1 if score > avg - stddev (trafficlight: green)
     """
 
     def leq(val: float, lim: float) -> bool:
         return val < lim or np.isclose(val, lim)
 
-    if stat.sigma_score < 1e-2:
+    if stat.stddev_score < 1e-2:
         # README: This happens when all the scores are the same, so any
         # deviation towards lower values can be interpreted as
         # underperformance.
@@ -54,8 +61,8 @@ def compute_feedback_simple(
         lim_lower = stat.avg_score - 2
         lim_upper = stat.avg_score - 1
     else:
-        lim_lower = stat.avg_score - 2 * stat.sigma_score
-        lim_upper = stat.avg_score - stat.sigma_score
+        lim_lower = stat.avg_score - 2 * stat.stddev_score
+        lim_upper = stat.avg_score - stat.stddev_score
 
     if leq(score, lim_lower):
         return TrafficLight.red.value
@@ -101,9 +108,9 @@ def compute_feedback_for_milestonegroup(
     -------
     int | tuple[int, dict[int, int]]
         the trafficlight feedback for the milestone group.
-        -1 if child score <= group_avg - 2 * group_sigma (trafficlight: red)
-        0 if group_avg - 2 * group_sigma < score <= group_avg - group_sigma (trafficlight: yellow)
-        1 if score > group_avg - group_sigma (trafficlight: green)
+        -1 if child score <= group_avg - 2 * group_stddev (trafficlight: red)
+        0 if group_avg - 2 * group_stddev < score <= group_avg - group_stddev (trafficlight: yellow)
+        1 if score > group_avg - group_stddev (trafficlight: green)
 
         If with_detailed is True, a tuple is returned with the first element being the total feedback and the second element being a dictionary with the feedback for each milestone in the milestonegroup.
     """

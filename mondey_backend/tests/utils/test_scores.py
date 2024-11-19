@@ -8,7 +8,11 @@ from mondey_backend.routers.scores import compute_feedback_simple
 
 def test_compute_feedback_simple():
     dummy_scores = MilestoneAgeScore(
-        milestone_id=1, age_months=8, avg_score=2.0, sigma_score=0.8, expected_score=1.0
+        milestone_id=1,
+        age_months=8,
+        avg_score=2.0,
+        stddev_score=0.8,
+        expected_score=1.0,
     )
     score = 0
     assert compute_feedback_simple(dummy_scores, score) == -1
@@ -22,7 +26,7 @@ def test_compute_feedback_simple():
 
 def test_compute_feedback_simple_bad_data():
     dummy_scores = MilestoneAgeScore(
-        milestone_id=1, age_months=8, avg_score=2.0, sigma_score=0, expected_score=1.0
+        milestone_id=1, age_months=8, avg_score=2.0, stddev_score=0, expected_score=1.0
     )
     score = 0
     assert compute_feedback_simple(dummy_scores, score) == -1

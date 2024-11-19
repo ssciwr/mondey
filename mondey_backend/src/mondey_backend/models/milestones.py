@@ -177,7 +177,7 @@ class MilestoneAgeScore(BaseModel):
     milestone_id: int
     age_months: int
     avg_score: float
-    sigma_score: float
+    stddev_score: float
     expected_score: float
 
 
@@ -190,4 +190,4 @@ class MilestoneGroupAgeScore(BaseModel):
     age_months: int
     group_id: int | None
     avg_score: float
-    sigma_score: float
+    stddev_score: float
