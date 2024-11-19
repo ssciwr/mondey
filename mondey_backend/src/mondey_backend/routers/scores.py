@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from enum import Enum
+
 import numpy as np
 
 from ..dependencies import SessionDep
@@ -10,6 +12,13 @@ from ..models.milestones import MilestoneGroupAgeScore
 from .utils import calculate_milestone_age_scores
 from .utils import calculate_milestone_group_age_scores
 from .utils import get
+
+
+class TrafficLight(Enum):
+    invalid = -2
+    red = -1
+    yellow = 0
+    green = 1
 
 
 def compute_feedback_simple(
@@ -35,27 +44,25 @@ def compute_feedback_simple(
     def leq(val: float, lim: float) -> bool:
         return val < lim or np.isclose(val, lim)
 
-    def geq(val: float, lim: float) -> bool:
-        return val > lim or np.isclose(val, lim)
-
     if stat.sigma_score < 1e-2:
-        # README: this relies on the score being, 1,2,3,4 integers
-        # Check again what client wants
+        # README: This happens when all the scores are the same, so any
+        # deviation towards lower values can be interpreted as
+        # underperformance.
+        # This logic relies on the score being integers, such that when the
+        # stddev is 0, the avg is an integer
+        # TODO: Check again what client wants to happen in such cases
         lim_lower = stat.avg_score - 2
-
         lim_upper = stat.avg_score - 1
-
     else:
         lim_lower = stat.avg_score - 2 * stat.sigma_score
-
         lim_upper = stat.avg_score - stat.sigma_score
 
     if leq(score, lim_lower):
-        return -1  # red
+        return TrafficLight.red.value
     elif score > lim_lower and leq(score, lim_upper):
-        return 0  # yellow
+        return TrafficLight.yellow.value
     else:
-        return 1  # green
+        return TrafficLight.green.value
 
 
 def compute_feedback_for_milestonegroup(
@@ -103,23 +110,29 @@ def compute_feedback_for_milestonegroup(
     age_lower = age - age_limit_low
     age_upper = age + age_limit_high
     milestonegroup = get(session, MilestoneGroup, milestonegroup_id)
-    # compute value for child
-    mean_score_child = np.mean(
-        [
-            answer_session.answers[milestone.id].answer  # type: ignore
-            for milestone in milestonegroup.milestones
-            if age_lower <= milestone.expected_age_months <= age_upper
-        ]
-    )
 
-    # compute milestone group statistics:
+    # get the relevant answers for the child
+    answers = {
+        k: v
+        for k, v in answer_session.answers.items()
+        if k in [m.id for m in milestonegroup.milestones]
+    }
+
+    if answers == {}:
+        return TrafficLight.invalid.value, None
+
+    # compute value for child
+    mean_score_child = np.nan_to_num(np.mean([a.answer for a in answers.values()]))
+
+    # compute milestone group statistics over relevant age range.
+    # this gets all answers that exist for the milestones in the group
     if mg_score is None:
         mg_score = calculate_milestone_group_age_scores(
             session,
-            milestonegroup.id,  # type: ignore
+            milestonegroup,  # type: ignore
             age,
-            age_lower,
-            age_upper,
+            age_lower=age_lower,
+            age_upper=age_upper,
         )
     # compute feedback for the milestonegroup as a whole.
     total_feedback = compute_feedback_simple(
@@ -130,17 +143,15 @@ def compute_feedback_for_milestonegroup(
     if with_detailed:
         # compute individual feedback for each milestone for the current time point
         detailed_feedback: dict[int, int] = {}
-        for milestone in milestonegroup.milestones:
-            if age_lower <= age < age_upper:
-                child_answer = answer_session.answers[milestone.id].answer  # type: ignore
 
-                statistics = calculate_milestone_age_scores(session, milestone.id)  # type: ignore
+        for milestone_id, answer in answers.items():
+            statistics = calculate_milestone_age_scores(session, milestone_id)  # type: ignore
 
-                feedback = compute_feedback_simple(
-                    statistics.scores[age],
-                    child_answer,  # type: ignore
-                )
-                detailed_feedback[milestone.id] = feedback  # type: ignore
+            feedback = compute_feedback_simple(
+                statistics.scores[age],
+                answer.answer,  # type: ignore
+            )
+            detailed_feedback[milestone_id] = feedback  # type: ignore
 
         return total_feedback, detailed_feedback
     else:

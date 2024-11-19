@@ -254,39 +254,23 @@ def calculate_milestone_age_scores(
 
 def calculate_milestone_group_age_scores(
     session: SessionDep,
-    milestone_group_id: int,
+    milestonegroup: MilestoneGroup,
     age: int,
     age_lower: int = 6,
     age_upper: int = 6,
-    answers: list[MilestoneAnswer] | None = None,
 ) -> MilestoneGroupAgeScore:
-    milestonegroup = get(session, MilestoneGroup, milestone_group_id)
-
-    if answers is None:
-        new_answers = []
-        for milestone in milestonegroup.milestones:
-            m_answers = [
-                answer.answer
-                for answer in session.exec(
-                    select(MilestoneAnswer).where(
-                        col(MilestoneAnswer.milestone_id) == milestone.id
-                        and age_lower <= milestone.expected_age_months <= age_upper
-                    )
-                ).all()
-            ]
-            new_answers.extend(m_answers)
-        answers = new_answers  # type: ignore
-    else:
-        new_answers = []
-        for milestone in milestonegroup.milestones:
-            m_answers = [
-                a.answer
-                for a in answers
-                if a.milestone_id == milestone.id
-                and age_lower <= milestone.expected_age_months <= age_upper
-            ]
-            new_answers.extend(m_answers)
-        answers = new_answers  # type: ignore
+    answers = []
+    for milestone in milestonegroup.milestones:
+        m_answers = [
+            answer.answer
+            for answer in session.exec(
+                select(MilestoneAnswer).where(
+                    col(MilestoneAnswer.milestone_id) == milestone.id
+                    and age_lower <= milestone.expected_age_months <= age_upper
+                )
+            ).all()
+        ]
+        answers.extend(m_answers)
 
     answers = np.array(answers) + 1  # convert 0-3 answer index to 1-4 score
     avg_group = np.nan_to_num(np.mean(answers))
@@ -297,6 +281,7 @@ def calculate_milestone_group_age_scores(
         avg_score=avg_group,
         sigma_score=sigma_group,
     )
+
     return mg_score
 
 
