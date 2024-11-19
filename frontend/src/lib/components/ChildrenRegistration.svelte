@@ -397,6 +397,17 @@ async function submitData(): Promise<void> {
 							<PlayOutline size='sm'/>
 							{$_("childData.nextButtonLabel")}
 						</Button>
+						<Button
+							class=" w-full text-center text-sm text-white"
+							color = "yellow"
+							type ="button"
+							onclick={() => {
+								activeTabChildren.set("childrenFeedback");
+							}}
+							>
+							<PlayOutline size='sm'/>
+							{$_("childData.feedbackButtonLabel")}
+						</Button>
 						<Hr hrClass="my-8"/>
 						<Button
 							class=" w-full text-center text-sm text-white"

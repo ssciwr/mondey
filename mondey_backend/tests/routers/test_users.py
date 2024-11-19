@@ -372,3 +372,7 @@ def test_get_milestonegroup_feedback_invalid_user(public_client: TestClient):
 def test_get_milestonegroup_feedback_invalid_milestonegroup(user_client: TestClient):
     response = user_client.get("/users/feedback/child=1/milestonegroup=5")
     assert response.status_code == 404
+
+
+def test_get_expired_milestone_answersessions(user_client: TestClient):
+    assert 3 == 6

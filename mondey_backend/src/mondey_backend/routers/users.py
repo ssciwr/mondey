@@ -134,6 +134,25 @@ def create_router() -> APIRouter:
         )
         return milestone_answer_session
 
+    @router.get(
+        "/milestone-answers-sessions/{child_id}",
+        response_model=list[MilestoneAnswerSessionPublic],
+    )
+    def get_expired_milestone_answer_sessions(
+        session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
+    ):
+        milestone_answer_sessions = [
+            mas
+            for mas in session.exec(
+                select(MilestoneAnswerSession).where(
+                    col(MilestoneAnswerSession.user_id) == current_active_user.id
+                    and col(MilestoneAnswerSession.child_id) == child_id
+                )
+            ).all()
+            if _session_has_expired(mas)
+        ]
+        return milestone_answer_sessions
+
     @router.put(
         "/milestone-answers/{milestone_answer_session_id}",
         response_model=MilestoneAnswerPublic,

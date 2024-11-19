@@ -455,6 +455,10 @@ export const MilestoneAdminSchema = {
 
 export const MilestoneAgeScoreSchema = {
     properties: {
+        milestone_id: {
+            type: 'integer',
+            title: 'Milestone Id'
+        },
         age_months: {
             type: 'integer',
             title: 'Age Months'
@@ -463,13 +467,17 @@ export const MilestoneAgeScoreSchema = {
             type: 'number',
             title: 'Avg Score'
         },
+        stddev_score: {
+            type: 'number',
+            title: 'Stddev Score'
+        },
         expected_score: {
             type: 'number',
             title: 'Expected Score'
         }
     },
     type: 'object',
-    required: ['age_months', 'avg_score', 'expected_score'],
+    required: ['milestone_id', 'age_months', 'avg_score', 'stddev_score', 'expected_score'],
     title: 'MilestoneAgeScore'
 } as const;
 

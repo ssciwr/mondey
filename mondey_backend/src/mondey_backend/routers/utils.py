@@ -120,7 +120,7 @@ def update_child_question_text(session: SessionDep, child_question: ChildQuestio
 
 
 def _session_has_expired(milestone_answer_session: MilestoneAnswerSession) -> bool:
-    session_lifetime_days = 7
+    session_lifetime_days = 3
     return (
         datetime.datetime.now() - milestone_answer_session.created_at
         > datetime.timedelta(days=session_lifetime_days)

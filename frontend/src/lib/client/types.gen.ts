@@ -119,8 +119,10 @@ export type MilestoneAdmin = {
 };
 
 export type MilestoneAgeScore = {
+    milestone_id: number;
     age_months: number;
     avg_score: number;
+    stddev_score: number;
     expected_score: number;
 };
 
@@ -658,6 +660,16 @@ export type GetCurrentMilestoneAnswerSessionResponse = (MilestoneAnswerSessionPu
 
 export type GetCurrentMilestoneAnswerSessionError = (HTTPValidationError);
 
+export type GetExpiredMilestoneAnswerSessionsData = {
+    path: {
+        child_id: number;
+    };
+};
+
+export type GetExpiredMilestoneAnswerSessionsResponse = (Array<MilestoneAnswerSessionPublic>);
+
+export type GetExpiredMilestoneAnswerSessionsError = (HTTPValidationError);
+
 export type UpdateMilestoneAnswerData = {
     body: MilestoneAnswerPublic;
     path: {
@@ -705,6 +717,27 @@ export type UpdateCurrentChildAnswersData = {
 export type UpdateCurrentChildAnswersResponse = (unknown);
 
 export type UpdateCurrentChildAnswersError = (HTTPValidationError);
+
+export type GetFeedbackForMilestonegroupData = {
+    path: {
+        child_id: number;
+        milestonegroup_id: number;
+    };
+    query?: {
+        with_detailed?: boolean;
+    };
+};
+
+export type GetFeedbackForMilestonegroupResponse = ({
+    [key: string]: ([
+    number,
+    {
+        [key: string]: (number);
+    }
+] | number);
+});
+
+export type GetFeedbackForMilestonegroupError = (HTTPValidationError);
 
 export type AuthCookieLoginData = {
     body: Body_auth_cookie_login_auth_login_post;
