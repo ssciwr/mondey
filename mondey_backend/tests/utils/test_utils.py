@@ -1,8 +1,9 @@
 import numpy as np
-from sqlalchemy import select
+from sqlmodel import select
 
 from mondey_backend.models.milestones import MilestoneAgeScore
 from mondey_backend.models.milestones import MilestoneAnswer
+from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.routers.scores import compute_feedback_simple
 from mondey_backend.routers.utils import _get_answer_session_child_ages_in_months
@@ -56,11 +57,9 @@ def test_get_answer_session_child_ages_in_months(session):
     assert child_ages[1] == 8
     assert child_ages[3] == 42
 
-    # TODO: check edge cases
-
 
 def test_get_average_scores_by_age(session):
-    answers = [answer[0] for answer in session.exec(select(MilestoneAnswer)).all()]
+    answers = session.exec(select(MilestoneAnswer)).all()
     child_ages = {1: 5, 2: 3, 3: 8}
 
     avg, sigma = _get_average_scores_by_age(answers, child_ages)
@@ -113,43 +112,56 @@ def test_calculate_milestone_age_scores(session):
             assert score.avg_score == 0.0
             assert score.sigma_score == 0.0
 
+    # get milestoneanswersession #1
+    answersession = session.exec(select(MilestoneAnswerSession)).first()
+    mscore = calculate_milestone_age_scores(
+        session, 1, answers=answersession.answers.values()
+    )
+    assert mscore.scores[8].avg_score == 2.0
+    assert mscore.scores[8].sigma_score == 0
+
+    for score in mscore.scores:
+        if score.age_months not in [8]:
+            assert score.avg_score == 0.0
+            assert score.sigma_score == 0.0
+
 
 def test_calculate_milestone_group_age_scores(session):
     age = 8
     age_lower = 6
-    age_upper = 3
+    age_upper = 11
     milestone_group_id = 1
 
     milestone_group = session.exec(
         select(MilestoneGroup).where(MilestoneGroup.id == 1)
     ).first()
-
-    # calculate_milestone_group_age_scores
-    answers = [answer[0] for answer in session.exec(select(MilestoneAnswer)).all()]
+    milestones = [m.id for m in milestone_group.milestones]
     answers = [
-        answer
-        for answer in answers
-        if answer.milestone_id in milestone_group.milestones
+        a.answer
+        for a in session.exec(select(MilestoneAnswer)).all()
+        if a.milestone_id in milestones
     ]
-
     score = calculate_milestone_group_age_scores(
         session, milestone_group_id, age, age_lower, age_upper
     )
-
     assert score.age_months == 8
-    assert score.milestone_group_id == 1
-    assert score.avg_score == 1.5
+    assert score.group_id == 1
+    assert score.avg_score == 2.5
     assert score.sigma_score == np.std(
-        [answers.answer],
+        answers,
         ddof=1,
     )
-    assert 3 == 6
 
-
-# def test_compute_milestonegroup_statistics_bad_data():
-#     # calculate_milestone_group_age_scores
-#     assert 3 == 6
-
-# def test_compute_milestonegroup_feedback():
-#     # compute_feedback_for_milestonegroup
-#     assert 3 == 6
+    answersession = session.exec(select(MilestoneAnswerSession)).first()
+    answers = [
+        a
+        for a in session.exec(select(MilestoneAnswer)).all()
+        if a.milestone_id in milestones and a.answer_session_id == answersession.id
+    ]
+    score = calculate_milestone_group_age_scores(
+        session, milestone_group_id, age, age_lower, age_upper, answers=answers
+    )
+    assert score.age_months == 8
+    assert score.group_id == 1
+    assert score.avg_score == 2.0
+    assert score.sigma_score == 0.0

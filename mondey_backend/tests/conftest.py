@@ -142,7 +142,11 @@ def session(children: list[dict]):
         for lang_id in lang_ids:
             session.add(Language(id=lang_id))
         # add a milestone group with 3 milestones
-        session.add(MilestoneGroup(order=2))
+        session.add(
+            MilestoneGroup(
+                order=2,
+            )
+        )
         for lang_id in lang_ids:
             lbl = f"g1_{lang_id}"
             session.add(
