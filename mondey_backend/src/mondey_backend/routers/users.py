@@ -269,21 +269,23 @@ def create_router() -> APIRouter:
                 child = get_db_child(
                     session, current_active_user, answersession.child_id
                 )
-                result = compute_feedback_for_milestonegroup(
-                    session,
-                    milestonegroup_id,
-                    answersession,
-                    get_child_age_in_months(child, answersession.created_at),
-                    age_limit_low=6,
-                    age_limit_high=6,
-                    with_detailed=with_detailed,
+                result: tuple[int, dict[int, int]] | int = (
+                    compute_feedback_for_milestonegroup(
+                        session,
+                        milestonegroup_id,
+                        answersession,
+                        get_child_age_in_months(child, answersession.created_at),
+                        age_limit_low=6,
+                        age_limit_high=6,
+                        with_detailed=with_detailed,
+                    )
                 )
             datestring = answersession.created_at.strftime("%Y-%m-%d")
             if with_detailed:
                 total, detailed = result  # type: ignore
                 results[datestring] = (total, detailed)
             else:
-                results[datestring] = result  # type: ignore
+                results[datestring] = result
         return results
 
     return router
