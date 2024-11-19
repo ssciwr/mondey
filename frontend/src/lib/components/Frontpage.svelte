@@ -2,8 +2,8 @@
 <script lang='ts'>
 import CardDisplay from "$lib/components//DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
-import FrontPageCard from "$lib/components/FrontPageCard.svelte";
 import FrontPageAbout from "$lib/components/FrontPageAbout.svelte";
+import FrontPageCard from "$lib/components/FrontPageCard.svelte";
 
 let { items = [] } = $props();
 </script>

@@ -1,6 +1,6 @@
 <script>
-    import { Card } from 'flowbite-svelte';
-    import { _ } from "svelte-i18n";
+import { Card } from "flowbite-svelte";
+import { _ } from "svelte-i18n";
 </script>
 
   <div class="flex mt-4 justify-center min-w-full">
