@@ -63,7 +63,7 @@ def test_compute_feedback_for_milestonegroup(session):
     assert total == 0
     assert detailed == {1: 0, 2: 0}
 
-    total, detailed = compute_feedback_for_milestonegroup(
+    total = compute_feedback_for_milestonegroup(
         session,
         1,
         answersession,
@@ -74,12 +74,22 @@ def test_compute_feedback_for_milestonegroup(session):
     )
 
     assert total == 0
-    assert detailed is None
 
 
 def test_compute_feedback_for_milestonegroup_bad_data(session):
     answersession = session.exec(select(MilestoneAnswerSession)).first()
     answersession.answers = {}
+    total = compute_feedback_for_milestonegroup(
+        session,
+        1,
+        answersession,
+        8,
+        age_limit_low=6,
+        age_limit_high=6,
+        with_detailed=False,
+    )
+    assert total == -2
+
     total, detailed = compute_feedback_for_milestonegroup(
         session,
         1,
@@ -89,5 +99,6 @@ def test_compute_feedback_for_milestonegroup_bad_data(session):
         age_limit_high=6,
         with_detailed=True,
     )
+
     assert total == -2
-    assert detailed is None
+    assert detailed == {-1: -2}

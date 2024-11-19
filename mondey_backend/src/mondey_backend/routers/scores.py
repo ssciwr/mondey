@@ -126,7 +126,11 @@ def compute_feedback_for_milestonegroup(
     }
 
     if answers == {}:
-        return TrafficLight.invalid.value
+        return (
+            (TrafficLight.invalid.value, {-1: TrafficLight.invalid.value})
+            if with_detailed
+            else TrafficLight.invalid.value
+        )
 
     # compute value for child
     mean_score_child = np.nan_to_num(np.mean([a.answer for a in answers.values()]))
