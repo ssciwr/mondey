@@ -24,13 +24,10 @@ from ..models.questions import UserAnswerPublic
 from ..models.users import UserRead
 from ..models.users import UserUpdate
 from ..users import fastapi_users
-from .scores import TrafficLight
-from .scores import compute_feedback_for_milestonegroup
 from .utils import _session_has_expired
 from .utils import add
 from .utils import child_image_path
 from .utils import get
-from .utils import get_child_age_in_months
 from .utils import get_db_child
 from .utils import get_or_create_current_milestone_answer_session
 from .utils import write_file
@@ -282,66 +279,18 @@ def create_router() -> APIRouter:
         return milestonegroups
 
     @router.get(
-        "/detailed_feedback/milestonegroup={milestonegroup_id}/answersession={answersession_id}",
-        response_model=dict[int, int],
+        "/feedback/child={child_id}",
+        response_model=dict[str, dict[int, tuple[int, dict[int, int]] | int]],
     )
-    def get_detailed_feedback(
-        session: SessionDep,
-        current_active_user: CurrentActiveUserDep,
-        milestonegroup_id: int,
-        answersession_id: int,
-    ) -> dict[int, int]:
-        # answersession = get(session, MilestoneAnswerSession, answersession_id)
-        # TODO: split off the detailed feedback from get_feedback_for_milestonegroup and put it here.
-        return {}
-
-    @router.get(
-        "/feedback/child={child_id}/milestonegroup={milestonegroup_id}",
-        response_model=dict[str, tuple[int, dict[int, int]] | int],
-    )
-    def get_feedback_for_milestonegroup(
+    def get_feedback(
         session: SessionDep,
         current_active_user: CurrentActiveUserDep,
         child_id: int,
         milestonegroup_id: int,
         with_detailed: bool = False,
-    ) -> dict[str, tuple[int, dict[int, int]] | int]:
-        results: dict[str, tuple[int, dict[int, int]] | int] = {}
-        # get all answer sessions and filter for completed ones
-        answersessions = [
-            a
-            for a in session.exec(
-                select(MilestoneAnswerSession).where(
-                    col(MilestoneAnswerSession.child_id) == child_id
-                    and col(MilestoneAnswerSession.user_id) == current_active_user.id
-                )
-            ).all()
-            if _session_has_expired(a)
-        ]
-        if answersessions == []:
-            return {"unknown": TrafficLight.invalid.value}  # type: ignore
-        else:
-            for answersession in answersessions:
-                child = get_db_child(
-                    session, current_active_user, answersession.child_id
-                )
-                result: tuple[int, dict[int, int]] | int = (
-                    compute_feedback_for_milestonegroup(
-                        session,
-                        milestonegroup_id,
-                        answersession,
-                        get_child_age_in_months(child, answersession.created_at),
-                        age_limit_low=6,
-                        age_limit_high=6,
-                        with_detailed=with_detailed,
-                    )
-                )
-            datestring = answersession.created_at.strftime("%Y-%m-%d")
-            if with_detailed:
-                total, detailed = result  # type: ignore
-                results[datestring] = (total, detailed)
-            else:
-                results[datestring] = result
+    ) -> dict[str, dict[int, tuple[int, dict[int, int]] | int]]:
+        results: dict[str, dict[int, tuple[int, dict[int, int]] | int]] = {}
+        
         return results
 
     return router
