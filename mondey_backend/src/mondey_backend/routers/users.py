@@ -92,7 +92,7 @@ def create_router() -> APIRouter:
         child = get_db_child(session, current_active_user, child_id)
         image_path = child_image_path(child_id)
         if child.has_image and image_path.exists():
-            return image_path
+            return FileResponse(image_path, media_type="image/webp")
         raise HTTPException(404)
 
     @router.put("/children-images/{child_id}")
