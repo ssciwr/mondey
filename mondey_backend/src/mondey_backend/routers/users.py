@@ -28,7 +28,7 @@ from .utils import child_image_path
 from .utils import get
 from .utils import get_db_child
 from .utils import get_or_create_current_milestone_answer_session
-from .utils import write_file
+from .utils import write_image_file
 
 
 def create_router() -> APIRouter:
@@ -92,7 +92,7 @@ def create_router() -> APIRouter:
         child = get_db_child(session, current_active_user, child_id)
         image_path = child_image_path(child_id)
         if child.has_image and image_path.exists():
-            return image_path
+            return FileResponse(image_path, media_type="image/webp")
         raise HTTPException(404)
 
     @router.put("/children-images/{child_id}")
@@ -105,7 +105,7 @@ def create_router() -> APIRouter:
         child = get_db_child(session, current_active_user, child_id)
         child.has_image = True
         session.commit()
-        write_file(file, child_image_path(child_id))
+        write_image_file(file, child_image_path(child_id))
         return {"ok": True}
 
     @router.delete("/children-images/{child_id}")

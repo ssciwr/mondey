@@ -7,6 +7,7 @@ import pytest
 import pytest_asyncio
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from PIL import Image
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -49,8 +50,8 @@ def static_dir(tmp_path_factory: pytest.TempPathFactory):
     milestone_images_dir.mkdir()
     # add some milestone image files
     for milestone_image_id in [1, 2, 3]:
-        with (milestone_images_dir / "f{milestone_image_id}.jpg").open("w") as f:
-            f.write(f"{milestone_image_id}")
+        img = Image.new("RGB", (201, 414))
+        img.save(milestone_images_dir / f"{milestone_image_id}.webp")
     return static_dir
 
 
@@ -60,9 +61,9 @@ def private_dir(tmp_path_factory: pytest.TempPathFactory):
     children_dir = private_dir / "children"
     children_dir.mkdir()
     # add some child image files
-    for filename in ["2.jpg", "3.jpg"]:
-        with (children_dir / filename).open("w") as f:
-            f.write(filename)
+    for child_id in [2, 3]:
+        img = Image.new("RGBA", (67, 38))
+        img.save(children_dir / f"{child_id}.webp")
     return private_dir
 
 
@@ -716,11 +717,27 @@ def admin_client(
 
 
 @pytest.fixture
-def jpg_file(tmp_path: pathlib.Path):
+def image_file_jpg_1600_1200(tmp_path: pathlib.Path):
     jpg_path = tmp_path / "test.jpg"
-    with jpg_path.open("w") as f:
-        f.write("test")
+    img = Image.new("RGB", (1600, 1200))
+    img.save(jpg_path)
     return jpg_path
+
+
+@pytest.fixture
+def image_file_jpg_64_64(tmp_path: pathlib.Path):
+    jpg_path = tmp_path / "test.jpg"
+    img = Image.new("RGB", (64, 64))
+    img.save(jpg_path)
+    return jpg_path
+
+
+@pytest.fixture
+def image_file_png_1100_1100(tmp_path: pathlib.Path):
+    png_path = tmp_path / "test.png"
+    img = Image.new("RGBA", (1100, 1100))
+    img.save(png_path)
+    return png_path
 
 
 @pytest.fixture

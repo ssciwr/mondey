@@ -110,7 +110,7 @@ async function deleteMilestoneImageAndUpdate() {
             <div class="flex flex-row">
                 {#each milestone.images as milestoneImage (milestoneImage.id)}
                     <EditImage
-                            filename={`m/${milestoneImage.id}.jpg`}
+                            filename={`m/${milestoneImage.id}.webp`}
                             ondelete={() => {
 						currentMilestoneImageId = milestoneImage.id;
 						showDeleteMilestoneImageModal = true;
@@ -125,7 +125,7 @@ async function deleteMilestoneImageAndUpdate() {
                     bind:files
                     on:change={updateImagesToUpload}
                     multiple
-                    accept=".jpg, .jpeg"
+                    accept=".jpg, .jpeg, .png"
                     id="img_upload"
                     class="mb-2 flex-grow-0"
             />
