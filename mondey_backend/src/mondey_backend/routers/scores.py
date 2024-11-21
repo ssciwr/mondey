@@ -145,7 +145,7 @@ def compute_summary_milestonegroup_feedback_for_answersession(
     milestonegroups = get_milestonegroups_for_answersession(session, answersession)
 
     filtered_answers = {
-        m: [
+        m.id: [
             answersession.answers[ms.id]
             for ms in m.milestones
             if ms.id in answersession.answers and ms.id is not None
@@ -154,10 +154,10 @@ def compute_summary_milestonegroup_feedback_for_answersession(
     }
 
     milestone_group_results: dict[int, int] = {}
-    for milestonegroup, answers in filtered_answers.items():
+    for milestonegroup_id, answers in filtered_answers.items():
         mg_stat = calculate_milestonegroup_statistics(
             session,
-            milestonegroup,  # type: ignore
+            milestonegroup_id,  # type: ignore
             age,
             age_lower=age - age_limit_low,
             age_upper=age + age_limit_high,
@@ -166,14 +166,14 @@ def compute_summary_milestonegroup_feedback_for_answersession(
         mean_for_mg = np.nan_to_num(np.mean([a.answer for a in answers]))
 
         result = compute_feedback_simple(mg_stat, mean_for_mg)
-        milestone_group_results[milestonegroup.id] = result  # type: ignore
+        milestone_group_results[milestonegroup_id] = result  # type: ignore
     return milestone_group_results
 
 
 def compute_summary_milestonegroup_feedback_for_all_sessions(
     session: SessionDep,
     current_active_user: CurrentActiveUserDep,
-    child_id: int,
+    child: Child,
     age_limit_low=6,
     age_limit_high=6,
 ) -> dict[str, dict[int, int]]:
@@ -184,7 +184,7 @@ def compute_summary_milestonegroup_feedback_for_all_sessions(
         a
         for a in session.exec(
             select(MilestoneAnswerSession).where(
-                col(MilestoneAnswerSession.child_id) == child_id
+                col(MilestoneAnswerSession.child_id) == child.id
                 and col(MilestoneAnswerSession.user_id) == current_active_user.id
             )
         ).all()
@@ -194,8 +194,6 @@ def compute_summary_milestonegroup_feedback_for_all_sessions(
     if answersessions == []:
         return results
     else:
-        child = get_db_child(session, current_active_user, child_id)
-
         for answersession in answersessions:
             milestone_group_results = (
                 compute_summary_milestonegroup_feedback_for_answersession(

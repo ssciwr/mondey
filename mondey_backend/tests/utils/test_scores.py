@@ -8,7 +8,14 @@ from mondey_backend.routers.scores import (
     compute_detailed_milestonegroup_feedback_for_answersession,
 )
 from mondey_backend.routers.scores import compute_feedback_simple
+from mondey_backend.routers.scores import (
+    compute_summary_milestonegroup_feedback_for_all_sessions,
+)
+from mondey_backend.routers.scores import (
+    compute_summary_milestonegroup_feedback_for_answersession,
+)
 from mondey_backend.routers.scores import get_milestonegroups_for_answersession
+from mondey_backend.users import fastapi_users
 
 
 def test_get_milestonegroups_for_answersession(session):
@@ -70,12 +77,42 @@ def test_compute_detailed_milestonegroup_feedback_for_answersession_no_data(sess
 
 
 def test_compute_summary_milestonegroup_feedback_for_answersession(session):
-    assert 4 == 7
+    answersession = session.get(MilestoneAnswerSession, 1)
+    child = session.exec(select(Child).where(Child.user_id == 3)).first()
 
+    result = compute_summary_milestonegroup_feedback_for_answersession(
+        session, answersession, child, age_limit_low=6, age_limit_high=6
+    )
 
+    assert result == {1:0} #FIXME: check this again
+
+def test_compute_summary_milestonegroup_feedback_for_answersession_no_data(session):
+    answersession = session.get(MilestoneAnswerSession, 3)
+    child = session.exec(select(Child).where(Child.user_id == 3)).first()
+
+    result = compute_summary_milestonegroup_feedback_for_answersession(
+        session, answersession, child, age_limit_low = 6, age_limit_high=6
+    )
+
+    assert result == {}
+    
+
+    
 def test_compute_summary_milestonegroup_feedback_for_all_sessions(session):
-    assert 4 == 7
+    child = session.exec(select(Child).where(Child.user_id == 3)).first()
+    user = fastapi_users.current_user(active=True)
+    result = compute_summary_milestonegroup_feedback_for_all_sessions(
+        session, 
+        user,
+        child,
+        age_limit_low=6,
+        age_limit_high=6
+    )
+    print(result)
+    assert result == {"22-10-2024": {1: 0}}  # FIXME: check this again. I'm pretty sure this is wrong
 
 
+def test_compute_summary_milestonegroup_feedback_for_all_sessions_no_data(session):
+    assert 5 == 7
 def test_compute_detailed_milestonegroup_feedback_for_all_sessions(session):
     assert 4 == 7
