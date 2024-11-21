@@ -1,22 +1,24 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from enum import Enum
 
 import numpy as np
 from sqlmodel import col
 from sqlmodel import select
 
+from ..dependencies import CurrentActiveUserDep
 from ..dependencies import SessionDep
+from ..models.children import Child
+from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAgeScore
-from ..models.milestones import MilestoneAnswer
+from ..models.milestones import MilestoneAgeScores
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneGroup
-from ..models.milestones import MilestoneGroupAgeScore
-from .utils import CurrentActiveUserDep
+from ..models.milestones import MilestoneGroupStatistics
 from .utils import _session_has_expired
-from .utils import calculate_milestone_age_scores
-from .utils import calculate_milestone_group_age_scores
-from .utils import get
+from .utils import calculate_milestone_statistics_by_age
+from .utils import calculate_milestonegroup_statistics
 from .utils import get_child_age_in_months
 from .utils import get_db_child
 
@@ -36,7 +38,7 @@ class TrafficLight(Enum):
 
 
 def compute_feedback_simple(
-    stat: MilestoneAgeScore | MilestoneGroupAgeScore, score: float
+    stat: MilestoneAgeScore | MilestoneGroupStatistics, score: float
 ) -> int:
     """
     Compute trafficlight feedback. Replace this function with your own if you
@@ -79,177 +81,104 @@ def compute_feedback_simple(
         return TrafficLight.green.value
 
 
-def compute_detailed_feedback_for_milestonegroup(
+def get_milestonegroups_for_answersession(
+    session: SessionDep, answersession: MilestoneAnswerSession
+) -> Sequence[MilestoneGroup]:
+    check_for_overlap = (
+        select(Milestone.group_id)
+        .where(Milestone.id.in_(answersession.answers.keys()))  # type: ignore
+        .distinct()
+    )
+    return session.exec(
+        select(MilestoneGroup).where(MilestoneGroup.id.in_(check_for_overlap))  # type: ignore
+    ).all()
+
+
+def compute_detailed_milestonegroup_feedback_for_answersession(
     session: SessionDep,
-    milestonegroup_id: int,
-    age: int,
-    answer_session: MilestoneAnswerSession = None,
-    answers: dict[int, MilestoneAnswer] = None,
-    age_limit_low: int = 6,
-    age_limit_high: int = 6,
+    answersession: MilestoneAnswerSession,
+    child: Child,
+) -> dict[int, dict[int, int]]:
+    age = get_child_age_in_months(child, answersession.created_at)
+    milestonegroups = get_milestonegroups_for_answersession(session, answersession)
+
+    filtered_answers = {
+        m: [
+            answersession.answers[ms.id]
+            for ms in m.milestones
+            if ms.id in answersession.answers and ms.id is not None
+        ]
+        for m in milestonegroups
+    }
+
+    result: dict[int, dict[int, int]] = {}
+    statistics: dict[int, MilestoneAgeScores] = {}
+    for milestonegroup, answers in filtered_answers.items():
+        milestonegroup_result: dict[int, int] = result.get(milestonegroup.id, {})  # type: ignore
+        for answer in answers:
+            if statistics.get(answer.milestone_id) is None:  # type: ignore
+                stat = calculate_milestone_statistics_by_age(
+                    session,
+                    answer.milestone_id,  # type: ignore
+                )  # type: ignore
+
+                statistics[answer.milestone_id] = stat  # type: ignore
+
+            feedback = compute_feedback_simple(
+                statistics[answer.milestone_id].scores[age],  # type: ignore
+                answer.answer,  # type: ignore
+            )  # type: ignore
+            milestonegroup_result[answer.milestone_id] = feedback  # type: ignore
+        result[milestonegroup.id] = milestonegroup_result  # type: ignore
+    return result
+
+
+def compute_summary_milestonegroup_feedback_for_answersession(
+    session: SessionDep,
+    answersession: MilestoneAnswerSession,
+    child: Child,
+    age_limit_low=6,
+    age_limit_high=6,
 ) -> dict[int, int]:
-    """
-    _summary_
+    age = get_child_age_in_months(child, answersession.created_at)
 
-    Parameters
-    ----------
-    session : SessionDep
-        _description_
-    milestonegroup_id : int
-        _description_
-    age : int
-        _description_
-    answer_session : MilestoneAnswerSession, optional
-        _description_, by default None
-    answers : dict[int, MilestoneAnswer], optional
-        _description_, by default None
-    age_limit_low : int, optional
-        _description_, by default 6
-    age_limit_high : int, optional
-        _description_, by default 6
+    milestonegroups = get_milestonegroups_for_answersession(session, answersession)
 
-    Returns
-    -------
-    dict[int, int]
-        _description_
+    filtered_answers = {
+        m: [
+            answersession.answers[ms.id]
+            for ms in m.milestones
+            if ms.id in answersession.answers and ms.id is not None
+        ]
+        for m in milestonegroups
+    }
 
-    Raises
-    ------
-    ValueError
-        _description_
-    """
-    if answer_session is None and answers is None:
-        raise ValueError("Either answer_session or answers must be provided")
-        return {}
-
-    if answers is None:
-        age_lower = age - age_limit_low
-        age_upper = age + age_limit_high
-        milestonegroup = get(session, MilestoneGroup, milestonegroup_id)
-        answers = {
-            k: v
-            for k, v in answer_session.answers.items()
-            if k in [m.id for m in milestonegroup.milestones]
-            and age_lower <= v.expected_age <= age_upper
-        }
-    # compute individual feedback for each milestone for the current time point
-    detailed_feedback: dict[int, int] = {}
-
-    for milestone_id, answer in answers.items():
-        statistics = calculate_milestone_age_scores(session, milestone_id)  # type: ignore
-
-        feedback = compute_feedback_simple(
-            statistics.scores[age],
-            answer.answer,  # type: ignore
-        )
-        detailed_feedback[milestone_id] = feedback  # type: ignore
-
-    return detailed_feedback
-
-
-def compute_feedback_for_milestonegroup(
-    session: SessionDep,
-    milestonegroup_id: int,
-    answer_session: MilestoneAnswerSession,
-    age: int,
-    age_limit_low: int = 6,
-    age_limit_high: int = 6,
-    with_detailed: bool = False,
-    mg_score=None,
-) -> tuple[int, dict[int, int]] | int:
-    """
-    Compute trafficlight feedback for milestonegroup.
-
-    Parameters
-    ----------
-    session : SessionDep
-        Current database session
-    milestonegroup_id : int
-        Relevant milestone group to compute the feedback for
-    answer_session : MilestoneAnswerSession
-        Current answer session. Child's score that is to be evaluated is derived from this as mean(answers)
-    age : int
-        child age
-    age_limit_low : int, optional
-        number of months subtracted from age to get lower limit for relevant milestones. Lower limit will be age - age_limit_low, by default 6
-    age_limit_high : int, optional
-        number of months added to age to get upper limit for relevant milestones. Upper limit will be age - age_limit_upper,, by default 6
-    with_detailed : bool, optional
-        Whether a detailed feedback for each milestone at the current age is desired or not, by default False
-    mg_score : _type_, optional
-        Statistics over the milestonegroup for the age interval [age-age_limit_low, age+age_limit_high). Will be computed if None. by default None
-
-    Returns
-    -------
-    int | tuple[int, dict[int, int]]
-        the trafficlight feedback for the milestone group.
-        -1 if child score <= group_avg - 2 * group_stddev (trafficlight: red)
-        0 if group_avg - 2 * group_stddev < score <= group_avg - group_stddev (trafficlight: yellow)
-        1 if score > group_avg - group_stddev (trafficlight: green)
-
-        If with_detailed is True, a tuple is returned with the first element being the total feedback and the second element being a dictionary with the feedback for each milestone in the milestonegroup.
-    """
-    age_lower = age - age_limit_low
-    age_upper = age + age_limit_high
-    milestonegroup = get(session, MilestoneGroup, milestonegroup_id)
-
-    # get the relevant answers for the child
-    milestoneids = [m.id for m in milestonegroup.milestones]
-    answers = {k: v for k, v in answer_session.answers.items() if k in milestoneids}
-
-    if answers == {}:
-        return (
-            (TrafficLight.invalid.value, {-1: TrafficLight.invalid.value})
-            if with_detailed
-            else TrafficLight.invalid.value
-        )
-
-    # compute value for child
-    mean_score_child = np.nan_to_num(np.mean([a.answer for a in answers.values()]))
-
-    # compute milestone group statistics over relevant age range.
-    # this gets all answers that exist for the milestones in the group
-    if mg_score is None:
-        # README: we have to decide if we want to store these and update 
-        # them in the database whenever x new answers are added or so
-        mg_score = calculate_milestone_group_age_scores(
+    milestone_group_results: dict[int, int] = {}
+    for milestonegroup, answers in filtered_answers.items():
+        mg_stat = calculate_milestonegroup_statistics(
             session,
             milestonegroup,  # type: ignore
             age,
-            age_lower=age_lower,
-            age_upper=age_upper,
+            age_lower=age - age_limit_low,
+            age_upper=age + age_limit_high,
         )
-    # compute feedback for the milestonegroup as a whole.
-    total_feedback = compute_feedback_simple(
-        mg_score,
-        mean_score_child,
-    )
 
-    if with_detailed:
-        detailed_feedback = compute_detailed_feedback_for_milestonegroup(
-            session,
-            milestonegroup_id,
-            age,
-            answers=answers,
-            age_limit_low=age_limit_low,
-            age_limit_high=age_limit_high,
-        )
-        return total_feedback, detailed_feedback
-    else:
-        return total_feedback
+        mean_for_mg = np.nan_to_num(np.mean([a.answer for a in answers]))
+
+        result = compute_feedback_simple(mg_stat, mean_for_mg)
+        milestone_group_results[milestonegroup.id] = result  # type: ignore
+    return milestone_group_results
 
 
-GroupFeedback = tuple[int, dict[int, int]] | int
-SessionFeedback = dict[int, GroupFeedback]
-Feedback = dict[str, SessionFeedback]
-
-def compute_feedback_for_all_sessions(
+def compute_summary_milestonegroup_feedback_for_all_sessions(
     session: SessionDep,
     current_active_user: CurrentActiveUserDep,
     child_id: int,
-    with_detailed: bool = False,
-) -> Feedback:
-    results: Feedback = {}
+    age_limit_low=6,
+    age_limit_high=6,
+) -> dict[str, dict[int, int]]:
+    results: dict[str, dict[int, int]] = {}
+
     # get all answer sessions and filter for completed ones
     answersessions = [
         a
@@ -261,37 +190,61 @@ def compute_feedback_for_all_sessions(
         ).all()
         if _session_has_expired(a)
     ]
+
     if answersessions == []:
         return results
     else:
+        child = get_db_child(session, current_active_user, child_id)
+
         for answersession in answersessions:
-            # find milestonegroups
-            milestone_groups = [
-                answer.milestone.group_id for answer in answersession.answers
-            ]
-
-            child = get_db_child(session, current_active_user, answersession.child_id)
-            age = get_child_age_in_months(child, answersession.created_at)
-            milestone_group_results: SessionFeedback = {}
-
-            # TODO: pass in the questions that are relevant and leave out the rest, put the question filtering crap here. 
-            # TODO: make this function return a MilestoneGroupScore object 
-            # then save it to database. 
-            for mid in milestone_groups:
-                result: GroupFeedback = compute_feedback_for_milestonegroup(
+            milestone_group_results = (
+                compute_summary_milestonegroup_feedback_for_answersession(
                     session,
-                    mid,
                     answersession,
-                    age,
-                    age_limit_low=6,
-                    age_limit_high=6,
-                    with_detailed=with_detailed,
+                    child,
+                    age_limit_low=age_limit_low,
+                    age_limit_high=age_limit_high,
                 )
-                if with_detailed:
-                    total, detailed = result  # type: ignore
-                    milestone_group_results[mid] = (total, detailed)
-                else:
-                    milestone_group_results[mid] = result
+            )
+
+            datestring = answersession.created_at.strftime("%d-%m-%Y")
+            results[datestring] = milestone_group_results
+
+    return results
+
+
+def compute_detailed_milestonegroup_feedback_for_all_sessions(
+    session: SessionDep,
+    current_active_user: CurrentActiveUserDep,
+    child_id: int,
+) -> dict[str, dict[int, dict[int, int]]]:
+    results: dict[str, dict[int, dict[int, int]]] = {}
+
+    # get all answer sessions and filter for completed ones
+    answersessions = [
+        a
+        for a in session.exec(
+            select(MilestoneAnswerSession).where(
+                col(MilestoneAnswerSession.child_id) == child_id
+                and col(MilestoneAnswerSession.user_id) == current_active_user.id
+            )
+        ).all()
+        if _session_has_expired(a)
+    ]
+
+    if answersessions == []:
+        return results
+    else:
+        child = get_db_child(session, current_active_user, child_id)
+
+        for answersession in answersessions:
+            milestone_group_results = (
+                compute_detailed_milestonegroup_feedback_for_answersession(
+                    session,
+                    answersession,
+                    child,
+                )
+            )
 
             datestring = answersession.created_at.strftime("%d-%m-%Y")
             results[datestring] = milestone_group_results

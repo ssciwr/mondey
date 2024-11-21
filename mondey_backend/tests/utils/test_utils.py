@@ -4,9 +4,9 @@ from sqlmodel import select
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.routers.utils import _get_answer_session_child_ages_in_months
-from mondey_backend.routers.utils import _get_average_scores_by_age
-from mondey_backend.routers.utils import calculate_milestone_age_scores
-from mondey_backend.routers.utils import calculate_milestone_group_age_scores
+from mondey_backend.routers.utils import _get_score_statistics_by_age
+from mondey_backend.routers.utils import calculate_milestone_statistics_by_age
+from mondey_backend.routers.utils import calculate_milestonegroup_statistics
 
 
 def test_get_answer_session_child_ages_in_months(session):
@@ -17,11 +17,11 @@ def test_get_answer_session_child_ages_in_months(session):
     assert child_ages[3] == 42
 
 
-def test_get_average_scores_by_age(session):
+def test_get_score_statistics_by_age(session):
     answers = session.exec(select(MilestoneAnswer)).all()
     child_ages = {1: 5, 2: 3, 3: 8}
 
-    avg, stddev = _get_average_scores_by_age(answers, child_ages)
+    avg, stddev = _get_score_statistics_by_age(answers, child_ages)
 
     assert avg[5] == 1.5
     assert avg[3] == 3.5
@@ -45,20 +45,20 @@ def test_get_average_scores_by_age(session):
     )
 
     child_ages = {}  # no answer sessions ==> empty child ages
-    avg, stddev = _get_average_scores_by_age(answers, child_ages)
+    avg, stddev = _get_score_statistics_by_age(answers, child_ages)
     assert np.all(avg == 0)
     assert np.all(stddev == 0)
 
     child_ages = {1: 5, 2: 3, 3: 8}
     answers = []  # no answers ==> empty answers
-    avg, stddev = _get_average_scores_by_age(answers, child_ages)
+    avg, stddev = _get_score_statistics_by_age(answers, child_ages)
     assert np.all(avg == 0)
     assert np.all(stddev == 0)
 
 
-def test_calculate_milestone_age_scores(session):
-    # calculate_milestone_age_scores
-    mscore = calculate_milestone_age_scores(session, 1)
+def test_calculate_milestone_statistics_by_age(session):
+    # calculate_milestone_statistics_by_age
+    mscore = calculate_milestone_statistics_by_age(session, 1)
 
     # only some are filled
     assert mscore.scores[8].avg_score == 2.0
@@ -72,7 +72,7 @@ def test_calculate_milestone_age_scores(session):
             assert score.stddev_score == 0.0
 
 
-def test_calculate_milestone_group_age_scores(session):
+def test_calculate_milestonegroup_statistics(session):
     age = 8
     age_lower = 6
     age_upper = 11
@@ -86,7 +86,7 @@ def test_calculate_milestone_group_age_scores(session):
         for a in session.exec(select(MilestoneAnswer)).all()
         if a.milestone_id in milestones
     ]
-    score = calculate_milestone_group_age_scores(
+    score = calculate_milestonegroup_statistics(
         session, milestone_group, age, age_lower, age_upper
     )
     assert score.age_months == 8

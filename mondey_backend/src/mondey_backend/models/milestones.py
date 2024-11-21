@@ -185,16 +185,23 @@ class MilestoneAgeScores(BaseModel):
     scores: list[MilestoneAgeScore]
     expected_age: int
 
+
 class MilestoneScore(SQLModel, table=True):
     child_id: int = Field(default=None, foreign_key="child.id", primary_key=True)
-    milestone_id: int = Field(default=None, foreign_key="milestone.id", primary_key=True)
+    milestone_id: int = Field(
+        default=None, foreign_key="milestone.id", primary_key=True
+    )
     score: float
 
-class MilestoneGroupAgeScore(SQLModel, table=True):
-    session_id: int = Field(default=None, foreign_key="milestoneanswersession.id", primary_key=True)
-    group_id: int = Field(default=None, foreign_key="milestonegroup.id", primary_key=True)
-    child_id: int =  Field(default=None, foreign_key="child.id", primary_key=True)
+
+class MilestoneGroupStatistics(SQLModel, table=True):
+    session_id: int = Field(
+        default=None, foreign_key="milestoneanswersession.id", primary_key=True
+    )
+    group_id: int = Field(
+        default=None, foreign_key="milestonegroup.id", primary_key=True
+    )
+    child_id: int = Field(default=None, foreign_key="child.id", primary_key=True)
     age_months: int
-    group_id: int | None
     avg_score: float
     stddev_score: float

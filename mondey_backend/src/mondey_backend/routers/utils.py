@@ -24,7 +24,7 @@ from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupAdmin
-from ..models.milestones import MilestoneGroupAgeScore
+from ..models.milestones import MilestoneGroupStatistics
 from ..models.milestones import MilestoneGroupText
 from ..models.milestones import MilestoneText
 from ..models.questions import ChildQuestion
@@ -183,26 +183,20 @@ def _get_expected_age_from_scores(scores: np.ndarray) -> int:
     return np.argmax(scores >= 3.0)
 
 
-def _get_average_scores_by_age(
+def _calculate_statistics_for(
+    data: Sequence[int | float], **statfuncs
+) -> dict[str, float | np.ndarray | tuple]:
+    result = {}
+    for name, func in statfuncs.items():
+        with np.errstate(invalid="ignore"):
+            stat = func(data)
+            result[name] = stat
+    return result
+
+
+def _get_score_statistics_by_age(
     answers: Sequence[MilestoneAnswer], child_ages: dict[int, int]
 ) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Compute average and standard deviation of scores for each age class that
-    is observed in the answers.
-
-    Parameters
-    ----------
-    answers : Sequence[MilestoneAnswer]
-        list of answer objects
-    child_ages : dict[int, int]
-        dictionary mapping child answer session ids to ages in months
-
-    Returns
-    -------
-    tuple[np.ndarray, np.ndarray]
-        tuple of the form (a, s) where a, are numpy arrays containing the average and standard deviation of the scores for each age in months.
-    """
-
     max_age_months = 72
     avg_scores = np.zeros(max_age_months + 1)
     stddev_scores = np.zeros(max_age_months + 1)
@@ -235,30 +229,20 @@ def _get_average_scores_by_age(
     return avg, stddev
 
 
-def calculate_milestone_age_scores(
+def calculate_milestone_statistics_by_age(
     session: SessionDep,
     milestone_id: int,
+    answers: Sequence[MilestoneAnswer] | None = None,
 ) -> MilestoneAgeScores:
-    """
-    Calculate the average and standard deviation of the scores for a milestone
-    at each age in months. This uses all available answers for a milestone.
-    Parameters
-    ----------
-    session : SessionDep
-        database session
-    milestone_id : int
-        id of the milestone to compute the statistics for
-    Returns
-    -------
-    MilestoneAgeScores
-        MilestoneAgeScores object containing the average and standard deviation of the scores for a single milestone for each age in range of ages the mondey system looks at.
-    """
     child_ages = _get_answer_session_child_ages_in_months(session)
 
-    answers = session.exec(
-        select(MilestoneAnswer).where(col(MilestoneAnswer.milestone_id) == milestone_id)
-    ).all()
-    avg, stddev = _get_average_scores_by_age(answers, child_ages)
+    if answers is None:
+        answers = session.exec(
+            select(MilestoneAnswer).where(
+                col(MilestoneAnswer.milestone_id) == milestone_id
+            )
+        ).all()
+    avg, stddev = _get_score_statistics_by_age(answers, child_ages)
     expected_age = _get_expected_age_from_scores(avg)
 
     return MilestoneAgeScores(
@@ -276,36 +260,17 @@ def calculate_milestone_age_scores(
     )
 
 
-def calculate_milestone_group_age_scores(
+def calculate_milestonegroup_statistics(
     session: SessionDep,
-    milestonegroup: MilestoneGroup,
+    mid: int,
     age: int,
-    age_lower: int = 6,
-    age_upper: int = 6,
-) -> MilestoneGroupAgeScore:
-    """
-    Calculate the average and standard deviation of the scores for a milestone group at a given age range. The age range is defined by the age parameter and the age_lower and age_upper parameters: [age - age_lower, age + age_upper]. This uses all available answers for a milestone group.
-
-    Parameters
-    ----------
-    session : SessionDep
-        database session
-    milestonegroup : MilestoneGroup
-        Milestonegroup to calculate the scores for
-    age : int
-        age in months to use as the anchor for the age range
-    age_lower : int, optional
-        value to compute the lower bound for the age range, by default 6
-    age_upper : int, optional
-        value to compute the upper bound for the age range, by default 6
-
-    Returns
-    -------
-    MilestoneGroupAgeScore
-        Struct containing the average and standard deviation of the scores for a single milestone group
-    """
+    age_lower: int,
+    age_upper: int,
+) -> MilestoneGroupStatistics:
+    milestonegroup = get(session, MilestoneGroup, mid)
     answers = []
     for milestone in milestonegroup.milestones:
+        # we want something that is relevant for the age of the child at hand. Hence we filter by age here. Is this what they want?
         m_answers = [
             answer.answer
             for answer in session.exec(
@@ -318,13 +283,18 @@ def calculate_milestone_group_age_scores(
         answers.extend(m_answers)
 
     answers = np.array(answers) + 1  # convert 0-3 answer index to 1-4 score
-    avg_group = np.nan_to_num(np.mean(answers))
-    stddev_group = np.nan_to_num(np.std(answers, correction=1))
-    mg_score = MilestoneGroupAgeScore(
+
+    result = _calculate_statistics_for(
+        answers,
+        mean=np.mean,
+        std=lambda a: np.std(a, correction=1),
+    )
+
+    mg_score = MilestoneGroupStatistics(
         age_months=age,
         group_id=milestonegroup.id,
-        avg_score=avg_group,
-        stddev_score=stddev_group,
+        avg_score=np.nan_to_num(result["mean"]),
+        stddev_score=np.nan_to_num(result["std"]),
     )
 
     return mg_score
