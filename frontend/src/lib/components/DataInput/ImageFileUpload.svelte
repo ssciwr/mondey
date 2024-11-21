@@ -47,6 +47,5 @@ function updateImagesToUpload(event: Event) {
 		class="mb-2 flex-grow-0"
 		{...rest}
 />
-
 <WarningModal bind:open={showWarningModal}
 			  text={`${$_("admin.max-file-size-is")} 2 MB`}></WarningModal>

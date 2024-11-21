@@ -68,7 +68,7 @@ export async function saveChanges() {
 }
 </script>
 
-<Modal title={$_('admin.edit')} bind:open autoclose size="xl">
+<Modal title={$_('admin.edit')} bind:open outsideclose size="xl">
 	{#if milestoneGroup}
 		{#each textKeys as textKey}
 			{@const title = $_(`admin.${textKey}`)}
@@ -96,7 +96,7 @@ export async function saveChanges() {
 		</div>
 	{/if}
 	<svelte:fragment slot="footer">
-		<SaveButton onclick={saveChanges} />
-		<CancelButton />
+		<SaveButton onclick={() => {open = false; saveChanges()}}/>
+		<CancelButton onclick={() => {open = false;}}/>
 	</svelte:fragment>
 </Modal>
