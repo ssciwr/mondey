@@ -103,7 +103,7 @@ def compute_detailed_milestonegroup_feedback_for_answersession(
     milestonegroups = get_milestonegroups_for_answersession(session, answersession)
 
     filtered_answers = {
-        m: [
+        m.id: [
             answersession.answers[ms.id]
             for ms in m.milestones
             if ms.id in answersession.answers and ms.id is not None
@@ -113,8 +113,8 @@ def compute_detailed_milestonegroup_feedback_for_answersession(
 
     result: dict[int, dict[int, int]] = {}
     statistics: dict[int, MilestoneAgeScores] = {}
-    for milestonegroup, answers in filtered_answers.items():
-        milestonegroup_result: dict[int, int] = result.get(milestonegroup.id, {})  # type: ignore
+    for milestonegroup_id, answers in filtered_answers.items():
+        milestonegroup_result: dict[int, int] = result.get(milestonegroup_id, {})  # type: ignore
         for answer in answers:
             if statistics.get(answer.milestone_id) is None:  # type: ignore
                 stat = calculate_milestone_statistics_by_age(
@@ -129,7 +129,7 @@ def compute_detailed_milestonegroup_feedback_for_answersession(
                 answer.answer,  # type: ignore
             )  # type: ignore
             milestonegroup_result[answer.milestone_id] = feedback  # type: ignore
-        result[milestonegroup.id] = milestonegroup_result  # type: ignore
+        result[milestonegroup_id] = milestonegroup_result  # type: ignore
     return result
 
 
