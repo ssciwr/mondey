@@ -87,7 +87,7 @@ def test_calculate_milestonegroup_statistics(session):
         if a.milestone_id in milestones
     ]
     score = calculate_milestonegroup_statistics(
-        session, milestone_group, age, age_lower, age_upper
+        session, milestone_group.id, age, age_lower, age_upper
     )
     assert score.age_months == 8
     assert score.group_id == 1
