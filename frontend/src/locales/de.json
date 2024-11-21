@@ -71,7 +71,8 @@
 		"recalculate-expected-age": "Voraussichtliches Alter neu berechnen",
 		"new-expected-age": "Neues Voraussichtliches Alter",
 		"editUserQuestionTitle": "Frage an Benutzer editieren",
-		"expected-age-data": "Voraussichtliches Alter Daten"
+		"expected-age-data": "Voraussichtliches Alter Daten",
+		"max-file-size-is": "Die maximale Dateigröße für ein Bild beträgt"
 	},
 	"researcher": {
 		"label": "Wissenschaft",
@@ -119,7 +120,6 @@
 		"profileAccess": "Ihr Profil",
 		"registerNew": "Als neuer Benutzer registrieren"
 	},
-
 	"userData": {
 		"label": "Persönliche Daten",
 		"heading": "Benutzerdaten eingeben",
