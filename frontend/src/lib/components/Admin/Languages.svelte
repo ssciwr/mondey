@@ -61,7 +61,7 @@ async function deleteLanguageAndUpdateLanguages() {
 		<TableHead>
 			<TableHeadCell>Code (ISO 639-1)</TableHeadCell>
 			<TableHeadCell>Name</TableHeadCell>
-			<TableHeadCell>Actions</TableHeadCell>
+			<TableHeadCell>{$_('admin.actions')}</TableHeadCell>
 		</TableHead>
 		<TableBody>
 			{#each $locales as lang_id}

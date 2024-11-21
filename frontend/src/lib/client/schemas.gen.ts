@@ -84,6 +84,19 @@ export const Body_reset_reset_password_auth_reset_password_postSchema = {
     title: 'Body_reset_reset_password_auth_reset_password_post'
 } as const;
 
+export const Body_submit_milestone_image_submitted_milestone_images__milestone_id__postSchema = {
+    properties: {
+        file: {
+            type: 'string',
+            format: 'binary',
+            title: 'File'
+        }
+    },
+    type: 'object',
+    required: ['file'],
+    title: 'Body_submit_milestone_image_submitted_milestone_images__milestone_id__post'
+} as const;
+
 export const Body_upload_child_image_users_children_images__child_id__putSchema = {
     properties: {
         file: {
@@ -817,6 +830,26 @@ export const QuestionTextPublicSchema = {
     },
     type: 'object',
     title: 'QuestionTextPublic'
+} as const;
+
+export const SubmittedMilestoneImagePublicSchema = {
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        milestone_id: {
+            type: 'integer',
+            title: 'Milestone Id'
+        },
+        user_id: {
+            type: 'integer',
+            title: 'User Id'
+        }
+    },
+    type: 'object',
+    required: ['id', 'milestone_id', 'user_id'],
+    title: 'SubmittedMilestoneImagePublic'
 } as const;
 
 export const UserAnswerPublicSchema = {

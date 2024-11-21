@@ -18,6 +18,10 @@ export type Body_reset_reset_password_auth_reset_password_post = {
     password: string;
 };
 
+export type Body_submit_milestone_image_submitted_milestone_images__milestone_id__post = {
+    file: (Blob | File);
+};
+
 export type Body_upload_child_image_users_children_images__child_id__put = {
     file: (Blob | File);
 };
@@ -212,6 +216,12 @@ export type QuestionTextPublic = {
     options?: string;
 };
 
+export type SubmittedMilestoneImagePublic = {
+    id: number;
+    milestone_id: number;
+    user_id: number;
+};
+
 export type UserAnswerPublic = {
     answer: string;
     additional_answer: (string | null);
@@ -308,6 +318,17 @@ export type GetMilestoneGroupsData = {
 export type GetMilestoneGroupsResponse = (Array<MilestoneGroupPublic>);
 
 export type GetMilestoneGroupsError = (HTTPValidationError);
+
+export type SubmitMilestoneImageData = {
+    body: Body_submit_milestone_image_submitted_milestone_images__milestone_id__post;
+    path: {
+        milestone_id: number;
+    };
+};
+
+export type SubmitMilestoneImageResponse = (unknown);
+
+export type SubmitMilestoneImageError = (HTTPValidationError);
 
 export type GetUserQuestionsResponse = (Array<UserQuestionPublic>);
 
@@ -451,6 +472,30 @@ export type DeleteMilestoneImageData = {
 export type DeleteMilestoneImageResponse = (unknown);
 
 export type DeleteMilestoneImageError = (HTTPValidationError);
+
+export type GetSubmittedMilestoneImagesResponse = (Array<SubmittedMilestoneImagePublic>);
+
+export type GetSubmittedMilestoneImagesError = unknown;
+
+export type ApproveSubmittedMilestoneImageData = {
+    path: {
+        submitted_milestone_image_id: number;
+    };
+};
+
+export type ApproveSubmittedMilestoneImageResponse = (unknown);
+
+export type ApproveSubmittedMilestoneImageError = (HTTPValidationError);
+
+export type DeleteSubmittedMilestoneImageData = {
+    path: {
+        submitted_milestone_image_id: number;
+    };
+};
+
+export type DeleteSubmittedMilestoneImageResponse = (unknown);
+
+export type DeleteSubmittedMilestoneImageError = (HTTPValidationError);
 
 export type GetMilestoneAgeScoresData = {
     path: {

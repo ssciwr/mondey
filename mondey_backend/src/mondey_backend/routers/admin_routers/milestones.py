@@ -15,12 +15,15 @@ from ...models.milestones import MilestoneGroupAdmin
 from ...models.milestones import MilestoneGroupText
 from ...models.milestones import MilestoneImage
 from ...models.milestones import MilestoneText
+from ...models.milestones import SubmittedMilestoneImage
+from ...models.milestones import SubmittedMilestoneImagePublic
 from ...models.utils import ItemOrder
 from ..utils import add
 from ..utils import calculate_milestone_age_scores
 from ..utils import get
 from ..utils import milestone_group_image_path
 from ..utils import milestone_image_path
+from ..utils import submitted_milestone_image_path
 from ..utils import update_item_orders
 from ..utils import update_milestone_group_text
 from ..utils import update_milestone_text
@@ -134,6 +137,45 @@ def create_router() -> APIRouter:
         milestone_image = get(session, MilestoneImage, milestone_image_id)
         milestone_image_path(milestone_image_id).unlink(missing_ok=True)
         session.delete(milestone_image)
+        session.commit()
+        return {"ok": True}
+
+    @router.get(
+        "/submitted-milestone-images/",
+        response_model=list[SubmittedMilestoneImagePublic],
+    )
+    def get_submitted_milestone_images(session: SessionDep):
+        submitted_milestone_images = session.exec(select(SubmittedMilestoneImage)).all()
+        return submitted_milestone_images
+
+    @router.post("/submitted-milestone-images/approve/{submitted_milestone_image_id}")
+    async def approve_submitted_milestone_image(
+        session: SessionDep, submitted_milestone_image_id: int
+    ):
+        submitted_milestone_image = get(
+            session, SubmittedMilestoneImage, submitted_milestone_image_id
+        )
+        milestone_id = submitted_milestone_image.milestone_id
+        milestone_image = MilestoneImage(milestone_id=milestone_id)
+        session.add(milestone_image)
+        session.delete(submitted_milestone_image)
+        session.commit()
+        submitted_milestone_image_path(submitted_milestone_image_id).rename(
+            milestone_image_path(milestone_image.id)
+        )
+        return {"ok": True}
+
+    @router.delete("/submitted-milestone-images/{submitted_milestone_image_id}")
+    async def delete_submitted_milestone_image(
+        session: SessionDep, submitted_milestone_image_id: int
+    ):
+        submitted_milestone_image = get(
+            session, SubmittedMilestoneImage, submitted_milestone_image_id
+        )
+        submitted_milestone_image_path(submitted_milestone_image_id).unlink(
+            missing_ok=True
+        )
+        session.delete(submitted_milestone_image)
         session.commit()
         return {"ok": True}
 

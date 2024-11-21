@@ -250,5 +250,13 @@ def milestone_group_image_path(milestone_group_id: int) -> pathlib.Path:
     )
 
 
+def submitted_milestone_image_path(
+    submitted_milestone_image_id: int | None,
+) -> pathlib.Path:
+    return pathlib.Path(
+        f"{app_settings.STATIC_FILES_PATH}/ms/{submitted_milestone_image_id}.webp"
+    )
+
+
 def i18n_language_path(language_id: str) -> pathlib.Path:
     return pathlib.Path(f"{app_settings.STATIC_FILES_PATH}/i18n/{language_id}.json")
