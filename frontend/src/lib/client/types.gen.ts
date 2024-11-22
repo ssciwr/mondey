@@ -660,16 +660,6 @@ export type GetCurrentMilestoneAnswerSessionResponse = (MilestoneAnswerSessionPu
 
 export type GetCurrentMilestoneAnswerSessionError = (HTTPValidationError);
 
-export type GetExpiredMilestoneAnswerSessionsData = {
-    path: {
-        child_id: number;
-    };
-};
-
-export type GetExpiredMilestoneAnswerSessionsResponse = (Array<MilestoneAnswerSessionPublic>);
-
-export type GetExpiredMilestoneAnswerSessionsError = (HTTPValidationError);
-
 export type UpdateMilestoneAnswerData = {
     body: MilestoneAnswerPublic;
     path: {
@@ -718,26 +708,51 @@ export type UpdateCurrentChildAnswersResponse = (unknown);
 
 export type UpdateCurrentChildAnswersError = (HTTPValidationError);
 
-export type GetFeedbackForMilestonegroupData = {
+export type GetExpiredMilestoneAnswerSessionsData = {
     path: {
         child_id: number;
-        milestonegroup_id: number;
-    };
-    query?: {
-        with_detailed?: boolean;
     };
 };
 
-export type GetFeedbackForMilestonegroupResponse = ({
-    [key: string]: ([
-    number,
-    {
-        [key: string]: (number);
-    }
-] | number);
+export type GetExpiredMilestoneAnswerSessionsResponse = (Array<MilestoneAnswerSessionPublic>);
+
+export type GetExpiredMilestoneAnswerSessionsError = (HTTPValidationError);
+
+export type GetMilestonegroupsForSessionData = {
+    path: {
+        answersession_id: number;
+    };
+};
+
+export type GetMilestonegroupsForSessionResponse = (Array<(number)>);
+
+export type GetMilestonegroupsForSessionError = (HTTPValidationError);
+
+export type GetSummaryFeedbackForAnswersessionData = {
+    path: {
+        answersession_id: number;
+    };
+};
+
+export type GetSummaryFeedbackForAnswersessionResponse = ({
+    [key: string]: (number);
 });
 
-export type GetFeedbackForMilestonegroupError = (HTTPValidationError);
+export type GetSummaryFeedbackForAnswersessionError = (HTTPValidationError);
+
+export type GetDetailedFeedbackForAnswersessionData = {
+    path: {
+        answersession_id: number;
+    };
+};
+
+export type GetDetailedFeedbackForAnswersessionResponse = ({
+    [key: string]: {
+        [key: string]: (number);
+    };
+});
+
+export type GetDetailedFeedbackForAnswersessionError = (HTTPValidationError);
 
 export type AuthCookieLoginData = {
     body: Body_auth_cookie_login_auth_login_post;
