@@ -1,10 +1,10 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import {
-    type MilestoneAnswerSessionPublic,
-    getExpiredMilestoneAnswerSessions,
-    getFeedbackForMilestonegroup,
-    getMilestoneGroups,
+	type MilestoneAnswerSessionPublic,
+	getExpiredMilestoneAnswerSessions,
+	getFeedbackForMilestonegroup,
+	getMilestoneGroups,
 } from "$lib/client";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
@@ -65,9 +65,11 @@ async function setup(): Promise<void> {
 
 function formatDate(date: string): string {
 	const dateObj = new Date(date);
-	return [dateObj.getDate(), dateObj.getMonth()+1, dateObj.getFullYear()].join(
-		"-",
-	);
+	return [
+		dateObj.getDate(),
+		dateObj.getMonth() + 1,
+		dateObj.getFullYear(),
+	].join("-");
 }
 
 const promise = setup();
