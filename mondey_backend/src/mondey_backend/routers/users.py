@@ -12,7 +12,6 @@ from ..dependencies import SessionDep
 from ..models.children import Child
 from ..models.children import ChildCreate
 from ..models.children import ChildPublic
-from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerSession
@@ -24,11 +23,14 @@ from ..models.questions import UserAnswerPublic
 from ..models.users import UserRead
 from ..models.users import UserUpdate
 from ..users import fastapi_users
+from .scores import compute_detailed_milestonegroup_feedback_for_answersession
+from .scores import compute_summary_milestonegroup_feedback_for_answersession
 from .utils import _session_has_expired
 from .utils import add
 from .utils import child_image_path
 from .utils import get
 from .utils import get_db_child
+from .utils import get_milestonegroups_for_answersession
 from .utils import get_or_create_current_milestone_answer_session
 from .utils import write_file
 
@@ -131,25 +133,6 @@ def create_router() -> APIRouter:
             session, current_active_user, child_id
         )
         return milestone_answer_session
-
-    @router.get(
-        "/milestone-answers-sessions/{child_id}",
-        response_model=list[MilestoneAnswerSessionPublic],
-    )
-    def get_expired_milestone_answer_sessions(
-        session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
-    ):
-        milestone_answer_sessions = [
-            mas
-            for mas in session.exec(
-                select(MilestoneAnswerSession).where(
-                    col(MilestoneAnswerSession.user_id) == current_active_user.id
-                    and col(MilestoneAnswerSession.child_id) == child_id
-                )
-            ).all()
-            if _session_has_expired(mas)
-        ]
-        return milestone_answer_sessions
 
     @router.put(
         "/milestone-answers/{milestone_answer_session_id}",
@@ -257,7 +240,26 @@ def create_router() -> APIRouter:
         return {"ok": True}
 
     @router.get(
-        "/feedback/milestonegroups/{answersession_id}",
+        "/milestone-answers-sessions/{child_id}",
+        response_model=list[MilestoneAnswerSessionPublic],
+    )
+    def get_expired_milestone_answer_sessions(
+        session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
+    ):
+        milestone_answer_sessions = [
+            mas
+            for mas in session.exec(
+                select(MilestoneAnswerSession).where(
+                    col(MilestoneAnswerSession.user_id) == current_active_user.id
+                    and col(MilestoneAnswerSession.child_id) == child_id
+                )
+            ).all()
+            if _session_has_expired(mas)
+        ]
+        return milestone_answer_sessions
+
+    @router.get(
+        "/feedback/answersession={answersession_id}",
         response_model=list[int],
     )
     def get_milestonegroups_for_session(
@@ -265,32 +267,36 @@ def create_router() -> APIRouter:
         answersession_id: int,
     ):
         answersession = get(session, MilestoneAnswerSession, answersession_id)
-
-        milestones = [answer.milestone_id for answer in answersession.answers]
-        milestonegroups = set(
-            [
-                m.group_id
-                for m in session.exec(
-                    select(Milestone).where(Milestone.id.in_(milestones))
-                ).all()
-            ]
-        )
-
-        return milestonegroups
+        return get_milestonegroups_for_answersession(session, answersession)
 
     @router.get(
-        "/feedback/child={child_id}",
-        response_model=dict[str, dict[int, tuple[int, dict[int, int]] | int]],
+        "/feedback/answersession={answersession_id}/summary",
+        response_model=dict[int, int],
     )
-    def get_feedback(
+    def get_summary_feedback_for_answersession(
         session: SessionDep,
         current_active_user: CurrentActiveUserDep,
-        child_id: int,
-        milestonegroup_id: int,
-        with_detailed: bool = False,
-    ) -> dict[str, dict[int, tuple[int, dict[int, int]] | int]]:
-        results: dict[str, dict[int, tuple[int, dict[int, int]] | int]] = {}
-        
-        return results
+        answersession_id: int,
+    ) -> dict[int, int]:
+        answersession = get(session, MilestoneAnswerSession, answersession_id)
+        child = get_db_child(session, current_active_user, answersession.child_id)
+        return compute_summary_milestonegroup_feedback_for_answersession(
+            session, answersession, child, age_limit_low=6, age_limit_high=6
+        )
+
+    @router.get(
+        "/feedback/answersession={answersession_id}/detailed",
+        response_model=dict[int, dict[int, int]],
+    )
+    def get_detailed_feedback_for_answersession(
+        session: SessionDep,
+        current_active_user: CurrentActiveUserDep,
+        answersession_id: int,
+    ) -> dict[int, dict[int, int]]:
+        answersession = get(session, MilestoneAnswerSession, answersession_id)
+        child = get_db_child(session, current_active_user, answersession.child_id)
+        return compute_detailed_milestonegroup_feedback_for_answersession(
+            session, answersession, child
+        )
 
     return router

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
 from enum import Enum
 
 import numpy as np
@@ -10,17 +9,15 @@ from sqlmodel import select
 from ..dependencies import CurrentActiveUserDep
 from ..dependencies import SessionDep
 from ..models.children import Child
-from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAgeScore
 from ..models.milestones import MilestoneAgeScores
 from ..models.milestones import MilestoneAnswerSession
-from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupStatistics
 from .utils import _session_has_expired
 from .utils import calculate_milestone_statistics_by_age
 from .utils import calculate_milestonegroup_statistics
 from .utils import get_child_age_in_months
-from .utils import get_db_child
+from .utils import get_milestonegroups_for_answersession
 
 
 class TrafficLight(Enum):
@@ -60,6 +57,7 @@ def compute_feedback_simple(
     def leq(val: float, lim: float) -> bool:
         return val < lim or np.isclose(val, lim)
 
+    # TODO: what happens if the average
     if stat.stddev_score < 1e-2:
         # README: This happens when all the scores are the same, so any
         # deviation towards lower values can be interpreted as
@@ -79,19 +77,6 @@ def compute_feedback_simple(
         return TrafficLight.yellow.value
     else:
         return TrafficLight.green.value
-
-
-def get_milestonegroups_for_answersession(
-    session: SessionDep, answersession: MilestoneAnswerSession
-) -> Sequence[MilestoneGroup]:
-    check_for_overlap = (
-        select(Milestone.group_id)
-        .where(Milestone.id.in_(answersession.answers.keys()))  # type: ignore
-        .distinct()
-    )
-    return session.exec(
-        select(MilestoneGroup).where(MilestoneGroup.id.in_(check_for_overlap))  # type: ignore
-    ).all()
 
 
 def compute_detailed_milestonegroup_feedback_for_answersession(
@@ -123,7 +108,6 @@ def compute_detailed_milestonegroup_feedback_for_answersession(
                 )  # type: ignore
 
                 statistics[answer.milestone_id] = stat  # type: ignore
-
             feedback = compute_feedback_simple(
                 statistics[answer.milestone_id].scores[age],  # type: ignore
                 answer.answer,  # type: ignore
@@ -142,6 +126,7 @@ def compute_summary_milestonegroup_feedback_for_answersession(
 ) -> dict[int, int]:
     age = get_child_age_in_months(child, answersession.created_at)
 
+    # TODO: double check if this does the right thing
     milestonegroups = get_milestonegroups_for_answersession(session, answersession)
 
     filtered_answers = {
@@ -162,6 +147,8 @@ def compute_summary_milestonegroup_feedback_for_answersession(
             age_lower=age - age_limit_low,
             age_upper=age + age_limit_high,
         )
+        mg_stat.session_id = answersession.id  # type: ignore
+        mg_stat.child_id = child.id  # type: ignore
 
         mean_for_mg = np.nan_to_num(np.mean([a.answer for a in answers]))
 
@@ -214,17 +201,18 @@ def compute_summary_milestonegroup_feedback_for_all_sessions(
 def compute_detailed_milestonegroup_feedback_for_all_sessions(
     session: SessionDep,
     current_active_user: CurrentActiveUserDep,
-    child_id: int,
+    child: Child,
 ) -> dict[str, dict[int, dict[int, int]]]:
     results: dict[str, dict[int, dict[int, int]]] = {}
 
+    user = current_active_user()
     # get all answer sessions and filter for completed ones
     answersessions = [
         a
         for a in session.exec(
             select(MilestoneAnswerSession).where(
-                col(MilestoneAnswerSession.child_id) == child_id
-                and col(MilestoneAnswerSession.user_id) == current_active_user.id
+                col(MilestoneAnswerSession.child_id) == child.id
+                and col(MilestoneAnswerSession.user_id) == user.id
             )
         ).all()
         if _session_has_expired(a)
@@ -233,8 +221,6 @@ def compute_detailed_milestonegroup_feedback_for_all_sessions(
     if answersessions == []:
         return results
     else:
-        child = get_db_child(session, current_active_user, child_id)
-
         for answersession in answersessions:
             milestone_group_results = (
                 compute_detailed_milestonegroup_feedback_for_answersession(

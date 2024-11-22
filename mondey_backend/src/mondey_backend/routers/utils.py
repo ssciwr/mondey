@@ -253,7 +253,9 @@ def calculate_milestone_statistics_by_age(
                 age_months=age,
                 avg_score=avg[age],
                 stddev_score=stddev[age],
-                expected_score=(4 if age >= expected_age else 1),
+                expected_score=(
+                    4 if age >= expected_age else 1
+                ),  # FIXME: don´t know what this is supposed to mean
             )
             for age in range(0, len(avg))
         ],
@@ -314,3 +316,16 @@ def milestone_group_image_path(milestone_group_id: int) -> pathlib.Path:
 
 def i18n_language_path(language_id: str) -> pathlib.Path:
     return pathlib.Path(f"{app_settings.STATIC_FILES_PATH}/i18n/{language_id}.json")
+
+
+def get_milestonegroups_for_answersession(
+    session: SessionDep, answersession: MilestoneAnswerSession
+) -> Sequence[MilestoneGroup]:
+    check_for_overlap = (
+        select(Milestone.group_id)
+        .where(Milestone.id.in_(answersession.answers.keys()))  # type: ignore
+        .distinct()
+    )
+    return session.exec(
+        select(MilestoneGroup).where(MilestoneGroup.id.in_(check_for_overlap))  # type: ignore
+    ).all()

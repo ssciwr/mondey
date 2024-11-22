@@ -2,11 +2,28 @@ import numpy as np
 from sqlmodel import select
 
 from mondey_backend.models.milestones import MilestoneAnswer
+from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.routers.utils import _get_answer_session_child_ages_in_months
 from mondey_backend.routers.utils import _get_score_statistics_by_age
 from mondey_backend.routers.utils import calculate_milestone_statistics_by_age
 from mondey_backend.routers.utils import calculate_milestonegroup_statistics
+from mondey_backend.routers.utils import get_milestonegroups_for_answersession
+
+
+def test_get_milestonegroups_for_answersession(session):
+    answersession = session.get(MilestoneAnswerSession, 1)
+    milestonegroups = get_milestonegroups_for_answersession(session, answersession)
+
+    assert milestonegroups[0].id == 1
+    assert len(milestonegroups) == 1
+
+    answersession = session.get(MilestoneAnswerSession, 2)
+    milestonegroups = session.exec(select(MilestoneGroup)).all()
+
+    milestonegroups = get_milestonegroups_for_answersession(session, answersession)
+    assert len(milestonegroups) == 1
+    assert milestonegroups[0].id == 1
 
 
 def test_get_answer_session_child_ages_in_months(session):
@@ -70,6 +87,11 @@ def test_calculate_milestone_statistics_by_age(session):
         if score.age_months not in [8, 9]:
             assert score.avg_score == 0.0
             assert score.stddev_score == 0.0
+
+        if score.age_months > 8:
+            assert score.expected_score == 4.0
+        else:
+            assert score.expected_score == 1.0
 
 
 def test_calculate_milestonegroup_statistics(session):

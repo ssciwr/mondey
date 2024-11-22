@@ -3,7 +3,9 @@ from sqlmodel import select
 from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import MilestoneAgeScore
 from mondey_backend.models.milestones import MilestoneAnswerSession
-from mondey_backend.models.milestones import MilestoneGroup
+from mondey_backend.routers.scores import (
+    compute_detailed_milestonegroup_feedback_for_all_sessions,
+)
 from mondey_backend.routers.scores import (
     compute_detailed_milestonegroup_feedback_for_answersession,
 )
@@ -15,22 +17,8 @@ from mondey_backend.routers.scores import (
     compute_summary_milestonegroup_feedback_for_answersession,
 )
 from mondey_backend.routers.scores import get_milestonegroups_for_answersession
+from mondey_backend.routers.utils import _session_has_expired
 from mondey_backend.users import fastapi_users
-
-
-def test_get_milestonegroups_for_answersession(session):
-    answersession = session.get(MilestoneAnswerSession, 1)
-    milestonegroups = get_milestonegroups_for_answersession(session, answersession)
-
-    assert milestonegroups[0].id == 1
-    assert len(milestonegroups) == 1
-
-    answersession = session.get(MilestoneAnswerSession, 2)
-    milestonegroups = session.exec(select(MilestoneGroup)).all()
-
-    milestonegroups = get_milestonegroups_for_answersession(session, answersession)
-    assert len(milestonegroups) == 1
-    assert milestonegroups[0].id == 1
 
 
 def test_get_milestonegroups_for_answersession_no_data(session):
@@ -59,6 +47,7 @@ def test_compute_feedback_simple():
 
 def test_compute_detailed_milestonegroup_feedback_for_answersession(session):
     answersession = session.get(MilestoneAnswerSession, 1)
+
     child = session.exec(select(Child).where(Child.user_id == 1)).first()
     result = compute_detailed_milestonegroup_feedback_for_answersession(
         session, answersession, child
@@ -83,36 +72,68 @@ def test_compute_summary_milestonegroup_feedback_for_answersession(session):
     result = compute_summary_milestonegroup_feedback_for_answersession(
         session, answersession, child, age_limit_low=6, age_limit_high=6
     )
+    assert result == {1: 0}
 
-    assert result == {1:0} #FIXME: check this again
 
 def test_compute_summary_milestonegroup_feedback_for_answersession_no_data(session):
     answersession = session.get(MilestoneAnswerSession, 3)
     child = session.exec(select(Child).where(Child.user_id == 3)).first()
 
     result = compute_summary_milestonegroup_feedback_for_answersession(
-        session, answersession, child, age_limit_low = 6, age_limit_high=6
+        session, answersession, child, age_limit_low=6, age_limit_high=6
     )
 
     assert result == {}
-    
 
-    
+
 def test_compute_summary_milestonegroup_feedback_for_all_sessions(session):
     child = session.exec(select(Child).where(Child.user_id == 3)).first()
     user = fastapi_users.current_user(active=True)
     result = compute_summary_milestonegroup_feedback_for_all_sessions(
-        session, 
-        user,
-        child,
-        age_limit_low=6,
-        age_limit_high=6
+        session, user, child, age_limit_low=6, age_limit_high=6
     )
-    print(result)
-    assert result == {"22-10-2024": {1: 0}}  # FIXME: check this again. I'm pretty sure this is wrong
+
+    relevant_answersession = list(
+        filter(
+            lambda a: _session_has_expired(a),
+            session.exec(
+                select(MilestoneAnswerSession).where(
+                    MilestoneAnswerSession.child_id == child.id
+                    and MilestoneAnswerSession.user_id == user.id
+                )
+            ).all(),
+        )
+    )
+    expected_result = {
+        answersession.created_at.strftime("%d-%m-%Y"): {1: 0}
+        for answersession in relevant_answersession
+    }
+    assert len(result) == len(relevant_answersession)
+
+    assert result == expected_result
 
 
-def test_compute_summary_milestonegroup_feedback_for_all_sessions_no_data(session):
-    assert 5 == 7
 def test_compute_detailed_milestonegroup_feedback_for_all_sessions(session):
-    assert 4 == 7
+    child = session.exec(select(Child).where(Child.user_id == 3)).first()
+    user = fastapi_users.current_user(active=True)
+
+    result = compute_detailed_milestonegroup_feedback_for_all_sessions(
+        session, user, child
+    )
+    relevant_answersession = list(
+        filter(
+            lambda a: _session_has_expired(a),
+            session.exec(
+                select(MilestoneAnswerSession).where(
+                    MilestoneAnswerSession.child_id == child.id
+                    and MilestoneAnswerSession.user_id == user.id
+                )
+            ).all(),
+        )
+    )
+    expected_result = {
+        answersession.created_at.strftime("%d-%m-%Y"): {1: {1: 0, 2: 0}}
+        for answersession in relevant_answersession
+    }
+    assert len(result) == len(relevant_answersession)
+    assert result == expected_result
