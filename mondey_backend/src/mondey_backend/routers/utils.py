@@ -49,7 +49,7 @@ def write_image_file(file: UploadFile, filename: pathlib.Path | str):
     image_max_height = 1024
     image_quality = 90
     try:
-        pathlib.Path(filename).parent.mkdir(exist_ok=True)
+        pathlib.Path(filename).parent.mkdir(parents=True, exist_ok=True)
         with Image.open(file.file) as img:
             # remove EXIF Orientation tag if present
             ImageOps.exif_transpose(img, in_place=True)
