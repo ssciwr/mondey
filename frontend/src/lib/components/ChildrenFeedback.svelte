@@ -144,16 +144,21 @@ const promise = setup();
 				<AccordionItem>
 					<span slot="header">{milestongeGroups[aid][Number(mid)].text[$locale].title}</span>
 					{#if Number(score)  > 0}
+						<div class="flex flex-row items-center">
 						<CheckCircleSolid color = "green" size="xl"/>
 						<p class = "text-lg">{$_("childData.recommendOk")}</p>
-
+						</div>
 					{:else if Number(score) === 0}
+						<div class="flex flex-row items-center">
 						<BellActiveSolid color = "orange"size="xl"/>
 						<p class = "text-lg">{$_("childData.recommendWatch")}</p>
+						</div>
 
 					{:else}
+						<div class="flex flex-row items-center">
 						<CircleMinusSolid color = "red" size="xl"/>
 						<p class = "text-lg">{$_("childData.recommmendHelp")}</p>
+						</div>
 					{/if}
 				</AccordionItem>
 				{/each}

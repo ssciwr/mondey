@@ -11,6 +11,7 @@ from ..dependencies import SessionDep
 from ..models.children import Child
 from ..models.milestones import MilestoneAgeScore
 from ..models.milestones import MilestoneAgeScores
+from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneGroupStatistics
 from .utils import _session_has_expired
@@ -79,6 +80,29 @@ def compute_feedback_simple(
         return TrafficLight.green.value
 
 
+def compute_detailed_feedback_for_answers(
+    session: SessionDep,
+    answers: list[MilestoneAnswer],
+    statistics: dict[int, MilestoneAgeScores],
+    age: int,
+) -> dict[int, int]:
+    milestonegroup_result: dict[int, int] = {}  # type: ignore
+    for answer in answers:
+        if statistics.get(answer.milestone_id) is None:  # type: ignore
+            stat = calculate_milestone_statistics_by_age(
+                session,
+                answer.milestone_id,  # type: ignore
+            )  # type: ignore
+
+            statistics[answer.milestone_id] = stat  # type: ignore
+        feedback = compute_feedback_simple(
+            statistics[answer.milestone_id].scores[age],  # type: ignore
+            answer.answer,  # type: ignore
+        )  # type: ignore
+        milestonegroup_result[answer.milestone_id] = feedback  # type: ignore
+    return milestonegroup_result
+
+
 def compute_detailed_milestonegroup_feedback_for_answersession(
     session: SessionDep,
     answersession: MilestoneAnswerSession,
@@ -99,20 +123,9 @@ def compute_detailed_milestonegroup_feedback_for_answersession(
     result: dict[int, dict[int, int]] = {}
     statistics: dict[int, MilestoneAgeScores] = {}
     for milestonegroup_id, answers in filtered_answers.items():
-        milestonegroup_result: dict[int, int] = result.get(milestonegroup_id, {})  # type: ignore
-        for answer in answers:
-            if statistics.get(answer.milestone_id) is None:  # type: ignore
-                stat = calculate_milestone_statistics_by_age(
-                    session,
-                    answer.milestone_id,  # type: ignore
-                )  # type: ignore
-
-                statistics[answer.milestone_id] = stat  # type: ignore
-            feedback = compute_feedback_simple(
-                statistics[answer.milestone_id].scores[age],  # type: ignore
-                answer.answer,  # type: ignore
-            )  # type: ignore
-            milestonegroup_result[answer.milestone_id] = feedback  # type: ignore
+        milestonegroup_result = compute_detailed_feedback_for_answers(
+            session, answers, statistics, age
+        )
         result[milestonegroup_id] = milestonegroup_result  # type: ignore
     return result
 
