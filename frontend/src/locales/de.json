@@ -166,7 +166,10 @@
 		"imageOfChildChange": "Bild des Kindes ändern (optional)",
 		"imageOfChildChangeDelete": "Das aktuelle Bild wurde gelöscht",
 		"noFileChosen": "Keine Datei ausgewählt",
-		"deleteImageButton": "Bild löschen"
+		"deleteImageButton": "Bild löschen",
+		"recommendOk": "Entwicklung des Kindes ist altersgemäß",
+		"recommendWatch": "Entwicklung des Kindes sollte beobachtet werden",
+		"recommmendHelp": "Entwicklung des Kindes sollte gefördert werden"
 	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",

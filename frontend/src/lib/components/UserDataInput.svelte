@@ -14,7 +14,7 @@ import AlertMessage from "$lib/components/AlertMessage.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import { componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
-import { Button, Card, Heading } from "flowbite-svelte";
+import { Button, Card, Heading, Spinner } from "flowbite-svelte";
 import { _, locale } from "svelte-i18n";
 
 async function submitData() {

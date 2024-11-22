@@ -714,7 +714,9 @@ export type GetExpiredMilestoneAnswerSessionsData = {
     };
 };
 
-export type GetExpiredMilestoneAnswerSessionsResponse = (Array<MilestoneAnswerSessionPublic>);
+export type GetExpiredMilestoneAnswerSessionsResponse = ({
+    [key: string]: MilestoneAnswerSessionPublic;
+});
 
 export type GetExpiredMilestoneAnswerSessionsError = (HTTPValidationError);
 
@@ -724,7 +726,9 @@ export type GetMilestonegroupsForSessionData = {
     };
 };
 
-export type GetMilestonegroupsForSessionResponse = (Array<(number)>);
+export type GetMilestonegroupsForSessionResponse = ({
+    [key: string]: MilestoneGroupPublic;
+});
 
 export type GetMilestonegroupsForSessionError = (HTTPValidationError);
 

@@ -3,20 +3,35 @@
 import {
 	type MilestoneAnswerSessionPublic,
 	getExpiredMilestoneAnswerSessions,
+	getMilestonegroupsForSession,
 	getSummaryFeedbackForAnswersession,
 } from "$lib/client";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
-import { Spinner, Timeline, TimelineItem } from "flowbite-svelte";
-import { _ } from "svelte-i18n";
+import {
+	Accordion,
+	AccordionItem,
+	Hr,
+	Spinner,
+	Timeline,
+	TimelineItem,
+} from "flowbite-svelte";
+import {
+	BellActiveSolid,
+	CheckCircleSolid,
+	CircleMinusSolid,
+} from "flowbite-svelte-icons";
+import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
 let showAlert = $state(false);
 let alertMessage = $state(
 	$_("childData.alertMessageError") as string | undefined,
 );
-let answerSessions = $state([] as MilestoneAnswerSessionPublic[]);
+let answerSessions = $state({} as Record<number, MilestoneAnswerSessionPublic>);
 let feedbackPerAnswersession = $state({} as Record<number, any>);
+let milestongeGroups = $state({} as Record<number, any>);
+let sessionkeys = $state([] as number[]);
 
 async function setup(): Promise<void> {
 	user.load;
@@ -35,12 +50,15 @@ async function setup(): Promise<void> {
 		return;
 	}
 	answerSessions = responseAnswerSessions.data;
-	console.log("answerSessions: ", answerSessions);
+	sessionkeys = Object.keys(answerSessions)
+		.sort()
+		.reverse()
+		.map((x) => Number(x));
 
-	for (const answersession of answerSessions) {
+	for (const aid of Object.keys(answerSessions)) {
 		const responseFeedback = await getSummaryFeedbackForAnswersession({
 			path: {
-				answersession_id: answersession.id,
+				answersession_id: Number(aid),
 			},
 		});
 
@@ -49,7 +67,20 @@ async function setup(): Promise<void> {
 			alertMessage = responseFeedback.error.detail;
 			return;
 		}
-		feedbackPerAnswersession[answersession.id] = responseFeedback.data;
+		feedbackPerAnswersession[aid] = responseFeedback.data;
+
+		const milestoneGroupResponse = await getMilestonegroupsForSession({
+			path: {
+				answersession_id: Number(aid),
+			},
+		});
+
+		if (milestoneGroupResponse.error) {
+			showAlert = true;
+			alertMessage = responseFeedback.error.detail;
+			return;
+		}
+		milestongeGroups[aid] = milestoneGroupResponse.data;
 	}
 }
 
@@ -62,22 +93,72 @@ function formatDate(date: string): string {
 	].join("-");
 }
 
+function summarizeFeedback(feedback: Record<number, number>): number {
+	let minscore = 1;
+	for (const score of Object.values(feedback)) {
+		if (score < minscore) {
+			minscore = score;
+		}
+	}
+
+	if (minscore < 0) {
+		return -1;
+	}
+	if (minscore === 0) {
+		return 0;
+	}
+	return 1;
+}
+
 const promise = setup();
 </script>
 
 {#await promise}
-<div class = "flex justify-center items-center ">
-<Spinner /> <p>{$_("childData.loadingMessage")}</p>
+<div class = "flex justify-center items-center flex-row">
+	<Spinner /> <p>{$_("childData.loadingMessage")}</p>
 </div>
-{:then _}
+{:then}
 <div>
     <Timeline>
-		{#each answerSessions as answersession}
-        <TimelineItem  date = {formatDate(answersession.created_at)}/>
-		<div class = "">
-			feedback goes here
-			{console.log(answersession.id, ": ", feedbackPerAnswersession[answersession.id] )}
-		</div>
+		{#each sessionkeys as aid}
+			{console.log("current session: ", aid, feedbackPerAnswersession[aid])}
+			<TimelineItem classTime = "text-xl font-bold text-gray-700 dark:text-gray-400 " date = {formatDate(answerSessions[aid].created_at)}>
+			<dev class = "flex flex-row text-gray-700 dark:text-gray-400 items-center ">
+			{#if summarizeFeedback(feedbackPerAnswersession[aid]) === 1}
+				<CheckCircleSolid color = "green" size="xl"/>
+				<p class = "text-lg">{$_("childData.recommendOk")}</p>
+
+			{:else if summarizeFeedback(feedbackPerAnswersession[aid]) === 0}
+				<BellActiveSolid color = "orange"size="xl"/>
+				<p class = "text-lg">{$_("childData.recommendWatch")}</p>
+
+			{:else}
+				<CircleMinusSolid color = "red" size="xl"/>
+				<p class = "text-lg">{$_("childData.recommmendHelp")}</p>
+			{/if}
+			</dev>
+			<Hr />
+			<Accordion>
+				{#each Object.entries(feedbackPerAnswersession[aid]) as [mid, score]}
+				{console.log(" milestonegroup: ", mid, score)}
+				<AccordionItem>
+					<span slot="header">{milestongeGroups[aid][Number(mid)].text[$locale].title}</span>
+					{#if Number(score)  > 0}
+						<CheckCircleSolid color = "green" size="xl"/>
+						<p class = "text-lg">{$_("childData.recommendOk")}</p>
+
+					{:else if Number(score) === 0}
+						<BellActiveSolid color = "orange"size="xl"/>
+						<p class = "text-lg">{$_("childData.recommendWatch")}</p>
+
+					{:else}
+						<CircleMinusSolid color = "red" size="xl"/>
+						<p class = "text-lg">{$_("childData.recommmendHelp")}</p>
+					{/if}
+				</AccordionItem>
+				{/each}
+			</Accordion>
+			</TimelineItem>
 		{/each}
     </Timeline>
 </div>
