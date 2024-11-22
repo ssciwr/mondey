@@ -3,14 +3,20 @@
 import {
 	type MilestoneAnswerSessionPublic,
 	getExpiredMilestoneAnswerSessions,
-	getFeedbackForMilestonegroup,
-	getMilestoneGroups,
+	getSummaryFeedbackForAnswersession,
 } from "$lib/client";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { Spinner, Timeline, TimelineItem } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
+
+let showAlert = $state(false);
+let alertMessage = $state(
+	$_("childData.alertMessageError") as string | undefined,
+);
+let answerSessions = $state([] as MilestoneAnswerSessionPublic[]);
+let feedbackPerAnswersession = $state({} as Record<number, any>);
 
 async function setup(): Promise<void> {
 	user.load;
@@ -31,35 +37,19 @@ async function setup(): Promise<void> {
 	answerSessions = responseAnswerSessions.data;
 	console.log("answerSessions: ", answerSessions);
 
-	const responseMilestoneGroups = await getMilestoneGroups({
-		path: { child_id: currentChild.id as number },
-	});
-	if (responseMilestoneGroups.error) {
-		showAlert = true;
-		alertMessage = feedbackMilestoneGroup.error.detail;
-		return;
-	}
-	const milestoneGroups = responseMilestoneGroups.data;
-	console.log("milestonegroups: ", milestoneGroups);
-
-	for (const milestonegroup of milestoneGroups) {
-		const responseFeedback = await getFeedbackForMilestonegroup({
+	for (const answersession of answerSessions) {
+		const responseFeedback = await getSummaryFeedbackForAnswersession({
 			path: {
-				child_id: currentChild.id,
-				milestonegroup_id: milestonegroup.id,
-			},
-			query: {
-				with_detailed: true,
+				answersession_id: answersession.id,
 			},
 		});
+
 		if (responseFeedback.error) {
 			showAlert = true;
 			alertMessage = responseFeedback.error.detail;
 			return;
 		}
-
-		feedbackMilestoneGroups[milestonegroup.id] = responseFeedback.data;
-		console.log("responseFeedback: ", responseFeedback.data);
+		feedbackPerAnswersession[answersession.id] = responseFeedback.data;
 	}
 }
 
@@ -73,27 +63,21 @@ function formatDate(date: string): string {
 }
 
 const promise = setup();
-let showAlert = $state(false);
-let alertMessage = $state(
-	$_("childData.alertMessageError") as string | undefined,
-);
-let answerSessions = $state([] as MilestoneAnswerSessionPublic[]);
-let feedbackMilestoneGroups = $state({});
 </script>
 
 {#await promise}
-<Spinner /> {$_("childData.loadingMessage")}
+<div class = "flex justify-center items-center ">
+<Spinner /> <p>{$_("childData.loadingMessage")}</p>
+</div>
 {:then _}
 <div>
     <Timeline>
-		{#each answerSessions as answerSession}
-        <TimelineItem  date = {formatDate(answerSession.created_at)}/>
-			{#each Object.entries(feedbackMilestoneGroups) as [mid, feedback]}
-				{#if formatDate(answerSession.created_at) in feedback}
-					{mid, 'total: ', feedback[formatDate(answerSession.created_at)][0]}
-					{console.log(mid, feedback)}
-				{/if}
-			{/each}
+		{#each answerSessions as answersession}
+        <TimelineItem  date = {formatDate(answersession.created_at)}/>
+		<div class = "">
+			feedback goes here
+			{console.log(answersession.id, ": ", feedbackPerAnswersession[answersession.id] )}
+		</div>
 		{/each}
     </Timeline>
 </div>

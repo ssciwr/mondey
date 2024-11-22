@@ -214,7 +214,10 @@ const breadcrumbdata: any[] = [
 </script>
 
 {#await promise}
+<div class="flex justify-center items-center">
+	<Spinner  />
 	<p>{$_("userData.loadingMessage")}</p>
+</div>
 {:then}
 	{#if showAlert}
 		<AlertMessage message={alertMessage} />

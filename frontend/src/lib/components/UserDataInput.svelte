@@ -111,7 +111,10 @@ let promise = $state(setup());
 <!-- The actual content -->
 {#if $locale}
 	{#await promise}
+	<div class="flex justify-center items-center">
+	<Spinner  />
 		<p>{$_("userData.loadingMessage")}</p>
+	</div>
 	{:then { questionnaire, answers }}
 		<div class="container m-1 mx-auto w-full max-w-xl">
 			<Card class="container m-1 mx-auto w-full max-w-xl">
