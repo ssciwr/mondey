@@ -16,6 +16,7 @@ from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneAnswerSessionPublic
+from ..models.milestones import MilestoneGroupPublic
 from ..models.questions import ChildAnswer
 from ..models.questions import ChildAnswerPublic
 from ..models.questions import UserAnswer
@@ -241,13 +242,13 @@ def create_router() -> APIRouter:
 
     @router.get(
         "/milestone-answers-sessions/{child_id}",
-        response_model=list[MilestoneAnswerSessionPublic],
+        response_model=dict[int, MilestoneAnswerSessionPublic],
     )
     def get_expired_milestone_answer_sessions(
         session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
-    ):
-        milestone_answer_sessions = [
-            mas
+    ) -> dict[int, MilestoneAnswerSessionPublic]:
+        milestone_answer_sessions = {
+            mas.id: mas  # type: ignore
             for mas in session.exec(
                 select(MilestoneAnswerSession).where(
                     col(MilestoneAnswerSession.user_id) == current_active_user.id
@@ -255,12 +256,12 @@ def create_router() -> APIRouter:
                 )
             ).all()
             if _session_has_expired(mas)
-        ]
-        return milestone_answer_sessions
+        }
+        return milestone_answer_sessions  # type: ignore
 
     @router.get(
         "/feedback/answersession={answersession_id}",
-        response_model=list[int],
+        response_model=dict[int, MilestoneGroupPublic],
     )
     def get_milestonegroups_for_session(
         session: SessionDep,

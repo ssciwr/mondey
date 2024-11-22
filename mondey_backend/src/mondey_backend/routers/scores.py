@@ -93,7 +93,7 @@ def compute_detailed_milestonegroup_feedback_for_answersession(
             for ms in m.milestones
             if ms.id in answersession.answers and ms.id is not None
         ]
-        for m in milestonegroups
+        for mid, m in milestonegroups.items()
     }
 
     result: dict[int, dict[int, int]] = {}
@@ -127,15 +127,16 @@ def compute_summary_milestonegroup_feedback_for_answersession(
     age = get_child_age_in_months(child, answersession.created_at)
 
     # TODO: double check if this does the right thing
+
     milestonegroups = get_milestonegroups_for_answersession(session, answersession)
 
     filtered_answers = {
-        m.id: [
+        milestonegroup.id: [
             answersession.answers[ms.id]
-            for ms in m.milestones
+            for ms in milestonegroup.milestones
             if ms.id in answersession.answers and ms.id is not None
         ]
-        for m in milestonegroups
+        for mid, milestonegroup in milestonegroups.items()
     }
 
     milestone_group_results: dict[int, int] = {}

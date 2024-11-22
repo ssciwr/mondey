@@ -21,6 +21,13 @@ from mondey_backend.routers.utils import _session_has_expired
 from mondey_backend.users import fastapi_users
 
 
+def test_get_milestonegroups_for_answersession(session):
+    answersession = session.get(MilestoneAnswerSession, 1)
+    milestonegroups = get_milestonegroups_for_answersession(session, answersession)
+    assert len(milestonegroups) == 1
+    assert milestonegroups[1].id == 1
+
+
 def test_get_milestonegroups_for_answersession_no_data(session):
     answersession = session.get(MilestoneAnswerSession, 3)
     milestonegroups = get_milestonegroups_for_answersession(session, answersession)

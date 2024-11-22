@@ -320,12 +320,15 @@ def i18n_language_path(language_id: str) -> pathlib.Path:
 
 def get_milestonegroups_for_answersession(
     session: SessionDep, answersession: MilestoneAnswerSession
-) -> Sequence[MilestoneGroup]:
+) -> dict[int, MilestoneGroup]:
     check_for_overlap = (
         select(Milestone.group_id)
         .where(Milestone.id.in_(answersession.answers.keys()))  # type: ignore
         .distinct()
     )
-    return session.exec(
-        select(MilestoneGroup).where(MilestoneGroup.id.in_(check_for_overlap))  # type: ignore
-    ).all()
+    return {
+        m.id: m  # type: ignore
+        for m in session.exec(
+            select(MilestoneGroup).where(MilestoneGroup.id.in_(check_for_overlap))  # type: ignore
+        ).all()
+    }
