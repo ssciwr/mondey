@@ -38,11 +38,11 @@ onMount(() => {
 			],
 			xAxis: new Axis({
 				label: `${$_("admin.age")} (m)`,
-				tickValues: [1, 2, 3, 4, 5, 6, 9, 12, 16, 24, 36, 48, 60, 72],
+				tickValues: [0, 1, 2, 3, 4, 5, 6, 9, 12, 16, 24, 36, 48, 60, 72],
 			}),
 			yAxis: new Axis({ label: `${$_("admin.average-score")} (1-4)` }),
 			xScale: Scale.scalePow().exponent(0.5),
-			xDomain: [1, 72],
+			xDomain: [0, 72],
 			yDomain: [1, 4],
 		},
 		scores,
