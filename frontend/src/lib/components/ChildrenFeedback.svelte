@@ -1,27 +1,27 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import {
-    type MilestoneAnswerSessionPublic,
-    type ValidationError,
-    getDetailedFeedbackForMilestonegroup,
-    getExpiredMilestoneAnswerSessions,
-    getMilestonegroupsForSession,
-    getSummaryFeedbackForAnswersession,
+	type MilestoneAnswerSessionPublic,
+	type ValidationError,
+	getDetailedFeedbackForMilestonegroup,
+	getExpiredMilestoneAnswerSessions,
+	getMilestonegroupsForSession,
+	getSummaryFeedbackForAnswersession,
 } from "$lib/client";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import {
-    Accordion,
-    AccordionItem,
-    Hr,
-    Spinner,
-    Timeline,
-    TimelineItem,
+	Accordion,
+	AccordionItem,
+	Hr,
+	Spinner,
+	Timeline,
+	TimelineItem,
 } from "flowbite-svelte";
 import {
-    BellActiveSolid,
-    CheckCircleSolid,
-    CircleMinusSolid,
+	BellActiveSolid,
+	CheckCircleSolid,
+	CircleMinusSolid,
 } from "flowbite-svelte-icons";
 import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
