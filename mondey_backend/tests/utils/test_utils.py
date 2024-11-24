@@ -77,14 +77,14 @@ def test_get_score_statistics_by_age(session):
 
     child_ages = {}  # no answer sessions ==> empty child ages
     avg, stddev = _get_score_statistics_by_age(answers, child_ages)
-    assert np.all(np.isclose(avg,0))
-    assert np.all(np.isclose(stddev,0))
+    assert np.all(np.isclose(avg, 0))
+    assert np.all(np.isclose(stddev, 0))
 
     child_ages = {1: 5, 2: 3, 3: 8}
     answers = []  # no answers ==> empty answers
     avg, stddev = _get_score_statistics_by_age(answers, child_ages)
-    assert np.all(np.isclose(avg,0))
-    assert np.all(np.isclose(stddev,0))
+    assert np.all(np.isclose(avg, 0))
+    assert np.all(np.isclose(stddev, 0))
 
 
 def test_calculate_milestone_statistics_by_age(session):
@@ -128,7 +128,10 @@ def test_calculate_milestonegroup_statistics(session):
     assert score.age_months == 8
     assert score.group_id == 1
     assert np.isclose(score.avg_score, 2.5)
-    assert np.isclose(score.stddev_score, np.std(
-        answers,
-        correction=1,
-    ))
+    assert np.isclose(
+        score.stddev_score,
+        np.std(
+            answers,
+            correction=1,
+        ),
+    )
