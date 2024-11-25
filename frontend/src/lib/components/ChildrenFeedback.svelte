@@ -1,39 +1,39 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import {
-	type MilestoneAnswerSessionPublic,
-	type MilestonePublic,
-	type ValidationError,
-	getDetailedFeedbackForMilestonegroup,
-	getExpiredMilestoneAnswerSessions,
-	getMilestonegroupsForSession,
-	getSummaryFeedbackForAnswersession,
+    type MilestoneAnswerSessionPublic,
+    type MilestonePublic,
+    type ValidationError,
+    getDetailedFeedbackForMilestonegroup,
+    getExpiredMilestoneAnswerSessions,
+    getMilestonegroupsForSession,
+    getSummaryFeedbackForAnswersession,
 } from "$lib/client";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { user } from "$lib/stores/userStore.svelte";
 import {
-	Accordion,
-	AccordionItem,
-	Button,
-	Checkbox,
-	Heading,
-	Hr,
-	Popover,
-	Spinner,
-	Timeline,
-	TimelineItem,
+    Accordion,
+    AccordionItem,
+    Button,
+    Checkbox,
+    Heading,
+    Hr,
+    Popover,
+    Spinner,
+    Timeline,
+    TimelineItem,
 } from "flowbite-svelte";
 import {
-	BellActiveSolid,
-	CalendarWeekSolid,
-	ChartLineUpOutline,
-	CheckCircleSolid,
-	CloseCircleSolid,
-	ExclamationCircleSolid,
-	EyeSolid,
-	UserSettingsOutline,
+    BellActiveSolid,
+    CalendarWeekSolid,
+    ChartLineUpOutline,
+    CheckCircleSolid,
+    CloseCircleSolid,
+    ExclamationCircleSolid,
+    EyeSolid,
+    UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
@@ -178,7 +178,7 @@ const promise = setup();
 			{#if with_text === true}
 				<p>{$_("childData.recommendOkWithCaveat")}</p>
 			{/if}
-			<EyeSolid color = "orange" size="xl"/>
+			<EyeSolid color = "green" size="xl"/>
 		{:else if summarizeFeedback(value) === 0}
 			{#if with_text === true}
 				<p>{$_("childData.recommendWatch")}</p>
@@ -200,13 +200,12 @@ const promise = setup();
 
 {#snippet detailedEvaluation(milestone: MilestonePublic, ms_score: number, )}
 	<div class = "flex text-gray-700 dark:text-gray-400 items-center justify-start space-x-2 p-2 m-2">
-		{TODO: adjust to 5 scale!}
-		{#if evaluate(ms_score) === 1}
+		{#if evaluate(ms_score) >=1 }
 			<CheckCircleSolid color = "green" size="xl"/>
 			<p class="font-bold">{milestone.text[$locale as string].title} </p>
 
 		{:else if evaluate(ms_score) === 0}
-			<BellActiveSolid color = "orange"size="xl"/>
+			<BellActiveSolid color = "orange" size="xl"/>
 			<p class="font-bold">{milestone.text[$locale as string].title} </p>
 			<Button id="b1">{$_("milestone.help")}</Button>
 			<Popover title={$_("milestone.help")} triggeredBy="#b1"  trigger="click">
@@ -240,6 +239,37 @@ const promise = setup();
 {:then}
 	<Heading tag="h2" class = "text-gray-700 dark:text-gray-400 items-center p-2 m-2 pb-4">{$_("milestone.feedbackTitle")} </Heading>
 	<Checkbox class= "pb-4 m-2 p-2"bind:checked={showHistory}>{$_("milestone.showHistory")}</Checkbox>
+	<Accordion>
+		<AccordionItem>
+			<span slot="header" class = "text-gray-700 dark:text-gray-400 items-center flex justify-center space-x-2" >
+				<span class = "font-bold" >
+					{$_("milestone.legend")}
+				</span>
+			</span>
+			<div class="flex flex-row text-gray-700 dark:text-gray-400 items-center p-2 m-2 pb-4">
+				<CheckCircleSolid color = "green" size="xl"/>
+				<p>{$_("childData.recommendOk")}</p>
+				<Hr classHr="mx-2"/>
+
+				<EyeSolid color = "green" size="xl"/>
+				<p>{$_("childData.recommendOkWithCaveat")}</p>
+				<Hr classHr="mx-2"/>
+
+				<BellActiveSolid color = "orange" size="xl"/>
+				<p>{$_("childData.recommendWatch")}</p>
+				<Hr classHr="mx-2"/>
+
+				<ExclamationCircleSolid color = "red" size="xl"/>
+				<p>{$_("childData.recommendWatchWithCaveat")}</p>
+				<Hr classHr="mx-2"/>
+
+				<CloseCircleSolid color = "red" size="xl"/>
+				<p>{$_("childData.recommmendHelp")}</p>
+				<Hr classHr="mx-2"/>
+			</div>
+		</AccordionItem>
+	</Accordion>
+
 
 	<div class="m-2 mx-auto w-full pb-4 p-2">
 		<Timeline order="horizontal">
@@ -254,9 +284,6 @@ const promise = setup();
 								<div class="hidden sm:flex w-full bg-gray-200 h-0.5 dark:bg-gray-700" ></div>
 							</div>
 						</svelte:fragment>
-						<dev class = "flex text-gray-700 dark:text-gray-400 items-center ">
-						{@render evaluation(feedbackPerAnswersession[aid])}
-						</dev>
 
 						<Hr classHr= "mx-2"/>
 

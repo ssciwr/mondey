@@ -19,8 +19,7 @@
 		"alertMessageError": "Ein Fehler ist aufgetreten",
 		"feedbackTitle": "Feedback zur Entwicklung",
 		"milestone": "Meilenstein",
-		"milestoneGroup": "Meilensteingruppe",
-		"showHistory": "Feedback zu vorherigen Beobachtungszeiträumen anzeigen"
+		"milestoneGroup": "Meilensteingruppe"
 	},
 	"search": {
 		"allLabel": "Alle",
@@ -171,11 +170,13 @@
 		"imageOfChildChangeDelete": "Das aktuelle Bild wurde gelöscht",
 		"noFileChosen": "Keine Datei ausgewählt",
 		"deleteImageButton": "Bild löschen",
-		"recommendOk": "Entwicklung des Kindes ist altersgemäß",
+		"recommendOk": "Entwicklung des Kindes ist altersgemäß.",
 		"recommendOkWithCaveat": "Entwicklung des Kindes ist altersgemäß, aber einzelne Meilensteine sollten besonders beobachtet und eventuell gefördert werden",
-		"recommendWatch": "Entwicklung des Kindes sollte beobachtet werden",
-		"recommendWatchWithCaveat": "Entwicklung des Kindes ist nicht ganz altersgemäß und sollte beobachtet werden. Einzelne Bereiche sollten besonders gefördert werden",
-		"recommmendHelp": "Entwicklung des Kindes ist möglicherweise verzögert und sollte gefördert werden."
+		"recommendWatch": "Entwicklung des Kindes ist leicht verzögert und sollte beobachtet werden um gegebenfalls gezielt einzelne Bereiche zu fördern",
+		"recommendWatchWithCaveat": "Entwicklung des Kindes ist nicht ganz altersgemäß und sollte genau beobachtet werden. Einzelne Bereiche sollten besonders gefördert werden",
+		"recommmendHelp": "Entwicklung des Kindes ist signifikant verzögert und sollte gefördert werden. Professionelle Hilfe wird kann notwendig sein.",
+		"showHistory": "Feedback zu vorherigen Beobachtungszeiträumen anzeigen", 
+		"legend": "Legende"
 	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",
