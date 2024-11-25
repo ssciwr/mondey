@@ -235,3 +235,41 @@ def test_get_milestone_age_scores(admin_client: TestClient):
     assert response.json()["scores"][8]["avg_score"] == pytest.approx(2.0)
     assert response.json()["scores"][9]["avg_score"] == pytest.approx(4.0)
     assert response.json()["scores"][10]["avg_score"] == pytest.approx(0.0)
+
+
+def test_get_submitted_milestone_images(admin_client: TestClient):
+    response = admin_client.get("/admin/submitted-milestone-images")
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+
+
+def test_approve_submitted_milestone_image(
+    admin_client: TestClient,
+    static_dir: pathlib.Path,
+):
+    submitted_image_file = static_dir / "ms" / "1.webp"
+    assert submitted_image_file.is_file()
+    approved_image_file = static_dir / "m" / "4.webp"
+    assert not approved_image_file.is_file()
+    assert len(admin_client.get("/admin/submitted-milestone-images").json()) == 2
+    response = admin_client.post("/admin/submitted-milestone-images/approve/1")
+    assert response.status_code == 200
+    assert not submitted_image_file.is_file()
+    assert approved_image_file.is_file()
+    assert len(admin_client.get("/admin/submitted-milestone-images").json()) == 1
+
+
+def test_delete_submitted_milestone_image(
+    admin_client: TestClient,
+    static_dir: pathlib.Path,
+):
+    submitted_image_file = static_dir / "ms" / "1.webp"
+    assert submitted_image_file.is_file()
+    approved_image_file = static_dir / "m" / "4.webp"
+    assert not approved_image_file.is_file()
+    assert len(admin_client.get("/admin/submitted-milestone-images").json()) == 2
+    response = admin_client.delete("/admin/submitted-milestone-images/1")
+    assert response.status_code == 200
+    assert not submitted_image_file.is_file()
+    assert not approved_image_file.is_file()
+    assert len(admin_client.get("/admin/submitted-milestone-images").json()) == 1

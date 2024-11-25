@@ -16,7 +16,10 @@
 		"autonext": "Automatisch weiter",
 		"groupOverviewLabel": "Übersicht Meilensteingruppen",
 		"alertMessageRetrieving": "Fehler beim Abrufen der Meilensteine",
-		"alertMessageError": "Ein Fehler ist aufgetreten"
+		"alertMessageError": "Ein Fehler ist aufgetreten",
+		"submit-image": "Bild einreichen",
+		"submit-image-text": "Haben Sie ein Bild von Ihrem Kind bei diesem Meilenstein, das Sie gerne beisteuern und veröffentlichen möchten? Wenn ja, können Sie es hier einreichen.",
+		"submit-image-conditions": "Ich bin damit einverstanden, dass dieses Bild veröffentlicht und den Benutzern als eines der Meilensteinbilder auf dieser Website angezeigt wird, sofern es von den Site-Administratoren genehmigt wird."
 	},
 	"search": {
 		"allLabel": "Alle",
@@ -40,6 +43,7 @@
 		"label": "Administration",
 		"title": "Titel",
 		"languages": "Sprachen",
+		"milestone": "Meilenstein",
 		"milestones": "Meilensteine",
 		"milestone-groups": "Meilensteingruppen",
 		"translations": "Übersetzungen",
@@ -51,6 +55,7 @@
 		"actions": "Aktionen",
 		"selectPlaceholder": "Erstens,Zweitens,Drittens;",
 		"add": "Hinzufügen",
+		"approve": "Genehmigen",
 		"edit": "Bearbeiten",
 		"delete": "Löschen",
 		"reorder": "Neu ordnen",
@@ -64,6 +69,7 @@
 		"help": "Förderhilfen",
 		"image": "Bild",
 		"images": "Bilder",
+		"submitted-images": "Eingereichte Bilder",
 		"age": "Alter",
 		"average-score": "Durchschnittspunktzahl",
 		"view-data": "Daten anzeigen",

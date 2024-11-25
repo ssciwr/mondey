@@ -122,7 +122,7 @@ onMount(async () => {
 			<TableHeadCell>Question</TableHeadCell>
 			<TableHeadCell>Input type</TableHeadCell>
 			<TableHeadCell>Options</TableHeadCell>
-			<TableHeadCell>Actions</TableHeadCell>
+			<TableHeadCell>{$_('admin.actions')}</TableHeadCell>
 		</TableHead>
 		<TableBody>
 			{#each $questions as question, groupIndex (question.id)}

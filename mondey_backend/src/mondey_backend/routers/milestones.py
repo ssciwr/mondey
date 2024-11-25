@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter
+from fastapi import UploadFile
 from sqlalchemy.orm import lazyload
 from sqlmodel import col
 from sqlmodel import select
@@ -12,9 +13,13 @@ from ..models.milestones import Milestone
 from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupPublic
 from ..models.milestones import MilestonePublic
+from ..models.milestones import SubmittedMilestoneImage
+from .utils import add
 from .utils import get
 from .utils import get_child_age_in_months
 from .utils import get_db_child
+from .utils import submitted_milestone_image_path
+from .utils import write_image_file
 
 
 def create_router() -> APIRouter:
@@ -71,5 +76,22 @@ def create_router() -> APIRouter:
         ).all()
 
         return milestone_groups
+
+    @router.post("/submitted-milestone-images/{milestone_id}")
+    async def submit_milestone_image(
+        session: SessionDep,
+        current_active_user: CurrentActiveUserDep,
+        milestone_id: int,
+        file: UploadFile,
+    ):
+        milestone = get(session, Milestone, milestone_id)
+        submitted_milestone_image = SubmittedMilestoneImage(
+            milestone_id=milestone.id, user_id=current_active_user.id
+        )
+        add(session, submitted_milestone_image)
+        write_image_file(
+            file, submitted_milestone_image_path(submitted_milestone_image.id)
+        )
+        return {"ok": True}
 
     return router
