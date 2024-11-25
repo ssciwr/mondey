@@ -16,6 +16,7 @@ from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneAnswerSessionPublic
+from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupPublic
 from ..models.questions import ChildAnswer
 from ..models.questions import ChildAnswerPublic
@@ -273,7 +274,7 @@ def create_router() -> APIRouter:
         return get_milestonegroups_for_answersession(session, answersession)
 
     @router.get(
-        "/feedback/answersession={answersession_id}/milestonegroup={milestonegroup_id}/details",
+        "/feedback/answersession={answersession_id}/milestonegroup={milestonegroup_id}/detailed",
         response_model=dict[int, int],
     )
     def get_detailed_feedback_for_milestonegroup(
@@ -283,7 +284,7 @@ def create_router() -> APIRouter:
         milestonegroup_id: int,
     ) -> dict[int, int]:
         answersession = get(session, MilestoneAnswerSession, answersession_id)
-        m = get(session, MilestoneGroupPublic, milestonegroup_id)
+        m = get(session, MilestoneGroup, milestonegroup_id)
         answers = [
             answersession.answers[ms.id]
             for ms in m.milestones

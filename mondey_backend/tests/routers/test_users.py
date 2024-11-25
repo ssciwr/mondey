@@ -349,7 +349,7 @@ def test_update_current_child_answers_no_prexisting(
     assert response.status_code == 404
 
 
-def test_get_summary_feedback_for_session(session, user_client: TestClient):
+def test_get_summary_feedback_for_session(user_client: TestClient):
     response = user_client.get("/users/feedback/answersession=1/summary")
     assert response.status_code == 200
     assert response.json() == {"1": 0}
@@ -360,7 +360,7 @@ def test_get_summary_feedback_for_session_invalid_user(public_client: TestClient
     assert response.status_code == 401
 
 
-def test_get_detailed_feedback_for_session(session, user_client: TestClient):
+def test_get_detailed_feedback_for_session(user_client: TestClient):
     response = user_client.get("/users/feedback/answersession=1/detailed")
     assert response.status_code == 200
     assert response.json() == {"1": {"1": 0, "2": 0}}
@@ -369,3 +369,11 @@ def test_get_detailed_feedback_for_session(session, user_client: TestClient):
 def test_get_detailed_feedback_for_session_invalid_user(public_client: TestClient):
     response = public_client.get("/users/feedback/answersession=1/detailed")
     assert response.status_code == 401
+
+
+def test_get_detailed_feedback_for_milestonegroup(user_client: TestClient):
+    response = user_client.get(
+        "users/feedback/answersession=1/milestonegroup=1/detailed"
+    )
+    assert response.status_code == 200
+    assert response.json() == {"1": 0, "2": 0}

@@ -16,7 +16,10 @@
 		"autonext": "Automatisch weiter",
 		"groupOverviewLabel": "Übersicht Meilensteingruppen",
 		"alertMessageRetrieving": "Fehler beim Abrufen der Meilensteine",
-		"alertMessageError": "Ein Fehler ist aufgetreten"
+		"alertMessageError": "Ein Fehler ist aufgetreten",
+		"feedbackTitle": "Feedback zur Entwicklung",
+		"milestone": "Meilenstein",
+		"milestoneGroup": "Meilensteingruppe"
 	},
 	"search": {
 		"allLabel": "Alle",

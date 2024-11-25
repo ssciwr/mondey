@@ -2,27 +2,37 @@
 <script lang="ts">
 import {
 	type MilestoneAnswerSessionPublic,
+	type MilestonePublic,
 	type ValidationError,
 	getDetailedFeedbackForMilestonegroup,
 	getExpiredMilestoneAnswerSessions,
 	getMilestonegroupsForSession,
 	getSummaryFeedbackForAnswersession,
 } from "$lib/client";
+import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
+import { activeTabChildren } from "$lib/stores/componentStore";
 import { user } from "$lib/stores/userStore.svelte";
 import {
 	Accordion,
 	AccordionItem,
+	Button,
 	Hr,
+	Popover,
 	Spinner,
 	Timeline,
 	TimelineItem,
 } from "flowbite-svelte";
+
 import {
 	BellActiveSolid,
+	ChartLineUpOutline,
 	CheckCircleSolid,
-	CircleMinusSolid,
+	ExclamationCircleSolid,
+	UserSettingsOutline,
 } from "flowbite-svelte-icons";
+
+import {} from "flowbite-svelte-icons";
 import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
@@ -32,9 +42,24 @@ let alertMessage = $state(
 );
 let answerSessions = $state({} as Record<number, MilestoneAnswerSessionPublic>);
 let feedbackPerAnswersession = $state({} as Record<number, any>);
-let milestongeGroups = $state({} as Record<number, any>);
+let milestoneGroups = $state({} as Record<number, any>);
 let sessionkeys = $state([] as number[]);
-let detailed = $state({} as Record<string, number>);
+const breadcrumbdata: any[] = [
+	{
+		label: currentChild.name,
+		onclick: () => {
+			activeTabChildren.set("childrenRegistration");
+		},
+		symbol: UserSettingsOutline,
+	},
+	{
+		label: $_("milestone.feedbackTitle"),
+		onclick: () => {
+			activeTabChildren.set("childrenFeedback");
+		},
+		symbol: ChartLineUpOutline,
+	},
+];
 
 async function setup(): Promise<void> {
 	user.load;
@@ -83,8 +108,28 @@ async function setup(): Promise<void> {
 			alertMessage = milestoneGroupResponse.error.detail;
 			return;
 		}
-		milestongeGroups[Number(aid)] = milestoneGroupResponse.data;
+		milestoneGroups[Number(aid)] = milestoneGroupResponse.data;
 	}
+}
+
+async function getDetailed(
+	aid: number,
+	mid: string,
+): Promise<Record<string, number>> {
+	const response = await getDetailedFeedbackForMilestonegroup({
+		path: {
+			answersession_id: aid,
+			milestonegroup_id: Number(mid),
+		},
+	});
+
+	if (response.error) {
+		showAlert = true;
+		alertMessage = response.error.detail;
+		return {};
+	}
+
+	return response.data;
 }
 
 function formatDate(date: string): string {
@@ -106,7 +151,12 @@ function evaluate(v: number): number {
 	return 1;
 }
 
-function summarizeFeedback(feedback: Record<number, number>): number {
+function summarizeFeedback(feedback: Record<number, number> | number): number {
+	// get minimum score
+	if (typeof feedback === "number") {
+		return evaluate(feedback);
+	}
+
 	let minscore = 1;
 	for (const score of Object.values(feedback)) {
 		if (score < minscore) {
@@ -119,82 +169,115 @@ function summarizeFeedback(feedback: Record<number, number>): number {
 const promise = setup();
 </script>
 
-{#snippet evaluation(value: Record<number, number>, with_text: boolean = true)}
-	{#if summarizeFeedback(value) === 1}
-		<CheckCircleSolid color = "green" size="xl"/>
-		{#if with_text === true}
-		<p class = "text-lg">{$_("childData.recommendOk")}</p>
-		{/if}
+{#snippet evaluation(value: Record<number, number> | number, with_text: boolean = true)}
+	<div class="flex text-gray-700 dark:text-gray-400 items-center p-2 m-2">
+		{#if summarizeFeedback(value) === 1}
+			<CheckCircleSolid color = "green" size="xl"/>
+			{#if with_text === true}
+			<p >{$_("childData.recommendOk")}</p>
+			{/if}
 
-	{:else if summarizeFeedback(value) === 0}
-		<BellActiveSolid color = "orange"size="xl"/>
-		{#if with_text === true}
-		<p class = "text-lg">{$_("childData.recommendWatch")}</p>
-		{/if}
+		{:else if summarizeFeedback(value) === 0}
+			<BellActiveSolid color = "orange"size="xl"/>
+			{#if with_text === true}
+			<p >{$_("childData.recommendWatch")}</p>
+			{/if}
 
-	{:else}
-		<CircleMinusSolid color = "red" size="xl"/>
-		{#if with_text === true}
-		<p class = "text-lg">{$_("childData.recommmendHelp")}</p>
+		{:else}
+			<ExclamationCircleSolid color = "red" size="xl"/>
+			{#if with_text === true}
+			<p>{$_("childData.recommmendHelp")}</p>
+			{/if}
 		{/if}
-	{/if}
+	</div>
 {/snippet}
 
+{#snippet detailedEvaluation(milestone: MilestonePublic, ms_score: number, )}
+	<div class = "flex text-gray-700 dark:text-gray-400 items-center p-2 m-2">
+		<p class="font-bold">{$_("milestone.milestone")} {milestone.text[$locale as string].title}: </p>
+		{#if evaluate(ms_score) === 1}
+			<CheckCircleSolid color = "green" size="xl"/>
+		{:else if evaluate(ms_score) === 0}
+			<BellActiveSolid color = "orange"size="xl"/>
+			<Button id="b1">{$_("milestone.help")}</Button>
+			<Popover title={$_("milestone.help")} triggeredBy="#b1"  trigger="click">
+				{milestone.text[$locale as string].help}
+			</Popover>
+		{:else}
+			<ExclamationCircleSolid color = "red" size="xl"/>
+			<Button id="b2">{$_("milestone.help")}</Button>
+			<Popover title={$_("milestone.help")} triggeredBy="#b2"  trigger="click">
+				{milestone.text[$locale as string].help}
+			</Popover>
+		{/if}
+	</div>
+{/snippet}
+
+<Breadcrumbs data={breadcrumbdata} />
+
+{#if showAlert}
+	<AlertMessage
+		message = {alertMessage}
+		title = {$_("childData.alertMessageTitle")}
+	/>
+{/if}
 
 {#await promise}
-<div class = "flex justify-center items-center flex-row">
-	<Spinner /> <p>{$_("childData.loadingMessage")}</p>
-</div>
+	<div class = "flex justify-center items-center ">
+		<Spinner /> <p>{$_("childData.loadingMessage")}</p>
+	</div>
 {:then}
-<div>
-    <Timeline>
-		{#each sessionkeys as aid}
-			<TimelineItem classTime = "text-xl font-bold text-gray-700 dark:text-gray-400 " date = {formatDate(answerSessions[aid].created_at)}>
-			<dev class = "flex flex-row text-gray-700 dark:text-gray-400 items-center ">
-			{@render evaluation(feedbackPerAnswersession[aid])}
-			</dev>
-			<Hr />
-			<Accordion>
-				{#each Object.entries(feedbackPerAnswersession[aid]) as [mid, score]}
-				<AccordionItem on:click = {async () => {
-					console.log("clicked on accordion item");
-					const response = await getDetailedFeedbackForMilestonegroup({
-						path: {
-							answersession_id: aid,
-        					milestonegroup_id: Number(mid)
-						}
-					});
-					if (response.error) {
-						showAlert = true;
-						alertMessage = response.error.detail;
-						return;
-					}
-					console.log("detailed feedback: ", response.data);
-					detailed = response.data;
+	<div class="container m-2 mx-auto w-full pb-4">
+		<Timeline>
+			{#each sessionkeys as aid}
 
-				}}>
-					<span slot="header">{milestongeGroups[aid][Number(mid)].text[$locale as string].title}</span>
-					{@render evaluation(score as Record<number, number>, false)}
-					{#each Object.entries(detailed) as [ms_id, ms_score]}
-						<p>{milestongeGroups[aid][Number(mid)].milestones[ms_id].text[$locale as string].title}</p>
-						{#if evaluate(ms_score) === 1}
-							<CheckCircleSolid color = "green" size="xl"/>
-						{:else if evaluate(ms_score) === 0}
-							<BellActiveSolid color = "orange"size="xl"/>
-						{:else}
-							<CircleMinusSolid color = "red" size="xl"/>
-						{/if}
-					{/each}
-				</AccordionItem>
-				{/each}
-			</Accordion>
-			</TimelineItem>
-		{/each}
-    </Timeline>
-</div>
+				<TimelineItem classTime = "text-xl font-bold text-gray-700 dark:text-gray-400 " date = {formatDate(answerSessions[aid].created_at)}>
+
+					<dev class = "flex text-gray-700 dark:text-gray-400 items-center ">
+					{@render evaluation(feedbackPerAnswersession[aid])}
+					</dev>
+
+					<Hr />
+
+					<Accordion>
+						{#each Object.entries(feedbackPerAnswersession[aid]) as [mid, score]}
+							{#await getDetailed(aid, mid)}
+								<Spinner /> <p>{$_("childData.loadingMessage")}</p>
+							{:then detailed}
+								<AccordionItem >
+									<span slot="header" class = "text-gray-700 dark:text-gray-400 items-center" >
+										<p class = "text-gray-700 dark:text-gray-400 font-bold" >
+										{$_("milestone.milestoneGroup") }
+										{milestoneGroups[aid][Number(mid)].text[$locale as string].title}</p>
+										<Hr />
+										{@render evaluation(score as number, true)}
+
+									</span>
+
+									<div class="flex-row justify-between">
+										{#each Object.entries(detailed) as [ms_id, ms_score]}
+											{@render detailedEvaluation(
+												milestoneGroups[aid][Number(mid)].milestones.find((element: any) => element.id === Number(ms_id)),
+												ms_score
+											)}
+										{/each}
+									</div>
+								</AccordionItem>
+							{:catch error}
+								<AlertMessage
+									message = {`${alertMessage} ${error}`}
+									title = {$_("childData.alertMessageTitle")}
+								/>
+							{/await}
+						{/each}
+					</Accordion>
+				</TimelineItem>
+			{/each}
+		</Timeline>
+	</div>
 {:catch error}
-<AlertMessage
-    message = {`${alertMessage} ${error}`}
-    title = {$_("childData.alertMessageTitle")}
-/>
+	<AlertMessage
+		message = {`${alertMessage} ${error}`}
+		title = {$_("childData.alertMessageTitle")}
+	/>
 {/await}

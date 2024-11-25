@@ -1,5 +1,6 @@
 <svelte:options runes={true} />
 <script lang='ts'>
+import type { ValidationError } from "$lib/client";
 import { Alert, Button } from "flowbite-svelte";
 import { EyeSolid, InfoCircleSolid } from "flowbite-svelte-icons";
 import { _ } from "svelte-i18n";
@@ -14,7 +15,7 @@ let {
 		console.log(event);
 	},
 }: {
-	message?: string;
+	message?: string | ValidationError[];
 	title?: string;
 	infotitle?: string;
 	lastpage?: string;

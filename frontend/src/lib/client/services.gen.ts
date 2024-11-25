@@ -566,7 +566,7 @@ export const getMilestonegroupsForSession = <ThrowOnError extends boolean = fals
 export const getDetailedFeedbackForMilestonegroup = <ThrowOnError extends boolean = false>(options: Options<GetDetailedFeedbackForMilestonegroupData, ThrowOnError>) => {
     return (options?.client ?? client).get<GetDetailedFeedbackForMilestonegroupResponse, GetDetailedFeedbackForMilestonegroupError, ThrowOnError>({
         ...options,
-        url: '/users/feedback/answersession={answersession_id}/milestonegroup={milestonegroup_id}/details'
+        url: '/users/feedback/answersession={answersession_id}/milestonegroup={milestonegroup_id}/detailed'
     });
 };
 
