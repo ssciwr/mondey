@@ -17,6 +17,8 @@ import {
 	Accordion,
 	AccordionItem,
 	Button,
+	Checkbox,
+	Heading,
 	Hr,
 	Popover,
 	Spinner,
@@ -26,6 +28,7 @@ import {
 
 import {
 	BellActiveSolid,
+	CalendarWeekSolid,
 	ChartLineUpOutline,
 	CheckCircleSolid,
 	ExclamationCircleSolid,
@@ -44,6 +47,8 @@ let answerSessions = $state({} as Record<number, MilestoneAnswerSessionPublic>);
 let feedbackPerAnswersession = $state({} as Record<number, any>);
 let milestoneGroups = $state({} as Record<number, any>);
 let sessionkeys = $state([] as number[]);
+let showHistory = $state(false);
+
 const breadcrumbdata: any[] = [
 	{
 		label: currentChild.name,
@@ -80,7 +85,6 @@ async function setup(): Promise<void> {
 	answerSessions = responseAnswerSessions.data;
 	sessionkeys = Object.keys(answerSessions)
 		.sort()
-		.reverse()
 		.map((x) => Number(x));
 
 	for (const aid of Object.keys(answerSessions)) {
@@ -213,6 +217,7 @@ const promise = setup();
 	</div>
 {/snippet}
 
+
 <Breadcrumbs data={breadcrumbdata} />
 
 {#if showAlert}
@@ -227,51 +232,63 @@ const promise = setup();
 		<Spinner /> <p>{$_("childData.loadingMessage")}</p>
 	</div>
 {:then}
-	<div class="container m-2 mx-auto w-full pb-4">
-		<Timeline>
+	<Heading tag="h2" class = "text-gray-700 dark:text-gray-400 items-center p-2 m-2 pb-4">{$_("milestone.feedbackTitle")} </Heading>
+	<Checkbox class= "pb-4 m-2 p-2"bind:checked={showHistory}>{$_("milestone.showHistory")}</Checkbox>
+
+	<div class="m-2 mx-auto w-full pb-4 p-2">
+		<Timeline order="horizontal">
 			{#each sessionkeys as aid}
 
-				<TimelineItem classTime = "text-xl font-bold text-gray-700 dark:text-gray-400 " date = {formatDate(answerSessions[aid].created_at)}>
+				{#if showHistory === true || aid === sessionkeys[sessionkeys.length -1]}
+					<TimelineItem classTime = "text-lg font-bold text-gray-700 dark:text-gray-400 m-2 p-2" date = {formatDate(answerSessions[aid].created_at)}>
+						<svelte:fragment slot="icon">
+							<div class="flex items-center">
+								<div class="flex z-10 justify-center items-center w-6 h-6 bg-primary-200 rounded-full ring-0 ring-white dark:bg-primary-900 sm:ring-8 dark:ring-gray-900 shrink-0">
+								<CalendarWeekSolid class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+								</div>
+								<div class="hidden sm:flex w-full bg-gray-200 h-0.5 dark:bg-gray-700" ></div>
+							</div>
+						</svelte:fragment>
+						<dev class = "flex text-gray-700 dark:text-gray-400 items-center ">
+						{@render evaluation(feedbackPerAnswersession[aid])}
+						</dev>
 
-					<dev class = "flex text-gray-700 dark:text-gray-400 items-center ">
-					{@render evaluation(feedbackPerAnswersession[aid])}
-					</dev>
+						<Hr classHr= "mx-2"/>
 
-					<Hr />
+						<Accordion class="p-2 m-2">
+							{#each Object.entries(feedbackPerAnswersession[aid]) as [mid, score]}
+								{#await getDetailed(aid, mid)}
+									<Spinner /> <p>{$_("childData.loadingMessage")}</p>
+								{:then detailed}
+									<AccordionItem >
+										<span slot="header" class = "text-gray-700 dark:text-gray-400 items-center" >
+											<p class = "text-gray-700 dark:text-gray-400 font-bold" >
+											{$_("milestone.milestoneGroup") }
+											{milestoneGroups[aid][Number(mid)].text[$locale as string].title}</p>
+											<Hr />
+											{@render evaluation(score as number, true)}
 
-					<Accordion>
-						{#each Object.entries(feedbackPerAnswersession[aid]) as [mid, score]}
-							{#await getDetailed(aid, mid)}
-								<Spinner /> <p>{$_("childData.loadingMessage")}</p>
-							{:then detailed}
-								<AccordionItem >
-									<span slot="header" class = "text-gray-700 dark:text-gray-400 items-center" >
-										<p class = "text-gray-700 dark:text-gray-400 font-bold" >
-										{$_("milestone.milestoneGroup") }
-										{milestoneGroups[aid][Number(mid)].text[$locale as string].title}</p>
-										<Hr />
-										{@render evaluation(score as number, true)}
+										</span>
 
-									</span>
-
-									<div class="flex-row justify-between">
-										{#each Object.entries(detailed) as [ms_id, ms_score]}
-											{@render detailedEvaluation(
-												milestoneGroups[aid][Number(mid)].milestones.find((element: any) => element.id === Number(ms_id)),
-												ms_score
-											)}
-										{/each}
-									</div>
-								</AccordionItem>
-							{:catch error}
-								<AlertMessage
-									message = {`${alertMessage} ${error}`}
-									title = {$_("childData.alertMessageTitle")}
-								/>
-							{/await}
-						{/each}
-					</Accordion>
-				</TimelineItem>
+										<div class="flex-row justify-between">
+											{#each Object.entries(detailed) as [ms_id, ms_score]}
+												{@render detailedEvaluation(
+													milestoneGroups[aid][Number(mid)].milestones.find((element: any) => element.id === Number(ms_id)),
+													ms_score
+												)}
+											{/each}
+										</div>
+									</AccordionItem>
+								{:catch error}
+									<AlertMessage
+										message = {`${alertMessage} ${error}`}
+										title = {$_("childData.alertMessageTitle")}
+									/>
+								{/await}
+							{/each}
+						</Accordion>
+					</TimelineItem>
+				{/if}
 			{/each}
 		</Timeline>
 	</div>

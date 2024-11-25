@@ -19,7 +19,8 @@
 		"alertMessageError": "Ein Fehler ist aufgetreten",
 		"feedbackTitle": "Feedback zur Entwicklung",
 		"milestone": "Meilenstein",
-		"milestoneGroup": "Meilensteingruppe"
+		"milestoneGroup": "Meilensteingruppe",
+		"showHistory": "Feedback zu vergangenen Beobachtungszeiträumen anzeigen"
 	},
 	"search": {
 		"allLabel": "Alle",
