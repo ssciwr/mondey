@@ -58,10 +58,9 @@ def create_router() -> APIRouter:
         milestone_group: MilestoneGroupAdmin,
     ):
         db_milestone_group = get(session, MilestoneGroup, milestone_group.id)
-        for key, value in milestone_group.model_dump(
-            exclude={"text", "milestones"}
-        ).items():
-            setattr(db_milestone_group, key, value)
+        db_milestone_group.sqlmodel_update(
+            milestone_group.model_dump(exclude={"text", "milestones"})
+        )
         update_milestone_group_text(session, milestone_group)
         add(session, db_milestone_group)
         return db_milestone_group
@@ -104,8 +103,7 @@ def create_router() -> APIRouter:
         milestone: MilestoneAdmin,
     ):
         db_milestone = get(session, Milestone, milestone.id)
-        for key, value in milestone.model_dump(exclude={"text", "images"}).items():
-            setattr(db_milestone, key, value)
+        db_milestone.sqlmodel_update(milestone.model_dump(exclude={"text", "images"}))
         update_milestone_text(session, milestone)
         add(session, db_milestone)
         return db_milestone

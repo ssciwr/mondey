@@ -102,8 +102,7 @@ def _update_text(
         if not db_text:
             db_text = text
         else:
-            for key, value in text.model_dump().items():
-                setattr(db_text, key, value)
+            db_text.sqlmodel_update(text.model_dump())
         session.add(db_text)
 
 
