@@ -273,6 +273,7 @@ def calculate_milestonegroup_statistics(
     answers = []
     for milestone in milestonegroup.milestones:
         # we want something that is relevant for the age of the child at hand. Hence we filter by age here. Is this what they want?
+        # FIXME: 11-25-2024: I think this is  not what we want and it should be filtered by the age of the child at the time of the answer session?
         m_answers = [
             answer.answer
             for answer in session.exec(
