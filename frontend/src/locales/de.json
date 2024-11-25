@@ -20,7 +20,7 @@
 		"feedbackTitle": "Feedback zur Entwicklung",
 		"milestone": "Meilenstein",
 		"milestoneGroup": "Meilensteingruppe",
-		"showHistory": "Feedback zu vergangenen Beobachtungszeiträumen anzeigen"
+		"showHistory": "Feedback zu vorherigen Beobachtungszeiträumen anzeigen"
 	},
 	"search": {
 		"allLabel": "Alle",
@@ -172,8 +172,10 @@
 		"noFileChosen": "Keine Datei ausgewählt",
 		"deleteImageButton": "Bild löschen",
 		"recommendOk": "Entwicklung des Kindes ist altersgemäß",
+		"recommendOkWithCaveat": "Entwicklung des Kindes ist altersgemäß, aber einzelne Meilensteine sollten besonders beobachtet und eventuell gefördert werden",
 		"recommendWatch": "Entwicklung des Kindes sollte beobachtet werden",
-		"recommmendHelp": "Entwicklung des Kindes sollte gefördert werden"
+		"recommendWatchWithCaveat": "Entwicklung des Kindes ist nicht ganz altersgemäß und sollte beobachtet werden. Einzelne Bereiche sollten besonders gefördert werden",
+		"recommmendHelp": "Entwicklung des Kindes ist möglicherweise verzögert und sollte gefördert werden."
 	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",

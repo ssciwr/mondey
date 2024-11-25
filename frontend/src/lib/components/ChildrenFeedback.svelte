@@ -25,17 +25,16 @@ import {
 	Timeline,
 	TimelineItem,
 } from "flowbite-svelte";
-
 import {
 	BellActiveSolid,
 	CalendarWeekSolid,
 	ChartLineUpOutline,
 	CheckCircleSolid,
+	CloseCircleSolid,
 	ExclamationCircleSolid,
+	EyeSolid,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
-
-import {} from "flowbite-svelte-icons";
 import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
@@ -118,12 +117,12 @@ async function setup(): Promise<void> {
 
 async function getDetailed(
 	aid: number,
-	mid: string,
+	mid: number,
 ): Promise<Record<string, number>> {
 	const response = await getDetailedFeedbackForMilestonegroup({
 		path: {
 			answersession_id: aid,
-			milestonegroup_id: Number(mid),
+			milestonegroup_id: mid,
 		},
 	});
 
@@ -156,59 +155,66 @@ function evaluate(v: number): number {
 }
 
 function summarizeFeedback(feedback: Record<number, number> | number): number {
-	// get minimum score
 	if (typeof feedback === "number") {
-		return evaluate(feedback);
+		return feedback;
 	}
 
-	let minscore = 1;
-	for (const score of Object.values(feedback)) {
-		if (score < minscore) {
-			minscore = score;
-		}
-	}
-	return evaluate(minscore);
+	const minscore = Math.min(...Object.values(feedback));
+
+	return minscore;
 }
-
+// FIXME: add something that explains the scale!
 const promise = setup();
 </script>
 
 {#snippet evaluation(value: Record<number, number> | number, with_text: boolean = true)}
-	<div class="flex text-gray-700 dark:text-gray-400 items-center p-2 m-2">
-		{#if summarizeFeedback(value) === 1}
+	<div class="text-gray-700 dark:text-gray-400 items-center flex justify-center space-x-2 p-2 m-2">
+		{#if summarizeFeedback(value) === 2}
+			{#if with_text === true}
+				<p >{$_("childData.recommendOk")}</p>
+			{/if}
 			<CheckCircleSolid color = "green" size="xl"/>
+		{:else if summarizeFeedback(value) === 1}
 			{#if with_text === true}
-			<p >{$_("childData.recommendOk")}</p>
+				<p>{$_("childData.recommendOkWithCaveat")}</p>
 			{/if}
-
+			<EyeSolid color = "orange" size="xl"/>
 		{:else if summarizeFeedback(value) === 0}
-			<BellActiveSolid color = "orange"size="xl"/>
 			{#if with_text === true}
-			<p >{$_("childData.recommendWatch")}</p>
+				<p>{$_("childData.recommendWatch")}</p>
 			{/if}
-
-		{:else}
+			<BellActiveSolid color = "orange" size="xl"/>
+		{:else if summarizeFeedback(value) === -1}
+			{#if with_text === true}
+				<p>{$_("childData.recommendWatchWithCaveat")}</p>
+			{/if}
 			<ExclamationCircleSolid color = "red" size="xl"/>
+		{:else}
 			{#if with_text === true}
-			<p>{$_("childData.recommmendHelp")}</p>
+				<p>{$_("childData.recommmendHelp")}</p>
 			{/if}
+			<CloseCircleSolid color = "red" size="xl"/>
 		{/if}
 	</div>
 {/snippet}
 
 {#snippet detailedEvaluation(milestone: MilestonePublic, ms_score: number, )}
-	<div class = "flex text-gray-700 dark:text-gray-400 items-center p-2 m-2">
-		<p class="font-bold">{$_("milestone.milestone")} {milestone.text[$locale as string].title}: </p>
+	<div class = "flex text-gray-700 dark:text-gray-400 items-center justify-start space-x-2 p-2 m-2">
+		{TODO: adjust to 5 scale!}
 		{#if evaluate(ms_score) === 1}
 			<CheckCircleSolid color = "green" size="xl"/>
+			<p class="font-bold">{milestone.text[$locale as string].title} </p>
+
 		{:else if evaluate(ms_score) === 0}
 			<BellActiveSolid color = "orange"size="xl"/>
+			<p class="font-bold">{milestone.text[$locale as string].title} </p>
 			<Button id="b1">{$_("milestone.help")}</Button>
 			<Popover title={$_("milestone.help")} triggeredBy="#b1"  trigger="click">
 				{milestone.text[$locale as string].help}
 			</Popover>
 		{:else}
 			<ExclamationCircleSolid color = "red" size="xl"/>
+			<p class="font-bold">{milestone.text[$locale as string].title} </p>
 			<Button id="b2">{$_("milestone.help")}</Button>
 			<Popover title={$_("milestone.help")} triggeredBy="#b2"  trigger="click">
 				{milestone.text[$locale as string].help}
@@ -238,7 +244,6 @@ const promise = setup();
 	<div class="m-2 mx-auto w-full pb-4 p-2">
 		<Timeline order="horizontal">
 			{#each sessionkeys as aid}
-
 				{#if showHistory === true || aid === sessionkeys[sessionkeys.length -1]}
 					<TimelineItem classTime = "text-lg font-bold text-gray-700 dark:text-gray-400 m-2 p-2" date = {formatDate(answerSessions[aid].created_at)}>
 						<svelte:fragment slot="icon">
@@ -257,23 +262,21 @@ const promise = setup();
 
 						<Accordion class="p-2 m-2">
 							{#each Object.entries(feedbackPerAnswersession[aid]) as [mid, score]}
-								{#await getDetailed(aid, mid)}
+								{#await getDetailed(aid, Number(mid))}
 									<Spinner /> <p>{$_("childData.loadingMessage")}</p>
 								{:then detailed}
 									<AccordionItem >
-										<span slot="header" class = "text-gray-700 dark:text-gray-400 items-center" >
-											<p class = "text-gray-700 dark:text-gray-400 font-bold" >
-											{$_("milestone.milestoneGroup") }
-											{milestoneGroups[aid][Number(mid)].text[$locale as string].title}</p>
-											<Hr />
-											{@render evaluation(score as number, true)}
-
+										<span slot="header" class = "text-gray-700 dark:text-gray-400 items-center flex justify-center space-x-2" >
+											<span class = "text-gray-700 dark:text-gray-400 font-bold" >
+											{milestoneGroups[aid][mid].text[$locale as string].title}
+											</span>
+											{@render evaluation( score as number, false)}
 										</span>
 
 										<div class="flex-row justify-between">
 											{#each Object.entries(detailed) as [ms_id, ms_score]}
 												{@render detailedEvaluation(
-													milestoneGroups[aid][Number(mid)].milestones.find((element: any) => element.id === Number(ms_id)),
+													milestoneGroups[aid][mid].milestones.find((element: any) => element.id === Number(ms_id)),
 													ms_score
 												)}
 											{/each}

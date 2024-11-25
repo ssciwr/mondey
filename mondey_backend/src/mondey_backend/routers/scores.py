@@ -29,14 +29,18 @@ class TrafficLight(Enum):
 
     """
 
-    invalid = -2
-    red = -1
+    invalid = -3
+    red = -2
+    yellowWithCaveat = -1
     yellow = 0
-    green = 1
+    greenWithCaveat = 1
+    green = 2
 
 
 def compute_feedback_simple(
-    stat: MilestoneAgeScore | MilestoneGroupStatistics, score: float
+    stat: MilestoneAgeScore | MilestoneGroupStatistics,
+    score: float,
+    min_score: float | None = None,
 ) -> int:
     """
     Compute trafficlight feedback. Replace this function with your own if you
@@ -58,14 +62,13 @@ def compute_feedback_simple(
     def leq(val: float, lim: float) -> bool:
         return val < lim or np.isclose(val, lim)
 
-    # TODO: what happens if the average
     if stat.stddev_score < 1e-2:
         # README: This happens when all the scores are the same, so any
         # deviation towards lower values can be interpreted as
         # underperformance.
         # This logic relies on the score being integers, such that when the
         # stddev is 0, the avg is an integer
-        # TODO: Check again what client wants to happen in such cases
+        # TODO: Check again what client wants to happen in such cases?
         lim_lower = stat.avg_score - 2
         lim_upper = stat.avg_score - 1
     else:
@@ -75,8 +78,12 @@ def compute_feedback_simple(
     if leq(score, lim_lower):
         return TrafficLight.red.value
     elif score > lim_lower and leq(score, lim_upper):
+        if min_score is not None and min_score < lim_lower:
+            return TrafficLight.yellowWithCaveat.value
         return TrafficLight.yellow.value
     else:
+        if min_score is not None and min_score < lim_upper:
+            return TrafficLight.greenWithCaveat.value
         return TrafficLight.green.value
 
 
@@ -165,8 +172,9 @@ def compute_summary_milestonegroup_feedback_for_answersession(
         mg_stat.child_id = child.id  # type: ignore
 
         mean_for_mg = np.nan_to_num(np.mean([a.answer for a in answers]))
+        min_for_mg = np.nan_to_num(np.min([a.answer for a in answers]))
 
-        result = compute_feedback_simple(mg_stat, mean_for_mg)
+        result = compute_feedback_simple(mg_stat, mean_for_mg, min_for_mg)
         milestone_group_results[milestonegroup_id] = result  # type: ignore
     return milestone_group_results
 

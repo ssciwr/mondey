@@ -43,13 +43,13 @@ def test_compute_feedback_simple():
         expected_score=1.0,
     )
     score = 0
-    assert compute_feedback_simple(dummy_scores, score) == -1
+    assert compute_feedback_simple(dummy_scores, score) == -2
 
     score = 1
     assert compute_feedback_simple(dummy_scores, score) == 0
 
     score = 3
-    assert compute_feedback_simple(dummy_scores, score) == 1
+    assert compute_feedback_simple(dummy_scores, score) == 2
 
 
 def test_compute_detailed_milestonegroup_feedback_for_answersession(session):
@@ -60,7 +60,7 @@ def test_compute_detailed_milestonegroup_feedback_for_answersession(session):
         session, answersession, child
     )
 
-    assert result == {1: {1: 1, 2: 1}}  # FIXME: check this again
+    assert result == {1: {1: 2, 2: 2}}
 
 
 def test_compute_detailed_milestonegroup_feedback_for_answersession_no_data(session):
