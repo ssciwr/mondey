@@ -95,9 +95,9 @@ def test_compute_summary_milestonegroup_feedback_for_answersession_no_data(sessi
 
 def test_compute_summary_milestonegroup_feedback_for_all_sessions(session):
     child = session.exec(select(Child).where(Child.user_id == 3)).first()
-    user = fastapi_users.current_user(active=True)
+
     result = compute_summary_milestonegroup_feedback_for_all_sessions(
-        session, user, child, age_limit_low=6, age_limit_high=6
+        session, child, age_limit_low=6, age_limit_high=6
     )
 
     relevant_answersession = list(
@@ -106,7 +106,7 @@ def test_compute_summary_milestonegroup_feedback_for_all_sessions(session):
             session.exec(
                 select(MilestoneAnswerSession)
                 .where(MilestoneAnswerSession.child_id == child.id)
-                .where(MilestoneAnswerSession.user_id == user.id)
+                .where(MilestoneAnswerSession.user_id == 3)
             ).all(),
         )
     )
@@ -132,7 +132,7 @@ def test_compute_detailed_milestonegroup_feedback_for_all_sessions(session):
             session.exec(
                 select(MilestoneAnswerSession)
                 .where(MilestoneAnswerSession.child_id == child.id)
-                .where(MilestoneAnswerSession.user_id == user.id)
+                .where(MilestoneAnswerSession.user_id == 3)
             ).all(),
         )
     )

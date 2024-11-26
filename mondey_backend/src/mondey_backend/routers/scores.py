@@ -181,7 +181,6 @@ def compute_summary_milestonegroup_feedback_for_answersession(
 
 def compute_summary_milestonegroup_feedback_for_all_sessions(
     session: SessionDep,
-    current_active_user: CurrentActiveUserDep,
     child: Child,
     age_limit_low=6,
     age_limit_high=6,
@@ -192,9 +191,9 @@ def compute_summary_milestonegroup_feedback_for_all_sessions(
     answersessions = [
         a
         for a in session.exec(
-            select(MilestoneAnswerSession)
-            .where(col(MilestoneAnswerSession.child_id) == child.id)
-            .where(col(MilestoneAnswerSession.user_id) == current_active_user.id)
+            select(MilestoneAnswerSession).where(
+                col(MilestoneAnswerSession.child_id) == child.id
+            )
         ).all()
         if _session_has_expired(a)
     ]

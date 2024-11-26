@@ -116,7 +116,11 @@ def test_calculate_milestonegroup_statistics(session):
     milestone_group = session.exec(
         select(MilestoneGroup).where(MilestoneGroup.id == 1)
     ).first()
-    milestones = [m.id for m in milestone_group.milestones]
+    milestones = [
+        m.id
+        for m in milestone_group.milestones
+        if age_lower <= m.expected_age_months <= age_upper
+    ]
     answers = [
         a.answer
         for a in session.exec(select(MilestoneAnswer)).all()
@@ -127,7 +131,7 @@ def test_calculate_milestonegroup_statistics(session):
     )
     assert score.age_months == 8
     assert score.group_id == 1
-    assert np.isclose(score.avg_score, 2.5)
+    assert np.isclose(score.avg_score, np.mean(np.array(answers) + 1))
     assert np.isclose(
         score.stddev_score,
         np.std(
