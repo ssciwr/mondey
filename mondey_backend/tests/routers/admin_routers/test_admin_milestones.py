@@ -230,18 +230,11 @@ def test_get_milestone_age_scores(admin_client: TestClient):
     # child 1 scored
     #   - 2 @ ~8 months old
     #   - 4 @ ~9 months old
-    expected_age = response.json()["expected_age"]
-    assert 8 <= expected_age <= 10
-    assert response.json()["scores"][expected_age - 2]["avg_score"] == pytest.approx(
-        0.0
-    )
-    assert response.json()["scores"][expected_age - 1]["avg_score"] == pytest.approx(
-        2.0
-    )
-    assert response.json()["scores"][expected_age]["avg_score"] == pytest.approx(4.0)
-    assert response.json()["scores"][expected_age + 1]["avg_score"] == pytest.approx(
-        0.0
-    )
+    assert response.json()["expected_age"] == 9
+    assert response.json()["scores"][7]["avg_score"] == pytest.approx(0.0)
+    assert response.json()["scores"][8]["avg_score"] == pytest.approx(2.0)
+    assert response.json()["scores"][9]["avg_score"] == pytest.approx(4.0)
+    assert response.json()["scores"][10]["avg_score"] == pytest.approx(0.0)
 
 
 def test_get_submitted_milestone_images(admin_client: TestClient):
