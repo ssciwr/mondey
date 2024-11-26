@@ -44,6 +44,7 @@ from mondey_backend.models.questions import ChildQuestionText
 from mondey_backend.models.questions import UserAnswer
 from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.questions import UserQuestionText
+from mondey_backend.models.research import ResearchGroup
 from mondey_backend.models.users import Base
 from mondey_backend.models.users import User
 from mondey_backend.models.users import UserRead
@@ -275,7 +276,8 @@ def session(children: list[dict]):
                 answer_session_id=3, milestone_id=7, milestone_group_id=2, answer=2
             )
         )
-
+        # add a research group (that user with id 3 is part of, and researcher with id 2 has access to)
+        session.add(ResearchGroup(id="123451"))
         # add user questions for admin
         user_questions = [
             UserQuestion(
@@ -790,6 +792,8 @@ def active_admin_user():
         is_active=True,
         is_superuser=True,
         is_researcher=False,
+        full_data_access=False,
+        research_group_id=0,
         is_verified=True,
     )
 
@@ -802,6 +806,8 @@ def active_research_user():
         is_active=True,
         is_superuser=False,
         is_researcher=True,
+        full_data_access=False,
+        research_group_id=123451,
         is_verified=True,
     )
 
@@ -814,6 +820,8 @@ def active_user():
         is_active=True,
         is_superuser=False,
         is_researcher=False,
+        full_data_access=False,
+        research_group_id=123451,
         is_verified=True,
     )
 
@@ -826,6 +834,8 @@ def active_user2():
         is_active=True,
         is_superuser=False,
         is_researcher=False,
+        full_data_access=False,
+        research_group_id=0,
         is_verified=True,
     )
 

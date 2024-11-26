@@ -2,51 +2,43 @@
 import { registerRegister } from "$lib/client/services.gen";
 import { type RegisterRegisterData } from "$lib/client/types.gen";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
+import ResearchCodeInput from "$lib/components/DataInput/ResearchCodeInput.svelte";
 import UserVerify from "$lib/components/UserVerify.svelte";
 import { preventDefault } from "$lib/util";
-import { Button, Card, Heading, Input, Label, Select } from "flowbite-svelte";
+import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
 
 async function submitData(): Promise<void> {
-	const equalPW = password !== "" && password === passwordconfirm;
-
 	const userData: RegisterRegisterData = {
 		body: {
 			email: email,
 			password: password,
 			is_active: true,
-			is_superuser: false,
-			is_researcher: false,
+			research_group_id: Number(researchCode),
 		},
 	};
-	if (equalPW) {
-		userData.body.is_researcher = role === $_("registration.researcherRole");
-		userData.body.is_superuser = role === $_("registration.adminRole");
+	const result = await registerRegister(userData);
 
-		const result = await registerRegister(userData);
-
-		if (result.error) {
-			console.log("error: ", result.response.status, result.error.detail);
-			alertMessage = `${$_("registration.alertMessageError")}: ${result.error.detail}`;
-			showAlert = true;
-		} else {
-			console.log("successful transmission: ", result.response.status);
-			success = true;
-		}
-	} else {
-		console.log("passwords not equal: ");
+	if (result.error) {
+		console.log("error: ", result.response.status, result.error.detail);
+		alertMessage = `${$_("registration.alertMessageError")}: ${result.error.detail}`;
 		showAlert = true;
-		alertMessage = $_("registration.alertMessagePasswords");
+	} else {
+		console.log("successful transmission: ", result.response.status);
+		success = true;
 	}
 }
 
-let email = "";
-let password = "";
-let passwordconfirm = "";
-let role: string = $_("registration.observerRole");
-let showAlert = false;
-let success = false;
-let alertMessage = $_("registration.alertMessageMissing");
+let email = $state("");
+let password = $state("");
+let passwordConfirm = $state("");
+let showAlert = $state(false);
+let success = $state(false);
+let alertMessage = $state($_("registration.alertMessageMissing"));
+let researchCodeValid = $state(false);
+let passwordValid = $derived(password !== "" && password === passwordConfirm);
+
+let { researchCode = "" }: { researchCode?: string } = $props();
 </script>
 
 <!-- Show big alert message when something is missing -->
@@ -85,6 +77,7 @@ let alertMessage = $_("registration.alertMessageMissing");
 					required
 					type="email"
 					id="email"
+					autocomplete="email"
 					placeholder={$_("registration.emailLabel")}
 				/>
 			</div>
@@ -100,6 +93,7 @@ let alertMessage = $_("registration.alertMessageMissing");
 					required
 					type="password"
 					id="password"
+					autocomplete="new-password"
 					placeholder={$_("registration.passwordLabel")}
 				/>
 			</div>
@@ -111,38 +105,23 @@ let alertMessage = $_("registration.alertMessageMissing");
 			>
 			<div class="space-y-4">
 				<Input
-					bind:value={passwordconfirm}
+					bind:value={passwordConfirm}
 					required
 					type="password"
-					id="passwordconfirm"
+					id="passwordConfirm"
+					autocomplete="new-password"
 					placeholder={$_("registration.passwordConfirmLabel")}
+					color={passwordConfirm === password ? 'base' : 'red'}
 				/>
 			</div>
 
-			<Label
-				for={"role"}
-				class="font-semibold text-gray-700 dark:text-gray-400"
-				>{$_("registration.role")}</Label
-			>
-			<div class="space-y-4">
-				<Select
-					bind:value={role}
-					items={[
-						$_("registration.observerRole"),
-						$_("registration.researcherRole"),
-						$_("registration.adminRole"),
-					].map((v) => {
-						return { name: String(v), value: v };
-					})}
-					id="role"
-					required
-					placeholder={$_("registration.selectPlaceholder")}
-				/>
-			</div>
+			<Label class="font-semibold text-gray-700 dark:text-gray-400">{$_("registration.researchCode")}</Label>
+			<ResearchCodeInput bind:value={researchCode} bind:valid={researchCodeValid}></ResearchCodeInput>
 
 			<Button
 				type="submit"
-				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+				disabled={!(researchCodeValid && passwordValid)}
+				class="dark:bg-primary-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
 				>{$_("registration.submitButtonLabel")}</Button
 			>
 		</form>

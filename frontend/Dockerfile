@@ -11,13 +11,15 @@ COPY package.json ./
 
 COPY pnpm-lock.yaml ./
 
+COPY pnpm-lock.yaml ./
+
 RUN npm install -g pnpm && pnpm install
 
 COPY . .
 
 RUN echo "VITE_MONDEY_API_URL=${MONDEY_API_URL}" > .env && pnpm run build
 
-FROM nginx:1.27.1
+FROM nginx:1.27.3
 
 COPY --from=builder /app/build /usr/share/nginx/html
 
