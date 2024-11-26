@@ -193,7 +193,7 @@ async function doDeleteMilestone() {
 												<TableBodyCell>
 													{#if milestone?.images?.length}
 														<img
-															src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${milestone.images[0].id}.jpg`}
+															src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${milestone.images[0].id}.webp`}
 															width="64"
 															height="64"
 															alt={milestoneTitle}

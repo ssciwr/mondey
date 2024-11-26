@@ -13,10 +13,10 @@ import DeleteModal from "$lib/components/Admin/DeleteModal.svelte";
 import EditImage from "$lib/components/Admin/EditImage.svelte";
 import MilestoneExpectedAgeModal from "$lib/components/Admin/MilestoneExpectedAgeModal.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
+import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";
 import {
 	Button,
 	ButtonGroup,
-	Fileupload,
 	InputAddon,
 	Label,
 	Modal,
@@ -36,15 +36,6 @@ let showDeleteMilestoneImageModal: boolean = $state(false);
 let showMilestoneExpectedAgeModal: boolean = $state(false);
 
 const textKeys = ["title", "desc", "obs", "help"];
-
-function updateImagesToUpload(event: Event) {
-	const target = event.target as HTMLInputElement;
-	if (target.files) {
-		images = Array.from(target.files).map((f) => URL.createObjectURL(f));
-	} else {
-		images = [];
-	}
-}
 
 async function saveChanges() {
 	if (!milestone) {
@@ -67,7 +58,7 @@ async function saveChanges() {
 }
 
 async function deleteMilestoneImageAndUpdate() {
-	if (!currentMilestoneImageId) {
+	if (!milestone || !currentMilestoneImageId) {
 		return;
 	}
 	const { data, error } = await deleteMilestoneImage({
@@ -110,7 +101,7 @@ async function deleteMilestoneImageAndUpdate() {
             <div class="flex flex-row">
                 {#each milestone.images as milestoneImage (milestoneImage.id)}
                     <EditImage
-                            filename={`m/${milestoneImage.id}.jpg`}
+                            filename={`m/${milestoneImage.id}.webp`}
                             ondelete={() => {
 						currentMilestoneImageId = milestoneImage.id;
 						showDeleteMilestoneImageModal = true;
@@ -121,14 +112,7 @@ async function deleteMilestoneImageAndUpdate() {
                     <img src={image} width="96" height="96" alt="milestone" class="w-24 h-24 m-2"/>
                 {/each}
             </div>
-            <Fileupload
-                    bind:files
-                    on:change={updateImagesToUpload}
-                    multiple
-                    accept=".jpg, .jpeg"
-                    id="img_upload"
-                    class="mb-2 flex-grow-0"
-            />
+            <ImageFileUpload bind:files bind:images multiple></ImageFileUpload>
         </div>
     {/if}
     <svelte:fragment slot="footer">
@@ -140,6 +124,8 @@ async function deleteMilestoneImageAndUpdate() {
 <DeleteModal bind:open={showDeleteMilestoneImageModal} onclick={deleteMilestoneImageAndUpdate}></DeleteModal>
 
 {#key milestone}
+    {#if milestone}
     <MilestoneExpectedAgeModal bind:open={showMilestoneExpectedAgeModal}
-                               milestoneId={milestone?.id}></MilestoneExpectedAgeModal>
+                               milestoneId={milestone.id}></MilestoneExpectedAgeModal>
+    {/if}
 {/key}

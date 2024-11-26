@@ -19,7 +19,10 @@
 		"alertMessageError": "Ein Fehler ist aufgetreten",
 		"feedbackTitle": "Feedback zur Entwicklung",
 		"milestone": "Meilenstein",
-		"milestoneGroup": "Meilensteingruppe"
+		"milestoneGroup": "Meilensteingruppe",
+		"submit-image": "Bild einreichen",
+		"submit-image-text": "Haben Sie ein Bild von Ihrem Kind bei diesem Meilenstein, das Sie gerne beisteuern und veröffentlichen möchten? Wenn ja, können Sie es hier einreichen.",
+		"submit-image-conditions": "Ich bin damit einverstanden, dass dieses Bild veröffentlicht und den Benutzern als eines der Meilensteinbilder auf dieser Website angezeigt wird, sofern es von den Site-Administratoren genehmigt wird."
 	},
 	"search": {
 		"allLabel": "Alle",
@@ -43,6 +46,7 @@
 		"label": "Administration",
 		"title": "Titel",
 		"languages": "Sprachen",
+		"milestone": "Meilenstein",
 		"milestones": "Meilensteine",
 		"milestone-groups": "Meilensteingruppen",
 		"translations": "Übersetzungen",
@@ -54,6 +58,7 @@
 		"actions": "Aktionen",
 		"selectPlaceholder": "Erstens,Zweitens,Drittens;",
 		"add": "Hinzufügen",
+		"approve": "Genehmigen",
 		"edit": "Bearbeiten",
 		"delete": "Löschen",
 		"reorder": "Neu ordnen",
@@ -67,6 +72,7 @@
 		"help": "Förderhilfen",
 		"image": "Bild",
 		"images": "Bilder",
+		"submitted-images": "Eingereichte Bilder",
 		"age": "Alter",
 		"average-score": "Durchschnittspunktzahl",
 		"view-data": "Daten anzeigen",
@@ -74,7 +80,8 @@
 		"recalculate-expected-age": "Voraussichtliches Alter neu berechnen",
 		"new-expected-age": "Neues Voraussichtliches Alter",
 		"editUserQuestionTitle": "Frage an Benutzer editieren",
-		"expected-age-data": "Voraussichtliches Alter Daten"
+		"expected-age-data": "Voraussichtliches Alter Daten",
+		"max-file-size-is": "Die maximale Dateigröße für ein Bild beträgt"
 	},
 	"researcher": {
 		"label": "Wissenschaft",
@@ -122,7 +129,6 @@
 		"profileAccess": "Ihr Profil",
 		"registerNew": "Als neuer Benutzer registrieren"
 	},
-
 	"userData": {
 		"label": "Persönliche Daten",
 		"heading": "Benutzerdaten eingeben",
@@ -200,5 +206,11 @@
 		"summary": "Hier sind Sie genau richtig!",
 		"buttonLabel": "Anmeldung",
 		"toolTip": "Anmelden oder ein neues Konto erstellen"
+	},
+	"frontpageAbout": {
+		"heading": "Was ist MONDEY?",
+		"summary1": "Ein mit Eltern und Fachkräften entwickeltes, wissenschaftlich geprüftes Program zur Beobachtung und Dokumentation der Entwicklung von Kindern bis 6 Jahre.",
+		"summary2": "Sie bewerten, wie gut das Kind bestimmte Alltagshandlungen ausführen kann. Auf dieser Basis bietet MONDEY Ihnen Feedback zum Entwicklungsstand des Kindes.",
+		"alt": "Ein kleines Kind hält ein Gänseblümchen in der Hand"
 	}
 }

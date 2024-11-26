@@ -2,6 +2,7 @@ import pathlib
 
 import pytest
 from fastapi.testclient import TestClient
+from PIL import Image
 
 
 def test_get_milestone_groups(
@@ -82,18 +83,33 @@ def test_delete_endpoints_invalid_admin_user(
     assert response.status_code == 401
 
 
+@pytest.mark.parametrize(
+    ["image_path_fixture", "image_tag"],
+    [
+        ("image_file_jpg_1600_1200", "image/jpeg"),
+        ("image_file_jpg_64_64", "image/jpeg"),
+        ("image_file_png_1100_1100", "image/png"),
+    ],
+)
 def test_put_milestone_group_image(
-    admin_client: TestClient, static_dir: pathlib.Path, jpg_file: pathlib.Path
+    admin_client: TestClient,
+    static_dir: pathlib.Path,
+    image_path_fixture: str,
+    image_tag: str,
+    request: pytest.FixtureRequest,
 ):
-    static_dir_jpg = static_dir / "mg" / "1.jpg"
-    assert not static_dir_jpg.is_file()
-    with open(jpg_file, "rb") as f:
+    image_path = request.getfixturevalue(image_path_fixture)
+    static_dir_image_file = static_dir / "mg" / "1.webp"
+    assert not static_dir_image_file.is_file()
+    original_width = Image.open(image_path).size[0]
+    with open(image_path, "rb") as f:
         response = admin_client.put(
             "/admin/milestone-group-images/1",
-            files={"file": ("filename", f, "image/jpeg")},
+            files={"file": ("filename", f, image_tag)},
         )
     assert response.status_code == 200
-    assert static_dir_jpg.is_file()
+    assert static_dir_image_file.is_file()
+    assert Image.open(static_dir_image_file).size[0] == min(original_width, 1024)
 
 
 def test_post_milestone(admin_client: TestClient):
@@ -159,7 +175,9 @@ def test_delete_milestone(admin_client: TestClient):
 
 
 def test_post_milestone_image(
-    admin_client: TestClient, static_dir: pathlib.Path, jpg_file: pathlib.Path
+    admin_client: TestClient,
+    static_dir: pathlib.Path,
+    image_file_jpg_1600_1200: pathlib.Path,
 ):
     # 3 milestone images already exist
     assert len(admin_client.get("/milestones/1").json()["images"]) == 2
@@ -172,16 +190,16 @@ def test_post_milestone_image(
     # add an image to each milestone
     for milestone_id in [1, 2, 3, 4, 5]:
         milestone_image_id += 1
-        filename = f"{milestone_image_id}.jpg"
-        static_dir_jpg = static_dir / "m" / filename
-        assert not static_dir_jpg.is_file()
-        with open(jpg_file, "rb") as f:
+        filename = f"{milestone_image_id}.webp"
+        static_dir_image_file = static_dir / "m" / filename
+        assert not static_dir_image_file.is_file()
+        with open(image_file_jpg_1600_1200, "rb") as f:
             response = admin_client.post(
                 f"/admin/milestone-images/{milestone_id}",
                 files={"file": ("filename", f, "image/jpeg")},
             )
         assert response.status_code == 200
-        assert static_dir_jpg.is_file()
+        assert static_dir_image_file.is_file()
     assert len(admin_client.get("/milestones/1").json()["images"]) == 3
     assert len(admin_client.get("/milestones/2").json()["images"]) == 2
     assert len(admin_client.get("/milestones/3").json()["images"]) == 1
@@ -189,16 +207,16 @@ def test_post_milestone_image(
     assert len(admin_client.get("/milestones/5").json()["images"]) == 1
     # remove added images
     for milestone_image_id in range(4, 9):
-        filename = f"{milestone_image_id}.jpg"
-        static_dir_jpg = static_dir / "m" / filename
-        assert static_dir_jpg.is_file()
+        filename = f"{milestone_image_id}.webp"
+        static_dir_image_file = static_dir / "m" / filename
+        assert static_dir_image_file.is_file()
         assert (
             admin_client.delete(
                 f"/admin/milestone-images/{milestone_image_id}"
             ).status_code
             == 200
         )
-        assert not static_dir_jpg.is_file()
+        assert not static_dir_image_file.is_file()
     assert len(admin_client.get("/milestones/1").json()["images"]) == 2
     assert len(admin_client.get("/milestones/2").json()["images"]) == 1
     assert len(admin_client.get("/milestones/3").json()["images"]) == 0
@@ -217,3 +235,41 @@ def test_get_milestone_age_scores(admin_client: TestClient):
     assert response.json()["scores"][8]["avg_score"] == pytest.approx(2.0)
     assert response.json()["scores"][9]["avg_score"] == pytest.approx(4.0)
     assert response.json()["scores"][10]["avg_score"] == pytest.approx(0.0)
+
+
+def test_get_submitted_milestone_images(admin_client: TestClient):
+    response = admin_client.get("/admin/submitted-milestone-images")
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+
+
+def test_approve_submitted_milestone_image(
+    admin_client: TestClient,
+    static_dir: pathlib.Path,
+):
+    submitted_image_file = static_dir / "ms" / "1.webp"
+    assert submitted_image_file.is_file()
+    approved_image_file = static_dir / "m" / "4.webp"
+    assert not approved_image_file.is_file()
+    assert len(admin_client.get("/admin/submitted-milestone-images").json()) == 2
+    response = admin_client.post("/admin/submitted-milestone-images/approve/1")
+    assert response.status_code == 200
+    assert not submitted_image_file.is_file()
+    assert approved_image_file.is_file()
+    assert len(admin_client.get("/admin/submitted-milestone-images").json()) == 1
+
+
+def test_delete_submitted_milestone_image(
+    admin_client: TestClient,
+    static_dir: pathlib.Path,
+):
+    submitted_image_file = static_dir / "ms" / "1.webp"
+    assert submitted_image_file.is_file()
+    approved_image_file = static_dir / "m" / "4.webp"
+    assert not approved_image_file.is_file()
+    assert len(admin_client.get("/admin/submitted-milestone-images").json()) == 2
+    response = admin_client.delete("/admin/submitted-milestone-images/1")
+    assert response.status_code == 200
+    assert not submitted_image_file.is_file()
+    assert not approved_image_file.is_file()
+    assert len(admin_client.get("/admin/submitted-milestone-images").json()) == 1

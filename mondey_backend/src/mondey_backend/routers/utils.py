@@ -8,11 +8,15 @@ from collections.abc import Sequence
 from typing import TypeVar
 
 import numpy as np
+import webp
 from fastapi import HTTPException
 from fastapi import UploadFile
+from PIL import Image
+from PIL import ImageOps
 from sqlmodel import SQLModel
 from sqlmodel import col
 from sqlmodel import select
+from webp import WebPPreset
 
 from ..dependencies import SessionDep
 from ..models.children import Child
@@ -41,13 +45,22 @@ Text = MilestoneText | MilestoneGroupText | UserQuestionText | ChildQuestionText
 OrderedItem = Milestone | MilestoneGroup | UserQuestion | ChildQuestion
 
 
-def write_file(file: UploadFile, filename: pathlib.Path | str):
-    logging.warning(f"Saving file {file.filename} to {filename}")
+def write_image_file(file: UploadFile, filename: pathlib.Path | str):
+    image_max_width = 1024
+    image_max_height = 1024
+    image_quality = 90
     try:
-        pathlib.Path(filename).parent.mkdir(exist_ok=True)
-        contents = file.file.read()
-        with open(filename, "wb") as f:
-            f.write(contents)
+        pathlib.Path(filename).parent.mkdir(parents=True, exist_ok=True)
+        with Image.open(file.file) as img:
+            # remove EXIF Orientation tag if present
+            ImageOps.exif_transpose(img, in_place=True)
+            # ensure image is not too large
+            if img.width > image_max_width or img.height > image_max_height:
+                img = ImageOps.contain(img, (image_max_width, image_max_height))
+            # save image in webp format: https://developers.google.com/speed/webp/docs/cwebp#options
+            webp.save_image(
+                img, filename, preset=WebPPreset.PHOTO, quality=image_quality
+            )
     except Exception as e:
         logging.exception(e)
         raise HTTPException(status_code=404, detail="Error saving uploaded file") from e
@@ -90,8 +103,7 @@ def _update_text(
         if not db_text:
             db_text = text
         else:
-            for key, value in text.model_dump().items():
-                setattr(db_text, key, value)
+            db_text.sqlmodel_update(text.model_dump())
         session.add(db_text)
 
 
@@ -307,15 +319,25 @@ def calculate_milestonegroup_statistics(
 
 
 def child_image_path(child_id: int | None) -> pathlib.Path:
-    return pathlib.Path(f"{app_settings.PRIVATE_FILES_PATH}/children/{child_id}.jpg")
+    return pathlib.Path(f"{app_settings.PRIVATE_FILES_PATH}/children/{child_id}.webp")
 
 
 def milestone_image_path(milestone_image_id: int | None) -> pathlib.Path:
-    return pathlib.Path(f"{app_settings.STATIC_FILES_PATH}/m/{milestone_image_id}.jpg")
+    return pathlib.Path(f"{app_settings.STATIC_FILES_PATH}/m/{milestone_image_id}.webp")
 
 
 def milestone_group_image_path(milestone_group_id: int) -> pathlib.Path:
-    return pathlib.Path(f"{app_settings.STATIC_FILES_PATH}/mg/{milestone_group_id}.jpg")
+    return pathlib.Path(
+        f"{app_settings.STATIC_FILES_PATH}/mg/{milestone_group_id}.webp"
+    )
+
+
+def submitted_milestone_image_path(
+    submitted_milestone_image_id: int | None,
+) -> pathlib.Path:
+    return pathlib.Path(
+        f"{app_settings.STATIC_FILES_PATH}/ms/{submitted_milestone_image_id}.webp"
+    )
 
 
 def i18n_language_path(language_id: str) -> pathlib.Path:

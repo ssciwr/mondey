@@ -7,6 +7,7 @@ import {
 	getCurrentMilestoneAnswerSession,
 	updateMilestoneAnswer,
 } from "$lib/client";
+import SubmitMilestoneImageModal from "$lib/components/DataInput/SubmitMilestoneImageModal.svelte";
 import MilestoneButton from "$lib/components/MilestoneButton.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
@@ -26,6 +27,7 @@ import {
 	InfoCircleSolid,
 	QuestionCircleSolid,
 	RectangleListOutline,
+	UploadOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
@@ -146,6 +148,7 @@ let showAlert = $state(false);
 let alertMessage = $state("");
 let autoGoToNextMilestone = $state(false);
 let currentImageIndex = $state(0);
+let showSubmitMilestoneImageModal = $state(false);
 const promise = setup();
 const breadcrumbdata = $derived([
 	{
@@ -190,16 +193,16 @@ const breadcrumbdata = $derived([
 		<Breadcrumbs data={breadcrumbdata} />
 
 		<div class="flex w-full flex-col md:flex-row">
-			<div class = "relative w-full h-48 md:h-96 md:w-48 lg:w-72 xl:w-96 overflow-hidden">
+			<div class="relative w-full h-48 md:h-96 md:w-48 lg:w-72 xl:w-96 overflow-hidden">
 				{#each currentMilestone.images as image, imageIndex}
 					<img
-						class={`absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
-						src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${image.id}.jpg`}
-						alt=""
+							class={`absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
+							src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${image.id}.webp`}
+							alt=""
 					/>
 				{/each}
 			</div>
-			<div class="m-2 md:m-4">
+			<div class="m-2 md:m-4 grow">
 				<h2 class="mb-2 text-2xl font-bold text-gray-700 dark:text-gray-400">
 					{currentMilestone.text[$locale].title}
 				</h2>
@@ -222,6 +225,17 @@ const breadcrumbdata = $derived([
 						<p>
 							{currentMilestone.text[$locale].help}
 						</p>
+					</AccordionItem>
+					<AccordionItem>
+						<span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
+							<UploadOutline class="mt-0.5"/>
+							<span>{$_('milestone.submit-image')}</span>
+						</span>
+						<p>
+							{$_('milestone.submit-image-text')}
+						</p>
+						<Button class="m-2"
+								onclick={()=>{showSubmitMilestoneImageModal=true;}}>{$_('milestone.submit-image')}</Button>
 					</AccordionItem>
 				</Accordion>
 			</div>
@@ -268,3 +282,7 @@ const breadcrumbdata = $derived([
 {:catch error}
 <AlertMessage message={$_("milestone.alertMessageError") + ": "+ error} />
 {/await}
+
+{#key showSubmitMilestoneImageModal}
+<SubmitMilestoneImageModal bind:open={showSubmitMilestoneImageModal} milestoneId={currentMilestone?.id}/>
+{/key}

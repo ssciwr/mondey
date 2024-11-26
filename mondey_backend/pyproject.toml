@@ -19,6 +19,8 @@ dependencies = [
     "python-multipart",
     "pydantic-settings",
     "click",
+    "pillow",
+    "webp",
 ]
 dynamic = ["version"]
 

@@ -7,6 +7,7 @@ import pytest
 import pytest_asyncio
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from PIL import Image
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -31,6 +32,7 @@ from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.models.milestones import MilestoneGroupText
 from mondey_backend.models.milestones import MilestoneImage
 from mondey_backend.models.milestones import MilestoneText
+from mondey_backend.models.milestones import SubmittedMilestoneImage
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import ChildQuestionText
@@ -45,12 +47,20 @@ from mondey_backend.models.users import UserRead
 @pytest.fixture()
 def static_dir(tmp_path_factory: pytest.TempPathFactory):
     static_dir = tmp_path_factory.mktemp("static")
+    # add some milestone image files
     milestone_images_dir = static_dir / "m"
     milestone_images_dir.mkdir()
-    # add some milestone image files
     for milestone_image_id in [1, 2, 3]:
-        with (milestone_images_dir / "f{milestone_image_id}.jpg").open("w") as f:
-            f.write(f"{milestone_image_id}")
+        img = Image.new("RGB", (201, 414))
+        img.save(milestone_images_dir / f"{milestone_image_id}.webp")
+    # add user submitted milestone image files
+    submitted_milestone_images_dir = static_dir / "ms"
+    submitted_milestone_images_dir.mkdir()
+    for submitted_milestone_image_id in [1, 2]:
+        img = Image.new("RGB", (281, 311))
+        img.save(
+            submitted_milestone_images_dir / f"{submitted_milestone_image_id}.webp"
+        )
     return static_dir
 
 
@@ -60,9 +70,9 @@ def private_dir(tmp_path_factory: pytest.TempPathFactory):
     children_dir = private_dir / "children"
     children_dir.mkdir()
     # add some child image files
-    for filename in ["2.jpg", "3.jpg"]:
-        with (children_dir / filename).open("w") as f:
-            f.write(filename)
+    for child_id in [2, 3]:
+        img = Image.new("RGBA", (67, 38))
+        img.save(children_dir / f"{child_id}.webp")
     return private_dir
 
 
@@ -201,10 +211,12 @@ def session(children: list[dict]):
                         help=f"{lbl}_h",
                     )
                 )
-        # add the milestone images that were created in the static directory
+        # add the milestone images and submitted milestone images that were created in the static directory
         session.add(MilestoneImage(milestone_id=1, filename="m1.jpg", approved=True))
         session.add(MilestoneImage(milestone_id=1, filename="m2.jpg", approved=True))
         session.add(MilestoneImage(milestone_id=2, filename="m3.jpg", approved=True))
+        session.add(SubmittedMilestoneImage(milestone_id=1, user_id=1))
+        session.add(SubmittedMilestoneImage(milestone_id=2, user_id=2))
         session.commit()
 
         for child, user_id in zip(children, [3, 3, 1], strict=False):
@@ -722,11 +734,27 @@ def admin_client(
 
 
 @pytest.fixture
-def jpg_file(tmp_path: pathlib.Path):
+def image_file_jpg_1600_1200(tmp_path: pathlib.Path):
     jpg_path = tmp_path / "test.jpg"
-    with jpg_path.open("w") as f:
-        f.write("test")
+    img = Image.new("RGB", (1600, 1200))
+    img.save(jpg_path)
     return jpg_path
+
+
+@pytest.fixture
+def image_file_jpg_64_64(tmp_path: pathlib.Path):
+    jpg_path = tmp_path / "test.jpg"
+    img = Image.new("RGB", (64, 64))
+    img.save(jpg_path)
+    return jpg_path
+
+
+@pytest.fixture
+def image_file_png_1100_1100(tmp_path: pathlib.Path):
+    png_path = tmp_path / "test.png"
+    img = Image.new("RGBA", (1100, 1100))
+    img.save(png_path)
+    return png_path
 
 
 @pytest.fixture

@@ -69,7 +69,7 @@ onMount(async () => {
 			<TableHeadCell>Verified</TableHeadCell>
 			<TableHeadCell>Researcher</TableHeadCell>
 			<TableHeadCell>Admin</TableHeadCell>
-			<TableHeadCell>Actions</TableHeadCell>
+			<TableHeadCell>{$_('admin.actions')}</TableHeadCell>
 		</TableHead>
 		<TableBody>
 			{#each users as user (user.id)}

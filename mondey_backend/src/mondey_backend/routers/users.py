@@ -36,7 +36,7 @@ from .utils import get_child_age_in_months
 from .utils import get_db_child
 from .utils import get_milestonegroups_for_answersession
 from .utils import get_or_create_current_milestone_answer_session
-from .utils import write_file
+from .utils import write_image_file
 
 
 def create_router() -> APIRouter:
@@ -77,8 +77,7 @@ def create_router() -> APIRouter:
         child: ChildPublic,
     ):
         db_child = get_db_child(session, current_active_user, child.id)
-        for key, value in child.model_dump().items():
-            setattr(db_child, key, value)
+        db_child.sqlmodel_update(child.model_dump())
         session.commit()
         return db_child
 
@@ -100,7 +99,7 @@ def create_router() -> APIRouter:
         child = get_db_child(session, current_active_user, child_id)
         image_path = child_image_path(child_id)
         if child.has_image and image_path.exists():
-            return image_path
+            return FileResponse(image_path, media_type="image/webp")
         raise HTTPException(404)
 
     @router.put("/children-images/{child_id}")
@@ -113,7 +112,7 @@ def create_router() -> APIRouter:
         child = get_db_child(session, current_active_user, child_id)
         child.has_image = True
         session.commit()
-        write_file(file, child_image_path(child_id))
+        write_image_file(file, child_image_path(child_id))
         return {"ok": True}
 
     @router.delete("/children-images/{child_id}")
@@ -194,8 +193,7 @@ def create_router() -> APIRouter:
                 )
                 add(session, current_answer)
             else:
-                for key, value in new_answer.model_dump().items():
-                    setattr(current_answer, key, value)
+                current_answer.sqlmodel_update(new_answer.model_dump())
 
         session.commit()
         return new_answers
@@ -237,8 +235,7 @@ def create_router() -> APIRouter:
                 )
                 session.add(current_answer)
             else:
-                for key, value in new_answer.model_dump().items():
-                    setattr(current_answer, key, value)
+                current_answer.sqlmodel_update(new_answer.model_dump())
         session.commit()
 
         return {"ok": True}
