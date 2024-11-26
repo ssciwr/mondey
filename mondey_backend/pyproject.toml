@@ -21,6 +21,8 @@ dependencies = [
     "click",
     "pillow",
     "webp",
+    "python-dateutil",
+    "types-python-dateutil"
 ]
 dynamic = ["version"]
 
