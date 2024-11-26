@@ -5,7 +5,7 @@ import pathlib
 
 import pytest
 import pytest_asyncio
-from dateutil.relativedelta import relativedelta  # type: ignore
+from dateutil.relativedelta import relativedelta
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from PIL import Image
@@ -81,12 +81,8 @@ def private_dir(tmp_path_factory: pytest.TempPathFactory):
 def children():
     today = datetime.datetime.today()
 
-    # README: this is not entirel stable for all dates. For example, for
-    # 26th november = today, nine-months ago give 1st March, which then gives
-    # you 8 months instead of 9 if done as today - datetime.timedelta(days=9 * 30)
-    # Hence: use dateutil.relativedelta which takes care of the 31 vs 30 vs 28 days stuff
-    nine_months_ago = today - relativedelta(months=9)  # type: ignore
-    twenty_months_ago = today - relativedelta(months=20)  # type: ignore
+    nine_months_ago = today - relativedelta(months=9)
+    twenty_months_ago = today - relativedelta(months=20)
 
     return [
         # ~9month old child for user (id 3)
@@ -235,13 +231,29 @@ def session(children: list[dict]):
                 ),
             )
         )
-        session.add(MilestoneAnswer(answer_session_id=1, milestone_id=1, answer=1))
-        session.add(MilestoneAnswer(answer_session_id=1, milestone_id=2, answer=0))
+        session.add(
+            MilestoneAnswer(
+                answer_session_id=1, milestone_id=1, milestone_group_id=1, answer=1
+            )
+        )
+        session.add(
+            MilestoneAnswer(
+                answer_session_id=1, milestone_id=2, milestone_group_id=1, answer=0
+            )
+        )
         # add another (current) milestone answer session for child 1 / user (id 3) with 2 answers to the same questions
         session.add(MilestoneAnswerSession(child_id=1, user_id=3, created_at=today))
         # add two milestone answers
-        session.add(MilestoneAnswer(answer_session_id=2, milestone_id=1, answer=3))
-        session.add(MilestoneAnswer(answer_session_id=2, milestone_id=2, answer=2))
+        session.add(
+            MilestoneAnswer(
+                answer_session_id=2, milestone_id=1, milestone_group_id=1, answer=3
+            )
+        )
+        session.add(
+            MilestoneAnswer(
+                answer_session_id=2, milestone_id=2, milestone_group_id=1, answer=2
+            )
+        )
         # add an (expired) milestone answer session for child 3 / admin user (id 1) with 1 answer
         session.add(
             MilestoneAnswerSession(
@@ -250,7 +262,11 @@ def session(children: list[dict]):
                 created_at=datetime.datetime(today.year - 1, 1, 1),
             )
         )
-        session.add(MilestoneAnswer(answer_session_id=3, milestone_id=7, answer=2))
+        session.add(
+            MilestoneAnswer(
+                answer_session_id=3, milestone_id=7, milestone_group_id=2, answer=2
+            )
+        )
 
         # add user questions for admin
         user_questions = [
