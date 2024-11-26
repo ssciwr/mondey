@@ -188,7 +188,7 @@ const promise = setup();
 			{#if with_text === true}
 				<p>{$_("childData.recommendWatchWithCaveat")}</p>
 			{/if}
-			<ExclamationCircleSolid color = "red" size="xl"/>
+			<ExclamationCircleSolid color = "orange" size="xl"/>
 		{:else}
 			{#if with_text === true}
 				<p>{$_("childData.recommmendHelp")}</p>
@@ -199,24 +199,34 @@ const promise = setup();
 {/snippet}
 
 {#snippet detailedEvaluation(milestone: MilestonePublic, ms_score: number, )}
-	<div class = "flex flex-col sm:flex-row text-gray-700 dark:text-gray-400 items-start justify-start space-x-2 p-2 m-2">
+	<div class = "flex flex-col sm:flex-row text-gray-700 dark:text-gray-400 items-center justify-start space-x-2 p-2 m-2">
 		{#if evaluate(ms_score) >=1 }
+			<span class = "flex items-center flex-1 space-x-2">
+			<p class="font-bold">{milestone.text[$locale as string].title} </p>
 			<CheckCircleSolid color = "green" size="xl"/>
+			</span>
+		{:else if evaluate(ms_score) in [0, 1]}
+			<span class ="flex items-center flex-1 space-x-2">
 			<p class="font-bold">{milestone.text[$locale as string].title} </p>
-		{:else if evaluate(ms_score) === 0}
 			<BellActiveSolid color = "orange" size="xl"/>
-			<p class="font-bold">{milestone.text[$locale as string].title} </p>
-			<Button id="b1">{$_("milestone.help")}</Button>
-			<Popover title={$_("milestone.help")} triggeredBy="#b1"  trigger="click">
-				{milestone.text[$locale as string].help}
-			</Popover>
+			</span>
+			<span class =  "ml-auto">
+				<Button id="b1">{$_("milestone.help")}</Button>
+				<Popover title={$_("milestone.help")} triggeredBy="#b1"  trigger="click">
+					{milestone.text[$locale as string].help}
+				</Popover>
+			</span>
 		{:else}
-			<ExclamationCircleSolid color = "red" size="xl"/>
-			<p class="font-bold">{milestone.text[$locale as string].title} </p>
-			<Button id="b2">{$_("milestone.help")}</Button>
-			<Popover title={$_("milestone.help")} triggeredBy="#b2"  trigger="click">
-				{milestone.text[$locale as string].help}
-			</Popover>
+			<span class = "flex items-center flex-1 space-x-2">
+				<p class="font-bold">{milestone.text[$locale as string].title} </p>
+				<CloseCircleSolid color = "red" size="xl"/>
+			</span>
+			<span class = "ml-auto">
+				<Button id="b2">{$_("milestone.help")}</Button>
+				<Popover title={$_("milestone.help")} triggeredBy="#b2"  trigger="click">
+					{milestone.text[$locale as string].help}
+				</Popover>
+			</span>
 		{/if}
 	</div>
 {/snippet}
@@ -254,31 +264,31 @@ const promise = setup();
 				<div class = "mx-2 px-2">
 					<CheckCircleSolid color = "green" size="xl" class="mx-2"/>
 					<p>{$_("childData.recommendOk")}</p>
-					<Hr classHr= "mx-2"/>
+					<Hr classHr= "mx-2 items-end"/>
 				</div>
 
 				<div class = "mx-2 px-2">
 					<EyeSolid color = "green" size="xl" class="mx-2"/>
 					<p>{$_("childData.recommendOkWithCaveat")}</p>
-					<Hr classHr= "mx-2"/>
+					<Hr classHr= "mx-2 items-end"/>
 				</div>
 
 				<div class = "mx-2 px-2">
 					<BellActiveSolid color = "orange" size="xl" class="mx-2"/>
 					<p>{$_("childData.recommendWatch")}</p>
-					<Hr classHr= "mx-2"/>
+					<Hr classHr= "mx-2 items-end"/>
 				</div>
 
 				<div class = "mx-2 px-2">
 					<ExclamationCircleSolid color = "orange" size="xl" class="mx-2"/>
 					<p>{$_("childData.recommendWatchWithCaveat")}</p>
-					<Hr classHr= "mx-2"/>
+					<Hr classHr= "mx-2 items-end"/>
 				</div>
 
 				<div class = "mx-2 px-2">
 					<CloseCircleSolid color = "red" size="xl" class="mx-2"/>
 					<p>{$_("childData.recommmendHelp")}</p>
-					<Hr classHr= "mx-2"/>
+					<Hr classHr= "mx-2 items-end"/>
 				</div>
 
 			</div>

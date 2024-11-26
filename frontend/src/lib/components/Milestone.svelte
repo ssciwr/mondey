@@ -12,13 +12,7 @@ import MilestoneButton from "$lib/components/MilestoneButton.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
-import {
-	Accordion,
-	AccordionItem,
-	Button,
-	Checkbox,
-	Spinner,
-} from "flowbite-svelte";
+import { Accordion, AccordionItem, Button, Checkbox } from "flowbite-svelte";
 import {
 	ArrowLeftOutline,
 	ArrowRightOutline,
@@ -180,10 +174,7 @@ const breadcrumbdata = $derived([
 </script>
 
 {#await promise}
-<div class="flex justify-center items-center">
-	<Spinner  />
 <p>{$_("userData.loadingMessage")}</p>
-</div>
 {:then}
 <div
 	class="mx-auto flex flex-col p-4 md:rounded-t-lg"
