@@ -172,11 +172,12 @@
 		"deleteImageButton": "Bild löschen",
 		"recommendOk": "Entwicklung des Kindes ist altersgemäß.",
 		"recommendOkWithCaveat": "Entwicklung des Kindes ist altersgemäß, aber einzelne Meilensteine sollten besonders beobachtet und eventuell gefördert werden",
-		"recommendWatch": "Entwicklung des Kindes ist leicht verzögert und sollte beobachtet werden um gegebenfalls gezielt einzelne Bereiche zu fördern",
-		"recommendWatchWithCaveat": "Entwicklung des Kindes ist nicht ganz altersgemäß und sollte genau beobachtet werden. Einzelne Bereiche sollten besonders gefördert werden",
-		"recommmendHelp": "Entwicklung des Kindes ist signifikant verzögert und sollte gefördert werden. Professionelle Hilfe wird kann notwendig sein.",
-		"showHistory": "Feedback zu vorherigen Beobachtungszeiträumen anzeigen", 
-		"legend": "Legende"
+		"recommendWatch": "Entwicklung des Kindes ist leicht verzögert und sollte beobachtet werden um gegebenfalls gezielt einzelne Bereiche zu fördern.",
+		"recommendWatchWithCaveat": "Entwicklung des Kindes ist nicht ganz altersgemäß und sollte genau beobachtet werden. Einzelne Bereiche sollten besonders gefördert werden.",
+		"recommmendHelp": "Entwicklung des Kindes ist signifikant verzögert und sollte gefördert werden. Professionelle Hilfe kann notwendig sein.",
+		"showHistory": "Feedback zu vorherigen Beobachtungszeiträumen anzeigen.",
+		"legend": "Erklärung zu den einzelnen Symbolen",
+		"feedbackExplanation": "Hier sehen sie wie sich das Kind im Vergleich zum Durchschnitt entwickelt. Die Farben und Symbole zeigen an, ob das Kind altersgemäß entwickelt ist oder ob es in einzelnen Bereichen Unterstützung benötigt. Durch setzen des Hakens unten können sie vergangene Beobachtungszeiträume einsehen und so die Entwicklung des Kindes über einen längeren Zeitraum verfolgen."
 	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",

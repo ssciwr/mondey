@@ -1,39 +1,39 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import {
-    type MilestoneAnswerSessionPublic,
-    type MilestonePublic,
-    type ValidationError,
-    getDetailedFeedbackForMilestonegroup,
-    getExpiredMilestoneAnswerSessions,
-    getMilestonegroupsForSession,
-    getSummaryFeedbackForAnswersession,
+	type MilestoneAnswerSessionPublic,
+	type MilestonePublic,
+	type ValidationError,
+	getDetailedFeedbackForMilestonegroup,
+	getExpiredMilestoneAnswerSessions,
+	getMilestonegroupsForSession,
+	getSummaryFeedbackForAnswersession,
 } from "$lib/client";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { user } from "$lib/stores/userStore.svelte";
 import {
-    Accordion,
-    AccordionItem,
-    Button,
-    Checkbox,
-    Heading,
-    Hr,
-    Popover,
-    Spinner,
-    Timeline,
-    TimelineItem,
+	Accordion,
+	AccordionItem,
+	Button,
+	Checkbox,
+	Heading,
+	Hr,
+	Popover,
+	Spinner,
+	Timeline,
+	TimelineItem,
 } from "flowbite-svelte";
 import {
-    BellActiveSolid,
-    CalendarWeekSolid,
-    ChartLineUpOutline,
-    CheckCircleSolid,
-    CloseCircleSolid,
-    ExclamationCircleSolid,
-    EyeSolid,
-    UserSettingsOutline,
+	BellActiveSolid,
+	CalendarWeekSolid,
+	ChartLineUpOutline,
+	CheckCircleSolid,
+	CloseCircleSolid,
+	ExclamationCircleSolid,
+	EyeSolid,
+	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
@@ -238,38 +238,53 @@ const promise = setup();
 	</div>
 {:then}
 	<Heading tag="h2" class = "text-gray-700 dark:text-gray-400 items-center p-2 m-2 pb-4">{$_("milestone.feedbackTitle")} </Heading>
-	<Checkbox class= "pb-4 m-2 p-2"bind:checked={showHistory}>{$_("milestone.showHistory")}</Checkbox>
+
+	<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{$_("childData.feedbackExplanation")}</p>
+
+	<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory}>{$_("childData.showHistory")}</Checkbox>
+	<Hr classHr= "mx-2"/>
+
 	<Accordion>
 		<AccordionItem>
 			<span slot="header" class = "text-gray-700 dark:text-gray-400 items-center flex justify-center space-x-2" >
 				<span class = "font-bold" >
-					{$_("milestone.legend")}
+					{$_("childData.legend")}
 				</span>
 			</span>
-			<div class="flex flex-row text-gray-700 dark:text-gray-400 items-center p-2 m-2 pb-4">
-				<CheckCircleSolid color = "green" size="xl"/>
-				<p>{$_("childData.recommendOk")}</p>
-				<Hr classHr="mx-2"/>
+			<div class="flex flex-row text-gray-700 dark:text-gray-400 items-start p-2 m-2 justify-center">
+				<div class = "mx-2 px-2">
+					<CheckCircleSolid color = "green" size="xl" class="mx-2"/>
+					<p>{$_("childData.recommendOk")}</p>
+					<Hr classHr= "mx-2"/>
+				</div>
 
-				<EyeSolid color = "green" size="xl"/>
-				<p>{$_("childData.recommendOkWithCaveat")}</p>
-				<Hr classHr="mx-2"/>
+				<div class = "mx-2 px-2">
+					<EyeSolid color = "green" size="xl" class="mx-2"/>
+					<p>{$_("childData.recommendOkWithCaveat")}</p>
+					<Hr classHr= "mx-2"/>
+				</div>
 
-				<BellActiveSolid color = "orange" size="xl"/>
-				<p>{$_("childData.recommendWatch")}</p>
-				<Hr classHr="mx-2"/>
+				<div class = "mx-2 px-2">
+					<BellActiveSolid color = "orange" size="xl" class="mx-2"/>
+					<p>{$_("childData.recommendWatch")}</p>
+					<Hr classHr= "mx-2"/>
+				</div>
 
-				<ExclamationCircleSolid color = "red" size="xl"/>
-				<p>{$_("childData.recommendWatchWithCaveat")}</p>
-				<Hr classHr="mx-2"/>
+				<div class = "mx-2 px-2">
+					<ExclamationCircleSolid color = "orange" size="xl" class="mx-2"/>
+					<p>{$_("childData.recommendWatchWithCaveat")}</p>
+					<Hr classHr= "mx-2"/>
+				</div>
 
-				<CloseCircleSolid color = "red" size="xl"/>
-				<p>{$_("childData.recommmendHelp")}</p>
-				<Hr classHr="mx-2"/>
+				<div class = "mx-2 px-2">
+					<CloseCircleSolid color = "red" size="xl" class="mx-2"/>
+					<p>{$_("childData.recommmendHelp")}</p>
+					<Hr classHr= "mx-2"/>
+				</div>
+
 			</div>
 		</AccordionItem>
 	</Accordion>
-
 
 	<div class="m-2 mx-auto w-full pb-4 p-2">
 		<Timeline order="horizontal">
@@ -278,7 +293,7 @@ const promise = setup();
 					<TimelineItem classTime = "text-lg font-bold text-gray-700 dark:text-gray-400 m-2 p-2" date = {formatDate(answerSessions[aid].created_at)}>
 						<svelte:fragment slot="icon">
 							<div class="flex items-center">
-								<div class="flex z-10 justify-center items-center w-6 h-6 bg-primary-200 rounded-full ring-0 ring-white dark:bg-primary-900 sm:ring-8 dark:ring-gray-900 shrink-0">
+								<div class="flex z-10 justify-center items-center w-6 h-6 bg-primary-200 rounded-full ring-0 ring-gray-400 dark:bg-primary-900 sm:ring-8 dark:ring-gray-400 shrink-0">
 								<CalendarWeekSolid class="w-4 h-4 text-primary-600 dark:text-primary-400" />
 								</div>
 								<div class="hidden sm:flex w-full bg-gray-200 h-0.5 dark:bg-gray-700" ></div>
