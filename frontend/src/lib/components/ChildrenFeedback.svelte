@@ -199,11 +199,10 @@ const promise = setup();
 {/snippet}
 
 {#snippet detailedEvaluation(milestone: MilestonePublic, ms_score: number, )}
-	<div class = "flex text-gray-700 dark:text-gray-400 items-center justify-start space-x-2 p-2 m-2">
+	<div class = "flex flex-col sm:flex-row text-gray-700 dark:text-gray-400 items-start justify-start space-x-2 p-2 m-2">
 		{#if evaluate(ms_score) >=1 }
 			<CheckCircleSolid color = "green" size="xl"/>
 			<p class="font-bold">{milestone.text[$locale as string].title} </p>
-
 		{:else if evaluate(ms_score) === 0}
 			<BellActiveSolid color = "orange" size="xl"/>
 			<p class="font-bold">{milestone.text[$locale as string].title} </p>
@@ -251,7 +250,7 @@ const promise = setup();
 					{$_("childData.legend")}
 				</span>
 			</span>
-			<div class="flex flex-row text-gray-700 dark:text-gray-400 items-start p-2 m-2 justify-center">
+			<div class="flex flex-col sm:flex-row text-gray-700 dark:text-gray-400 items-start p-2 m-2 justify-center">
 				<div class = "mx-2 px-2">
 					<CheckCircleSolid color = "green" size="xl" class="mx-2"/>
 					<p>{$_("childData.recommendOk")}</p>
@@ -293,7 +292,7 @@ const promise = setup();
 					<TimelineItem classTime = "text-lg font-bold text-gray-700 dark:text-gray-400 m-2 p-2" date = {formatDate(answerSessions[aid].created_at)}>
 						<svelte:fragment slot="icon">
 							<div class="flex items-center">
-								<div class="flex z-10 justify-center items-center w-6 h-6 bg-primary-200 rounded-full ring-0 ring-gray-400 dark:bg-primary-900 sm:ring-8 dark:ring-gray-400 shrink-0">
+								<div class="flex z-10 justify-center items-center w-6 h-6 bg-primary-200 rounded-full ring-0 ring-gray-200 dark:bg-primary-900 sm:ring-8 dark:ring-gray-400 shrink-0">
 								<CalendarWeekSolid class="w-4 h-4 text-primary-600 dark:text-primary-400" />
 								</div>
 								<div class="hidden sm:flex w-full bg-gray-200 h-0.5 dark:bg-gray-700" ></div>
@@ -321,6 +320,7 @@ const promise = setup();
 													milestoneGroups[aid][mid].milestones.find((element: any) => element.id === Number(ms_id)),
 													ms_score
 												)}
+												<Hr classHr="mx-2"/>
 											{/each}
 										</div>
 									</AccordionItem>
