@@ -69,8 +69,7 @@ def create_router() -> APIRouter:
         child: ChildPublic,
     ):
         db_child = get_db_child(session, current_active_user, child.id)
-        for key, value in child.model_dump().items():
-            setattr(db_child, key, value)
+        db_child.sqlmodel_update(child.model_dump())
         session.commit()
         return db_child
 
@@ -186,8 +185,7 @@ def create_router() -> APIRouter:
                 )
                 add(session, current_answer)
             else:
-                for key, value in new_answer.model_dump().items():
-                    setattr(current_answer, key, value)
+                current_answer.sqlmodel_update(new_answer.model_dump())
 
         session.commit()
         return new_answers
@@ -229,8 +227,7 @@ def create_router() -> APIRouter:
                 )
                 session.add(current_answer)
             else:
-                for key, value in new_answer.model_dump().items():
-                    setattr(current_answer, key, value)
+                current_answer.sqlmodel_update(new_answer.model_dump())
         session.commit()
 
         return {"ok": True}

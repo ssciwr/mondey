@@ -49,8 +49,7 @@ def create_router() -> APIRouter:
         user_question: UserQuestionAdmin,
     ):
         db_user_question = get(session, UserQuestion, user_question.id)
-        for key, value in user_question.model_dump(exclude={"text"}).items():
-            setattr(db_user_question, key, value)
+        db_user_question.sqlmodel_update(user_question.model_dump(exclude={"text"}))
         update_user_question_text(session, user_question)
         add(session, db_user_question)
         return db_user_question
@@ -97,9 +96,7 @@ def create_router() -> APIRouter:
         child_question: ChildQuestionAdmin,
     ):
         db_child_question = get(session, ChildQuestion, child_question.id)
-
-        for key, value in child_question.model_dump(exclude={"text"}).items():
-            setattr(db_child_question, key, value)
+        db_child_question.sqlmodel_update(child_question.model_dump(exclude={"text"}))
         update_child_question_text(session, child_question)
         add(session, db_child_question)
         return db_child_question
