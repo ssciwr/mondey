@@ -120,7 +120,9 @@ const searchData = [
 </script>
 
 {#await promise}
-	<Spinner /> <p>{$_("userData.loadingMessage")}</p>
+<div class = "flex justify-center items-center ">
+<Spinner />  <p>{$_("userData.loadingMessage")}</p>
+</div>
 {:then data}
 	{#if showAlert}
 		<AlertMessage

@@ -14,7 +14,7 @@ import AlertMessage from "$lib/components/AlertMessage.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import { componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
-import { Button, Card, Heading } from "flowbite-svelte";
+import { Button, Card, Heading, Spinner } from "flowbite-svelte";
 import { _, locale } from "svelte-i18n";
 
 async function submitData() {
@@ -111,7 +111,10 @@ let promise = $state(setup());
 <!-- The actual content -->
 {#if $locale}
 	{#await promise}
+	<div class="flex justify-center items-center">
+	<Spinner  />
 		<p>{$_("userData.loadingMessage")}</p>
+	</div>
 	{:then { questionnaire, answers }}
 		<div class="container m-1 mx-auto w-full max-w-xl">
 			<Card class="container m-1 mx-auto w-full max-w-xl">

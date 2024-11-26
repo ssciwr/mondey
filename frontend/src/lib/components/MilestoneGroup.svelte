@@ -212,7 +212,9 @@ const searchData: any[] = [
 </script>
 
 {#await promise}
-<Spinner /> <p>{$_("userData.loadingMessage")}</p>
+<div class="flex justify-center items-center">
+	<Spinner  /> <p>{$_("userData.loadingMessage")}</p>
+</div>
 {:then data}
 <div class="flex flex-col md:rounded-t-lg">
 	<Breadcrumbs data={breadcrumbdata} />
