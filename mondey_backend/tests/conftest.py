@@ -152,11 +152,7 @@ def session(children: list[dict]):
         for lang_id in lang_ids:
             session.add(Language(id=lang_id))
         # add a milestone group with 3 milestones
-        session.add(
-            MilestoneGroup(
-                order=2,
-            )
-        )
+        session.add(MilestoneGroup(order=2))
         for lang_id in lang_ids:
             lbl = f"g1_{lang_id}"
             session.add(
@@ -218,10 +214,8 @@ def session(children: list[dict]):
         session.add(SubmittedMilestoneImage(milestone_id=1, user_id=1))
         session.add(SubmittedMilestoneImage(milestone_id=2, user_id=2))
         session.commit()
-
         for child, user_id in zip(children, [3, 3, 1], strict=False):
             session.add(Child.model_validate(child, update={"user_id": user_id}))
-
         today = datetime.datetime.today()
         last_month = today - datetime.timedelta(days=30)
         # add an (expired) milestone answer session for child 1 / user (id 3) with 2 answers

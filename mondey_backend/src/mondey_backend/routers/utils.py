@@ -146,8 +146,10 @@ def get_or_create_current_milestone_answer_session(
 
     milestone_answer_session = session.exec(
         select(MilestoneAnswerSession)
-        .where(col(MilestoneAnswerSession.user_id) == current_active_user.id)
-        .where(col(MilestoneAnswerSession.child_id) == child_id)
+        .where(
+            (col(MilestoneAnswerSession.user_id) == current_active_user.id)
+            & (col(MilestoneAnswerSession.child_id) == child_id)
+        )
         .order_by(col(MilestoneAnswerSession.created_at).desc())
     ).first()
 
@@ -167,6 +169,16 @@ def get_or_create_current_milestone_answer_session(
 def get_child_age_in_months(child: Child, date: datetime.date | None = None) -> int:
     if date is None:
         date = datetime.date.today()
+    print("date: ", date)
+    print(" date.year: ", date.year)
+    print(" date.month: ", date.month)
+    print("child: ", child.id)
+    print(" child.birth_year: ", child.birth_year)
+    print(" child.birth_month: ", child.birth_month)
+    print(
+        " age in months: ",
+        (date.year - child.birth_year) * 12 + (date.month - child.birth_month),
+    )
     return (date.year - child.birth_year) * 12 + (date.month - child.birth_month)
 
 
@@ -183,6 +195,9 @@ def get_db_child(
 
 def _get_answer_session_child_ages_in_months(session: SessionDep) -> dict[int, int]:
     answer_sessions = session.exec(select(MilestoneAnswerSession)).all()
+
+    print(answer_sessions)
+
     return {
         answer_session.id: get_child_age_in_months(  # type: ignore
             get(session, Child, answer_session.child_id), answer_session.created_at
