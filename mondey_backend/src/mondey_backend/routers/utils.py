@@ -132,7 +132,7 @@ def update_child_question_text(session: SessionDep, child_question: ChildQuestio
 
 
 def _session_has_expired(milestone_answer_session: MilestoneAnswerSession) -> bool:
-    session_lifetime_days = 3
+    session_lifetime_days = 7
     return (
         datetime.datetime.now() - milestone_answer_session.created_at
         > datetime.timedelta(days=session_lifetime_days)
@@ -143,14 +143,14 @@ def get_or_create_current_milestone_answer_session(
     session: SessionDep, current_active_user: User, child_id: int
 ) -> MilestoneAnswerSession:
     get_db_child(session, current_active_user, child_id)
+
     milestone_answer_session = session.exec(
         select(MilestoneAnswerSession)
-        .where(
-            (col(MilestoneAnswerSession.user_id) == current_active_user.id)
-            & (col(MilestoneAnswerSession.child_id) == child_id)
-        )
+        .where(col(MilestoneAnswerSession.user_id) == current_active_user.id)
+        .where(col(MilestoneAnswerSession.child_id) == child_id)
         .order_by(col(MilestoneAnswerSession.created_at).desc())
     ).first()
+
     if milestone_answer_session is None or _session_has_expired(
         milestone_answer_session
     ):
@@ -160,6 +160,7 @@ def get_or_create_current_milestone_answer_session(
             created_at=datetime.datetime.now(),
         )
         add(session, milestone_answer_session)
+
     return milestone_answer_session
 
 
@@ -292,10 +293,9 @@ def calculate_milestonegroup_statistics(
         m_answers = [
             answer.answer
             for answer in session.exec(
-                select(MilestoneAnswer).where(
-                    col(MilestoneAnswer.milestone_id) == milestone.id
-                    and age_lower <= milestone.expected_age_months <= age_upper
-                )
+                select(MilestoneAnswer)
+                .where(col(MilestoneAnswer.milestone_id) == milestone.id)
+                .where(age_lower <= milestone.expected_age_months <= age_upper)
             ).all()
         ]
         answers.extend(m_answers)

@@ -104,10 +104,9 @@ def test_compute_summary_milestonegroup_feedback_for_all_sessions(session):
         filter(
             lambda a: _session_has_expired(a),
             session.exec(
-                select(MilestoneAnswerSession).where(
-                    MilestoneAnswerSession.child_id == child.id
-                    and MilestoneAnswerSession.user_id == user.id
-                )
+                select(MilestoneAnswerSession)
+                .where(MilestoneAnswerSession.child_id == child.id)
+                .where(MilestoneAnswerSession.user_id == user.id)
             ).all(),
         )
     )
@@ -131,10 +130,9 @@ def test_compute_detailed_milestonegroup_feedback_for_all_sessions(session):
         filter(
             lambda a: _session_has_expired(a),
             session.exec(
-                select(MilestoneAnswerSession).where(
-                    MilestoneAnswerSession.child_id == child.id
-                    and MilestoneAnswerSession.user_id == user.id
-                )
+                select(MilestoneAnswerSession)
+                .where(MilestoneAnswerSession.child_id == child.id)
+                .where(MilestoneAnswerSession.user_id == user.id)
             ).all(),
         )
     )

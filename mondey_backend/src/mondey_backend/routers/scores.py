@@ -192,10 +192,9 @@ def compute_summary_milestonegroup_feedback_for_all_sessions(
     answersessions = [
         a
         for a in session.exec(
-            select(MilestoneAnswerSession).where(
-                col(MilestoneAnswerSession.child_id) == child.id
-                and col(MilestoneAnswerSession.user_id) == current_active_user.id
-            )
+            select(MilestoneAnswerSession)
+            .where(col(MilestoneAnswerSession.child_id) == child.id)
+            .where(col(MilestoneAnswerSession.user_id) == current_active_user.id)
         ).all()
         if _session_has_expired(a)
     ]

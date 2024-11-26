@@ -251,8 +251,8 @@ def create_router() -> APIRouter:
             mas.id: mas  # type: ignore
             for mas in session.exec(
                 select(MilestoneAnswerSession).where(
-                    col(MilestoneAnswerSession.user_id) == current_active_user.id
-                    and col(MilestoneAnswerSession.child_id) == child_id
+                    (col(MilestoneAnswerSession.user_id) == current_active_user.id)
+                    & (col(MilestoneAnswerSession.child_id) == child_id)
                 )
             ).all()
             if _session_has_expired(mas)
