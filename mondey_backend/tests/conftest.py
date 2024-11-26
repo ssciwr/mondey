@@ -5,6 +5,7 @@ import pathlib
 
 import pytest
 import pytest_asyncio
+from dateutil.relativedelta import relativedelta
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from PIL import Image
@@ -79,8 +80,13 @@ def private_dir(tmp_path_factory: pytest.TempPathFactory):
 @pytest.fixture
 def children():
     today = datetime.datetime.today()
-    nine_months_ago = today - datetime.timedelta(days=9 * 30)
-    twenty_months_ago = today - datetime.timedelta(days=20 * 30)
+
+    # README: this is not entirel stable for all dates. For example, for
+    # 26th november = today, nine-months ago give 1st March, which then gives
+    # you 8 months instead of 9 if done as today - datetime.timedelta(days=9 * 30)
+    # Hence: use dateutil.relativedelta which takes care of the 31 vs 30 vs 28 days stuff
+    nine_months_ago = today - relativedelta(months=9)  # type: ignore
+    twenty_months_ago = today - relativedelta(months=20)  # type: ignore
     return [
         # ~9month old child for user (id 3)
         {
@@ -218,6 +224,17 @@ def session(children: list[dict]):
             session.add(Child.model_validate(child, update={"user_id": user_id}))
         today = datetime.datetime.today()
         last_month = today - datetime.timedelta(days=30)
+
+        for child in children:
+            print("child: ", child)
+
+        print("today: ", today)
+        print("time delta: ", last_month)
+        print(
+            "session created at: ",
+            datetime.datetime(last_month.year, last_month.month, last_month.day),
+        )
+
         # add an (expired) milestone answer session for child 1 / user (id 3) with 2 answers
         session.add(
             MilestoneAnswerSession(

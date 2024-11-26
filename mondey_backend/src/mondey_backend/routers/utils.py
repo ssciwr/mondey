@@ -169,16 +169,7 @@ def get_or_create_current_milestone_answer_session(
 def get_child_age_in_months(child: Child, date: datetime.date | None = None) -> int:
     if date is None:
         date = datetime.date.today()
-    print("date: ", date)
-    print(" date.year: ", date.year)
-    print(" date.month: ", date.month)
-    print("child: ", child.id)
-    print(" child.birth_year: ", child.birth_year)
-    print(" child.birth_month: ", child.birth_month)
-    print(
-        " age in months: ",
-        (date.year - child.birth_year) * 12 + (date.month - child.birth_month),
-    )
+
     return (date.year - child.birth_year) * 12 + (date.month - child.birth_month)
 
 
