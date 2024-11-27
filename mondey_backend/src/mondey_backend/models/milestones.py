@@ -186,11 +186,26 @@ class MilestoneAnswerSessionPublic(SQLModel):
 
 
 class MilestoneAgeScore(BaseModel):
+    milestone_id: int
     age_months: int
     avg_score: float
+    stddev_score: float
     expected_score: float
 
 
 class MilestoneAgeScores(BaseModel):
     scores: list[MilestoneAgeScore]
     expected_age: int
+
+
+class MilestoneGroupStatistics(SQLModel):
+    session_id: int = Field(
+        default=None, foreign_key="milestoneanswersession.id", primary_key=True
+    )
+    group_id: int = Field(
+        default=None, foreign_key="milestonegroup.id", primary_key=True
+    )
+    child_id: int = Field(default=None, foreign_key="child.id", primary_key=True)
+    age_months: int
+    avg_score: float
+    stddev_score: float

@@ -19,7 +19,7 @@ from ...models.milestones import SubmittedMilestoneImage
 from ...models.milestones import SubmittedMilestoneImagePublic
 from ...models.utils import ItemOrder
 from ..utils import add
-from ..utils import calculate_milestone_age_scores
+from ..utils import calculate_milestone_statistics_by_age
 from ..utils import get
 from ..utils import milestone_group_image_path
 from ..utils import milestone_image_path
@@ -181,6 +181,6 @@ def create_router() -> APIRouter:
     def get_milestone_age_scores(
         session: SessionDep, milestone_id: int
     ) -> MilestoneAgeScores:
-        return calculate_milestone_age_scores(session, milestone_id)
+        return calculate_milestone_statistics_by_age(session, milestone_id)
 
     return router

@@ -18,6 +18,7 @@ dependencies = [
     "aiosqlite",
     "python-multipart",
     "pydantic-settings",
+    "types-python-dateutil",
     "click",
     "pillow",
     "webp",
