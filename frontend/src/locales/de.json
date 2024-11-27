@@ -200,5 +200,22 @@
 		"summary1": "Ein mit Eltern und Fachkräften entwickeltes, wissenschaftlich geprüftes Program zur Beobachtung und Dokumentation der Entwicklung von Kindern bis 6 Jahre.",
 		"summary2": "Sie bewerten, wie gut das Kind bestimmte Alltagshandlungen ausführen kann. Auf dieser Basis bietet MONDEY Ihnen Feedback zum Entwicklungsstand des Kindes.",
 		"alt": "Ein kleines Kind hält ein Gänseblümchen in der Hand"
+	},
+	"frontpageBookmarks": {
+	"title": "Welche Entwicklungsbereiche werden erfasst?",
+	"headingMotor": "Grobmotorik",
+	"headingFineMotor": "Handmotorik",
+	"headingThinking": "Denken",
+	"headingLanguage": "Sprache",
+	"headingSocialDevelopment": "Soziale Entwicklung",
+	"headingInnerStates": "Innere Zustände",
+	"headingSchool": "Schulische Vorläuferfertigkeiten",
+	"summaryMotor": "Verfolgen Sie, wie das Kind von seiner Geburt bis zum 6. Lebensjahr lernt, seinen Rumpf, seine Arme und seine Beine immer besser zu koordinieren und im Alltag immer komplexere Bewegungsmuster ausführt.",
+	"summaryFineMotor": "Beobachten Sie, wie das Kind lernt, seine Hände und Finger immer geschickter zu nutzen, um damit seine Umwelt zu erkunden und zu verändern.",
+	"summaryThinking": "Das Denken besteht aus Basisprozessen (z.B. wahrnehmen, vergleichen und kategorisieren, sich etwas merken, flexibel umschalten, in Symbolen denken) und aus höheren Prozessen (z.B. planen, analysieren, kreativ sein). Beobachten Sie, wie sich der kindliche Geist entfaltet.",
+	"summaryLanguage": "Zur Sprache gehören das Erkennen und Produzieren von Lauten, Worten und Sätzen. Entdecken Sie, wie das Kind andere Menschen versteht und lernt, sich ihnen verständlich zu machen.",
+	"summarySocialDevelopment": "Verfolgen Sie mit, wie Kinder das Verhalten anderer Menschen zunehmend besser verstehen und darauf Einfluss darauf nehmen, aber auch, wie sie lernen, sich in die Gemeinschaft einzufügen. Diese Entwicklung beginnt schon bei den Kleinsten, aber sie ist auch im Erwachsenenalter nie endgültig abgeschlossen...",
+	"summaryInnerStates": "Hier beobachten Sie, wie das Kind die Fähigkeit entwickelt, mit seinen Bedürfnissen, motivationalen Zuständen und mit seinen Gefühlen umzugehen. Einige Meilensteine dieses Bereiches sind erfahrungsgemäß nicht so einfach zu bewerten.",
+	"summarySchool": "Bei älteren Kindergarten- und Vorschulkindern lohnt es sich, genau hinzuschauen, welche geistigen und motorischen Fähigkeiten, die konkret auf die Schule vorbereiten, schon entwickelt wurden."
 	}
 }
