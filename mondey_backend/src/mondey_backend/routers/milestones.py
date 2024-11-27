@@ -8,6 +8,7 @@ from sqlmodel import select
 
 from ..dependencies import CurrentActiveUserDep
 from ..dependencies import SessionDep
+from ..models.milestones import AgeInterval
 from ..models.milestones import Language
 from ..models.milestones import Milestone
 from ..models.milestones import MilestoneGroup
@@ -86,5 +87,15 @@ def create_router() -> APIRouter:
             file, submitted_milestone_image_path(submitted_milestone_image.id)
         )
         return {"ok": True}
+
+    @router.get("/age-intervals", response_model=list[AgeInterval])
+    def get_age_intervals(session: SessionDep):
+        return session.exec(select(AgeInterval)).all()
+
+    @router.post("/age-intervals")
+    def create_age_interval(session: SessionDep, lower_limit: int, upper_limit: int):
+        age_interval = AgeInterval(lower_limit=lower_limit, upper_limit=upper_limit)
+        add(session, age_interval)
+        return {"ok", True}
 
     return router

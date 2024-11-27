@@ -20,9 +20,14 @@ class Language(SQLModel, table=True):
     id: str = fixed_length_string_field(max_length=2, index=True, primary_key=True)
 
 
+## age interval for milestones
+class AgeInterval(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    lower_limit: int
+    upper_limit: int
+
+
 ## MilestoneGroupText
-
-
 class MilestoneGroupTextBase(SQLModel):
     title: str = ""
     desc: str = ""
@@ -105,6 +110,7 @@ class Milestone(SQLModel, table=True):
     group: MilestoneGroup = back_populates("milestones")
     text: Mapped[dict[str, MilestoneText]] = dict_relationship(key="lang_id")
     images: Mapped[list[MilestoneImage]] = back_populates("milestone")
+    age_interval: int = Field(default=None, foreign_key="ageinterval.id")
 
 
 class MilestonePublic(SQLModel):
@@ -112,6 +118,7 @@ class MilestonePublic(SQLModel):
     expected_age_months: int
     text: dict[str, MilestoneTextPublic]
     images: list[MilestoneImagePublic]
+    age_interval: int = Field(default=None, foreign_key="ageinterval.id")
 
 
 class MilestoneAdmin(SQLModel):
@@ -121,6 +128,7 @@ class MilestoneAdmin(SQLModel):
     expected_age_months: int
     text: dict[str, MilestoneText]
     images: list[MilestoneImage]
+    age_interval: int = Field(default=None, foreign_key="ageinterval.id")
 
 
 ## MilestoneImage
@@ -184,6 +192,9 @@ class MilestoneAnswerSessionPublic(SQLModel):
     child_id: int
     created_at: datetime.datetime
     answers: dict[int, MilestoneAnswerPublic]
+
+
+# statistics
 
 
 class MilestoneAgeScore(BaseModel):
