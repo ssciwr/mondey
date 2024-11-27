@@ -163,6 +163,7 @@ class MilestoneAnswer(SQLModel, table=True):
     milestone_id: int | None = Field(
         default=None, foreign_key="milestone.id", primary_key=True
     )
+    milestone_group_id: int = Field(default=None, foreign_key="milestonegroup.id")
     answer: int
 
 
