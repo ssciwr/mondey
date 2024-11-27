@@ -1,7 +1,8 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import { type AgeInterval, getAgeIntervals } from "$lib/client";
-import { Button, Spinner } from "flowbite-svelte";
+import AddButton from "$lib/components/Admin/AddButton.svelte";
+import { Hr, Spinner } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
 import AlertMessage from "../AlertMessage.svelte";
 import CreateAgeIntervalsModal from "./CreateAgeIntervalModal.svelte";
@@ -24,7 +25,6 @@ async function setup(): Promise<AgeInterval[]> {
 let promise = setup();
 </script>
 
-
 {#await promise}
 	<Spinner /> <p>{$_("userData.loadingMessage")}</p>
 {:then data}
@@ -45,9 +45,11 @@ let promise = setup();
             <p>{ageinterval.upper_limit}</p>
         </div>
     {/each}
-    <Button type="button" id = "newAgeIntervalButton" on:click = {()=>{
+    <Hr classHr="mx-2" />
+
+    <AddButton onclick = {()=>{
             showCreate = true;
-            }}>$_("milestone.newAgeInterval")</Button>
+            }}/>
 
     <CreateAgeIntervalsModal bind:show={showCreate} />
 
