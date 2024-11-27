@@ -123,8 +123,10 @@ export type MilestoneAdmin = {
 };
 
 export type MilestoneAgeScore = {
+    milestone_id: number;
     age_months: number;
     avg_score: number;
+    stddev_score: number;
     expected_score: number;
 };
 
@@ -750,6 +752,69 @@ export type UpdateCurrentChildAnswersData = {
 export type UpdateCurrentChildAnswersResponse = (unknown);
 
 export type UpdateCurrentChildAnswersError = (HTTPValidationError);
+
+export type GetExpiredMilestoneAnswerSessionsData = {
+    path: {
+        child_id: number;
+    };
+};
+
+export type GetExpiredMilestoneAnswerSessionsResponse = ({
+    [key: string]: MilestoneAnswerSessionPublic;
+});
+
+export type GetExpiredMilestoneAnswerSessionsError = (HTTPValidationError);
+
+export type GetMilestonegroupsForSessionData = {
+    path: {
+        answersession_id: number;
+    };
+};
+
+export type GetMilestonegroupsForSessionResponse = ({
+    [key: string]: MilestoneGroupPublic;
+});
+
+export type GetMilestonegroupsForSessionError = (HTTPValidationError);
+
+export type GetDetailedFeedbackForMilestonegroupData = {
+    path: {
+        answersession_id: number;
+        milestonegroup_id: number;
+    };
+};
+
+export type GetDetailedFeedbackForMilestonegroupResponse = ({
+    [key: string]: (number);
+});
+
+export type GetDetailedFeedbackForMilestonegroupError = (HTTPValidationError);
+
+export type GetSummaryFeedbackForAnswersessionData = {
+    path: {
+        answersession_id: number;
+    };
+};
+
+export type GetSummaryFeedbackForAnswersessionResponse = ({
+    [key: string]: (number);
+});
+
+export type GetSummaryFeedbackForAnswersessionError = (HTTPValidationError);
+
+export type GetDetailedFeedbackForAnswersessionData = {
+    path: {
+        answersession_id: number;
+    };
+};
+
+export type GetDetailedFeedbackForAnswersessionResponse = ({
+    [key: string]: {
+        [key: string]: (number);
+    };
+});
+
+export type GetDetailedFeedbackForAnswersessionError = (HTTPValidationError);
 
 export type AuthCookieLoginData = {
     body: Body_auth_cookie_login_auth_login_post;
