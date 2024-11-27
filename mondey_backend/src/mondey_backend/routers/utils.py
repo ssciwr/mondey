@@ -140,16 +140,12 @@ def _session_has_expired(milestone_answer_session: MilestoneAnswerSession) -> bo
 
 
 def get_or_create_current_milestone_answer_session(
-    session: SessionDep, current_active_user: User, child_id: int
+    session: SessionDep, current_active_user: User, child: Child
 ) -> MilestoneAnswerSession:
-    get_db_child(session, current_active_user, child_id)
-
     milestone_answer_session = session.exec(
         select(MilestoneAnswerSession)
-        .where(
-            (col(MilestoneAnswerSession.user_id) == current_active_user.id)
-            & (col(MilestoneAnswerSession.child_id) == child_id)
-        )
+        .where(col(MilestoneAnswerSession.user_id) == current_active_user.id)
+        .where(col(MilestoneAnswerSession.child_id) == child.id)
         .order_by(col(MilestoneAnswerSession.created_at).desc())
     ).first()
 
@@ -157,12 +153,32 @@ def get_or_create_current_milestone_answer_session(
         milestone_answer_session
     ):
         milestone_answer_session = MilestoneAnswerSession(
-            child_id=child_id,
+            child_id=child.id,
             user_id=current_active_user.id,
             created_at=datetime.datetime.now(),
         )
         add(session, milestone_answer_session)
-
+        delta_months = 6
+        child_age_months = get_child_age_in_months(child)
+        milestones = session.exec(
+            select(Milestone)
+            .where(
+                child_age_months >= col(Milestone.expected_age_months) - delta_months
+            )
+            .where(
+                child_age_months <= col(Milestone.expected_age_months) + delta_months
+            )
+        ).all()
+        for milestone in milestones:
+            session.add(
+                MilestoneAnswer(
+                    answer_session_id=milestone_answer_session.id,
+                    milestone_id=milestone.id,
+                    milestone_group_id=milestone.group_id,
+                    answer=-1,
+                )
+            )
+        session.commit()
     return milestone_answer_session
 
 

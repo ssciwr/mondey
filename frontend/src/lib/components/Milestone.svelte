@@ -255,7 +255,7 @@ const breadcrumbdata = $derived([
 					</Button>
 					<Button
 						color="light"
-						disabled={selectedAnswer === undefined}
+						disabled={!selectedAnswer || selectedAnswer < 0}
 						on:click={nextMilestone}
 						class="m-1 mt-4 text-gray-700 dark:text-gray-400"
 					>

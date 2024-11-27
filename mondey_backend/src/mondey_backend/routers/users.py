@@ -12,7 +12,6 @@ from ..dependencies import SessionDep
 from ..models.children import Child
 from ..models.children import ChildCreate
 from ..models.children import ChildPublic
-from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneAnswerSessionPublic
@@ -132,8 +131,9 @@ def create_router() -> APIRouter:
     def get_current_milestone_answer_session(
         session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
     ):
+        child = get_db_child(session, current_active_user, child_id)
         milestone_answer_session = get_or_create_current_milestone_answer_session(
-            session, current_active_user, child_id
+            session, current_active_user, child
         )
         return milestone_answer_session
 
@@ -154,15 +154,9 @@ def create_router() -> APIRouter:
             raise HTTPException(401)
         milestone_answer = milestone_answer_session.answers.get(answer.milestone_id)
         if milestone_answer is None:
-            milestone_answer = MilestoneAnswer(
-                answer_session_id=milestone_answer_session.id,
-                milestone_id=answer.milestone_id,
-                answer=answer.answer,
-            )
-            add(session, milestone_answer)
-        else:
-            milestone_answer.answer = answer.answer
-            session.commit()
+            raise HTTPException(401)
+        milestone_answer.answer = answer.answer
+        session.commit()
         return milestone_answer
 
     # Endpoints for answers to user question
