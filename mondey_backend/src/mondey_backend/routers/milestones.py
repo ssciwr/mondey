@@ -9,6 +9,7 @@ from sqlmodel import select
 from ..dependencies import CurrentActiveUserDep
 from ..dependencies import SessionDep
 from ..models.milestones import AgeInterval
+from ..models.milestones import AgeIntervalPublic
 from ..models.milestones import Language
 from ..models.milestones import Milestone
 from ..models.milestones import MilestoneGroup
@@ -88,7 +89,7 @@ def create_router() -> APIRouter:
         )
         return {"ok": True}
 
-    @router.get("/age-intervals", response_model=list[AgeInterval])
+    @router.get("/age-intervals", response_model=list[AgeIntervalPublic])
     def get_age_intervals(session: SessionDep):
         return session.exec(select(AgeInterval)).all()
 

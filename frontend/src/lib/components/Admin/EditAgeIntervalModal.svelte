@@ -7,20 +7,21 @@ import AlertMessage from "$lib/components/AlertMessage.svelte";
 import { Label, Modal, Range } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
 
-let { show = $bindable(false) }: { show: boolean } = $props();
-let lowerBound = $state(0);
-let upperBound = $state(0);
+let {
+	show = $bindable(false),
+	interval = $bindable({} as AgeIntervalPublic),
+}: { show: boolean; interval: AgeIntervalPublic } = $props();
 let showAlert = $state(false);
 let alertMessage = $state($_("userData.alertMessageError"));
 
 async function saveChanges(): Promise<void> {
-	if (upperBound < lowerBound) {
+	if (interval.upper_limit < interval.lower_limit) {
 		console.log("Upper bound must be greater than lower bound");
 	} else {
 		const submitResponse = await createAgeInterval({
 			query: {
-				lower_limit: lowerBound,
-				upper_limit: upperBound,
+				lower_limit: interval.lower_limit,
+				upper_limit: interval.upper_limit,
 			},
 		});
 
@@ -48,12 +49,12 @@ async function saveChanges(): Promise<void> {
 
     <div class="p-4">
         <Label for="lowerBoundInput" class="block mb-2">{$_("milestone.lowerAgeboundHeading")}</Label>
-        <p>{$_('milestone.lowerAgeboundExplanation')}</p>
-        <Range id="expected-age-months" min="1" max="72" bind:value={lowerBound}/>
+        <p>{$_('milestone.lowerAgeboundExplanation')}: {interval.lower_limit}</p>
+        <Range id="expected-age-months" min="1" max="72" bind:value={interval.lower_limit}/>
 
         <Label for="upperBoundInput" class="block mb-2">{$_("milestone.upperAgeboundHeading")}</Label>
-        <p>$_{"milestone.upperBoundExplanation"}</p>
-        <Range id="expected-age-months" min={String(lowerBound)} max="72" bind:value={upperBound}/>
+        <p>$_{"milestone.upperBoundExplanation"}: {interval.upper_limit}</p>
+        <Range id="expected-age-months" min={String(interval.lower_limit)} max="72" bind:value={interval.upper_limit}/>
     </div>
 	<svelte:fragment slot="footer">
 		<SaveButton onclick={saveChanges} />

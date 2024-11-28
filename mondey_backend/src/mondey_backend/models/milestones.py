@@ -26,6 +26,9 @@ class AgeInterval(SQLModel, table=True):
     lower_limit: int
     upper_limit: int
 
+class AgeIntervalPublic(SQLModel):
+    lower_limit: int
+    upper_limit: int
 
 ## MilestoneGroupText
 class MilestoneGroupTextBase(SQLModel):

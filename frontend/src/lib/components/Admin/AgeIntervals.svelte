@@ -5,21 +5,24 @@ import AddButton from "$lib/components/Admin/AddButton.svelte";
 import { Hr, Spinner } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
 import AlertMessage from "../AlertMessage.svelte";
-import CreateAgeIntervalsModal from "./CreateAgeIntervalModal.svelte";
+import EditAgeIntervalModal from "./EditAgeIntervalModal.svelte";
+import EditButton from "./EditButton.svelte";
 
 let alertMessage = $state($_("userData.alertMessageError"));
 let showAlert = $state(false);
-let showCreate = $state(false);
+let openEdit = $state(false);
+let ageintervals: AgeInterval[] = $state([]);
 
 async function setup(): Promise<AgeInterval[]> {
-	const ageintervals = await getAgeIntervals();
+	const ageintervalsResponse = await getAgeIntervals();
 
-	if (ageintervals.error) {
+	if (ageintervalsResponse.error) {
 		showAlert = true;
 		alertMessage = `${$_("userData.alertMessageError")} {ageintervals.error.detail}`;
 		return [] as AgeInterval[];
 	}
-	return ageintervals.data;
+	ageintervals = ageintervalsResponse.data as AgeInterval[];
+	return ageintervals;
 }
 
 let promise = setup();
@@ -38,20 +41,22 @@ let promise = setup();
 		/>
 	{/if}
 
-    {#each data as ageinterval}
+    {#each data as ageinterval, idx}
         <div>
             <p>{ageinterval.id}</p>
             <p>{ageinterval.lower_limit}</p>
             <p>{ageinterval.upper_limit}</p>
+			<EditButton onclick={() => {openEdit = true;}} />
+			<EditAgeIntervalModal bind:show={openEdit} bind:interval={data[idx]} />
         </div>
     {/each}
+
     <Hr classHr="mx-2" />
 
     <AddButton onclick = {()=>{
-            showCreate = true;
+            openEdit = true;
             }}/>
-
-    <CreateAgeIntervalsModal bind:show={showCreate} />
+    <EditAgeIntervalModal bind:show={openEdit}/>
 
 {:catch error}
 	<AlertMessage
