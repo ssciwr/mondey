@@ -41,7 +41,7 @@ onMount(async () => {
     <TabItem>
         <div slot="title" class="flex items-center gap-2">
             <ClockOutline size="md"/>
-            {$_("admin.age-intervals")}
+            {$_("admin.ageIntervals")}
         </div>
         <AgeIntervals />
     </TabItem>

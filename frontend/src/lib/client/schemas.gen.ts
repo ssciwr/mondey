@@ -757,7 +757,7 @@ export const MilestonePublicSchema = {
         }
     },
     type: 'object',
-    required: ['id', 'expected_age_months', 'text', 'images'],
+    required: ['id', 'expected_age_months', 'text', 'images', 'age_interval'],
     title: 'MilestonePublic'
 } as const;
 

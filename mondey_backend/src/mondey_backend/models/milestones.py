@@ -118,7 +118,7 @@ class MilestonePublic(SQLModel):
     expected_age_months: int
     text: dict[str, MilestoneTextPublic]
     images: list[MilestoneImagePublic]
-    age_interval: int = Field(default=None, foreign_key="ageinterval.id")
+    age_interval: int
 
 
 class MilestoneAdmin(SQLModel):

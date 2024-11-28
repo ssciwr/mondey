@@ -199,7 +199,7 @@ export type MilestonePublic = {
         [key: string]: MilestoneTextPublic;
     };
     images: Array<MilestoneImagePublic>;
-    age_interval?: number;
+    age_interval: number;
 };
 
 export type MilestoneText = {
@@ -466,6 +466,9 @@ export type UploadMilestoneGroupImageError = (HTTPValidationError);
 export type CreateMilestoneData = {
     path: {
         milestone_group_id: number;
+    };
+    query: {
+        age_interval: number;
     };
 };
 

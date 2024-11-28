@@ -86,8 +86,11 @@ def create_router() -> APIRouter:
         return {"ok": True}
 
     @router.post("/milestones/{milestone_group_id}", response_model=MilestoneAdmin)
-    def create_milestone(session: SessionDep, milestone_group_id: int):
+    def create_milestone(
+        session: SessionDep, milestone_group_id: int, age_interval: int
+    ):
         db_milestone = Milestone(group_id=milestone_group_id)
+        db_milestone.age_interval = age_interval
         add(session, db_milestone)
         for language in session.exec(select(Language)).all():
             session.add(
