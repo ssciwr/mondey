@@ -61,11 +61,10 @@ async function addAgeInterval(): Promise<void> {
 }
 
 async function doDeleteAgeInterval(): Promise<void> {
-	console.log("current", current);
 	if (current !== null) {
 		const response = await deleteAgeInterval({
 			path: {
-				age_interval_id: ageintervals[current].id,
+				age_interval_id: ageintervals[current].id as number,
 			},
 		});
 
@@ -85,11 +84,8 @@ async function doDeleteAgeInterval(): Promise<void> {
 		return;
 	}
 }
-$effect(() => {
-	console.log("ageintervals: ", ageintervals);
-	console.log("current: ", current, ageintervals[current]);
-});
-let promise = setup();
+
+const promise = setup();
 </script>
 
 {#await promise}
