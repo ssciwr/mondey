@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter
+from fastapi import HTTPException
 from fastapi import UploadFile
 from sqlalchemy.orm import lazyload
 from sqlmodel import col
@@ -9,7 +10,6 @@ from sqlmodel import select
 from ..dependencies import CurrentActiveUserDep
 from ..dependencies import SessionDep
 from ..models.milestones import AgeInterval
-from ..models.milestones import AgeIntervalPublic
 from ..models.milestones import Language
 from ..models.milestones import Milestone
 from ..models.milestones import MilestoneGroup
@@ -59,7 +59,7 @@ def create_router() -> APIRouter:
             session, current_active_user, child
         )
         milestone_ids = list(milestone_answer_session.answers.keys())
-        print("milestone_ids", milestone_ids)
+
         milestone_groups = session.exec(
             select(MilestoneGroup)
             .order_by(col(MilestoneGroup.order))
@@ -89,14 +89,38 @@ def create_router() -> APIRouter:
         )
         return {"ok": True}
 
-    @router.get("/age-intervals", response_model=list[AgeIntervalPublic])
+    @router.get("/age-intervals", response_model=list[AgeInterval])
     def get_age_intervals(session: SessionDep):
-        return session.exec(select(AgeInterval)).all()
+        return session.exec(select(AgeInterval).order_by(col(AgeInterval.id))).all()
 
-    @router.post("/age-intervals")
-    def create_age_interval(session: SessionDep, lower_limit: int, upper_limit: int):
-        age_interval = AgeInterval(lower_limit=lower_limit, upper_limit=upper_limit)
+    @router.post("/age-intervals", response_model=AgeInterval)
+    def create_age_interval(session: SessionDep, low: int, high: int):
+        age_interval = AgeInterval(lower_limit=low, upper_limit=high)
         add(session, age_interval)
-        return {"ok", True}
+        return age_interval
+
+    @router.put("/age-intervals/{age_interval_id}", response_model=AgeInterval)
+    def update_age_interval(
+        session: SessionDep, age_interval_id: int, low: int, high: int
+    ):
+        age_interval = get(session, AgeInterval, age_interval_id)
+        if age_interval is None:
+            raise HTTPException(status_code=404, detail="Age interval not found")
+
+        age_interval.lower_limit = low
+        age_interval.upper_limit = high
+        session.commit()
+        session.refresh(age_interval)
+        return age_interval
+
+    @router.delete("/age-intervals/{age_interval_id}")
+    def delete_age_interval(session: SessionDep, age_interval_id: int):
+        age_interval = get(session, AgeInterval, age_interval_id)
+        if age_interval is None:
+            raise HTTPException(status_code=404, detail="Age interval not found")
+
+        session.delete(age_interval)
+        session.commit()
+        return {"ok": True}
 
     return router

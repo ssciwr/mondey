@@ -1,36 +1,102 @@
 <svelte:options runes={true} />
 <script lang="ts">
-import { type AgeInterval, getAgeIntervals } from "$lib/client";
+import {
+	type AgeInterval,
+	createAgeInterval,
+	deleteAgeInterval,
+	getAgeIntervals,
+} from "$lib/client";
 import AddButton from "$lib/components/Admin/AddButton.svelte";
-import { Hr, Spinner } from "flowbite-svelte";
+import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
+import EditAgeIntervalModal from "$lib/components/Admin/EditAgeIntervalModal.svelte";
+import AlertMessage from "$lib/components/AlertMessage.svelte";
+import {
+	Card,
+	Hr,
+	Spinner,
+	Table,
+	TableBody,
+	TableBodyCell,
+	TableBodyRow,
+	TableHead,
+	TableHeadCell,
+} from "flowbite-svelte";
 import { _ } from "svelte-i18n";
-import AlertMessage from "../AlertMessage.svelte";
-import EditAgeIntervalModal from "./EditAgeIntervalModal.svelte";
+import DeleteModal from "./DeleteModal.svelte";
 import EditButton from "./EditButton.svelte";
 
 let alertMessage = $state($_("userData.alertMessageError"));
 let showAlert = $state(false);
 let openEdit = $state(false);
+let openDelete = $state(false);
 let ageintervals: AgeInterval[] = $state([]);
+let current: number = $state(0);
 
-async function setup(): Promise<AgeInterval[]> {
+async function setup(): Promise<void> {
 	const ageintervalsResponse = await getAgeIntervals();
 
 	if (ageintervalsResponse.error) {
 		showAlert = true;
 		alertMessage = `${$_("userData.alertMessageError")} {ageintervals.error.detail}`;
-		return [] as AgeInterval[];
 	}
 	ageintervals = ageintervalsResponse.data as AgeInterval[];
-	return ageintervals;
 }
 
+async function addAgeInterval(): Promise<void> {
+	const response = await createAgeInterval({
+		query: {
+			high: 0,
+			low: 0,
+		},
+	});
+
+	if (response.error) {
+		showAlert = true;
+		alertMessage = `${$_("userData.alertMessageError")} {response.error.detail}`;
+		return;
+	}
+
+	ageintervals = [...ageintervals, response.data as AgeInterval];
+	current = ageintervals.length - 1;
+}
+
+async function doDeleteAgeInterval(): Promise<void> {
+	console.log("current", current);
+	if (current !== null) {
+		const response = await deleteAgeInterval({
+			path: {
+				age_interval_id: ageintervals[current].id,
+			},
+		});
+
+		if (response.error) {
+			showAlert = true;
+			alertMessage = `${$_("userData.alertMessageError")} {response.error.detail}`;
+			return;
+		}
+
+		ageintervals = ageintervals.filter(
+			(element) => element.id !== ageintervals[current].id,
+		);
+		current = Math.max(current - 1, 0);
+	} else {
+		showAlert = true;
+		alertMessage = `{$_("userData.alertMessageError")} {No interval selected}`;
+		return;
+	}
+}
+$effect(() => {
+	console.log("ageintervals: ", ageintervals);
+	console.log("current: ", current, ageintervals[current]);
+});
 let promise = setup();
 </script>
 
 {#await promise}
-	<Spinner /> <p>{$_("userData.loadingMessage")}</p>
-{:then data}
+	<div class="flex justify-center items-center">
+	<Spinner /> <p class="text-gray-700 dark:text-gray-400">{$_("userData.loadingMessage")}</p>
+	</div>
+{:then}
 	{#if showAlert}
 		<AlertMessage
 			title={$_("childData.alertMessageTitle")}
@@ -40,24 +106,53 @@ let promise = setup();
 			}}
 		/>
 	{/if}
+	<Card size="xl" class="m-5">
 
-    {#each data as ageinterval, idx}
-        <div>
-            <p>{ageinterval.id}</p>
-            <p>{ageinterval.lower_limit}</p>
-            <p>{ageinterval.upper_limit}</p>
-			<EditButton onclick={() => {openEdit = true;}} />
-			<EditAgeIntervalModal bind:show={openEdit} bind:interval={data[idx]} />
-        </div>
-    {/each}
+	<Table >
+		<TableHead>
+			<TableHeadCell>Id</TableHeadCell>
+			<TableHeadCell>Min</TableHeadCell>
+			<TableHeadCell>Max</TableHeadCell>
+			<TableHeadCell>{$_('admin.actions')}</TableHeadCell>
+		</TableHead>
+		<TableBody>
+    		{#each ageintervals as ageinterval, idx}
+				<TableBodyRow>
+            		<TableBodyCell>{ageinterval.id}</TableBodyCell>
+            		<TableBodyCell>{ageinterval.lower_limit}</TableBodyCell>
+            		<TableBodyCell>{ageinterval.upper_limit}</TableBodyCell>
+					<TableBodyCell>
+						<EditButton
+							onclick={() => {
+								current = idx;
+								openEdit = true;
+							}}
+						/>
+						<DeleteButton
+							onclick={() => {
+								current = idx;
+								openDelete = true;
+							}}
+						/>
 
+					</TableBodyCell>
+				</TableBodyRow>
+    		{/each}
+		</TableBody>
+	</Table>
     <Hr classHr="mx-2" />
 
-    <AddButton onclick = {()=>{
+    <AddButton onclick = {async ()=>{
+			await addAgeInterval();
             openEdit = true;
             }}/>
-    <EditAgeIntervalModal bind:show={openEdit}/>
-
+	{#key openEdit}
+	<EditAgeIntervalModal bind:open={openEdit} bind:interval={ageintervals[current]}/>
+	{/key}
+	<DeleteModal bind:open={openDelete} onclick={async ()=>{
+							await doDeleteAgeInterval();
+						}}/>
+	</Card>
 {:catch error}
 	<AlertMessage
 		title={"Error in server request"}

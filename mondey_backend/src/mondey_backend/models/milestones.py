@@ -22,13 +22,10 @@ class Language(SQLModel, table=True):
 
 ## age interval for milestones
 class AgeInterval(SQLModel, table=True):
-    id: int = Field(primary_key=True)
+    id: int = Field(primary_key=True, default=None)
     lower_limit: int
     upper_limit: int
 
-class AgeIntervalPublic(SQLModel):
-    lower_limit: int
-    upper_limit: int
 
 ## MilestoneGroupText
 class MilestoneGroupTextBase(SQLModel):

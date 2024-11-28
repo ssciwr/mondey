@@ -16,7 +16,7 @@ export const AgeIntervalSchema = {
         }
     },
     type: 'object',
-    required: ['id', 'lower_limit', 'upper_limit'],
+    required: ['lower_limit', 'upper_limit'],
     title: 'AgeInterval'
 } as const;
 
