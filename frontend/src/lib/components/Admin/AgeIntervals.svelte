@@ -134,14 +134,19 @@ const promise = setup();
 					</TableBodyCell>
 				</TableBodyRow>
     		{/each}
+			<TableBodyRow>
+				<TableBodyCell/>
+				<TableBodyCell/>
+				<TableBodyCell/>
+				<TableBodyCell >
+					<AddButton onclick={addAgeInterval} />
+				</TableBodyCell>
+			</TableBodyRow>
 		</TableBody>
 	</Table>
     <Hr classHr="mx-2" />
 
-    <AddButton onclick = {async ()=>{
-			await addAgeInterval();
-            openEdit = true;
-            }}/>
+
 	{#key openEdit}
 	<EditAgeIntervalModal bind:open={openEdit} bind:interval={ageintervals[current]}/>
 	{/key}

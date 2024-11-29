@@ -194,9 +194,6 @@ class MilestoneAnswerSessionPublic(SQLModel):
     answers: dict[int, MilestoneAnswerPublic]
 
 
-# statistics
-
-
 class MilestoneAgeScore(BaseModel):
     age_months: int
     avg_score: float

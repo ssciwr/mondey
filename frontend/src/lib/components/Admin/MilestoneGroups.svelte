@@ -291,7 +291,6 @@ async function doDeleteMilestone() {
 ></DeleteModal>
 
 {#key showEditMilestoneModal}
-
 	<EditMilestoneModal bind:open={showEditMilestoneModal} bind:milestone={currentMilestone} bind:ageintervals= {ageIntervals}
 	></EditMilestoneModal>
 
