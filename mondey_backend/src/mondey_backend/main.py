@@ -6,13 +6,12 @@ import time
 from contextlib import asynccontextmanager
 from datetime import datetime
 from datetime import timedelta
-from multiprocessing import Process
 
 import uvicorn
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from sqlmodel import Session
 
@@ -31,13 +30,9 @@ from .settings import app_settings
 
 
 def recompute_statistics():
-    # FIXME: asked AI about this stuff and this is what it came up with. Check and understand
     while True:
         with Session(engine) as session:
             try:
-                # Acquire a lock to prevent concurrent access
-                session.exec(text("LOCK TABLE milestonegroup IN ACCESS EXCLUSIVE MODE"))
-                session.exec(text("LOCK TABLE milestone IN ACCESS EXCLUSIVE MODE"))
                 with session.begin():
                     recompute_milestone_statistics(session)
                     recompute_milestonegroup_statistics(session)
@@ -46,6 +41,8 @@ def recompute_statistics():
                 print(f"Error acquiring lock: {e}")
             finally:
                 session.commit()
+
+        # sleep until next run - 3:00 AM the week after
         now = datetime.now()
         next_run = (now + timedelta(days=7)).replace(
             hour=3, minute=0, second=0, microsecond=0
@@ -58,13 +55,16 @@ def recompute_statistics():
 async def lifespan(app: FastAPI):
     create_mondey_db_and_tables()
     await create_user_db_and_tables()
+    
     # run the statistics recomputation in a separate process
-    process = Process(target=recompute_statistics)
-    process.start()
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(recompute_statistics, 'cron', hour=3, minute=0, day_of_week='mon')  # Every Monday at 3:00 AM
+    scheduler.start()
+
     yield
-    process.terminate()
 
-
+    scheduler.shutdown()
+    
 def create_app() -> FastAPI:
     # ensure static files directory exists
     pathlib.Path(app_settings.STATIC_FILES_PATH).mkdir(parents=True, exist_ok=True)

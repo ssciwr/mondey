@@ -289,7 +289,8 @@ def calculate_milestone_statistics_by_age(
         _description_
     """
     child_ages = _get_answer_session_child_ages_in_months(session)
-    print("child_ages: ", child_ages)
+    # FIXME: change this to an online algorithm that starts with the last known statistcs 
+    # and then adds the new answers
     if answers is None:
         answers = session.exec(
             select(MilestoneAnswer).where(
@@ -342,6 +343,8 @@ def calculate_milestonegroup_statistics_by_age(
     MilestoneGroupAgeScoreCollection
         _description_
     """
+    # FIXME: change this to an online algorithm that starts with the last known statistcs 
+    # and then adds the new answers
     child_ages = _get_answer_session_child_ages_in_months(session)
 
     if answers is None:
