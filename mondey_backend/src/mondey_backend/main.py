@@ -2,14 +2,22 @@ from __future__ import annotations
 
 import logging
 import pathlib
+import time
 from contextlib import asynccontextmanager
+from datetime import datetime
+from datetime import timedelta
+from multiprocessing import Process
 
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
+from sqlalchemy.exc import OperationalError
+from sqlmodel import Session
 
 from .databases.mondey import create_mondey_db_and_tables
+from .databases.mondey import engine
 from .databases.users import create_user_db_and_tables
 from .routers import admin
 from .routers import auth
@@ -17,14 +25,44 @@ from .routers import milestones
 from .routers import questions
 from .routers import research
 from .routers import users
+from .routers.utils import recompute_milestone_statistics
+from .routers.utils import recompute_milestonegroup_statistics
 from .settings import app_settings
+
+
+def recompute_statistics():
+    # FIXME: asked AI about this stuff and this is what it came up with. Check and understand
+    while True:
+        with Session(engine) as session:
+            try:
+                # Acquire a lock to prevent concurrent access
+                session.exec(text("LOCK TABLE milestonegroup IN ACCESS EXCLUSIVE MODE"))
+                session.exec(text("LOCK TABLE milestone IN ACCESS EXCLUSIVE MODE"))
+                with session.begin():
+                    recompute_milestone_statistics(session)
+                    recompute_milestonegroup_statistics(session)
+                    print("Recomputing statistics")
+            except OperationalError as e:
+                print(f"Error acquiring lock: {e}")
+            finally:
+                session.commit()
+        now = datetime.now()
+        next_run = (now + timedelta(days=7)).replace(
+            hour=3, minute=0, second=0, microsecond=0
+        )
+        sleep_duration = (next_run - now).total_seconds()
+        time.sleep(sleep_duration)  # 1 week. needs to be put into config
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_mondey_db_and_tables()
     await create_user_db_and_tables()
+    # run the statistics recomputation in a separate process
+    process = Process(target=recompute_statistics)
+    process.start()
     yield
+    process.terminate()
 
 
 def create_app() -> FastAPI:

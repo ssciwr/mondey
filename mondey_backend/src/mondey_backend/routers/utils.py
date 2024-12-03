@@ -9,7 +9,6 @@ from typing import TypeVar
 
 import numpy as np
 import webp
-from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException
 from fastapi import UploadFile
 from PIL import Image
@@ -371,9 +370,7 @@ def calculate_milestonegroup_statistics_by_age(
     )
 
 
-def check_and_recompute_milestonegroup_statistics(
-    session: SessionDep, timedelta: relativedelta = relativedelta(weeks=1)
-):
+def recompute_milestonegroup_statistics(session: SessionDep):
     # fetch all milestonegroup statsitcs and check how old they are. Then
     # recompute the ones that are older than timedelta and put back into database
     # do the same for milestone statistics
@@ -386,21 +383,17 @@ def check_and_recompute_milestonegroup_statistics(
         add(session, statistics)
 
 
-def check_and_recompute_milestone_statistics(
-    session: SessionDep, timedelta: relativedelta = relativedelta(weeks=1)
-):
+def recompute_milestone_statistics(session: SessionDep):
     # fetch all milestonegroup statsitcs and check how old they are. Then
     # recompute the ones that are older than timedelta and put back into database
     # do the same for milestone statistics
 
     milestones = session.exec(select(Milestone.id)).all()
     for milestone in milestones:
-        statistics = calculate_milestone_statistics_by_age(session, milestone)
+        statistics = calculate_milestone_statistics_by_age(session, milestone)  # type: ignore
         for score in statistics.scores:
             add(session, score)
         add(session, statistics)
-
-    session.commit()
 
 
 def child_image_path(child_id: int | None) -> pathlib.Path:
