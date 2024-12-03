@@ -193,17 +193,23 @@ class MilestoneAnswerSessionPublic(SQLModel):
     answers: dict[int, MilestoneAnswerPublic]
 
 
-class Statistics(SQLModel):
+class MilestoneAgeScore(SQLModel, table=True):
+    id: int | None = Field(primary_key=True, default=None)
+    collection_id: int | None = Field(
+        default=None, foreign_key="milestoneagescorecollection.id"
+    )
+    collection: MilestoneAgeScoreCollection = back_populates("scores")
     avg_score: float
     stddev_score: float
     age_months: int
     expected_score: float
 
 
-class MilestoneAgeScores(SQLModel, table=True):
-    milestone_id: int = Field(primary_key=True, default=None)
-    scores: list[Statistics]
+class MilestoneAgeScoreCollection(SQLModel, table=True):
+    id: int | None = Field(primary_key=True, default=None)
+    milestone_id: int = Field(default=None, foreign_key="milestone.id")
     expected_age: int
+    scores: Mapped[list[MilestoneAgeScore]] = back_populates("collection")
     created_at: datetime.datetime = Field(
         sa_column_kwargs={
             "server_default": text("CURRENT_TIMESTAMP"),
@@ -211,9 +217,21 @@ class MilestoneAgeScores(SQLModel, table=True):
     )
 
 
-class MilestoneGroupAgeScores(SQLModel, table=True):
-    milestonegroup_id: int = Field(primary_key=True, default=None)
-    scores: list[Statistics]
+class MilestoneGroupAgeScore(SQLModel, table=True):
+    id: int = Field(primary_key=True, default=None)
+    collection_id: int | None = Field(
+        default=None, foreign_key="milestonegroupagescorecollection.id"
+    )
+    collection: MilestoneGroupAgeScoreCollection = back_populates("scores")
+    avg_score: float
+    stddev_score: float
+    age_months: int
+
+
+class MilestoneGroupAgeScoreCollection(SQLModel, table=True):
+    id: int | None = Field(primary_key=True, default=None)
+    milestonegroup_id: int = Field(default=None, foreign_key="milestonegroup.id")
+    scores: Mapped[list[MilestoneGroupAgeScore]] = back_populates("collection")
     created_at: datetime.datetime = Field(
         sa_column_kwargs={
             "server_default": text("CURRENT_TIMESTAMP"),

@@ -9,7 +9,7 @@ from ...dependencies import SessionDep
 from ...models.milestones import Language
 from ...models.milestones import Milestone
 from ...models.milestones import MilestoneAdmin
-from ...models.milestones import MilestoneAgeScores
+from ...models.milestones import MilestoneAgeScoreCollection
 from ...models.milestones import MilestoneGroup
 from ...models.milestones import MilestoneGroupAdmin
 from ...models.milestones import MilestoneGroupText
@@ -183,7 +183,7 @@ def create_router() -> APIRouter:
     @router.get("/milestone-age-scores/{milestone_id}")
     def get_milestone_age_scores(
         session: SessionDep, milestone_id: int
-    ) -> MilestoneAgeScores:
+    ) -> MilestoneAgeScoreCollection:
         return calculate_milestone_statistics_by_age(session, milestone_id)
 
     return router

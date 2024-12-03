@@ -6,9 +6,8 @@ from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.routers.utils import _get_answer_session_child_ages_in_months
-from mondey_backend.routers.utils import _get_score_statistics_by_age
+from mondey_backend.routers.utils import _get_statistics_by_age
 from mondey_backend.routers.utils import calculate_milestone_statistics_by_age
-from mondey_backend.routers.utils import calculate_milestonegroup_statistics
 from mondey_backend.routers.utils import get_milestonegroups_for_answersession
 
 
@@ -39,7 +38,7 @@ def test_get_score_statistics_by_age(session):
     answers = session.exec(select(MilestoneAnswer)).all()
     child_ages = {1: 5, 2: 3, 3: 8}
 
-    avg, stddev = _get_score_statistics_by_age(answers, child_ages)
+    avg, stddev = _get_statistics_by_age(answers, child_ages)
 
     assert isclose(avg[5], 1.5)
     assert isclose(avg[3], 3.5)
@@ -76,13 +75,13 @@ def test_get_score_statistics_by_age(session):
     )
 
     child_ages = {}  # no answer sessions ==> empty child ages
-    avg, stddev = _get_score_statistics_by_age(answers, child_ages)
+    avg, stddev = _get_statistics_by_age(answers, child_ages)
     assert np.all(np.isclose(avg, 0))
     assert np.all(np.isclose(stddev, 0))
 
     child_ages = {1: 5, 2: 3, 3: 8}
     answers = []  # no answers ==> empty answers
-    avg, stddev = _get_score_statistics_by_age(answers, child_ages)
+    avg, stddev = _get_statistics_by_age(answers, child_ages)
     assert np.all(np.isclose(avg, 0))
     assert np.all(np.isclose(stddev, 0))
 
@@ -126,9 +125,10 @@ def test_calculate_milestonegroup_statistics(session):
         for a in session.exec(select(MilestoneAnswer)).all()
         if a.milestone_id in milestones
     ]
-    score = calculate_milestonegroup_statistics(
-        session, milestone_group.id, age, age_lower, age_upper
-    )
+    # score = calculate_milestonegroup_statistics_by_age(
+    #     session, milestone_group.id,
+    # )
+    score = {}
     assert score.age_months == 8
     assert score.group_id == 1
     assert np.isclose(score.avg_score, np.mean(np.array(answers) + 1))
