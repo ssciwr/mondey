@@ -205,6 +205,19 @@ class MilestoneAgeScore(SQLModel, table=True):
     expected_score: float
 
 
+class MilestoneAgeScorePublic(SQLModel):
+    def __init__(self, avg_score=0, stddev_score=0, age_months=0, expected_score=0):
+        self.avg_score = avg_score
+        self.stddev_score = stddev_score
+        self.age_months = age_months
+        self.expected_score = expected_score
+
+    avg_score: float
+    stddev_score: float
+    age_months: int
+    expected_score: float
+
+
 class MilestoneAgeScoreCollection(SQLModel, table=True):
     id: int | None = Field(primary_key=True, default=None)
     milestone_id: int = Field(default=None, foreign_key="milestone.id")
@@ -217,6 +230,19 @@ class MilestoneAgeScoreCollection(SQLModel, table=True):
     )
 
 
+class MilestoneAgeScoreCollectionPublic(SQLModel):
+    def __init__(self, milestone_id=0, expected_age=0, scores=None, created_at=None):
+        self.milestone_id = milestone_id
+        self.expected_age = expected_age
+        self.scores = scores or []
+        self.created_at = created_at or datetime.datetime.now()
+
+    milestone_id: int
+    expected_age: int
+    scores: list[MilestoneAgeScorePublic]
+    created_at: datetime.datetime
+
+
 class MilestoneGroupAgeScore(SQLModel, table=True):
     id: int = Field(primary_key=True, default=None)
     collection_id: int | None = Field(
@@ -226,6 +252,22 @@ class MilestoneGroupAgeScore(SQLModel, table=True):
     avg_score: float
     stddev_score: float
     age_months: int
+    milestonegroup_id: int = Field(
+        default=None, primary_key=True, foreign_key="milestonegroup.id"
+    )
+
+
+class MilestoneGroupAgeScorePublic(SQLModel):
+    def __init__(self, avg_score=0, stddev_score=0, age_months=0, milestonegroup_id=0):
+        self.avg_score = avg_score
+        self.stddev_score = stddev_score
+        self.age_months = age_months
+        self.milestonegroup_id = milestonegroup_id
+
+    avg_score: float
+    stddev_score: float
+    age_months: int
+    milestonegroup_id: int
 
 
 class MilestoneGroupAgeScoreCollection(SQLModel, table=True):
@@ -237,3 +279,15 @@ class MilestoneGroupAgeScoreCollection(SQLModel, table=True):
             "server_default": text("CURRENT_TIMESTAMP"),
         }
     )
+
+
+class MilestoneGroupAgeScoreCollectionPublic(SQLModel):
+    def __init__(self, milestonegroup_id=0, scores=None, created_at=None):
+        self.milestonegroup_id = milestonegroup_id
+        self.scores = scores or []
+        self.created_at = created_at or datetime.datetime.now()
+
+    id: int
+    milestonegroup_id: int
+    scores: list[MilestoneGroupAgeScorePublic]
+    created_at: datetime.datetime

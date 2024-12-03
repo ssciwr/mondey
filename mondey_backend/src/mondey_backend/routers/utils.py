@@ -23,14 +23,14 @@ from ..models.children import Child
 from ..models.milestones import AgeInterval
 from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAdmin
-from ..models.milestones import MilestoneAgeScore
-from ..models.milestones import MilestoneAgeScoreCollection
+from ..models.milestones import MilestoneAgeScoreCollectionPublic
+from ..models.milestones import MilestoneAgeScorePublic
 from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupAdmin
-
-# from ..models.milestones import MilestoneGroupAgeScores
+from ..models.milestones import MilestoneGroupAgeScoreCollectionPublic
+from ..models.milestones import MilestoneGroupAgeScorePublic
 from ..models.milestones import MilestoneGroupText
 from ..models.milestones import MilestoneText
 from ..models.questions import ChildQuestion
@@ -219,6 +219,21 @@ def _get_expected_age_from_scores(scores: np.ndarray) -> int:
 def _get_statistics_by_age(
     answers: Sequence[MilestoneAnswer], child_ages: dict[int, int]
 ) -> tuple[np.ndarray, np.ndarray]:
+    """
+    _summary_
+
+    Parameters
+    ----------
+    answers : Sequence[MilestoneAnswer]
+        _description_
+    child_ages : dict[int, int]
+        _description_
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray]
+        _description_
+    """
     max_age_months = 72
     avg_scores = np.zeros(max_age_months + 1)
     stddev_scores = np.zeros(max_age_months + 1)
@@ -239,7 +254,7 @@ def _get_statistics_by_age(
     # compute standard deviation
     for answer in answers:
         age = child_ages[answer.answer_session_id]  # type: ignore
-        stddev_scores[age] += (answer.answer + 1 - avg_scores[age]) ** 2
+        stddev_scores[age] += ((answer.answer + 1) - avg_scores[age]) ** 2
 
     with np.errstate(invalid="ignore"):
         stddev_scores = np.sqrt(stddev_scores / np.max(counts - 1, 0))
@@ -255,63 +270,100 @@ def calculate_milestone_statistics_by_age(
     session: SessionDep,
     milestone_id: int,
     answers: Sequence[MilestoneAnswer] | None = None,
-) -> MilestoneAgeScoreCollection:
-    child_ages = _get_answer_session_child_ages_in_months(session)
+) -> MilestoneAgeScoreCollectionPublic:
+    """
+    _summary_
 
+    Parameters
+    ----------
+    session : SessionDep
+        _description_
+    milestone_id : int
+        _description_
+    answers : Sequence[MilestoneAnswer] | None, optional
+        _description_, by default None
+
+    Returns
+    -------
+    MilestoneAgeScoreCollection
+        _description_
+    """
+    child_ages = _get_answer_session_child_ages_in_months(session)
+    print("child_ages: ", child_ages)
     if answers is None:
         answers = session.exec(
             select(MilestoneAnswer).where(
                 col(MilestoneAnswer.milestone_id) == milestone_id
             )
         ).all()
+
     avg, stddev = _get_statistics_by_age(answers, child_ages)
     expected_age = _get_expected_age_from_scores(avg)
-
-    return MilestoneAgeScoreCollection(
+    return MilestoneAgeScoreCollectionPublic(
         milestone_id=milestone_id,
         expected_age=expected_age,
         created_at=datetime.datetime.now(),
         scores=[
-            MilestoneAgeScore(
-                age_months=age,
+            MilestoneAgeScorePublic(
                 avg_score=avg[age],
                 stddev_score=stddev[age],
-                expected_score=(
-                    4 if age >= expected_age else 1
-                ),  # TODO: placeholder algorithm? how does the model behind this look like really?
+                age_months=age,
+                expected_score=4
+                if age >= expected_age
+                else 1,  # TODO: placeholder algorithm? how does the model behind this look like really?
             )
             for age in range(0, len(avg))
         ],
     )
 
 
-# def calculate_milestonegroup_statistics_by_age(
-#     session: SessionDep,
-#     milestonegroup_id,
-#     answers: Sequence[MilestoneAnswer] | None = None,
-# ) -> MilestoneGroupAgeScores:
-#     child_ages = _get_answer_session_child_ages_in_months(session)
+def calculate_milestonegroup_statistics_by_age(
+    session: SessionDep,
+    milestonegroup_id,
+    answers: Sequence[MilestoneAnswer] | None = None,
+) -> MilestoneGroupAgeScoreCollectionPublic:
+    """
+    _summary_
 
-#     if answers is None:
-#         answers = session.exec(
-#             select(MilestoneAnswer).where(
-#                 col(MilestoneAnswer.milestone_group_id) == milestonegroup_id
-#             )
-#         ).all()
+    Parameters
+    ----------
+    session : SessionDep
+        _description_
+    milestonegroup_id : _type_
+        _description_
+    answers : Sequence[MilestoneAnswer] | None, optional
+        _description_, by default None
 
-#     avg, stddev = _get_statistics_by_age(answers, child_ages)
-#     return MilestoneGroupAgeScores(
-#         milestonegroup_id=milestonegroup_id,
-#         scores=[
-#             Statistics(
-#                 age_months=age,
-#                 avg_score=avg[age],
-#                 stddev_score=stddev[age],
-#             )
-#             for age in range(0, len(avg))
-#         ],
-#         created_at=datetime.datetime.now(),
-#     )
+    Returns
+    -------
+    MilestoneGroupAgeScoreCollection
+        _description_
+    """
+    child_ages = _get_answer_session_child_ages_in_months(session)
+
+    if answers is None:
+        answers = session.exec(
+            select(MilestoneAnswer).where(
+                col(MilestoneAnswer.milestone_group_id) == milestonegroup_id
+            )
+        ).all()
+
+    print("mg answers: ", answers)
+    print("child ages: ", child_ages)
+    avg, stddev = _get_statistics_by_age(answers, child_ages)
+    return MilestoneGroupAgeScoreCollectionPublic(
+        milestonegroup_id=milestonegroup_id,
+        scores=[
+            MilestoneGroupAgeScorePublic(
+                age_months=age,
+                avg_score=avg[age],
+                stddev_score=stddev[age],
+                milestonegroup_id=milestonegroup_id,
+            )
+            for age in range(0, len(avg))
+        ],
+        created_at=datetime.datetime.now(),
+    )
 
 
 def child_image_path(child_id: int | None) -> pathlib.Path:
