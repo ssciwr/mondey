@@ -55,16 +55,19 @@ def recompute_statistics():
 async def lifespan(app: FastAPI):
     create_mondey_db_and_tables()
     await create_user_db_and_tables()
-    
+
     # run the statistics recomputation in a separate process
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(recompute_statistics, 'cron', hour=3, minute=0, day_of_week='mon')  # Every Monday at 3:00 AM
+    scheduler.add_job(
+        recompute_statistics, "cron", hour=3, minute=0, day_of_week="mon"
+    )  # Every Monday at 3:00 AM
     scheduler.start()
 
     yield
 
     scheduler.shutdown()
-    
+
+
 def create_app() -> FastAPI:
     # ensure static files directory exists
     pathlib.Path(app_settings.STATIC_FILES_PATH).mkdir(parents=True, exist_ok=True)
