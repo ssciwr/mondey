@@ -9,6 +9,7 @@ from typing import TypeVar
 
 import numpy as np
 import webp
+from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException
 from fastapi import UploadFile
 from PIL import Image
@@ -23,14 +24,14 @@ from ..models.children import Child
 from ..models.milestones import AgeInterval
 from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAdmin
-from ..models.milestones import MilestoneAgeScoreCollectionPublic
-from ..models.milestones import MilestoneAgeScorePublic
+from ..models.milestones import MilestoneAgeScore
+from ..models.milestones import MilestoneAgeScoreCollection
 from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupAdmin
-from ..models.milestones import MilestoneGroupAgeScoreCollectionPublic
-from ..models.milestones import MilestoneGroupAgeScorePublic
+from ..models.milestones import MilestoneGroupAgeScore
+from ..models.milestones import MilestoneGroupAgeScoreCollection
 from ..models.milestones import MilestoneGroupText
 from ..models.milestones import MilestoneText
 from ..models.questions import ChildQuestion
@@ -270,7 +271,7 @@ def calculate_milestone_statistics_by_age(
     session: SessionDep,
     milestone_id: int,
     answers: Sequence[MilestoneAnswer] | None = None,
-) -> MilestoneAgeScoreCollectionPublic:
+) -> MilestoneAgeScoreCollection:
     """
     _summary_
 
@@ -299,12 +300,15 @@ def calculate_milestone_statistics_by_age(
 
     avg, stddev = _get_statistics_by_age(answers, child_ages)
     expected_age = _get_expected_age_from_scores(avg)
-    return MilestoneAgeScoreCollectionPublic(
+    return MilestoneAgeScoreCollection(
+        id=None,
         milestone_id=milestone_id,
         expected_age=expected_age,
         created_at=datetime.datetime.now(),
         scores=[
-            MilestoneAgeScorePublic(
+            MilestoneAgeScore(
+                id=None,
+                collection_id=None,
                 avg_score=avg[age],
                 stddev_score=stddev[age],
                 age_months=age,
@@ -321,7 +325,7 @@ def calculate_milestonegroup_statistics_by_age(
     session: SessionDep,
     milestonegroup_id,
     answers: Sequence[MilestoneAnswer] | None = None,
-) -> MilestoneGroupAgeScoreCollectionPublic:
+) -> MilestoneGroupAgeScoreCollection:
     """
     _summary_
 
@@ -348,13 +352,14 @@ def calculate_milestonegroup_statistics_by_age(
             )
         ).all()
 
-    print("mg answers: ", answers)
-    print("child ages: ", child_ages)
     avg, stddev = _get_statistics_by_age(answers, child_ages)
-    return MilestoneGroupAgeScoreCollectionPublic(
+    return MilestoneGroupAgeScoreCollection(
+        id=None,
         milestonegroup_id=milestonegroup_id,
         scores=[
-            MilestoneGroupAgeScorePublic(
+            MilestoneGroupAgeScore(
+                id=None,
+                collection_id=None,
                 age_months=age,
                 avg_score=avg[age],
                 stddev_score=stddev[age],
@@ -364,6 +369,38 @@ def calculate_milestonegroup_statistics_by_age(
         ],
         created_at=datetime.datetime.now(),
     )
+
+
+def check_and_recompute_milestonegroup_statistics(
+    session: SessionDep, timedelta: relativedelta = relativedelta(weeks=1)
+):
+    # fetch all milestonegroup statsitcs and check how old they are. Then
+    # recompute the ones that are older than timedelta and put back into database
+    # do the same for milestone statistics
+
+    milestonegroups = session.exec(select(MilestoneGroup.id)).all()
+    for milestonegroup in milestonegroups:
+        statistics = calculate_milestonegroup_statistics_by_age(session, milestonegroup)
+        for score in statistics.scores:
+            add(session, score)
+        add(session, statistics)
+
+
+def check_and_recompute_milestone_statistics(
+    session: SessionDep, timedelta: relativedelta = relativedelta(weeks=1)
+):
+    # fetch all milestonegroup statsitcs and check how old they are. Then
+    # recompute the ones that are older than timedelta and put back into database
+    # do the same for milestone statistics
+
+    milestones = session.exec(select(Milestone.id)).all()
+    for milestone in milestones:
+        statistics = calculate_milestone_statistics_by_age(session, milestone)
+        for score in statistics.scores:
+            add(session, score)
+        add(session, statistics)
+
+    session.commit()
 
 
 def child_image_path(child_id: int | None) -> pathlib.Path:
