@@ -129,17 +129,11 @@ export type MilestoneAdmin = {
     age_interval?: number;
 };
 
-export type MilestoneAgeScore = {
-    milestone_id: number;
-    age_months: number;
-    avg_score: number;
-    stddev_score: number;
-    expected_score: number;
-};
-
-export type MilestoneAgeScores = {
-    scores: Array<MilestoneAgeScore>;
+export type MilestoneAgeScoreCollection = {
+    id?: (number | null);
+    milestone_id?: number;
     expected_age: number;
+    created_at: string;
 };
 
 export type MilestoneAnswerPublic = {
@@ -555,7 +549,7 @@ export type GetMilestoneAgeScoresData = {
     };
 };
 
-export type GetMilestoneAgeScoresResponse = (MilestoneAgeScores);
+export type GetMilestoneAgeScoresResponse = (MilestoneAgeScoreCollection);
 
 export type GetMilestoneAgeScoresError = (HTTPValidationError);
 

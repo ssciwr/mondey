@@ -490,51 +490,36 @@ export const MilestoneAdminSchema = {
     title: 'MilestoneAdmin'
 } as const;
 
-export const MilestoneAgeScoreSchema = {
+export const MilestoneAgeScoreCollectionSchema = {
     properties: {
+        id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Id'
+        },
         milestone_id: {
             type: 'integer',
             title: 'Milestone Id'
         },
-        age_months: {
-            type: 'integer',
-            title: 'Age Months'
-        },
-        avg_score: {
-            type: 'number',
-            title: 'Avg Score'
-        },
-        stddev_score: {
-            type: 'number',
-            title: 'Stddev Score'
-        },
-        expected_score: {
-            type: 'number',
-            title: 'Expected Score'
-        }
-    },
-    type: 'object',
-    required: ['milestone_id', 'age_months', 'avg_score', 'stddev_score', 'expected_score'],
-    title: 'MilestoneAgeScore'
-} as const;
-
-export const MilestoneAgeScoresSchema = {
-    properties: {
-        scores: {
-            items: {
-                '$ref': '#/components/schemas/MilestoneAgeScore'
-            },
-            type: 'array',
-            title: 'Scores'
-        },
         expected_age: {
             type: 'integer',
             title: 'Expected Age'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
         }
     },
     type: 'object',
-    required: ['scores', 'expected_age'],
-    title: 'MilestoneAgeScores'
+    required: ['expected_age', 'created_at'],
+    title: 'MilestoneAgeScoreCollection'
 } as const;
 
 export const MilestoneAnswerPublicSchema = {
