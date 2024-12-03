@@ -25,10 +25,12 @@ function computeProgress(
 	answerSession: MilestoneAnswerSessionPublic,
 ): number {
 	if (milestones === undefined) {
+		console.log("milestones undefined");
 		return 0;
 	}
 
 	if (milestones.length === 0) {
+		console.log("milestones empty");
 		return 0;
 	}
 	const progress = milestones.filter((item) => {
@@ -88,7 +90,14 @@ async function setup(): Promise<any> {
 		return data;
 	}
 
-	data = milestonegroups.data.map((item) => {
+	data = milestonegroups.data.reduce((arr, item) => {
+		if (item.milestones === undefined) {
+			return arr;
+		}
+		if (item.milestones.length === 0) {
+			return arr;
+		}
+
 		const res = {
 			header: item.text ? item.text[$locale].title : undefined,
 			summary: item.text?.[$locale]?.desc,
@@ -102,8 +111,9 @@ async function setup(): Promise<any> {
 				},
 			},
 		};
-		return res;
-	});
+		arr.push(res);
+		return arr;
+	}, [] as any[]);
 
 	return data;
 }
