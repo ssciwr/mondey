@@ -233,16 +233,6 @@ def session(children: list[dict]):
         today = datetime.datetime.today()
         last_month = today - datetime.timedelta(days=30)
 
-        for child in children:
-            print("child: ", child)
-
-        print("today: ", today)
-        print("time delta: ", last_month)
-        print(
-            "session created at: ",
-            datetime.datetime(last_month.year, last_month.month, last_month.day),
-        )
-
         # add an (expired) milestone answer session for child 1 / user (id 3) with 2 answers
         session.add(
             MilestoneAnswerSession(

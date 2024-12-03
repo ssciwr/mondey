@@ -1,16 +1,7 @@
-from sqlmodel import select
-
-from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import MilestoneAgeScore
 from mondey_backend.models.milestones import MilestoneAnswerSession
-from mondey_backend.routers.scores import (
-    compute_detailed_milestonegroup_feedback_for_answersession,
-)
 from mondey_backend.routers.scores import compute_feedback_simple
-from mondey_backend.routers.scores import (
-    compute_summary_milestonegroup_feedback_for_answersession,
-)
-from mondey_backend.routers.scores import get_milestonegroups_for_answersession
+from mondey_backend.routers.utils import get_milestonegroups_for_answersession
 
 
 def test_get_milestonegroups_for_answersession(session):
@@ -45,41 +36,16 @@ def test_compute_feedback_simple():
 
 
 def test_compute_detailed_milestonegroup_feedback_for_answersession(session):
-    answersession = session.get(MilestoneAnswerSession, 1)
-
-    child = session.exec(select(Child).where(Child.user_id == 1)).first()
-    result = compute_detailed_milestonegroup_feedback_for_answersession(
-        session, answersession, child
-    )
-
-    assert result == {1: {1: 2, 2: 2}}
+    assert 3 == 6
 
 
 def test_compute_detailed_milestonegroup_feedback_for_answersession_no_data(session):
-    answersession = session.get(MilestoneAnswerSession, 3)
-    child = session.exec(select(Child).where(Child.user_id == 3)).first()
-    result = compute_detailed_milestonegroup_feedback_for_answersession(
-        session, answersession, child
-    )
-    assert result == {}
+    assert 6 == 7
 
 
 def test_compute_summary_milestonegroup_feedback_for_answersession(session):
-    answersession = session.get(MilestoneAnswerSession, 1)
-    child = session.exec(select(Child).where(Child.user_id == 3)).first()
-
-    result = compute_summary_milestonegroup_feedback_for_answersession(
-        session, answersession, child, age_limit_low=6, age_limit_high=6
-    )
-    assert result == {1: 0}
+    assert 3 == 9
 
 
 def test_compute_summary_milestonegroup_feedback_for_answersession_no_data(session):
-    answersession = session.get(MilestoneAnswerSession, 3)
-    child = session.exec(select(Child).where(Child.user_id == 3)).first()
-
-    result = compute_summary_milestonegroup_feedback_for_answersession(
-        session, answersession, child, age_limit_low=6, age_limit_high=6
-    )
-
-    assert result == {}
+    assert 5 == 9

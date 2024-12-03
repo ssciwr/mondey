@@ -15,7 +15,6 @@ from ..models.children import ChildPublic
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneAnswerSessionPublic
-from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupPublic
 from ..models.questions import ChildAnswer
 from ..models.questions import ChildAnswerPublic
@@ -24,14 +23,10 @@ from ..models.questions import UserAnswerPublic
 from ..models.users import UserRead
 from ..models.users import UserUpdate
 from ..users import fastapi_users
-from .scores import compute_detailed_feedback_for_answers
-from .scores import compute_detailed_milestonegroup_feedback_for_answersession
-from .scores import compute_summary_milestonegroup_feedback_for_answersession
 from .utils import _session_has_expired
 from .utils import add
 from .utils import child_image_path
 from .utils import get
-from .utils import get_child_age_in_months
 from .utils import get_db_child
 from .utils import get_milestonegroups_for_answersession
 from .utils import get_or_create_current_milestone_answer_session
@@ -274,23 +269,7 @@ def create_router() -> APIRouter:
         answersession_id: int,
         milestonegroup_id: int,
     ) -> dict[int, int]:
-        answersession = get(session, MilestoneAnswerSession, answersession_id)
-        m = get(session, MilestoneGroup, milestonegroup_id)
-        answers = [
-            answersession.answers[ms.id]
-            for ms in m.milestones
-            if ms.id in answersession.answers and ms.id is not None
-        ]
-        child = get_db_child(session, current_active_user, answersession.child_id)
-        age = get_child_age_in_months(child, answersession.created_at)
-        statistics = {}  # type: ignore
-        feedback = compute_detailed_feedback_for_answers(
-            session,
-            answers,
-            statistics,
-            age,
-        )
-        return feedback
+        return {}
 
     @router.get(
         "/feedback/answersession={answersession_id}/summary",
@@ -301,11 +280,7 @@ def create_router() -> APIRouter:
         current_active_user: CurrentActiveUserDep,
         answersession_id: int,
     ) -> dict[int, int]:
-        answersession = get(session, MilestoneAnswerSession, answersession_id)
-        child = get_db_child(session, current_active_user, answersession.child_id)
-        return compute_summary_milestonegroup_feedback_for_answersession(
-            session, answersession, child, age_limit_low=6, age_limit_high=6
-        )
+        return {}
 
     @router.get(
         "/feedback/answersession={answersession_id}/detailed",
@@ -316,10 +291,6 @@ def create_router() -> APIRouter:
         current_active_user: CurrentActiveUserDep,
         answersession_id: int,
     ) -> dict[int, dict[int, int]]:
-        answersession = get(session, MilestoneAnswerSession, answersession_id)
-        child = get_db_child(session, current_active_user, answersession.child_id)
-        return compute_detailed_milestonegroup_feedback_for_answersession(
-            session, answersession, child
-        )
+        return {}
 
     return router
