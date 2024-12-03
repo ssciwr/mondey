@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import datetime
 
-from pydantic import BaseModel
 from sqlalchemy.orm import Mapped
 from sqlmodel import Field
 from sqlmodel import SQLModel
@@ -194,27 +193,29 @@ class MilestoneAnswerSessionPublic(SQLModel):
     answers: dict[int, MilestoneAnswerPublic]
 
 
-class MilestoneAgeScore(BaseModel):
-    milestone_id: int
-    age_months: int
+class Statistics(SQLModel):
     avg_score: float
     stddev_score: float
+    age_months: int
     expected_score: float
 
 
-class MilestoneAgeScores(BaseModel):
-    scores: list[MilestoneAgeScore]
+class MilestoneAgeScores(SQLModel, table=True):
+    milestone_id: int = Field(primary_key=True, default=None)
+    scores: list[Statistics]
     expected_age: int
+    created_at: datetime.datetime = Field(
+        sa_column_kwargs={
+            "server_default": text("CURRENT_TIMESTAMP"),
+        }
+    )
 
 
-class MilestoneGroupStatistics(SQLModel):
-    session_id: int = Field(
-        default=None, foreign_key="milestoneanswersession.id", primary_key=True
+class MilestoneGroupAgeScores(SQLModel, table=True):
+    milestonegroup_id: int = Field(primary_key=True, default=None)
+    scores: list[Statistics]
+    created_at: datetime.datetime = Field(
+        sa_column_kwargs={
+            "server_default": text("CURRENT_TIMESTAMP"),
+        }
     )
-    group_id: int = Field(
-        default=None, foreign_key="milestonegroup.id", primary_key=True
-    )
-    child_id: int = Field(default=None, foreign_key="child.id", primary_key=True)
-    age_months: int
-    avg_score: float
-    stddev_score: float
