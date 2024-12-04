@@ -490,6 +490,80 @@ export const MilestoneAdminSchema = {
     title: 'MilestoneAdmin'
 } as const;
 
+export const MilestoneAgeScoreSchema = {
+    properties: {
+        milestone_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Milestone Id'
+        },
+        age: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Age'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        },
+        avg_score: {
+            type: 'number',
+            title: 'Avg Score'
+        },
+        stddev_score: {
+            type: 'number',
+            title: 'Stddev Score'
+        },
+        expected_score: {
+            type: 'number',
+            title: 'Expected Score'
+        }
+    },
+    type: 'object',
+    required: ['count', 'avg_score', 'stddev_score', 'expected_score'],
+    title: 'MilestoneAgeScore'
+} as const;
+
+export const MilestoneAgeScoreCollectionPublicSchema = {
+    properties: {
+        milestone_id: {
+            type: 'integer',
+            title: 'Milestone Id'
+        },
+        expected_age: {
+            type: 'integer',
+            title: 'Expected Age'
+        },
+        scores: {
+            items: {
+                '$ref': '#/components/schemas/MilestoneAgeScore'
+            },
+            type: 'array',
+            title: 'Scores'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['milestone_id', 'expected_age', 'scores', 'created_at'],
+    title: 'MilestoneAgeScoreCollectionPublic'
+} as const;
+
 export const MilestoneAnswerPublicSchema = {
     properties: {
         milestone_id: {

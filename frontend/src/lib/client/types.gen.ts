@@ -129,6 +129,22 @@ export type MilestoneAdmin = {
     age_interval?: number;
 };
 
+export type MilestoneAgeScore = {
+    milestone_id?: (number | null);
+    age?: (number | null);
+    count: number;
+    avg_score: number;
+    stddev_score: number;
+    expected_score: number;
+};
+
+export type MilestoneAgeScoreCollectionPublic = {
+    milestone_id: number;
+    expected_age: number;
+    scores: Array<MilestoneAgeScore>;
+    created_at: string;
+};
+
 export type MilestoneAnswerPublic = {
     milestone_id: number;
     answer: number;
@@ -535,6 +551,16 @@ export type DeleteSubmittedMilestoneImageData = {
 export type DeleteSubmittedMilestoneImageResponse = (unknown);
 
 export type DeleteSubmittedMilestoneImageError = (HTTPValidationError);
+
+export type GetMilestoneAgeScoresData = {
+    path: {
+        milestone_id: number;
+    };
+};
+
+export type GetMilestoneAgeScoresResponse = (MilestoneAgeScoreCollectionPublic);
+
+export type GetMilestoneAgeScoresError = (HTTPValidationError);
 
 export type GetUserQuestionsAdminResponse = (Array<UserQuestionAdmin>);
 
