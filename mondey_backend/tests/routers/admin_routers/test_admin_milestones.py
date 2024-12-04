@@ -241,8 +241,6 @@ def test_get_milestone_age_scores(admin_client: TestClient):
         assert response.json()["scores"][i]["stddev_score"] == 0
 
 
-
-
 def test_get_submitted_milestone_images(admin_client: TestClient):
     response = admin_client.get("/admin/submitted-milestone-images")
     assert response.status_code == 200
