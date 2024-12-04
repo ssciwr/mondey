@@ -4,11 +4,13 @@ from datetime import timedelta
 from sqlmodel import select
 
 from mondey_backend.models.milestones import MilestoneAgeScore
+from mondey_backend.models.milestones import MilestoneAgeScoreCollection
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroupAgeScore
 from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
 from mondey_backend.routers.scores import TrafficLight
 from mondey_backend.routers.scores import compute_feedback_simple
+from mondey_backend.routers.scores import compute_milestonegroup_feedback_detailed
 from mondey_backend.routers.scores import compute_milestonegroup_feedback_summary
 from mondey_backend.routers.utils import get_milestonegroups_for_answersession
 
@@ -71,7 +73,7 @@ def test_compute_summary_milestonegroup_feedback_for_answersession(session):
     assert feedback[1] == TrafficLight.green.value
 
 
-def test_compute_summary_milestonegroup_feedback_for_answersession_no_statistics(
+def test_compute_summary_milestonegroup_feedback_for_answersession_recompute_statistics(
     session,
 ):
     feedback = compute_milestonegroup_feedback_summary(
@@ -110,9 +112,54 @@ def test_compute_summary_milestonegroup_feedback_for_answersession_no_statistics
             assert score.count == 0
 
 
-# def test_compute_detailed_milestonegroup_feedback_for_answersession(session):
-#     feedback = compute_milestonegroup_feedback_detailed(session, child_id=1, answersession_id=1)
+def test_compute_detailed_milestonegroup_feedback_for_answersession(session):
+    # with the child being age 8, we only have milestonegroup 1 with milestone 1 and 2 for answersession 1, which yields
+    # answers 1, 2 compared to mean = 1.5, stddev = 0.702
+    feedback = compute_milestonegroup_feedback_detailed(
+        session, child_id=1, answersession_id=1
+    )
+    assert len(feedback) == 1
+    assert len(feedback[1]) == 2
+    assert feedback[1][1] == TrafficLight.green.value
+    assert feedback[1][2] == TrafficLight.green.value
 
 
-# def test_compute_detailed_milestonegroup_feedback_for_answersession_no_data(session):
-#     assert 6 == 7
+def test_compute_detailed_milestonegroup_feedback_for_answersession_recompute_statistics(
+    session,
+):
+    feedback = compute_milestonegroup_feedback_detailed(
+        session, child_id=3, answersession_id=3
+    )
+
+    assert len(feedback) == 1
+    assert len(feedback[2]) == 1
+    assert (
+        feedback[2][7] == TrafficLight.invalid.value
+    )  # for the respective age we have no data
+
+    # check that the statistics have been updated
+    statistics = session.exec(
+        select(MilestoneAgeScoreCollection).where(
+            MilestoneAgeScoreCollection.milestone_id == 7
+        )
+    ).all()
+    assert len(statistics) == 1
+    assert statistics[0].created_at >= datetime.now() - timedelta(
+        minutes=3
+    )  # can be at max 3 min old
+
+    for i, score in enumerate(statistics[0].scores):
+        if i in [8, 9]:
+            assert score.avg_score > 0
+            assert score.stddev_score > 0
+            assert score.count == 2
+
+        if i == 65:
+            assert score.avg_score > 0
+            assert score.stddev_score == 0
+            assert score.count == 1
+
+        if i not in [8, 9, 65]:
+            assert score.avg_score == 0
+            assert score.stddev_score == 0
+            assert score.count == 0

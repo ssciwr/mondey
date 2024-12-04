@@ -148,7 +148,9 @@ def calculate_milestone_statistics_by_age(
                 MilestoneAgeScore(
                     age=age,
                     milestone_id=milestone_id,
-                    count=count[age],
+                    count=int(
+                        count[age]
+                    ),  # need a conversion to avoid numpy.int32 being stored as byte object
                     avg_score=avg_scores[age],
                     stddev_score=stddev_scores[age],
                     expected_score=4 if age >= expected_age else 1,
@@ -210,24 +212,10 @@ def calculate_milestonegroup_statistics_by_age(
     if len(answers) == 0:
         return last_statistics
     else:
-        print("answers for group statistics: ", answers)
-        print(
-            "old statistics: ",
-            avg_scores[avg_scores > 0],
-            stddev_scores[stddev_scores > 0],
-        )
         count, avg, stddev = _get_statistics_by_age(
             answers, child_ages, count=count, avg=avg_scores, stddev=stddev_scores
         )
-        print(
-            "new statistics: ",
-            np.nonzero(count),
-            np.nonzero(avg),
-            np.nonzero(stddev),
-            count[count > 0],
-            avg[avg > 0],
-            stddev[stddev > 0],
-        )
+
         return MilestoneGroupAgeScoreCollection(
             milestone_group_id=milestonegroup_id,
             scores=[
