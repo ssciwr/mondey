@@ -118,6 +118,7 @@ def calculate_milestone_statistics_by_age(
             MilestoneAnswer.milestone_id == milestone_id
         )
     else:
+        # fetch all answers that have been added in answersessions after the last statistics were calculated
         answers_query = (
             select(MilestoneAnswer)
             .join(
@@ -130,29 +131,31 @@ def calculate_milestone_statistics_by_age(
             )
         )
     answers = session.exec(answers_query).all()
+    if len(answers) == 0:
+        return last_statistics
+    else:
+        count, avg_scores, stddev_scores = _get_statistics_by_age(
+            answers, child_ages, count=count, avg=avg_scores, stddev=stddev_scores
+        )
+        expected_age = _get_expected_age_from_scores(avg_scores)
 
-    count, avg_scores, stddev_scores = _get_statistics_by_age(
-        answers, child_ages, count=count, avg=avg_scores, stddev=stddev_scores
-    )
-    expected_age = _get_expected_age_from_scores(avg_scores)
-
-    # overwrite last_statistics with updated stuff
-    return MilestoneAgeScoreCollection(
-        milestone_id=milestone_id,
-        expected_age=expected_age,
-        created_at=datetime.datetime.now(),
-        scores=[
-            MilestoneAgeScore(
-                age=age,
-                milestone_id=milestone_id,
-                count=count[age],
-                avg_score=avg_scores[age],
-                stddev_score=stddev_scores[age],
-                expected_score=4 if age >= expected_age else 1,
-            )
-            for age in range(0, len(avg_scores))
-        ],
-    )
+        # overwrite last_statistics with updated stuff
+        return MilestoneAgeScoreCollection(
+            milestone_id=milestone_id,
+            expected_age=expected_age,
+            created_at=datetime.datetime.now(),
+            scores=[
+                MilestoneAgeScore(
+                    age=age,
+                    milestone_id=milestone_id,
+                    count=count[age],
+                    avg_score=avg_scores[age],
+                    stddev_score=stddev_scores[age],
+                    expected_score=4 if age >= expected_age else 1,
+                )
+                for age in range(0, len(avg_scores))
+            ],
+        )
 
 
 def calculate_milestonegroup_statistics_by_age(
@@ -173,8 +176,12 @@ def calculate_milestonegroup_statistics_by_age(
     avg_scores = None
     stddev_scores = None
     if last_statistics is not None:
-        count = np.array([score.count for score in last_statistics.scores])
-        avg_scores = np.array([score.avg_score for score in last_statistics.scores])
+        count = np.array(
+            [score.count for score in last_statistics.scores], dtype=np.int32
+        )
+        avg_scores = np.array(
+            [score.avg_score for score in last_statistics.scores], dtype=np.float64
+        )
         stddev_scores = np.array(
             [score.stddev_score for score in last_statistics.scores]
         )
@@ -186,6 +193,7 @@ def calculate_milestonegroup_statistics_by_age(
             col(MilestoneAnswer.milestone_group_id) == milestonegroup_id
         )
     else:
+        # fetch all answers that have been added in answersessions after the last statistics were calculated
         answer_query = (
             select(MilestoneAnswer)
             .join(
@@ -199,21 +207,40 @@ def calculate_milestonegroup_statistics_by_age(
         )
 
     answers = session.exec(answer_query).all()
-
-    count, avg, stddev = _get_statistics_by_age(
-        answers, child_ages, count=count, avg=avg_scores, stddev=stddev_scores
-    )
-    return MilestoneGroupAgeScoreCollection(
-        milestone_group_id=milestonegroup_id,
-        scores=[
-            MilestoneGroupAgeScore(
-                milestone_group_id=milestonegroup_id,
-                age=age,
-                count=count[age],
-                avg_score=avg[age],
-                stddev_score=stddev[age],
-            )
-            for age in range(0, len(avg))
-        ],
-        created_at=datetime.datetime.now(),
-    )
+    if len(answers) == 0:
+        return last_statistics
+    else:
+        print("answers for group statistics: ", answers)
+        print(
+            "old statistics: ",
+            avg_scores[avg_scores > 0],
+            stddev_scores[stddev_scores > 0],
+        )
+        count, avg, stddev = _get_statistics_by_age(
+            answers, child_ages, count=count, avg=avg_scores, stddev=stddev_scores
+        )
+        print(
+            "new statistics: ",
+            np.nonzero(count),
+            np.nonzero(avg),
+            np.nonzero(stddev),
+            count[count > 0],
+            avg[avg > 0],
+            stddev[stddev > 0],
+        )
+        return MilestoneGroupAgeScoreCollection(
+            milestone_group_id=milestonegroup_id,
+            scores=[
+                MilestoneGroupAgeScore(
+                    milestone_group_id=milestonegroup_id,
+                    age=age,
+                    count=int(
+                        count[age]
+                    ),  # need a conversion to avoid numpy.int32 being stored as byte object
+                    avg_score=avg[age],
+                    stddev_score=stddev[age],
+                )
+                for age in range(0, len(avg))
+            ],
+            created_at=datetime.datetime.now(),
+        )

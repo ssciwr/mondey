@@ -270,6 +270,7 @@ def session(children: list[dict]):
                 answer_session_id=2, milestone_id=2, milestone_group_id=1, answer=2
             )
         )
+
         # add an (expired) milestone answer session for child 3 / admin user (id 1) with 1 answer
         session.add(
             MilestoneAnswerSession(
@@ -353,26 +354,43 @@ def session(children: list[dict]):
                 created_at=datetime.datetime.today() - datetime.timedelta(days=1),
             )
         )
+
         session.add(
             MilestoneAgeScoreCollection(
                 milestone_id=7,
                 expected_age=42,
-                created_at=datetime.datetime.today() - datetime.timedelta(days=1),
+                created_at=datetime.datetime.today() - datetime.timedelta(days=12),
             )
         )
-
-        # add basic statistics for milestonegroup 1
+        # add basic statistics for milestonegroups, one that is current and one that is outdated
         session.add(
             MilestoneGroupAgeScoreCollection(
                 milestonegroup_id=1,
                 created_at=datetime.datetime.today() - datetime.timedelta(days=1),
             )
         )
-
         session.add(
             MilestoneGroupAgeScoreCollection(
                 milestonegroup_id=2,
-                created_at=datetime.datetime.today() - datetime.timedelta(days=1),
+                created_at=datetime.datetime.today() - datetime.timedelta(days=12),
+            )
+        )
+
+        # add an expired milestone answer session that is newer than the last statistics for milestonegroup
+        session.add(
+            MilestoneAnswerSession(
+                child_id=3, user_id=1, created_at=today - datetime.timedelta(days=1)
+            )
+        )
+        # add two milestone answers
+        session.add(
+            MilestoneAnswer(
+                answer_session_id=4, milestone_id=7, milestone_group_id=2, answer=2
+            )
+        )
+        session.add(
+            MilestoneAnswer(
+                answer_session_id=4, milestone_id=2, milestone_group_id=1, answer=3
             )
         )
 

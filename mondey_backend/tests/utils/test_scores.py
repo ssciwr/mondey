@@ -1,6 +1,12 @@
+from datetime import datetime
+from datetime import timedelta
+
+from sqlmodel import select
+
 from mondey_backend.models.milestones import MilestoneAgeScore
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroupAgeScore
+from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
 from mondey_backend.routers.scores import TrafficLight
 from mondey_backend.routers.scores import compute_feedback_simple
 from mondey_backend.routers.scores import compute_milestonegroup_feedback_summary
@@ -57,20 +63,51 @@ def test_compute_summary_milestonegroup_feedback_for_answersession(session):
     assert feedback[1] == TrafficLight.yellowWithCaveat.value
     assert len(feedback) == 1
 
-    # # same as above, but for answers 4, 3  -> 3.5 ==> green
-    # feedback = compute_milestonegroup_feedback_summary(
-    #     session,
-    #     child_id=1,
-    #     answersession_id=2
-    # )
-    # assert len(feedback) == 1
-    # assert feedback[1] == TrafficLight.green.value
+    # same as above, but for answers 4, 3  -> 3.5 ==> green
+    feedback = compute_milestonegroup_feedback_summary(
+        session, child_id=1, answersession_id=2
+    )
+    assert len(feedback) == 1
+    assert feedback[1] == TrafficLight.green.value
 
 
 def test_compute_summary_milestonegroup_feedback_for_answersession_no_statistics(
     session,
 ):
-    assert 5 == 9
+    feedback = compute_milestonegroup_feedback_summary(
+        session, child_id=3, answersession_id=3
+    )
+
+    # child is 42 months old, for which there is no data. Hence the feedback is invalid
+    assert len(feedback) == 1
+    assert feedback[2] == TrafficLight.invalid.value
+
+    # check that the statistics have been updated
+    statistics = session.exec(
+        select(MilestoneGroupAgeScoreCollection).where(
+            MilestoneGroupAgeScoreCollection.milestone_group_id == 2
+        )
+    ).all()
+    assert len(statistics) == 1
+    assert statistics[0].created_at >= datetime.now() - timedelta(
+        minutes=3
+    )  # can be at max 3 min old
+
+    for i, score in enumerate(statistics[0].scores):
+        if i in [8, 9]:
+            assert score.avg_score > 0
+            assert score.stddev_score > 0
+            assert score.count == 2
+
+        if i == 65:
+            assert score.avg_score > 0
+            assert score.stddev_score == 0
+            assert score.count == 1
+
+        if i not in [8, 9, 65]:
+            assert score.avg_score == 0
+            assert score.stddev_score == 0
+            assert score.count == 0
 
 
 # def test_compute_detailed_milestonegroup_feedback_for_answersession(session):
