@@ -28,9 +28,13 @@ from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import AgeInterval
 from mondey_backend.models.milestones import Language
 from mondey_backend.models.milestones import Milestone
+from mondey_backend.models.milestones import MilestoneAgeScore
+from mondey_backend.models.milestones import MilestoneAgeScoreCollection
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroup
+from mondey_backend.models.milestones import MilestoneGroupAgeScore
+from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
 from mondey_backend.models.milestones import MilestoneGroupText
 from mondey_backend.models.milestones import MilestoneImage
 from mondey_backend.models.milestones import MilestoneText
@@ -277,6 +281,98 @@ def session(children: list[dict]):
         session.add(
             MilestoneAnswer(
                 answer_session_id=3, milestone_id=7, milestone_group_id=2, answer=2
+            )
+        )
+
+        # add basic statistics for milestone 1, milestonegroup1
+        for age in range(0, 73):
+            session.add(
+                MilestoneAgeScore(
+                    milestone_id=1,
+                    count=2 if age in [8, 9] else 0,
+                    avg_score=1.5 if age in [8, 9] else 0,
+                    stddev_score=0.702 if age in [8, 9] else 0,
+                    age=age,
+                    expected_score=4,
+                )
+            )
+
+            session.add(
+                MilestoneAgeScore(
+                    milestone_id=2,
+                    count=2 if age in [8, 9] else 0,
+                    avg_score=1.5 if age in [8, 9] else 0,
+                    stddev_score=0.702 if age in [8, 9] else 0,
+                    age=age,
+                    expected_score=4,
+                )
+            )
+
+            session.add(
+                MilestoneAgeScore(
+                    milestone_id=7,
+                    count=2 if age in [8, 9] else 0,
+                    avg_score=1.5 if age in [8, 9] else 0,
+                    stddev_score=0.702 if age in [8, 9] else 0,
+                    age=age,
+                    expected_score=8,
+                )
+            )
+
+            session.add(
+                MilestoneGroupAgeScore(
+                    age=age,
+                    milestone_group_id=1,
+                    count=2 if age in [8, 9] else 0,
+                    avg_score=2.3 if age in [8, 9] else 0,
+                    stddev_score=0.45 if age in [8, 9] else 0,
+                )
+            )
+
+            session.add(
+                MilestoneGroupAgeScore(
+                    age=age,
+                    milestone_group_id=2,
+                    count=2 if age in [8, 9] else 0,
+                    avg_score=1.47 if age in [8, 9] else 0,
+                    stddev_score=0.72 if age in [8, 9] else 0,
+                )
+            )
+
+        session.add(
+            MilestoneAgeScoreCollection(
+                milestone_id=1,
+                expected_age=8,
+                created_at=datetime.datetime.today() - datetime.timedelta(days=1),
+            )
+        )
+        session.add(
+            MilestoneAgeScoreCollection(
+                milestone_id=2,
+                expected_age=62,
+                created_at=datetime.datetime.today() - datetime.timedelta(days=1),
+            )
+        )
+        session.add(
+            MilestoneAgeScoreCollection(
+                milestone_id=7,
+                expected_age=42,
+                created_at=datetime.datetime.today() - datetime.timedelta(days=1),
+            )
+        )
+
+        # add basic statistics for milestonegroup 1
+        session.add(
+            MilestoneGroupAgeScoreCollection(
+                milestonegroup_id=1,
+                created_at=datetime.datetime.today() - datetime.timedelta(days=1),
+            )
+        )
+
+        session.add(
+            MilestoneGroupAgeScoreCollection(
+                milestonegroup_id=2,
+                created_at=datetime.datetime.today() - datetime.timedelta(days=1),
             )
         )
 

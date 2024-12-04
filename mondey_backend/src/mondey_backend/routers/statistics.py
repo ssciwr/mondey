@@ -98,7 +98,7 @@ def calculate_milestone_statistics_by_age(
     last_statistics = session.exec(
         select(MilestoneAgeScoreCollection)
         .where(col(MilestoneAgeScoreCollection.milestone_id) == milestone_id)
-        .order_by(MilestoneAgeScoreCollection.created_at.desc())
+        .order_by(col(MilestoneAgeScoreCollection.created_at).desc())
     ).first()
 
     # initialize avg and stddev scores with the last known statistics or to None if no statistics are available
@@ -166,7 +166,7 @@ def calculate_milestonegroup_statistics_by_age(
             col(MilestoneGroupAgeScoreCollection.milestone_group_id)
             == milestonegroup_id
         )
-        .order_by(MilestoneGroupAgeScoreCollection.created_at.desc())
+        .order_by(col(MilestoneGroupAgeScoreCollection.created_at).desc())
     ).first()
 
     count = None
