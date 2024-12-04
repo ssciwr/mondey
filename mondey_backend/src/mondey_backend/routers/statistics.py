@@ -54,7 +54,7 @@ def _finalize_statistics(
             valid_counts = count >= 2
             variance = m2
             variance[valid_counts] /= count[valid_counts] - 1
-            variance[not valid_counts] = 0.0
+            variance[np.invert(valid_counts)] = 0.0
             return count, np.nan_to_num(mean), np.nan_to_num(np.sqrt(variance))
     else:
         raise ValueError("given values must be of type int|float|np.ndarray")
