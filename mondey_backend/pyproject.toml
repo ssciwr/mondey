@@ -24,7 +24,6 @@ dependencies = [
     "webp",
     "python-dateutil",
     "types-python-dateutil",
-    "apscheduler"
 ]
 dynamic = ["version"]
 
