@@ -8,17 +8,14 @@ from sqlmodel import col
 from sqlmodel import select
 
 from ..dependencies import SessionDep
-from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAgeScore
 from ..models.milestones import MilestoneAgeScoreCollection
 from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerSession
-from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupAgeScore
 from ..models.milestones import MilestoneGroupAgeScoreCollection
 from .utils import _get_answer_session_child_ages_in_months
 from .utils import _get_expected_age_from_scores
-from .utils import add
 
 
 # see: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
@@ -97,23 +94,6 @@ def calculate_milestone_statistics_by_age(
     session: SessionDep,
     milestone_id: int,
 ) -> MilestoneAgeScoreCollection:
-    """
-    _summary_
-
-    Parameters
-    ----------
-    session : SessionDep
-        _description_
-    milestone_id : int
-        _description_
-    answers : Sequence[MilestoneAnswer] | None, optional
-        _description_, by default None
-
-    Returns
-    -------
-    MilestoneAgeScoreCollection
-        _description_
-    """
     # get the newest statistics for the milestone
     last_statistics = session.exec(
         select(MilestoneAgeScoreCollection)
@@ -151,28 +131,26 @@ def calculate_milestone_statistics_by_age(
         )
     answers = session.exec(answers_query).all()
 
-    count, avg, stddev = _get_statistics_by_age(
+    count, avg_scores, stddev_scores = _get_statistics_by_age(
         answers, child_ages, count=count, avg=avg_scores, stddev=stddev_scores
     )
-    expected_age = _get_expected_age_from_scores(avg)
-    new_id = last_statistics.id + 1 if last_statistics is not None else 1
+    expected_age = _get_expected_age_from_scores(avg_scores)
+
+    # overwrite last_statistics with updated stuff
     return MilestoneAgeScoreCollection(
-        id=new_id,
         milestone_id=milestone_id,
         expected_age=expected_age,
         created_at=datetime.datetime.now(),
         scores=[
             MilestoneAgeScore(
-                collection_id=new_id,
+                age=age,
+                milestone_id=milestone_id,
                 count=count[age],
-                avg_score=avg[age],
-                stddev_score=stddev[age],
-                age_months=age,
-                expected_score=4
-                if age >= expected_age
-                else 1,  # TODO: placeholder algorithm? how does the model behind this look like really?
+                avg_score=avg_scores[age],
+                stddev_score=stddev_scores[age],
+                expected_score=4 if age >= expected_age else 1,
             )
-            for age in range(0, len(avg))
+            for age in range(0, len(avg_scores))
         ],
     )
 
@@ -181,29 +159,12 @@ def calculate_milestonegroup_statistics_by_age(
     session: SessionDep,
     milestonegroup_id,
 ) -> MilestoneGroupAgeScoreCollection:
-    """
-    _summary_
-
-    Parameters
-    ----------
-    session : SessionDep
-        _description_
-    milestonegroup_id : _type_
-        _description_
-    answers : Sequence[MilestoneAnswer] | None, optional
-        _description_, by default None
-
-    Returns
-    -------
-    MilestoneGroupAgeScoreCollection
-        _description_
-    """
-
     # get the newest statistics for the milestonegroup
     last_statistics = session.exec(
         select(MilestoneGroupAgeScoreCollection)
         .where(
-            col(MilestoneGroupAgeScoreCollection.milestonegroup_id) == milestonegroup_id
+            col(MilestoneGroupAgeScoreCollection.milestone_group_id)
+            == milestonegroup_id
         )
         .order_by(MilestoneGroupAgeScoreCollection.created_at.desc())
     ).first()
@@ -211,12 +172,7 @@ def calculate_milestonegroup_statistics_by_age(
     count = None
     avg_scores = None
     stddev_scores = None
-    if last_statistics is None:
-        max_age_months = 72
-        count = np.zeros(max_age_months + 1)
-        avg_scores = np.zeros(max_age_months + 1)
-        stddev_scores = np.zeros(max_age_months + 1)
-    else:
+    if last_statistics is not None:
         count = np.array([score.count for score in last_statistics.scores])
         avg_scores = np.array([score.avg_score for score in last_statistics.scores])
         stddev_scores = np.array(
@@ -247,46 +203,17 @@ def calculate_milestonegroup_statistics_by_age(
     count, avg, stddev = _get_statistics_by_age(
         answers, child_ages, count=count, avg=avg_scores, stddev=stddev_scores
     )
-    new_id = last_statistics.id + 1 if last_statistics is not None else 1
     return MilestoneGroupAgeScoreCollection(
-        id=new_id,
-        milestonegroup_id=milestonegroup_id,
+        milestone_group_id=milestonegroup_id,
         scores=[
             MilestoneGroupAgeScore(
-                collection_id=new_id,
-                age_months=age,
+                milestone_group_id=milestonegroup_id,
+                age=age,
                 count=count[age],
                 avg_score=avg[age],
                 stddev_score=stddev[age],
-                milestonegroup_id=milestonegroup_id,
             )
             for age in range(0, len(avg))
         ],
         created_at=datetime.datetime.now(),
     )
-
-
-def recompute_milestonegroup_statistics(session: SessionDep):
-    # fetch all milestonegroup statsitcs and check how old they are. Then
-    # recompute the ones that are older than timedelta and put back into database
-    # do the same for milestone statistics
-
-    milestonegroups = session.exec(select(MilestoneGroup.id)).all()
-    for milestonegroup in milestonegroups:
-        statistics = calculate_milestonegroup_statistics_by_age(session, milestonegroup)
-        for score in statistics.scores:
-            add(session, score)
-        add(session, statistics)
-
-
-def recompute_milestone_statistics(session: SessionDep):
-    # fetch all milestonegroup statsitcs and check how old they are. Then
-    # recompute the ones that are older than timedelta and put back into database
-    # do the same for milestone statistics
-
-    milestones = session.exec(select(Milestone.id)).all()
-    for milestone in milestones:
-        statistics = calculate_milestone_statistics_by_age(session, milestone)  # type: ignore
-        for score in statistics.scores:
-            add(session, score)
-        add(session, statistics)
