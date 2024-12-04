@@ -490,38 +490,6 @@ export const MilestoneAdminSchema = {
     title: 'MilestoneAdmin'
 } as const;
 
-export const MilestoneAgeScoreCollectionSchema = {
-    properties: {
-        id: {
-            anyOf: [
-                {
-                    type: 'integer'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Id'
-        },
-        milestone_id: {
-            type: 'integer',
-            title: 'Milestone Id'
-        },
-        expected_age: {
-            type: 'integer',
-            title: 'Expected Age'
-        },
-        created_at: {
-            type: 'string',
-            format: 'date-time',
-            title: 'Created At'
-        }
-    },
-    type: 'object',
-    required: ['expected_age', 'created_at'],
-    title: 'MilestoneAgeScoreCollection'
-} as const;
-
 export const MilestoneAnswerPublicSchema = {
     properties: {
         milestone_id: {

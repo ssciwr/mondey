@@ -129,13 +129,6 @@ export type MilestoneAdmin = {
     age_interval?: number;
 };
 
-export type MilestoneAgeScoreCollection = {
-    id?: (number | null);
-    milestone_id?: number;
-    expected_age: number;
-    created_at: string;
-};
-
 export type MilestoneAnswerPublic = {
     milestone_id: number;
     answer: number;
@@ -542,16 +535,6 @@ export type DeleteSubmittedMilestoneImageData = {
 export type DeleteSubmittedMilestoneImageResponse = (unknown);
 
 export type DeleteSubmittedMilestoneImageError = (HTTPValidationError);
-
-export type GetMilestoneAgeScoresData = {
-    path: {
-        milestone_id: number;
-    };
-};
-
-export type GetMilestoneAgeScoresResponse = (MilestoneAgeScoreCollection);
-
-export type GetMilestoneAgeScoresError = (HTTPValidationError);
 
 export type GetUserQuestionsAdminResponse = (Array<UserQuestionAdmin>);
 
