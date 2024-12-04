@@ -218,7 +218,11 @@ class MilestoneAgeScoreCollection(SQLModel, table=True):
             "server_default": text("CURRENT_TIMESTAMP"),
         }
     )
-
+class MilestoneAgeScoreCollectionPublic(SQLModel):
+    milestone_id: int
+    expected_age: int
+    scores: list[MilestoneAgeScore]
+    created_at: datetime.datetime 
 
 class MilestoneGroupAgeScore(SQLModel, table=True):
     age: int | None = Field(default=None, primary_key=True)

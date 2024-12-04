@@ -228,14 +228,19 @@ def test_post_milestone_image(
 def test_get_milestone_age_scores(admin_client: TestClient):
     response = admin_client.get("/admin/milestone-age-scores/1")
     assert response.status_code == 200
-    # child 1 scored
-    #   - 2 @ ~8 months old
-    #   - 4 @ ~9 months old
-    assert response.json()["expected_age"] == 9
-    assert response.json()["scores"][7]["avg_score"] == pytest.approx(0.0)
-    assert response.json()["scores"][8]["avg_score"] == pytest.approx(2.0)
-    assert response.json()["scores"][9]["avg_score"] == pytest.approx(4.0)
-    assert response.json()["scores"][10]["avg_score"] == pytest.approx(0.0)
+    assert response.json()["expected_age"] == 8
+    assert response.json()["scores"][8]["avg_score"] == pytest.approx(1.5)
+    assert response.json()["scores"][8]["stddev_score"] == pytest.approx(0.702)
+    assert response.json()["scores"][9]["avg_score"] == pytest.approx(1.5)
+    assert response.json()["scores"][9]["stddev_score"] == pytest.approx(0.702)
+
+    for i in range(0, 73):
+        if i in [8, 9]:
+            continue
+        assert response.json()["scores"][i]["avg_score"] == 0
+        assert response.json()["scores"][i]["stddev_score"] == 0
+
+
 
 
 def test_get_submitted_milestone_images(admin_client: TestClient):

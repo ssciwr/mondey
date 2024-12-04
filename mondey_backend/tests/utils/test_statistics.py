@@ -66,7 +66,7 @@ def test_online_statistics_computation_too_little_data():
 
 def test_get_score_statistics_by_age(session):
     answers = session.exec(select(MilestoneAnswer)).all()
-    child_ages = {1: 5, 2: 3, 3: 8}
+    child_ages = {1: 5, 2: 3, 3: 8, 4: 65}
 
     count, avg, stddev = _get_statistics_by_age(answers, child_ages)
 
