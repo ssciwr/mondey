@@ -23,6 +23,8 @@ from ..models.questions import UserAnswerPublic
 from ..models.users import UserRead
 from ..models.users import UserUpdate
 from ..users import fastapi_users
+from .scores import compute_milestonegroup_feedback_detailed
+from .scores import compute_milestonegroup_feedback_summary
 from .utils import _session_has_expired
 from .utils import add
 from .utils import child_image_path
@@ -277,10 +279,14 @@ def create_router() -> APIRouter:
     )
     def get_summary_feedback_for_answersession(
         session: SessionDep,
-        current_active_user: CurrentActiveUserDep,
         answersession_id: int,
     ) -> dict[int, int]:
-        return {}
+        answersession = session.get(MilestoneAnswerSession, answersession_id)
+        child_id = answersession.child_id
+        feedback = compute_milestonegroup_feedback_summary(
+            session, child_id, answersession_id
+        )
+        return feedback
 
     @router.get(
         "/feedback/answersession={answersession_id}/detailed",
@@ -288,9 +294,13 @@ def create_router() -> APIRouter:
     )
     def get_detailed_feedback_for_answersession(
         session: SessionDep,
-        current_active_user: CurrentActiveUserDep,
         answersession_id: int,
     ) -> dict[int, dict[int, int]]:
-        return {}
+        answersession = session.get(MilestoneAnswerSession, answersession_id)
+        child_id = answersession.child_id
+        feedback = compute_milestonegroup_feedback_detailed(
+            session, child_id, answersession_id
+        )
+        return feedback
 
     return router
