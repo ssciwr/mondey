@@ -9,7 +9,6 @@ from ...dependencies import SessionDep
 from ...models.milestones import Language
 from ...models.milestones import Milestone
 from ...models.milestones import MilestoneAdmin
-from ...models.milestones import MilestoneAgeScoreCollection
 from ...models.milestones import MilestoneGroup
 from ...models.milestones import MilestoneGroupAdmin
 from ...models.milestones import MilestoneGroupText
@@ -19,7 +18,6 @@ from ...models.milestones import SubmittedMilestoneImage
 from ...models.milestones import SubmittedMilestoneImagePublic
 from ...models.utils import ItemOrder
 from ..utils import add
-from ..utils import calculate_milestone_statistics_by_age
 from ..utils import get
 from ..utils import milestone_group_image_path
 from ..utils import milestone_image_path
@@ -180,10 +178,10 @@ def create_router() -> APIRouter:
         session.commit()
         return {"ok": True}
 
-    @router.get("/milestone-age-scores/{milestone_id}")
-    def get_milestone_age_scores(
-        session: SessionDep, milestone_id: int
-    ) -> MilestoneAgeScoreCollection:
-        return calculate_milestone_statistics_by_age(session, milestone_id)
+    # @router.get("/milestone-age-scores/{milestone_id}")
+    # def get_milestone_age_scores(
+    #     session: SessionDep, milestone_id: int
+    # ) -> MilestoneAgeScoreCollection:
+    #     return calculate_milestone_statistics_by_age(session, milestone_id)
 
     return router

@@ -199,6 +199,7 @@ class MilestoneAgeScore(SQLModel, table=True):
         default=None, foreign_key="milestoneagescorecollection.id"
     )
     collection: MilestoneAgeScoreCollection = back_populates("scores")
+    count: int
     avg_score: float
     stddev_score: float
     age_months: int
@@ -206,12 +207,16 @@ class MilestoneAgeScore(SQLModel, table=True):
 
 
 class MilestoneAgeScorePublic(SQLModel):
-    def __init__(self, avg_score=0, stddev_score=0, age_months=0, expected_score=0):
+    def __init__(
+        self, count=0, avg_score=0, stddev_score=0, age_months=0, expected_score=0
+    ):
+        self.count = count
         self.avg_score = avg_score
         self.stddev_score = stddev_score
         self.age_months = age_months
         self.expected_score = expected_score
 
+    count: int
     avg_score: float
     stddev_score: float
     age_months: int
@@ -249,6 +254,7 @@ class MilestoneGroupAgeScore(SQLModel, table=True):
         default=None, foreign_key="milestonegroupagescorecollection.id"
     )
     collection: MilestoneGroupAgeScoreCollection = back_populates("scores")
+    count: int
     avg_score: float
     stddev_score: float
     age_months: int
@@ -258,12 +264,16 @@ class MilestoneGroupAgeScore(SQLModel, table=True):
 
 
 class MilestoneGroupAgeScorePublic(SQLModel):
-    def __init__(self, avg_score=0, stddev_score=0, age_months=0, milestonegroup_id=0):
+    def __init__(
+        self, count=0, avg_score=0, stddev_score=0, age_months=0, milestonegroup_id=0
+    ):
+        self.count = count
         self.avg_score = avg_score
         self.stddev_score = stddev_score
         self.age_months = age_months
         self.milestonegroup_id = milestonegroup_id
 
+    count: int
     avg_score: float
     stddev_score: float
     age_months: int

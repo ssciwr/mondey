@@ -24,8 +24,8 @@ from .routers import milestones
 from .routers import questions
 from .routers import research
 from .routers import users
-from .routers.utils import recompute_milestone_statistics
-from .routers.utils import recompute_milestonegroup_statistics
+from .routers.statistics import recompute_milestone_statistics
+from .routers.statistics import recompute_milestonegroup_statistics
 from .settings import app_settings
 
 
