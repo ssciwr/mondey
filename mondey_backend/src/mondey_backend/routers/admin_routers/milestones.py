@@ -186,8 +186,7 @@ def create_router() -> APIRouter:
     )
     def get_milestone_age_scores(
         session: SessionDep, milestone_id: int
-    ) -> MilestoneAgeScoreCollection:
-        print("call: ", "get_milestone_age_scores")
+    ) -> MilestoneAgeScoreCollection | None:
         collection = session.get(MilestoneAgeScoreCollection, milestone_id)
         return collection
 

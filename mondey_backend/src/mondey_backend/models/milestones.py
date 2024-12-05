@@ -193,8 +193,8 @@ class MilestoneAnswerSessionPublic(SQLModel):
     answers: dict[int, MilestoneAnswerPublic]
 
 
-# models for statistics. README: Perhaps this could be made simpler if the data was stored in a database with array-column support. sqlite apparently doesnt: https://stackoverflow.com/questions/3005231/how-to-store-array-in-one-column-in-sqlite3, but postgres does: https://www.postgresql.org/docs/9.1/arrays.html
-# will be returned to later. Issue no.
+# models for statistics. README: Perhaps this could be made simpler if the data was stored in a database with array-column support. sqlite apparently doesnt have this: https://stackoverflow.com/questions/3005231/how-to-store-array-in-one-column-in-sqlite3, but postgres does: https://www.postgresql.org/docs/9.1/arrays.html
+# will be returned to later. Issue no. 119
 class MilestoneAgeScore(SQLModel, table=True):
     milestone_id: int | None = Field(
         default=None,

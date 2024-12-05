@@ -23,11 +23,11 @@ from .utils import _get_expected_age_from_scores
 # reason for not using existing package: bessel correction usually not respected
 # we are using Welford's method here. This necessitates recording the count
 def _add_sample(
-    count: int,
+    count: float | int,
     mean: float,
     m2: float,
     new_value: float,
-) -> tuple[int, float, float]:
+) -> tuple[float, float, float]:
     count += 1
     delta = new_value - mean
     mean += delta / count
@@ -37,29 +37,29 @@ def _add_sample(
 
 
 def _finalize_statistics(
-    count: int | np.ndarray[int],
+    count: float | int | np.ndarray[float | int],
     mean: float | np.ndarray[float],
     m2: float | np.ndarray[float],
-) -> tuple[int | np.ndarray[int], float | np.ndarray[float], float | np.ndarray[float]]:
-    if isinstance(count, int) and isinstance(mean, float) and isinstance(m2, float):
+) -> tuple[
+    float | np.ndarray[float], float | np.ndarray[float], float | np.ndarray[float]
+]:
+    if all(isinstance(x, float) for x in [count, mean, m2]):
         if count < 2:
             return count, mean, 0.0
         else:
             var: float = m2 / (count - 1)
             return count, mean, np.sqrt(var)
-    elif (
-        isinstance(count, np.ndarray)
-        and isinstance(mean, np.ndarray)
-        and isinstance(m2, np.ndarray)
-    ):
+    elif all(isinstance(x, np.ndarray) for x in [count, mean, m2]):
         with np.errstate(invalid="ignore"):
-            valid_counts = count >= 2
-            variance: np.ndarray = m2
-            variance[valid_counts] /= count[valid_counts] - 1
-            variance[np.invert(valid_counts)] = 0.0
+            valid_counts: np.ndarray = count >= 2 # type: ignore
+            variance: np.ndarray = m2 # type: ignore
+            variance[valid_counts] /= count[valid_counts] - 1 # type: ignore
+            variance[np.invert(valid_counts)] = 0.0 
             return count, np.nan_to_num(mean), np.nan_to_num(np.sqrt(variance))
     else:
-        raise ValueError("given values must be of type int|float|np.ndarray")
+        raise ValueError(
+            "Given values for statistics computation must be of type int|float|np.ndarray"
+        )
 
 
 def _get_statistics_by_age(
@@ -75,22 +75,23 @@ def _get_statistics_by_age(
         avg = np.zeros(max_age_months + 1)
         stddev = np.zeros(max_age_months + 1)
 
-    # online algorithm computes variance, so need to square stddev first
-    var = stddev**2
-
     if child_ages == {}:
         return count, avg, stddev
 
+    # online algorithm computes variance, compute m2 from stddev
+    # we can ignore count-1 <= 0 because stddev is zero in this case
+    m2 = stddev**2 * (count - 1)
+
     for answer in answers:
         age = child_ages[answer.answer_session_id]  # type: ignore
-        new_count, new_avg, new_var = _add_sample(
-            count[age], avg[age], var[age], answer.answer + 1
+        new_count, new_avg, new_m2 = _add_sample(
+            count[age], avg[age], m2[age], answer.answer + 1
         )
         count[age] = new_count
         avg[age] = new_avg
-        var[age] = new_var
+        m2[age] = new_m2
 
-    count, avg, stddev = _finalize_statistics(count, avg, var)
+    count, avg, stddev = _finalize_statistics(count, avg, m2)
 
     return count, avg, stddev
 
@@ -144,13 +145,16 @@ def calculate_milestone_statistics_by_age(
                 )  # expired session only which are not in the last statistics
             )
         )
+
     answers = session.exec(answers_query).all()
+
     if len(answers) == 0:
         return last_statistics
     else:
         count, avg_scores, stddev_scores = _get_statistics_by_age(
             answers, child_ages, count=count, avg=avg_scores, stddev=stddev_scores
         )
+
         expected_age = _get_expected_age_from_scores(avg_scores)
 
         # overwrite last_statistics with updated stuff --> set primary keys explicitly
@@ -233,6 +237,7 @@ def calculate_milestonegroup_statistics_by_age(
             )  # expired session only which are not in the last statistics
         )
     answers = session.exec(answer_query).all()
+
     if len(answers) == 0:
         return last_statistics
     else:
