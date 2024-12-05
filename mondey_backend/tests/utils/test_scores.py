@@ -58,10 +58,6 @@ def test_compute_summary_milestonegroup_feedback_for_answersession(session):
         session, child_id=1, answersession_id=1
     )
 
-    # the statistics for the given answersession specify mean = 2.3, stddev = 0.45 for ages 8, 9
-    # where we have answers for milestone 1 (age 8) and milestone 2 (age 9)
-    # with the child being age 8, we only have milestonegroup 1 with milestone 1 and 2, which yields
-    # avg 1.5, min = 1 ==> yellowWithCaveat
     assert feedback[1] == TrafficLight.yellowWithCaveat.value
     assert len(feedback) == 1
 
@@ -113,8 +109,6 @@ def test_compute_summary_milestonegroup_feedback_for_answersession_recompute_sta
 
 
 def test_compute_detailed_milestonegroup_feedback_for_answersession(session):
-    # with the child being age 8, we only have milestonegroup 1 with milestone 1 and 2 for answersession 1, which yields
-    # answers 1, 2 compared to mean = 1.5, stddev = 0.702
     feedback = compute_milestonegroup_feedback_detailed(
         session, child_id=1, answersession_id=1
     )

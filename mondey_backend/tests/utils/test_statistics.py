@@ -2,6 +2,8 @@ import datetime
 
 import numpy as np
 import pytest
+from sqlmodel import select
+
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.routers.statistics import _add_sample
@@ -9,7 +11,6 @@ from mondey_backend.routers.statistics import _finalize_statistics
 from mondey_backend.routers.statistics import _get_statistics_by_age
 from mondey_backend.routers.statistics import calculate_milestone_statistics_by_age
 from mondey_backend.routers.statistics import calculate_milestonegroup_statistics_by_age
-from sqlmodel import select
 
 
 def test_online_statistics_computation():

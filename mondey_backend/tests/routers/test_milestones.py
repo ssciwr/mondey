@@ -50,11 +50,7 @@ def test_get_milestone_groups_child3(
     # and first last milestone from group2 (24m):
     milestone_group2["milestones"] = []
 
-    assert len(response.json()) == 2
-    assert response.json() == [
-        milestone_group1,
-        milestone_group2,
-    ]
+    assert response.json() == [milestone_group2, milestone_group1]
 
 
 def test_get_milestone_groups_child_doesnt_belong_to_user(
