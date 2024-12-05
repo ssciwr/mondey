@@ -51,9 +51,11 @@ def compute_feedback_simple(
     Returns
     -------
     int
-        -1 if score <= avg - 2 * stddev (trafficlight: red)
+        -2 if score <= avg - 2 * stddev (trafficlight: red)
+        -1 if 2*stddev < score <= avg - stddev and min < avg - 2*stddev (trafficlight: yellowWithCaveat)
         0 if avg - 2 * stddev < score <= avg - stddev (trafficlight: yellow)
-        1 if score > avg - stddev (trafficlight: green)
+        1 if score > avg - stddev and  avg - 2*stddev < score < avg - stddev (trafficlight: greenWithCaveat)
+        2 if score > avg - stddev (trafficlight: green)
     """
 
     def leq(val: float, lim: float) -> bool:
@@ -88,6 +90,27 @@ def compute_feedback_simple(
 def compute_milestonegroup_feedback_summary(
     session: SessionDep, child_id: int, answersession_id: int
 ) -> dict[int, int]:
+    """
+    Compute the summary milestonegroup feedback for a single milestonegroup. This is done
+    by first calculating the mean score over all milestones that belong to the milestonegroup that
+    are relevant for the child when the given answersession was created. The mean is then
+    compared against the mean and standard deviation over the known population of children for the child's age.
+    See `compute_feedback_simple` for the feedback logic.
+
+    Parameters
+    ----------
+    session : SessionDep
+        database session
+    child_id : int
+        child to compute feedback for. Needed for age computation
+    answersession_id : int
+        answersession to compute feedback for. This contains the answers on which basis the feedback is computed
+
+    Returns
+    -------
+    dict[int, int]
+        Dictionary of milestonegroup_id -> feedback
+    """
     answersession = session.get(MilestoneAnswerSession, answersession_id)
     # get child age
     child = session.get(Child, child_id)
@@ -98,10 +121,9 @@ def compute_milestonegroup_feedback_summary(
     today = datetime.now()
 
     # for each milestonegroup, get the statistics, compute the current mean, and compute the feedback
+    # if the statistics is older than a week, we update it with the current data
     feedback: dict[int, int] = {}
     for group in groups:
-        # try to get statistics to use as evaluation basis and recompute if it's not there
-        # or is too old
         stats = session.exec(
             select(MilestoneGroupAgeScoreCollection).where(
                 MilestoneGroupAgeScoreCollection.milestone_group_id == group
@@ -110,9 +132,11 @@ def compute_milestonegroup_feedback_summary(
 
         if stats is None or stats.created_at < today - timedelta(days=7):
             new_stats = calculate_milestonegroup_statistics_by_age(session, group)
+
             # update stuff in database
             for new_score in new_stats.scores:
                 session.merge(new_score)
+
             session.merge(new_stats)
             session.commit()
             stats = new_stats
@@ -134,6 +158,23 @@ def compute_milestonegroup_feedback_summary(
 def compute_milestonegroup_feedback_detailed(
     session: SessionDep, child_id: int, answersession_id: int
 ) -> dict[int, dict[int, int]]:
+    """
+    _summary_
+
+    Parameters
+    ----------
+    session : SessionDep
+        _description_
+    child_id : int
+        _description_
+    answersession_id : int
+        _description_
+
+    Returns
+    -------
+    dict[int, dict[int, int]]
+        _description_
+    """
     answersession = session.get(MilestoneAnswerSession, answersession_id)
     # get child age
     child = session.get(Child, child_id)
@@ -144,26 +185,30 @@ def compute_milestonegroup_feedback_detailed(
     feedback: dict[int, dict[int, int]] = {}
 
     for milestone_id, answer in answersession.answers.items():
-        # try to get statistics to use as evaluation basis and recompute if it's not there
+        # try to get statistics for the current milestone and update it if it's not there
         # or is too old
+
         stats = session.exec(
             select(MilestoneAgeScoreCollection).where(
                 MilestoneAgeScoreCollection.milestone_id == milestone_id
             )
         ).first()
+
         if stats is None or stats.created_at < today - timedelta(days=7):
             new_stats = calculate_milestone_statistics_by_age(session, milestone_id)
             # update stuff in database
             for new_score in new_stats.scores:
                 session.merge(new_score)
+
             session.merge(new_stats)
             session.commit()
             stats = new_stats
 
         if answer.milestone_group_id not in feedback:
             feedback[answer.milestone_group_id] = {}
+
         feedback[answer.milestone_group_id][answer.milestone_id] = (
             compute_feedback_simple(stats.scores[age], answer.answer + 1)
         )
-    session.commit()
+
     return feedback
