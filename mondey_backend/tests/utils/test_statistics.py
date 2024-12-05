@@ -19,8 +19,8 @@ def test_online_statistics_computation():
     data_second = data[100:200]
 
     count = 0
-    avg = 0.
-    var = 0.
+    avg = 0.0
+    var = 0.0
 
     for v in data_first:
         count, avg, var = _add_sample(count, avg, var, v)
@@ -91,7 +91,11 @@ def test_get_score_statistics_by_age(session):
     answers = session.exec(select(MilestoneAnswer)).all()
     print(answers)
     # which answers we choose here is arbitrary for testing, we just need to make sure it's fixed and not empty
-    child_ages = {1: 5, 2: 3, 3: 8,}
+    child_ages = {
+        1: 5,
+        2: 3,
+        3: 8,
+    }
 
     count, avg, stddev = _get_statistics_by_age(answers, child_ages)
 
@@ -103,7 +107,7 @@ def test_get_score_statistics_by_age(session):
     ]
     answers_8 = [
         answer.answer + 1 for answer in answers if answer.answer_session_id == 3
-    ]    
+    ]
 
     assert count[5] == 2
     assert count[3] == 2
@@ -138,7 +142,6 @@ def test_get_score_statistics_by_age(session):
             )
         ),
     )
-
 
     # check that updating works correctly. This is not done for all sessions
     second_answers = answers

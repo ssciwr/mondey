@@ -123,7 +123,8 @@ def calculate_milestone_statistics_by_age(
     if last_statistics is None:
         # no statistics exists yet -> all answers from expired sessions are relevant
         answers_query = (
-            select(MilestoneAnswer).join(
+            select(MilestoneAnswer)
+            .join(
                 MilestoneAnswerSession,
                 MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,
             )
@@ -216,7 +217,8 @@ def calculate_milestonegroup_statistics_by_age(
         # print(' no statistics')
         # no statistics exists yet -> all answers from expired sessions are relevant
         answer_query = (
-            select(MilestoneAnswer).join(
+            select(MilestoneAnswer)
+            .join(
                 MilestoneAnswerSession,
                 MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,
             )
@@ -227,7 +229,7 @@ def calculate_milestonegroup_statistics_by_age(
             )
         )
     else:
-        # print(' statistics exists') 
+        # print(' statistics exists')
         # we calculate the statistics with an online algorithm, so we only consider new data
         # that has not been included in the last statistics but which stems from sessions that are expired
         answer_query = (
@@ -246,10 +248,10 @@ def calculate_milestonegroup_statistics_by_age(
         )
     # all_answers = session.exec(select(MilestoneAnswer)).all()
     # print('weird join: ', session.exec(select(MilestoneAnswer)
-            # .join(
-            #     MilestoneAnswerSession,
-            #     MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,
-            # )).all())
+    # .join(
+    #     MilestoneAnswerSession,
+    #     MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,
+    # )).all())
     # print(' all answers: ', all_answers)
     answers = session.exec(answer_query).all()
     # print(' last statistics: ', last_statistics)
