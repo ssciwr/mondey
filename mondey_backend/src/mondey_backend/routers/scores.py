@@ -74,7 +74,7 @@ def compute_feedback_simple(
     else:
         lim_lower = stat.avg_score - 2 * stat.stddev_score
         lim_upper = stat.avg_score - stat.stddev_score
-    print('eval: ', lim_lower, lim_upper, stat.avg_score, score)
+    print("eval: ", lim_lower, lim_upper, stat.avg_score, score)
     if leq(score, lim_lower):
         return TrafficLight.red.value
     elif score > lim_lower and leq(score, lim_upper):
@@ -133,7 +133,7 @@ def compute_milestonegroup_feedback_summary(
                 MilestoneGroupAgeScoreCollection.milestone_group_id == group
             )
         ).first()
-        if stats is not None:
+        # if stats is not None:
             # print('stats before: ', stats, stats.scores[age])
         if stats is None or stats.created_at < today - timedelta(days=7):
             new_stats = calculate_milestonegroup_statistics_by_age(session, group)

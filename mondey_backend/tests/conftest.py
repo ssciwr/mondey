@@ -485,17 +485,15 @@ def statistics_session(session):
     )
 
     # add another expired answersession for milestone 7 for child 3 that is a bit later
-    # than answersession 3 (the last one for the same child), but still expired 
+    # than answersession 3 (the last one for the same child), but still expired
     session.add(
         MilestoneAnswerSession(
-            child_id=3,
-            user_id=1,
-            created_at=datetime.datetime(today.year - 1, 1, 10)
+            child_id=3, user_id=1, created_at=datetime.datetime(today.year - 1, 1, 10)
         )
     )
     session.add(
         MilestoneAnswer(
-           answer_session_id=5, milestone_id=7, milestone_group_id=2, answer=1
+            answer_session_id=5, milestone_id=7, milestone_group_id=2, answer=1
         )
     )
 
