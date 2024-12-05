@@ -74,7 +74,7 @@ def compute_feedback_simple(
     else:
         lim_lower = stat.avg_score - 2 * stat.stddev_score
         lim_upper = stat.avg_score - stat.stddev_score
-
+    print('eval: ', lim_lower, lim_upper, stat.avg_score, score)
     if leq(score, lim_lower):
         return TrafficLight.red.value
     elif score > lim_lower and leq(score, lim_upper):
@@ -112,24 +112,29 @@ def compute_milestonegroup_feedback_summary(
         Dictionary of milestonegroup_id -> feedback
     """
     answersession = session.get(MilestoneAnswerSession, answersession_id)
+    print('answersession', answersession)
+    print('answers: ', answersession.answers)  
     # get child age
     child = session.get(Child, child_id)
+    print('child', child)
     age = get_child_age_in_months(child, answersession.created_at)
-
+    print('age ', age)
     # extract milestonegroups
     groups = set(answer.milestone_group_id for answer in answersession.answers.values())
     today = datetime.now()
-
+    print('groups: ', groups)
     # for each milestonegroup, get the statistics, compute the current mean, and compute the feedback
     # if the statistics is older than a week, we update it with the current data
     feedback: dict[int, int] = {}
     for group in groups:
+        print("current group: ", group)
         stats = session.exec(
             select(MilestoneGroupAgeScoreCollection).where(
                 MilestoneGroupAgeScoreCollection.milestone_group_id == group
             )
         ).first()
-
+        if stats is not None:
+            print('stats: ', stats, stats.scores[age])
         if stats is None or stats.created_at < today - timedelta(days=7):
             new_stats = calculate_milestonegroup_statistics_by_age(session, group)
 
@@ -140,14 +145,16 @@ def compute_milestonegroup_feedback_summary(
             session.merge(new_stats)
             session.commit()
             stats = new_stats
-
+        print('stats after: ', stats, stats.scores[age])
         # extract the answers for the current milestone group
         group_answers = [
             answer.answer + 1
             for answer in answersession.answers.values()
             if answer.milestone_group_id == group
         ]
-
+        print('group_answers: ', group_answers, stats.scores[age])
+        print('mean: ', np.mean(group_answers))
+        print('min: ', min(group_answers))
         # use the statistics recorded for a certain age as the basis for the feedback computation
         feedback[group] = compute_feedback_simple(
             stats.scores[age], np.mean(group_answers), min(group_answers)

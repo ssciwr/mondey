@@ -116,16 +116,19 @@ def calculate_milestone_statistics_by_age(
         stddev_scores = np.array([score.stddev_score for score in last_scores])
 
     child_ages = _get_answer_session_child_ages_in_months(session)
-    expiration_data = datetime.datetime.now() - datetime.timedelta(
+    expiration_date = datetime.datetime.now() - datetime.timedelta(
         days=session_expired_days
     )
 
     if last_statistics is None:
         # no statistics exists yet -> all answers from expired sessions are relevant
         answers_query = (
-            select(MilestoneAnswer)
+            select(MilestoneAnswer).join(
+                MilestoneAnswerSession,
+                MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,
+            )
             .where(MilestoneAnswer.milestone_id == milestone_id)
-            .where(MilestoneAnswerSession.created_at < expiration_data)
+            .where(MilestoneAnswerSession.created_at < expiration_date)
         )
     else:
         # we calculate the statistics with an online algorithm, so we only consider new data
@@ -140,7 +143,7 @@ def calculate_milestone_statistics_by_age(
             .where(
                 and_(
                     MilestoneAnswerSession.created_at > last_statistics.created_at,
-                    MilestoneAnswerSession.created_at <= expiration_data,
+                    MilestoneAnswerSession.created_at <= expiration_date,
                 )  # expired session only which are not in the last statistics
             )
         )
@@ -205,20 +208,26 @@ def calculate_milestonegroup_statistics_by_age(
         )
 
     child_ages = _get_answer_session_child_ages_in_months(session)
-    expiration_data = datetime.datetime.now() - datetime.timedelta(
+    expiration_date = datetime.datetime.now() - datetime.timedelta(
         days=session_expired_days
     )
+    # print(' expiration_date: ', expiration_date)
     if last_statistics is None:
+        # print(' no statistics')
         # no statistics exists yet -> all answers from expired sessions are relevant
         answer_query = (
-            select(MilestoneAnswer)
+            select(MilestoneAnswer).join(
+                MilestoneAnswerSession,
+                MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,
+            )
             .where(col(MilestoneAnswer.milestone_group_id) == milestonegroup_id)
             .where(
                 MilestoneAnswerSession.created_at
-                < expiration_data  # expired session only
+                < expiration_date  # expired session only
             )
         )
     else:
+        # print(' statistics exists') 
         # we calculate the statistics with an online algorithm, so we only consider new data
         # that has not been included in the last statistics but which stems from sessions that are expired
         answer_query = (
@@ -231,12 +240,20 @@ def calculate_milestonegroup_statistics_by_age(
             .where(
                 and_(
                     MilestoneAnswerSession.created_at > last_statistics.created_at,
-                    MilestoneAnswerSession.created_at <= expiration_data,
+                    MilestoneAnswerSession.created_at <= expiration_date,
                 )
             )  # expired session only which are not in the last statistics
         )
+    # all_answers = session.exec(select(MilestoneAnswer)).all()
+    # print('weird join: ', session.exec(select(MilestoneAnswer)
+            # .join(
+            #     MilestoneAnswerSession,
+            #     MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,
+            # )).all())
+    # print(' all answers: ', all_answers)
     answers = session.exec(answer_query).all()
-
+    # print(' last statistics: ', last_statistics)
+    # print(' relevant answers: ', answers)
     if len(answers) == 0:
         return last_statistics
     else:

@@ -87,28 +87,29 @@ def test_online_statistics_computation_too_little_data():
         count, avg, std = _finalize_statistics(count, avg, var)
 
 
-def test_get_score_statistics_by_age(statistics_session):
-    answers = statistics_session.exec(select(MilestoneAnswer)).all()
+def test_get_score_statistics_by_age(session):
+    answers = session.exec(select(MilestoneAnswer)).all()
+    print(answers)
     # which answers we choose here is arbitrary for testing, we just need to make sure it's fixed and not empty
-    child_ages = {1: 5, 2: 3, 3: 8, 4: 5}
+    child_ages = {1: 5, 2: 3, 3: 8,}
 
     count, avg, stddev = _get_statistics_by_age(answers, child_ages)
 
     answers_5 = [
-        answer.answer + 1 for answer in answers if answer.answer_session_id in [1, 4]
+        answer.answer + 1 for answer in answers if answer.answer_session_id == 1
     ]
     answers_3 = [
         answer.answer + 1 for answer in answers if answer.answer_session_id == 2
     ]
     answers_8 = [
         answer.answer + 1 for answer in answers if answer.answer_session_id == 3
-    ]
+    ]    
 
-    assert count[5] == 4
+    assert count[5] == 2
     assert count[3] == 2
     assert count[8] == 1
 
-    assert np.isclose(avg[5], 2.5)
+    assert np.isclose(avg[5], 1.5)
     assert np.isclose(avg[3], 3.5)
     assert np.isclose(avg[8], 3.0)
 
@@ -138,6 +139,8 @@ def test_get_score_statistics_by_age(statistics_session):
         ),
     )
 
+
+    # check that updating works correctly. This is not done for all sessions
     second_answers = answers
     for answer in second_answers:
         answer.answer += 1 if answer.answer != 3 else -1
@@ -167,7 +170,7 @@ def test_get_score_statistics_by_age(statistics_session):
         second_answers, child_ages, count, avg, stddev
     )
 
-    assert count[5] == 8
+    assert count[5] == 4
     assert count[3] == 4
     assert count[8] == 2
     assert np.isclose(avg[5], np.mean(answers_5))

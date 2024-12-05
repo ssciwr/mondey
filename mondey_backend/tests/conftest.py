@@ -484,6 +484,21 @@ def statistics_session(session):
         )
     )
 
+    # add another expired answersession for milestone 7 for child 3 that is a bit later
+    # than answersession 3 (the last one for the same child), but still expired 
+    session.add(
+        MilestoneAnswerSession(
+            child_id=3,
+            user_id=1,
+            created_at=datetime.datetime(today.year - 1, 1, 10)
+        )
+    )
+    session.add(
+        MilestoneAnswer(
+           answer_session_id=5, milestone_id=7, milestone_group_id=2, answer=1
+        )
+    )
+
     # add MilestoneAgeScoreCollections for milestone 1 and 2. Done such that
     # answersession 4 added above did not yet factor into its calculation
     # numbers for avg/stddev in the scores will be arbitrary
@@ -545,17 +560,6 @@ def statistics_session(session):
                 expected_score=3 if age >= 10 else 1,
             )
         )
-
-    # add milestoneagescore collection for milestone 7
-    session.add(
-        MilestoneAgeScoreCollection(
-            milestone_id=7,
-            expected_age=22,
-            created_at=datetime.datetime(today.year - 1, 1, 2),
-        )
-    )
-
-    # TODO: add age scores for milestone 7
 
     # add milestonegroup age score collection for milestonegroup 1
     # which is a month old and hence is. repeats the logic used for the
