@@ -51,10 +51,10 @@ def _finalize_statistics(
             return count, mean, np.sqrt(var)
     elif all(isinstance(x, np.ndarray) for x in [count, mean, m2]):
         with np.errstate(invalid="ignore"):
-            valid_counts: np.ndarray = count >= 2 # type: ignore
-            variance: np.ndarray = m2 # type: ignore
-            variance[valid_counts] /= count[valid_counts] - 1 # type: ignore
-            variance[np.invert(valid_counts)] = 0.0 
+            valid_counts: np.ndarray = count >= 2  # type: ignore
+            variance: np.ndarray = m2  # type: ignore
+            variance[valid_counts] /= count[valid_counts] - 1  # type: ignore
+            variance[np.invert(valid_counts)] = 0.0
             return count, np.nan_to_num(mean), np.nan_to_num(np.sqrt(variance))
     else:
         raise ValueError(
