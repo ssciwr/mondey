@@ -558,7 +558,7 @@ export type GetMilestoneAgeScoresData = {
     };
 };
 
-export type GetMilestoneAgeScoresResponse = (MilestoneAgeScoreCollectionPublic);
+export type GetMilestoneAgeScoresResponse = ((MilestoneAgeScoreCollectionPublic | null));
 
 export type GetMilestoneAgeScoresError = (HTTPValidationError);
 
