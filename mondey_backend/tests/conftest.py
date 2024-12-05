@@ -903,6 +903,7 @@ def admin_client(
     yield client
     app.dependency_overrides.clear()
 
+
 @pytest.fixture
 def admin_client_stat(
     app: FastAPI,
@@ -915,6 +916,7 @@ def admin_client_stat(
     client = TestClient(app)
     yield client
     app.dependency_overrides.clear()
+
 
 @pytest.fixture
 def image_file_jpg_1600_1200(tmp_path: pathlib.Path):
