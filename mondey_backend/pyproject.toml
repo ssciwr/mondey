@@ -22,7 +22,8 @@ dependencies = [
     "pillow",
     "webp",
     "python-dateutil",
-    "types-python-dateutil"
+    "types-python-dateutil",
+    "checkdigit",
 ]
 dynamic = ["version"]
 
