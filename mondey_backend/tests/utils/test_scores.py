@@ -108,12 +108,20 @@ def test_compute_summary_milestonegroup_feedback_for_answersession_no_existing_s
             assert np.isclose(score.stddev_score, 0)
             assert np.isclose(score.count, 0)
 
-def test_compute_detailed_milestonegroup_feedback_for_answersession(session):
+def test_compute_detailed_milestonegroup_feedback_for_answersession_with_recompute(statistics_session):
     feedback = compute_milestonegroup_feedback_detailed(
-        session, child_id=1, answersession_id=1
+        statistics_session, child_id=1, answersession_id=1
     )
     assert len(feedback) == 1
     assert len(feedback[1]) == 2
-    assert feedback[1][1] == TrafficLight.green.value
-    assert feedback[1][2] == TrafficLight.green.value
+    assert feedback[1][1] == TrafficLight.green.red.value
+    assert feedback[1][2] == TrafficLight.green.red.value
 
+def test_compute_detailed_milestonegroup_feedback_for_answersession_no_stat(statistics_session):
+    # follows the same logic as the corresponding test for the milestonegroup summary feedback
+    feedback = compute_milestonegroup_feedback_detailed(
+        statistics_session, child_id=3, answersession_id=3
+    )
+
+    assert len(feedback) == 1
+    assert feedback[2][7] == TrafficLight.green.green.value

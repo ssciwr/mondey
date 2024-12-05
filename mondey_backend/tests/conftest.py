@@ -905,6 +905,18 @@ def admin_client(
     yield client
     app.dependency_overrides.clear()
 
+@pytest.fixture
+def admin_client_stat(
+    app: FastAPI,
+    statistics_session: Session,
+    user_session: AsyncSession,
+    active_admin_user: UserRead,
+):
+    app.dependency_overrides[current_active_user] = lambda: active_admin_user
+    app.dependency_overrides[current_active_superuser] = lambda: active_admin_user
+    client = TestClient(app)
+    yield client
+    app.dependency_overrides.clear()
 
 @pytest.fixture
 def image_file_jpg_1600_1200(tmp_path: pathlib.Path):

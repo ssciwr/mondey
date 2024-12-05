@@ -119,7 +119,8 @@ def calculate_milestone_statistics_by_age(
     expiration_date = datetime.datetime.now() - datetime.timedelta(
         days=session_expired_days
     )
-
+    # print(' expiration_date: ', expiration_date)
+    # print(' last statistics: ', last_statistics)
     if last_statistics is None:
         # no statistics exists yet -> all answers from expired sessions are relevant
         answers_query = (
@@ -149,7 +150,7 @@ def calculate_milestone_statistics_by_age(
         )
 
     answers = session.exec(answers_query).all()
-
+    # print('  answers: ', answers)
     if len(answers) == 0:
         return last_statistics
     else:
@@ -158,7 +159,9 @@ def calculate_milestone_statistics_by_age(
         )
 
         expected_age = _get_expected_age_from_scores(avg_scores)
-
+        # print(' expected_age: ', expected_age)
+        # print(' avg_scores: ', avg_scores)
+        # print(' stddev_scores: ', stddev_scores)
         # overwrite last_statistics with updated stuff --> set primary keys explicitly
         return MilestoneAgeScoreCollection(
             milestone_id=milestone_id,
