@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Sequence
+from numbers import Real
 
 import numpy as np
 from sqlalchemy import and_
@@ -23,11 +24,11 @@ from .utils import _get_expected_age_from_scores
 # reason for not using existing package: bessel correction usually not respected
 # we are using Welford's method here. This necessitates recording the count
 def _add_sample(
-    count: float | int,
-    mean: float,
-    m2: float,
-    new_value: float,
-) -> tuple[float, float, float]:
+    count: Real,
+    mean: Real,
+    m2: Real,
+    new_value: Real,
+) -> tuple[Real, Real, Real]:
     count += 1
     delta = new_value - mean
     mean += delta / count
@@ -37,24 +38,22 @@ def _add_sample(
 
 
 def _finalize_statistics(
-    count: float | int | np.ndarray[float | int],
-    mean: float | np.ndarray[float],
-    m2: float | np.ndarray[float],
-) -> tuple[
-    float | np.ndarray[float], float | np.ndarray[float], float | np.ndarray[float]
-]:
-    if all(isinstance(x, float) for x in [count, mean, m2]):
+    count: Real | np.ndarray,
+    mean: Real | np.ndarray,
+    m2: Real | np.ndarray,
+) -> tuple[Real | np.ndarray, float | np.ndarray, float | np.ndarray]:
+    if all(isinstance(x, Real) for x in [count, mean, m2]):
         if count < 2:
             return count, mean, 0.0
         else:
-            var: float = m2 / (count - 1)
+            var = m2 / (count - 1)
             return count, mean, np.sqrt(var)
     elif all(isinstance(x, np.ndarray) for x in [count, mean, m2]):
         with np.errstate(invalid="ignore"):
-            valid_counts: np.ndarray = count >= 2 # type: ignore
-            variance: np.ndarray = m2 # type: ignore
-            variance[valid_counts] /= count[valid_counts] - 1 # type: ignore
-            variance[np.invert(valid_counts)] = 0.0 
+            valid_counts = count >= 2  # type: ignore
+            variance = m2  # type: ignore
+            variance[valid_counts] /= count[valid_counts] - 1  # type: ignore
+            variance[np.invert(valid_counts)] = 0.0
             return count, np.nan_to_num(mean), np.nan_to_num(np.sqrt(variance))
     else:
         raise ValueError(

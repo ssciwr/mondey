@@ -19,8 +19,8 @@ def test_online_statistics_computation():
     data_second = data[100:200]
 
     count = 0
-    avg = 0
-    var = 0
+    avg = 0.
+    var = 0.
 
     for v in data_first:
         count, avg, var = _add_sample(count, avg, var, v)
