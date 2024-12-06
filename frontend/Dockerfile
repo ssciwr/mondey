@@ -7,7 +7,9 @@ ARG MONDEY_API_URL
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json ./
+
+COPY pnpm-lock.yaml ./
 
 RUN npm install -g pnpm && pnpm install
 
