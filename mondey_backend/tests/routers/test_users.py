@@ -358,8 +358,15 @@ def test_get_summary_feedback_for_session(user_client: TestClient):
     assert response.status_code == 200
     assert response.json() == {"1": 2}
 
+def test_get_summary_feedback_for_session_invalid(user_client: TestClient): 
+    response = user_client.get("/users/feedback/answersession=12/summary")
+    assert response.status_code == 404
 
 def test_get_detailed_feedback_for_session(user_client: TestClient):
     response = user_client.get("/users/feedback/answersession=1/detailed")
     assert response.status_code == 200
     assert response.json() == {"1": {"1": 2, "2": 2}}
+
+def test_get_detailed_feedback_for_session_invalid(user_client: TestClient): 
+    response = user_client.get("/users/feedback/answersession=12/detailed")
+    assert response.status_code == 404
