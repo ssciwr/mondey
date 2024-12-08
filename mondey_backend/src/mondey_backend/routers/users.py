@@ -261,7 +261,6 @@ def create_router() -> APIRouter:
         answersession = get(session, MilestoneAnswerSession, answersession_id)
         return get_milestonegroups_for_answersession(session, answersession)
 
-
     @router.get(
         "/feedback/answersession={answersession_id}/summary",
         response_model=dict[int, int],
@@ -271,7 +270,7 @@ def create_router() -> APIRouter:
         answersession_id: int,
     ) -> dict[int, int]:
         answersession = session.get(MilestoneAnswerSession, answersession_id)
-        if answersession is None: 
+        if answersession is None:
             raise HTTPException(404, detail="Answer session not found")
         child_id = answersession.child_id
         feedback = compute_milestonegroup_feedback_summary(
@@ -288,7 +287,7 @@ def create_router() -> APIRouter:
         answersession_id: int,
     ) -> dict[int, dict[int, int]]:
         answersession = session.get(MilestoneAnswerSession, answersession_id)
-        if answersession is None: 
+        if answersession is None:
             raise HTTPException(404, detail="Answer session not found")
         child_id = answersession.child_id
         feedback = compute_milestonegroup_feedback_detailed(
