@@ -53,7 +53,7 @@ def test_online_statistics_computation_too_little_data():
     count, avg, std = _finalize_statistics(count, avg, var)
 
     assert count == 1
-    assert avg == 2.42342
+    assert np.isclose(avg, 2.42342)
     assert std == 0
 
     data = np.array([])

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Sequence
-from numbers import Real
 
 import numpy as np
 from sqlalchemy import and_
@@ -24,11 +23,11 @@ from .utils import _get_expected_age_from_scores
 # reason for not using existing package: bessel correction usually not respected
 # we are using Welford's method here. This necessitates recording the count
 def _add_sample(
-    count: Real,
-    mean: Real,
-    m2: Real,
-    new_value: Real,
-) -> tuple[Real, Real, Real]:
+    count: int,
+    mean: float | int,
+    m2: float | int,
+    new_value: float | int,
+) -> tuple[float | int, float | int, float | int]:
     count += 1
     delta = new_value - mean
     mean += delta / count
@@ -38,11 +37,11 @@ def _add_sample(
 
 
 def _finalize_statistics(
-    count: Real | np.ndarray,
-    mean: Real | np.ndarray,
-    m2: Real | np.ndarray,
-) -> tuple[Real | np.ndarray, float | np.ndarray, float | np.ndarray]:
-    if all(isinstance(x, Real) for x in [count, mean, m2]):
+    count: int | np.ndarray,
+    mean: float | int | np.ndarray,
+    m2: float | int | np.ndarray,
+) -> tuple[float | int | np.ndarray, float | np.ndarray, float | np.ndarray]:
+    if all(isinstance(x, float | int) for x in [count, mean, m2]):
         if count < 2:
             return count, mean, 0.0
         else:
@@ -50,10 +49,10 @@ def _finalize_statistics(
             return count, mean, np.sqrt(var)
     elif all(isinstance(x, np.ndarray) for x in [count, mean, m2]):
         with np.errstate(invalid="ignore"):
-            valid_counts = count >= 2  # type: ignore
-            variance = m2  # type: ignore
+            valid_counts = count >= 2
+            variance = m2
             variance[valid_counts] /= count[valid_counts] - 1  # type: ignore
-            variance[np.invert(valid_counts)] = 0.0
+            variance[np.invert(valid_counts)] = 0.0  # type: ignore
             return count, np.nan_to_num(mean), np.nan_to_num(np.sqrt(variance))
     else:
         raise ValueError(
@@ -64,15 +63,15 @@ def _finalize_statistics(
 def _get_statistics_by_age(
     answers: Sequence[MilestoneAnswer],
     child_ages: dict[int, int],
-    count: np.ndarray = None,
-    avg: np.ndarray = None,
-    stddev: np.ndarray = None,
+    count: np.ndarray | None = None,
+    avg: np.ndarray | None = None,
+    stddev: np.ndarray | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     if count is None or avg is None or stddev is None:
         max_age_months = 72
-        count = np.zeros(max_age_months + 1)
-        avg = np.zeros(max_age_months + 1)
-        stddev = np.zeros(max_age_months + 1)
+        count = np.zeros(max_age_months + 1, dtype=np.int32)
+        avg = np.zeros(max_age_months + 1, dtype=np.float64)
+        stddev = np.zeros(max_age_months + 1, dtype=np.float64)
 
     if child_ages == {}:
         return count, avg, stddev
@@ -90,7 +89,7 @@ def _get_statistics_by_age(
         avg[age] = new_avg
         m2[age] = new_m2
 
-    count, avg, stddev = _finalize_statistics(count, avg, m2)
+    count, avg, stddev = _finalize_statistics(count, avg, m2)  # type: ignore
 
     return count, avg, stddev
 

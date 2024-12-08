@@ -112,6 +112,9 @@ def compute_milestonegroup_feedback_summary(
         Dictionary of milestonegroup_id -> feedback
     """
     answersession = session.get(MilestoneAnswerSession, answersession_id)
+
+    if answersession is None:
+        raise ValueError("No answersession with id: ", answersession_id)
     # print('answersession', answersession)
     # print('answers: ', answersession.answers)
     # get child age
@@ -137,6 +140,9 @@ def compute_milestonegroup_feedback_summary(
         # print('stats before: ', stats, stats.scores[age])
         if stats is None or stats.created_at < today - timedelta(days=7):
             new_stats = calculate_milestonegroup_statistics_by_age(session, group)
+
+            if new_stats is None:
+                raise ValueError("No statistics for milestone group: ", group)
 
             # update stuff in database
             for new_score in new_stats.scores:
