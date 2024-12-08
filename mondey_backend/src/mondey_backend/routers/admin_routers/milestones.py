@@ -9,7 +9,8 @@ from ...dependencies import SessionDep
 from ...models.milestones import Language
 from ...models.milestones import Milestone
 from ...models.milestones import MilestoneAdmin
-from ...models.milestones import MilestoneAgeScores
+from ...models.milestones import MilestoneAgeScoreCollection
+from ...models.milestones import MilestoneAgeScoreCollectionPublic
 from ...models.milestones import MilestoneGroup
 from ...models.milestones import MilestoneGroupAdmin
 from ...models.milestones import MilestoneGroupText
@@ -19,7 +20,6 @@ from ...models.milestones import SubmittedMilestoneImage
 from ...models.milestones import SubmittedMilestoneImagePublic
 from ...models.utils import ItemOrder
 from ..utils import add
-from ..utils import calculate_milestone_age_scores
 from ..utils import get
 from ..utils import milestone_group_image_path
 from ..utils import milestone_image_path
@@ -86,8 +86,11 @@ def create_router() -> APIRouter:
         return {"ok": True}
 
     @router.post("/milestones/{milestone_group_id}", response_model=MilestoneAdmin)
-    def create_milestone(session: SessionDep, milestone_group_id: int):
+    def create_milestone(
+        session: SessionDep, milestone_group_id: int, age_interval: int
+    ):
         db_milestone = Milestone(group_id=milestone_group_id)
+        db_milestone.age_interval = age_interval
         add(session, db_milestone)
         for language in session.exec(select(Language)).all():
             session.add(
@@ -177,10 +180,14 @@ def create_router() -> APIRouter:
         session.commit()
         return {"ok": True}
 
-    @router.get("/milestone-age-scores/{milestone_id}")
+    @router.get(
+        "/milestone-age-scores/{milestone_id}",
+        response_model=MilestoneAgeScoreCollectionPublic | None,
+    )
     def get_milestone_age_scores(
         session: SessionDep, milestone_id: int
-    ) -> MilestoneAgeScores:
-        return calculate_milestone_age_scores(session, milestone_id)
+    ) -> MilestoneAgeScoreCollection | None:
+        collection = session.get(MilestoneAgeScoreCollection, milestone_id)
+        return collection
 
     return router

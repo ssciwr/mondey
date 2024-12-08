@@ -25,11 +25,16 @@ from mondey_backend.dependencies import current_active_user
 from mondey_backend.dependencies import get_session
 from mondey_backend.main import create_app
 from mondey_backend.models.children import Child
+from mondey_backend.models.milestones import AgeInterval
 from mondey_backend.models.milestones import Language
 from mondey_backend.models.milestones import Milestone
+from mondey_backend.models.milestones import MilestoneAgeScore
+from mondey_backend.models.milestones import MilestoneAgeScoreCollection
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroup
+from mondey_backend.models.milestones import MilestoneGroupAgeScore
+from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
 from mondey_backend.models.milestones import MilestoneGroupText
 from mondey_backend.models.milestones import MilestoneImage
 from mondey_backend.models.milestones import MilestoneText
@@ -150,6 +155,10 @@ def session(children: list[dict]):
     SQLModel.metadata.create_all(engine)
     # add some test data
     with Session(engine) as session:
+        # add 3 age intervals
+        for interval in [(4, 12), (13, 18), (19, 36)]:
+            session.add(AgeInterval(lower_limit=interval[0], upper_limit=interval[1]))
+
         # add 3 languages
         lang_ids = ["de", "en", "fr"]
         for lang_id in lang_ids:
@@ -163,12 +172,13 @@ def session(children: list[dict]):
                     group_id=1, lang_id=lang_id, title=f"{lbl}_t", desc=f"{lbl}_d"
                 )
             )
-        for milestone_id in [1, 2, 3]:
+        for milestone_id, age_interval_id in zip([1, 2, 3], [1, 1, 2], strict=False):
             session.add(
                 Milestone(
                     order=14 - milestone_id,
                     group_id=1,
                     expected_age_months=milestone_id * 6,
+                    age_interval=age_interval_id,
                 )
             )
             for lang_id in lang_ids:
@@ -183,6 +193,7 @@ def session(children: list[dict]):
                         help=f"{lbl}_h",
                     )
                 )
+
         # add a second milestone group with 2 milestones
         session.add(MilestoneGroup(order=1))
         for lang_id in lang_ids:
@@ -192,10 +203,14 @@ def session(children: list[dict]):
                     group_id=2, lang_id=lang_id, title=f"{lbl}_t", desc=f"{lbl}_d"
                 )
             )
+
         for milestone_id in [4, 5]:
             session.add(
                 Milestone(
-                    order=milestone_id, group_id=2, expected_age_months=milestone_id * 6
+                    order=milestone_id,
+                    group_id=2,
+                    expected_age_months=milestone_id * 6,
+                    age_interval=3,
                 )
             )
             for lang_id in lang_ids:
@@ -220,7 +235,7 @@ def session(children: list[dict]):
         for child, user_id in zip(children, [3, 3, 1], strict=False):
             session.add(Child.model_validate(child, update={"user_id": user_id}))
         today = datetime.datetime.today()
-        last_month = today - datetime.timedelta(days=30)
+        last_month = today - relativedelta(months=1)
         # add an (expired) milestone answer session for child 1 / user (id 3) with 2 answers
         session.add(
             MilestoneAnswerSession(
@@ -440,6 +455,145 @@ def session(children: list[dict]):
         )
         session.commit()
         yield session
+
+
+@pytest.fixture
+def statistics_session(session):
+    today = datetime.datetime.today()
+    last_month = today - relativedelta(months=1)
+    two_weeks_ago = today - relativedelta(weeks=2)
+
+    # add another expired milestoneanswersession for milestones 1, 2 for child
+    session.add(
+        MilestoneAnswerSession(
+            child_id=1,
+            user_id=3,
+            created_at=datetime.datetime(
+                two_weeks_ago.year, two_weeks_ago.month, two_weeks_ago.day
+            ),
+        )
+    )
+    session.add(
+        MilestoneAnswer(
+            answer_session_id=4, milestone_id=1, milestone_group_id=1, answer=3
+        )
+    )
+    session.add(
+        MilestoneAnswer(
+            answer_session_id=4, milestone_id=2, milestone_group_id=1, answer=2
+        )
+    )
+
+    # add another expired answersession for milestone 7 for child 3 that is a bit later
+    # than answersession 3 (the last one for the same child), but still expired
+    session.add(
+        MilestoneAnswerSession(
+            child_id=3, user_id=1, created_at=datetime.datetime(today.year - 1, 1, 10)
+        )
+    )
+    session.add(
+        MilestoneAnswer(
+            answer_session_id=5, milestone_id=7, milestone_group_id=2, answer=1
+        )
+    )
+
+    # add MilestoneAgeScoreCollections for milestone 1 and 2. Done such that
+    # answersession 4 added above did not yet factor into its calculation
+    # numbers for avg/stddev in the scores will be arbitrary
+    session.add(
+        MilestoneAgeScoreCollection(
+            milestone_id=1,
+            expected_age=8,
+            created_at=datetime.datetime(
+                last_month.year,
+                last_month.month,
+                last_month.day + 2,  # between answersessions -> recompute
+            ),
+        )
+    )
+
+    session.add(
+        MilestoneAgeScoreCollection(
+            milestone_id=2,
+            expected_age=8,
+            created_at=datetime.datetime(
+                last_month.year,
+                last_month.month,
+                last_month.day + 2,  # between answersessions -> recompute
+            ),
+        )
+    )
+
+    def sigma(age, lower, upper, value):
+        if age < lower or age >= upper:
+            return 0
+        else:
+            return value
+
+    # add scores for milestone 1 and 2
+    for age in range(0, 73):
+        session.add(
+            MilestoneAgeScore(
+                age=age,
+                milestone_id=1,
+                count=12,
+                avg_score=0.0
+                if age < 5
+                else min(
+                    1 * age - 5, 3
+                ),  # linear increase from some age onward arbitrary numbers here
+                stddev_score=sigma(
+                    age, 5, 8, 0.35
+                ),  # arbitrary numbers here. constant stddev for increasing avg else 0
+                expected_score=3 if age >= 8 else 1,
+            )
+        )
+        session.add(
+            MilestoneAgeScore(
+                age=age,
+                milestone_id=2,
+                count=7,
+                avg_score=0.0 if age < 5 else min(0.5 * age - 2, 3),
+                stddev_score=sigma(age, 5, 10, 0.4),
+                expected_score=3 if age >= 10 else 1,
+            )
+        )
+
+    # add milestonegroup age score collection for milestonegroup 1
+    # which is a month old and hence is. repeats the logic used for the
+    # MilestoneAgeScores
+    session.add(
+        MilestoneGroupAgeScoreCollection(
+            milestone_group_id=1,
+            created_at=datetime.datetime(
+                last_month.year,
+                last_month.month,
+                last_month.day + 2,  # between answersessions -> recompute
+            ),
+        )
+    )
+
+    for age in range(0, 73):
+        session.add(
+            MilestoneGroupAgeScore(
+                age=age,
+                milestone_group_id=1,
+                count=4
+                if age
+                in [
+                    5,
+                    6,
+                    7,
+                    8,
+                ]
+                else 0,
+                avg_score=0.0 if age < 5 else min(0.24 * age, 3),
+                stddev_score=sigma(age, 5, 9, 0.21),
+            )
+        )
+
+    session.commit()
+    yield session
 
 
 @pytest.fixture
@@ -751,6 +905,20 @@ def admin_client(
 
 
 @pytest.fixture
+def admin_client_stat(
+    app: FastAPI,
+    statistics_session: Session,
+    user_session: AsyncSession,
+    active_admin_user: UserRead,
+):
+    app.dependency_overrides[current_active_user] = lambda: active_admin_user
+    app.dependency_overrides[current_active_superuser] = lambda: active_admin_user
+    client = TestClient(app)
+    yield client
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
 def image_file_jpg_1600_1200(tmp_path: pathlib.Path):
     jpg_path = tmp_path / "test.jpg"
     img = Image.new("RGB", (1600, 1200))
@@ -787,6 +955,7 @@ def milestone_group1():
             {
                 "id": 3,
                 "expected_age_months": 18,
+                "age_interval": 2,
                 "text": {
                     "de": {
                         "title": "m3_de_t",
@@ -812,6 +981,7 @@ def milestone_group1():
             {
                 "id": 2,
                 "expected_age_months": 12,
+                "age_interval": 1,
                 "text": {
                     "de": {
                         "title": "m2_de_t",
@@ -837,6 +1007,7 @@ def milestone_group1():
             {
                 "id": 1,
                 "expected_age_months": 6,
+                "age_interval": 1,
                 "text": {
                     "de": {
                         "title": "m1_de_t",
@@ -893,6 +1064,7 @@ def milestone_group_admin1():
                 "group_id": 1,
                 "order": 11,
                 "id": 3,
+                "age_interval": 2,
                 "expected_age_months": 18,
                 "images": [],
                 "text": {
@@ -926,6 +1098,7 @@ def milestone_group_admin1():
                 "group_id": 1,
                 "order": 12,
                 "id": 2,
+                "age_interval": 1,
                 "expected_age_months": 12,
                 "images": [
                     {
@@ -964,6 +1137,7 @@ def milestone_group_admin1():
                 "group_id": 1,
                 "order": 13,
                 "id": 1,
+                "age_interval": 1,
                 "expected_age_months": 6,
                 "images": [
                     {
@@ -1019,6 +1193,7 @@ def milestone_group2():
             {
                 "id": 4,
                 "expected_age_months": 24,
+                "age_interval": 3,
                 "images": [],
                 "text": {
                     "de": {
@@ -1044,6 +1219,7 @@ def milestone_group2():
             {
                 "id": 5,
                 "expected_age_months": 30,
+                "age_interval": 3,
                 "images": [],
                 "text": {
                     "de": {
@@ -1101,6 +1277,7 @@ def milestone_group_admin2():
                 "order": 4,
                 "id": 4,
                 "expected_age_months": 24,
+                "age_interval": 3,
                 "images": [],
                 "text": {
                     "de": {
@@ -1134,6 +1311,7 @@ def milestone_group_admin2():
                 "order": 5,
                 "id": 5,
                 "expected_age_months": 30,
+                "age_interval": 3,
                 "images": [],
                 "text": {
                     "de": {

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import datetime
 
-from pydantic import BaseModel
 from sqlalchemy.orm import Mapped
 from sqlmodel import Field
 from sqlmodel import SQLModel
@@ -20,9 +19,14 @@ class Language(SQLModel, table=True):
     id: str = fixed_length_string_field(max_length=2, index=True, primary_key=True)
 
 
+## age interval for milestones
+class AgeInterval(SQLModel, table=True):
+    id: int = Field(primary_key=True, default=None)
+    lower_limit: int
+    upper_limit: int
+
+
 ## MilestoneGroupText
-
-
 class MilestoneGroupTextBase(SQLModel):
     title: str = ""
     desc: str = ""
@@ -105,6 +109,7 @@ class Milestone(SQLModel, table=True):
     group: MilestoneGroup = back_populates("milestones")
     text: Mapped[dict[str, MilestoneText]] = dict_relationship(key="lang_id")
     images: Mapped[list[MilestoneImage]] = back_populates("milestone")
+    age_interval: int = Field(default=None, foreign_key="ageinterval.id")
 
 
 class MilestonePublic(SQLModel):
@@ -112,6 +117,7 @@ class MilestonePublic(SQLModel):
     expected_age_months: int
     text: dict[str, MilestoneTextPublic]
     images: list[MilestoneImagePublic]
+    age_interval: int
 
 
 class MilestoneAdmin(SQLModel):
@@ -121,6 +127,7 @@ class MilestoneAdmin(SQLModel):
     expected_age_months: int
     text: dict[str, MilestoneText]
     images: list[MilestoneImage]
+    age_interval: int = Field(default=None, foreign_key="ageinterval.id")
 
 
 ## MilestoneImage
@@ -186,12 +193,58 @@ class MilestoneAnswerSessionPublic(SQLModel):
     answers: dict[int, MilestoneAnswerPublic]
 
 
-class MilestoneAgeScore(BaseModel):
-    age_months: int
+# models for statistics. README: Perhaps this could be made simpler if the data was stored in a database with array-column support. sqlite apparently doesnt have this: https://stackoverflow.com/questions/3005231/how-to-store-array-in-one-column-in-sqlite3, but postgres does: https://www.postgresql.org/docs/9.1/arrays.html
+# will be returned to later. Issue no. 119
+class MilestoneAgeScore(SQLModel, table=True):
+    milestone_id: int | None = Field(
+        default=None,
+        primary_key=True,
+        foreign_key="milestoneagescorecollection.milestone_id",
+    )
+    age: int | None = Field(default=None, primary_key=True)
+    collection: MilestoneAgeScoreCollection = back_populates("scores")
+    count: int
     avg_score: float
+    stddev_score: float
     expected_score: float
 
 
-class MilestoneAgeScores(BaseModel):
-    scores: list[MilestoneAgeScore]
+class MilestoneAgeScoreCollection(SQLModel, table=True):
+    milestone_id: int = Field(default=None, primary_key=True)
     expected_age: int
+    scores: Mapped[list[MilestoneAgeScore]] = back_populates("collection")
+    created_at: datetime.datetime = Field(
+        sa_column_kwargs={
+            "server_default": text("CURRENT_TIMESTAMP"),
+        }
+    )
+
+
+class MilestoneAgeScoreCollectionPublic(SQLModel):
+    milestone_id: int
+    expected_age: int
+    scores: list[MilestoneAgeScore]
+    created_at: datetime.datetime
+
+
+class MilestoneGroupAgeScore(SQLModel, table=True):
+    age: int | None = Field(default=None, primary_key=True)
+    milestone_group_id: int | None = Field(
+        default=None,
+        primary_key=True,
+        foreign_key="milestonegroupagescorecollection.milestone_group_id",
+    )
+    collection: MilestoneGroupAgeScoreCollection = back_populates("scores")
+    count: int
+    avg_score: float
+    stddev_score: float
+
+
+class MilestoneGroupAgeScoreCollection(SQLModel, table=True):
+    milestone_group_id: int = Field(default=None, primary_key=True)
+    scores: Mapped[list[MilestoneGroupAgeScore]] = back_populates("collection")
+    created_at: datetime.datetime = Field(
+        sa_column_kwargs={
+            "server_default": text("CURRENT_TIMESTAMP"),
+        }
+    )
