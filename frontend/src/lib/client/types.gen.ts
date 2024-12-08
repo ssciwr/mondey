@@ -830,19 +830,6 @@ export type GetMilestonegroupsForSessionResponse = ({
 
 export type GetMilestonegroupsForSessionError = (HTTPValidationError);
 
-export type GetDetailedFeedbackForMilestonegroupData = {
-    path: {
-        answersession_id: number;
-        milestonegroup_id: number;
-    };
-};
-
-export type GetDetailedFeedbackForMilestonegroupResponse = ({
-    [key: string]: (number);
-});
-
-export type GetDetailedFeedbackForMilestonegroupError = (HTTPValidationError);
-
 export type GetSummaryFeedbackForAnswersessionData = {
     path: {
         answersession_id: number;
