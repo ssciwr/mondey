@@ -24,7 +24,6 @@
 	"search": {
 		"allLabel": "Alle",
 		"allPlaceholder": "Alle Kategorien durchsuchen",
-		"answerLabel": "Antwort",
 		"nameLabel": "Name",
 		"namePlaceholder": "Nach Namen suchen",
 		"remarkLabel": "Bemerkung",
@@ -46,7 +45,6 @@
 		"languages": "Sprachen",
 		"milestone": "Meilenstein",
 		"milestones": "Meilensteine",
-		"ageIntervals": "Altersintervalle",
 		"milestone-groups": "Meilensteingruppen",
 		"translations": "Übersetzungen",
 		"users": "Benutzer",
