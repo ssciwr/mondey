@@ -3,11 +3,10 @@
 <script lang="ts">
 import { refreshMilestoneGroups } from "$lib/admin.svelte";
 import {
-	type AgeInterval,
 	deleteMilestoneImage,
 	updateMilestone,
 	uploadMilestoneImage,
-} from "$lib/client";
+} from "$lib/client/services.gen";
 import type { MilestoneAdmin } from "$lib/client/types.gen";
 import CancelButton from "$lib/components/Admin/CancelButton.svelte";
 import DeleteModal from "$lib/components/Admin/DeleteModal.svelte";
@@ -22,7 +21,6 @@ import {
 	Label,
 	Modal,
 	Range,
-	Select,
 	Textarea,
 } from "flowbite-svelte";
 import { _, locales } from "svelte-i18n";
@@ -30,12 +28,7 @@ import { _, locales } from "svelte-i18n";
 let {
 	open = $bindable(false),
 	milestone = $bindable(null),
-	ageintervals = $bindable([]),
-}: {
-	open: boolean;
-	milestone: MilestoneAdmin | null;
-	ageintervals: AgeInterval[];
-} = $props();
+}: { open: boolean; milestone: MilestoneAdmin | null } = $props();
 let files: FileList | undefined = $state(undefined);
 let images: Array<string> = $state([]);
 let currentMilestoneImageId: number | null = $state(null as number | null);
@@ -43,13 +36,6 @@ let showDeleteMilestoneImageModal: boolean = $state(false);
 let showMilestoneExpectedAgeModal: boolean = $state(false);
 
 const textKeys = ["title", "desc", "obs", "help"];
-
-function make_interval_items() {
-	return ageintervals.map((interval) => ({
-		value: interval.id,
-		name: `${interval.lower_limit}m - ${interval.upper_limit}m`,
-	}));
-}
 
 async function saveChanges() {
 	if (!milestone) {
@@ -105,10 +91,6 @@ async function deleteMilestoneImageAndUpdate() {
                 {/each}
             </div>
         {/each}
-		<div class="mb-5">
-			<Label>{$_("admin.ageIntervals")}</Label>
-			<Select items = {make_interval_items()} bind:value={milestone.age_interval}/>
-		</div>
         <div class="mb-5">
             <Label>{`${$_("admin.expected-age")}: ${milestone.expected_age_months}m`}</Label>
             <Range id="expected-age-months" min="1" max="72" bind:value={milestone.expected_age_months}/>
