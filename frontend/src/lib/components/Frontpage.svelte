@@ -14,11 +14,6 @@ let { items = [] } = $props();
 <FrontPageAbout
 />
 
-<div class="flex mt-7 flex-col text-center justify-center items-center space-y-6">
-  <h1 class="text-2xl dark:text-white justify-center text-center text-balance max-w-prose font-bold text-gray-700">{$_('frontpageBookmarks.title')}</h1>
-   <FrontPageBookmarks {bookmarks} />
-  </div>
-
 <GalleryDisplay
 	withSearch={false}
 	itemComponent={CardDisplay}
