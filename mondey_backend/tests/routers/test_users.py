@@ -189,9 +189,8 @@ def test_update_milestone_answer_no_current_answer_session(
     current_answer_session = user_client.get("/users/milestone-answers/2").json()
     assert current_answer_session["child_id"] == 2
 
-    # child 2 is 20 months old, so milestones 4 and 5
+    # child 2 is 20 months old, so milestones 4
     assert current_answer_session["answers"]["4"]["answer"] == -1
-    assert current_answer_session["answers"]["5"]["answer"] == -1
     new_answer = {"milestone_id": 4, "answer": 2}
     response = user_client.put(
         f"/users/milestone-answers/{current_answer_session['id']}", json=new_answer

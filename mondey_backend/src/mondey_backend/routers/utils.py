@@ -19,7 +19,6 @@ from webp import WebPPreset
 
 from ..dependencies import SessionDep
 from ..models.children import Child
-from ..models.milestones import AgeInterval
 from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAdmin
 from ..models.milestones import MilestoneAnswer
@@ -145,7 +144,6 @@ def get_or_create_current_milestone_answer_session(
         .where(col(MilestoneAnswerSession.child_id) == child.id)
         .order_by(col(MilestoneAnswerSession.created_at).desc())
     ).first()
-
     if milestone_answer_session is None or _session_has_expired(
         milestone_answer_session
     ):
@@ -155,14 +153,16 @@ def get_or_create_current_milestone_answer_session(
             created_at=datetime.datetime.now(),
         )
         add(session, milestone_answer_session)
+        delta_months = 6
         child_age_months = get_child_age_in_months(child)
-        age_interval_ids = session.exec(
-            select(AgeInterval.id)
-            .where(AgeInterval.lower_limit <= child_age_months)
-            .where(child_age_months <= AgeInterval.upper_limit)
-        ).all()
         milestones = session.exec(
-            select(Milestone).where(col(Milestone.age_interval).in_(age_interval_ids))
+            select(Milestone)
+            .where(
+                child_age_months >= col(Milestone.expected_age_months) - delta_months
+            )
+            .where(
+                child_age_months <= col(Milestone.expected_age_months) + delta_months
+            )
         ).all()
         for milestone in milestones:
             session.add(
