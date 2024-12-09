@@ -29,7 +29,7 @@ def send_email_validation_link(email: str, token: str) -> None:
     msg["To"] = email
     msg["Subject"] = "MONDEY-Konto aktivieren"
     msg.set_content(
-        f"Bitte klicken Sie hier, um Ihr MONDEY-Konto zu aktivieren:\n\nhttps://mondey.lkeegan.dev/verify/{token}"
+        f"Bitte klicken Sie hier, um Ihr MONDEY-Konto zu aktivieren:\n\nhttps://mondey.lkeegan.dev/verify/{token}\n\n-----\n\nPlease click here to activate your MONDEY account:\n\nhttps://mondey.lkeegan.dev/verify/{token}"
     )
     with smtplib.SMTP(app_settings.SMTP_HOST) as s:
         s.send_message(msg)
