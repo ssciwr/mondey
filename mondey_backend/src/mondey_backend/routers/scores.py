@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from datetime import timedelta
 from enum import Enum
+from typing import cast
 
 import numpy as np
 from sqlmodel import select
@@ -59,7 +60,7 @@ def compute_feedback_simple(
     """
 
     def leq(val: float, lim: float) -> bool:
-        return val < lim or np.isclose(val, lim)
+        return val < lim or bool(np.isclose(val, lim))
 
     if stat.avg_score < 1e-2 and stat.stddev_score < 1e-2:
         # statistics has no data
@@ -119,6 +120,8 @@ def compute_milestonegroup_feedback_summary(
     # print('answers: ', answersession.answers)
     # get child age
     child = session.get(Child, child_id)
+    if child is None:
+        raise ValueError("No child with id: ", child_id)
     # print('child', child)
     age = get_child_age_in_months(child, answersession.created_at)
     # print('age ', age)
@@ -163,7 +166,7 @@ def compute_milestonegroup_feedback_summary(
         # print('min: ', min(group_answers))
         # use the statistics recorded for a certain age as the basis for the feedback computation
         feedback[group] = compute_feedback_simple(
-            stats.scores[age], np.mean(group_answers), min(group_answers)
+            stats.scores[age], float(np.mean(group_answers)), min(group_answers)
         )
     return feedback
 
@@ -189,8 +192,16 @@ def compute_milestonegroup_feedback_detailed(
         Dictionary of milestonegroup_id -> [milestone_id -> feedback]
     """
     answersession = session.get(MilestoneAnswerSession, answersession_id)
+
+    if answersession is None:
+        raise ValueError("No answersession with id: ", answersession_id)
+
     # get child age
     child = session.get(Child, child_id)
+
+    if child is None:
+        raise ValueError("No child with id: ", child_id)
+
     age = get_child_age_in_months(child, answersession.created_at)
     today = datetime.today()
     # print('child: ', child)
@@ -213,6 +224,13 @@ def compute_milestonegroup_feedback_detailed(
 
         if stats is None or stats.created_at < today - timedelta(days=7):
             new_stats = calculate_milestone_statistics_by_age(session, milestone_id)
+
+            if new_stats is None:
+                raise ValueError(
+                    "No new statistics could be calculated for milestone: ",
+                    milestone_id,
+                )
+
             # update stuff in database
             for new_score in new_stats.scores:
                 session.merge(new_score)
@@ -225,7 +243,7 @@ def compute_milestonegroup_feedback_detailed(
             feedback[answer.milestone_group_id] = {}
 
         # print(' stats after: ', stats, stats.scores[age], answer.answer+1)
-        feedback[answer.milestone_group_id][answer.milestone_id] = (
+        feedback[answer.milestone_group_id][cast(int, answer.milestone_id)] = (
             compute_feedback_simple(stats.scores[age], answer.answer + 1)
         )
 
