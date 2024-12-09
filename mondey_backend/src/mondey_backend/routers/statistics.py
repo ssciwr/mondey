@@ -122,11 +122,15 @@ def calculate_milestone_statistics_by_age(
     # print(' last statistics: ', last_statistics)
     if last_statistics is None:
         # no statistics exists yet -> all answers from expired sessions are relevant
+
+        # README: type: ignore here because mypy flags the second argument, but the documentation of sqlquery has
+        # boolean conditions: https://docs.sqlalchemy.org/en/20/orm/queryguide/api.html#sqlalchemy.orm.join
+        # the code-docstring of this function has it as example as well: selectable.py
         answers_query = (
             select(MilestoneAnswer)
             .join(
                 MilestoneAnswerSession,
-                MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,
+                MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,  # type: ignore
             )
             .where(MilestoneAnswer.milestone_id == milestone_id)
             .where(MilestoneAnswerSession.created_at < expiration_date)
@@ -138,13 +142,13 @@ def calculate_milestone_statistics_by_age(
             select(MilestoneAnswer)
             .join(
                 MilestoneAnswerSession,
-                MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,
+                MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,  # type: ignore
             )
             .where(MilestoneAnswer.milestone_id == milestone_id)
             .where(
                 and_(
-                    MilestoneAnswerSession.created_at > last_statistics.created_at,
-                    MilestoneAnswerSession.created_at <= expiration_date,
+                    MilestoneAnswerSession.created_at > last_statistics.created_at,  # type: ignore
+                    MilestoneAnswerSession.created_at <= expiration_date,  # type: ignore
                 )  # expired session only which are not in the last statistics
             )
         )
@@ -222,7 +226,7 @@ def calculate_milestonegroup_statistics_by_age(
             select(MilestoneAnswer)
             .join(
                 MilestoneAnswerSession,
-                MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,
+                MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,  # type: ignore
             )
             .where(col(MilestoneAnswer.milestone_group_id) == milestonegroup_id)
             .where(
@@ -234,17 +238,18 @@ def calculate_milestonegroup_statistics_by_age(
         # print(' statistics exists')
         # we calculate the statistics with an online algorithm, so we only consider new data
         # that has not been included in the last statistics but which stems from sessions that are expired
+        # README: same reason for type: ignore as in the function above
         answer_query = (
             select(MilestoneAnswer)
             .join(
                 MilestoneAnswerSession,
-                MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,
+                MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,  # type: ignore
             )
             .where(MilestoneAnswer.milestone_group_id == milestonegroup_id)
             .where(
                 and_(
-                    MilestoneAnswerSession.created_at > last_statistics.created_at,
-                    MilestoneAnswerSession.created_at <= expiration_date,
+                    MilestoneAnswerSession.created_at > last_statistics.created_at,  # type: ignore
+                    MilestoneAnswerSession.created_at <= expiration_date,  # type: ignore
                 )
             )  # expired session only which are not in the last statistics
         )
