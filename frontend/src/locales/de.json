@@ -101,6 +101,8 @@
 		"submitButtonLabel": "Absenden",
 		"selectPlaceholder": "Bitte auswählen",
 		"successMessage": "Bitte überprüfen sie ihr E-Mail Postfach",
+		"emailValidationMessage": "Ihre E-Mail-Adresse wurde bestätigt und Sie können sich jetzt anmelden.",
+		"emailValidationError": "Ungültiger oder abgelaufener E-Mail-Validierungslink",
 		"goHome": "Zur Hauptseite"
 	},
 	"login": {

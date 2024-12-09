@@ -14,6 +14,7 @@ class AppSettings(BaseSettings):
     PRIVATE_FILES_PATH: str = "private"
     ENABLE_CORS: bool = True
     HOST: str = "localhost"
+    SMTP_HOST: str = "email:587"
     PORT: int = 8000
     RELOAD: bool = True
     LOG_LEVEL: str = "debug"
