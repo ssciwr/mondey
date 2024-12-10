@@ -20,13 +20,6 @@ class Language(SQLModel, table=True):
     id: str = fixed_length_string_field(max_length=2, index=True, primary_key=True)
 
 
-## age interval for milestones
-class AgeInterval(SQLModel, table=True):
-    id: int = Field(primary_key=True, default=None)
-    lower_limit: int
-    upper_limit: int
-
-
 ## MilestoneGroupText
 class MilestoneGroupTextBase(SQLModel):
     title: str = ""
@@ -110,7 +103,8 @@ class Milestone(SQLModel, table=True):
     group: MilestoneGroup = back_populates("milestones")
     text: Mapped[dict[str, MilestoneText]] = dict_relationship(key="lang_id")
     images: Mapped[list[MilestoneImage]] = back_populates("milestone")
-    age_interval: int = Field(default=None, foreign_key="ageinterval.id")
+    age_months_low: int = 6
+    age_months_high: int = 18
 
 
 class MilestonePublic(SQLModel):
@@ -118,7 +112,8 @@ class MilestonePublic(SQLModel):
     expected_age_months: int
     text: dict[str, MilestoneTextPublic]
     images: list[MilestoneImagePublic]
-    age_interval: int
+    age_months_low: int
+    age_months_high: int
 
 
 class MilestoneAdmin(SQLModel):
@@ -128,7 +123,8 @@ class MilestoneAdmin(SQLModel):
     expected_age_months: int
     text: dict[str, MilestoneText]
     images: list[MilestoneImage]
-    age_interval: int = Field(default=None, foreign_key="ageinterval.id")
+    age_months_low: int
+    age_months_high: int
 
 
 ## MilestoneImage

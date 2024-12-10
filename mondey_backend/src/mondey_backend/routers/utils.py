@@ -14,13 +14,13 @@ from fastapi import UploadFile
 from PIL import Image
 from PIL import ImageOps
 from sqlmodel import SQLModel
+from sqlmodel import and_
 from sqlmodel import col
 from sqlmodel import select
 from webp import WebPPreset
 
 from ..dependencies import SessionDep
 from ..models.children import Child
-from ..models.milestones import AgeInterval
 from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAdmin
 from ..models.milestones import MilestoneAgeScore
@@ -158,14 +158,16 @@ def get_or_create_current_milestone_answer_session(
         )
         add(session, milestone_answer_session)
         child_age_months = get_child_age_in_months(child)
-        age_interval_ids = session.exec(
-            select(AgeInterval.id)
-            .where(AgeInterval.lower_limit <= child_age_months)
-            .where(child_age_months <= AgeInterval.upper_limit)
-        ).all()
+
         milestones = session.exec(
-            select(Milestone).where(col(Milestone.age_interval).in_(age_interval_ids))
+            select(Milestone).where(
+                and_(
+                    Milestone.age_months_low >= child_age_months,
+                    Milestone.age_months_high <= child_age_months,
+                )
+            )
         ).all()
+
         for milestone in milestones:
             session.add(
                 MilestoneAnswer(
