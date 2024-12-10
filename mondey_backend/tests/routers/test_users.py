@@ -188,16 +188,17 @@ def test_update_milestone_answer_no_current_answer_session(
 ):
     current_answer_session = user_client.get("/users/milestone-answers/2").json()
     assert current_answer_session["child_id"] == 2
-    assert current_answer_session["answers"]["3"]["answer"] == -1
+
+    # child 2 is 20 months old, so milestones 4
     assert current_answer_session["answers"]["4"]["answer"] == -1
-    new_answer = {"milestone_id": 3, "answer": 2}
+    new_answer = {"milestone_id": 4, "answer": 2}
     response = user_client.put(
         f"/users/milestone-answers/{current_answer_session['id']}", json=new_answer
     )
     assert response.status_code == 200
     assert response.json() == new_answer
     new_answer_session = user_client.get("/users/milestone-answers/2").json()
-    assert new_answer_session["answers"]["3"] == new_answer
+    assert new_answer_session["answers"]["4"] == new_answer
 
 
 def test_update_milestone_answer_update_existing_answer(user_client: TestClient):
@@ -348,4 +349,26 @@ def test_update_current_child_answers_no_prexisting(
         "/users/children-answers/2",
         json=child_answers,
     )
+    assert response.status_code == 404
+
+
+def test_get_summary_feedback_for_session(user_client: TestClient):
+    response = user_client.get("/users/feedback/answersession=1/summary")
+    assert response.status_code == 200
+    assert response.json() == {"1": 2}
+
+
+def test_get_summary_feedback_for_session_invalid(user_client: TestClient):
+    response = user_client.get("/users/feedback/answersession=12/summary")
+    assert response.status_code == 404
+
+
+def test_get_detailed_feedback_for_session(user_client: TestClient):
+    response = user_client.get("/users/feedback/answersession=1/detailed")
+    assert response.status_code == 200
+    assert response.json() == {"1": {"1": 2, "2": 2}}
+
+
+def test_get_detailed_feedback_for_session_invalid(user_client: TestClient):
+    response = user_client.get("/users/feedback/answersession=12/detailed")
     assert response.status_code == 404
