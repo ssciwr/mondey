@@ -12,7 +12,7 @@ import {
 	deleteMilestoneGroupAdmin,
 	orderMilestoneGroupsAdmin,
 	orderMilestonesAdmin,
-} from "$lib/client/services.gen";
+} from "$lib/client";
 import type {
 	MilestoneAdmin,
 	MilestoneGroupAdmin,
@@ -52,6 +52,7 @@ let showDeleteMilestoneModal = $state(false);
 let currentOrderEndpoint = $state(orderMilestonesAdmin);
 let currentOrderItems = $state([] as Array<{ id: number; text: string }>);
 let showOrderItemsModal = $state(false);
+let ageIntervals = $state([] as AgeInterval[]);
 
 function toggleOpenGroupIndex(index: number) {
 	if (openMilestoneGroupIndex === index) {
@@ -96,6 +97,10 @@ async function doDeleteMilestoneGroup() {
 async function addMilestone(milestoneGroupId: number) {
 	const { data, error } = await createMilestone({
 		path: { milestone_group_id: milestoneGroupId },
+		query: {
+			expected_age_months_plus: 18,
+			expected_age_months_minus: 6,
+		},
 	});
 	if (error) {
 		console.log(error);
@@ -270,8 +275,9 @@ async function doDeleteMilestone() {
 ></DeleteModal>
 
 {#key showEditMilestoneModal}
-	<EditMilestoneModal bind:open={showEditMilestoneModal} bind:milestone={currentMilestone}
+	<EditMilestoneModal bind:open={showEditMilestoneModal} bind:milestone={currentMilestone} bind:ageintervals= {ageIntervals}
 	></EditMilestoneModal>
+
 {/key}
 <DeleteModal bind:open={showDeleteMilestoneModal} onclick={doDeleteMilestone}></DeleteModal>
 

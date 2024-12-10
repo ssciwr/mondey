@@ -21,8 +21,6 @@ class Language(SQLModel, table=True):
 
 
 ## MilestoneGroupText
-
-
 class MilestoneGroupTextBase(SQLModel):
     title: str = ""
     desc: str = ""
@@ -105,6 +103,8 @@ class Milestone(SQLModel, table=True):
     group: MilestoneGroup = back_populates("milestones")
     text: Mapped[dict[str, MilestoneText]] = dict_relationship(key="lang_id")
     images: Mapped[list[MilestoneImage]] = back_populates("milestone")
+    expected_age_months_minus: int = 6
+    expected_age_months_plus: int = 18
 
 
 class MilestonePublic(SQLModel):
@@ -112,6 +112,8 @@ class MilestonePublic(SQLModel):
     expected_age_months: int
     text: dict[str, MilestoneTextPublic]
     images: list[MilestoneImagePublic]
+    expected_age_months_minus: int
+    expected_age_months_plus: int
 
 
 class MilestoneAdmin(SQLModel):
@@ -121,6 +123,8 @@ class MilestoneAdmin(SQLModel):
     expected_age_months: int
     text: dict[str, MilestoneText]
     images: list[MilestoneImage]
+    expected_age_months_minus: int
+    expected_age_months_plus: int
 
 
 ## MilestoneImage

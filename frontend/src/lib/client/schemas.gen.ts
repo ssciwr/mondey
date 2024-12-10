@@ -459,10 +459,18 @@ export const MilestoneAdminSchema = {
             },
             type: 'array',
             title: 'Images'
+        },
+        expected_age_months_minus: {
+            type: 'integer',
+            title: 'Expected Age Months Minus'
+        },
+        expected_age_months_plus: {
+            type: 'integer',
+            title: 'Expected Age Months Plus'
         }
     },
     type: 'object',
-    required: ['id', 'group_id', 'order', 'expected_age_months', 'text', 'images'],
+    required: ['id', 'group_id', 'order', 'expected_age_months', 'text', 'images', 'expected_age_months_minus', 'expected_age_months_plus'],
     title: 'MilestoneAdmin'
 } as const;
 
@@ -726,10 +734,18 @@ export const MilestonePublicSchema = {
             },
             type: 'array',
             title: 'Images'
+        },
+        expected_age_months_minus: {
+            type: 'integer',
+            title: 'Expected Age Months Minus'
+        },
+        expected_age_months_plus: {
+            type: 'integer',
+            title: 'Expected Age Months Plus'
         }
     },
     type: 'object',
-    required: ['id', 'expected_age_months', 'text', 'images'],
+    required: ['id', 'expected_age_months', 'text', 'images', 'expected_age_months_minus', 'expected_age_months_plus'],
     title: 'MilestonePublic'
 } as const;
 

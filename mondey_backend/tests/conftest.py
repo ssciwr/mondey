@@ -148,6 +148,9 @@ def session(children: list[dict]):
         echo=False,
     )
     SQLModel.metadata.create_all(engine)
+
+    age_intervals = [(0, 10), (8, 12), (13, 36)]
+
     # add some test data
     with Session(engine) as session:
         # add 3 languages
@@ -163,12 +166,14 @@ def session(children: list[dict]):
                     group_id=1, lang_id=lang_id, title=f"{lbl}_t", desc=f"{lbl}_d"
                 )
             )
-        for milestone_id in [1, 2, 3]:
+        for age_interval, milestone_id in zip(age_intervals, [1, 2, 3], strict=True):
             session.add(
                 Milestone(
                     order=14 - milestone_id,
                     group_id=1,
                     expected_age_months=milestone_id * 6,
+                    expected_age_months_minus=age_interval[0],
+                    expected_age_months_plus=age_interval[1],
                 )
             )
             for lang_id in lang_ids:
@@ -192,10 +197,16 @@ def session(children: list[dict]):
                     group_id=2, lang_id=lang_id, title=f"{lbl}_t", desc=f"{lbl}_d"
                 )
             )
-        for milestone_id in [4, 5]:
+        for age_interval, milestone_id in zip(
+            [age_intervals[2], age_intervals[2]], [4, 5], strict=False
+        ):
             session.add(
                 Milestone(
-                    order=milestone_id, group_id=2, expected_age_months=milestone_id * 6
+                    order=milestone_id,
+                    group_id=2,
+                    expected_age_months=milestone_id * 6,
+                    expected_age_months_minus=age_interval[0],
+                    expected_age_months_plus=age_interval[1],
                 )
             )
             for lang_id in lang_ids:
@@ -787,6 +798,8 @@ def milestone_group1():
             {
                 "id": 3,
                 "expected_age_months": 18,
+                "expected_age_months_minus": 13,
+                "expected_age_months_plus": 36,
                 "text": {
                     "de": {
                         "title": "m3_de_t",
@@ -812,6 +825,8 @@ def milestone_group1():
             {
                 "id": 2,
                 "expected_age_months": 12,
+                "expected_age_months_minus": 8,
+                "expected_age_months_plus": 12,
                 "text": {
                     "de": {
                         "title": "m2_de_t",
@@ -837,6 +852,8 @@ def milestone_group1():
             {
                 "id": 1,
                 "expected_age_months": 6,
+                "expected_age_months_minus": 0,
+                "expected_age_months_plus": 10,
                 "text": {
                     "de": {
                         "title": "m1_de_t",
@@ -894,6 +911,8 @@ def milestone_group_admin1():
                 "order": 11,
                 "id": 3,
                 "expected_age_months": 18,
+                "expected_age_months_minus": 13,
+                "expected_age_months_plus": 36,
                 "images": [],
                 "text": {
                     "de": {
@@ -927,6 +946,8 @@ def milestone_group_admin1():
                 "order": 12,
                 "id": 2,
                 "expected_age_months": 12,
+                "expected_age_months_minus": 8,
+                "expected_age_months_plus": 12,
                 "images": [
                     {
                         "id": 3,
@@ -965,6 +986,8 @@ def milestone_group_admin1():
                 "order": 13,
                 "id": 1,
                 "expected_age_months": 6,
+                "expected_age_months_minus": 0,
+                "expected_age_months_plus": 10,
                 "images": [
                     {
                         "id": 1,
@@ -1019,6 +1042,8 @@ def milestone_group2():
             {
                 "id": 4,
                 "expected_age_months": 24,
+                "expected_age_months_minus": 13,
+                "expected_age_months_plus": 36,
                 "images": [],
                 "text": {
                     "de": {
@@ -1044,6 +1069,8 @@ def milestone_group2():
             {
                 "id": 5,
                 "expected_age_months": 30,
+                "expected_age_months_minus": 13,
+                "expected_age_months_plus": 36,
                 "images": [],
                 "text": {
                     "de": {
@@ -1101,6 +1128,8 @@ def milestone_group_admin2():
                 "order": 4,
                 "id": 4,
                 "expected_age_months": 24,
+                "expected_age_months_minus": 13,
+                "expected_age_months_plus": 36,
                 "images": [],
                 "text": {
                     "de": {
@@ -1134,6 +1163,8 @@ def milestone_group_admin2():
                 "order": 5,
                 "id": 5,
                 "expected_age_months": 30,
+                "expected_age_months_minus": 13,
+                "expected_age_months_plus": 36,
                 "images": [],
                 "text": {
                     "de": {

@@ -33,11 +33,10 @@ def test_get_milestone_groups_child2(
     response = user_client.get("/milestone-groups/2")
     assert response.status_code == 200
     assert len(response.json()) == 2
-    # child 2 age is 20 months old, so first milestone from group1 (18m):
+    # child 2 age is 20 months old, so first milestone from group1 (18m , [13m, 36m]):
     milestone_group1["milestones"] = milestone_group1["milestones"][0:1]
 
-    # and first milestone from group2 (24m):
-    milestone_group2["milestones"] = milestone_group2["milestones"][0:1]
+    # and both milestones from group2 (24m, [13m, 36m]), (30m, [13m, 36m]):
     assert response.json() == [milestone_group2, milestone_group1]
 
 
@@ -75,9 +74,14 @@ def test_order_milestones_and_milestone_groups_child1(
     # initial milestone group order:
     assert milestone_groups[0]["id"] == 2
     assert milestone_groups[1]["id"] == 1
-    # initial milestone order within group1:
+    assert len(milestone_groups[0]["milestones"]) == 0
+    assert len(milestone_groups[1]["milestones"]) == 2
+
+    print("milestonegroups: ", milestone_groups)
+    # milestones 2 and 1 with respective age intervals (low, expected, high) = (0,6,10,), (8, 12, 12) are selected for child 1 of age 9 months
     assert milestone_groups[1]["milestones"][0]["id"] == 2
     assert milestone_groups[1]["milestones"][1]["id"] == 1
+
     # re-order milestone groups
     response = admin_client.post(
         "/admin/milestone-groups/order/",

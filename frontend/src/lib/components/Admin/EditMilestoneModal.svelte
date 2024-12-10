@@ -6,7 +6,7 @@ import {
 	deleteMilestoneImage,
 	updateMilestone,
 	uploadMilestoneImage,
-} from "$lib/client/services.gen";
+} from "$lib/client";
 import type { MilestoneAdmin } from "$lib/client/types.gen";
 import CancelButton from "$lib/components/Admin/CancelButton.svelte";
 import DeleteModal from "$lib/components/Admin/DeleteModal.svelte";
@@ -14,13 +14,13 @@ import EditImage from "$lib/components/Admin/EditImage.svelte";
 import MilestoneExpectedAgeModal from "$lib/components/Admin/MilestoneExpectedAgeModal.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";
+import RangeSlider from "$lib/components/DataInput/RangeSlider.svelte";
 import {
 	Button,
 	ButtonGroup,
 	InputAddon,
 	Label,
 	Modal,
-	Range,
 	Textarea,
 } from "flowbite-svelte";
 import { _, locales } from "svelte-i18n";
@@ -28,7 +28,10 @@ import { _, locales } from "svelte-i18n";
 let {
 	open = $bindable(false),
 	milestone = $bindable(null),
-}: { open: boolean; milestone: MilestoneAdmin | null } = $props();
+}: {
+	open: boolean;
+	milestone: MilestoneAdmin | null;
+} = $props();
 let files: FileList | undefined = $state(undefined);
 let images: Array<string> = $state([]);
 let currentMilestoneImageId: number | null = $state(null as number | null);
@@ -73,6 +76,28 @@ async function deleteMilestoneImageAndUpdate() {
 		await refreshMilestoneGroups();
 	}
 }
+
+let lower_age_bound = $derived(
+	milestone !== null
+		? milestone.expected_age_months - milestone.expected_age_months_minus
+		: 0,
+);
+let upper_age_bound = $derived(
+	milestone !== null
+		? milestone.expected_age_months + milestone.expected_age_months_plus
+		: 0,
+);
+$effect(() => {
+	if (milestone !== null) {
+		console.log(
+			"data: ",
+			milestone,
+			lower_age_bound,
+			upper_age_bound,
+			milestone?.expected_age_months,
+		);
+	}
+});
 </script>
 
 <Modal title={$_('admin.edit')} bind:open size="xl" outsideclose>
@@ -91,11 +116,12 @@ async function deleteMilestoneImageAndUpdate() {
                 {/each}
             </div>
         {/each}
-        <div class="mb-5">
-            <Label>{`${$_("admin.expected-age")}: ${milestone.expected_age_months}m`}</Label>
-            <Range id="expected-age-months" min="1" max="72" bind:value={milestone.expected_age_months}/>
-            <Button onclick={() => {showMilestoneExpectedAgeModal = true;}}>View data</Button>
-        </div>
+		<div class="mb-5 space-y-2 flex flex-col">
+			<Label class="pb-2">{`${$_("admin.ageIntervals")} [${lower_age_bound}m, ${upper_age_bound}m]`}</Label>
+			<Label class="pb-2">{`${$_("admin.expected-age")}: ${milestone.expected_age_months}m`}</Label>
+			<RangeSlider divClass="mb-2" lower={lower_age_bound} upper={upper_age_bound} central = {milestone.expected_age_months}/>
+            <Button class = "mb-2 md:w-1/4 w-1/2" onclick={() => {showMilestoneExpectedAgeModal = true;}}>View data</Button>
+		</div>
         <div class="mb-5">
             <Label for="img_upload" class="pb-2">{$_('admin.images')}</Label>
             <div class="flex flex-row">
