@@ -149,7 +149,7 @@ def session(children: list[dict]):
     )
     SQLModel.metadata.create_all(engine)
 
-    age_intervals = [(0, 7), (8, 12), (13, 36)]
+    age_intervals = [(0, 10), (8, 12), (13, 36)]
 
     # add some test data
     with Session(engine) as session:
@@ -798,6 +798,8 @@ def milestone_group1():
             {
                 "id": 3,
                 "expected_age_months": 18,
+                "age_months_low": 13,
+                "age_months_high": 36,
                 "text": {
                     "de": {
                         "title": "m3_de_t",
@@ -823,6 +825,8 @@ def milestone_group1():
             {
                 "id": 2,
                 "expected_age_months": 12,
+                "age_months_low": 8,
+                "age_months_high": 12,
                 "text": {
                     "de": {
                         "title": "m2_de_t",
@@ -848,6 +852,8 @@ def milestone_group1():
             {
                 "id": 1,
                 "expected_age_months": 6,
+                "age_months_low": 0,
+                "age_months_high": 10,
                 "text": {
                     "de": {
                         "title": "m1_de_t",
@@ -905,6 +911,8 @@ def milestone_group_admin1():
                 "order": 11,
                 "id": 3,
                 "expected_age_months": 18,
+                "age_months_low": 13,
+                "age_months_high": 36,
                 "images": [],
                 "text": {
                     "de": {
@@ -938,6 +946,8 @@ def milestone_group_admin1():
                 "order": 12,
                 "id": 2,
                 "expected_age_months": 12,
+                "age_months_low": 8,
+                "age_months_high": 12,
                 "images": [
                     {
                         "id": 3,
@@ -976,6 +986,8 @@ def milestone_group_admin1():
                 "order": 13,
                 "id": 1,
                 "expected_age_months": 6,
+                "age_months_low": 0,
+                "age_months_high": 10,
                 "images": [
                     {
                         "id": 1,
@@ -1030,6 +1042,8 @@ def milestone_group2():
             {
                 "id": 4,
                 "expected_age_months": 24,
+                "age_months_low": 13,
+                "age_months_high": 36,
                 "images": [],
                 "text": {
                     "de": {
@@ -1055,6 +1069,8 @@ def milestone_group2():
             {
                 "id": 5,
                 "expected_age_months": 30,
+                "age_months_low": 13,
+                "age_months_high": 36,
                 "images": [],
                 "text": {
                     "de": {
@@ -1112,6 +1128,8 @@ def milestone_group_admin2():
                 "order": 4,
                 "id": 4,
                 "expected_age_months": 24,
+                "age_months_low": 13,
+                "age_months_high": 36,
                 "images": [],
                 "text": {
                     "de": {
@@ -1145,6 +1163,8 @@ def milestone_group_admin2():
                 "order": 5,
                 "id": 5,
                 "expected_age_months": 30,
+                "age_months_low": 13,
+                "age_months_high": 36,
                 "images": [],
                 "text": {
                     "de": {
