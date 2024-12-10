@@ -162,8 +162,8 @@ def get_or_create_current_milestone_answer_session(
         milestones = session.exec(
             select(Milestone).where(
                 and_(
-                    Milestone.age_months_low <= child_age_months,
-                    Milestone.age_months_high >= child_age_months,
+                    Milestone.expected_age_months_minus <= child_age_months,
+                    Milestone.expected_age_months_plus >= child_age_months,
                 )
             )
         ).all()

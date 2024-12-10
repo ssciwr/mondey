@@ -3,7 +3,6 @@
 <script lang="ts">
 import { refreshMilestoneGroups } from "$lib/admin.svelte";
 import {
-	type AgeInterval,
 	deleteMilestoneImage,
 	updateMilestone,
 	uploadMilestoneImage,
@@ -15,14 +14,13 @@ import EditImage from "$lib/components/Admin/EditImage.svelte";
 import MilestoneExpectedAgeModal from "$lib/components/Admin/MilestoneExpectedAgeModal.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";
+import RangeSlider from "$lib/components/DataInput/RangeSlider.svelte";
 import {
 	Button,
 	ButtonGroup,
 	InputAddon,
 	Label,
 	Modal,
-	Range,
-	Select,
 	Textarea,
 } from "flowbite-svelte";
 import { _, locales } from "svelte-i18n";
@@ -30,11 +28,9 @@ import { _, locales } from "svelte-i18n";
 let {
 	open = $bindable(false),
 	milestone = $bindable(null),
-	ageintervals = $bindable([]),
 }: {
 	open: boolean;
 	milestone: MilestoneAdmin | null;
-	ageintervals: AgeInterval[];
 } = $props();
 let files: FileList | undefined = $state(undefined);
 let images: Array<string> = $state([]);
@@ -43,13 +39,6 @@ let showDeleteMilestoneImageModal: boolean = $state(false);
 let showMilestoneExpectedAgeModal: boolean = $state(false);
 
 const textKeys = ["title", "desc", "obs", "help"];
-
-function make_interval_items() {
-	return ageintervals.map((interval) => ({
-		value: interval.id,
-		name: `${interval.lower_limit}m - ${interval.upper_limit}m`,
-	}));
-}
 
 async function saveChanges() {
 	if (!milestone) {
@@ -87,6 +76,28 @@ async function deleteMilestoneImageAndUpdate() {
 		await refreshMilestoneGroups();
 	}
 }
+
+let lower_age_bound = $derived(
+	milestone !== null
+		? milestone.expected_age_months - milestone.expected_age_months_minus
+		: 0,
+);
+let upper_age_bound = $derived(
+	milestone !== null
+		? milestone.expected_age_months + milestone.expected_age_months_plus
+		: 0,
+);
+$effect(() => {
+	if (milestone !== null) {
+		console.log(
+			"data: ",
+			milestone,
+			lower_age_bound,
+			upper_age_bound,
+			milestone?.expected_age_months,
+		);
+	}
+});
 </script>
 
 <Modal title={$_('admin.edit')} bind:open size="xl" outsideclose>
@@ -105,15 +116,12 @@ async function deleteMilestoneImageAndUpdate() {
                 {/each}
             </div>
         {/each}
-		<div class="mb-5">
-			<Label>{$_("admin.ageIntervals")}</Label>
-			<Select items = {make_interval_items()} bind:value={milestone.age_interval}/>
+		<div class="mb-5 space-y-2 flex flex-col">
+			<Label class="pb-2">{`${$_("admin.ageIntervals")} [${lower_age_bound}m, ${upper_age_bound}m]`}</Label>
+			<Label class="pb-2">{`${$_("admin.expected-age")}: ${milestone.expected_age_months}m`}</Label>
+			<RangeSlider divClass="mb-2" lower={lower_age_bound} upper={upper_age_bound} central = {milestone.expected_age_months}/>
+            <Button class = "mb-2 md:w-1/4 w-1/2" onclick={() => {showMilestoneExpectedAgeModal = true;}}>View data</Button>
 		</div>
-        <div class="mb-5">
-            <Label>{`${$_("admin.expected-age")}: ${milestone.expected_age_months}m`}</Label>
-            <Range id="expected-age-months" min="1" max="72" bind:value={milestone.expected_age_months}/>
-            <Button onclick={() => {showMilestoneExpectedAgeModal = true;}}>View data</Button>
-        </div>
         <div class="mb-5">
             <Label for="img_upload" class="pb-2">{$_('admin.images')}</Label>
             <div class="flex flex-row">

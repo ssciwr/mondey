@@ -89,12 +89,12 @@ def create_router() -> APIRouter:
     def create_milestone(
         session: SessionDep,
         milestone_group_id: int,
-        age_months_low: int,
-        age_months_high: int,
+        expected_age_months_minus: int,
+        expected_age_months_plus: int,
     ):
         db_milestone = Milestone(group_id=milestone_group_id)
-        db_milestone.age_months_high = age_months_high
-        db_milestone.age_months_low = age_months_low
+        db_milestone.expected_age_months_plus = expected_age_months_plus
+        db_milestone.expected_age_months_minus = expected_age_months_minus
         add(session, db_milestone)
         for language in session.exec(select(Language)).all():
             session.add(

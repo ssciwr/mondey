@@ -114,7 +114,8 @@ def test_put_milestone_group_image(
 
 def test_post_milestone(admin_client: TestClient):
     response = admin_client.post(
-        "/admin/milestones/2", params={"age_months_low": 5, "age_months_high": 14}
+        "/admin/milestones/2",
+        params={"expected_age_months_minus": 5, "expected_age_months_plus": 14},
     )
     assert response.status_code == 200
     assert response.json() == {
@@ -122,8 +123,8 @@ def test_post_milestone(admin_client: TestClient):
         "group_id": 2,
         "order": 0,
         "expected_age_months": 12,
-        "age_months_low": 5,
-        "age_months_high": 14,
+        "expected_age_months_minus": 5,
+        "expected_age_months_plus": 14,
         "text": {
             "de": {
                 "milestone_id": 6,

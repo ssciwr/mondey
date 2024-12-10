@@ -2,7 +2,6 @@
 
 <script lang="ts">
 import { refreshMilestoneGroups } from "$lib/admin.svelte";
-import AgeIntervals from "$lib/components/Admin/AgeIntervals.svelte";
 import Languages from "$lib/components/Admin/Languages.svelte";
 import MilestoneExpectedAges from "$lib/components/Admin/MilestoneExpectedAges.svelte";
 import MilestoneGroups from "$lib/components/Admin/MilestoneGroups.svelte";
@@ -15,7 +14,6 @@ import { TabItem, Tabs } from "flowbite-svelte";
 import {
 	BadgeCheckOutline,
 	ClipboardListOutline,
-	ClockOutline,
 	FileImageOutline,
 	LanguageOutline,
 	ScaleBalancedOutline,
@@ -37,13 +35,6 @@ onMount(async () => {
             {$_("admin.milestones")}
         </div>
         <MilestoneGroups/>
-    </TabItem>
-    <TabItem>
-        <div slot="title" class="flex items-center gap-2">
-            <ClockOutline size="md"/>
-            {$_("admin.ageIntervals")}
-        </div>
-        <AgeIntervals />
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">

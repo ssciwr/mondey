@@ -6,12 +6,10 @@ import {
 	refreshMilestoneGroups,
 } from "$lib/admin.svelte";
 import {
-	type AgeInterval,
 	createMilestone,
 	createMilestoneGroupAdmin,
 	deleteMilestone,
 	deleteMilestoneGroupAdmin,
-	getAgeIntervals,
 	orderMilestoneGroupsAdmin,
 	orderMilestonesAdmin,
 } from "$lib/client";
@@ -39,7 +37,6 @@ import {
 } from "flowbite-svelte";
 import ChevronDownOutline from "flowbite-svelte-icons/ChevronDownOutline.svelte";
 import ChevronUpOutline from "flowbite-svelte-icons/ChevronUpOutline.svelte";
-import { onMount } from "svelte";
 import { _, locale } from "svelte-i18n";
 import AlertMessage from "../AlertMessage.svelte";
 
@@ -56,20 +53,6 @@ let currentOrderEndpoint = $state(orderMilestonesAdmin);
 let currentOrderItems = $state([] as Array<{ id: number; text: string }>);
 let showOrderItemsModal = $state(false);
 let ageIntervals = $state([] as AgeInterval[]);
-
-async function doGetAgeIntervals(): Promise<void> {
-	const response = await getAgeIntervals();
-
-	if (response.error) {
-		console.log(response.error);
-		return;
-	}
-	ageIntervals = response.data as AgeInterval[];
-}
-
-onMount(async () => {
-	await doGetAgeIntervals();
-});
 
 function toggleOpenGroupIndex(index: number) {
 	if (openMilestoneGroupIndex === index) {
@@ -115,7 +98,8 @@ async function addMilestone(milestoneGroupId: number) {
 	const { data, error } = await createMilestone({
 		path: { milestone_group_id: milestoneGroupId },
 		query: {
-			age_interval: 0,
+			expected_age_months_plus: 18,
+			expected_age_months_minus: 6,
 		},
 	});
 	if (error) {
