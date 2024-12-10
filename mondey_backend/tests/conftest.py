@@ -148,11 +148,11 @@ def session(children: list[dict]):
         echo=False,
     )
     SQLModel.metadata.create_all(engine)
+
+    age_intervals = [(0, 7), (8, 12), (13, 36)]
+
     # add some test data
     with Session(engine) as session:
-        # add 2 age intervals
-        age_intervals = [(4, 12), (13, 18), (19, 36)]
-
         # add 3 languages
         lang_ids = ["de", "en", "fr"]
         for lang_id in lang_ids:
@@ -166,14 +166,14 @@ def session(children: list[dict]):
                     group_id=1, lang_id=lang_id, title=f"{lbl}_t", desc=f"{lbl}_d"
                 )
             )
-        for milestone_id, age_interval_id in zip([1, 2, 3], [1, 1, 2], strict=False):
+        for age_interval, milestone_id in zip(age_intervals, [1, 2, 3], strict=True):
             session.add(
                 Milestone(
                     order=14 - milestone_id,
                     group_id=1,
                     expected_age_months=milestone_id * 6,
-                    age_months_low=age_intervals[age_interval_id][0],
-                    age_months_high=age_intervals[age_interval_id][1],
+                    age_months_low=age_interval[0],
+                    age_months_high=age_interval[1],
                 )
             )
             for lang_id in lang_ids:
@@ -188,7 +188,6 @@ def session(children: list[dict]):
                         help=f"{lbl}_h",
                     )
                 )
-
         # add a second milestone group with 2 milestones
         session.add(MilestoneGroup(order=1))
         for lang_id in lang_ids:
@@ -198,15 +197,16 @@ def session(children: list[dict]):
                     group_id=2, lang_id=lang_id, title=f"{lbl}_t", desc=f"{lbl}_d"
                 )
             )
-
-        for milestone_id in [4, 5]:
+        for age_interval, milestone_id in zip(
+            [age_intervals[2], age_intervals[2]], [4, 5], strict=False
+        ):
             session.add(
                 Milestone(
                     order=milestone_id,
                     group_id=2,
                     expected_age_months=milestone_id * 6,
-                    age_months_low=age_intervals[2][0],
-                    age_months_high=age_intervals[2][1],
+                    age_months_low=age_interval[0],
+                    age_months_high=age_interval[1],
                 )
             )
             for lang_id in lang_ids:
@@ -798,8 +798,6 @@ def milestone_group1():
             {
                 "id": 3,
                 "expected_age_months": 18,
-                "age_months_low": 13,
-                "age_months_high": 18,
                 "text": {
                     "de": {
                         "title": "m3_de_t",
@@ -825,8 +823,6 @@ def milestone_group1():
             {
                 "id": 2,
                 "expected_age_months": 12,
-                "age_months_low": 4,
-                "age_months_high": 12,
                 "text": {
                     "de": {
                         "title": "m2_de_t",
@@ -852,8 +848,6 @@ def milestone_group1():
             {
                 "id": 1,
                 "expected_age_months": 6,
-                "age_months_low": 4,
-                "age_months_high": 12,
                 "text": {
                     "de": {
                         "title": "m1_de_t",
@@ -910,8 +904,6 @@ def milestone_group_admin1():
                 "group_id": 1,
                 "order": 11,
                 "id": 3,
-                "age_months_low": 13,
-                "age_months_high": 18,
                 "expected_age_months": 18,
                 "images": [],
                 "text": {
@@ -945,8 +937,6 @@ def milestone_group_admin1():
                 "group_id": 1,
                 "order": 12,
                 "id": 2,
-                "age_months_low": 4,
-                "age_months_high": 12,
                 "expected_age_months": 12,
                 "images": [
                     {
@@ -985,8 +975,6 @@ def milestone_group_admin1():
                 "group_id": 1,
                 "order": 13,
                 "id": 1,
-                "age_months_low": 4,
-                "age_months_high": 12,
                 "expected_age_months": 6,
                 "images": [
                     {
@@ -1042,8 +1030,6 @@ def milestone_group2():
             {
                 "id": 4,
                 "expected_age_months": 24,
-                "age_months_low": 19,
-                "age_months_high": 36,
                 "images": [],
                 "text": {
                     "de": {
@@ -1069,8 +1055,6 @@ def milestone_group2():
             {
                 "id": 5,
                 "expected_age_months": 30,
-                "age_months_low": 19,
-                "age_months_high": 36,
                 "images": [],
                 "text": {
                     "de": {
@@ -1128,8 +1112,6 @@ def milestone_group_admin2():
                 "order": 4,
                 "id": 4,
                 "expected_age_months": 24,
-                "age_months_low": 19,
-                "age_months_high": 36,
                 "images": [],
                 "text": {
                     "de": {
@@ -1163,8 +1145,6 @@ def milestone_group_admin2():
                 "order": 5,
                 "id": 5,
                 "expected_age_months": 30,
-                "age_months_low": 19,
-                "age_months_high": 36,
                 "images": [],
                 "text": {
                     "de": {

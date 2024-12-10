@@ -120,8 +120,6 @@ def test_post_milestone(admin_client: TestClient):
         "group_id": 2,
         "order": 0,
         "expected_age_months": 12,
-        "age_months_low": 4,
-        "age_months_high": 12,
         "text": {
             "de": {
                 "milestone_id": 6,
