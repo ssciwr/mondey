@@ -64,7 +64,9 @@ async def get_user_manager(
 
 
 cookie_transport = CookieTransport(
-    cookie_max_age=3600, cookie_secure=app_settings.COOKIE_SECURE
+    cookie_max_age=3600,
+    cookie_secure=app_settings.COOKIE_SECURE,
+    cookie_samesite="strict",
 )
 
 
