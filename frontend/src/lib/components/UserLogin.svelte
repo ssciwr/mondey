@@ -129,7 +129,7 @@ let alertMessage: string = $state($_("login.badCredentials"));
 		>{$_("login.notRegistered")}</span
 	>
 	<a
-		href={`${base}/userLand/userRegistration`}
+		href={`${base}/signup`}
 		class="text-primary-700 hover:underline dark:text-primary-500"
 	>
 		{$_("login.registerNew")}

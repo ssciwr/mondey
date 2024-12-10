@@ -10,7 +10,7 @@ import { _ } from "svelte-i18n";
   <p class="mb-5 text-base text-gray-600 sm:text-md dark:text-gray-400">{$_("frontpage.summary")}</p>
   <div class="justify-center mb-1 items-center mt-2">
       <Button class="text-bold text-md w-44 hover:text-white dark:text-white bg-white text-gray-700" onclick ={() => {
-        goto("/userLand/userRegistration");
+        goto("/signup");
       }}>{$_("frontpage.buttonLabel")}</Button>
       <Tooltip>{$_("frontpage.toolTip")}</Tooltip>
   </div>
