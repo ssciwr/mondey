@@ -39,47 +39,111 @@ $effect(() => {
 </script>
 
 <div class={"relative w-full h-12 " + divClass}>
-    <input
-        id="slider-lower"
-        class="absolute w-full bg-transparent appearance-none cursor-pointer z-30 h-2"
-        type="range"
-        min="0"
-        max="72"
-        step="1"
-        value={lower}
-        oninput={handleLowerInput}
-    />
 
-    <input
-        id="slider-upper"
-        class="absolute w-full bg-transparent appearance-none cursor-pointer z-20 h-2 "
-        type="range"
-        min="0"
-        max="72"
-        step="1"
-        value={upper}
-        oninput={handleUpperInput}
-    />
+    <div class="rounded-md bg-gray-300 dark:bg-gray-600 h-5 w-full">
+        <div class = "absolute bg-gray-400 dark:bg-gray-700 rounded-md h-5" style="width: calc((100% / 72) * {upper - lower})" >
 
-    <input
-        id="slider-central"
-        class="p-2 m-2 absolute w-full rounded-md bg-gray-50 dark:bg-gray-600 text-gray-900 dark:text-white appearance-none cursor-default z-10 h-2"
-        type="range"
-        min="0"
-        max="72"
-        step="1"
-        value={central}
-        oninput={handleCentralInput}
-    />
+        </div>
+        <input
+            id="slider-lower"
+            class="absolute w-full bg-transparent appearance-none cursor-pointer z-30 h-0"
+            type="range"
+            min="0"
+            max="72"
+            step="1"
+            value={lower}
+            oninput={handleLowerInput}
+        />
+
+        <input
+            id="slider-upper"
+            class="absolute w-full bg-transparent appearance-none cursor-pointer z-20 h-0 "
+            type="range"
+            min="0"
+            max="72"
+            step="1"
+            value={upper}
+            oninput={handleUpperInput}
+        />
+
+        <input
+            id="slider-central"
+            class="absolute w-full bg-transparent appearance-none cursor-default h-0 z-10 "
+            type="range"
+            min="0"
+            max="72"
+            step="1"
+            value={central}
+            oninput={handleCentralInput}
+        />
+    </div>
 </div>
 
 <style>
-    input[type="range"]::-webkit-slider-runnable-track {
-        height: 0;
+    input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 2px;
         background: transparent;
     }
-    input[type="range"]::-moz-range-track {
-        height: 0;
+
+    input[type="range"]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 2px;
+        cursor: pointer;
         background: transparent;
+    }
+
+    /* make left slider a triangle pointing to the right*/
+    #slider-lower::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+        clip-path: polygon(50% 0%, 100% 50%, 50% 100%); /* Triangle shape right */
+    }
+
+    #slider-lower::-moz-range-thumb {
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+        clip-path: polygon(50% 0%, 100% 50%, 50% 100%);  /* Triangle shape left */
+    }
+
+    /* make right slider a triangle pointing to the left*/
+    #slider-upper::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+        clip-path: polygon(50% 0%, 50% 100%, 0% 50%);; /* Triangle shape right */
+    }
+
+    #slider-upper::-moz-range-thumb {
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+        clip-path: polygon(50% 0%, 50% 100%, 0% 50%);  /* Triangle shape left */
+    }
+
+    /*make the central slider a cross */
+
+    #slider-central::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+        clip-path: polygon(20% 0%, 0% 20%, 30% 50%, 0% 80%, 20% 100%, 50% 70%, 80% 100%, 100% 80%, 70% 50%, 100% 20%, 80% 0%, 50% 30%); /* cross*/
+    }
+
+    #slider-central::-moz-range-thumb {
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+        clip-path: polygon(20% 0%, 0% 20%, 30% 50%, 0% 80%, 20% 100%, 50% 70%, 80% 100%, 100% 80%, 70% 50%, 100% 20%, 80% 0%, 50% 30%);  /* rectangle */
     }
 </style>
