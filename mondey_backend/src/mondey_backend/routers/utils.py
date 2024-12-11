@@ -4,7 +4,6 @@ import datetime
 import logging
 import pathlib
 from collections.abc import Iterable
-from collections.abc import Sequence
 from typing import TypeVar
 
 import numpy as np
@@ -22,13 +21,10 @@ from ..dependencies import SessionDep
 from ..models.children import Child
 from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAdmin
-from ..models.milestones import MilestoneAgeScore
-from ..models.milestones import MilestoneAgeScores
 from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupAdmin
-from ..models.milestones import MilestoneGroupStatistics
 from ..models.milestones import MilestoneGroupText
 from ..models.milestones import MilestoneText
 from ..models.questions import ChildQuestion
@@ -140,29 +136,44 @@ def _session_has_expired(milestone_answer_session: MilestoneAnswerSession) -> bo
 
 
 def get_or_create_current_milestone_answer_session(
-    session: SessionDep, current_active_user: User, child_id: int
+    session: SessionDep, current_active_user: User, child: Child
 ) -> MilestoneAnswerSession:
-    get_db_child(session, current_active_user, child_id)
-
     milestone_answer_session = session.exec(
         select(MilestoneAnswerSession)
-        .where(
-            (col(MilestoneAnswerSession.user_id) == current_active_user.id)
-            & (col(MilestoneAnswerSession.child_id) == child_id)
-        )
+        .where(col(MilestoneAnswerSession.user_id) == current_active_user.id)
+        .where(col(MilestoneAnswerSession.child_id) == child.id)
         .order_by(col(MilestoneAnswerSession.created_at).desc())
     ).first()
-
     if milestone_answer_session is None or _session_has_expired(
         milestone_answer_session
     ):
         milestone_answer_session = MilestoneAnswerSession(
-            child_id=child_id,
+            child_id=child.id,
             user_id=current_active_user.id,
             created_at=datetime.datetime.now(),
         )
         add(session, milestone_answer_session)
-
+        delta_months = 6
+        child_age_months = get_child_age_in_months(child)
+        milestones = session.exec(
+            select(Milestone)
+            .where(
+                child_age_months >= col(Milestone.expected_age_months) - delta_months
+            )
+            .where(
+                child_age_months <= col(Milestone.expected_age_months) + delta_months
+            )
+        ).all()
+        for milestone in milestones:
+            session.add(
+                MilestoneAnswer(
+                    answer_session_id=milestone_answer_session.id,
+                    milestone_id=milestone.id,
+                    milestone_group_id=milestone.group_id,
+                    answer=-1,
+                )
+            )
+        session.commit()
     return milestone_answer_session
 
 
@@ -187,8 +198,6 @@ def get_db_child(
 def _get_answer_session_child_ages_in_months(session: SessionDep) -> dict[int, int]:
     answer_sessions = session.exec(select(MilestoneAnswerSession)).all()
 
-    print(answer_sessions)
-
     return {
         answer_session.id: get_child_age_in_months(  # type: ignore
             get(session, Child, answer_session.child_id), answer_session.created_at
@@ -200,128 +209,6 @@ def _get_answer_session_child_ages_in_months(session: SessionDep) -> dict[int, i
 def _get_expected_age_from_scores(scores: np.ndarray) -> int:
     # placeholder algorithm: returns first age with avg score > 3
     return np.argmax(scores >= 3.0)
-
-
-def _calculate_statistics_for(
-    data: Sequence[int | float], **statfuncs
-) -> dict[str, float | np.ndarray | tuple]:
-    result = {}
-    for name, func in statfuncs.items():
-        with np.errstate(invalid="ignore"):
-            stat = func(data)
-            result[name] = stat
-    return result
-
-
-def _get_score_statistics_by_age(
-    answers: Sequence[MilestoneAnswer], child_ages: dict[int, int]
-) -> tuple[np.ndarray, np.ndarray]:
-    max_age_months = 72
-    avg_scores = np.zeros(max_age_months + 1)
-    stddev_scores = np.zeros(max_age_months + 1)
-    counts = np.zeros_like(avg_scores)
-    if child_ages == {}:
-        return avg_scores, stddev_scores
-
-    # compute average
-    for answer in answers:
-        age = child_ages[answer.answer_session_id]  # type: ignore
-        # convert 0-3 answer index to 1-4 score
-        avg_scores[age] += answer.answer + 1
-        counts[age] += 1
-
-    with np.errstate(invalid="ignore"):
-        avg_scores /= counts
-
-    # compute standard deviation
-    for answer in answers:
-        age = child_ages[answer.answer_session_id]  # type: ignore
-        stddev_scores[age] += (answer.answer + 1 - avg_scores[age]) ** 2
-
-    with np.errstate(invalid="ignore"):
-        stddev_scores = np.sqrt(stddev_scores / np.max(counts - 1, 0))
-
-    # replace NaNs (due to zero counts) with zeros
-    avg = np.nan_to_num(avg_scores)
-    stddev = np.nan_to_num(stddev_scores)
-
-    return avg, stddev
-
-
-def calculate_milestone_statistics_by_age(
-    session: SessionDep,
-    milestone_id: int,
-    answers: Sequence[MilestoneAnswer] | None = None,
-) -> MilestoneAgeScores:
-    child_ages = _get_answer_session_child_ages_in_months(session)
-
-    if answers is None:
-        answers = session.exec(
-            select(MilestoneAnswer).where(
-                col(MilestoneAnswer.milestone_id) == milestone_id
-            )
-        ).all()
-    avg, stddev = _get_score_statistics_by_age(answers, child_ages)
-    expected_age = _get_expected_age_from_scores(avg)
-
-    return MilestoneAgeScores(
-        expected_age=expected_age,
-        scores=[
-            MilestoneAgeScore(
-                milestone_id=milestone_id,
-                age_months=age,
-                avg_score=avg[age],
-                stddev_score=stddev[age],
-                expected_score=(
-                    4 if age >= expected_age else 1
-                ),  # FIXME: don´t know what this is supposed to mean
-            )
-            for age in range(0, len(avg))
-        ],
-    )
-
-
-def calculate_milestonegroup_statistics(
-    session: SessionDep,
-    mid: int,
-    age: int,
-    age_lower: int,
-    age_upper: int,
-) -> MilestoneGroupStatistics:
-    milestonegroup = get(session, MilestoneGroup, mid)
-    answers = []
-    for milestone in milestonegroup.milestones:
-        # we want something that is relevant for the age of the child at hand. Hence we filter by age here. Is this what they want?
-        # FIXME: 11-25-2024: I think this is  not what we want and it should be filtered by the age of the child at the time of the answer session?
-        # this however should already be handled by the answersession itself?
-        # dazed and confused....
-        # At any rate the above comment is obsolete.
-        m_answers = [
-            answer.answer
-            for answer in session.exec(
-                select(MilestoneAnswer)
-                .where(col(MilestoneAnswer.milestone_id) == milestone.id)
-                .where(age_lower <= milestone.expected_age_months <= age_upper)
-            ).all()
-        ]
-        answers.extend(m_answers)
-
-    answers = np.array(answers) + 1  # convert 0-3 answer index to 1-4 score
-
-    result = _calculate_statistics_for(
-        answers,
-        mean=np.mean,
-        std=lambda a: np.std(a, correction=1),
-    )
-
-    mg_score = MilestoneGroupStatistics(
-        age_months=age,
-        group_id=milestonegroup.id,
-        avg_score=np.nan_to_num(result["mean"]),
-        stddev_score=np.nan_to_num(result["std"]),
-    )
-
-    return mg_score
 
 
 def child_image_path(child_id: int | None) -> pathlib.Path:

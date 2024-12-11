@@ -18,11 +18,12 @@ dependencies = [
     "aiosqlite",
     "python-multipart",
     "pydantic-settings",
+    "types-python-dateutil",
     "click",
     "pillow",
     "webp",
-    "python-dateutil", 
-    "types-python-dateutil"
+    "python-dateutil",
+    "checkdigit",
 ]
 dynamic = ["version"]
 

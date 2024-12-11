@@ -12,11 +12,9 @@ from ..dependencies import SessionDep
 from ..models.children import Child
 from ..models.children import ChildCreate
 from ..models.children import ChildPublic
-from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneAnswerSessionPublic
-from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupPublic
 from ..models.questions import ChildAnswer
 from ..models.questions import ChildAnswerPublic
@@ -25,14 +23,12 @@ from ..models.questions import UserAnswerPublic
 from ..models.users import UserRead
 from ..models.users import UserUpdate
 from ..users import fastapi_users
-from .scores import compute_detailed_feedback_for_answers
-from .scores import compute_detailed_milestonegroup_feedback_for_answersession
-from .scores import compute_summary_milestonegroup_feedback_for_answersession
+from .scores import compute_milestonegroup_feedback_detailed
+from .scores import compute_milestonegroup_feedback_summary
 from .utils import _session_has_expired
 from .utils import add
 from .utils import child_image_path
 from .utils import get
-from .utils import get_child_age_in_months
 from .utils import get_db_child
 from .utils import get_milestonegroups_for_answersession
 from .utils import get_or_create_current_milestone_answer_session
@@ -132,8 +128,9 @@ def create_router() -> APIRouter:
     def get_current_milestone_answer_session(
         session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
     ):
+        child = get_db_child(session, current_active_user, child_id)
         milestone_answer_session = get_or_create_current_milestone_answer_session(
-            session, current_active_user, child_id
+            session, current_active_user, child
         )
         return milestone_answer_session
 
@@ -154,15 +151,9 @@ def create_router() -> APIRouter:
             raise HTTPException(401)
         milestone_answer = milestone_answer_session.answers.get(answer.milestone_id)
         if milestone_answer is None:
-            milestone_answer = MilestoneAnswer(
-                answer_session_id=milestone_answer_session.id,
-                milestone_id=answer.milestone_id,
-                answer=answer.answer,
-            )
-            add(session, milestone_answer)
-        else:
-            milestone_answer.answer = answer.answer
-            session.commit()
+            raise HTTPException(401)
+        milestone_answer.answer = answer.answer
+        session.commit()
         return milestone_answer
 
     # Endpoints for answers to user question
@@ -271,47 +262,21 @@ def create_router() -> APIRouter:
         return get_milestonegroups_for_answersession(session, answersession)
 
     @router.get(
-        "/feedback/answersession={answersession_id}/milestonegroup={milestonegroup_id}/detailed",
-        response_model=dict[int, int],
-    )
-    def get_detailed_feedback_for_milestonegroup(
-        session: SessionDep,
-        current_active_user: CurrentActiveUserDep,
-        answersession_id: int,
-        milestonegroup_id: int,
-    ) -> dict[int, int]:
-        answersession = get(session, MilestoneAnswerSession, answersession_id)
-        m = get(session, MilestoneGroup, milestonegroup_id)
-        answers = [
-            answersession.answers[ms.id]
-            for ms in m.milestones
-            if ms.id in answersession.answers and ms.id is not None
-        ]
-        child = get_db_child(session, current_active_user, answersession.child_id)
-        age = get_child_age_in_months(child, answersession.created_at)
-        statistics = {}  # type: ignore
-        feedback = compute_detailed_feedback_for_answers(
-            session,
-            answers,
-            statistics,
-            age,
-        )
-        return feedback
-
-    @router.get(
         "/feedback/answersession={answersession_id}/summary",
         response_model=dict[int, int],
     )
     def get_summary_feedback_for_answersession(
         session: SessionDep,
-        current_active_user: CurrentActiveUserDep,
         answersession_id: int,
     ) -> dict[int, int]:
         answersession = get(session, MilestoneAnswerSession, answersession_id)
-        child = get_db_child(session, current_active_user, answersession.child_id)
-        return compute_summary_milestonegroup_feedback_for_answersession(
-            session, answersession, child, age_limit_low=6, age_limit_high=6
+        if answersession is None:
+            raise HTTPException(404, detail="Answer session not found")
+        child_id = answersession.child_id
+        feedback = compute_milestonegroup_feedback_summary(
+            session, child_id, answersession_id
         )
+        return feedback
 
     @router.get(
         "/feedback/answersession={answersession_id}/detailed",
@@ -319,13 +284,15 @@ def create_router() -> APIRouter:
     )
     def get_detailed_feedback_for_answersession(
         session: SessionDep,
-        current_active_user: CurrentActiveUserDep,
         answersession_id: int,
     ) -> dict[int, dict[int, int]]:
-        answersession = get(session, MilestoneAnswerSession, answersession_id)
-        child = get_db_child(session, current_active_user, answersession.child_id)
-        return compute_detailed_milestonegroup_feedback_for_answersession(
-            session, answersession, child
+        answersession = session.get(MilestoneAnswerSession, answersession_id)
+        if answersession is None:
+            raise HTTPException(404, detail="Answer session not found")
+        child_id = answersession.child_id
+        feedback = compute_milestonegroup_feedback_detailed(
+            session, child_id, answersession_id
         )
+        return feedback
 
     return router
