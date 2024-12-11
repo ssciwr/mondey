@@ -24,6 +24,7 @@ class SMTPMock:
 @pytest.fixture
 def smtp_mock(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(smtplib, "SMTP", SMTPMock)
+    SMTPMock.last_message = None
     return SMTPMock
 
 
