@@ -77,29 +77,41 @@ async function deleteMilestoneImageAndUpdate() {
 	}
 }
 
-let lower_age_bound = $state(0);
-let upper_age_bound = $state(0);
+let lower_age_bound = $state(
+	milestone !== null
+		? milestone.expected_age_months - milestone.expected_age_months_minus
+		: 0,
+);
+let upper_age_bound = $state(
+	milestone !== null
+		? milestone?.expected_age_months + milestone?.expected_age_months_plus
+		: 0,
+);
 
 $effect(() => {
 	if (milestone !== null) {
-		milestone.expected_age_months - milestone.expected_age_months_minus;
-	}
-});
+		milestone.expected_age_months_minus =
+			milestone.expected_age_months - lower_age_bound;
+		milestone.expected_age_months_plus =
+			upper_age_bound - milestone.expected_age_months;
 
-$effect(() => {
-	if (milestone !== null) {
-		milestone.expected_age_months + milestone.expected_age_months_plus;
+		console.log(
+			"data: ",
+			milestone,
+			"lower ",
+			lower_age_bound,
+			"upper ",
+			upper_age_bound,
+			"central ",
+			milestone?.expected_age_months,
+			"minus ",
+			milestone?.expected_age_months_minus,
+			"plus ",
+			milestone?.expected_age_months_plus,
+		);
+	} else {
+		console.log("milestone null");
 	}
-});
-
-$effect(() => {
-	console.log(
-		"data: ",
-		milestone,
-		lower_age_bound,
-		upper_age_bound,
-		milestone?.expected_age_months,
-	);
 });
 </script>
 
@@ -120,9 +132,9 @@ $effect(() => {
             </div>
         {/each}
 		<div class="mb-5 space-y-2 flex flex-col">
-			<Label class="pb-2">{`${$_("admin.ageIntervals")} [${lower_age_bound}m, ${upper_age_bound}m]`}</Label>
-			<Label class="pb-2">{`${$_("admin.expected-age")}: ${milestone.expected_age_months}m`}</Label>
-			<RangeSlider divClass="mb-2" lower={lower_age_bound} upper={upper_age_bound} central = {milestone.expected_age_months}/>
+			<Label class="mb-2">{`${$_("admin.ageIntervals")} [${lower_age_bound}m, ${upper_age_bound}m]`}</Label>
+			<Label class="mb-2">{`${$_("admin.expected-age")}: ${milestone.expected_age_months}m`}</Label>
+			<RangeSlider divClass="mb-2" bind:lower={lower_age_bound} bind:upper={upper_age_bound} bind:central = {milestone.expected_age_months}/>
             <Button class = "mb-2 md:w-1/4 w-1/2" onclick={() => {showMilestoneExpectedAgeModal = true;}}>View data</Button>
 		</div>
         <div class="mb-5">

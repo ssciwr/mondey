@@ -97,10 +97,6 @@ async function doDeleteMilestoneGroup() {
 async function addMilestone(milestoneGroupId: number) {
 	const { data, error } = await createMilestone({
 		path: { milestone_group_id: milestoneGroupId },
-		query: {
-			expected_age_months_plus: 18,
-			expected_age_months_minus: 6,
-		},
 	});
 	if (error) {
 		console.log(error);

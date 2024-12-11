@@ -125,23 +125,23 @@ function handleCentralInput(event: Event) {
 
     /* Specific styles for 'slider-lower' thumb */
     #slider-lower::-webkit-slider-thumb {
-        background: #FF0000;
+        background: #4A90E2;
         clip-path: polygon(0% 0%, 0% 100%, 100% 50%); /* Triangle pointing right */
     }
 
     #slider-lower::-moz-range-thumb {
-        background: #FF0000;
+        background: #4A90E2;
         clip-path: polygon(0% 0%, 0% 100%, 100% 50%); /* Triangle pointing right */
     }
 
     /* Specific styles for 'slider-upper' thumb */
     #slider-upper::-webkit-slider-thumb {
-        background: #00FF00;
+        background: #4A90E2;
         clip-path: polygon(100% 0%, 100% 100%, 0% 50%); /* Triangle pointing left */
     }
 
     #slider-upper::-moz-range-thumb {
-        background: #00FF00;
+        background: #4A90E2;
         clip-path: polygon(100% 0%, 100% 100%, 0% 50%); /* Triangle pointing left */
     }
 
