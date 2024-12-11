@@ -468,13 +468,32 @@ export const MilestoneAdminSchema = {
 
 export const MilestoneAgeScoreSchema = {
     properties: {
-        age_months: {
+        milestone_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Milestone Id'
+        },
+        age: {
             type: 'integer',
-            title: 'Age Months'
+            title: 'Age'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
         },
         avg_score: {
             type: 'number',
             title: 'Avg Score'
+        },
+        stddev_score: {
+            type: 'number',
+            title: 'Stddev Score'
         },
         expected_score: {
             type: 'number',
@@ -482,12 +501,20 @@ export const MilestoneAgeScoreSchema = {
         }
     },
     type: 'object',
-    required: ['age_months', 'avg_score', 'expected_score'],
+    required: ['age', 'count', 'avg_score', 'stddev_score', 'expected_score'],
     title: 'MilestoneAgeScore'
 } as const;
 
-export const MilestoneAgeScoresSchema = {
+export const MilestoneAgeScoreCollectionPublicSchema = {
     properties: {
+        milestone_id: {
+            type: 'integer',
+            title: 'Milestone Id'
+        },
+        expected_age: {
+            type: 'integer',
+            title: 'Expected Age'
+        },
         scores: {
             items: {
                 '$ref': '#/components/schemas/MilestoneAgeScore'
@@ -495,14 +522,15 @@ export const MilestoneAgeScoresSchema = {
             type: 'array',
             title: 'Scores'
         },
-        expected_age: {
-            type: 'integer',
-            title: 'Expected Age'
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
         }
     },
     type: 'object',
-    required: ['scores', 'expected_age'],
-    title: 'MilestoneAgeScores'
+    required: ['milestone_id', 'expected_age', 'scores', 'created_at'],
+    title: 'MilestoneAgeScoreCollectionPublic'
 } as const;
 
 export const MilestoneAnswerPublicSchema = {

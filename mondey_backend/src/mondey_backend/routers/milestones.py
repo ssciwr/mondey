@@ -57,7 +57,7 @@ def create_router() -> APIRouter:
             session, current_active_user, child
         )
         milestone_ids = list(milestone_answer_session.answers.keys())
-        print("milestone_ids", milestone_ids)
+
         milestone_groups = session.exec(
             select(MilestoneGroup)
             .order_by(col(MilestoneGroup.order))

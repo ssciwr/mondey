@@ -22,13 +22,13 @@ onMount(() => {
 		{
 			components: [
 				new StackedBar<MilestoneAgeScore>({
-					x: (d: MilestoneAgeScore) => d.age_months,
+					x: (d: MilestoneAgeScore) => d.age,
 					y: (d: MilestoneAgeScore) => d.avg_score,
 					barMinHeight1Px: true,
 					barPadding: 0.0,
 				}),
 				new Line<MilestoneAgeScore>({
-					x: (d: MilestoneAgeScore) => d.age_months,
+					x: (d: MilestoneAgeScore) => d.age,
 					y: (d: MilestoneAgeScore) => d.expected_score,
 					lineWidth: 3,
 					curveType: CurveType.Step,
