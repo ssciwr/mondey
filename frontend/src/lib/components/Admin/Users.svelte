@@ -3,6 +3,8 @@
 <script lang="ts">
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import {
+	Alert,
+	Button,
 	Card,
 	Checkbox,
 	Table,
@@ -13,8 +15,12 @@ import {
 	TableHeadCell,
 } from "flowbite-svelte";
 
-import { getUsers, usersPatchUser } from "$lib/client/services.gen";
-import type { UserRead, UserUpdate } from "$lib/client/types.gen";
+import {
+	createResearchGroup,
+	getUsers,
+	usersPatchUser,
+} from "$lib/client/services.gen";
+import type { UserRead } from "$lib/client/types.gen";
 import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 
@@ -53,6 +59,19 @@ async function updateUser(user: UserRead) {
 	}
 }
 
+async function addResearchGroup(user: UserRead) {
+	const { data, error } = await createResearchGroup({
+		path: {
+			user_id: user.id,
+		},
+	});
+	if (error || !data) {
+		console.log(error);
+	} else {
+		await refreshUsers();
+	}
+}
+
 onMount(async () => {
 	await refreshUsers();
 });
@@ -68,6 +87,8 @@ onMount(async () => {
 			<TableHeadCell>Active</TableHeadCell>
 			<TableHeadCell>Verified</TableHeadCell>
 			<TableHeadCell>Researcher</TableHeadCell>
+			<TableHeadCell>Full data access</TableHeadCell>
+			<TableHeadCell>Research Code</TableHeadCell>
 			<TableHeadCell>Admin</TableHeadCell>
 			<TableHeadCell>{$_('admin.actions')}</TableHeadCell>
 		</TableHead>
@@ -85,6 +106,18 @@ onMount(async () => {
 					</TableBodyCell>
 					<TableBodyCell>
 						<Checkbox bind:checked={user.is_researcher} onchange={() => {saveDisabled[user.id]=false}} />
+					</TableBodyCell>
+					<TableBodyCell>
+						<Checkbox bind:checked={user.full_data_access} onchange={() => {saveDisabled[user.id]=false}} />
+					</TableBodyCell>
+					<TableBodyCell>
+						{#if user.research_group_id > 0}
+						<Alert border={user.is_researcher} color="dark">
+							{user.research_group_id}
+						</Alert>
+							{:else if user.is_researcher}
+							<Button onclick={() => {addResearchGroup(user)}}>Add research code</Button>
+						{/if}
 					</TableBodyCell>
 					<TableBodyCell>
 						<Checkbox bind:checked={user.is_superuser} onchange={() => {saveDisabled[user.id]=false}} />

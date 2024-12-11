@@ -44,6 +44,7 @@ from mondey_backend.models.questions import ChildQuestionText
 from mondey_backend.models.questions import UserAnswer
 from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.questions import UserQuestionText
+from mondey_backend.models.research import ResearchGroup
 from mondey_backend.models.users import Base
 from mondey_backend.models.users import User
 from mondey_backend.models.users import UserRead
@@ -122,12 +123,15 @@ async def user_session(
     active_research_user: UserRead,
     active_user: UserRead,
     active_user2: UserRead,
+    monkeypatch: pytest.MonkeyPatch,
 ):
     # use a new in-memory SQLite user database for each test
     engine = create_async_engine("sqlite+aiosqlite://")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
+    # we also need to monkey patch the async_session_maker which is directly used in the users module
+    monkeypatch.setattr("mondey_backend.users.async_session_maker", async_session_maker)
     async with async_session_maker() as session:
         for user_read in [
             active_admin_user,
@@ -139,11 +143,12 @@ async def user_session(
             for k, v in user_read.model_dump().items():
                 setattr(user, k, v)
             session.add(user)
+        await session.commit()
         yield session
 
 
 @pytest.fixture
-def session(children: list[dict]):
+def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
     # use a new in-memory SQLite database for each test
     engine = create_engine(
         "sqlite://",
@@ -152,6 +157,8 @@ def session(children: list[dict]):
         echo=False,
     )
     SQLModel.metadata.create_all(engine)
+    # we also need to monkey patch the mondey_engine which is directly used in the users module
+    monkeypatch.setattr("mondey_backend.users.mondey_engine", engine)
     # add some test data
     with Session(engine) as session:
         # add 3 languages
@@ -275,7 +282,8 @@ def session(children: list[dict]):
                 answer_session_id=3, milestone_id=7, milestone_group_id=2, answer=2
             )
         )
-
+        # add a research group (that user with id 3 is part of, and researcher with id 2 has access to)
+        session.add(ResearchGroup(id="123451"))
         # add user questions for admin
         user_questions = [
             UserQuestion(
@@ -790,6 +798,8 @@ def active_admin_user():
         is_active=True,
         is_superuser=True,
         is_researcher=False,
+        full_data_access=False,
+        research_group_id=0,
         is_verified=True,
     )
 
@@ -802,6 +812,8 @@ def active_research_user():
         is_active=True,
         is_superuser=False,
         is_researcher=True,
+        full_data_access=False,
+        research_group_id=123451,
         is_verified=True,
     )
 
@@ -814,6 +826,8 @@ def active_user():
         is_active=True,
         is_superuser=False,
         is_researcher=False,
+        full_data_access=False,
+        research_group_id=123451,
         is_verified=True,
     )
 
@@ -826,6 +840,8 @@ def active_user2():
         is_active=True,
         is_superuser=False,
         is_researcher=False,
+        full_data_access=False,
+        research_group_id=0,
         is_verified=True,
     )
 

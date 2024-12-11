@@ -860,6 +860,18 @@ export const QuestionTextPublicSchema = {
     title: 'QuestionTextPublic'
 } as const;
 
+export const ResearchGroupSchema = {
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['id'],
+    title: 'ResearchGroup'
+} as const;
+
 export const SubmittedMilestoneImagePublicSchema = {
     properties: {
         id: {
@@ -965,6 +977,30 @@ export const UserCreateSchema = {
             ],
             title: 'Is Researcher',
             default: false
+        },
+        full_data_access: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Full Data Access',
+            default: false
+        },
+        research_group_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Research Group Id',
+            default: 0
         }
     },
     type: 'object',
@@ -1126,10 +1162,18 @@ export const UserReadSchema = {
         is_researcher: {
             type: 'boolean',
             title: 'Is Researcher'
+        },
+        full_data_access: {
+            type: 'boolean',
+            title: 'Full Data Access'
+        },
+        research_group_id: {
+            type: 'integer',
+            title: 'Research Group Id'
         }
     },
     type: 'object',
-    required: ['id', 'email', 'is_researcher'],
+    required: ['id', 'email', 'is_researcher', 'full_data_access', 'research_group_id'],
     title: 'UserRead'
 } as const;
 
@@ -1201,6 +1245,28 @@ export const UserUpdateSchema = {
                 }
             ],
             title: 'Is Researcher'
+        },
+        full_data_access: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Full Data Access'
+        },
+        research_group_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Research Group Id'
         }
     },
     type: 'object',

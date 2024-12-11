@@ -221,6 +221,10 @@ export type QuestionTextPublic = {
     options?: string;
 };
 
+export type ResearchGroup = {
+    id: number;
+};
+
 export type SubmittedMilestoneImagePublic = {
     id: number;
     milestone_id: number;
@@ -240,6 +244,8 @@ export type UserCreate = {
     is_superuser?: (boolean | null);
     is_verified?: (boolean | null);
     is_researcher?: (boolean | null);
+    full_data_access?: (boolean | null);
+    research_group_id?: (number | null);
 };
 
 export type UserQuestionAdmin = {
@@ -279,6 +285,8 @@ export type UserRead = {
     is_superuser?: boolean;
     is_verified?: boolean;
     is_researcher: boolean;
+    full_data_access: boolean;
+    research_group_id: number;
 };
 
 export type UserUpdate = {
@@ -288,6 +296,8 @@ export type UserUpdate = {
     is_superuser?: (boolean | null);
     is_verified?: (boolean | null);
     is_researcher?: (boolean | null);
+    full_data_access?: (boolean | null);
+    research_group_id?: (number | null);
 };
 
 export type ValidationError = {
@@ -583,6 +593,30 @@ export type OrderChildQuestionsAdminError = (HTTPValidationError);
 export type GetUsersResponse = (Array<UserRead>);
 
 export type GetUsersError = unknown;
+
+export type GetResearchGroupsResponse = (Array<ResearchGroup>);
+
+export type GetResearchGroupsError = unknown;
+
+export type CreateResearchGroupData = {
+    path: {
+        user_id: number;
+    };
+};
+
+export type CreateResearchGroupResponse = (ResearchGroup);
+
+export type CreateResearchGroupError = (HTTPValidationError);
+
+export type DeleteResearchGroupData = {
+    path: {
+        research_group_id: number;
+    };
+};
+
+export type DeleteResearchGroupResponse = (unknown);
+
+export type DeleteResearchGroupError = (HTTPValidationError);
 
 export type UsersCurrentUserResponse = (UserRead);
 
