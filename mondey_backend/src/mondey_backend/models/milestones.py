@@ -187,7 +187,7 @@ class MilestoneAgeScore(SQLModel, table=True):
         primary_key=True,
         foreign_key="milestoneagescorecollection.milestone_id",
     )
-    age: int | None = Field(default=None, primary_key=True)
+    age: int = Field(primary_key=True)
     collection: MilestoneAgeScoreCollection = back_populates("scores")
     count: int
     avg_score: float

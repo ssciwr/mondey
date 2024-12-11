@@ -133,7 +133,6 @@ def compute_milestonegroup_feedback_summary(
     feedback: dict[int, int] = {}
     for group in groups:
         stats = session.get(MilestoneGroupAgeScoreCollection, group)
-        # if stats is not None:
 
         if stats is None or stats.created_at < today - timedelta(days=7):
             new_stats = calculate_milestonegroup_statistics_by_age(session, group)

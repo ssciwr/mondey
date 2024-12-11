@@ -185,7 +185,7 @@ def create_router() -> APIRouter:
     def get_milestone_age_scores(
         session: SessionDep, milestone_id: int
     ) -> MilestoneAgeScoreCollection:
-        collection = session.get(MilestoneAgeScoreCollection, milestone_id)
+        collection = get(session, MilestoneAgeScoreCollection, milestone_id)
 
         if collection is None:
             raise HTTPException(

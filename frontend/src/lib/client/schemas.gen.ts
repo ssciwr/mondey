@@ -480,14 +480,7 @@ export const MilestoneAgeScoreSchema = {
             title: 'Milestone Id'
         },
         age: {
-            anyOf: [
-                {
-                    type: 'integer'
-                },
-                {
-                    type: 'null'
-                }
-            ],
+            type: 'integer',
             title: 'Age'
         },
         count: {
@@ -508,7 +501,7 @@ export const MilestoneAgeScoreSchema = {
         }
     },
     type: 'object',
-    required: ['count', 'avg_score', 'stddev_score', 'expected_score'],
+    required: ['age', 'count', 'avg_score', 'stddev_score', 'expected_score'],
     title: 'MilestoneAgeScore'
 } as const;
 

@@ -124,7 +124,7 @@ export type MilestoneAdmin = {
 
 export type MilestoneAgeScore = {
     milestone_id?: (number | null);
-    age?: (number | null);
+    age: number;
     count: number;
     avg_score: number;
     stddev_score: number;
@@ -508,7 +508,7 @@ export type GetMilestoneAgeScoresData = {
     };
 };
 
-export type GetMilestoneAgeScoresResponse = ((MilestoneAgeScoreCollectionPublic | null));
+export type GetMilestoneAgeScoresResponse = (MilestoneAgeScoreCollectionPublic);
 
 export type GetMilestoneAgeScoresError = (HTTPValidationError);
 
