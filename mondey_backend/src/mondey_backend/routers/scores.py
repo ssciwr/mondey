@@ -132,7 +132,6 @@ def compute_milestonegroup_feedback_summary(
     # if the statistics is older than a week, we update it with the current data
     feedback: dict[int, int] = {}
     for group in groups:
-        # print("current group: ", group)
         stats = session.exec(
             select(MilestoneGroupAgeScoreCollection).where(
                 MilestoneGroupAgeScoreCollection.milestone_group_id == group
