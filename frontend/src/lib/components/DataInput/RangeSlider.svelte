@@ -32,10 +32,6 @@ function handleCentralInput(event: Event) {
 		lower = lower + (central - old_central);
 	}
 }
-
-$effect(() => {
-	console.log(lower, central, upper);
-});
 </script>
 
 <div class={"relative w-full h-12 " + divClass}>

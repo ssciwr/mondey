@@ -77,26 +77,29 @@ async function deleteMilestoneImageAndUpdate() {
 	}
 }
 
-let lower_age_bound = $derived(
-	milestone !== null
-		? milestone.expected_age_months - milestone.expected_age_months_minus
-		: 0,
-);
-let upper_age_bound = $derived(
-	milestone !== null
-		? milestone.expected_age_months + milestone.expected_age_months_plus
-		: 0,
-);
+let lower_age_bound = $state(0);
+let upper_age_bound = $state(0);
+
 $effect(() => {
 	if (milestone !== null) {
-		console.log(
-			"data: ",
-			milestone,
-			lower_age_bound,
-			upper_age_bound,
-			milestone?.expected_age_months,
-		);
+		milestone.expected_age_months - milestone.expected_age_months_minus;
 	}
+});
+
+$effect(() => {
+	if (milestone !== null) {
+		milestone.expected_age_months + milestone.expected_age_months_plus;
+	}
+});
+
+$effect(() => {
+	console.log(
+		"data: ",
+		milestone,
+		lower_age_bound,
+		upper_age_bound,
+		milestone?.expected_age_months,
+	);
 });
 </script>
 
