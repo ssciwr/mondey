@@ -15,11 +15,15 @@ from fastapi_users.authentication import CookieTransport
 from fastapi_users.authentication.strategy.db import AccessTokenDatabase
 from fastapi_users.authentication.strategy.db import DatabaseStrategy
 from fastapi_users.db import SQLAlchemyUserDatabase
+from sqlmodel import Session
 
+from .databases.mondey import engine as mondey_engine
 from .databases.users import AccessToken
 from .databases.users import User
+from .databases.users import async_session_maker
 from .databases.users import get_access_token_db
 from .databases.users import get_user_db
+from .models.research import ResearchGroup
 from .settings import app_settings
 
 
@@ -41,6 +45,16 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
 
     async def on_after_register(self, user: User, request: Request | None = None):
         logging.info(f"User {user.email} registered.")
+        with Session(mondey_engine) as mondey_session:
+            if mondey_session.get(ResearchGroup, user.research_group_id) is None:
+                logging.warning(
+                    f"Invalid research code {user.research_group_id} used by User {user.email} - ignoring."
+                )
+                async with async_session_maker() as user_session:
+                    user_db = await user_session.get(User, user.id)
+                    if user_db is not None:
+                        user_db.research_group_id = 0
+                    await user_session.commit()
         await self.request_verify(user, request)
 
     async def on_after_forgot_password(

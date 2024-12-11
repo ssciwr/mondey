@@ -140,6 +140,7 @@ async def user_session(
             for k, v in user_read.model_dump().items():
                 setattr(user, k, v)
             session.add(user)
+        await session.commit()
         yield session
 
 
