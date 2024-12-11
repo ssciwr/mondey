@@ -424,10 +424,6 @@ export type CreateMilestoneData = {
     path: {
         milestone_group_id: number;
     };
-    query: {
-        expected_age_months_minus: number;
-        expected_age_months_plus: number;
-    };
 };
 
 export type CreateMilestoneResponse = (MilestoneAdmin);
