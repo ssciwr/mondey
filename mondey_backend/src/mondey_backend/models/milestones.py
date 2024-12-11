@@ -103,8 +103,8 @@ class Milestone(SQLModel, table=True):
     group: MilestoneGroup = back_populates("milestones")
     text: Mapped[dict[str, MilestoneText]] = dict_relationship(key="lang_id")
     images: Mapped[list[MilestoneImage]] = back_populates("milestone")
-    expected_age_months_minus: int = 6
-    expected_age_months_plus: int = 18
+    expected_age_months_minus: int = 11
+    expected_age_months_plus: int = 13
 
 
 class MilestonePublic(SQLModel):
