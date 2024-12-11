@@ -123,12 +123,15 @@ async def user_session(
     active_research_user: UserRead,
     active_user: UserRead,
     active_user2: UserRead,
+    monkeypatch: pytest.MonkeyPatch,
 ):
     # use a new in-memory SQLite user database for each test
     engine = create_async_engine("sqlite+aiosqlite://")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
+    # we also need to monkey patch the async_session_maker which is directly used in the users module
+    monkeypatch.setattr("mondey_backend.users.async_session_maker", async_session_maker)
     async with async_session_maker() as session:
         for user_read in [
             active_admin_user,
@@ -145,7 +148,7 @@ async def user_session(
 
 
 @pytest.fixture
-def session(children: list[dict]):
+def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
     # use a new in-memory SQLite database for each test
     engine = create_engine(
         "sqlite://",
@@ -154,6 +157,8 @@ def session(children: list[dict]):
         echo=False,
     )
     SQLModel.metadata.create_all(engine)
+    # we also need to monkey patch the mondey_engine which is directly used in the users module
+    monkeypatch.setattr("mondey_backend.users.mondey_engine", engine)
     # add some test data
     with Session(engine) as session:
         # add 3 languages

@@ -44,3 +44,31 @@ def test_register_new_user(public_client: TestClient, smtp_mock: SMTPMock):
     token = msg.get_content().split("\n\n")[1].rsplit("/")[-1]
     response = public_client.post("/auth/verify", json={"token": token})
     assert response.status_code == 200
+
+
+def test_register_new_user_invalid_research_code_ignored(
+    admin_client: TestClient, smtp_mock: SMTPMock
+):
+    email = "a@b.com"
+    response = admin_client.post(
+        "/auth/register",
+        json={"email": email, "password": "p1", "research_group_id": 703207},
+    )
+    assert response.status_code == 201
+    new_user = admin_client.get("/admin/users/").json()[-1]
+    assert new_user["email"] == email
+    assert new_user["research_group_id"] == 0
+
+
+def test_register_new_user_valid_research_code(
+    admin_client: TestClient, smtp_mock: SMTPMock
+):
+    email = "a@b.com"
+    response = admin_client.post(
+        "/auth/register",
+        json={"email": email, "password": "p1", "research_group_id": 123451},
+    )
+    assert response.status_code == 201
+    new_user = admin_client.get("/admin/users/").json()[-1]
+    assert new_user["email"] == email
+    assert new_user["research_group_id"] == 123451
