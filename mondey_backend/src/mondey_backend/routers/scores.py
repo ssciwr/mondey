@@ -6,7 +6,6 @@ from enum import Enum
 from typing import cast
 
 import numpy as np
-from sqlmodel import select
 
 from ..dependencies import SessionDep
 from ..models.children import Child
@@ -23,8 +22,9 @@ from .utils import get_child_age_in_months
 class TrafficLight(Enum):
     """
     Enum for the trafficlight feedback.
-    Includes -1 for red, 0 for yellow, and 1 for green.
-    Invalid is -2 and is included for edge cases.
+    Includes -2 for red, -1 for overall yellow but with red minimum score (yellowWithCaveat), 0 for yellow, and 1 for green with yellow minimum score (greenWithCaveat). 2 is green overall.
+
+    Invalid is -3 and is included for edge cases like no data.
     """
 
     invalid = -3
@@ -132,12 +132,7 @@ def compute_milestonegroup_feedback_summary(
     # if the statistics is older than a week, we update it with the current data
     feedback: dict[int, int] = {}
     for group in groups:
-        # print("current group: ", group)
-        stats = session.exec(
-            select(MilestoneGroupAgeScoreCollection).where(
-                MilestoneGroupAgeScoreCollection.milestone_group_id == group
-            )
-        ).first()
+        stats = session.get(MilestoneGroupAgeScoreCollection, group)
         # if stats is not None:
 
         if stats is None or stats.created_at < today - timedelta(days=7):
@@ -153,6 +148,7 @@ def compute_milestonegroup_feedback_summary(
             session.merge(new_stats)
             session.commit()
             stats = new_stats
+
         # extract the answers for the current milestone group
         group_answers = [
             answer.answer + 1
@@ -208,12 +204,7 @@ def compute_milestonegroup_feedback_detailed(
     for milestone_id, answer in answersession.answers.items():
         # try to get statistics for the current milestone and update it if it's not there
         # or is too old
-
-        stats = session.exec(
-            select(MilestoneAgeScoreCollection).where(
-                MilestoneAgeScoreCollection.milestone_id == milestone_id
-            )
-        ).first()
+        stats = session.get(MilestoneAgeScoreCollection, milestone_id)
 
         if stats is None or stats.created_at < today - timedelta(days=7):
             new_stats = calculate_milestone_statistics_by_age(session, milestone_id)

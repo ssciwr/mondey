@@ -196,7 +196,9 @@ class MilestoneAgeScore(SQLModel, table=True):
 
 
 class MilestoneAgeScoreCollection(SQLModel, table=True):
-    milestone_id: int = Field(default=None, primary_key=True)
+    milestone_id: int = Field(
+        default=None, primary_key=True, foreign_key="milestone.id"
+    )
     expected_age: int
     scores: Mapped[list[MilestoneAgeScore]] = back_populates("collection")
     created_at: datetime.datetime = Field(
@@ -227,7 +229,9 @@ class MilestoneGroupAgeScore(SQLModel, table=True):
 
 
 class MilestoneGroupAgeScoreCollection(SQLModel, table=True):
-    milestone_group_id: int = Field(default=None, primary_key=True)
+    milestone_group_id: int = Field(
+        default=None, primary_key=True, foreign_key="milestonegroup.id"
+    )
     scores: Mapped[list[MilestoneGroupAgeScore]] = back_populates("collection")
     created_at: datetime.datetime = Field(
         sa_column_kwargs={

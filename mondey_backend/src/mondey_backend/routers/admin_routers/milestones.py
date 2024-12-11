@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter
+from fastapi import HTTPException
 from fastapi import UploadFile
 from sqlmodel import col
 from sqlmodel import select
@@ -179,12 +180,19 @@ def create_router() -> APIRouter:
 
     @router.get(
         "/milestone-age-scores/{milestone_id}",
-        response_model=MilestoneAgeScoreCollectionPublic | None,
+        response_model=MilestoneAgeScoreCollectionPublic,
     )
     def get_milestone_age_scores(
         session: SessionDep, milestone_id: int
-    ) -> MilestoneAgeScoreCollection | None:
+    ) -> MilestoneAgeScoreCollection:
         collection = session.get(MilestoneAgeScoreCollection, milestone_id)
+
+        if collection is None:
+            raise HTTPException(
+                404,
+                detail='"No milestone age score collection with id: ", milestone_id',
+            )
+
         return collection
 
     return router

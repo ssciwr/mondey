@@ -269,7 +269,7 @@ def create_router() -> APIRouter:
         session: SessionDep,
         answersession_id: int,
     ) -> dict[int, int]:
-        answersession = session.get(MilestoneAnswerSession, answersession_id)
+        answersession = get(session, MilestoneAnswerSession, answersession_id)
         if answersession is None:
             raise HTTPException(404, detail="Answer session not found")
         child_id = answersession.child_id

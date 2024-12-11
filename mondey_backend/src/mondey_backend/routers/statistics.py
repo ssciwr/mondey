@@ -27,7 +27,7 @@ def _add_sample(
     mean: float | int,
     m2: float | int,
     new_value: float | int,
-) -> tuple[float | int, float | int, float | int]:
+) -> tuple[int, float | int, float | int]:
     """
     Add a sample to the the current statistics. This function uses an online algorithm to compute the mean (directly) and an intermediate for the variance. This uses Welford's method with a slight
     modification to avoid numerical instability. See https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
@@ -176,7 +176,8 @@ def _get_statistics_by_age(
 
 
 def calculate_milestone_statistics_by_age(
-    session: SessionDep, milestone_id: int, session_expired_days: int = 7
+    session: SessionDep,
+    milestone_id: int,
 ) -> MilestoneAgeScoreCollection | None:
     """
     Calculate the mean, variance of a milestone per age in months.
@@ -188,21 +189,17 @@ def calculate_milestone_statistics_by_age(
         database session
     milestone_id : int
         id of the milestone to calculate the statistics for
-    session_expired_days : int, optional
-        expiration age of an answersession, by default 7
-
     Returns
     -------
     MilestoneAgeScoreCollection | None
         MilestoneAgeScoreCollection object which contains a list of MilestoneAgeScore objects,
     one for each month, or None if there are no answers for the milestoneg and no previous statistics.
     """
+    # TODO: when the answersession eventually has an expired flag, this can go again.
+    session_expired_days: int = 7
+
     # get the newest statistics for the milestone
-    last_statistics = session.exec(
-        select(MilestoneAgeScoreCollection)
-        .where(col(MilestoneAgeScoreCollection.milestone_id) == milestone_id)
-        .order_by(col(MilestoneAgeScoreCollection.created_at).desc())
-    ).first()
+    last_statistics = session.get(MilestoneAgeScoreCollection, milestone_id)
 
     # initialize avg and stddev scores with the last known statistics or to None if no statistics are available
     child_ages = _get_answer_session_child_ages_in_months(session)
@@ -217,14 +214,11 @@ def calculate_milestone_statistics_by_age(
     if last_statistics is None:
         # no statistics exists yet -> all answers from expired sessions are relevant
 
-        # README: type: ignore here because mypy flags the second argument, but the documentation of sqlquery has
-        # boolean conditions: https://docs.sqlalchemy.org/en/20/orm/queryguide/api.html#sqlalchemy.orm.join
-        # the code-docstring of this function has it as example as well: selectable.py
         answers_query = (
             select(MilestoneAnswer)
             .join(
                 MilestoneAnswerSession,
-                MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,  # type: ignore
+                col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
             )
             .where(MilestoneAnswer.milestone_id == milestone_id)
             .where(MilestoneAnswerSession.created_at < expiration_date)
@@ -242,13 +236,13 @@ def calculate_milestone_statistics_by_age(
             select(MilestoneAnswer)
             .join(
                 MilestoneAnswerSession,
-                MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,  # type: ignore
+                col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
             )
             .where(MilestoneAnswer.milestone_id == milestone_id)
             .where(
                 and_(
-                    MilestoneAnswerSession.created_at > last_statistics.created_at,  # type: ignore
-                    MilestoneAnswerSession.created_at <= expiration_date,  # type: ignore
+                    col(MilestoneAnswerSession.created_at) > last_statistics.created_at,
+                    col(MilestoneAnswerSession.created_at) <= expiration_date,
                 )  # expired session only which are not in the last statistics
             )
         )
@@ -287,7 +281,8 @@ def calculate_milestone_statistics_by_age(
 
 
 def calculate_milestonegroup_statistics_by_age(
-    session: SessionDep, milestonegroup_id: int, session_expired_days: int = 7
+    session: SessionDep,
+    milestonegroup_id: int,
 ) -> MilestoneGroupAgeScoreCollection | None:
     """
     Calculate the mean, variance of a milestonegroup per age in months.
@@ -299,8 +294,6 @@ def calculate_milestonegroup_statistics_by_age(
         database session
     milestonegroup_id : int
         id of the milestonegroup to calculate the statistics for
-    session_expired_days : int, optional
-        expiration age of an answersession, by default 7
 
     Returns
     -------
@@ -308,15 +301,12 @@ def calculate_milestonegroup_statistics_by_age(
         MilestoneGroupAgeScoreCollection object which contains a list of MilestoneGroupAgeScore objects,
     one for each month, or None if there are no answers for the milestonegroup and no previous statistics.
     """
+
+    # TODO: when the answersession eventually has an 'expired' flag, this can go again.
+    session_expired_days: int = 7
+
     # get the newest statistics for the milestonegroup
-    last_statistics = session.exec(
-        select(MilestoneGroupAgeScoreCollection)
-        .where(
-            col(MilestoneGroupAgeScoreCollection.milestone_group_id)
-            == milestonegroup_id
-        )
-        .order_by(col(MilestoneGroupAgeScoreCollection.created_at).desc())
-    ).first()
+    last_statistics = session.get(MilestoneGroupAgeScoreCollection, milestonegroup_id)
 
     child_ages = _get_answer_session_child_ages_in_months(session)
     expiration_date = datetime.datetime.now() - datetime.timedelta(
@@ -333,9 +323,9 @@ def calculate_milestonegroup_statistics_by_age(
             select(MilestoneAnswer)
             .join(
                 MilestoneAnswerSession,
-                MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,  # type: ignore
+                col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
             )
-            .where(col(MilestoneAnswer.milestone_group_id) == milestonegroup_id)
+            .where(MilestoneAnswer.milestone_group_id == milestonegroup_id)
             .where(
                 MilestoneAnswerSession.created_at
                 < expiration_date  # expired session only
