@@ -120,8 +120,8 @@ export type MilestoneAdmin = {
         [key: string]: MilestoneText;
     };
     images: Array<MilestoneImage>;
-    age_months_low: number;
-    age_months_high: number;
+    expected_age_months_minus: number;
+    expected_age_months_plus: number;
 };
 
 export type MilestoneAgeScore = {
@@ -194,8 +194,8 @@ export type MilestonePublic = {
         [key: string]: MilestoneTextPublic;
     };
     images: Array<MilestoneImagePublic>;
-    age_months_low: number;
-    age_months_high: number;
+    expected_age_months_minus: number;
+    expected_age_months_plus: number;
 };
 
 export type MilestoneText = {
@@ -425,8 +425,8 @@ export type CreateMilestoneData = {
         milestone_group_id: number;
     };
     query: {
-        age_months_high: number;
-        age_months_low: number;
+        expected_age_months_minus: number;
+        expected_age_months_plus: number;
     };
 };
 
