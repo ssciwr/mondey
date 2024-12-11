@@ -179,12 +179,12 @@ def create_router() -> APIRouter:
 
     @router.get(
         "/milestone-age-scores/{milestone_id}",
-        response_model=MilestoneAgeScoreCollectionPublic | None,
+        response_model=MilestoneAgeScoreCollectionPublic,
     )
     def get_milestone_age_scores(
         session: SessionDep, milestone_id: int
-    ) -> MilestoneAgeScoreCollection | None:
-        collection = session.get(MilestoneAgeScoreCollection, milestone_id)
+    ) -> MilestoneAgeScoreCollection:
+        collection = get(session, MilestoneAgeScoreCollection, milestone_id)
         return collection
 
     return router

@@ -6,7 +6,7 @@ import {
 	getMilestoneAgeScores,
 	updateMilestone,
 } from "$lib/client/services.gen";
-import type { MilestoneAgeScores } from "$lib/client/types.gen";
+import type { MilestoneAgeScoreCollectionPublic } from "$lib/client/types.gen";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import PlotScoreAge from "$lib/components/DataDisplay/PlotScoreAge.svelte";
 import { milestoneGroups } from "$lib/stores/adminStore";
@@ -28,7 +28,9 @@ import { _, locale } from "svelte-i18n";
 let currentMilestoneId = $state(null as number | null);
 let showMilestoneExpectedAgeModal = $state(false);
 let currentTitle = $state("");
-let expectedAges = $state({} as Record<number, MilestoneAgeScores>);
+let expectedAges = $state(
+	{} as Record<number, MilestoneAgeScoreCollectionPublic>,
+);
 let calculateProgress = $state(0);
 let saveProgress = $state(0);
 
