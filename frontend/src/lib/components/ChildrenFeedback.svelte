@@ -152,27 +152,27 @@ const promise = setup();
 	<div class="text-gray-700 dark:text-gray-400 items-center flex justify-center space-x-2 p-2 m-2">
 		{#if summarizeFeedback(value) === 2}
 			{#if with_text === true}
-				<p >{$_("childData.recommendOk")}</p>
+				<p >{$_("milestone.recommendOk")}</p>
 			{/if}
 			<CheckCircleSolid color = "green" size="xl"/>
 		{:else if summarizeFeedback(value) === 1}
 			{#if with_text === true}
-				<p>{$_("childData.recommendOkWithCaveat")}</p>
+				<p>{$_("milestone.recommendOkWithCaveat")}</p>
 			{/if}
 			<EyeSolid color = "green" size="xl"/>
 		{:else if summarizeFeedback(value) === 0}
 			{#if with_text === true}
-				<p>{$_("childData.recommendWatch")}</p>
+				<p>{$_("milestone.recommendWatch")}</p>
 			{/if}
 			<BellActiveSolid color = "orange" size="xl"/>
 		{:else if summarizeFeedback(value) === -1}
 			{#if with_text === true}
-				<p>{$_("childData.recommendWatchWithCaveat")}</p>
+				<p>{$_("milestone.recommendWatchWithCaveat")}</p>
 			{/if}
 			<ExclamationCircleSolid color = "orange" size="xl"/>
 		{:else}
 			{#if with_text === true}
-				<p>{$_("childData.recommmendHelp")}</p>
+				<p>{$_("milestone.recommmendHelp")}</p>
 			{/if}
 			<CloseCircleSolid color = "red" size="xl"/>
 		{/if}
@@ -229,46 +229,46 @@ const promise = setup();
 {:then}
 	<Heading tag="h2" class = "text-gray-700 dark:text-gray-400 items-center p-2 m-2 pb-4">{$_("milestone.feedbackTitle")} </Heading>
 
-	<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{$_("childData.feedbackExplanation")}</p>
+	<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{$_("milestone.feedbackExplanation")}</p>
 
-	<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory}>{$_("childData.showHistory")}</Checkbox>
+	<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory}>{$_("milestone.showHistory")}</Checkbox>
 	<Hr classHr= "mx-2"/>
 
 	<Accordion>
 		<AccordionItem>
 			<span slot="header" class = "text-gray-700 dark:text-gray-400 items-center flex justify-center space-x-2" >
 				<span class = "font-bold" >
-					{$_("childData.legend")}
+					{$_("milestone.legend")}
 				</span>
 			</span>
 			<div class="flex flex-col sm:flex-row text-gray-700 dark:text-gray-400 items-start p-2 m-2 justify-center">
 				<div class = "mx-2 px-2">
 					<CheckCircleSolid color = "green" size="xl" class="mx-2"/>
-					<p>{$_("childData.recommendOk")}</p>
+					<p>{$_("milestone.recommendOk")}</p>
 					<Hr classHr= "mx-2 items-end"/>
 				</div>
 
 				<div class = "mx-2 px-2">
 					<EyeSolid color = "green" size="xl" class="mx-2"/>
-					<p>{$_("childData.recommendOkWithCaveat")}</p>
+					<p>{$_("milestone.recommendOkWithCaveat")}</p>
 					<Hr classHr= "mx-2 items-end"/>
 				</div>
 
 				<div class = "mx-2 px-2">
 					<BellActiveSolid color = "orange" size="xl" class="mx-2"/>
-					<p>{$_("childData.recommendWatch")}</p>
+					<p>{$_("milestone.recommendWatch")}</p>
 					<Hr classHr= "mx-2 items-end"/>
 				</div>
 
 				<div class = "mx-2 px-2">
 					<ExclamationCircleSolid color = "orange" size="xl" class="mx-2"/>
-					<p>{$_("childData.recommendWatchWithCaveat")}</p>
+					<p>{$_("milestone.recommendWatchWithCaveat")}</p>
 					<Hr classHr= "mx-2 items-end"/>
 				</div>
 
 				<div class = "mx-2 px-2">
 					<CloseCircleSolid color = "red" size="xl" class="mx-2"/>
-					<p>{$_("childData.recommmendHelp")}</p>
+					<p>{$_("milestone.recommmendHelp")}</p>
 					<Hr classHr= "mx-2 items-end"/>
 				</div>
 

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter
 from fastapi import HTTPException
 from fastapi import UploadFile
@@ -132,6 +134,10 @@ def create_router() -> APIRouter:
         milestone_answer_session = get_or_create_current_milestone_answer_session(
             session, current_active_user, child
         )
+        logger = logging.getLogger(__name__)
+        logger.info(f"milestones: {milestone_answer_session.answers}")
+        logger.info(f"session: {milestone_answer_session}")
+
         return milestone_answer_session
 
     @router.put(

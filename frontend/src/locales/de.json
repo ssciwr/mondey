@@ -19,7 +19,16 @@
 		"alertMessageError": "Ein Fehler ist aufgetreten",
 		"submit-image": "Bild einreichen",
 		"submit-image-text": "Haben Sie ein Bild von Ihrem Kind bei diesem Meilenstein, das Sie gerne beisteuern und veröffentlichen möchten? Wenn ja, können Sie es hier einreichen.",
-		"submit-image-conditions": "Ich bin damit einverstanden, dass dieses Bild veröffentlicht und den Benutzern als eines der Meilensteinbilder auf dieser Website angezeigt wird, sofern es von den Site-Administratoren genehmigt wird."
+		"submit-image-conditions": "Ich bin damit einverstanden, dass dieses Bild veröffentlicht und den Benutzern als eines der Meilensteinbilder auf dieser Website angezeigt wird, sofern es von den Site-Administratoren genehmigt wird.",
+		"feedbackTitle": "Feedback zur Entwicklung",
+		"recommendOk": "Entwicklung des Kindes ist altersgemäß.",
+		"recommendOkWithCaveat": "Entwicklung des Kindes ist altersgemäß, aber einzelne Meilensteine sollten besonders beobachtet und eventuell gefördert werden",
+		"recommendWatch": "Entwicklung des Kindes ist leicht verzögert und sollte beobachtet werden um gegebenfalls gezielt einzelne Bereiche zu fördern.",
+		"recommendWatchWithCaveat": "Entwicklung des Kindes ist nicht ganz altersgemäß und sollte genau beobachtet werden. Einzelne Bereiche sollten besonders gefördert werden.",
+		"recommmendHelp": "Entwicklung des Kindes ist signifikant verzögert und sollte gefördert werden. Professionelle Hilfe kann notwendig sein.",
+		"showHistory": "Feedback zu vorherigen Beobachtungszeiträumen anzeigen.",
+		"legend": "Erklärung zu den einzelnen Symbolen",
+		"feedbackExplanation": "Hier sehen sie wie sich das Kind im Vergleich zum Durchschnitt entwickelt. Die Farben und Symbole zeigen an, ob das Kind altersgemäß entwickelt ist oder ob es in einzelnen Bereichen Unterstützung benötigt. Durch setzen des Hakens unten können sie vergangene Beobachtungszeiträume einsehen und so die Entwicklung des Kindes über einen längeren Zeitraum verfolgen."
 	},
 	"search": {
 		"allLabel": "Alle",
@@ -170,7 +179,8 @@
 		"imageOfChildChangeDelete": "Das aktuelle Bild wurde gelöscht",
 		"noFileChosen": "Keine Datei ausgewählt",
 		"deleteImageButton": "Bild löschen",
-		"nextButtonLabel": "Weiter zu Meilensteinen"
+		"nextButtonLabel": "Weiter zu Meilensteinen",
+		"feedbackButtonLabel": "Feedback zur Entwicklung"
 	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",

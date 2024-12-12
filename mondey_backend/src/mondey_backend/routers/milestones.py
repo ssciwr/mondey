@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter
 from fastapi import UploadFile
 from sqlalchemy.orm import lazyload
@@ -67,6 +69,12 @@ def create_router() -> APIRouter:
                 )
             )
         ).all()
+
+        logger = logging.getLogger(__name__)
+        logger.info(f"milestone_groups: {milestone_groups}")
+        logger.info(
+            f"milestone groups milestones: {[mg.milestones for mg in milestone_groups]}"
+        )
 
         return milestone_groups
 
