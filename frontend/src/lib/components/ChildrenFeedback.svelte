@@ -2,11 +2,8 @@
 <script lang="ts">
 import {
 	type MilestoneAnswerSessionPublic,
-	type MilestonePublic,
 	type ValidationError,
-	getDetailedFeedbackForMilestonegroup,
 	getExpiredMilestoneAnswerSessions,
-	getMilestonegroupsForSession,
 	getSummaryFeedbackForAnswersession,
 } from "$lib/client";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
@@ -16,11 +13,9 @@ import { user } from "$lib/stores/userStore.svelte";
 import {
 	Accordion,
 	AccordionItem,
-	Button,
 	Checkbox,
 	Heading,
 	Hr,
-	Popover,
 	Spinner,
 	Timeline,
 	TimelineItem,
@@ -35,7 +30,7 @@ import {
 	EyeSolid,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
-import { _, locale } from "svelte-i18n";
+import { _ } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
 let showAlert = $state(false);
@@ -43,7 +38,8 @@ let alertMessage = $state(
 	$_("childData.alertMessageError") as string | ValidationError[] | undefined,
 );
 let answerSessions = $state({} as Record<number, MilestoneAnswerSessionPublic>);
-let feedbackPerAnswersession = $state({} as Record<number, any>);
+let summaryFeedbackPerAnswersession = $state({} as Record<number, any>);
+let detailedFeedbackPerAnswersession = $state({} as Record<number, any>);
 let milestoneGroups = $state({} as Record<number, any>);
 let sessionkeys = $state([] as number[]);
 let showHistory = $state(false);
@@ -98,42 +94,27 @@ async function setup(): Promise<void> {
 			alertMessage = responseFeedback.error.detail;
 			return;
 		}
-		feedbackPerAnswersession[Number(aid)] = responseFeedback.data;
-
-		const milestoneGroupResponse = await getMilestonegroupsForSession({
-			path: {
-				answersession_id: Number(aid),
-			},
-		});
-
-		if (milestoneGroupResponse.error) {
-			showAlert = true;
-			alertMessage = milestoneGroupResponse.error.detail;
-			return;
-		}
-		milestoneGroups[Number(aid)] = milestoneGroupResponse.data;
+		summaryFeedbackPerAnswersession[Number(aid)] = responseFeedback.data;
 	}
 }
 
-async function getDetailed(
-	aid: number,
-	mid: number,
-): Promise<Record<string, number>> {
-	const response = await getDetailedFeedbackForMilestonegroup({
-		path: {
-			answersession_id: aid,
-			milestonegroup_id: mid,
-		},
-	});
+// async function getDetailed(
+// 	aid: number,
+// ): Promise<Record<string, Record<string, number>>> {
+// 	const response = await getDetailedFeedbackForAnswersession({
+// 		path: {
+// 			answersession_id: aid,
+// 		},
+// 	});
 
-	if (response.error) {
-		showAlert = true;
-		alertMessage = response.error.detail;
-		return {};
-	}
+// 	if (response.error) {
+// 		showAlert = true;
+// 		alertMessage = response.error.detail;
+// 		return {};
+// 	}
 
-	return response.data;
-}
+// 	return response.data;
+// }
 
 function formatDate(date: string): string {
 	const dateObj = new Date(date);
@@ -144,15 +125,15 @@ function formatDate(date: string): string {
 	].join("-");
 }
 
-function evaluate(v: number): number {
-	if (v < 0) {
-		return -1;
-	}
-	if (v === 0) {
-		return 0;
-	}
-	return 1;
-}
+// function evaluate(v: number): number {
+// 	if (v < 0) {
+// 		return -1;
+// 	}
+// 	if (v === 0) {
+// 		return 0;
+// 	}
+// 	return 1;
+// }
 
 function summarizeFeedback(feedback: Record<number, number> | number): number {
 	if (typeof feedback === "number") {
@@ -163,7 +144,7 @@ function summarizeFeedback(feedback: Record<number, number> | number): number {
 
 	return minscore;
 }
-// FIXME: add something that explains the scale!
+
 const promise = setup();
 </script>
 
@@ -197,7 +178,7 @@ const promise = setup();
 		{/if}
 	</div>
 {/snippet}
-
+<!--
 {#snippet detailedEvaluation(milestone: MilestonePublic, ms_score: number, )}
 	<div class = "flex flex-col sm:flex-row text-gray-700 dark:text-gray-400 items-center justify-start space-x-2 p-2 m-2">
 		{#if evaluate(ms_score) >=1 }
@@ -229,7 +210,7 @@ const promise = setup();
 			</span>
 		{/if}
 	</div>
-{/snippet}
+{/snippet} -->
 
 
 <Breadcrumbs data={breadcrumbdata} />
@@ -310,10 +291,11 @@ const promise = setup();
 						</svelte:fragment>
 
 						<Hr classHr= "mx-2"/>
-
+<!--
 						<Accordion class="p-2 m-2">
-							{#each Object.entries(feedbackPerAnswersession[aid]) as [mid, score]}
-								{#await getDetailed(aid, Number(mid))}
+							{#each Object.entries(summaryFeedbackPerAnswersession[aid]) as [mid, score]}
+								{console.log('mid: ', mid, 'score: ', score)}
+								{#await getDetailed(aid)}
 									<Spinner /> <p>{$_("childData.loadingMessage")}</p>
 								{:then detailed}
 									<AccordionItem >
@@ -341,7 +323,7 @@ const promise = setup();
 									/>
 								{/await}
 							{/each}
-						</Accordion>
+						</Accordion> -->
 					</TimelineItem>
 				{/if}
 			{/each}

@@ -157,101 +157,6 @@
 				}
 			}
 		},
-		"/age-intervals": {
-			"get": {
-				"tags": ["milestones"],
-				"summary": "Get Age Intervals",
-				"operationId": "get_age_intervals",
-				"responses": {
-					"200": {
-						"description": "Successful Response",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "array",
-									"items": { "$ref": "#/components/schemas/AgeInterval" },
-									"title": "Response Get Age Intervals Age Intervals Get"
-								}
-							}
-						}
-					}
-				}
-			},
-			"post": {
-				"tags": ["milestones"],
-				"summary": "Create Age Interval",
-				"operationId": "create_age_interval",
-				"parameters": [
-					{
-						"name": "low",
-						"in": "query",
-						"required": true,
-						"schema": { "type": "integer", "title": "Low" }
-					},
-					{
-						"name": "high",
-						"in": "query",
-						"required": true,
-						"schema": { "type": "integer", "title": "High" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Successful Response",
-						"content": { "application/json": { "schema": {} } }
-					},
-					"422": {
-						"description": "Validation Error",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-							}
-						}
-					}
-				}
-			}
-		},
-		"/age-intervals/{age_interval_id}": {
-			"put": {
-				"tags": ["milestones"],
-				"summary": "Update Age Interval",
-				"operationId": "update_age_interval",
-				"parameters": [
-					{
-						"name": "age_interval_id",
-						"in": "path",
-						"required": true,
-						"schema": { "type": "integer", "title": "Age Interval Id" }
-					},
-					{
-						"name": "low",
-						"in": "query",
-						"required": true,
-						"schema": { "type": "integer", "title": "Low" }
-					},
-					{
-						"name": "high",
-						"in": "query",
-						"required": true,
-						"schema": { "type": "integer", "title": "High" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Successful Response",
-						"content": { "application/json": { "schema": {} } }
-					},
-					"422": {
-						"description": "Validation Error",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-							}
-						}
-					}
-				}
-			}
-		},
 		"/user-questions/": {
 			"get": {
 				"tags": ["questions"],
@@ -900,7 +805,9 @@
 						"description": "Successful Response",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/MilestoneAgeScores" }
+								"schema": {
+									"$ref": "#/components/schemas/MilestoneAgeScoreCollectionPublic"
+								}
 							}
 						}
 					},
@@ -1205,6 +1112,92 @@
 					}
 				},
 				"security": [{ "APIKeyCookie": [] }]
+			}
+		},
+		"/admin/research-groups/": {
+			"get": {
+				"tags": ["admin"],
+				"summary": "Get Research Groups",
+				"operationId": "get_research_groups",
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": { "$ref": "#/components/schemas/ResearchGroup" },
+									"type": "array",
+									"title": "Response Get Research Groups Admin Research Groups  Get"
+								}
+							}
+						}
+					}
+				},
+				"security": [{ "APIKeyCookie": [] }]
+			}
+		},
+		"/admin/research-groups/{user_id}": {
+			"post": {
+				"tags": ["admin"],
+				"summary": "Create Research Group",
+				"operationId": "create_research_group",
+				"security": [{ "APIKeyCookie": [] }],
+				"parameters": [
+					{
+						"name": "user_id",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "integer", "title": "User Id" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ResearchGroup" }
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/admin/research-groups/{research_group_id}": {
+			"delete": {
+				"tags": ["admin"],
+				"summary": "Delete Research Group",
+				"operationId": "delete_research_group",
+				"security": [{ "APIKeyCookie": [] }],
+				"parameters": [
+					{
+						"name": "research_group_id",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "integer", "title": "Research Group Id" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": { "application/json": { "schema": {} } }
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+							}
+						}
+					}
+				}
 			}
 		},
 		"/users/me": {
@@ -1881,6 +1874,162 @@
 				}
 			}
 		},
+		"/users/milestone-answers-sessions/{child_id}": {
+			"get": {
+				"tags": ["users"],
+				"summary": "Get Expired Milestone Answer Sessions",
+				"operationId": "get_expired_milestone_answer_sessions",
+				"security": [{ "APIKeyCookie": [] }],
+				"parameters": [
+					{
+						"name": "child_id",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "integer", "title": "Child Id" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"additionalProperties": {
+										"$ref": "#/components/schemas/MilestoneAnswerSessionPublic"
+									},
+									"title": "Response Get Expired Milestone Answer Sessions Users Milestone Answers Sessions  Child Id  Get"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/users/feedback/answersession={answersession_id}": {
+			"get": {
+				"tags": ["users"],
+				"summary": "Get Milestonegroups For Session",
+				"operationId": "get_milestonegroups_for_session",
+				"parameters": [
+					{
+						"name": "answersession_id",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "integer", "title": "Answersession Id" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"additionalProperties": {
+										"$ref": "#/components/schemas/MilestoneGroupPublic"
+									},
+									"title": "Response Get Milestonegroups For Session Users Feedback Answersession  Answersession Id  Get"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/users/feedback/answersession={answersession_id}/summary": {
+			"get": {
+				"tags": ["users"],
+				"summary": "Get Summary Feedback For Answersession",
+				"operationId": "get_summary_feedback_for_answersession",
+				"parameters": [
+					{
+						"name": "answersession_id",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "integer", "title": "Answersession Id" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"additionalProperties": { "type": "integer" },
+									"title": "Response Get Summary Feedback For Answersession Users Feedback Answersession  Answersession Id  Summary Get"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/users/feedback/answersession={answersession_id}/detailed": {
+			"get": {
+				"tags": ["users"],
+				"summary": "Get Detailed Feedback For Answersession",
+				"operationId": "get_detailed_feedback_for_answersession",
+				"parameters": [
+					{
+						"name": "answersession_id",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "integer", "title": "Answersession Id" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"additionalProperties": {
+										"type": "object",
+										"additionalProperties": { "type": "integer" }
+									},
+									"title": "Response Get Detailed Feedback For Answersession Users Feedback Answersession  Answersession Id  Detailed Get"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+							}
+						}
+					}
+				}
+			}
+		},
 		"/auth/login": {
 			"post": {
 				"tags": ["auth"],
@@ -2189,16 +2338,6 @@
 	},
 	"components": {
 		"schemas": {
-			"AgeInterval": {
-				"properties": {
-					"id": { "type": "integer", "title": "Id" },
-					"lower_limit": { "type": "integer", "title": "Lower Limit" },
-					"upper_limit": { "type": "integer", "title": "Upper Limit" }
-				},
-				"type": "object",
-				"required": ["lower_limit", "upper_limit"],
-				"title": "AgeInterval"
-			},
 			"Body_auth_cookie_login_auth_login_post": {
 				"properties": {
 					"grant_type": {
@@ -2461,8 +2600,7 @@
 						"items": { "$ref": "#/components/schemas/MilestoneImage" },
 						"type": "array",
 						"title": "Images"
-					},
-					"age_interval": { "type": "integer", "title": "Age Interval" }
+					}
 				},
 				"type": "object",
 				"required": [
@@ -2477,26 +2615,44 @@
 			},
 			"MilestoneAgeScore": {
 				"properties": {
-					"age_months": { "type": "integer", "title": "Age Months" },
+					"milestone_id": {
+						"anyOf": [{ "type": "integer" }, { "type": "null" }],
+						"title": "Milestone Id"
+					},
+					"age": { "type": "integer", "title": "Age" },
+					"count": { "type": "integer", "title": "Count" },
 					"avg_score": { "type": "number", "title": "Avg Score" },
+					"stddev_score": { "type": "number", "title": "Stddev Score" },
 					"expected_score": { "type": "number", "title": "Expected Score" }
 				},
 				"type": "object",
-				"required": ["age_months", "avg_score", "expected_score"],
+				"required": [
+					"age",
+					"count",
+					"avg_score",
+					"stddev_score",
+					"expected_score"
+				],
 				"title": "MilestoneAgeScore"
 			},
-			"MilestoneAgeScores": {
+			"MilestoneAgeScoreCollectionPublic": {
 				"properties": {
+					"milestone_id": { "type": "integer", "title": "Milestone Id" },
+					"expected_age": { "type": "integer", "title": "Expected Age" },
 					"scores": {
 						"items": { "$ref": "#/components/schemas/MilestoneAgeScore" },
 						"type": "array",
 						"title": "Scores"
 					},
-					"expected_age": { "type": "integer", "title": "Expected Age" }
+					"created_at": {
+						"type": "string",
+						"format": "date-time",
+						"title": "Created At"
+					}
 				},
 				"type": "object",
-				"required": ["scores", "expected_age"],
-				"title": "MilestoneAgeScores"
+				"required": ["milestone_id", "expected_age", "scores", "created_at"],
+				"title": "MilestoneAgeScoreCollectionPublic"
 			},
 			"MilestoneAnswerPublic": {
 				"properties": {
@@ -2631,8 +2787,7 @@
 						"items": { "$ref": "#/components/schemas/MilestoneImagePublic" },
 						"type": "array",
 						"title": "Images"
-					},
-					"age_interval": { "type": "integer", "title": "Age Interval" }
+					}
 				},
 				"type": "object",
 				"required": ["id", "expected_age_months", "text", "images"],
@@ -2678,6 +2833,12 @@
 				},
 				"type": "object",
 				"title": "QuestionTextPublic"
+			},
+			"ResearchGroup": {
+				"properties": { "id": { "type": "integer", "title": "Id" } },
+				"type": "object",
+				"required": ["id"],
+				"title": "ResearchGroup"
 			},
 			"SubmittedMilestoneImagePublic": {
 				"properties": {
@@ -2725,6 +2886,16 @@
 						"anyOf": [{ "type": "boolean" }, { "type": "null" }],
 						"title": "Is Researcher",
 						"default": false
+					},
+					"full_data_access": {
+						"anyOf": [{ "type": "boolean" }, { "type": "null" }],
+						"title": "Full Data Access",
+						"default": false
+					},
+					"research_group_id": {
+						"anyOf": [{ "type": "integer" }, { "type": "null" }],
+						"title": "Research Group Id",
+						"default": 0
 					}
 				},
 				"type": "object",
@@ -2827,10 +2998,24 @@
 						"title": "Is Verified",
 						"default": false
 					},
-					"is_researcher": { "type": "boolean", "title": "Is Researcher" }
+					"is_researcher": { "type": "boolean", "title": "Is Researcher" },
+					"full_data_access": {
+						"type": "boolean",
+						"title": "Full Data Access"
+					},
+					"research_group_id": {
+						"type": "integer",
+						"title": "Research Group Id"
+					}
 				},
 				"type": "object",
-				"required": ["id", "email", "is_researcher"],
+				"required": [
+					"id",
+					"email",
+					"is_researcher",
+					"full_data_access",
+					"research_group_id"
+				],
 				"title": "UserRead"
 			},
 			"UserUpdate": {
@@ -2861,6 +3046,14 @@
 					"is_researcher": {
 						"anyOf": [{ "type": "boolean" }, { "type": "null" }],
 						"title": "Is Researcher"
+					},
+					"full_data_access": {
+						"anyOf": [{ "type": "boolean" }, { "type": "null" }],
+						"title": "Full Data Access"
+					},
+					"research_group_id": {
+						"anyOf": [{ "type": "integer" }, { "type": "null" }],
+						"title": "Research Group Id"
 					}
 				},
 				"type": "object",
