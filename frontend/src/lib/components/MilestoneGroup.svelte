@@ -87,7 +87,7 @@ async function setup(): Promise<any> {
 		data = [];
 		return data;
 	}
-
+	console.log("milestonegroups.data ", milestonegroups.data);
 	data = milestonegroups.data.map((item) => {
 		const res = {
 			header: item.text ? item.text[$locale].title : undefined,
@@ -96,6 +96,8 @@ async function setup(): Promise<any> {
 			progress: computeProgress(item.milestones, answerSession.data),
 			events: {
 				onclick: () => {
+					console.log("clicked on milestone group", item.id);
+					console.log("milestone group data", item);
 					activeTabChildren.set("milestoneOverview");
 					contentStore.milestoneGroup = item.id;
 					contentStore.milestoneGroupData = item;

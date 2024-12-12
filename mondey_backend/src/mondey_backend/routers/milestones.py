@@ -58,6 +58,10 @@ def create_router() -> APIRouter:
         milestone_answer_session = get_or_create_current_milestone_answer_session(
             session, current_active_user, child
         )
+        logger = logging.getLogger("backend-1")
+
+        logger.info(f"milestone_answer_session: {milestone_answer_session}")
+
         milestone_ids = list(milestone_answer_session.answers.keys())
 
         milestone_groups = session.exec(
@@ -70,7 +74,6 @@ def create_router() -> APIRouter:
             )
         ).all()
 
-        logger = logging.getLogger(__name__)
         logger.info(f"milestone_groups: {milestone_groups}")
         logger.info(
             f"milestone groups milestones: {[mg.milestones for mg in milestone_groups]}"
