@@ -10,6 +10,7 @@ import { _ } from "svelte-i18n";
 let { items = [] } = $props();
 
 const bookmarks = [
+  
    { titleKey: $_('frontpageBookmarks.headingMotor') , contentKey: $_('frontpageBookmarks.summaryMotor') },
    { titleKey: $_('frontpageBookmarks.headingFineMotor') , contentKey: $_('frontpageBookmarks.summaryFineMotor') },
    { titleKey: $_('frontpageBookmarks.headingThinking') , contentKey: $_('frontpageBookmarks.summaryThinking') },
@@ -18,6 +19,7 @@ const bookmarks = [
    { titleKey: $_('frontpageBookmarks.headingInnerStates') , contentKey: $_('frontpageBookmarks.summaryInnerStates') },
    { titleKey: $_('frontpageBookmarks.headingSchool') , contentKey: $_('frontpageBookmarks.summarySchool') },
    ];
+
 </script>
 
 <FrontPageCard

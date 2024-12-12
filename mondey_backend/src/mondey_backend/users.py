@@ -1,8 +1,8 @@
-# TODO: 17th Oct. 2024: remove the artificial verification setting again as soon as
-# the email verification server has been implemented. See 'README' block @ line 33f
-
 from __future__ import annotations
 
+import logging
+import smtplib
+from email.message import EmailMessage
 from typing import Annotated
 
 from fastapi import Depends
@@ -15,13 +15,28 @@ from fastapi_users.authentication import CookieTransport
 from fastapi_users.authentication.strategy.db import AccessTokenDatabase
 from fastapi_users.authentication.strategy.db import DatabaseStrategy
 from fastapi_users.db import SQLAlchemyUserDatabase
+from sqlmodel import Session
 
+from .databases.mondey import engine as mondey_engine
 from .databases.users import AccessToken
 from .databases.users import User
 from .databases.users import async_session_maker
 from .databases.users import get_access_token_db
 from .databases.users import get_user_db
+from .models.research import ResearchGroup
 from .settings import app_settings
+
+
+def send_email_validation_link(email: str, token: str) -> None:
+    msg = EmailMessage()
+    msg["From"] = "no-reply@mondey.lkeegan.dev"
+    msg["To"] = email
+    msg["Subject"] = "MONDEY-Konto aktivieren"
+    msg.set_content(
+        f"Bitte klicken Sie hier, um Ihr MONDEY-Konto zu aktivieren:\n\nhttps://mondey.lkeegan.dev/verify/{token}\n\n-----\n\nPlease click here to activate your MONDEY account:\n\nhttps://mondey.lkeegan.dev/verify/{token}"
+    )
+    with smtplib.SMTP(app_settings.SMTP_HOST) as s:
+        s.send_message(msg)
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
@@ -29,18 +44,18 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     verification_token_secret = app_settings.SECRET
 
     async def on_after_register(self, user: User, request: Request | None = None):
-        # README: Sets the verified flag artificially to allow users to work without an
-        # actual verification process for now. this can go again as soon as we have an email server for verification.
-        async with async_session_maker() as session:
-            user_db = await session.get(User, user.id)
-            if user_db:
-                user_db.is_verified = True
-                await session.commit()
-                await session.refresh(user_db)
-
-                print(f"User {user_db.id} has registered.")
-                print(f"User is verified? {user_db.is_verified}")
-        # end README
+        logging.info(f"User {user.email} registered.")
+        with Session(mondey_engine) as mondey_session:
+            if mondey_session.get(ResearchGroup, user.research_group_id) is None:
+                logging.warning(
+                    f"Invalid research code {user.research_group_id} used by User {user.email} - ignoring."
+                )
+                async with async_session_maker() as user_session:
+                    user_db = await user_session.get(User, user.id)
+                    if user_db is not None:
+                        user_db.research_group_id = 0
+                    await user_session.commit()
+        await self.request_verify(user, request)
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Request | None = None
@@ -50,7 +65,10 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     async def on_after_request_verify(
         self, user: User, token: str, request: Request | None = None
     ):
-        print(f"Verification requested for user {user.id}. Verification token: {token}")
+        logging.info(
+            f"Verification requested for user {user.id}. Verification token: {token}"
+        )
+        send_email_validation_link(user.email, token)
 
 
 async def get_user_manager(

@@ -123,14 +123,19 @@ export type MilestoneAdmin = {
 };
 
 export type MilestoneAgeScore = {
-    age_months: number;
+    milestone_id?: (number | null);
+    age: number;
+    count: number;
     avg_score: number;
+    stddev_score: number;
     expected_score: number;
 };
 
-export type MilestoneAgeScores = {
-    scores: Array<MilestoneAgeScore>;
+export type MilestoneAgeScoreCollectionPublic = {
+    milestone_id: number;
     expected_age: number;
+    scores: Array<MilestoneAgeScore>;
+    created_at: string;
 };
 
 export type MilestoneAnswerPublic = {
@@ -216,6 +221,10 @@ export type QuestionTextPublic = {
     options?: string;
 };
 
+export type ResearchGroup = {
+    id: number;
+};
+
 export type SubmittedMilestoneImagePublic = {
     id: number;
     milestone_id: number;
@@ -235,6 +244,8 @@ export type UserCreate = {
     is_superuser?: (boolean | null);
     is_verified?: (boolean | null);
     is_researcher?: (boolean | null);
+    full_data_access?: (boolean | null);
+    research_group_id?: (number | null);
 };
 
 export type UserQuestionAdmin = {
@@ -274,6 +285,8 @@ export type UserRead = {
     is_superuser?: boolean;
     is_verified?: boolean;
     is_researcher: boolean;
+    full_data_access: boolean;
+    research_group_id: number;
 };
 
 export type UserUpdate = {
@@ -283,6 +296,8 @@ export type UserUpdate = {
     is_superuser?: (boolean | null);
     is_verified?: (boolean | null);
     is_researcher?: (boolean | null);
+    full_data_access?: (boolean | null);
+    research_group_id?: (number | null);
 };
 
 export type ValidationError = {
@@ -503,7 +518,7 @@ export type GetMilestoneAgeScoresData = {
     };
 };
 
-export type GetMilestoneAgeScoresResponse = (MilestoneAgeScores);
+export type GetMilestoneAgeScoresResponse = (MilestoneAgeScoreCollectionPublic);
 
 export type GetMilestoneAgeScoresError = (HTTPValidationError);
 
@@ -578,6 +593,30 @@ export type OrderChildQuestionsAdminError = (HTTPValidationError);
 export type GetUsersResponse = (Array<UserRead>);
 
 export type GetUsersError = unknown;
+
+export type GetResearchGroupsResponse = (Array<ResearchGroup>);
+
+export type GetResearchGroupsError = unknown;
+
+export type CreateResearchGroupData = {
+    path: {
+        user_id: number;
+    };
+};
+
+export type CreateResearchGroupResponse = (ResearchGroup);
+
+export type CreateResearchGroupError = (HTTPValidationError);
+
+export type DeleteResearchGroupData = {
+    path: {
+        research_group_id: number;
+    };
+};
+
+export type DeleteResearchGroupResponse = (unknown);
+
+export type DeleteResearchGroupError = (HTTPValidationError);
 
 export type UsersCurrentUserResponse = (UserRead);
 
@@ -750,6 +789,56 @@ export type UpdateCurrentChildAnswersData = {
 export type UpdateCurrentChildAnswersResponse = (unknown);
 
 export type UpdateCurrentChildAnswersError = (HTTPValidationError);
+
+export type GetExpiredMilestoneAnswerSessionsData = {
+    path: {
+        child_id: number;
+    };
+};
+
+export type GetExpiredMilestoneAnswerSessionsResponse = ({
+    [key: string]: MilestoneAnswerSessionPublic;
+});
+
+export type GetExpiredMilestoneAnswerSessionsError = (HTTPValidationError);
+
+export type GetMilestonegroupsForSessionData = {
+    path: {
+        answersession_id: number;
+    };
+};
+
+export type GetMilestonegroupsForSessionResponse = ({
+    [key: string]: MilestoneGroupPublic;
+});
+
+export type GetMilestonegroupsForSessionError = (HTTPValidationError);
+
+export type GetSummaryFeedbackForAnswersessionData = {
+    path: {
+        answersession_id: number;
+    };
+};
+
+export type GetSummaryFeedbackForAnswersessionResponse = ({
+    [key: string]: (number);
+});
+
+export type GetSummaryFeedbackForAnswersessionError = (HTTPValidationError);
+
+export type GetDetailedFeedbackForAnswersessionData = {
+    path: {
+        answersession_id: number;
+    };
+};
+
+export type GetDetailedFeedbackForAnswersessionResponse = ({
+    [key: string]: {
+        [key: string]: (number);
+    };
+});
+
+export type GetDetailedFeedbackForAnswersessionError = (HTTPValidationError);
 
 export type AuthCookieLoginData = {
     body: Body_auth_cookie_login_auth_login_post;

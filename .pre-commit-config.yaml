@@ -9,7 +9,7 @@ repos:
       - id: check-toml
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.0
+    rev: v0.8.1
     hooks:
       - id: ruff
         types_or: [python, pyi, jupyter]
@@ -21,7 +21,7 @@ repos:
     rev: v1.13.0
     hooks:
       - id: mypy
-        additional_dependencies: ["sqlmodel"]
+        additional_dependencies: ["sqlmodel", "types-python-dateutil"]
         args:
           [
             --ignore-missing-imports,

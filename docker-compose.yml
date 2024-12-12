@@ -28,9 +28,7 @@ services:
     volumes:
       - ${MONDEY_SSL_CERT:-./cert.pem}:/mondey_ssl_cert.pem
       - ${MONDEY_SSL_KEY:-./key.pem}:/mondey_ssl_key.pem
-#  email:
-#    image: "boky/postfix"
-#    environment:
-#      - ALLOW_EMPTY_SENDER_DOMAINS="true"
-#    networks:
-#      - mondey-network
+  email:
+    image: "boky/postfix"
+    environment:
+      - ALLOW_EMPTY_SENDER_DOMAINS="true"

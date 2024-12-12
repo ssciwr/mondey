@@ -16,8 +16,8 @@ from ..models.milestones import MilestonePublic
 from ..models.milestones import SubmittedMilestoneImage
 from .utils import add
 from .utils import get
-from .utils import get_child_age_in_months
 from .utils import get_db_child
+from .utils import get_or_create_current_milestone_answer_session
 from .utils import submitted_milestone_image_path
 from .utils import write_image_file
 
@@ -52,25 +52,18 @@ def create_router() -> APIRouter:
         current_active_user: CurrentActiveUserDep,
         child_id: int,
     ):
-        delta_months = 6
         child = get_db_child(session, current_active_user, child_id)
+        milestone_answer_session = get_or_create_current_milestone_answer_session(
+            session, current_active_user, child
+        )
+        milestone_ids = list(milestone_answer_session.answers.keys())
 
-        child_age_months = get_child_age_in_months(child)
         milestone_groups = session.exec(
             select(MilestoneGroup)
             .order_by(col(MilestoneGroup.order))
             .options(
                 lazyload(
-                    MilestoneGroup.milestones.and_(
-                        (
-                            child_age_months
-                            >= col(Milestone.expected_age_months) - delta_months
-                        )
-                        & (
-                            child_age_months
-                            <= col(Milestone.expected_age_months) + delta_months
-                        )
-                    )
+                    MilestoneGroup.milestones.and_(col(Milestone.id).in_(milestone_ids))
                 )
             )
         ).all()

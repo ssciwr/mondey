@@ -9,8 +9,9 @@ import { _ } from "svelte-i18n";
   <h5 class="mb-2 mt-4 text-xl font-bold text-gray-700 dark:text-white tracking-wide">{$_("frontpage.heading")}</h5>
   <p class="mb-5 text-base text-gray-600 sm:text-md dark:text-gray-400">{$_("frontpage.summary")}</p>
   <div class="justify-center mb-1 items-center mt-2">
+
       <Button class="text-bold text-md w-44 dark:bg-gray-100 hover:bg-gray-600 dark:hover:bg-gray-600 hover:text-white bg-white text-gray-700" onclick ={() => {
-        goto("/userLand/userRegistration");
+        goto("/signup");
       }}>{$_("frontpage.buttonLabel")}</Button>
       <Tooltip>{$_("frontpage.toolTip")}</Tooltip>
   </div>
