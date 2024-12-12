@@ -1,28 +1,28 @@
 <script>
-    export let bookmarks = [];
-    import { _ } from "svelte-i18n";
+export let bookmarks = [];
+import { _ } from "svelte-i18n";
 
-    let activeIndex = 0;
-    let interval;
+let activeIndex = 0;
+let interval;
 
-    function changeTab() {
-        activeIndex = (activeIndex + 1) % bookmarks.length;
-    }
+function changeTab() {
+	activeIndex = (activeIndex + 1) % bookmarks.length;
+}
 
-    import { onMount } from "svelte";
-    onMount(() => {
-        interval = setInterval(changeTab, 4000);
+import { onMount } from "svelte";
+onMount(() => {
+	interval = setInterval(changeTab, 4000);
 
-        return () => {
-            clearInterval(interval);
-        };
-    });
+	return () => {
+		clearInterval(interval);
+	};
+});
 
-    function selectTab(index) {
-        activeIndex = index;
-        clearInterval(interval);
-    }
-  </script>
+function selectTab(index) {
+	activeIndex = index;
+	clearInterval(interval);
+}
+</script>
 
    <div class="w-full min-w-full px-4 mx-auto">
     <!-- Tabs (Bookmarks) -->
