@@ -1,6 +1,5 @@
 <script>
 export let bookmarks = [];
-import { _ } from "svelte-i18n";
 
 let activeIndex = 0;
 let interval;

@@ -13,6 +13,7 @@ import type {
 import CancelButton from "$lib/components/Admin/CancelButton.svelte";
 import InputPreview from "$lib/components/Admin/InputPreview.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import {
 	Badge,
 	Button,
@@ -26,7 +27,6 @@ import {
 	type SelectOptionType,
 	Textarea,
 } from "flowbite-svelte";
-import { _, locales } from "svelte-i18n";
 
 let {
 	open = $bindable(false),
@@ -67,7 +67,7 @@ function updateOptionsJson() {
 		return;
 	}
 	const values = question.options.split(";");
-	for (const lang_id of $locales) {
+	for (const lang_id of i18n.locales) {
 		const items = question.text[lang_id].options.split(";");
 		question.text[lang_id].options_json = JSON.stringify(
 			values.map((value, index) => ({
@@ -99,14 +99,14 @@ async function saveChanges() {
 		<div class="flex flex-row items-center">
 			<div class="mr-5 grow">
 				<div class="mb-5">
-					<Label class="mb-2">{$_("admin.question")}</Label>
+					<Label class="mb-2">{i18n.tr.admin.question}</Label>
 					{#each Object.values(question.text) as text}
 						<div class="mb-1">
 							<ButtonGroup class="w-full">
 								<InputAddon>{text.lang_id}</InputAddon>
 								<Input
 									bind:value={text.question}
-									placeholder={$_("admin.placeholder")}
+									placeholder=""
 								/>
 							</ButtonGroup>
 						</div>
@@ -164,7 +164,7 @@ async function saveChanges() {
 						<Label class="mb-2">Preview</Label>
 						<div class="flex flex-row">
 							<ButtonGroup class="mb-2 mr-2">
-								{#each $locales as lang_id}
+								{#each i18n.locales as lang_id}
 									<Button
 										checked={preview_lang === lang_id}
 										on:click={(e) => {

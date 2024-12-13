@@ -8,6 +8,7 @@ import AlertMessage from "$lib/components/AlertMessage.svelte";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
@@ -18,7 +19,6 @@ import {
 	RectangleListOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
-import { _, locale } from "svelte-i18n";
 
 function searchStatus(data: any[], key: string): any[] {
 	if (key === "") {
@@ -26,7 +26,7 @@ function searchStatus(data: any[], key: string): any[] {
 	}
 	return data.filter((item) => {
 		// button label contains info about completion status => use for search
-		if (key === $_("milestone.complete").toLowerCase()) {
+		if (key === i18n.tr.milestone.complete.toLowerCase()) {
 			return item.complete === true;
 		}
 		return item.complete === false;
@@ -76,9 +76,9 @@ function searchAll(data: any[], key: string): any[] {
 async function setup(): Promise<void> {
 	console.log("setup overview");
 
-	if ($locale === undefined || $locale === null) {
+	if (i18n.locale === undefined || i18n.locale === null) {
 		showAlert = true;
-		alertMessage = $_("userData.alertMessageError");
+		alertMessage = i18n.tr.userData.alertMessageError;
 		console.log("No locale");
 		return;
 	}
@@ -93,7 +93,7 @@ async function setup(): Promise<void> {
 			contentStore.milestoneGroupData,
 		);
 		showAlert = true;
-		alertMessage = $_("milestone.alertMessageRetrieving");
+		alertMessage = i18n.tr.milestone.alertMessageRetrieving;
 	} else {
 		let milestoneAnswerSession = undefined;
 		const response = await getCurrentMilestoneAnswerSession({
@@ -103,7 +103,7 @@ async function setup(): Promise<void> {
 		if (response.error) {
 			console.log("Error when retrieving milestone answer session");
 			showAlert = true;
-			alertMessage = `${$_("milestone.alertMessageRetrieving")} ${response.error.detail}`;
+			alertMessage = `${i18n.tr.milestone.alertMessageRetrieving} ${response.error.detail}`;
 			return;
 		}
 
@@ -120,9 +120,9 @@ async function setup(): Promise<void> {
 					answer.answer !== undefined &&
 					answer.answer >= 0;
 				return {
-					header: item?.text?.[$locale]?.title ?? "",
+					header: item?.text?.[i18n.locale]?.title ?? "",
 					complete: complete,
-					summary: item?.text?.[$locale]?.desc ?? "",
+					summary: item?.text?.[i18n.locale]?.desc ?? "",
 					events: {
 						onclick: () => {
 							activeTabChildren.set("milestone");
@@ -156,34 +156,34 @@ function createStyle(data: any[]) {
 }
 
 let showAlert = $state(false);
-let alertMessage = $state($_("milestoneGroup.alertMessageError"));
+let alertMessage = $state(i18n.tr.milestone.alertMessageError);
 const promise = setup();
 let data = $state([]);
 
 const searchData = [
 	{
-		label: $_("search.allLabel"),
-		placeholder: $_("search.allPlaceholder"),
+		label: i18n.tr.search.allLabel,
+		placeholder: i18n.tr.search.allPlaceholder,
 		filterFunction: searchAll,
 	},
 	{
-		label: $_("search.statusLabel"),
-		placeholder: $_("search.statusPlaceholder"),
+		label: i18n.tr.search.statusLabel,
+		placeholder: i18n.tr.search.statusPlaceholder,
 		filterFunction: searchStatus,
 	},
 	{
-		label: $_("search.answerLabel"),
-		placeholder: $_("search.answerPlaceholder"),
+		label: i18n.tr.search.answerLabel,
+		placeholder: i18n.tr.search.answerPlaceholder,
 		filterFunction: searchAnswer,
 	},
 	{
-		label: $_("search.nameLabel"),
-		placeholder: $_("search.namePlaceholder"),
+		label: i18n.tr.search.nameLabel,
+		placeholder: i18n.tr.search.namePlaceholder,
 		filterFunction: searchTitle,
 	},
 	{
-		label: $_("search.descriptionLabel"),
-		placeholder: $_("search.descriptionPlaceholder"),
+		label: i18n.tr.search.descriptionLabel,
+		placeholder: i18n.tr.search.descriptionPlaceholder,
 		filterFunction: searchDescription,
 	},
 ];
@@ -197,14 +197,14 @@ const breadcrumbdata: any[] = [
 		symbol: UserSettingsOutline,
 	},
 	{
-		label: $_("milestone.groupOverviewLabel"),
+		label: i18n.tr.milestone.groupOverviewLabel,
 		onclick: () => {
 			activeTabChildren.set("milestoneGroup");
 		},
 		symbol: RectangleListOutline,
 	},
 	{
-		label: contentStore.milestoneGroupData.text[$locale].title,
+		label: contentStore.milestoneGroupData.text[i18n.locale].title,
 		onclick: () => {
 			activeTabChildren.set("milestoneOverview");
 		},
@@ -214,7 +214,7 @@ const breadcrumbdata: any[] = [
 </script>
 
 {#await promise}
-	<p>{$_("userData.loadingMessage")}</p>
+	<p>{i18n.tr.userData.loadingMessage}</p>
 {:then}
 	{#if showAlert}
 		<AlertMessage message={alertMessage} />

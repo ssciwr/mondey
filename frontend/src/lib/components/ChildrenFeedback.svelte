@@ -11,6 +11,7 @@ import {
 	getSummaryFeedbackForAnswersession,
 } from "$lib/client";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { user } from "$lib/stores/userStore.svelte";
@@ -36,12 +37,11 @@ import {
 	ExclamationCircleSolid,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
-import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
 let showAlert = $state(false);
 let alertMessage = $state(
-	$_("childData.alertMessageError") as string | ValidationError[] | undefined,
+	i18n.tr.childData.alertMessageError as string | ValidationError[] | undefined,
 );
 
 let milestoneGroups = $state(
@@ -58,16 +58,20 @@ const intervalSize = 4;
 let currentSessionIndices = $state([0, intervalSize]);
 let relevant_sessionkeys = $state([] as number[]);
 const milestonePresentation = [
-	{ icon: CheckCircleSolid, color: "green", text: $_("milestone.recommendOk") },
+	{
+		icon: CheckCircleSolid,
+		color: "green",
+		text: i18n.tr.milestone.recommendOk,
+	},
 	{
 		icon: ExclamationCircleSolid,
 		color: "orange",
-		text: $_("milestone.recommendWatch"),
+		text: i18n.tr.milestone.recommendWatch,
 	},
 	{
 		icon: CloseCircleSolid,
 		color: "red",
-		text: $_("milestone.recommmendHelp"),
+		text: i18n.tr.milestone.recommmendHelp,
 	},
 ];
 const breadcrumbdata: any[] = [
@@ -79,7 +83,7 @@ const breadcrumbdata: any[] = [
 		symbol: UserSettingsOutline,
 	},
 	{
-		label: $_("milestone.feedbackTitle"),
+		label: i18n.tr.milestone.feedbackTitle,
 		onclick: () => {
 			activeTabChildren.set("childrenFeedback");
 		},
@@ -211,7 +215,7 @@ function formatDate(date: string): string {
 
 function makeTitle(aid: number): string {
 	return aid === sessionkeys[0]
-		? $_("milestone.current")
+		? i18n.tr.milestone.current
 		: formatDate(answerSessions[aid].created_at);
 }
 
@@ -229,36 +233,36 @@ let promise = $state(setup());
 
 {#snippet evaluation(aid: number, milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, value: number, isMilestone: boolean, withText: boolean = false)}
 	<div class="text-gray-700 dark:text-gray-400 space-x-2 space-y-4 p-2 m-2">
-		{console.log('   aid: ', aid, milestone_or_group?.text[$locale as string].title, value, isMilestone, withText)}
+		{console.log('   aid: ', aid, milestone_or_group?.text[i18n.locale].title, value, isMilestone, withText)}
 		{#if value === 1}
 			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
 				<CheckCircleSolid color = "green" size="xl"/>
 				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
-					{milestone_or_group?.text[$locale as string].title}
+					{milestone_or_group?.text[i18n.locale].title}
 				</span>
 				<Hr class="mx-2"/>
 				{#if withText}
-				<p>{$_("milestone.recommendOk")}</p>
+				<p>{i18n.tr.milestone.recommendOk}</p>
 				{/if}
 			</div>
 		{:else if value === 0}
 			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
 				<BellActiveSolid color = "orange" size="xl"/>
 				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
-					{milestone_or_group?.text[$locale as string].title}
+					{milestone_or_group?.text[i18n.locale].title}
 				</span>
 				<Hr class="mx-2"/>
 				{#if withText}
-				<p>{$_("milestone.recommendWatch")}</p>
+				<p>{i18n.tr.milestone.recommendWatch}</p>
 				{/if}
 			</div>
 			{#if isMilestone}
 				<span class =  "ml-auto mt-4">
 					<Button id="b1" onclick={()=>{
 						showHelp= true;
-					}}>{$_("milestone.help")}</Button>
-					<Modal title={$_("milestone.help")} bind:open={showHelp} dismissable={true}>
-						{milestone_or_group?.text[$locale as string].help}
+					}}>{i18n.tr.milestone.help}</Button>
+					<Modal title={i18n.tr.milestone.help} bind:open={showHelp} dismissable={true}>
+						{milestone_or_group?.text[i18n.locale].help}
 					</Modal>
 				</span>
 			{/if}
@@ -266,21 +270,21 @@ let promise = $state(setup());
 			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
 				<CloseCircleSolid color = "red" size="xl"/>
 				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
-					{milestone_or_group?.text[$locale as string].title}
+					{milestone_or_group?.text[i18n.locale].title}
 				</span>
 				<Hr class="mx-2"/>
 				{#if withText}
-				<p>{$_("milestone.recommmendHelp")}</p>
+				<p>{i18n.tr.milestone.recommmendHelp}</p>
 				{/if}
 			</div>
 			{#if isMilestone}
 				<span class =  "ml-auto mt-4">
 					<Button id="b1" onclick={()=>{
 						showHelp= true;
-					}}>{$_("milestone.help")}</Button>
+					}}>{i18n.tr.milestone.help}</Button>
 
-					<Modal title={$_("milestone.help")} bind:open={showHelp} dismissable={true}>
-						{milestone_or_group?.text[$locale as string].help}
+					<Modal title={i18n.tr.milestone.help} bind:open={showHelp} dismissable={true}>
+						{milestone_or_group?.text[i18n.locale].help}
 					</Modal>
 				</span>
 			{/if}
@@ -288,11 +292,11 @@ let promise = $state(setup());
 		<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
 			<CloseCircleSolid color = "gray" size="xl"/>
 			<span class = "text-gray-700 dark:text-gray-400 font-bold " >
-				{milestone_or_group?.text[$locale as string].title}
+				{milestone_or_group?.text[i18n.locale].title}
 			</span>
 			<Hr class="mx-2"/>
 			{#if withText}
-			<p>{$_("milestone.notEnoughDataYet")}</p>
+			<p>{i18n.tr.milestone.notEnoughDataYet}</p>
 			{/if}
 		</div>
 
@@ -306,35 +310,35 @@ let promise = $state(setup());
 {#if showAlert}
 	<AlertMessage
 		message = {alertMessage}
-		title = {$_("childData.alertMessageTitle")}
+		title = {i18n.tr.childData.alertMessageTitle}
 	/>
 {:else}
 	{#await promise}
 		<div class = "flex justify-center items-center space-x-2">
-			<Spinner /> <p>{$_("childData.loadingMessage")}</p>
+			<Spinner /> <p>{i18n.tr.childData.loadingMessage}</p>
 		</div>
 	{:then}
 
-	<Heading tag="h2" class = "text-gray-700 dark:text-gray-400 items-center p-2 m-2 pb-4">{$_("milestone.feedbackTitle")} </Heading>
+	<Heading tag="h2" class = "text-gray-700 dark:text-gray-400 items-center p-2 m-2 pb-4">{i18n.tr.milestone.feedbackTitle} </Heading>
 
 	<div class ="m-2 p-2 pb-4 ">
-		<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{$_("milestone.feedbackExplanation")}</p>
+		<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{i18n.tr.milestone.feedbackExplanation}</p>
 
 		<Button class = "m-2 p-2 pb-4 mb-4 items-center justify-center md:w-1/4" onclick = {() => {
 			showMoreInfo = true;
-		}}>{$_("milestone.moreInfoOnEval")}</Button>
+		}}>{i18n.tr.milestone.moreInfoOnEval}</Button>
 
 
-		<Modal classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-400" title={$_("milestone.info")} bind:open={showMoreInfo} dismissable={true}>
-			<p class ="text-gray-700 dark:text-gray-400">{$_("milestone.feedbackDetailsMilestoneGroup")}</p>
-			<p class ="text-gray-700 dark:text-gray-400">{$_("milestone.feedbackDetailsMilestone")}</p>
+		<Modal classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-400" title={i18n.tr.milestone.info} bind:open={showMoreInfo} dismissable={true}>
+			<p class ="text-gray-700 dark:text-gray-400">{i18n.tr.milestone.feedbackDetailsMilestoneGroup}</p>
+			<p class ="text-gray-700 dark:text-gray-400">{i18n.tr.milestone.feedbackDetailsMilestone}</p>
 		</Modal>
 
 		<Accordion>
 			<AccordionItem>
 				<span slot="header" class="text-gray-700 dark:text-gray-400 flex items-center justify-center">
 					<span class="font-bold">
-						{$_("milestone.legend")}
+						{i18n.tr.milestone.legend}
 					</span>
 				</span>
 				<div class="flex flex-col text-gray-700 dark:text-gray-400 items-start p-2 m-2 space-y-6 justify-center">
@@ -349,7 +353,7 @@ let promise = $state(setup());
 			</AccordionItem>
 		</Accordion>
 
-		<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory} >{$_("milestone.showHistory")}</Checkbox>
+		<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory} >{i18n.tr.milestone.showHistory}</Checkbox>
 		<Hr classHr= "mx-2"/>
 	</div>
 
@@ -362,7 +366,7 @@ let promise = $state(setup());
 			{/if}
 			<div class="flex flex-col md:flex-row">
 				{#if relevant_sessionkeys.length=== 0}
-					<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{$_("milestone.noFeedback")}</p>
+					<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{i18n.tr.milestone.noFeedback}</p>
 				{:else}
 					{#each relevant_sessionkeys as aid}
 						{#if showHistory === true || aid === sessionkeys[0]}
@@ -405,7 +409,7 @@ let promise = $state(setup());
 	{:catch error}
 		<AlertMessage
 			message = {`${alertMessage} ${error}`}
-			title = {$_("childData.alertMessageTitle")}
+			title = {i18n.tr.childData.alertMessageTitle}
 		/>
 	{/await}
 {/if}
