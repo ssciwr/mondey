@@ -6,6 +6,7 @@ import FrontPageAbout from "$lib/components/FrontPageAbout.svelte";
 import FrontPageCard from "$lib/components/FrontPageCard.svelte";
 import { _ } from "svelte-i18n";
 import FrontPageBookmarks from "./FrontPageBookmarks.svelte";
+import FrontPageAccordion from "./FrontPageAccordion.svelte";
 
 let { items = [] } = $props();
 
@@ -51,6 +52,8 @@ const bookmarks = [
   <h1 class="text-2xl dark:text-white justify-center text-center text-balance max-w-prose font-bold text-gray-700">{$_('frontpageBookmarks.title')}</h1>
    <FrontPageBookmarks {bookmarks} />
   </div>
+
+  <FrontPageAccordion/>
 
 <GalleryDisplay
 	withSearch={false}
