@@ -5,8 +5,8 @@ import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import FrontPageAbout from "$lib/components/FrontPageAbout.svelte";
 import FrontPageCard from "$lib/components/FrontPageCard.svelte";
 import { _ } from "svelte-i18n";
-import FrontPageBookmarks from "./FrontPageBookmarks.svelte";
 import FrontPageAccordion from "./FrontPageAccordion.svelte";
+import FrontPageBookmarks from "./FrontPageBookmarks.svelte";
 
 let { items = [] } = $props();
 
