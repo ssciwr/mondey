@@ -23,8 +23,8 @@ import {
 	Hr,
 	Modal,
 	Spinner,
-	Timeline,
-	TimelineItem,
+	TabItem,
+	Tabs,
 } from "flowbite-svelte";
 import {
 	BellActiveSolid,
@@ -178,81 +178,101 @@ async function setup() {
 const promise = setup();
 </script>
 
-{#snippet evaluation( milestone_or_group: MilestonePublic | MilestoneGroupPublic, value: number, isMilestone: boolean)}
-	{console.log(' milestonegroup: ', milestone_or_group.text[$locale as string].title, ', value: ', value)}
+{#snippet evaluation( milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, value: number, isMilestone: boolean, withText: boolean = false)}
+	{console.log(' milestonegroup: ', milestone_or_group?.text[$locale as string].title, ', value: ', value)}
 	<div class="text-gray-700 dark:text-gray-400 space-x-2 space-y-4 p-2 m-2">
 		{#if value === 2}
-			<div class="flex flex-cols space-x-2">
+			<div class="flex flex-cols space-x-2 items-center">
 				<CheckCircleSolid color = "green" size="xl"/>
-				<span class = "text-gray-700 dark:text-gray-400 font-bold text-lg" >
-					{milestone_or_group.text[$locale as string].title}
+				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
+					{milestone_or_group?.text[$locale as string].title}
 				</span>
 				<Hr class="mx-2"/>
+				{#if withText}
+				<p>{$_("milestone.recommendOk")}</p>
+				{/if}
 			</div>
-			<p >{$_("milestone.recommendOk")}</p>
 		{:else if value === 1}
-			<div class="flex flex-cols space-x-2">
+			<div class="flex flex-cols space-x-2 items-center">
 				<EyeSolid color = "green" size="xl"/>
-				<span class = "text-gray-700 dark:text-gray-400 font-bold text-lg" >
-					{milestone_or_group.text[$locale as string].title}
+				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
+					{milestone_or_group?.text[$locale as string].title}
 				</span>
 				<Hr class="mx-2"/>
+				{#if withText}
+				<p>{$_("milestone.recommendOkWithCaveat")}</p>
+				{/if}
 			</div>
-			<p>{$_("milestone.recommendOkWithCaveat")}</p>
 		{:else if value === 0}
-			<div class="flex flex-cols space-x-2">
+			<div class="flex flex-cols space-x-2 items-center">
 				<BellActiveSolid color = "orange" size="xl"/>
-				<span class = "text-gray-700 dark:text-gray-400 font-bold text-lg" >
-					{milestone_or_group.text[$locale as string].title}
+				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
+					{milestone_or_group?.text[$locale as string].title}
 				</span>
 				<Hr class="mx-2"/>
+				{#if withText}
+				<p>{$_("milestone.recommendWatch")}</p>
+				{/if}
 			</div>
-			<p>{$_("milestone.recommendWatch")}</p>
 			{#if isMilestone}
 				<span class =  "ml-auto">
 					<Button id="b1" onclick={()=>{
 						showHelp= true;
 					}}>{$_("milestone.help")}</Button>
 					<Modal title={$_("milestone.help")} bind:open={showHelp} >
-						{milestone_or_group.text[$locale as string].help}
+						{milestone_or_group?.text[$locale as string].help}
+						<Button onclick= {() => {
+							activeTabChildren.set("milestone");
+						}}>{$_("milestone.toTheMilestone")}</Button>
 					</Modal>
 				</span>
 			{/if}
 		{:else if value === -1}
-			<div class="flex flex-cols space-x-2">
+			<div class="flex flex-cols space-x-2 items-center">
 				<ExclamationCircleSolid color = "orange" size="xl"/>
-				<span class = "text-gray-700 dark:text-gray-400 font-bold text-lg" >
-					{milestone_or_group.text[$locale as string].title}
+				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
+					{milestone_or_group?.text[$locale as string].title}
 				</span>
 				<Hr class="mx-2"/>
+				{#if withText}
+				<p>{$_("milestone.recommendWatchWithCaveat")}</p>
+				{/if}
 			</div>
-			<p>{$_("milestone.recommendWatchWithCaveat")}</p>
 			{#if isMilestone}
 				<span class =  "ml-auto">
 					<Button id="b1" onclick={()=>{
 						showHelp= true;
 					}}>{$_("milestone.help")}</Button>
 					<Modal title={$_("milestone.help")} bind:open={showHelp} >
-						{milestone_or_group.text[$locale as string].help}
+						{milestone_or_group?.text[$locale as string].help}
+						<Button onclick= {() => {
+							activeTabChildren.set("milestone");
+						}}>{$_("milestone.toTheMilestone")}</Button>
 					</Modal>
 				</span>
 			{/if}
 		{:else}
-			<div class="flex flex-cols space-x-2">
+			<div class="flex flex-cols space-x-2 items-center">
 				<CloseCircleSolid color = "red" size="xl"/>
-				<span class = "text-gray-700 dark:text-gray-400 font-bold text-lg" >
-					{milestone_or_group.text[$locale as string].title}
+				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
+					{milestone_or_group?.text[$locale as string].title}
 				</span>
 				<Hr class="mx-2"/>
+				{#if withText}
+				<p>{$_("milestone.recommmendHelp")}</p>
+				{/if}
 			</div>
-			<p>{$_("milestone.recommmendHelp")}</p>
 			{#if isMilestone}
 				<span class =  "ml-auto">
 					<Button id="b1" onclick={()=>{
 						showHelp= true;
 					}}>{$_("milestone.help")}</Button>
+
 					<Modal title={$_("milestone.help")} bind:open={showHelp} >
-						{milestone_or_group.text[$locale as string].help}
+						{milestone_or_group?.text[$locale as string].help}
+						<Button onclick= {() => {
+							activeTabChildren.set("milestone");
+						}}>{$_("milestone.toTheMilestone")}</Button>
 					</Modal>
 				</span>
 			{/if}
@@ -320,11 +340,14 @@ const promise = setup();
 	<Hr classHr= "mx-2"/>
 
 	<div class="m-2 mx-auto w-full pb-4 p-2">
-		<Timeline order="horizontal">
+		<Tabs tabStyle="underline">
 			{#each sessionkeys as aid}
-				<!-- {#if showHistory === true || aid === sessionkeys[sessionkeys.length -1]} -->
+				{#if showHistory === true || aid === sessionkeys[sessionkeys.length -1]}
 					{console.log(" aid: ", aid, answerSessions[aid])}
-					<TimelineItem classTime = "text-lg font-bold text-gray-700 dark:text-gray-400 m-2 p-2" date = {formatDate(answerSessions[aid].created_at)}>
+
+					<TabItem defaultClass=" font-bold text-gray-700 dark:text-gray-400 m-2 p-2" title={aid === sessionkeys[sessionkeys.length-1] ? $_("milestone.current") : formatDate(answerSessions[aid].created_at)} open={aid === sessionkeys[sessionkeys.length - 1]}>
+					<Hr class="m-2"/>
+
 						<svelte:fragment slot="icon">
 							<div class="flex items-center">
 								<div class="flex z-10 justify-center items-center w-6 h-6 bg-primary-200 rounded-full ring-0 ring-gray-200 dark:bg-primary-900 sm:ring-8 dark:ring-gray-400 shrink-0">
@@ -338,7 +361,7 @@ const promise = setup();
 							{#each Object.entries(summary[aid]) as [mid, score]}
 								<AccordionItem >
 									<span slot="header" class="text-gray-700 dark:text-gray-400 items-center flex justify-center space-x-2">
-										{@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
+										{@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false, false)}
 									</span>
 									<div class="flex-row justify-between">
 										{console.log(" aid: ", aid, ", detailed[aid]: ", detailed[aid])}
@@ -349,7 +372,7 @@ const promise = setup();
 													return element.id === Number(ms_id);
 												}),
 												Number(ms_score),
-												true
+												true, true
 											)}
 											<Hr classHr="mx-2"/>
 										{/each}
@@ -357,10 +380,10 @@ const promise = setup();
 								</AccordionItem>
 							{/each}
 						</Accordion>
-					</TimelineItem>
-				<!-- {/if} -->
+					</TabItem>
+				{/if}
 			{/each}
-		</Timeline>
+		</Tabs>
 	</div>
 	{:catch error}
 	<AlertMessage
