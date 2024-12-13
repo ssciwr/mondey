@@ -20,10 +20,19 @@ import de from "../../../locales/de.json";
 type Translation = Record<string, Record<string, string>>;
 let translations = $state({} as Record<string, Translation>);
 
+function fillMissingSections(translation: Translation): Translation {
+	for (const section_key in de) {
+		if (!(section_key in translation)) {
+			translation[section_key] = {};
+		}
+	}
+	return translation;
+}
+
 async function refreshTranslations() {
 	for (const lang_id of $locales) {
 		if (lang_id !== "de") {
-			translations[lang_id] = await getI18nJson(lang_id);
+			translations[lang_id] = fillMissingSections(await getI18nJson(lang_id));
 		}
 	}
 }
