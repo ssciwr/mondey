@@ -1,4 +1,4 @@
-name: run tests
+name: tests
 on:
   push:
     branches:
@@ -13,6 +13,7 @@ jobs:
     defaults:
       run:
         working-directory: ./frontend
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -25,7 +26,7 @@ jobs:
           cache-dependency-path: frontend/pnpm-lock.yaml
       - run: pnpm install
       - run: pnpm build
-      - run: pnpm run test
+      - run: pnpm run test:unit
       - uses: codecov/codecov-action@v5
         with:
           files: ./frontend/coverage/coverage-final.json
@@ -33,11 +34,38 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
           verbose: true
+  frontend-ui-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps
+      - run: pnpm test:ui
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7
   backend-unit-tests:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./mondey_backend
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

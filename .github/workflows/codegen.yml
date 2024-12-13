@@ -5,7 +5,7 @@ on:
       - main
 
 jobs:
-  codegen-and-format:
+  codegen:
     runs-on: ubuntu-latest
     defaults:
       run:

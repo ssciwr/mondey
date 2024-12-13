@@ -32,6 +32,10 @@ onMount(async () => {
 });
 </script>
 
+<svelte:head>
+	<title>MONDEY :: Milestones of Normal Development in Early Years</title>
+</svelte:head>
+
 <Navbar>
 	<NavBrand href={base}>
 		<img src={logo_light} class="mt-6 block h-12 dark:hidden" alt="MONDEY Logo" />
