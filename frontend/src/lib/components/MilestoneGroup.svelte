@@ -83,7 +83,6 @@ async function setup(): Promise<any> {
 		showAlert = true;
 		alertMessage =
 			$_("milestone.alertMessageRetrieving") + milestonegroups.error.detail;
-
 		data = [];
 		return data;
 	}
@@ -229,5 +228,8 @@ const searchData: any[] = [
 	</div>
 </div>
 {:catch error}
-<AlertMessage message={$_("milestone.alertMessageError") + " "+ error} />
+<AlertMessage message={$_("milestone.alertMessageError") + " "+ error} onclick={() => {
+	activeTabChildren.set("milestoneOverview");
+	showAlert = false;
+}}/>
 {/await}
