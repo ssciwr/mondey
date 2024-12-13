@@ -5,7 +5,7 @@ import { createLanguage, deleteLanguage } from "$lib/client/services.gen";
 import AddButton from "$lib/components/Admin/AddButton.svelte";
 import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
 import DeleteModal from "$lib/components/Admin/DeleteModal.svelte";
-import { getTranslations } from "$lib/i18n";
+import { i18n } from "$lib/i18n.svelte";
 import type { SelectOptionType } from "flowbite-svelte";
 import {
 	Card,
@@ -18,7 +18,6 @@ import {
 	TableHeadCell,
 } from "flowbite-svelte";
 import ISO6391 from "iso-639-1";
-import { _, locales } from "svelte-i18n";
 
 const langCodes = ISO6391.getAllCodes();
 const langNames = ISO6391.getAllNativeNames();
@@ -38,7 +37,7 @@ async function createLanguageAndUpdateLanguages() {
 		console.log(error);
 	} else {
 		console.log(data);
-		await getTranslations();
+		await i18n.load();
 	}
 }
 
@@ -50,21 +49,21 @@ async function deleteLanguageAndUpdateLanguages() {
 		console.log(error);
 	} else {
 		console.log(data);
-		await getTranslations();
+		await i18n.load();
 	}
 }
 </script>
 
 <Card size="xl" class="m-5">
-	<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">{$_('admin.languages')}</h3>
+	<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">{i18n.tr.admin.languages}</h3>
 	<Table>
 		<TableHead>
 			<TableHeadCell>Code (ISO 639-1)</TableHeadCell>
 			<TableHeadCell>Name</TableHeadCell>
-			<TableHeadCell>{$_('admin.actions')}</TableHeadCell>
+			<TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
 		</TableHead>
 		<TableBody>
-			{#each $locales as lang_id}
+			{#each i18n.locales as lang_id}
 				<TableBodyRow>
 					<TableBodyCell>
 						{lang_id}

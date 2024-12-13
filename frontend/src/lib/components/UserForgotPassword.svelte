@@ -8,21 +8,21 @@ import { preventDefault } from "$lib/util";
 
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { Button, Card, Heading, Input } from "flowbite-svelte";
-import { _ } from "svelte-i18n";
 
 const maildata = {
 	component: Input,
 	type: "email",
 	value: "",
 	props: {
-		placeholder: $_("forgotPw.placeholder"),
+		placeholder: i18n.tr.forgotPw.placeholder,
 		id: "email",
 		required: true,
 	},
 };
 
-let alertMessage: string = $_("forgotPw.formatError");
+let alertMessage: string = i18n.tr.forgotPw.formatError;
 let showAlert: boolean;
 let showSuccess = false;
 
@@ -38,7 +38,7 @@ async function submitData(): Promise<void> {
 	if (result.error) {
 		console.log("error: ", result.error);
 		showAlert = true;
-		alertMessage = $_("forgotPw.sendError");
+		alertMessage = i18n.tr.forgotPw.sendError;
 	} else {
 		console.log(
 			"successful transmission, response status: ",
@@ -51,7 +51,7 @@ async function submitData(): Promise<void> {
 
 {#if showAlert}
 	<AlertMessage
-		title={$_('forgotPw.alertTitle')}
+		title={i18n.tr.forgotPw.alertTitle}
 		message={alertMessage}
 		lastpage={`${base}/userLand/lostPassword`}
 		onclick={() => {
@@ -64,7 +64,7 @@ async function submitData(): Promise<void> {
 	<Heading
 		tag="h3"
 		class="m-2 p-2 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-		>{$_('forgotPw.heading')}</Heading
+		>{i18n.tr.forgotPw.heading}</Heading
 	>
 	{#if showSuccess === false}
 		<form onsubmit={preventDefault(submitData)}>
@@ -77,12 +77,12 @@ async function submitData(): Promise<void> {
 			</div>
 
 			<div class="m-2 flex w-full items-center justify-center p-2">
-				<Button size="md" type="submit">{$_('forgotPw.pending')}</Button>
+				<Button size="md" type="submit">{i18n.tr.forgotPw.pending}</Button>
 			</div>
 		</form>
 	{:else}
 		<div class="m-2 flex w-full items-center justify-center p-2">
-			<p>{$_('forgotPw.mailSentMessage')}</p>
+			<p>{i18n.tr.forgotPw.mailSentMessage}</p>
 		</div>
 		<div class="m-2 flex w-full items-center justify-center p-2">
 			<Button
@@ -91,7 +91,7 @@ async function submitData(): Promise<void> {
 				type="button"
 				on:click={(event) => {
 					goto(`/${base}`);
-				}}>{$_('forgotPw.success')}</Button
+				}}>{i18n.tr.forgotPw.success}</Button
 			>
 		</div>
 	{/if}

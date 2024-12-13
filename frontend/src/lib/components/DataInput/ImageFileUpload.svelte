@@ -2,8 +2,8 @@
 
 <script lang="ts">
 import WarningModal from "$lib/components/WarningModal.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { Fileupload } from "flowbite-svelte";
-import { _ } from "svelte-i18n";
 
 let {
 	files = $bindable(undefined),
@@ -48,4 +48,4 @@ function updateImagesToUpload(event: Event) {
 		{...rest}
 />
 <WarningModal bind:open={showWarningModal}
-			  text={`${$_("admin.max-file-size-is")} 2 MB`}></WarningModal>
+			  text={`${i18n.tr.admin.maxFileSizeIs} 2 MB`}></WarningModal>
