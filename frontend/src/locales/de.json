@@ -28,7 +28,8 @@
 		"recommmendHelp": "Entwicklung des Kindes ist signifikant verzögert und sollte gefördert werden. Professionelle Hilfe kann notwendig sein.",
 		"showHistory": "Feedback zu vorherigen Beobachtungszeiträumen anzeigen.",
 		"legend": "Erklärung zu den einzelnen Symbolen",
-		"feedbackExplanation": "Hier sehen sie wie sich das Kind im Vergleich zum Durchschnitt entwickelt. Die Farben und Symbole zeigen an, ob das Kind altersgemäß entwickelt ist oder ob es in einzelnen Bereichen Unterstützung benötigt. Durch setzen des Hakens unten können sie vergangene Beobachtungszeiträume einsehen und so die Entwicklung des Kindes über einen längeren Zeitraum verfolgen."
+		"feedbackExplanation": "Hier sehen sie wie sich das Kind im Vergleich zum Durchschnitt entwickelt. Die Farben und Symbole zeigen an, ob das Kind altersgemäß entwickelt ist oder ob es in einzelnen Bereichen Unterstützung benötigt. Durch setzen des Hakens unten können sie vergangene Beobachtungszeiträume einsehen und so die Entwicklung des Kindes über einen längeren Zeitraum verfolgen.",
+		"disableHelp": "Ausblenden"
 	},
 	"search": {
 		"allLabel": "Alle",

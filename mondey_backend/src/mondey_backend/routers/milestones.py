@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import logging
-
 from fastapi import APIRouter
+from fastapi import HTTPException
 from fastapi import UploadFile
 from sqlalchemy.orm import lazyload
 from sqlmodel import col
@@ -12,6 +11,7 @@ from ..dependencies import CurrentActiveUserDep
 from ..dependencies import SessionDep
 from ..models.milestones import Language
 from ..models.milestones import Milestone
+from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupPublic
 from ..models.milestones import MilestonePublic
@@ -47,7 +47,8 @@ def create_router() -> APIRouter:
         return get(session, Milestone, milestone_id)
 
     @router.get(
-        "/milestone-groups/{child_id}", response_model=list[MilestoneGroupPublic]
+        "/milestone-groups/childid={child_id}",
+        response_model=list[MilestoneGroupPublic],
     )
     def get_milestone_groups(
         session: SessionDep,
@@ -55,12 +56,13 @@ def create_router() -> APIRouter:
         child_id: int,
     ):
         child = get_db_child(session, current_active_user, child_id)
+
+        if not child:
+            raise HTTPException(status_code=404, detail="Child not found")
+
         milestone_answer_session = get_or_create_current_milestone_answer_session(
             session, current_active_user, child
         )
-        logger = logging.getLogger("backend-1")
-
-        logger.info(f"milestone_answer_session: {milestone_answer_session}")
 
         milestone_ids = list(milestone_answer_session.answers.keys())
 
@@ -74,10 +76,32 @@ def create_router() -> APIRouter:
             )
         ).all()
 
-        logger.info(f"milestone_groups: {milestone_groups}")
-        logger.info(
-            f"milestone groups milestones: {[mg.milestones for mg in milestone_groups]}"
-        )
+        return milestone_groups
+
+    @router.get(
+        "/milestone-groups/answersession_id={answersession_id}",
+        response_model=list[MilestoneGroupPublic],
+    )
+    def get_milestone_groups_for_answersession(
+        session: SessionDep,
+        answersession_id: int,
+    ):
+        answersession = session.get(MilestoneAnswerSession, answersession_id)
+
+        if not answersession:
+            raise HTTPException(status_code=404, detail="Answersession not found")
+
+        milestone_ids = list(answersession.answers.keys())
+
+        milestone_groups = session.exec(
+            select(MilestoneGroup)
+            .order_by(col(MilestoneGroup.order))
+            .options(
+                lazyload(
+                    MilestoneGroup.milestones.and_(col(Milestone.id).in_(milestone_ids))
+                )
+            )
+        ).all()
 
         return milestone_groups
 

@@ -117,6 +117,45 @@
 				}
 			}
 		},
+		"/milestone-groups/{answersession_id}": {
+			"get": {
+				"tags": ["milestones"],
+				"summary": "Get Milestone Groups For Answersession",
+				"operationId": "get_milestone_groups_for_answersession",
+				"parameters": [
+					{
+						"name": "answersession_id",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "integer", "title": "Answersession Id" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/MilestoneGroupPublic"
+									},
+									"title": "Response Get Milestone Groups For Answersession Milestone Groups  Answersession Id  Get"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+							}
+						}
+					}
+				}
+			}
+		},
 		"/submitted-milestone-images/{milestone_id}": {
 			"post": {
 				"tags": ["milestones"],
