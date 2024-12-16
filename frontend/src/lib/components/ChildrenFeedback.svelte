@@ -53,6 +53,7 @@ let detailed = $state({}) as Record<number, any>;
 let summary = $state({}) as Record<number, any>;
 let answerSessions = $state({}) as Record<number, MilestoneAnswerSessionPublic>;
 let showHelp = $state(false);
+let showMoreInfo = $state(false);
 
 const breadcrumbdata: any[] = [
 	{
@@ -297,48 +298,59 @@ const promise = setup();
 
 	<Heading tag="h2" class = "text-gray-700 dark:text-gray-400 items-center p-2 m-2 pb-4">{$_("milestone.feedbackTitle")} </Heading>
 
-	<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{$_("milestone.feedbackExplanation")}</p>
+	<div class ="m-2 p-2 pb-4 ">
+		<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{$_("milestone.feedbackExplanation")}</p>
 
-	<Accordion>
-		<AccordionItem >
-			<span slot="header" class = "text-gray-700 dark:text-gray-400 items-center flex justify-center" >
-				<span class = "font-bold" >
-					{$_("milestone.legend")}
+		<Button class = "m-2 p-2 pb-4 mb-4 items-center justify-center w-1/4" onclick = {() => {
+			showMoreInfo = true;
+		}}>{$_("milestone.moreInfoOnEval")}</Button>
+
+
+		<Modal classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-400" title={$_("milestone.info")} bind:open={showMoreInfo} >
+			<p class ="text-gray-700 dark:text-gray-400">{$_("milestone.feedbackDetailsMilestoneGroup")}</p>
+			<p class ="text-gray-700 dark:text-gray-400">{$_("milestone.feedbackDetailsMilestone")}</p>
+		</Modal>
+
+		<Accordion>
+			<AccordionItem >
+				<span slot="header" class = "text-gray-700 dark:text-gray-400 items-center flex justify-center" >
+					<span class = "font-bold" >
+						{$_("milestone.legend")}
+					</span>
 				</span>
-			</span>
-			<div class="flex flex-col text-gray-700 dark:text-gray-400 items-start p-2 m-2 space-y-6 justify-center">
-				<div class = "mx-2 px-2 w-full flex flex-row">
-					<CheckCircleSolid color = "green" size="xl" class="mx-2"/>
-					<p>{$_("milestone.recommendOk")}</p>
+				<div class="flex flex-col text-gray-700 dark:text-gray-400 items-start p-2 m-2 space-y-6 justify-center">
+					<div class = "mx-2 px-2 w-full flex flex-row">
+						<CheckCircleSolid color = "green" size="xl" class="mx-2"/>
+						<p>{$_("milestone.recommendOk")}</p>
+					</div>
+					<Hr classHr= "mx-2 px-2 items-end w-full"/>
+					<div class = "mx-2 px-2 w-full flex flex-row">
+						<EyeSolid color = "green" size="xl" class="mx-2"/>
+						<p>{$_("milestone.recommendOkWithCaveat")}</p>
+					</div>
+					<Hr classHr= "mx-2 px-2 items-end w-full"/>
+					<div class = "mx-2 px-2 w-full flex flex-row">
+						<BellActiveSolid color = "orange" size="xl" class="mx-2"/>
+						<p>{$_("milestone.recommendWatch")}</p>
+					</div>
+					<Hr classHr= "mx-2 px-2 items-end w-full"/>
+					<div class = "mx-2 px-2 w-full flex flex-row">
+						<ExclamationCircleSolid color = "orange" size="xl" class="mx-2"/>
+						<p>{$_("milestone.recommendWatchWithCaveat")}</p>
+					</div>
+					<Hr classHr= "mx-2 px-2 items-end w-full"/>
+					<div class = "mx-2 px-2 w-full flex flex-row">
+						<CloseCircleSolid color = "red" size="xl" class="mx-2"/>
+						<p>{$_("milestone.recommmendHelp")}</p>
+					</div>
+					<Hr classHr="mx-2 px-2 items-end w-full"/>
 				</div>
-				<Hr classHr= "mx-2 px-2 items-end w-full"/>
-				<div class = "mx-2 px-2 w-full flex flex-row">
-					<EyeSolid color = "green" size="xl" class="mx-2"/>
-					<p>{$_("milestone.recommendOkWithCaveat")}</p>
-				</div>
-				<Hr classHr= "mx-2 px-2 items-end w-full"/>
-				<div class = "mx-2 px-2 w-full flex flex-row">
-					<BellActiveSolid color = "orange" size="xl" class="mx-2"/>
-					<p>{$_("milestone.recommendWatch")}</p>
-				</div>
-				<Hr classHr= "mx-2 px-2 items-end w-full"/>
-				<div class = "mx-2 px-2 w-full flex flex-row">
-					<ExclamationCircleSolid color = "orange" size="xl" class="mx-2"/>
-					<p>{$_("milestone.recommendWatchWithCaveat")}</p>
-				</div>
-				<Hr classHr= "mx-2 px-2 items-end w-full"/>
-				<div class = "mx-2 px-2 w-full flex flex-row">
-					<CloseCircleSolid color = "red" size="xl" class="mx-2"/>
-					<p>{$_("milestone.recommmendHelp")}</p>
-				</div>
-				<Hr classHr="mx-2 px-2 items-end w-full"/>
-			</div>
-		</AccordionItem>
-	</Accordion>
+			</AccordionItem>
+		</Accordion>
 
-	<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory}>{$_("milestone.showHistory")}</Checkbox>
-	<Hr classHr= "mx-2"/>
-
+		<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory}>{$_("milestone.showHistory")}</Checkbox>
+		<Hr classHr= "mx-2"/>
+	</div>
 	<div class="m-2 mx-auto w-full pb-4 p-2">
 		<Tabs tabStyle="underline">
 			{#each sessionkeys as aid}
