@@ -14,4 +14,3 @@ import { _ } from "svelte-i18n";
         <p class="mb-4 mt-4 px-4 text-gray-700 dark:text-gray-400">{$_('frontpageAccordion.summary2')}</p>
       </AccordionItem>
   </Accordion>
-
