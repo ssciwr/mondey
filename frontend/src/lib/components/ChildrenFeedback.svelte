@@ -54,6 +54,8 @@ let summary = $state({}) as Record<number, any>;
 let answerSessions = $state({}) as Record<number, MilestoneAnswerSessionPublic>;
 let showHelp = $state(false);
 let showMoreInfo = $state(false);
+let currentSessionIndices = $state([0, 5]);
+let relevant_sessionkeys = $state([] as number[]);
 
 const breadcrumbdata: any[] = [
 	{
@@ -101,7 +103,14 @@ async function loadAnswersessions(): Promise<void> {
 }
 
 async function loadSummaryFeedback(): Promise<void> {
-	for (const aid of sessionkeys) {
+	const maxindex = Math.min(currentSessionIndices[1], sessionkeys.length - 1);
+	console.log("current sessionkeys indices ", currentSessionIndices);
+	relevant_sessionkeys = sessionkeys.slice(currentSessionIndices[0], maxindex);
+	console.log("sessionkeys max: ", maxindex);
+	console.log("all sessionkeys: ", sessionkeys);
+	console.log("relevant_sessionkeys: ", relevant_sessionkeys);
+	for (const aid of relevant_sessionkeys) {
+		console.log(" aid: ", aid);
 		const milestoneGroupResponse = await getMilestoneGroupsForAnswersession({
 			path: {
 				answersession_id: Number(aid),
@@ -136,7 +145,13 @@ async function loadSummaryFeedback(): Promise<void> {
 }
 
 async function loadDetailedFeedback(): Promise<void> {
-	for (const aid of sessionkeys) {
+	const maxindex = Math.min(currentSessionIndices[1], sessionkeys.length - 1);
+	console.log("current sessionkeys indices ", currentSessionIndices);
+	relevant_sessionkeys = sessionkeys.slice(currentSessionIndices[0], maxindex);
+	console.log("sessionkeys max: ", maxindex);
+	console.log("all sessionkeys: ", sessionkeys);
+	console.log("relevant_sessionkeys: ", relevant_sessionkeys);
+	for (const aid of relevant_sessionkeys) {
 		const response = await getDetailedFeedbackForAnswersession({
 			path: {
 				answersession_id: Number(aid),
@@ -220,7 +235,7 @@ const promise = setup();
 					<Button id="b1" onclick={()=>{
 						showHelp= true;
 					}}>{$_("milestone.help")}</Button>
-					<Modal title={$_("milestone.help")} bind:open={showHelp} >
+					<Modal title={$_("milestone.help")} bind:open={showHelp} dismissable={true}>
 						{milestone_or_group?.text[$locale as string].help}
 						<Button onclick= {() => {
 							activeTabChildren.set("milestone");
@@ -244,7 +259,7 @@ const promise = setup();
 					<Button id="b1" onclick={()=>{
 						showHelp= true;
 					}}>{$_("milestone.help")}</Button>
-					<Modal title={$_("milestone.help")} bind:open={showHelp} >
+					<Modal title={$_("milestone.help")} bind:open={showHelp} dismissable={true} >
 						{milestone_or_group?.text[$locale as string].help}
 						<Button onclick= {() => {
 							activeTabChildren.set("milestone");
@@ -269,7 +284,7 @@ const promise = setup();
 						showHelp= true;
 					}}>{$_("milestone.help")}</Button>
 
-					<Modal title={$_("milestone.help")} bind:open={showHelp} >
+					<Modal title={$_("milestone.help")} bind:open={showHelp} dismissable={true}>
 						{milestone_or_group?.text[$locale as string].help}
 						<Button onclick= {() => {
 							activeTabChildren.set("milestone");
@@ -306,7 +321,7 @@ const promise = setup();
 		}}>{$_("milestone.moreInfoOnEval")}</Button>
 
 
-		<Modal classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-400" title={$_("milestone.info")} bind:open={showMoreInfo} >
+		<Modal classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-400" title={$_("milestone.info")} bind:open={showMoreInfo} dismissable={true}>
 			<p class ="text-gray-700 dark:text-gray-400">{$_("milestone.feedbackDetailsMilestoneGroup")}</p>
 			<p class ="text-gray-700 dark:text-gray-400">{$_("milestone.feedbackDetailsMilestone")}</p>
 		</Modal>
@@ -353,7 +368,7 @@ const promise = setup();
 	</div>
 	<div class="m-2 mx-auto w-full pb-4 p-2">
 		<Tabs tabStyle="underline">
-			{#each sessionkeys as aid}
+			{#each relevant_sessionkeys as aid}
 				{#if showHistory === true || aid === sessionkeys[sessionkeys.length -1]}
 					{console.log(" aid: ", aid, answerSessions[aid])}
 
