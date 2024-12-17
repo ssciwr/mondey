@@ -132,7 +132,6 @@ def create_router() -> APIRouter:
         milestone_answer_session = get_or_create_current_milestone_answer_session(
             session, current_active_user, child
         )
-
         return milestone_answer_session
 
     @router.put(
@@ -288,7 +287,6 @@ def create_router() -> APIRouter:
         answersession_id: int,
     ) -> dict[int, dict[int, int]]:
         answersession = session.get(MilestoneAnswerSession, answersession_id)
-
         if answersession is None:
             raise HTTPException(404, detail="Answer session not found")
         child_id = answersession.child_id

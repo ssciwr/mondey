@@ -236,7 +236,6 @@ const breadcrumbdata = $derived([
 						index={answerIndex}
 						selected={selectedAnswer === answerIndex}
 						onClick={() => {
-							console.log('selectAnswer', answerIndex);
 							selectAnswer(answerIndex);
 						}}
 						tooltip={$_(`milestone.answer${answerIndex}-desc`)}

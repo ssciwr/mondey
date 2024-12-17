@@ -77,29 +77,15 @@ def compute_feedback_simple(
         lim_upper = stat.avg_score - stat.stddev_score
 
     if leq(score, lim_lower):
-        final_score = TrafficLight.red.value
+        return TrafficLight.red.value
     elif score > lim_lower and leq(score, lim_upper):
         if min_score is not None and min_score < lim_lower:
-            final_score = TrafficLight.yellowWithCaveat.value
-        else:
-            final_score = TrafficLight.yellow.value
+            return TrafficLight.yellowWithCaveat.value
+        return TrafficLight.yellow.value
     else:
         if min_score is not None and min_score < lim_upper:
-            final_score = TrafficLight.greenWithCaveat.value
-        else:
-            final_score = TrafficLight.green.value
-
-    print(
-        "eval: ",
-        lim_lower,
-        lim_upper,
-        stat.avg_score,
-        stat.stddev_score,
-        score,
-        final_score,
-    )
-
-    return final_score
+            return TrafficLight.greenWithCaveat.value
+        return TrafficLight.green.value
 
 
 def compute_milestonegroup_feedback_summary(
