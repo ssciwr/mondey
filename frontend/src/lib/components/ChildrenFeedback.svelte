@@ -27,8 +27,9 @@ import {
 	Tabs,
 } from "flowbite-svelte";
 import {
+	ArrowLeftOutline,
+	ArrowRightOutline,
 	BellActiveSolid,
-	CalendarWeekSolid,
 	ChartLineUpOutline,
 	CheckCircleSolid,
 	CloseCircleSolid,
@@ -54,7 +55,7 @@ let summary = $state({}) as Record<number, any>;
 let answerSessions = $state({}) as Record<number, MilestoneAnswerSessionPublic>;
 let showHelp = $state(false);
 let showMoreInfo = $state(false);
-let currentSessionIndices = $state([0, 5]);
+let currentSessionIndices = $state([0, 4]);
 let relevant_sessionkeys = $state([] as number[]);
 
 const breadcrumbdata: any[] = [
@@ -98,18 +99,16 @@ async function loadAnswersessions(): Promise<void> {
 	sessionkeys = Object.keys(answerSessions)
 		.sort()
 		.map((x) => Number(x));
+	const maxindex = Math.min(currentSessionIndices[1], sessionkeys.length);
+	relevant_sessionkeys = sessionkeys.slice(currentSessionIndices[0], maxindex);
 
-	console.log("sessionkeys: ", sessionkeys);
+	console.log("all sessionkeys: ", sessionkeys);
+	console.log("sessionkeys max: ", maxindex);
+	console.log("relevant_sessionkeys: ", relevant_sessionkeys);
 }
 
-async function loadSummaryFeedback(): Promise<void> {
-	const maxindex = Math.min(currentSessionIndices[1], sessionkeys.length - 1);
-	console.log("current sessionkeys indices ", currentSessionIndices);
-	relevant_sessionkeys = sessionkeys.slice(currentSessionIndices[0], maxindex);
-	console.log("sessionkeys max: ", maxindex);
-	console.log("all sessionkeys: ", sessionkeys);
-	console.log("relevant_sessionkeys: ", relevant_sessionkeys);
-	for (const aid of relevant_sessionkeys) {
+async function loadSummaryFeedback(relevant: number[]): Promise<void> {
+	for (const aid of relevant) {
 		console.log(" aid: ", aid);
 		const milestoneGroupResponse = await getMilestoneGroupsForAnswersession({
 			path: {
@@ -144,14 +143,8 @@ async function loadSummaryFeedback(): Promise<void> {
 	}
 }
 
-async function loadDetailedFeedback(): Promise<void> {
-	const maxindex = Math.min(currentSessionIndices[1], sessionkeys.length - 1);
-	console.log("current sessionkeys indices ", currentSessionIndices);
-	relevant_sessionkeys = sessionkeys.slice(currentSessionIndices[0], maxindex);
-	console.log("sessionkeys max: ", maxindex);
-	console.log("all sessionkeys: ", sessionkeys);
-	console.log("relevant_sessionkeys: ", relevant_sessionkeys);
-	for (const aid of relevant_sessionkeys) {
+async function loadDetailedFeedback(relevant: number[]): Promise<void> {
+	for (const aid of relevant) {
 		const response = await getDetailedFeedbackForAnswersession({
 			path: {
 				answersession_id: Number(aid),
@@ -168,6 +161,38 @@ async function loadDetailedFeedback(): Promise<void> {
 	}
 }
 
+async function loadLast() {
+	console.log("loadLast current indices before", currentSessionIndices);
+	currentSessionIndices = [
+		Math.max(currentSessionIndices[0] - 4, 0),
+		Math.max(currentSessionIndices[1] - 4, 4),
+	];
+	console.log("loadLast current indices after", currentSessionIndices);
+	relevant_sessionkeys = sessionkeys.slice(
+		currentSessionIndices[0],
+		currentSessionIndices[1],
+	);
+
+	await loadSummaryFeedback(relevant_sessionkeys);
+	await loadDetailedFeedback(relevant_sessionkeys);
+}
+
+async function loadNext() {
+	console.log("loadNext current indices before", currentSessionIndices);
+	currentSessionIndices = [
+		Math.min(currentSessionIndices[0] + 4, Math.max(sessionkeys.length - 4, 0)),
+		Math.min(currentSessionIndices[1] + 4, sessionkeys.length),
+	];
+	console.log("loadNext current indices after", currentSessionIndices);
+	relevant_sessionkeys = sessionkeys.slice(
+		currentSessionIndices[0],
+		currentSessionIndices[1],
+	);
+
+	await loadSummaryFeedback(relevant_sessionkeys);
+	await loadDetailedFeedback(relevant_sessionkeys);
+}
+
 function formatDate(date: string): string {
 	const dateObj = new Date(date);
 	return [
@@ -177,13 +202,19 @@ function formatDate(date: string): string {
 	].join("-");
 }
 
+function makeTitle(aid: number): string {
+	return aid === sessionkeys[sessionkeys.length - 1]
+		? $_("milestone.current")
+		: formatDate(answerSessions[aid].created_at);
+}
+
 async function setup() {
 	await loadAnswersessions();
 	if (Object.keys(answerSessions).length === 0) {
 		return;
 	}
-	await loadSummaryFeedback();
-	await loadDetailedFeedback();
+	await loadSummaryFeedback(relevant_sessionkeys);
+	await loadDetailedFeedback(relevant_sessionkeys);
 
 	console.log("answerSessions: ", answerSessions);
 	console.log("milestoneGroups: ", milestoneGroups);
@@ -306,9 +337,9 @@ const promise = setup();
 	/>
 {:else}
 	{#await promise}
-	<div class = "flex justify-center items-center space-x-2">
-		<Spinner /> <p>{$_("childData.loadingMessage")}</p>
-	</div>
+		<div class = "flex justify-center items-center space-x-2">
+			<Spinner /> <p>{$_("childData.loadingMessage")}</p>
+		</div>
 	{:then}
 
 	<Heading tag="h2" class = "text-gray-700 dark:text-gray-400 items-center p-2 m-2 pb-4">{$_("milestone.feedbackTitle")} </Heading>
@@ -316,7 +347,7 @@ const promise = setup();
 	<div class ="m-2 p-2 pb-4 ">
 		<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{$_("milestone.feedbackExplanation")}</p>
 
-		<Button class = "m-2 p-2 pb-4 mb-4 items-center justify-center w-1/4" onclick = {() => {
+		<Button class = "m-2 p-2 pb-4 mb-4 items-center justify-center md:w-1/4" onclick = {() => {
 			showMoreInfo = true;
 		}}>{$_("milestone.moreInfoOnEval")}</Button>
 
@@ -366,24 +397,17 @@ const promise = setup();
 		<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory}>{$_("milestone.showHistory")}</Checkbox>
 		<Hr classHr= "mx-2"/>
 	</div>
-	<div class="m-2 mx-auto w-full pb-4 p-2">
-		<Tabs tabStyle="underline">
+	<div class="m-2 p-2 pb-4 w-full">
+		<Tabs tabStyle="underline" class="items-center flex flex-col mb-4">
+			{#if showHistory === true}
+				<Button size="md" type="button" class="md:w-16 md:h-8" on:click={async () => {
+					await loadLast();
+				}}><ArrowLeftOutline class="w-4 h-4" /></Button>
+			{/if}
+			<div class="flex flex-row md:flex-col">
 			{#each relevant_sessionkeys as aid}
 				{#if showHistory === true || aid === sessionkeys[sessionkeys.length -1]}
-					{console.log(" aid: ", aid, answerSessions[aid])}
-
-					<TabItem defaultClass=" font-bold text-gray-700 dark:text-gray-400 m-2 p-2" title={aid === sessionkeys[sessionkeys.length-1] ? $_("milestone.current") : formatDate(answerSessions[aid].created_at)} open={aid === sessionkeys[sessionkeys.length - 1]}>
-					<Hr class="m-2"/>
-
-						<svelte:fragment slot="icon">
-							<div class="flex items-center">
-								<div class="flex z-10 justify-center items-center w-6 h-6 bg-primary-200 rounded-full ring-0 ring-gray-200 dark:bg-primary-900 sm:ring-8 dark:ring-gray-400 shrink-0">
-								<CalendarWeekSolid class="w-4 h-4 text-primary-600 dark:text-primary-400" />
-								</div>
-								<div class="hidden sm:flex w-full bg-gray-200 h-0.5 dark:bg-gray-700" ></div>
-							</div>
-						</svelte:fragment>
-
+					<TabItem defaultClass="font-bold text-gray-700 dark:text-gray-400 m-2 p-2" title={makeTitle(aid)} open={aid === sessionkeys[sessionkeys.length - 1]}>
 						<Accordion class="p-2 m-2">
 							{#each Object.entries(summary[aid]) as [mid, score]}
 								<AccordionItem >
@@ -410,12 +434,18 @@ const promise = setup();
 					</TabItem>
 				{/if}
 			{/each}
+			</div>
+			{#if showHistory === true}
+				<Button size="md" type="button" class="md:w-16 md:h-8" on:click={async () => {
+					await loadNext();
+				}}><ArrowRightOutline class="w-4 h-4" /></Button>
+			{/if}
 		</Tabs>
 	</div>
 	{:catch error}
-	<AlertMessage
-		message = {`${alertMessage} ${error}`}
-		title = {$_("childData.alertMessageTitle")}
-	/>
+		<AlertMessage
+			message = {`${alertMessage} ${error}`}
+			title = {$_("childData.alertMessageTitle")}
+		/>
 	{/await}
 {/if}

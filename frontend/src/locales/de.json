@@ -27,7 +27,7 @@
 		"recommendWatch": "Entwicklung des Kindes ist leicht verzögert und sollte beobachtet werden um gegebenfalls gezielt einzelne Bereiche zu fördern.",
 		"recommendWatchWithCaveat": "Entwicklung des Kindes ist nicht ganz altersgemäß und sollte genau beobachtet werden. Einzelne Bereiche sollten besonders gefördert werden.",
 		"recommmendHelp": "Entwicklung des Kindes ist signifikant verzögert und sollte gefördert werden. Professionelle Hilfe kann notwendig sein.",
-		"showHistory": "Feedback zu vorherigen Beobachtungszeiträumen anzeigen (max. 5)",
+		"showHistory": "Feedback zu vorherigen Beobachtungszeiträumen anzeigen",
 		"moreInfoOnEval": "Mehr Informationen zur Erstellung der Bewertung",
 		"legend": "Erklärung zu den einzelnen Symbolen",
 		"feedbackExplanation": "Hier sehen sie wie sich das Kind im Vergleich zum Durchschnitt entwickelt. Die Farben und Symbole zeigen an, ob das Kind altersgemäß entwickelt ist oder ob es in einzelnen Bereichen Unterstützung benötigt. Durch setzen des Hakens unten können sie vergangene Beobachtungszeiträume einsehen und so die Entwicklung des Kindes über einen längeren Zeitraum verfolgen. Es werden standardmäßig nur die Bewertungen der Meilensteingruppen angezeigt. Für eine genauere Analyse können sie die Bewertungen der einzelnen Meilensteine einsehen indem sie auf die jeweilige Meilensteingruppe klicken. Beachten sie bitte die zusätzlichen Informationen und die Erklärung zu den Symbolen.",
@@ -35,7 +35,9 @@
 		"feedbackDetailsMilestone": "Einzelne Meilensteine werden nach demselben Schema bewertet, allerdings sind hier Durchschnitt und Standardabweichung für den jeweiligen Meilenstein relevant. Dies kann in einzelnen Fällen dazu führen, dass zwar die Meilensteine als 'altersgemäß' bewertet werden, aber die Gruppe als ganzes dennoch z.B. eine Stufe unter 'altersgemäß' bewerted wird, wenn die Statistik der Gruppe zeigt dass Kinder in dieser Altergruppe in diesem Bereich generell etwas weiter sind.",
 		"disableHelp": "Ausblenden",
 		"current": "Aktuell",
-		"toTheMilestone": "Zum Meilenstein"
+		"toTheMilestone": "Zum Meilenstein",
+		"older": "Weiter zurück",
+		"newer": "Weiter vor"
 	},
 	"search": {
 		"allLabel": "Alle",
