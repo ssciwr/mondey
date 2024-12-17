@@ -55,9 +55,32 @@ let summary = $state({}) as Record<number, any>;
 let answerSessions = $state({}) as Record<number, MilestoneAnswerSessionPublic>;
 let showHelp = $state(false);
 let showMoreInfo = $state(false);
-let currentSessionIndices = $state([0, 4]);
+const intervalSize = 4;
+let currentSessionIndices = $state([0, intervalSize]);
 let relevant_sessionkeys = $state([] as number[]);
-
+const milestonePresentation = [
+	{ icon: CheckCircleSolid, color: "green", text: $_("milestone.recommendOk") },
+	{
+		icon: EyeSolid,
+		color: "green",
+		text: $_("milestone.recommendOkWithCaveat"),
+	},
+	{
+		icon: BellActiveSolid,
+		color: "orange",
+		text: $_("milestone.recommendWatch"),
+	},
+	{
+		icon: ExclamationCircleSolid,
+		color: "orange",
+		text: $_("milestone.recommendWatchWithCaveat"),
+	},
+	{
+		icon: CloseCircleSolid,
+		color: "red",
+		text: $_("milestone.recommmendHelp"),
+	},
+];
 const breadcrumbdata: any[] = [
 	{
 		label: currentChild.name,
@@ -98,7 +121,8 @@ async function loadAnswersessions(): Promise<void> {
 
 	sessionkeys = Object.keys(answerSessions)
 		.sort()
-		.map((x) => Number(x));
+		.map((x) => Number(x))
+		.reverse();
 	const maxindex = Math.min(currentSessionIndices[1], sessionkeys.length);
 	relevant_sessionkeys = sessionkeys.slice(currentSessionIndices[0], maxindex);
 
@@ -164,8 +188,8 @@ async function loadDetailedFeedback(relevant: number[]): Promise<void> {
 async function loadLast() {
 	console.log("loadLast current indices before", currentSessionIndices);
 	currentSessionIndices = [
-		Math.max(currentSessionIndices[0] - 4, 0),
-		Math.max(currentSessionIndices[1] - 4, 4),
+		Math.max(currentSessionIndices[0] - intervalSize, 0),
+		Math.max(currentSessionIndices[1] - intervalSize, intervalSize),
 	];
 	console.log("loadLast current indices after", currentSessionIndices);
 	relevant_sessionkeys = sessionkeys.slice(
@@ -180,8 +204,11 @@ async function loadLast() {
 async function loadNext() {
 	console.log("loadNext current indices before", currentSessionIndices);
 	currentSessionIndices = [
-		Math.min(currentSessionIndices[0] + 4, Math.max(sessionkeys.length - 4, 0)),
-		Math.min(currentSessionIndices[1] + 4, sessionkeys.length),
+		Math.min(
+			currentSessionIndices[0] + intervalSize,
+			Math.max(sessionkeys.length - intervalSize, 0),
+		),
+		Math.min(currentSessionIndices[1] + intervalSize, sessionkeys.length),
 	];
 	console.log("loadNext current indices after", currentSessionIndices);
 	relevant_sessionkeys = sessionkeys.slice(
@@ -203,7 +230,7 @@ function formatDate(date: string): string {
 }
 
 function makeTitle(aid: number): string {
-	return aid === sessionkeys[sessionkeys.length - 1]
+	return aid === sessionkeys[0]
 		? $_("milestone.current")
 		: formatDate(answerSessions[aid].created_at);
 }
@@ -222,14 +249,14 @@ async function setup() {
 	console.log("detailed: ", detailed);
 }
 
-const promise = setup();
+let promise = $state(setup());
 </script>
 
-{#snippet evaluation( milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, value: number, isMilestone: boolean, withText: boolean = false)}
-	{console.log(' milestonegroup: ', milestone_or_group?.text[$locale as string].title, ', value: ', value)}
+{#snippet evaluation(aid: number, milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, value: number, isMilestone: boolean, withText: boolean = false)}
+	{console.log('    aid: ', aid, 'milestone or group id: ', milestone_or_group?.id, ' milestone or group title ', milestone_or_group?.text[$locale as string].title, ', value: ', value)}
 	<div class="text-gray-700 dark:text-gray-400 space-x-2 space-y-4 p-2 m-2">
 		{#if value === 2}
-			<div class="flex flex-cols space-x-2 items-center">
+			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
 				<CheckCircleSolid color = "green" size="xl"/>
 				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
 					{milestone_or_group?.text[$locale as string].title}
@@ -240,7 +267,7 @@ const promise = setup();
 				{/if}
 			</div>
 		{:else if value === 1}
-			<div class="flex flex-cols space-x-2 items-center">
+			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
 				<EyeSolid color = "green" size="xl"/>
 				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
 					{milestone_or_group?.text[$locale as string].title}
@@ -251,7 +278,7 @@ const promise = setup();
 				{/if}
 			</div>
 		{:else if value === 0}
-			<div class="flex flex-cols space-x-2 items-center">
+			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
 				<BellActiveSolid color = "orange" size="xl"/>
 				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
 					{milestone_or_group?.text[$locale as string].title}
@@ -262,20 +289,17 @@ const promise = setup();
 				{/if}
 			</div>
 			{#if isMilestone}
-				<span class =  "ml-auto">
+				<span class =  "ml-auto mt-4">
 					<Button id="b1" onclick={()=>{
 						showHelp= true;
 					}}>{$_("milestone.help")}</Button>
 					<Modal title={$_("milestone.help")} bind:open={showHelp} dismissable={true}>
 						{milestone_or_group?.text[$locale as string].help}
-						<Button onclick= {() => {
-							activeTabChildren.set("milestone");
-						}}>{$_("milestone.toTheMilestone")}</Button>
 					</Modal>
 				</span>
 			{/if}
 		{:else if value === -1}
-			<div class="flex flex-cols space-x-2 items-center">
+			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
 				<ExclamationCircleSolid color = "orange" size="xl"/>
 				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
 					{milestone_or_group?.text[$locale as string].title}
@@ -286,20 +310,17 @@ const promise = setup();
 				{/if}
 			</div>
 			{#if isMilestone}
-				<span class =  "ml-auto">
+				<span class =  "ml-auto mt-4">
 					<Button id="b1" onclick={()=>{
 						showHelp= true;
 					}}>{$_("milestone.help")}</Button>
 					<Modal title={$_("milestone.help")} bind:open={showHelp} dismissable={true} >
 						{milestone_or_group?.text[$locale as string].help}
-						<Button onclick= {() => {
-							activeTabChildren.set("milestone");
-						}}>{$_("milestone.toTheMilestone")}</Button>
 					</Modal>
 				</span>
 			{/if}
 		{:else}
-			<div class="flex flex-cols space-x-2 items-center">
+			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
 				<CloseCircleSolid color = "red" size="xl"/>
 				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
 					{milestone_or_group?.text[$locale as string].title}
@@ -310,16 +331,13 @@ const promise = setup();
 				{/if}
 			</div>
 			{#if isMilestone}
-				<span class =  "ml-auto">
+				<span class =  "ml-auto mt-4">
 					<Button id="b1" onclick={()=>{
 						showHelp= true;
 					}}>{$_("milestone.help")}</Button>
 
 					<Modal title={$_("milestone.help")} bind:open={showHelp} dismissable={true}>
 						{milestone_or_group?.text[$locale as string].help}
-						<Button onclick= {() => {
-							activeTabChildren.set("milestone");
-						}}>{$_("milestone.toTheMilestone")}</Button>
 					</Modal>
 				</span>
 			{/if}
@@ -358,38 +376,20 @@ const promise = setup();
 		</Modal>
 
 		<Accordion>
-			<AccordionItem >
-				<span slot="header" class = "text-gray-700 dark:text-gray-400 items-center flex justify-center" >
-					<span class = "font-bold" >
+			<AccordionItem>
+				<span slot="header" class="text-gray-700 dark:text-gray-400 flex items-center justify-center">
+					<span class="font-bold">
 						{$_("milestone.legend")}
 					</span>
 				</span>
 				<div class="flex flex-col text-gray-700 dark:text-gray-400 items-start p-2 m-2 space-y-6 justify-center">
-					<div class = "mx-2 px-2 w-full flex flex-row">
-						<CheckCircleSolid color = "green" size="xl" class="mx-2"/>
-						<p>{$_("milestone.recommendOk")}</p>
-					</div>
-					<Hr classHr= "mx-2 px-2 items-end w-full"/>
-					<div class = "mx-2 px-2 w-full flex flex-row">
-						<EyeSolid color = "green" size="xl" class="mx-2"/>
-						<p>{$_("milestone.recommendOkWithCaveat")}</p>
-					</div>
-					<Hr classHr= "mx-2 px-2 items-end w-full"/>
-					<div class = "mx-2 px-2 w-full flex flex-row">
-						<BellActiveSolid color = "orange" size="xl" class="mx-2"/>
-						<p>{$_("milestone.recommendWatch")}</p>
-					</div>
-					<Hr classHr= "mx-2 px-2 items-end w-full"/>
-					<div class = "mx-2 px-2 w-full flex flex-row">
-						<ExclamationCircleSolid color = "orange" size="xl" class="mx-2"/>
-						<p>{$_("milestone.recommendWatchWithCaveat")}</p>
-					</div>
-					<Hr classHr= "mx-2 px-2 items-end w-full"/>
-					<div class = "mx-2 px-2 w-full flex flex-row">
-						<CloseCircleSolid color = "red" size="xl" class="mx-2"/>
-						<p>{$_("milestone.recommmendHelp")}</p>
-					</div>
-					<Hr classHr="mx-2 px-2 items-end w-full"/>
+					{#each milestonePresentation as milestone}
+						<div class="mx-2 px-2 w-full flex flex-row items-center">
+							<svelte:component this={milestone.icon} color={milestone.color} size="xl" class="mx-2"/>
+							<p>{milestone.text}</p>
+						</div>
+						<Hr classHr="mx-2 px-2 items-end w-full"/>
+					{/each}
 				</div>
 			</AccordionItem>
 		</Accordion>
@@ -397,27 +397,29 @@ const promise = setup();
 		<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory}>{$_("milestone.showHistory")}</Checkbox>
 		<Hr classHr= "mx-2"/>
 	</div>
+
 	<div class="m-2 p-2 pb-4 w-full">
-		<Tabs tabStyle="underline" class="items-center flex flex-col mb-4">
+		<Tabs tabStyle="underline" class="items-center flex flex-wrap">
 			{#if showHistory === true}
-				<Button size="md" type="button" class="md:w-16 md:h-8" on:click={async () => {
-					await loadLast();
+				<Button size="md" type="button" class="md:w-16 md:h-8" on:click={() => {
+					promise = loadLast();
 				}}><ArrowLeftOutline class="w-4 h-4" /></Button>
 			{/if}
-			<div class="flex flex-row md:flex-col">
+			<div class="flex flex-col md:flex-row">
 			{#each relevant_sessionkeys as aid}
-				{#if showHistory === true || aid === sessionkeys[sessionkeys.length -1]}
-					<TabItem defaultClass="font-bold text-gray-700 dark:text-gray-400 m-2 p-2" title={makeTitle(aid)} open={aid === sessionkeys[sessionkeys.length - 1]}>
+				{#if showHistory === true || aid === sessionkeys[0]}
+					<TabItem defaultClass="font-bold text-gray-700 dark:text-gray-400 m-2 p-2" title={makeTitle(aid)} open={aid === sessionkeys[0]}>
 						<Accordion class="p-2 m-2">
 							{#each Object.entries(summary[aid]) as [mid, score]}
 								<AccordionItem >
 									<span slot="header" class="text-gray-700 dark:text-gray-400 items-center flex justify-center space-x-2">
-										{@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false, false)}
+										{@render evaluation(aid, milestoneGroups[aid][Number(mid)], score as number, false, false)}
 									</span>
 									<div class="flex-row justify-between">
 										{console.log(" aid: ", aid, ", detailed[aid]: ", detailed[aid])}
 										{#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
 											{@render evaluation(
+												aid,
 												milestoneGroups[aid][Number(mid)].milestones.find((element: any) =>
 												{
 													return element.id === Number(ms_id);
@@ -436,8 +438,8 @@ const promise = setup();
 			{/each}
 			</div>
 			{#if showHistory === true}
-				<Button size="md" type="button" class="md:w-16 md:h-8" on:click={async () => {
-					await loadNext();
+				<Button size="md" type="button" class="md:w-16 md:h-8" on:click={() => {
+					promise = loadNext();
 				}}><ArrowRightOutline class="w-4 h-4" /></Button>
 			{/if}
 		</Tabs>
