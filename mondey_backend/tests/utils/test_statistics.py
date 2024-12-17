@@ -89,6 +89,7 @@ def test_online_statistics_computation_too_little_data():
 
 def test_get_score_statistics_by_age(session):
     answers = session.exec(select(MilestoneAnswer)).all()
+    print(answers)
     # which answers we choose here is arbitrary for testing, we just need to make sure it's fixed and not empty
     child_ages = {
         1: 5,
@@ -212,6 +213,12 @@ def test_calculate_milestone_statistics_by_age(statistics_session):
 
     # we have nothing new for everything else
     for age in range(0, len(mscore.scores)):
+        print(
+            age,
+            mscore.scores[age].count,
+            mscore.scores[age].avg_score,
+            mscore.scores[age].stddev_score,
+        )
         if age != 8:
             assert mscore.scores[age].count == 12
             avg = 0 if age < 5 else min(1 * age - 5, 3)
