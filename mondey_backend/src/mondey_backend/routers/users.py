@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import logging
-
 from fastapi import APIRouter
 from fastapi import HTTPException
 from fastapi import UploadFile
@@ -134,9 +132,6 @@ def create_router() -> APIRouter:
         milestone_answer_session = get_or_create_current_milestone_answer_session(
             session, current_active_user, child
         )
-        logger = logging.getLogger("backend-1")
-        logger.info(f"milestones: {milestone_answer_session.answers}")
-        logger.info(f"session: {milestone_answer_session}")
 
         return milestone_answer_session
 
@@ -278,12 +273,10 @@ def create_router() -> APIRouter:
         answersession = get(session, MilestoneAnswerSession, answersession_id)
         if answersession is None:
             raise HTTPException(404, detail="Answer session not found")
-        logger = logging.getLogger("backend-1")
         child_id = answersession.child_id
         feedback = compute_milestonegroup_feedback_summary(
             session, child_id, answersession_id
         )
-        logger.info(f"{answersession_id}: summary feedback: {feedback}")
         return feedback
 
     @router.get(
@@ -295,7 +288,6 @@ def create_router() -> APIRouter:
         answersession_id: int,
     ) -> dict[int, dict[int, int]]:
         answersession = session.get(MilestoneAnswerSession, answersession_id)
-        logger = logging.getLogger("backend-1")
 
         if answersession is None:
             raise HTTPException(404, detail="Answer session not found")
@@ -303,7 +295,6 @@ def create_router() -> APIRouter:
         feedback = compute_milestonegroup_feedback_detailed(
             session, child_id, answersession_id
         )
-        logger.info(f"{answersession_id}: detailed feedback: {feedback}")
         return feedback
 
     return router

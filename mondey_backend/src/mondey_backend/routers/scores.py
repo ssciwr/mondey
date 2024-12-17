@@ -89,6 +89,16 @@ def compute_feedback_simple(
         else:
             final_score = TrafficLight.green.value
 
+    print(
+        "eval: ",
+        lim_lower,
+        lim_upper,
+        stat.avg_score,
+        stat.stddev_score,
+        score,
+        final_score,
+    )
+
     return final_score
 
 
