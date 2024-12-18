@@ -334,16 +334,6 @@ export type GetMilestoneGroupsResponse = (Array<MilestoneGroupPublic>);
 
 export type GetMilestoneGroupsError = (HTTPValidationError);
 
-export type GetMilestoneGroupsForAnswersessionData = {
-    path: {
-        answersession_id: number;
-    };
-};
-
-export type GetMilestoneGroupsForAnswersessionResponse = (Array<MilestoneGroupPublic>);
-
-export type GetMilestoneGroupsForAnswersessionError = (HTTPValidationError);
-
 export type SubmitMilestoneImageData = {
     body: Body_submit_milestone_image_submitted_milestone_images__milestone_id__post;
     path: {
