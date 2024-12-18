@@ -401,7 +401,6 @@ let promise = $state(setup());
 										{@render evaluation(aid, milestoneGroups[aid][Number(mid)], score as number, false, false)}
 									</span>
 									<div class="flex-row justify-between">
-										{console.log("    aid: ", aid, relevant_sessionkeys[0], ", detailed[aid]: ", detailed[aid])}
 										{#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
 											{@render evaluation(
 												aid,
