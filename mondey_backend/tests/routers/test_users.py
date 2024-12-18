@@ -2,6 +2,9 @@ import datetime
 import pathlib
 
 from fastapi.testclient import TestClient
+from sqlmodel import select
+
+from mondey_backend.models.milestones import MilestoneAnswer
 
 
 def _is_approx_now(iso_date_string: str, delta=datetime.timedelta(hours=1)) -> bool:
@@ -173,7 +176,6 @@ def test_get_milestone_answers_child3_no_current_answer_session(
 
 def test_get_milestone_answers_child1_current_answer_session(user_client: TestClient):
     response = user_client.get("/users/milestone-answers/1")
-
     assert response.status_code == 200
     assert response.json()["id"] == 2
     assert response.json()["child_id"] == 1
@@ -187,8 +189,8 @@ def test_get_milestone_answers_child1_current_answer_session(user_client: TestCl
         "2": {
             "milestone_id": 2,
             "answer": 2,
-            "included_in_milestonegroup_statistics": False,
             "included_in_milestone_statistics": False,
+            "included_in_milestonegroup_statistics": False,
         },
     }
     assert _is_approx_now(response.json()["created_at"])
@@ -378,7 +380,16 @@ def test_update_current_child_answers_no_prexisting(
     assert response.status_code == 404
 
 
-def test_get_summary_feedback_for_session(user_client: TestClient):
+def test_get_summary_feedback_for_session(user_client: TestClient, session):
+    answers = session.exec(
+        select(MilestoneAnswer).where(MilestoneAnswer.answer_session_id == 1)
+    ).all()
+    for answer in answers:
+        answer.included_in_milestone_statistics = False
+        answer.included_in_milestonegroup_statistics = False
+        session.merge(answer)
+    session.commit()
+
     response = user_client.get("/users/feedback/answersession=1/summary")
     assert response.status_code == 200
     assert response.json() == {"1": 2}
@@ -389,7 +400,15 @@ def test_get_summary_feedback_for_session_invalid(user_client: TestClient):
     assert response.status_code == 404
 
 
-def test_get_detailed_feedback_for_session(user_client: TestClient):
+def test_get_detailed_feedback_for_session(user_client: TestClient, session):
+    answers = session.exec(
+        select(MilestoneAnswer).where(MilestoneAnswer.answer_session_id == 1)
+    ).all()
+    for answer in answers:
+        answer.included_in_milestone_statistics = False
+        answer.included_in_milestonegroup_statistics = False
+        session.merge(answer)
+    session.commit()
     response = user_client.get("/users/feedback/answersession=1/detailed")
     assert response.status_code == 200
     assert response.json() == {"1": {"1": 2, "2": 2}}

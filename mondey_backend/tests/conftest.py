@@ -269,22 +269,12 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         # add two milestone answers
         session.add(
             MilestoneAnswer(
-                answer_session_id=2,
-                milestone_id=1,
-                milestone_group_id=1,
-                answer=3,
-                included_in_milestone_statistics=False,
-                included_in_milestonegroup_statistics=False,
+                answer_session_id=2, milestone_id=1, milestone_group_id=1, answer=3
             )
         )
         session.add(
             MilestoneAnswer(
-                answer_session_id=2,
-                milestone_id=2,
-                milestone_group_id=1,
-                answer=2,
-                included_in_milestone_statistics=False,
-                included_in_milestonegroup_statistics=False,
+                answer_session_id=2, milestone_id=2, milestone_group_id=1, answer=2
             )
         )
         # add an (expired) milestone answer session for child 3 / admin user (id 1) with 1 answer
@@ -301,8 +291,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 milestone_id=7,
                 milestone_group_id=2,
                 answer=2,
-                included_in_milestone_statistics=True,
-                included_in_milestonegroup_statistics=True,
             )
         )
         # add a research group (that user with id 3 is part of, and researcher with id 2 has access to)
@@ -486,53 +474,36 @@ def statistics_session(session):
     today = datetime.datetime.today()
     last_month = today - relativedelta(months=1)
 
-    # add another expired milestoneanswersession for milestones 1, 2 for child.
-    # the answers belonging to this one are intended to be not included in the statistics
+    # add another expired milestoneanswersession for milestones 1, 2 for child
+    # this answersession is not part of the statistics yet
     session.add(
         MilestoneAnswerSession(
             child_id=1,
             user_id=3,
-            created_at=datetime.datetime(last_month.year, last_month.month, 20),
+            created_at=datetime.datetime(today.year, last_month.month, 20),
         )
     )
     session.add(
         MilestoneAnswer(
-            answer_session_id=4,
-            milestone_id=1,
-            milestone_group_id=1,
-            answer=3,
-            included_in_milestone_statistics=False,
-            included_in_milestonegroup_statistics=False,
+            answer_session_id=4, milestone_id=1, milestone_group_id=1, answer=3
         )
     )
     session.add(
         MilestoneAnswer(
-            answer_session_id=4,
-            milestone_id=2,
-            milestone_group_id=1,
-            answer=2,
-            included_in_milestone_statistics=False,
-            included_in_milestonegroup_statistics=False,
+            answer_session_id=4, milestone_id=2, milestone_group_id=1, answer=2
         )
     )
 
     # add another expired answersession for milestone 7 for child 3 that is a bit later
-    # than answersession 3 (the last one for the same child), but still expired. This one has
-    # already been included in the statistics
+    # than answersession 3 (the last one for the same child), but still expired
     session.add(
         MilestoneAnswerSession(
             child_id=3, user_id=1, created_at=datetime.datetime(today.year - 1, 1, 10)
         )
     )
-
     session.add(
         MilestoneAnswer(
-            answer_session_id=5,
-            milestone_id=7,
-            milestone_group_id=2,
-            answer=1,
-            included_in_milestone_statistics=True,
-            included_in_milestonegroup_statistics=True,
+            answer_session_id=5, milestone_id=7, milestone_group_id=2, answer=1
         )
     )
 
