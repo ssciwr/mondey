@@ -4,7 +4,6 @@ import datetime
 from collections.abc import Sequence
 
 import numpy as np
-from sqlalchemy import and_
 from sqlmodel import col
 from sqlmodel import select
 
@@ -195,7 +194,6 @@ def calculate_milestone_statistics_by_age(
         MilestoneAgeScoreCollection object which contains a list of MilestoneAgeScore objects,
     one for each month, or None if there are no answers for the milestoneg and no previous statistics.
     """
-    # TODO: when the answersession eventually has an expired flag, this can go again.
     session_expired_days: int = 7
 
     # get the newest statistics for the milestone
@@ -221,6 +219,7 @@ def calculate_milestone_statistics_by_age(
                 col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
             )
             .where(MilestoneAnswer.milestone_id == milestone_id)
+            .where(not MilestoneAnswer.included_in_milestone_statistics)
             .where(MilestoneAnswerSession.created_at < expiration_date)
         )
     else:
@@ -239,15 +238,16 @@ def calculate_milestone_statistics_by_age(
                 col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
             )
             .where(MilestoneAnswer.milestone_id == milestone_id)
-            .where(
-                and_(
-                    col(MilestoneAnswerSession.created_at) > last_statistics.created_at,
-                    col(MilestoneAnswerSession.created_at) <= expiration_date,
-                )  # expired session only which are not in the last statistics
-            )
+            .where(not MilestoneAnswer.included_in_milestone_statistics)
+            .where(col(MilestoneAnswerSession.created_at) <= expiration_date)
         )
 
     answers = session.exec(answers_query).all()
+
+    for answer in answers:
+        answer.included_in_milestone_statistics = True
+        session.merge(answer)
+    session.commit()
 
     if len(answers) == 0:
         # return last statistics if no new answers are available, because that is the best we can do then.
@@ -302,7 +302,6 @@ def calculate_milestonegroup_statistics_by_age(
     one for each month, or None if there are no answers for the milestonegroup and no previous statistics.
     """
 
-    # TODO: when the answersession eventually has an 'expired' flag, this can go again.
     session_expired_days: int = 7
 
     # get the newest statistics for the milestonegroup
@@ -326,9 +325,10 @@ def calculate_milestonegroup_statistics_by_age(
                 col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
             )
             .where(MilestoneAnswer.milestone_group_id == milestonegroup_id)
+            .where(not MilestoneAnswer.included_in_milestonegroup_statistics)
             .where(
                 MilestoneAnswerSession.created_at
-                < expiration_date  # expired session only
+                <= expiration_date  # expired session only
             )
         )
     else:
@@ -352,15 +352,17 @@ def calculate_milestonegroup_statistics_by_age(
                 MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,  # type: ignore
             )
             .where(MilestoneAnswer.milestone_group_id == milestonegroup_id)
-            .where(
-                and_(
-                    MilestoneAnswerSession.created_at > last_statistics.created_at,  # type: ignore
-                    MilestoneAnswerSession.created_at <= expiration_date,  # type: ignore
-                )
-            )  # expired session only which are not in the last statistics
+            .where(not MilestoneAnswer.included_in_milestonegroup_statistics)
+            .where(MilestoneAnswerSession.created_at <= expiration_date)
         )
 
     answers = session.exec(answer_query).all()
+
+    # update answer.included_in_milestonegroup_statistics to True
+    for answer in answers:
+        answer.included_in_milestonegroup_statistics = True
+        session.merge(answer)
+    session.commit()
 
     if len(answers) == 0:
         # return last statistics if no new answers are available, because that is the best we can do then.
