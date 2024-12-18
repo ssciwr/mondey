@@ -75,7 +75,6 @@ def compute_feedback_simple(
     else:
         lim_lower = stat.avg_score - 2 * stat.stddev_score
         lim_upper = stat.avg_score - stat.stddev_score
-    print("eval: ", lim_lower, lim_upper, stat.avg_score, score)
     if leq(score, lim_lower):
         return TrafficLight.red.value
     elif score > lim_lower and leq(score, lim_upper):
