@@ -7,7 +7,7 @@ import {
 	type ValidationError,
 	getDetailedFeedbackForAnswersession,
 	getExpiredMilestoneAnswerSessions,
-	getMilestoneGroupsForAnswersession,
+	getMilestonegroupsForSession,
 	getSummaryFeedbackForAnswersession,
 } from "$lib/client";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
@@ -134,10 +134,10 @@ async function loadAnswersessions(): Promise<void> {
 async function loadSummaryFeedback(relevant: number[]): Promise<void> {
 	for (const aid of relevant) {
 		console.log(" aid: ", aid);
-		const milestoneGroupResponse = await getMilestoneGroupsForAnswersession({
+		const milestoneGroupResponse = await getMilestonegroupsForSession({
 			path: {
 				answersession_id: Number(aid),
-			},
+			}
 		});
 
 		if (milestoneGroupResponse.error) {
@@ -147,7 +147,7 @@ async function loadSummaryFeedback(relevant: number[]): Promise<void> {
 		}
 
 		milestoneGroups[Number(aid)] = {};
-		for (const m of milestoneGroupResponse.data) {
+		for (const m of Object.values(milestoneGroupResponse.data)) {
 			milestoneGroups[Number(aid)][m.id] = m;
 		}
 
