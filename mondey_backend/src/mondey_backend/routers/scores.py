@@ -36,7 +36,6 @@ class TrafficLight(Enum):
 def compute_feedback_simple(
     stat: MilestoneAgeScore | MilestoneGroupAgeScore,
     score: float,
-    min_score: float | None = None,
 ) -> int:
     """
     Compute trafficlight feedback. Replace this function with your own if you
@@ -50,11 +49,9 @@ def compute_feedback_simple(
     Returns
     -------
     int
-        -2 if score <= avg - 2 * stddev (trafficlight: red)
-        -1 if 2*stddev < score <= avg - stddev and min < avg - 2*stddev (trafficlight: yellowWithCaveat)
+        -1 if score <= avg - 2 * stddev (trafficlight: red)
         0 if avg - 2 * stddev < score <= avg - stddev (trafficlight: yellow)
-        1 if score > avg - stddev and  avg - 2*stddev < score < avg - stddev (trafficlight: greenWithCaveat)
-        2 if score > avg - stddev (trafficlight: green)
+        1if score > avg - stddev (trafficlight: green)
     """
 
     def leq(val: float, lim: float) -> bool:
@@ -73,15 +70,12 @@ def compute_feedback_simple(
     else:
         lim_lower = stat.avg_score - 2 * stat.stddev_score
         lim_upper = stat.avg_score - stat.stddev_score
+
     if leq(score, lim_lower):
         return TrafficLight.red.value
     elif score > lim_lower and leq(score, lim_upper):
-        if min_score is not None and min_score < lim_lower:
-            return TrafficLight.yellowWithCaveat.value
         return TrafficLight.yellow.value
     else:
-        if min_score is not None and min_score < lim_upper:
-            return TrafficLight.greenWithCaveat.value
         return TrafficLight.green.value
 
 
@@ -154,7 +148,7 @@ def compute_milestonegroup_feedback_summary(
 
         # use the statistics recorded for a certain age as the basis for the feedback computation
         feedback[group] = compute_feedback_simple(
-            stats.scores[age], float(np.mean(group_answers)), min(group_answers)
+            stats.scores[age], float(np.mean(group_answers))
         )
     return feedback
 
