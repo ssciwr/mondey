@@ -125,15 +125,10 @@ async function loadAnswersessions(): Promise<void> {
 		.reverse();
 	const maxindex = Math.min(currentSessionIndices[1], sessionkeys.length);
 	relevant_sessionkeys = sessionkeys.slice(currentSessionIndices[0], maxindex);
-
-	console.log("all sessionkeys: ", sessionkeys);
-	console.log("sessionkeys max: ", maxindex);
-	console.log("relevant_sessionkeys: ", relevant_sessionkeys);
 }
 
 async function loadSummaryFeedback(relevant: number[]): Promise<void> {
 	for (const aid of relevant) {
-		console.log(" aid: ", aid);
 		const milestoneGroupResponse = await getMilestonegroupsForSession({
 			path: {
 				answersession_id: Number(aid),
@@ -186,12 +181,10 @@ async function loadDetailedFeedback(relevant: number[]): Promise<void> {
 }
 
 async function loadLast() {
-	console.log("loadLast current indices before", currentSessionIndices);
 	currentSessionIndices = [
 		Math.max(currentSessionIndices[0] - intervalSize, 0),
 		Math.max(currentSessionIndices[1] - intervalSize, intervalSize),
 	];
-	console.log("loadLast current indices after", currentSessionIndices);
 	relevant_sessionkeys = sessionkeys.slice(
 		currentSessionIndices[0],
 		currentSessionIndices[1],
@@ -202,7 +195,6 @@ async function loadLast() {
 }
 
 async function loadNext() {
-	console.log("loadNext current indices before", currentSessionIndices);
 	currentSessionIndices = [
 		Math.min(
 			currentSessionIndices[0] + intervalSize,
@@ -210,7 +202,6 @@ async function loadNext() {
 		),
 		Math.min(currentSessionIndices[1] + intervalSize, sessionkeys.length),
 	];
-	console.log("loadNext current indices after", currentSessionIndices);
 	relevant_sessionkeys = sessionkeys.slice(
 		currentSessionIndices[0],
 		currentSessionIndices[1],
@@ -242,18 +233,12 @@ async function setup() {
 	}
 	await loadSummaryFeedback(relevant_sessionkeys);
 	await loadDetailedFeedback(relevant_sessionkeys);
-
-	console.log("answerSessions: ", answerSessions);
-	console.log("milestoneGroups: ", milestoneGroups);
-	console.log("summary: ", summary);
-	console.log("detailed: ", detailed);
 }
 
 let promise = $state(setup());
 </script>
 
 {#snippet evaluation(aid: number, milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, value: number, isMilestone: boolean, withText: boolean = false)}
-	{console.log('    aid: ', aid, 'milestone or group id: ', milestone_or_group?.id, ' milestone or group title ', milestone_or_group?.text[$locale as string].title, ', value: ', value)}
 	<div class="text-gray-700 dark:text-gray-400 space-x-2 space-y-4 p-2 m-2">
 		{#if value === 2}
 			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
@@ -408,7 +393,7 @@ let promise = $state(setup());
 			<div class="flex flex-col md:flex-row">
 			{#each relevant_sessionkeys as aid}
 				{#if showHistory === true || aid === sessionkeys[0]}
-					<TabItem defaultClass="font-bold text-gray-700 dark:text-gray-400 m-2 p-2" title={makeTitle(aid)} open={aid === sessionkeys[0]}>
+					<TabItem defaultClass="font-bold text-gray-700 dark:text-gray-400 m-2 p-2" title={makeTitle(aid)} open={aid === relevant_sessionkeys[0] }>
 						<Accordion class="p-2 m-2">
 							{#each Object.entries(summary[aid]) as [mid, score]}
 								<AccordionItem >
@@ -416,7 +401,7 @@ let promise = $state(setup());
 										{@render evaluation(aid, milestoneGroups[aid][Number(mid)], score as number, false, false)}
 									</span>
 									<div class="flex-row justify-between">
-										{console.log(" aid: ", aid, ", detailed[aid]: ", detailed[aid])}
+										{console.log("    aid: ", aid, relevant_sessionkeys[0], ", detailed[aid]: ", detailed[aid])}
 										{#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
 											{@render evaluation(
 												aid,
