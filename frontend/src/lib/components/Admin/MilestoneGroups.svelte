@@ -25,6 +25,7 @@ import EditMilestoneGroupModal from "$lib/components/Admin/EditMilestoneGroupMod
 import EditMilestoneModal from "$lib/components/Admin/EditMilestoneModal.svelte";
 import OrderItemsModal from "$lib/components/Admin/OrderItemsModal.svelte";
 import ReorderButton from "$lib/components/Admin/ReorderButton.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { milestoneGroups } from "$lib/stores/adminStore";
 import {
 	Card,
@@ -37,7 +38,6 @@ import {
 } from "flowbite-svelte";
 import ChevronDownOutline from "flowbite-svelte-icons/ChevronDownOutline.svelte";
 import ChevronUpOutline from "flowbite-svelte-icons/ChevronUpOutline.svelte";
-import { _, locale } from "svelte-i18n";
 import AlertMessage from "../AlertMessage.svelte";
 
 let currentMilestoneGroup = $state(null as MilestoneGroupAdmin | null);
@@ -126,16 +126,16 @@ async function doDeleteMilestone() {
 }
 </script>
 
-{#if $locale}
+{#if i18n.locale}
 <Card size="xl" class="m-5">
 	{#if milestoneGroups}
 		<Table>
 			<TableHead>
-				<TableHeadCell colSpan="4">{$_('admin.milestone-groups')}</TableHeadCell>
+				<TableHeadCell colSpan="4">{i18n.tr.admin.milestoneGroups}</TableHeadCell>
 			</TableHead>
 			<TableBody>
 				{#each $milestoneGroups as milestoneGroup, groupIndex (milestoneGroup.id)}
-					{@const groupTitle = milestoneGroup.text[$locale]?.title}
+					{@const groupTitle = milestoneGroup.text[i18n.locale]?.title}
 					<TableBodyRow
 						on:click={() => {
 							toggleOpenGroupIndex(groupIndex);
@@ -184,11 +184,11 @@ async function doDeleteMilestone() {
 							<TableBodyCell colSpan="3">
 								<Table>
 									<TableHead>
-										<TableHeadCell colspan="4">{$_('admin.milestones')}</TableHeadCell>
+										<TableHeadCell colspan="4">{i18n.tr.admin.milestones}</TableHeadCell>
 									</TableHead>
 									<TableBody>
 										{#each milestoneGroup.milestones as milestone (milestone.id)}
-											{@const milestoneTitle = milestone?.text[$locale]?.title}
+											{@const milestoneTitle = milestone?.text[i18n.locale]?.title}
 											<TableBodyRow>
 												<TableBodyCell>
 													{#if milestone?.images?.length}
@@ -229,7 +229,7 @@ async function doDeleteMilestone() {
 														onclick={(event: Event) => {
 															event.stopPropagation();
 															currentOrderEndpoint = orderMilestonesAdmin;
-															currentOrderItems = milestoneGroup.milestones.map((milestone) => {return {id: milestone.id, text: milestone.text[$locale]?.title};});
+															currentOrderItems = milestoneGroup.milestones.map((milestone) => {return {id: milestone.id, text: milestone.text[i18n.locale]?.title};});
 															showOrderItemsModal = true;
 														}} />
 											</TableBodyCell>
@@ -250,7 +250,7 @@ async function doDeleteMilestone() {
 								onclick={(event: Event) => {
 									event.stopPropagation();
 									currentOrderEndpoint = orderMilestoneGroupsAdmin;
-									currentOrderItems = $milestoneGroups.map((milestoneGroup) => {return {id: milestoneGroup.id, text: milestoneGroup.text[$locale]?.title};});
+									currentOrderItems = $milestoneGroups.map((milestoneGroup) => {return {id: milestoneGroup.id, text: milestoneGroup.text[i18n.locale]?.title};});
 									showOrderItemsModal = true;
 								}} />
 					</TableBodyCell>
@@ -277,5 +277,5 @@ async function doDeleteMilestone() {
 
 <OrderItemsModal bind:open={showOrderItemsModal} items={currentOrderItems} endpoint={currentOrderEndpoint} callback={refreshMilestoneGroups}  />
 {:else}
- <AlertMessage title={$_("userData.alertMessageTitle")} message={$_("userData.alertMessageError")} />
+ <AlertMessage title={i18n.tr.userData.alertMessageTitle} message={i18n.tr.userData.alertMessageError} />
 {/if}

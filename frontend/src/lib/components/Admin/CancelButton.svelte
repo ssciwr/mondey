@@ -1,9 +1,9 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
+import { i18n } from "$lib/i18n.svelte";
 import CloseOutline from "flowbite-svelte-icons/CloseOutline.svelte";
 import Button from "flowbite-svelte/Button.svelte";
-import { _ } from "svelte-i18n";
 
 let {
 	onclick = () => {
@@ -13,5 +13,5 @@ let {
 </script>
 
 <Button color="alternative" {onclick}
-	><CloseOutline class="me-2 h-5 w-5" /> {$_('admin.cancel')}</Button
+	><CloseOutline class="me-2 h-5 w-5" /> {i18n.tr.admin.cancel}</Button
 >

@@ -4,9 +4,9 @@
 import { getMilestoneAgeScores } from "$lib/client/services.gen";
 import type { MilestoneAgeScore } from "$lib/client/types.gen";
 import PlotScoreAge from "$lib/components/DataDisplay/PlotScoreAge.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { Modal } from "flowbite-svelte";
 import { onMount } from "svelte";
-import { _ } from "svelte-i18n";
 
 let {
 	open = $bindable(false),
@@ -34,7 +34,7 @@ onMount(async () => {
 });
 </script>
 
-<Modal title={$_('admin.expected-age-data')} bind:open size="lg" outsideclose>
+<Modal title={i18n.tr.admin.expectedAgeData} bind:open size="lg" outsideclose>
 	{#if scores}
 		<PlotScoreAge {scores} />
 	{/if}

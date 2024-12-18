@@ -9,6 +9,7 @@ import {
 import type { MilestoneAgeScoreCollectionPublic } from "$lib/client/types.gen";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import PlotScoreAge from "$lib/components/DataDisplay/PlotScoreAge.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { milestoneGroups } from "$lib/stores/adminStore";
 import {
 	Button,
@@ -23,7 +24,6 @@ import {
 	TableHeadCell,
 } from "flowbite-svelte";
 import RefreshOutline from "flowbite-svelte-icons/RefreshOutline.svelte";
-import { _, locale } from "svelte-i18n";
 
 let currentMilestoneId = $state(null as number | null);
 let showMilestoneExpectedAgeModal = $state(false);
@@ -86,11 +86,11 @@ async function saveNewExpectedAges() {
 </script>
 
 <Card size="xl" class="m-5">
-    {#if milestoneGroups && $locale}
+    {#if milestoneGroups && i18n.locale}
         <div class="grid grid-cols-2 justify-items-stretch">
             <div class="grid grid-rows-2">
                 <Button class="mx-2" onclick={getNewExpectedAges}>
-                    <RefreshOutline class="me-2 h-5 w-5"/> {$_("admin.recalculate-expected-age")}</Button>
+                    <RefreshOutline class="me-2 h-5 w-5"/> {i18n.tr.admin.recalculateExpectedAge}</Button>
                 <div class="m-2">
                     <Progressbar labelInside progress={calculateProgress} size="h-4"/>
                 </div>
@@ -104,23 +104,23 @@ async function saveNewExpectedAges() {
         </div>
         <Table>
             <TableHead>
-                <TableHeadCell>{$_('admin.milestones')}</TableHeadCell>
-                <TableHeadCell>{$_('admin.expected-age')}</TableHeadCell>
-                <TableHeadCell>{$_('admin.new-expected-age')}</TableHeadCell>
-                <TableHeadCell>{$_('admin.actions')}</TableHeadCell>
+                <TableHeadCell>{i18n.tr.admin.milestones}</TableHeadCell>
+                <TableHeadCell>{i18n.tr.admin.expectedAge}</TableHeadCell>
+                <TableHeadCell>{i18n.tr.admin.newExpectedAge}</TableHeadCell>
+                <TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
             </TableHead>
             <TableBody>
                 {#each $milestoneGroups as milestoneGroup (milestoneGroup.id)}
-                    {@const groupTitle = milestoneGroup.text[$locale].title}
+                    {@const groupTitle = milestoneGroup.text[i18n.locale].title}
                     {#each milestoneGroup.milestones as milestone (milestone.id)}
-                        {@const milestoneTitle = `${groupTitle} / ${milestone.text[$locale].title}`}
+                        {@const milestoneTitle = `${groupTitle} / ${milestone.text[i18n.locale].title}`}
                         {@const newExpectedAge = expectedAges?.[milestone.id]?.expected_age ?? '-'}
                         <TableBodyRow>
                             <TableBodyCell>{milestoneTitle}</TableBodyCell>
                             <TableBodyCell>{milestone.expected_age_months}</TableBodyCell>
                             <TableBodyCell>{newExpectedAge}</TableBodyCell>
                             <Button class="m-2" disabled={!expectedAges?.[milestone.id]}
-                                    onclick={() => {currentMilestoneId = milestone.id; currentTitle = `${milestoneTitle} ${$_('admin.new-expected-age')}: ${newExpectedAge}m`; showMilestoneExpectedAgeModal = true;}}>{$_("admin.view-data")}</Button>
+                                    onclick={() => {currentMilestoneId = milestone.id; currentTitle = `${milestoneTitle} ${i18n.tr.admin.newExpectedAge}: ${newExpectedAge}m`; showMilestoneExpectedAgeModal = true;}}>{i18n.tr.admin.viewData}</Button>
                         </TableBodyRow>
                     {/each}
                 {/each}

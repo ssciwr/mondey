@@ -1,13 +1,13 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
+import { i18n } from "$lib/i18n.svelte";
 import CheckOutline from "flowbite-svelte-icons/CheckOutline.svelte";
 import Button from "flowbite-svelte/Button.svelte";
-import { _ } from "svelte-i18n";
 
 let {
 	onclick,
-	text = $_("admin.save-changes"),
+	text = i18n.tr.admin.saveChanges,
 	disabled = false,
 }: { onclick: () => void; text?: string; disabled?: boolean } = $props();
 </script>
