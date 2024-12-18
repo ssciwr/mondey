@@ -219,7 +219,7 @@ def calculate_milestone_statistics_by_age(
                 col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
             )
             .where(MilestoneAnswer.milestone_id == milestone_id)
-            .where(not MilestoneAnswer.included_in_milestone_statistics)
+            .where(~col(MilestoneAnswer.included_in_milestone_statistics))
             .where(MilestoneAnswerSession.created_at < expiration_date)
         )
     else:
@@ -238,7 +238,7 @@ def calculate_milestone_statistics_by_age(
                 col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
             )
             .where(MilestoneAnswer.milestone_id == milestone_id)
-            .where(not MilestoneAnswer.included_in_milestone_statistics)
+            .where(~col(MilestoneAnswer.included_in_milestone_statistics))
             .where(col(MilestoneAnswerSession.created_at) <= expiration_date)
         )
 
@@ -325,7 +325,7 @@ def calculate_milestonegroup_statistics_by_age(
                 col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
             )
             .where(MilestoneAnswer.milestone_group_id == milestonegroup_id)
-            .where(not MilestoneAnswer.included_in_milestonegroup_statistics)
+            .where(~col(MilestoneAnswer.included_in_milestonegroup_statistics))
             .where(
                 MilestoneAnswerSession.created_at
                 <= expiration_date  # expired session only
@@ -349,10 +349,10 @@ def calculate_milestonegroup_statistics_by_age(
             select(MilestoneAnswer)
             .join(
                 MilestoneAnswerSession,
-                MilestoneAnswer.answer_session_id == MilestoneAnswerSession.id,  # type: ignore
+                col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
             )
             .where(MilestoneAnswer.milestone_group_id == milestonegroup_id)
-            .where(not MilestoneAnswer.included_in_milestonegroup_statistics)
+            .where(~col(MilestoneAnswer.included_in_milestonegroup_statistics))
             .where(MilestoneAnswerSession.created_at <= expiration_date)
         )
 
