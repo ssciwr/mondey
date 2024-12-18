@@ -3,10 +3,6 @@
 <script lang="ts">
 import { verhoeff } from "cdigit";
 import { Input } from "flowbite-svelte";
-import {
-	CheckCircleOutline,
-	ExclamationCircleOutline,
-} from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 
 let {
@@ -32,5 +28,5 @@ onMount(() => {
 </script>
 
 <div class="flex flex-row items-center">
-	<Input type="text" bind:value class="mr-2" {oninput} color={valid ? 'base' : 'red'}/>
+	<Input type="text" bind:value class="mr-2" {oninput} color={valid ? 'base' : 'red'} data-testid="researchCodeInput"/>
 </div>

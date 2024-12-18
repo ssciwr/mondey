@@ -177,3 +177,10 @@ mondey_backend/static/*.jpg
 # project specific
 private
 static
+
+# playwright
+/frontend/node_modules/
+/frontend/test-results/
+/frontend/playwright-report/
+/frontend/blob-report/
+/frontend/playwright/.cache/
