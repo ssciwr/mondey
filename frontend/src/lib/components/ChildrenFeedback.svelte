@@ -137,7 +137,7 @@ async function loadSummaryFeedback(relevant: number[]): Promise<void> {
 		const milestoneGroupResponse = await getMilestonegroupsForSession({
 			path: {
 				answersession_id: Number(aid),
-			}
+			},
 		});
 
 		if (milestoneGroupResponse.error) {
