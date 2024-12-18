@@ -61,19 +61,9 @@ let relevant_sessionkeys = $state([] as number[]);
 const milestonePresentation = [
 	{ icon: CheckCircleSolid, color: "green", text: $_("milestone.recommendOk") },
 	{
-		icon: EyeSolid,
-		color: "green",
-		text: $_("milestone.recommendOkWithCaveat"),
-	},
-	{
-		icon: BellActiveSolid,
-		color: "orange",
-		text: $_("milestone.recommendWatch"),
-	},
-	{
 		icon: ExclamationCircleSolid,
 		color: "orange",
-		text: $_("milestone.recommendWatchWithCaveat"),
+		text: $_("milestone.recommendWatch"),
 	},
 	{
 		icon: CloseCircleSolid,
@@ -240,7 +230,7 @@ let promise = $state(setup());
 
 {#snippet evaluation(aid: number, milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, value: number, isMilestone: boolean, withText: boolean = false)}
 	<div class="text-gray-700 dark:text-gray-400 space-x-2 space-y-4 p-2 m-2">
-		{#if value === 2}
+		{#if value === 1}
 			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
 				<CheckCircleSolid color = "green" size="xl"/>
 				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
@@ -249,17 +239,6 @@ let promise = $state(setup());
 				<Hr class="mx-2"/>
 				{#if withText}
 				<p>{$_("milestone.recommendOk")}</p>
-				{/if}
-			</div>
-		{:else if value === 1}
-			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
-				<EyeSolid color = "green" size="xl"/>
-				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
-					{milestone_or_group?.text[$locale as string].title}
-				</span>
-				<Hr class="mx-2"/>
-				{#if withText}
-				<p>{$_("milestone.recommendOkWithCaveat")}</p>
 				{/if}
 			</div>
 		{:else if value === 0}
@@ -279,27 +258,6 @@ let promise = $state(setup());
 						showHelp= true;
 					}}>{$_("milestone.help")}</Button>
 					<Modal title={$_("milestone.help")} bind:open={showHelp} dismissable={true}>
-						{milestone_or_group?.text[$locale as string].help}
-					</Modal>
-				</span>
-			{/if}
-		{:else if value === -1}
-			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
-				<ExclamationCircleSolid color = "orange" size="xl"/>
-				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
-					{milestone_or_group?.text[$locale as string].title}
-				</span>
-				<Hr class="mx-2"/>
-				{#if withText}
-				<p>{$_("milestone.recommendWatchWithCaveat")}</p>
-				{/if}
-			</div>
-			{#if isMilestone}
-				<span class =  "ml-auto mt-4">
-					<Button id="b1" onclick={()=>{
-						showHelp= true;
-					}}>{$_("milestone.help")}</Button>
-					<Modal title={$_("milestone.help")} bind:open={showHelp} dismissable={true} >
 						{milestone_or_group?.text[$locale as string].help}
 					</Modal>
 				</span>

@@ -22,17 +22,15 @@ from .utils import get_child_age_in_months
 class TrafficLight(Enum):
     """
     Enum for the trafficlight feedback.
-    Includes -2 for red, -1 for overall yellow but with red minimum score (yellowWithCaveat), 0 for yellow, and 1 for green with yellow minimum score (greenWithCaveat). 2 is green overall.
+    Includes -1 for red,  0 for yellow and 1 is green overall.
 
-    Invalid is -3 and is included for edge cases like no data.
+    Invalid is -2 and is included for edge cases like no data.
     """
 
-    invalid = -3
-    red = -2
-    yellowWithCaveat = -1
+    invalid = -2
+    red = -1
     yellow = 0
-    greenWithCaveat = 1
-    green = 2
+    green = 1
 
 
 def compute_feedback_simple(
