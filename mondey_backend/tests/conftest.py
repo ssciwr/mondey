@@ -8,6 +8,15 @@ import pytest_asyncio
 from dateutil.relativedelta import relativedelta
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from PIL import Image
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlmodel import Session
+from sqlmodel import SQLModel
+from sqlmodel import create_engine
+from sqlmodel.pool import StaticPool
+
 from mondey_backend import settings
 from mondey_backend.databases.users import get_async_session
 from mondey_backend.dependencies import current_active_researcher
@@ -39,14 +48,6 @@ from mondey_backend.models.research import ResearchGroup
 from mondey_backend.models.users import Base
 from mondey_backend.models.users import User
 from mondey_backend.models.users import UserRead
-from PIL import Image
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.ext.asyncio import async_sessionmaker
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlmodel import Session
-from sqlmodel import SQLModel
-from sqlmodel import create_engine
-from sqlmodel.pool import StaticPool
 
 
 @pytest.fixture()
@@ -240,9 +241,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             MilestoneAnswerSession(
                 child_id=1,
                 user_id=3,
-                created_at=datetime.datetime(
-                    last_month.year, last_month.month, 15
-                ),
+                created_at=datetime.datetime(last_month.year, last_month.month, 15),
             )
         )
         session.add(
@@ -459,7 +458,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
 
 @pytest.fixture
 def statistics_session(session):
-
     today = datetime.datetime.today()
     last_month = today - relativedelta(months=1)
 
@@ -469,9 +467,7 @@ def statistics_session(session):
         MilestoneAnswerSession(
             child_id=1,
             user_id=3,
-            created_at=datetime.datetime(
-                today.year, last_month.month, 20
-            ),
+            created_at=datetime.datetime(today.year, last_month.month, 20),
         )
     )
     session.add(
