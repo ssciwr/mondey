@@ -141,6 +141,8 @@ export type MilestoneAgeScoreCollectionPublic = {
 export type MilestoneAnswerPublic = {
     milestone_id: number;
     answer: number;
+    included_in_milestone_statistics?: boolean;
+    included_in_milestonegroup_statistics?: boolean;
 };
 
 export type MilestoneAnswerSessionPublic = {
