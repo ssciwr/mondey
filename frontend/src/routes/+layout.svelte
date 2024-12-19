@@ -7,6 +7,7 @@ import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import FunctionalIcon from "$lib/components/Navigation/FunctionalIcon.svelte";
 import UserProfile from "$lib/components/UserProfile.svelte";
 import "$lib/i18n";
+import Footer from "$lib/components/Navigation/Footer.svelte";
 import { getTranslations } from "$lib/i18n";
 import { user } from "$lib/stores/userStore.svelte";
 import {
@@ -69,3 +70,5 @@ onMount(async () => {
 >
 	{@render children?.()}
 </div>
+
+<Footer/>
