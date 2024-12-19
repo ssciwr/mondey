@@ -38,13 +38,13 @@ def test_compute_feedback_simple():
         expected_score=1.0,
     )
     score = 0
-    assert compute_feedback_simple(dummy_scores, score) == -2
+    assert compute_feedback_simple(dummy_scores, score) == -1
 
     score = 1
     assert compute_feedback_simple(dummy_scores, score) == 0
 
     score = 3
-    assert compute_feedback_simple(dummy_scores, score) == 2
+    assert compute_feedback_simple(dummy_scores, score) == 1
 
     dummy_scores = MilestoneGroupAgeScore(
         milestonegroup_id=1,

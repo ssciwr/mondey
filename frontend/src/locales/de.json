@@ -11,6 +11,7 @@
 		"milestones": "Meilensteine",
 		"observation": "Beobachtungshinweise",
 		"help": "Förderhilfen",
+		"info": "Informationen zur Erstellung der Bewertung",
 		"next": "Weiter",
 		"prev": "Zurück",
 		"autonext": "Automatisch weiter",
@@ -19,7 +20,26 @@
 		"alertMessageError": "Ein Fehler ist aufgetreten",
 		"submit-image": "Bild einreichen",
 		"submit-image-text": "Haben Sie ein Bild von Ihrem Kind bei diesem Meilenstein, das Sie gerne beisteuern und veröffentlichen möchten? Wenn ja, können Sie es hier einreichen.",
-		"submit-image-conditions": "Ich bin damit einverstanden, dass dieses Bild veröffentlicht und den Benutzern als eines der Meilensteinbilder auf dieser Website angezeigt wird, sofern es von den Site-Administratoren genehmigt wird."
+		"submit-image-conditions": "Ich bin damit einverstanden, dass dieses Bild veröffentlicht und den Benutzern als eines der Meilensteinbilder auf dieser Website angezeigt wird, sofern es von den Site-Administratoren genehmigt wird.",
+		"feedbackTitle": "Feedback zur Entwicklung",
+		"recommendOk": "Entwicklung des Kindes ist altersgemäß.",
+		"recommendOkWithCaveat": "Entwicklung des Kindes ist altersgemäß, aber einzelne Meilensteine sollten besonders beobachtet und eventuell gefördert werden",
+		"recommendWatch": "Entwicklung des Kindes ist leicht verzögert und sollte beobachtet werden um gegebenfalls gezielt einzelne Bereiche zu fördern.",
+		"recommendWatchWithCaveat": "Entwicklung des Kindes ist nicht ganz altersgemäß und sollte genau beobachtet werden. Einzelne Bereiche sollten besonders gefördert werden.",
+		"recommmendHelp": "Entwicklung des Kindes ist signifikant verzögert und sollte gefördert werden. Professionelle Hilfe kann notwendig sein.",
+		"showHistory": "Feedback zu vorherigen Beobachtungszeiträumen anzeigen",
+		"moreInfoOnEval": "Mehr Informationen zur Erstellung der Bewertung",
+		"legend": "Erklärung zu den einzelnen Symbolen",
+		"feedbackExplanation": "Hier sehen sie wie sich das Kind im Vergleich zum Durchschnitt entwickelt. Die Farben und Symbole zeigen an, ob das Kind altersgemäß entwickelt ist oder ob es in einzelnen Bereichen Unterstützung benötigt. Durch setzen des Hakens unten können sie vergangene Beobachtungszeiträume einsehen und so die Entwicklung des Kindes über einen längeren Zeitraum verfolgen. Es werden standardmäßig nur die Bewertungen der Meilensteingruppen angezeigt. Für eine genauere Analyse können sie die Bewertungen der einzelnen Meilensteine einsehen indem sie auf die jeweilige Meilensteingruppe klicken. Beachten sie bitte die zusätzlichen Informationen und die Erklärung zu den Symbolen.",
+		"feedbackDetailsMilestoneGroup": "Zu jeder Meilensteingruppe wird der Durchschnitt und die Standardabweichung der erreichten Punktzahl aller für das Kindesalter relevanten Meilensteine dieser Gruppe berechnet. Danach wird der Durchschnitt des der erreichten Punktzahl des Kindes mit dem Durchschnitt der Gruppe verglichen. Wenn der Durchschnitt des Kindes zwei Standardabweichungen unter dem Gruppendurchschnitt liegt, wird das Kind als 'Entwicklung verzögert' eingestuft (rot), wenn es zwei bis eine Standardabweichung unterhalb des Gruppendurchschnitts liegt, wird es als 'Entwicklung leicht verzögert' eingestuft (gelb). Wenn die Durchschnittszahl des Kindes innerhalb einer Standardabweichung des Gruppendurchschnitts oder darüber liegt, wird es als 'Entwicklung altersgemäß' eingestuft (grün). Statistisch liegen ungefähr 67% aller Kinder liegen innerhalb einer Standardabweichung um den Gruppendurchschnitt und 95% innerhalb von zwei Standardabweichungen. Zur Bewertung dieser Einstufungen ist es sinnvoll, die Bewertung der einzelnen Meilensteine miteinzubeziehen",
+		"feedbackDetailsMilestone": "Einzelne Meilensteine werden nach demselben Schema bewertet, allerdings sind hier Durchschnitt und Standardabweichung für den jeweiligen Meilenstein relevant. Beachten sie, dass die Bewertung einzelner Meilensteine nicht diesselbe sein muss wie für die ganze Gruppe - einzelne Meilensteine können gegebenenfalls signifikant verzögert sein ohne dass die ganze Meilensteingruppe als entwicklungsverzögert bewertet wird. In solchen Fällen ist besondere Aufmerksamkeit notwendig.",
+		"disableHelp": "Ausblenden",
+		"noFeedback": "Kein Feedback verfügbar. Sie müssen ein Kind länger als eine Woche beobachten und regelmäßig Meilensteine bewerten um Feedback zu erhalten.",
+		"current": "Aktuell",
+		"toTheMilestone": "Zum Meilenstein",
+		"older": "Weiter zurück",
+		"newer": "Weiter vor",
+		"notEnoughDataYet": "Noch nicht genügend Daten für Feedback"
 	},
 	"search": {
 		"allLabel": "Alle",
@@ -170,7 +190,8 @@
 		"imageOfChildChangeDelete": "Das aktuelle Bild wurde gelöscht",
 		"noFileChosen": "Keine Datei ausgewählt",
 		"deleteImageButton": "Bild löschen",
-		"nextButtonLabel": "Weiter zu Meilensteinen"
+		"nextButtonLabel": "Weiter zu Meilensteinen",
+		"feedbackButtonLabel": "Feedback zur Entwicklung"
 	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",

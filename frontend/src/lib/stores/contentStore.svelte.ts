@@ -3,7 +3,7 @@ interface Content {
 }
 
 function createContent() {
-	const content = {} as Content;
+	const content = $state({} as Content);
 
 	return {
 		set milestoneGroup(value: number) {

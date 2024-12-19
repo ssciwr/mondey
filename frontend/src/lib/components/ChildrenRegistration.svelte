@@ -23,7 +23,7 @@ import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
-import { Button, Card, Heading, Hr } from "flowbite-svelte";
+import { Button, Card, Heading, Hr, Spinner } from "flowbite-svelte";
 import {
 	CheckCircleOutline,
 	PlayOutline,
@@ -255,7 +255,9 @@ async function submitData(): Promise<void> {
 {#if $locale}
 <Breadcrumbs data={breadcrumbdata} />
 {#await promise}
-	<p>{$_("childData.loadingMessage")}</p>
+<div class = "flex justify-center items-center ">
+<Spinner /> <p>{$_("childData.loadingMessage")}</p>
+</div>
 {:then { questionnaire, answers }}
 	{#if showAlert}
 		<AlertMessage
@@ -396,6 +398,17 @@ async function submitData(): Promise<void> {
 							>
 							<PlayOutline size='sm'/>
 							{$_("childData.nextButtonLabel")}
+						</Button>
+						<Button
+							class=" w-full text-center text-sm text-white"
+							color = "yellow"
+							type ="button"
+							onclick={() => {
+								activeTabChildren.set("childrenFeedback");
+							}}
+							>
+							<PlayOutline size='sm'/>
+							{$_("childData.feedbackButtonLabel")}
 						</Button>
 						<Hr hrClass="my-8"/>
 						<Button

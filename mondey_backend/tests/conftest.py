@@ -241,9 +241,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             MilestoneAnswerSession(
                 child_id=1,
                 user_id=3,
-                created_at=datetime.datetime(
-                    last_month.year, last_month.month, last_month.day
-                ),
+                created_at=datetime.datetime(last_month.year, last_month.month, 15),
             )
         )
         session.add(
@@ -462,16 +460,14 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
 def statistics_session(session):
     today = datetime.datetime.today()
     last_month = today - relativedelta(months=1)
-    two_weeks_ago = today - relativedelta(weeks=2)
 
     # add another expired milestoneanswersession for milestones 1, 2 for child
+    # this answersession is not part of the statistics yet
     session.add(
         MilestoneAnswerSession(
             child_id=1,
             user_id=3,
-            created_at=datetime.datetime(
-                two_weeks_ago.year, two_weeks_ago.month, two_weeks_ago.day
-            ),
+            created_at=datetime.datetime(today.year, last_month.month, 20),
         )
     )
     session.add(
@@ -508,7 +504,7 @@ def statistics_session(session):
             created_at=datetime.datetime(
                 last_month.year,
                 last_month.month,
-                last_month.day + 2,  # between answersessions -> recompute
+                17,  # between answersessions -> recompute
             ),
         )
     )
@@ -520,7 +516,7 @@ def statistics_session(session):
             created_at=datetime.datetime(
                 last_month.year,
                 last_month.month,
-                last_month.day + 2,  # between answersessions -> recompute
+                17,  # between answersessions -> recompute
             ),
         )
     )
@@ -569,7 +565,7 @@ def statistics_session(session):
             created_at=datetime.datetime(
                 last_month.year,
                 last_month.month,
-                last_month.day + 2,  # between answersessions -> recompute
+                17,  # between answersessions -> recompute
             ),
         )
     )
