@@ -34,7 +34,6 @@ import {
 	CheckCircleSolid,
 	CloseCircleSolid,
 	ExclamationCircleSolid,
-	EyeSolid,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import { _, locale } from "svelte-i18n";
@@ -230,6 +229,7 @@ let promise = $state(setup());
 
 {#snippet evaluation(aid: number, milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, value: number, isMilestone: boolean, withText: boolean = false)}
 	<div class="text-gray-700 dark:text-gray-400 space-x-2 space-y-4 p-2 m-2">
+		{console.log('   aid: ', aid, milestone_or_group?.text[$locale as string].title, value, isMilestone, withText)}
 		{#if value === 1}
 			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
 				<CheckCircleSolid color = "green" size="xl"/>
@@ -262,7 +262,7 @@ let promise = $state(setup());
 					</Modal>
 				</span>
 			{/if}
-		{:else}
+		{:else if value === -1}
 			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
 				<CloseCircleSolid color = "red" size="xl"/>
 				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
@@ -284,6 +284,18 @@ let promise = $state(setup());
 					</Modal>
 				</span>
 			{/if}
+		{:else }
+		<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
+			<CloseCircleSolid color = "gray" size="xl"/>
+			<span class = "text-gray-700 dark:text-gray-400 font-bold " >
+				{milestone_or_group?.text[$locale as string].title}
+			</span>
+			<Hr class="mx-2"/>
+			{#if withText}
+			<p>{$_("milestone.notEnoughDataYet")}</p>
+			{/if}
+		</div>
+
 		{/if}
 	</div>
 {/snippet}
@@ -337,7 +349,7 @@ let promise = $state(setup());
 			</AccordionItem>
 		</Accordion>
 
-		<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory}>{$_("milestone.showHistory")}</Checkbox>
+		<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory} >{$_("milestone.showHistory")}</Checkbox>
 		<Hr classHr= "mx-2"/>
 	</div>
 
@@ -349,35 +361,39 @@ let promise = $state(setup());
 				}}><ArrowLeftOutline class="w-4 h-4" /></Button>
 			{/if}
 			<div class="flex flex-col md:flex-row">
-			{#each relevant_sessionkeys as aid}
-				{#if showHistory === true || aid === sessionkeys[0]}
-					<TabItem defaultClass="font-bold text-gray-700 dark:text-gray-400 m-2 p-2" title={makeTitle(aid)} open={aid === relevant_sessionkeys[0] }>
-						<Accordion class="p-2 m-2">
-							{#each Object.entries(summary[aid]) as [mid, score]}
-								<AccordionItem >
-									<span slot="header" class="text-gray-700 dark:text-gray-400 items-center flex justify-center space-x-2">
-										{@render evaluation(aid, milestoneGroups[aid][Number(mid)], score as number, false, false)}
-									</span>
-									<div class="flex-row justify-between">
-										{#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
-											{@render evaluation(
-												aid,
-												milestoneGroups[aid][Number(mid)].milestones.find((element: any) =>
-												{
-													return element.id === Number(ms_id);
-												}),
-												Number(ms_score),
-												true, true
-											)}
-											<Hr classHr="mx-2"/>
-										{/each}
-									</div>
-								</AccordionItem>
-							{/each}
-						</Accordion>
-					</TabItem>
+				{#if relevant_sessionkeys.length=== 0}
+					<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{$_("milestone.noFeedback")}</p>
+				{:else}
+					{#each relevant_sessionkeys as aid}
+						{#if showHistory === true || aid === sessionkeys[0]}
+							<TabItem defaultClass="font-bold text-gray-700 dark:text-gray-400 m-2 p-2" title={makeTitle(aid)} open={aid === relevant_sessionkeys[0] }>
+								<Accordion class="p-2 m-2">
+									{#each Object.entries(summary[aid]) as [mid, score]}
+										<AccordionItem >
+											<span slot="header" class="text-gray-700 dark:text-gray-400 items-center flex justify-center space-x-2">
+												{@render evaluation(aid, milestoneGroups[aid][Number(mid)], score as number, false, false)}
+											</span>
+											<div class="flex-row justify-between">
+												{#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
+													{@render evaluation(
+														aid,
+														milestoneGroups[aid][Number(mid)].milestones.find((element: any) =>
+														{
+															return element.id === Number(ms_id);
+														}),
+														Number(ms_score),
+														true, true
+													)}
+													<Hr classHr="mx-2"/>
+												{/each}
+											</div>
+										</AccordionItem>
+									{/each}
+								</Accordion>
+							</TabItem>
+						{/if}
+					{/each}
 				{/if}
-			{/each}
 			</div>
 			{#if showHistory === true}
 				<Button size="md" type="button" class="md:w-16 md:h-8" on:click={() => {
