@@ -9,6 +9,7 @@ import UserProfile from "$lib/components/UserProfile.svelte";
 import "$lib/i18n";
 import { getTranslations } from "$lib/i18n";
 import { user } from "$lib/stores/userStore.svelte";
+import Footer from "$lib/components/Navigation/Footer.svelte";
 import {
 	Avatar,
 	DarkMode,
@@ -65,3 +66,5 @@ onMount(async () => {
 >
 	{@render children?.()}
 </div>
+
+<Footer/>
