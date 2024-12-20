@@ -11,16 +11,6 @@ import { Heading, Spinner } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
-function makeChildClass(childdata: CardElement): string {
-	if (childdata.image !== null && childdata.image !== undefined) {
-		return "";
-	}
-	const classstr =
-		"hover:cursor-pointer m-2 max-w-prose text-gray-700 hover:text-white dark:text-white hover:dark:text-gray-400 hover:bg-primary-800 dark:hover:bg-primary-700";
-
-	return classstr;
-}
-
 function createStyle(data: CardElement[]): CardStyle[] {
 	return data.map((item) => ({
 		card:
@@ -31,7 +21,8 @@ function createStyle(data: CardElement[]): CardStyle[] {
 						horizontal: false,
 					}
 				: {
-						class: makeChildClass(item),
+						class:
+							"hover:cursor-pointer m-2 max-w-prose text-gray-700 hover:text-white dark:text-white hover:dark:text-gray-400 hover:bg-primary-800 dark:hover:bg-primary-700",
 						style: item.color ? `background-color: ${item.color};` : "",
 						horizontal: false,
 					},

@@ -151,7 +151,7 @@ async function submitChildData(): Promise<void> {
 				birth_year: birthyear,
 				birth_month: birthmonth,
 				has_image: image !== null,
-				color: color,
+				color: image !== null ? null : color,
 			} as ChildCreate,
 		});
 
@@ -163,6 +163,8 @@ async function submitChildData(): Promise<void> {
 		}
 		currentChild.id = new_child.data.id;
 	} else {
+		console.log("updating existing child");
+
 		// update existing child
 		const response = await updateChild({
 			body: {
@@ -341,7 +343,7 @@ async function submitData(): Promise<void> {
 						label={$_("childData.childColor")}
 						required={false}
 						placeholder={$_("childData.chooseColor")}
-						disabled={image!==null || disableEdit}
+						disabled={disableEdit}
 						id="child_color"
 						kwargs = {{type: "color"}}
 						componentClass="w-1/4 h-12 rounded"

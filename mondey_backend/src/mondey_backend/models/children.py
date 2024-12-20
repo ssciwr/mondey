@@ -8,7 +8,7 @@ class ChildBase(SQLModel):
     name: str = ""
     birth_year: int
     birth_month: int
-    color: str = "#ffffff"
+    color: str | None = None
 
 
 class Child(ChildBase, table=True):
