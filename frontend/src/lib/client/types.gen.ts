@@ -52,12 +52,14 @@ export type ChildCreate = {
     name?: string;
     birth_year: number;
     birth_month: number;
+    color?: (string | null);
 };
 
 export type ChildPublic = {
     name?: string;
     birth_year: number;
     birth_month: number;
+    color?: (string | null);
     id: number;
     has_image: boolean;
 };

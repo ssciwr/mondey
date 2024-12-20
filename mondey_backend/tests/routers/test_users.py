@@ -71,6 +71,7 @@ def test_create_update_and_delete_child(user_client: TestClient):
             "name": "child1",
             "birth_year": 2021,
             "birth_month": 3,
+            "color": "#000000",
         },
     )
     assert response_create.status_code == 200
@@ -80,6 +81,7 @@ def test_create_update_and_delete_child(user_client: TestClient):
         "birth_year": 2021,
         "birth_month": 3,
         "has_image": False,
+        "color": "#000000",
     }
     assert len(user_client.get("/users/children/").json()) == 3
     response_update = user_client.put(
@@ -90,6 +92,7 @@ def test_create_update_and_delete_child(user_client: TestClient):
             "birth_year": 2020,
             "birth_month": 9,
             "has_image": False,
+            "color": "af4413",
         },
     )
     assert response_update.status_code == 200
@@ -99,6 +102,7 @@ def test_create_update_and_delete_child(user_client: TestClient):
         "birth_year": 2020,
         "birth_month": 9,
         "has_image": False,
+        "color": "af4413",
     }
     assert len(user_client.get("/users/children/").json()) == 3
     response_delete = user_client.delete("/users/children/4")

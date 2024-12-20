@@ -97,6 +97,7 @@ def children():
             "birth_year": nine_months_ago.year,
             "birth_month": nine_months_ago.month,
             "has_image": False,
+            "color": "#f0f0ff",
         },
         # ~20month old child for user (id 3)
         {
@@ -105,6 +106,7 @@ def children():
             "birth_year": twenty_months_ago.year,
             "birth_month": twenty_months_ago.month,
             "has_image": True,
+            "color": "#ffffff",
         },
         # ~5 year old child for admin user (id 1)
         {
@@ -113,6 +115,7 @@ def children():
             "id": 3,
             "name": "child3",
             "has_image": True,
+            "color": "#ffffff",
         },
     ]
 

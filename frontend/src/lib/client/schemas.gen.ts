@@ -202,6 +202,17 @@ export const ChildCreateSchema = {
         birth_month: {
             type: 'integer',
             title: 'Birth Month'
+        },
+        color: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Color'
         }
     },
     type: 'object',
@@ -223,6 +234,17 @@ export const ChildPublicSchema = {
         birth_month: {
             type: 'integer',
             title: 'Birth Month'
+        },
+        color: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Color'
         },
         id: {
             type: 'integer',
