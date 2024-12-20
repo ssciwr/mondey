@@ -244,11 +244,6 @@ def calculate_milestone_statistics_by_age(
 
     answers = session.exec(answers_query).all()
 
-    for answer in answers:
-        answer.included_in_milestone_statistics = True
-        session.merge(answer)
-    session.commit()
-
     if len(answers) == 0:
         # return last statistics if no new answers are available, because that is the best we can do then.
         return last_statistics
@@ -258,6 +253,11 @@ def calculate_milestone_statistics_by_age(
         )
 
         expected_age = _get_expected_age_from_scores(avg_scores)
+
+        for answer in answers:
+            answer.included_in_milestone_statistics = True
+            session.merge(answer)
+        session.commit()
 
         # overwrite last_statistics with updated stuff --> set primary keys explicitly
         return MilestoneAgeScoreCollection(
@@ -358,12 +358,6 @@ def calculate_milestonegroup_statistics_by_age(
 
     answers = session.exec(answer_query).all()
 
-    # update answer.included_in_milestonegroup_statistics to True
-    for answer in answers:
-        answer.included_in_milestonegroup_statistics = True
-        session.merge(answer)
-    session.commit()
-
     if len(answers) == 0:
         # return last statistics if no new answers are available, because that is the best we can do then.
 
@@ -372,6 +366,12 @@ def calculate_milestonegroup_statistics_by_age(
         count, avg, stddev = _get_statistics_by_age(
             answers, child_ages, count=count, avg=avg_scores, stddev=stddev_scores
         )
+
+        # update answer.included_in_milestonegroup_statistics to True
+        for answer in answers:
+            answer.included_in_milestonegroup_statistics = True
+            session.merge(answer)
+        session.commit()
 
         return MilestoneGroupAgeScoreCollection(
             milestone_group_id=milestonegroup_id,
