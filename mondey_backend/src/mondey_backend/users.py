@@ -45,7 +45,7 @@ def send_reset_password_link(email: str, token: str) -> None:
     msg["To"] = email
     msg["Subject"] = "MONDEY Passwort zurücksetzen"
     msg.set_content(
-        f"Bitte klicken Sie hier, um Ihr MONDEY Passwort zurückzusetzen:\n\nhttps://mondey.lkeegan.dev/reset-password/{token}\n\n-----\n\nPlease click here to reset your MONDEY password:\n\nhttps://mondey.lkeegan.dev/reset-password/{token}"
+        f"Bitte klicken Sie hier, um Ihr MONDEY Passwort zurückzusetzen:\n\nhttps://mondey.lkeegan.dev/resetPassword/{token}\n\n-----\n\nPlease click here to reset your MONDEY password:\n\nhttps://mondey.lkeegan.dev/resetPassword/{token}"
     )
     with smtplib.SMTP(app_settings.SMTP_HOST) as s:
         s.send_message(msg)

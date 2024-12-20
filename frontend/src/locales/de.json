@@ -175,13 +175,20 @@
 	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",
+		"resetHeading": "Passwort zurücksetzen",
 		"placeholder": "Bitte geben sie eine E-mail Adresse an um ihr Passwort zu erneuern",
 		"success": "Bitte überprüfen sie ihr E-Mail Postfach!",
+		"successReset": "Ihr Passwort wurde erfolgreich zurückgesetzt",
+		"goToLogin": "Zurück zum Login",
 		"pending": "Absenden",
 		"alertTitle": "Fehler",
 		"formatError": "Die angegebene email Adresse hat ein falsches Format",
 		"sendError": "Beim Senden der Daten ist ein Fehler aufgetreten. Bitte versuchen sie es erneut",
-		"confirmError": "Eingaben nicht identisch"
+		"confirmError": "Eingaben nicht identisch",
+		"Error": "Ein Fehler ist aufgetreten",
+		"codeError": "Ungültiger oder leerer reset code",
+		"inputlabelPw": "Neues Passwort",
+		"inputlabelPwConfirm": "Neues Passwort bestätigen"
 	},
 	"misc": {
 		"understood": "Verstanden",

@@ -2,12 +2,10 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { base } from "$app/paths";
-
 import { type ResetForgotPasswordData, resetForgotPassword } from "$lib/client";
-import { preventDefault } from "$lib/util";
-
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
+import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
 
