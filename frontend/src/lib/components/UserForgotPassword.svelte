@@ -1,9 +1,9 @@
+<svelte:options runes={true} />
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { base } from "$app/paths";
 
 import { type ResetForgotPasswordData } from "$lib/client";
-import { resetForgotPassword } from "$lib/client/services.gen";
 import { preventDefault } from "$lib/util";
 
 import AlertMessage from "$lib/components/AlertMessage.svelte";
@@ -14,7 +14,6 @@ import { _ } from "svelte-i18n";
 const maildata = {
 	component: Input,
 	type: "email",
-	value: "",
 	props: {
 		placeholder: $_("forgotPw.placeholder"),
 		id: "email",
@@ -22,23 +21,38 @@ const maildata = {
 	},
 };
 
-let alertMessage: string = $_("forgotPw.formatError");
-let showAlert: boolean;
-let showSuccess = false;
+let userEmail = $state("");
+let confirmEmail = $state("");
 
-async function submitData(): Promise<void> {
+let alertMessage: string = $state($_("forgotPw.formatError"));
+let showAlert: boolean = $state(false);
+let showSuccess = $state(false);
+
+function submitData(): void {
+	// TODO: how the fuck should this BS work?
+	if (userEmail !== confirmEmail) {
+		alertMessage = $_("forgotPw.confirmError");
+		showAlert = true;
+		return;
+	}
+
 	const data: ResetForgotPasswordData = {
 		body: {
-			email: maildata.value,
+			email: userEmail,
 		},
 	};
 
-	const result = await resetForgotPassword(data);
+	const result = {
+		response: {
+			status: 200,
+		},
+		error: "blergh",
+	};
 
 	if (result.error) {
 		console.log("error: ", result.error);
-		showAlert = true;
 		alertMessage = $_("forgotPw.sendError");
+		showAlert = true;
 	} else {
 		console.log(
 			"successful transmission, response status: ",
@@ -53,7 +67,7 @@ async function submitData(): Promise<void> {
 	<AlertMessage
 		title={$_('forgotPw.alertTitle')}
 		message={alertMessage}
-		lastpage={`${base}/userLand/lostPassword`}
+		lastpage={`${base}/forgotPassword`}
 		onclick={() => {
 			showAlert = false;
 		}}
@@ -71,7 +85,12 @@ async function submitData(): Promise<void> {
 			<div class="m-2 mx-auto w-full flex-col space-y-6 p-2">
 				<DataInput
 					component={maildata.component}
-					bind:value={maildata.value}
+					bind:value={userEmail}
+					{...maildata.props}
+				/>
+				<DataInput
+					component={maildata.component}
+					bind:value={confirmEmail}
 					{...maildata.props}
 				/>
 			</div>

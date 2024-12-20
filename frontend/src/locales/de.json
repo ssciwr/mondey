@@ -123,7 +123,8 @@
 		"profileButtonLabelLogout": "Logout",
 		"profileTitleDefault": "Willkommen!",
 		"profileAccess": "Ihr Profil",
-		"registerNew": "Als neuer Benutzer registrieren"
+		"registerNew": "Als neuer Benutzer registrieren",
+		"forgotPassword": "Passwort vergessen?"
 	},
 	"userData": {
 		"label": "Persönliche Daten",
@@ -180,7 +181,8 @@
 		"alertTitle": "Fehler",
 		"formatError": "Die angegebene email Adresse hat ein falsches Format",
 		"mailSentMessage": "Bitte überprüfen sie ihr E-Mail Postfach",
-		"sendError": "Beim Senden der Daten ist ein Fehler aufgetreten. Bitte versuchen sie es erneut"
+		"sendError": "Beim Senden der Daten ist ein Fehler aufgetreten. Bitte versuchen sie es erneut",
+		"confirmError": "Eingaben nicht identisch"
 	},
 	"misc": {
 		"understood": "Verstanden",

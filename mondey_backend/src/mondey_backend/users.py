@@ -39,6 +39,16 @@ def send_email_validation_link(email: str, token: str) -> None:
         s.send_message(msg)
 
 
+def send_reset_password_link(email: str, token: str) -> None:
+    msg = EmailMessage()
+    msg["From"] = "no-reply@mondey.lkeegan.dev"
+    msg["To"] = email
+    msg["Subject"] = "MONDEY Passwort zurücksetzen"
+    msg.set_content(
+        f"Bitte klicken Sie hier, um Ihr MONDEY Passwort zurückzusetzen:\n\nhttps://mondey.lkeegan.dev/reset-password/{token}\n\n-----\n\nPlease click here to reset your MONDEY password:\n\nhttps://mondey.lkeegan.dev/reset-password/{token}"
+    )
+
+
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     reset_password_token_secret = app_settings.SECRET
     verification_token_secret = app_settings.SECRET
@@ -60,7 +70,8 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     async def on_after_forgot_password(
         self, user: User, token: str, request: Request | None = None
     ):
-        print(f"User {user.id} has forgot their password. Reset token: {token}")
+        logging.info(f"User {user.id} has forgot their password. Reset token: {token}")
+        send_reset_password_link(user.email, token)
 
     async def on_after_request_verify(
         self, user: User, token: str, request: Request | None = None
