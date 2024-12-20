@@ -241,19 +241,27 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             MilestoneAnswerSession(
                 child_id=1,
                 user_id=3,
-                created_at=datetime.datetime(
-                    last_month.year, last_month.month, last_month.day
-                ),
+                created_at=datetime.datetime(last_month.year, last_month.month, 15),
             )
         )
         session.add(
             MilestoneAnswer(
-                answer_session_id=1, milestone_id=1, milestone_group_id=1, answer=1
+                answer_session_id=1,
+                milestone_id=1,
+                milestone_group_id=1,
+                answer=1,
+                included_in_milestone_statistics=True,
+                included_in_milestonegroup_statistics=True,
             )
         )
         session.add(
             MilestoneAnswer(
-                answer_session_id=1, milestone_id=2, milestone_group_id=1, answer=0
+                answer_session_id=1,
+                milestone_id=2,
+                milestone_group_id=1,
+                answer=0,
+                included_in_milestone_statistics=True,
+                included_in_milestonegroup_statistics=True,
             )
         )
         # add another (current) milestone answer session for child 1 / user (id 3) with 2 answers to the same questions
@@ -279,7 +287,10 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         )
         session.add(
             MilestoneAnswer(
-                answer_session_id=3, milestone_id=7, milestone_group_id=2, answer=2
+                answer_session_id=3,
+                milestone_id=7,
+                milestone_group_id=2,
+                answer=2,
             )
         )
         # add a research group (that user with id 3 is part of, and researcher with id 2 has access to)
@@ -462,16 +473,14 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
 def statistics_session(session):
     today = datetime.datetime.today()
     last_month = today - relativedelta(months=1)
-    two_weeks_ago = today - relativedelta(weeks=2)
 
     # add another expired milestoneanswersession for milestones 1, 2 for child
+    # this answersession is not part of the statistics yet
     session.add(
         MilestoneAnswerSession(
             child_id=1,
             user_id=3,
-            created_at=datetime.datetime(
-                two_weeks_ago.year, two_weeks_ago.month, two_weeks_ago.day
-            ),
+            created_at=datetime.datetime(today.year, last_month.month, 20),
         )
     )
     session.add(
@@ -508,7 +517,7 @@ def statistics_session(session):
             created_at=datetime.datetime(
                 last_month.year,
                 last_month.month,
-                last_month.day + 2,  # between answersessions -> recompute
+                17,  # between answersessions -> recompute
             ),
         )
     )
@@ -520,7 +529,7 @@ def statistics_session(session):
             created_at=datetime.datetime(
                 last_month.year,
                 last_month.month,
-                last_month.day + 2,  # between answersessions -> recompute
+                17,  # between answersessions -> recompute
             ),
         )
     )
@@ -569,7 +578,7 @@ def statistics_session(session):
             created_at=datetime.datetime(
                 last_month.year,
                 last_month.month,
-                last_month.day + 2,  # between answersessions -> recompute
+                17,  # between answersessions -> recompute
             ),
         )
     )
