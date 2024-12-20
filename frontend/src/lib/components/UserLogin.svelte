@@ -116,6 +116,8 @@ let alertMessage: string = $state($_("login.badCredentials"));
 					placeholder={$_("login.passwordLabel")}
 					required
 				/>
+				<a href={`${base}/forgotPassword`} class="text-primary-700 dark:text-primary-500">
+					{$_("login.forgotPassword")}
 			</div>
 
 			<Button

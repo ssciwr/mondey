@@ -73,3 +73,62 @@ def test_register_new_user_valid_research_code(
     new_user = admin_client.get("/admin/users/").json()[-1]
     assert new_user["email"] == email
     assert new_user["research_group_id"] == 123451
+
+
+def test_user_reset_password(user_client: TestClient, smtp_mock: SMTPMock):
+    assert smtp_mock.last_message is None
+    email = "user@mondey.de"
+    response = user_client.post("/auth/forgot-password", json={"email": email})
+    assert response.status_code == 202
+
+    msg = smtp_mock.last_message
+    assert msg is not None
+    assert msg.get("To") == email
+    token = msg.get_content().split("\n\n")[1].rsplit("/")[-1]
+    new_password = "new_password"
+    response = user_client.post(
+        "/auth/reset-password", json={"token": token, "password": new_password}
+    )
+    assert response.status_code == 200
+
+
+def test_user_reset_password_invalid_token(
+    user_client: TestClient, smtp_mock: SMTPMock
+):
+    assert smtp_mock.last_message is None
+    email = "user@mondey.de"
+    response = user_client.post("/auth/forgot-password", json={"email": email})
+    assert response.status_code == 202
+
+    msg = smtp_mock.last_message
+    assert msg is not None
+    assert msg.get("To") == email
+    token = msg.get_content().split("\n\n")[1].rsplit("/")[-1] + "invalid"
+    new_password = "new_password"
+    response = user_client.post(
+        "/auth/reset-password", json={"token": token, "password": new_password}
+    )
+    assert response.status_code == 400
+
+
+def test_user_forgot_password(
+    user_client: TestClient, active_user, smtp_mock: SMTPMock
+):
+    assert smtp_mock.last_message is None
+    response = user_client.post(
+        "/auth/forgot-password", json={"email": active_user.email}
+    )
+    assert response.status_code == 202
+
+
+def test_user_forgot_password_invalid_email(
+    user_client: TestClient, smtp_mock: SMTPMock
+):
+    assert smtp_mock.last_message is None
+    email = "invalid-email"
+    response = user_client.post("/auth/forgot-password", json={"email": email})
+    assert (
+        response.json()["detail"][0]["msg"]
+        == "value is not a valid email address: An email address must have an @-sign."
+    )
+    assert response.json()["detail"][0]["type"] == "value_error"

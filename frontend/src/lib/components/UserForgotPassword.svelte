@@ -1,20 +1,17 @@
+<svelte:options runes={true} />
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { base } from "$app/paths";
-
-import { type ResetForgotPasswordData } from "$lib/client";
-import { resetForgotPassword } from "$lib/client/services.gen";
-import { preventDefault } from "$lib/util";
-
+import { type ResetForgotPasswordData, resetForgotPassword } from "$lib/client";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
+import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
 
 const maildata = {
 	component: Input,
 	type: "email",
-	value: "",
 	props: {
 		placeholder: $_("forgotPw.placeholder"),
 		id: "email",
@@ -22,28 +19,34 @@ const maildata = {
 	},
 };
 
-let alertMessage: string = $_("forgotPw.formatError");
-let showAlert: boolean;
-let showSuccess = false;
+let userEmail = $state("");
+let confirmEmail = $state("");
+
+let alertMessage: string = $state($_("forgotPw.formatError"));
+let showAlert: boolean = $state(false);
+let showSuccess = $state(false);
 
 async function submitData(): Promise<void> {
+	if (userEmail !== confirmEmail) {
+		alertMessage = $_("forgotPw.confirmError");
+		showAlert = true;
+		return;
+	}
+
 	const data: ResetForgotPasswordData = {
 		body: {
-			email: maildata.value,
+			email: userEmail,
 		},
 	};
+	const response = await resetForgotPassword(data);
 
-	const result = await resetForgotPassword(data);
-
-	if (result.error) {
-		console.log("error: ", result.error);
-		showAlert = true;
+	if (response.error) {
+		console.log("error: ", response.error);
 		alertMessage = $_("forgotPw.sendError");
+		showAlert = true;
 	} else {
-		console.log(
-			"successful transmission, response status: ",
-			result.response.status,
-		);
+		console.log("successful transmission of forgot password email");
+		console.log("response: ", response);
 		showSuccess = true;
 	}
 }
@@ -53,7 +56,7 @@ async function submitData(): Promise<void> {
 	<AlertMessage
 		title={$_('forgotPw.alertTitle')}
 		message={alertMessage}
-		lastpage={`${base}/userLand/lostPassword`}
+		lastpage={`${base}/forgotPassword`}
 		onclick={() => {
 			showAlert = false;
 		}}
@@ -71,7 +74,12 @@ async function submitData(): Promise<void> {
 			<div class="m-2 mx-auto w-full flex-col space-y-6 p-2">
 				<DataInput
 					component={maildata.component}
-					bind:value={maildata.value}
+					bind:value={userEmail}
+					{...maildata.props}
+				/>
+				<DataInput
+					component={maildata.component}
+					bind:value={confirmEmail}
 					{...maildata.props}
 				/>
 			</div>
@@ -81,9 +89,6 @@ async function submitData(): Promise<void> {
 			</div>
 		</form>
 	{:else}
-		<div class="m-2 flex w-full items-center justify-center p-2">
-			<p>{$_('forgotPw.mailSentMessage')}</p>
-		</div>
 		<div class="m-2 flex w-full items-center justify-center p-2">
 			<Button
 				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
