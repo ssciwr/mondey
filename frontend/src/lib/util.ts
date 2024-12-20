@@ -17,6 +17,7 @@ export type CardElement = {
 	events?: { [key: string]: EventHandler } | undefined;
 	auxilliary?: any | undefined;
 	buttonIcon?: Component | undefined;
+	color?: string | undefined;
 };
 
 export type CardStyle = {

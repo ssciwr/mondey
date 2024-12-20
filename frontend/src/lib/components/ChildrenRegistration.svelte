@@ -23,7 +23,7 @@ import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
-import { Button, Card, Heading, Hr } from "flowbite-svelte";
+import { Button, Card, Heading, Hr, Input } from "flowbite-svelte";
 import {
 	CheckCircleOutline,
 	PlayOutline,
@@ -42,11 +42,13 @@ let answers: { [k: number]: ChildAnswerPublic } = $state({});
 let {
 	name = $bindable(null),
 	image = $bindable(null),
+	color = $bindable("#ffffff"),
 	birthyear = $bindable(null),
 	birthmonth = $bindable(null),
 }: {
 	name: string | null | undefined;
 	image: File | boolean | null;
+	color: string;
 	birthyear: number | null;
 	birthmonth: number | null;
 } = $props();
@@ -98,6 +100,7 @@ async function setup(): Promise<{
 			birthyear = child.data.birth_year;
 			birthmonth = child.data.birth_month;
 			image = child.data.has_image ? true : null;
+			color = child.data.color;
 		}
 
 		// get existing answers
@@ -148,6 +151,7 @@ async function submitChildData(): Promise<void> {
 				birth_year: birthyear,
 				birth_month: birthmonth,
 				has_image: image !== null,
+				color: color,
 			} as ChildCreate,
 		});
 
@@ -167,6 +171,7 @@ async function submitChildData(): Promise<void> {
 				birth_month: birthmonth,
 				id: currentChild.id,
 				has_image: image !== null && imageDeleted === false,
+				color: color,
 			} as ChildPublic,
 		});
 
@@ -293,8 +298,10 @@ async function submitData(): Promise<void> {
 						required={true}
 						placeholder={$_("childData.pleaseEnter")}
 						disabled={disableEdit}
+						id="child_name"
 						kwargs = {{type: "text"}}
 						/>
+
 					<DataInput
 						component={componentTable["input"]}
 						bind:value={birthmonth}
@@ -302,8 +309,10 @@ async function submitData(): Promise<void> {
 						required={true}
 						placeholder={$_("childData.pleaseEnterNumber")}
 						disabled={disableEdit}
+						id="child_birthmonth"
 						kwargs = {{type: "number", min: 0, max:12, step: '1'}}
 						/>
+
 					<DataInput
 						component={componentTable["input"]}
 						bind:value={birthyear}
@@ -311,6 +320,7 @@ async function submitData(): Promise<void> {
 						required={true}
 						placeholder={$_("childData.pleaseEnterNumber")}
 						disabled={disableEdit}
+						id="child_birthyear"
 						kwargs = {{type: "number", min: 2007, step: '1'}}
 						/>
 
@@ -321,8 +331,21 @@ async function submitData(): Promise<void> {
 						required={false}
 						placeholder={$_("childData.noFileChosen")}
 						disabled={disableEdit}
+						id="child_image"
 						kwargs = {{accept: ".jpg, .jpeg, .png", clearable: true}}
 						/>
+
+					<DataInput
+						component={Input}
+						bind:value={color}
+						label={$_("childData.childColor")}
+						required={false}
+						placeholder={$_("childData.chooseColor")}
+						disabled={image!==null || disableEdit}
+						id="child_color"
+						kwargs = {{type: "color"}}
+						componentClass="w-1/4 h-12 rounded"
+					/>
 
 					{#if image !== null && disableEdit === false}
 						<Button

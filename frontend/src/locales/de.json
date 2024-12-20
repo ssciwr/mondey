@@ -170,7 +170,9 @@
 		"imageOfChildChangeDelete": "Das aktuelle Bild wurde gelöscht",
 		"noFileChosen": "Keine Datei ausgewählt",
 		"deleteImageButton": "Bild löschen",
-		"nextButtonLabel": "Weiter zu Meilensteinen"
+		"nextButtonLabel": "Weiter zu Meilensteinen",
+		"childColor": "Hintergrundfarbe für Icon wenn kein Bild benutzt werden soll",
+		"chooseColor": "Farbe wählen"
 	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",
