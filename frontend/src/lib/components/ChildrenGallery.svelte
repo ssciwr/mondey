@@ -12,13 +12,11 @@ import { _ } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
 function makeChildClass(childdata: CardElement): string {
-	console.log(childdata);
 	if (childdata.image !== null && childdata.image !== undefined) {
 		return "";
 	}
 	const classstr =
 		"hover:cursor-pointer m-2 max-w-prose text-gray-700 hover:text-white dark:text-white hover:dark:text-gray-400 hover:bg-primary-800 dark:hover:bg-primary-700";
-	console.log("  class: ", classstr);
 
 	return classstr;
 }
@@ -121,7 +119,6 @@ async function setup(): Promise<CardElement[]> {
 
 		style = createStyle(data);
 	}
-	console.log("child data: ", children.data);
 	return data;
 }
 
