@@ -3,7 +3,7 @@
 import { goto } from "$app/navigation";
 import { base } from "$app/paths";
 
-import { type ResetForgotPasswordData } from "$lib/client";
+import { type ResetForgotPasswordData, resetForgotPassword } from "$lib/client";
 import { preventDefault } from "$lib/util";
 
 import AlertMessage from "$lib/components/AlertMessage.svelte";
@@ -28,8 +28,7 @@ let alertMessage: string = $state($_("forgotPw.formatError"));
 let showAlert: boolean = $state(false);
 let showSuccess = $state(false);
 
-function submitData(): void {
-	// TODO: how the fuck should this BS work?
+async function submitData(): Promise<void> {
 	if (userEmail !== confirmEmail) {
 		alertMessage = $_("forgotPw.confirmError");
 		showAlert = true;
@@ -41,23 +40,15 @@ function submitData(): void {
 			email: userEmail,
 		},
 	};
+	const response = await resetForgotPassword(data);
 
-	const result = {
-		response: {
-			status: 200,
-		},
-		error: "blergh",
-	};
-
-	if (result.error) {
-		console.log("error: ", result.error);
+	if (response.error) {
+		console.log("error: ", response.error);
 		alertMessage = $_("forgotPw.sendError");
 		showAlert = true;
 	} else {
-		console.log(
-			"successful transmission, response status: ",
-			result.response.status,
-		);
+		console.log("successful transmission of forgot password email");
+		console.log("response: ", response);
 		showSuccess = true;
 	}
 }
@@ -100,9 +91,6 @@ function submitData(): void {
 			</div>
 		</form>
 	{:else}
-		<div class="m-2 flex w-full items-center justify-center p-2">
-			<p>{$_('forgotPw.mailSentMessage')}</p>
-		</div>
 		<div class="m-2 flex w-full items-center justify-center p-2">
 			<Button
 				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
