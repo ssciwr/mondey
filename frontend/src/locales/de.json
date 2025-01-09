@@ -143,7 +143,8 @@
 		"profileButtonLabelLogout": "Logout",
 		"profileTitleDefault": "Willkommen!",
 		"profileAccess": "Ihr Profil",
-		"registerNew": "Als neuer Benutzer registrieren"
+		"registerNew": "Als neuer Benutzer registrieren",
+		"forgotPassword": "Passwort vergessen?"
 	},
 	"userData": {
 		"label": "Persönliche Daten",
@@ -195,13 +196,20 @@
 	},
 	"forgotPw": {
 		"heading": "Passwort vergessen?",
+		"resetHeading": "Passwort zurücksetzen",
 		"placeholder": "Bitte geben sie eine E-mail Adresse an um ihr Passwort zu erneuern",
-		"success": "Zurück zur Startseite",
+		"success": "Bitte überprüfen sie ihr E-Mail Postfach!",
+		"successReset": "Ihr Passwort wurde erfolgreich zurückgesetzt",
+		"goToLogin": "Zurück zum Login",
 		"pending": "Absenden",
 		"alertTitle": "Fehler",
 		"formatError": "Die angegebene email Adresse hat ein falsches Format",
-		"mailSentMessage": "Bitte überprüfen sie ihr E-Mail Postfach",
-		"sendError": "Beim Senden der Daten ist ein Fehler aufgetreten. Bitte versuchen sie es erneut"
+		"sendError": "Beim Senden der Daten ist ein Fehler aufgetreten. Bitte versuchen sie es erneut",
+		"confirmError": "Eingaben nicht identisch",
+		"Error": "Ein Fehler ist aufgetreten",
+		"codeError": "Ungültiger oder leerer reset code",
+		"inputlabelPw": "Neues Passwort",
+		"inputlabelPwConfirm": "Neues Passwort bestätigen"
 	},
 	"misc": {
 		"understood": "Verstanden",
