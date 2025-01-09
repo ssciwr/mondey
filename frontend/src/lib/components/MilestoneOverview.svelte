@@ -118,7 +118,7 @@ async function setup(): Promise<void> {
 					answer &&
 					answer.answer !== null &&
 					answer.answer !== undefined &&
-					answer.answer > 0;
+					answer.answer >= 0;
 				return {
 					header: item?.text?.[$locale]?.title ?? "",
 					complete: complete,
