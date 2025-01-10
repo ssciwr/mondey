@@ -1,4 +1,5 @@
 <script>
+import logo_dark from "$lib/assets/mondey_dark.svg";
 import {
 	Footer,
 	FooterBrand,
@@ -13,7 +14,7 @@ import { _ } from "svelte-i18n";
   <Footer footerType="socialmedia" class="bg-zinc-700">
     <div class="flex justify-between items-center px-1">
       <div class="mb-2 mr-5 lg:ml-11 md:ml-10 max-sm:mr-3 max-sm:ml-1">
-        <FooterBrand class="flex" href="/" src="/src/lib/assets/mondey_dark.svg" alt="MONDEY logo"/>
+        <FooterBrand class="flex" href="/" src={logo_dark} alt="MONDEY logo"/>
       </div>
       <div class="grid grid-cols-2 gap-9 sm:grid-cols-2 min-md:mr-20 lg:mr-20 ml-3">
         <div>
