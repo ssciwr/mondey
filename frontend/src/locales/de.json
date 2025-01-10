@@ -256,34 +256,7 @@
 	},
 	"frontpageAccordion": {
 		"heading1": "Wie funktioniert MONDEY?",
-		"summary1": "<p>Für alle wichtigen Bereiche der Entwicklung  bis zum Schulalter haben wir eine Liste von <strong>Meilensteine</strong> zusammengestellt. Jeder Meilenstein steht für eine Kompetenz, die KInder typischerweise irgendwann zwischen 0 und 6 Jahren erreichen. Meilensteine können Sie ohne besondere Ausbildung oder Testmaterial im Alltag gut beobachten und gezielt fördern. Gerne können Sie sich die Liste der Meilensteine vorab anschauen oder herunterladen.<br />
-		<br />Wenn Sie sich anmelden, bitten wir Sie zunächst um einige <strong>Angaben zu Ihrer Person und zum beobachteten Kind</strong>. Diese Information benötigen wir ausschließlich, um ihre Daten richtig einordnen zu können und unsere Stichprobe in wissenschaftlichen Publikationen korrekt beschreiben zu können.<br />
-<br />Gerne können Sie sich die Liste der Personenbezogenen Daten vorab anschauen oder herunterladen, nach denen wir Sie fragen werden.<br />
-<br />Anschließend sollen Sie für jeden Entwicklungsbereich alle Meilensteine bewerten, indem Sie beurteilen, ob das Kind die beschriebene Kompetenz:<br />
-<ul>
-  <li>„noch nicht“,</li>
-  <li>„in Ansätzen“,</li>
-  <li>„weitgehend“</li>
-  <li>oder „zuverlässig“ zeigt.</li>
-</ul><br />
-<br />Für die Bewertung jedes Meilensteins gibt es zur Unterstützung abrufbare <strong>Beobachtungshinweise</strong>.<br />
-<br />Bei der ersten <strong>Bestandsaufnahme</stong> werden Sie zunächst durch alle Meilensteine geführt. Je nach Alter des KIndes dauert das etwas länger. Wenn Sie die Entwicklung des gleichen KIndes später <strong>kontinuierlich weiter dokumentiere</strong> möchten, werden nur noch die Meilensteine abgefragt, die zuvor noch nicht als „zuverlässig gekonnt“ bewertet wurden.<br />
-<br />Am Ende Ihrer Bestandsaufnahme erhalten Sie ein <strong>Ampel-Feedback</strong>. Wir geben Ihnen für jeden Entwicklungsbereich einzeln Rückmeldung, ob das Kind:<br />
-<ul>
-  <li>altergemäß entwickelt ist (Ampel grün),</li>
-  <li>ob einzelne Meilensteine verspätet sind (Ampel gelb),</li>
-  <li>oder ob in einem Bereich Anzeichen für eine deutlich verzögerte Entwicklung gibt (Ampel rot).</li>
-</ul>
-Das Feedback basiert auf einem Vergleich mit einer großen Standard-Stichprobe. Auch Ihre Daten gehen in diese Vergleichsstichprobe ein. Sie wächst damit ständig und wird immer zuverlässiger.<br />
-<br />Zusätzlich erhalten Sie auf Wunsch auch Meilenstein-bezogene <strong>Förder-Hinweise</strong>.<br />
-<br />Wichtig ist, dass Sie Ihre Beobachtung in regelmäßigen Abständen vornehmen, um feststellen zu können, ob sich Änderungen am Entwicklungsstatus ergeben.<br />
-Jedes Kind hat sein eigenes Tempo - vieles kann sich schnell ändern.<br />
-<br /><strong>Mit MONDEY lernen Sie:</strong>
-<ul>
-  <li>die Entwicklungsfortschritte von Kindern kontinuierlich genau zu beobachten</li>
-  <li>die Kinder beim Erwerb wichtiger neuer Kompetenzen gezielt zu unterstützen</li>
-  <li>den Entwicklungsstand eines Kindes einzuschätzen und ggf. rechtzeitig Unterstützung zu geben</li>
-</ul>Außerdem leisten Sie einen wichtigen Beitrag zur Entwicklungspsychologischen Grundlagenforschung!</p>",
+		"summary1": "<p>Für alle wichtigen Bereiche der Entwicklung bis zum Schulalter haben wir eine Liste von <strong>Meilensteine</strong> zusammengestellt. Jeder Meilenstein steht für eine Kompetenz, die KInder typischerweise irgendwann zwischen 0 und 6 Jahren erreichen. Meilensteine können Sie ohne besondere Ausbildung oder Testmaterial im Alltag gut beobachten und gezielt fördern. Gerne können Sie sich die Liste der Meilensteine vorab anschauen oder herunterladen.<br /><br />Wenn Sie sich anmelden, bitten wir Sie zunächst um einige <strong>Angaben zu Ihrer Person und zum beobachteten Kind</strong>. Diese Information benötigen wir ausschließlich, um ihre Daten richtig einordnen zu können und unsere Stichprobe in wissenschaftlichen Publikationen korrekt beschreiben zu können.<br /><br />Gerne können Sie sich die Liste der Personenbezogenen Daten vorab anschauen oder herunterladen, nach denen wir Sie fragen werden.<br /><br />Anschließend sollen Sie für jeden Entwicklungsbereich alle Meilensteine bewerten, indem Sie beurteilen, ob das Kind die beschriebene Kompetenz:<br /><ul><li>„noch nicht“,</li><li>„in Ansätzen“,</li>\n  <li>„weitgehend“</li><li>oder „zuverlässig“ zeigt.</li></ul><br /><br />Für die Bewertung jedes Meilensteins gibt es zur Unterstützung abrufbare <strong>Beobachtungshinweise</strong>.<br /><br />Bei der ersten <strong>Bestandsaufnahme</strong> werden Sie zunächst durch alle Meilensteine geführt. Je nach Alter des KIndes dauert das etwas länger. Wenn Sie die Entwicklung des gleichen KIndes später <strong>kontinuierlich weiter dokumentiere</strong> möchten, werden nur noch die Meilensteine abgefragt, die zuvor noch nicht als „zuverlässig gekonnt“ bewertet wurden.<br /><br />Am Ende Ihrer Bestandsaufnahme erhalten Sie ein <strong>Ampel-Feedback</strong>. Wir geben Ihnen für jeden Entwicklungsbereich einzeln Rückmeldung, ob das Kind:<br /><ul><li>altergemäß entwickelt ist (Ampel grün),</li><li>ob einzelne Meilensteine verspätet sind (Ampel gelb),</li><li>oder ob in einem Bereich Anzeichen für eine deutlich verzögerte Entwicklung gibt (Ampel rot).</li>\n</ul>\nDas Feedback basiert auf einem Vergleich mit einer großen Standard-Stichprobe. Auch Ihre Daten gehen in diese Vergleichsstichprobe ein. Sie wächst damit ständig und wird immer zuverlässiger.<br /><br />Zusätzlich erhalten Sie auf Wunsch auch Meilenstein-bezogene <strong>Förder-Hinweise</strong>.<br /><br />Wichtig ist, dass Sie Ihre Beobachtung in regelmäßigen Abständen vornehmen, um feststellen zu können, ob sich Änderungen am Entwicklungsstatus ergeben.<br />\nJedes Kind hat sein eigenes Tempo - vieles kann sich schnell ändern.<br /><br /><strong>Mit MONDEY lernen Sie:</strong><ul><li>die Entwicklungsfortschritte von Kindern kontinuierlich genau zu beobachten</li><li>die Kinder beim Erwerb wichtiger neuer Kompetenzen gezielt zu unterstützen</li><li>den Entwicklungsstand eines Kindes einzuschätzen und ggf. rechtzeitig Unterstützung zu geben</li></ul>Außerdem leisten Sie einen wichtigen Beitrag zur Entwicklungspsychologischen Grundlagenforschung!</p>",
 		"heading2": "Häufig gestellte Fragen",
 		"summary2": "Ein mit Eltern und Fachkräften entwickeltes, wissenschaftlich geprüftes Program zur Beobachtung und Dokumentation der Entwicklung von Kindern bis 6 Jahre. Sie bewerten, wie gut das Kind bestimmte Alltagshandlungen ausführen kann."
 	}
