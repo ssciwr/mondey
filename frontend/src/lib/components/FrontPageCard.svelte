@@ -5,7 +5,7 @@ import { _ } from "svelte-i18n";
 </script>
 
 <div class="flex justify-center px-4 mt-6">
-<Card class="flex justify-center text-center max-w-prose bg-additional-color min-w-full">
+<Card class="flex justify-center text-center max-w-prose bg-additional-color-400 min-w-full">
   <h5 class="mb-2 mt-4 text-xl font-bold text-gray-700 dark:text-white tracking-wide">{$_("frontpage.heading")}</h5>
   <p class="mb-5 text-base text-gray-600 sm:text-md dark:text-gray-400">{$_("frontpage.summary")}</p>
   <div class="justify-center mb-1 items-center mt-2">
