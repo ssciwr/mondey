@@ -192,6 +192,8 @@
 		"noFileChosen": "Keine Datei ausgewählt",
 		"deleteImageButton": "Bild löschen",
 		"nextButtonLabel": "Weiter zu Meilensteinen",
+		"childColor": "Hintergrundfarbe für Icon wählen",
+		"chooseColor": "Farbe wählen",
 		"feedbackButtonLabel": "Feedback zur Entwicklung"
 	},
 	"forgotPw": {

@@ -11,56 +11,6 @@ import { Heading, Spinner } from "flowbite-svelte";
 import { _ } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
-async function setup(): Promise<CardElement[]> {
-	const children = await getChildren();
-
-	if (children.error) {
-		console.log("Error when retrieving child data");
-		showAlert = true;
-		alertMessage = $_("childData.alertMessageRetrieving");
-	} else {
-		const childrenData = await Promise.all(
-			(children.data || []).map(async (child): Promise<CardElement> => {
-				let image = undefined as string | undefined;
-				const childImageResponse = await getChildImage({
-					path: { child_id: child.id },
-				});
-				if (!childImageResponse.error) {
-					image = URL.createObjectURL(childImageResponse.data as Blob);
-				}
-				return {
-					header: child.name,
-					image,
-					summary: null,
-					events: {
-						onclick: async () => {
-							currentChild.id = child.id;
-							await currentChild.load_data();
-							activeTabChildren.set("childrenRegistration");
-						},
-					},
-				};
-			}),
-		);
-
-		// add the 'new child' card as the first element
-		data = [
-			...childrenData,
-			{
-				header: $_("childData.newChildHeading"),
-				summary: $_("childData.newChildHeadingLong"),
-				events: {
-					onclick: () => {
-						currentChild.id = null;
-						activeTabChildren.set("childrenRegistration");
-					},
-				},
-			},
-		];
-	}
-	return data;
-}
-
 function createStyle(data: CardElement[]): CardStyle[] {
 	return data.map((item) => ({
 		card:
@@ -70,7 +20,12 @@ function createStyle(data: CardElement[]): CardStyle[] {
 							"hover:cursor-pointer m-2 max-w-prose bg-primary-700 dark:bg-primary-600 hover:bg-primary-800 dark:hover:bg-primary-700",
 						horizontal: false,
 					}
-				: { horizontal: false },
+				: {
+						class:
+							"hover:cursor-pointer m-2 max-w-prose text-gray-700 hover:text-white dark:text-white hover:dark:text-gray-400 hover:bg-primary-800 dark:hover:bg-primary-700",
+						style: item.color ? `background-color: ${item.color};` : "",
+						horizontal: false,
+					},
 		header:
 			item.header === $_("childData.newChildHeading")
 				? {
@@ -105,10 +60,63 @@ function searchName(data: CardElement[], key: string): CardElement[] {
 	});
 	return res;
 }
+async function setup(): Promise<CardElement[]> {
+	const children = await getChildren();
+
+	if (children.error) {
+		console.log("Error when retrieving child data");
+		showAlert = true;
+		alertMessage = $_("childData.alertMessageRetrieving");
+	} else {
+		const childrenData = await Promise.all(
+			(children.data || []).map(async (child): Promise<CardElement> => {
+				let image = undefined as string | undefined;
+				const childImageResponse = await getChildImage({
+					path: { child_id: child.id },
+				});
+				if (!childImageResponse.error) {
+					image = URL.createObjectURL(childImageResponse.data as Blob);
+				}
+				return {
+					header: child.name,
+					image,
+					summary: null,
+					color: child.color,
+					events: {
+						onclick: async () => {
+							currentChild.id = child.id;
+							await currentChild.load_data();
+							activeTabChildren.set("childrenRegistration");
+						},
+					},
+				};
+			}),
+		);
+
+		// add the 'new child' card as the first element
+		data = [
+			...childrenData,
+			{
+				header: $_("childData.newChildHeading"),
+				summary: $_("childData.newChildHeadingLong"),
+				events: {
+					onclick: () => {
+						currentChild.id = null;
+						activeTabChildren.set("childrenRegistration");
+					},
+				},
+			},
+		];
+
+		style = createStyle(data);
+	}
+	return data;
+}
 
 let showAlert = $state(false);
 let alertMessage = $state($_("childData.alertMessageError"));
 let data: CardElement[] = $state([]);
+let style: CardStyle[] = $state([]);
 const promise = $state(setup());
 const searchData = [
 	{
@@ -147,7 +155,7 @@ const searchData = [
 			<GalleryDisplay
 				{data}
 				itemComponent={CardDisplay}
-				componentProps={createStyle(data)}
+				componentProps={style}
 				{searchData}
 			/>
 		</div>
