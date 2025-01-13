@@ -16,6 +16,11 @@ services:
       - PORT=${PORT:-80}
       - RELOAD=${RELOAD:-false}
       - LOG_LEVEL=${LOG_LEVEL:-info}
+    logging:
+      driver: "local"
+      options:
+        max-size: 20m
+        max-file: 25
   frontend:
     image: ghcr.io/ssciwr/mondey_frontend:${MONDEY_DOCKER_IMAGE_TAG:-latest}
     build:
@@ -28,7 +33,19 @@ services:
     volumes:
       - ${MONDEY_SSL_CERT:-./cert.pem}:/mondey_ssl_cert.pem
       - ${MONDEY_SSL_KEY:-./key.pem}:/mondey_ssl_key.pem
+      # to allow certbot to renew SSL certificates:
+      - /var/www/certbot:/var/www/certbot:ro
+    logging:
+      driver: "local"
+      options:
+        max-size: 20m
+        max-file: 25
   email:
     image: "boky/postfix"
     environment:
       - ALLOW_EMPTY_SENDER_DOMAINS="true"
+    logging:
+      driver: "local"
+      options:
+        max-size: 20m
+        max-file: 3
