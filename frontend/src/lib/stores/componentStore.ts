@@ -1,4 +1,5 @@
 import AdminPage from "$lib/components/AdminPage.svelte";
+import ChildrenFeedback from "$lib/components/ChildrenFeedback.svelte";
 import ChildrenGallery from "$lib/components/ChildrenGallery.svelte";
 import ChildrenRegistration from "$lib/components/ChildrenRegistration.svelte";
 import DateInput from "$lib/components/DataInput/DateInput.svelte";
@@ -21,6 +22,7 @@ export const componentTable: ComponentTable = {
 	childrenRegistration: ChildrenRegistration,
 	milestoneGroup: MilestoneGroup,
 	milestoneOverview: MilestoneOverview,
+	childrenFeedback: ChildrenFeedback,
 	milestone: Milestone,
 	radioList: RadioList,
 	input: Input,

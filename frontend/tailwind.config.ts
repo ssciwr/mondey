@@ -33,7 +33,18 @@ export default {
 					900: "#46537E",
 				},
 
-				"additional-color": "#a4d2d0",
+				"additional-color": {
+					50: "#E2F1F0",
+					100: "#D5EAE9",
+					200: "#C7E3E2",
+					300: "#B6DBDA",
+					400: "#A5D2D1",
+					500: "#96BFBE",
+					600: "#7C9E9D",
+					700: "#698584",
+					800: "#556C6B",
+					900: "4D6261",
+				},
 
 				"milestone-answer": {
 					0: "#f2e8cf",

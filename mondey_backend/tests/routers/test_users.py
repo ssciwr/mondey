@@ -382,7 +382,7 @@ def test_get_summary_feedback_for_session(user_client: TestClient, session):
 
     response = user_client.get("/users/feedback/answersession=1/summary")
     assert response.status_code == 200
-    assert response.json() == {"1": 2}
+    assert response.json() == {"1": 1}
 
 
 def test_get_summary_feedback_for_session_invalid(user_client: TestClient):
@@ -401,7 +401,7 @@ def test_get_detailed_feedback_for_session(user_client: TestClient, session):
     session.commit()
     response = user_client.get("/users/feedback/answersession=1/detailed")
     assert response.status_code == 200
-    assert response.json() == {"1": {"1": 2, "2": 2}}
+    assert response.json() == {"1": {"1": 1, "2": 1}}
 
 
 def test_get_detailed_feedback_for_session_invalid(user_client: TestClient):

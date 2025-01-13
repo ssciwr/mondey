@@ -473,9 +473,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
 def statistics_session(session):
     today = datetime.datetime.today()
     last_month = today - relativedelta(months=1)
-    expiration_date = datetime.datetime.now() - datetime.timedelta(days=7)
-
-    print("expiration date: ", expiration_date)
 
     # add another expired milestoneanswersession for milestones 1, 2 for child
     # this answersession is not part of the statistics yet
