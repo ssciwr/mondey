@@ -52,7 +52,7 @@ let milestoneGroups = $state(
 	{} as Record<number, Record<number, MilestoneGroupPublic>>,
 );
 let sessionkeys = $state([] as number[]);
-let showHistory = $state(false);
+let showHistory = $state(true);
 let detailed = $state({}) as Record<number, any>;
 let summary = $state({}) as Record<number, any>;
 let answerSessions = $state({}) as Record<number, MilestoneAnswerSessionPublic>;
@@ -242,7 +242,7 @@ let promise = $state(setup());
 	<div class="text-gray-700 dark:text-gray-400 space-x-2 space-y-4 p-2 m-2">
 		{console.log('   aid: ', aid, milestone_or_group?.text[$locale as string].title, value, isMilestone, withText)}
 		{#if value === 1}
-			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
+			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 				<CheckCircleSolid color = "green" size="xl"/>
 				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
 					{milestone_or_group?.text[$locale as string].title}
@@ -253,7 +253,7 @@ let promise = $state(setup());
 				{/if}
 			</div>
 		{:else if value === 0}
-			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
+			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 				<BellActiveSolid color = "orange" size="xl"/>
 				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
 					{milestone_or_group?.text[$locale as string].title}
@@ -274,7 +274,7 @@ let promise = $state(setup());
 				</span>
 			{/if}
 		{:else if value === -1}
-			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
+			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 				<CloseCircleSolid color = "red" size="xl"/>
 				<span class = "text-gray-700 dark:text-gray-400 font-bold " >
 					{milestone_or_group?.text[$locale as string].title}
@@ -296,7 +296,7 @@ let promise = $state(setup());
 				</span>
 			{/if}
 		{:else }
-		<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
+		<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 			<CloseCircleSolid color = "gray" size="xl"/>
 			<span class = "text-gray-700 dark:text-gray-400 font-bold " >
 				{milestone_or_group?.text[$locale as string].title}
@@ -331,30 +331,35 @@ let promise = $state(setup());
 	<div class ="m-2 p-2 pb-4 ">
 		<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{$_("milestone.feedbackExplanation")}</p>
 
-		<Button class = "m-2 p-2 pb-4 mb-4 items-center justify-center md:w-1/4" onclick = {() => {
-			showMoreInfo = true;
-		}}>{$_("milestone.moreInfoOnEval")}</Button>
-
-
 		<Modal classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-400" title={$_("milestone.info")} bind:open={showMoreInfo} dismissable={true}>
 			<p class ="text-gray-700 dark:text-gray-400">{$_("milestone.feedbackExplanationDetailed")}</p>
 			<p class ="text-gray-700 dark:text-gray-400">{$_("milestone.feedbackDetailsMilestoneGroup")}</p>
 			<p class ="text-gray-700 dark:text-gray-400">{$_("milestone.feedbackDetailsMilestone")}</p>
 		</Modal>
 
-		<Table striped={true}>
-			<TableBody tableBodyClass="divide-y">
-			{#each milestonePresentation as milestone}
-				<TableBodyRow class="text-gray-700 dark:text-gray-400 flex flex-col md:flex-row">
-					<TableBodyCell><svelte:component this={milestone.icon} color={milestone.color} size="xl" class="mx-2"/></TableBodyCell>
-					<TableBodyCell class="font-bold justify-start mr-auto">{milestone.short}</TableBodyCell>
-					<TableBodyCell class="break-words whitespace-normal md:justify-start justify-center md:mr-auto mx-auto">{milestone.text}</TableBodyCell>
-					<TableBodyCell class="md:ml-auto mx-auto md:justify-start justify-center"><Button class="m-2 p-2 pb-4 md:w-24 justify-center" onclick={() => {
-					}}>{$_("milestone.moreInfoOnLegend")}</Button></TableBodyCell>
-				</TableBodyRow>
-			{/each}
-			</TableBody>
-		</Table>
+		<Accordion class="p-2 m-2">
+			<AccordionItem>
+			<span slot="header">{$_("milestone.legend")}</span>
+			<Table striped={true}>
+				<TableBody tableBodyClass="divide-y">
+				{#each milestonePresentation as milestone}
+					<TableBodyRow class="text-gray-700 dark:text-gray-400 flex flex-col md:flex-row">
+						<TableBodyCell><svelte:component this={milestone.icon} color={milestone.color} size="xl" class="mx-2"/></TableBodyCell>
+						<TableBodyCell class="font-bold justify-start mr-auto">{milestone.short}</TableBodyCell>
+						<TableBodyCell class="break-words whitespace-normal md:justify-start justify-center md:mr-auto mx-auto">{milestone.text}</TableBodyCell>
+						<TableBodyCell class="md:ml-auto mx-auto md:justify-start justify-center"><Button class="m-2 p-2 pb-4 md:w-24 justify-center" onclick={() => {
+						}}>{$_("milestone.moreInfoOnLegend")}</Button></TableBodyCell>
+					</TableBodyRow>
+				{/each}
+				</TableBody>
+			</Table>
+		</AccordionItem>
+		</Accordion>
+
+		<Button class = "m-2 p-2 pb-4 mb-4 items-center justify-center md:w-1/4" onclick = {() => {
+			showMoreInfo = true;
+		}}>{$_("milestone.moreInfoOnEval")}</Button>
+
 		<Hr classHr= "mx-2"/>
 	</div>
 
