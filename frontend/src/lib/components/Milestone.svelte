@@ -9,6 +9,7 @@ import {
 } from "$lib/client";
 import SubmitMilestoneImageModal from "$lib/components/DataInput/SubmitMilestoneImageModal.svelte";
 import MilestoneButton from "$lib/components/MilestoneButton.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
@@ -25,7 +26,6 @@ import {
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
-import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 import Breadcrumbs from "./Navigation/Breadcrumbs.svelte";
 
@@ -123,7 +123,7 @@ async function setup() {
 	if (response.error) {
 		console.log("Error when retrieving milestone answer session");
 		showAlert = true;
-		alertMessage = `${$_("milestone.alertMessageRetrieving")} ${response.error.detail}`;
+		alertMessage = `${i18n.tr.milestone.alertMessageRetrieving} ${response.error.detail}`;
 		milestoneAnswerSession = undefined;
 	} else {
 		milestoneAnswerSession = response.data;
@@ -153,14 +153,14 @@ const breadcrumbdata = $derived([
 		symbol: UserSettingsOutline,
 	},
 	{
-		label: $_("milestone.groupOverviewLabel"),
+		label: i18n.tr.milestone.groupOverviewLabel,
 		onclick: () => {
 			activeTabChildren.set("milestoneGroup");
 		},
 		symbol: RectangleListOutline,
 	},
 	{
-		label: contentStore.milestoneGroupData.text[$locale].title,
+		label: contentStore.milestoneGroupData.text[i18n.locale].title,
 		onclick: () => {
 			activeTabChildren.set("milestoneOverview");
 		},
@@ -174,12 +174,12 @@ const breadcrumbdata = $derived([
 </script>
 
 {#await promise}
-<p>{$_("userData.loadingMessage")}</p>
+<p>{i18n.tr.userData.loadingMessage}</p>
 {:then}
 <div
 	class="mx-auto flex flex-col p-4 md:rounded-t-lg"
 >
-	{#if $locale && contentStore.milestoneGroupData && contentStore.milestoneGroupData.text && contentStore.milestoneGroupData.milestones && currentMilestone && currentMilestone.text && currentMilestone.images}
+	{#if i18n.locale && contentStore.milestoneGroupData && contentStore.milestoneGroupData.text && contentStore.milestoneGroupData.milestones && currentMilestone && currentMilestone.text && currentMilestone.images}
 
 		<Breadcrumbs data={breadcrumbdata} />
 
@@ -195,38 +195,38 @@ const breadcrumbdata = $derived([
 			</div>
 			<div class="m-2 md:m-4 grow">
 				<h2 class="mb-2 text-2xl font-bold text-gray-700 dark:text-gray-400">
-					{currentMilestone.text[$locale].title}
+					{currentMilestone.text[i18n.locale].title}
 				</h2>
-				<p class="mb-2 text-base">{currentMilestone.text[$locale].desc}</p>
+				<p class="mb-2 text-base">{currentMilestone.text[i18n.locale].desc}</p>
 				<Accordion flush>
 					<AccordionItem>
 						<span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
 							<InfoCircleSolid class="mt-0.5" />
-							<span>{$_('milestone.observation')}</span>
+							<span>{i18n.tr.milestone.observation}</span>
 						</span>
 						<p>
-							{currentMilestone.text[$locale].obs}
+							{currentMilestone.text[i18n.locale].obs}
 						</p>
 					</AccordionItem>
 					<AccordionItem>
 						<span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
 							<QuestionCircleSolid class="mt-0.5" />
-							<span>{$_('milestone.help')}</span>
+							<span>{i18n.tr.milestone.help}</span>
 						</span>
 						<p>
-							{currentMilestone.text[$locale].help}
+							{currentMilestone.text[i18n.locale].help}
 						</p>
 					</AccordionItem>
 					<AccordionItem>
 						<span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
 							<UploadOutline class="mt-0.5"/>
-							<span>{$_('milestone.submit-image')}</span>
+							<span>{i18n.tr.milestone.submitImage}</span>
 						</span>
 						<p>
-							{$_('milestone.submit-image-text')}
+							{i18n.tr.milestone.submitImageText}
 						</p>
 						<Button class="m-2"
-								onclick={()=>{showSubmitMilestoneImageModal=true;}}>{$_('milestone.submit-image')}</Button>
+								onclick={()=>{showSubmitMilestoneImageModal=true;}}>{i18n.tr.milestone.submitImage}</Button>
 					</AccordionItem>
 				</Accordion>
 			</div>
@@ -238,9 +238,9 @@ const breadcrumbdata = $derived([
 						onClick={() => {
 							selectAnswer(answerIndex);
 						}}
-						tooltip={$_(`milestone.answer${answerIndex}-desc`)}
+						tooltip={i18n.tr.milestone[`answer${answerIndex}Desc`]}
 					>
-						{$_(`milestone.answer${answerIndex}-text`)}
+						{i18n.tr.milestone[`answer${answerIndex}Text`]}
 					</MilestoneButton>
 				{/each}
 				<div class="flex flex-row justify-center ">
@@ -251,7 +251,7 @@ const breadcrumbdata = $derived([
 						class="m-1 mt-4 text-gray-700 dark:text-gray-400"
 					>
 						<ArrowLeftOutline class="me-2 h-5 w-5 text-gray-700 dark:text-gray-400" />
-						{$_('milestone.prev')}
+						{i18n.tr.milestone.prev}
 					</Button>
 					<Button
 						color="light"
@@ -259,19 +259,19 @@ const breadcrumbdata = $derived([
 						on:click={nextMilestone}
 						class="m-1 mt-4 text-gray-700 dark:text-gray-400"
 					>
-						{$_('milestone.next')}
+						{i18n.tr.milestone.next}
 						<ArrowRightOutline class="ms-2 h-5 w-5 text-gray-700 dark:text-gray-400" />
 					</Button>
 				</div>
 				<Checkbox class="m-1 justify-center" bind:checked={autoGoToNextMilestone}>
-					<p class="text-xs">{$_('milestone.autonext')}</p>
+					<p class="text-xs">{i18n.tr.milestone.autoNext}</p>
 				</Checkbox>
 			</div>
 		</div>
 	{/if}
 </div>
 {:catch error}
-<AlertMessage message={$_("milestone.alertMessageError") + ": "+ error} />
+<AlertMessage message={i18n.tr.milestone.alertMessageError + ": "+ error} />
 {/await}
 
 {#key showSubmitMilestoneImageModal}

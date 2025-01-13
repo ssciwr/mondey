@@ -4,16 +4,16 @@ import { page } from "$app/stores";
 import { resetResetPassword } from "$lib/client/services.gen";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input } from "flowbite-svelte";
 import { CheckCircleOutline } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
-import { _ } from "svelte-i18n";
 
 let pw = $state("");
 let confirmPw = $state("");
 let showAlert = $state(false);
-let alertMessage = $state($_("forgotPw.confirmError"));
+let alertMessage = $state(i18n.tr.forgotPw.confirmError);
 let success: boolean = $state(false);
 
 onMount(() => {
@@ -22,7 +22,7 @@ onMount(() => {
 		$page.params.code === null ||
 		$page.params.code === ""
 	) {
-		alertMessage = $_("forgotPw.codeError");
+		alertMessage = i18n.tr.forgotPw.codeError;
 		showAlert = true;
 	}
 });
@@ -43,14 +43,14 @@ async function submitData(): Promise<void> {
 	}
 
 	console.log(error);
-	alertMessage = $_("forgotPw.sendError");
+	alertMessage = i18n.tr.forgotPw.sendError;
 	showAlert = true;
 	success = false;
 }
 </script>
 
 {#if showAlert === true}
-    <AlertMessage title={$_('forgotPw.Error')} message={alertMessage} onclick={() => {
+    <AlertMessage title={i18n.tr.forgotPw.error} message={alertMessage} onclick={() => {
         showAlert = false;
     }}/>
 {:else}
@@ -58,27 +58,27 @@ async function submitData(): Promise<void> {
         <div class="flex flex-row">
             <CheckCircleOutline size="xl" color="green" class="m-2"/>
             <div class="m-2 p-2">
-                {$_('forgotPw.successReset')}
+                {i18n.tr.forgotPw.successReset}
             </div>
         </div>
-        <Button href="/userLand/userLogin" size="md">{$_('forgotPw.goToLogin')}</Button>
+        <Button href="/userLand/userLogin" size="md">{i18n.tr.forgotPw.goToLogin}</Button>
     {:else}
     <Card class="container m-2 mx-auto w-full max-w-xl items-center justify-center p-2">
 
         <Heading
             tag="h3"
             class="m-2 p-2 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-            >{$_('forgotPw.resetHeading')}</Heading>
+            >{i18n.tr.forgotPw.resetHeading}</Heading>
 
         <form onsubmit={preventDefault(submitData)} class = "space-y-4">
             <div class="m-2 mx-auto w-full flex-col space-y-6 p-2">
 
-                <DataInput component = {Input} bind:value={pw} required={true} id="restPw" kwargs={{type: "password"}} label={$_("forgotPw.inputlabelPw")}/>
+                <DataInput component = {Input} bind:value={pw} required={true} id="restPw" kwargs={{type: "password"}} label={i18n.tr.forgotPw.inputLabelPw}/>
 
-                <DataInput component = {Input} bind:value={confirmPw} required={true} id="restConfirmPw" kwargs={{type: "password"}} label={$_("forgotPw.inputlabelPwConfirm")}/>
+                <DataInput component = {Input} bind:value={confirmPw} required={true} id="restConfirmPw" kwargs={{type: "password"}} label={i18n.tr.forgotPw.inputlabelPwConfirm}/>
             </div>
 			<div class="m-2 flex w-full items-center justify-center p-2">
-                <Button size="md" type="submit">{$_('forgotPw.pending')}</Button>
+                <Button size="md" type="submit">{i18n.tr.forgotPw.pending}</Button>
             </div>
         </form>
     </Card>

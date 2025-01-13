@@ -8,7 +8,7 @@ import TableHeader from "$lib/components/DataDisplay/TableElements/TableHeader.s
 import {
 	filterItemsDefault,
 	makePlaceholderTextDefault,
-} from "$lib/components/DataDisplay/TableElements/TableDisplayHelpers";
+} from "$lib/components/DataDisplay/TableDisplayHelpers";
 
 let {
 	data = [],
@@ -57,7 +57,7 @@ let filteredItems = $derived(filterItems(data, searchTerm, searchableColumns));
 				{#each Object.entries(row) as pair, j}
 					<TableCell
 						key={pair[0]}
-						value={pair[1] as string}
+						value={pair[1]}
 						{statusIndicator}
 						{statusColumns}
 						href={celllinks?.[i]?.[j] || ''}

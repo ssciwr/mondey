@@ -7,10 +7,10 @@ import AlertMessage from "$lib/components/AlertMessage.svelte";
 import { goto } from "$app/navigation";
 import { authCookieLogin, usersCurrentUser } from "$lib/client/services.gen";
 import { type AuthCookieLoginData } from "$lib/client/types.gen";
+import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
-import { _ } from "svelte-i18n";
 
 async function refresh(): Promise<string> {
 	const returned = await usersCurrentUser();
@@ -41,14 +41,14 @@ async function submitData(): Promise<void> {
 
 	if (authReturn.error) {
 		showAlert = true;
-		alertMessage = $_("login.badCredentials") + authReturn.error.detail;
+		alertMessage = i18n.tr.login.badCredentials + authReturn.error.detail;
 		console.log("error during login ", authReturn.error.detail);
 	} else {
 		const status: string = await refresh();
 		if (status !== "success") {
 			console.log("error during retrieving active users: ", status);
 			showAlert = true;
-			alertMessage = `${$_("login.unauthorized")}: ${status}`;
+			alertMessage = `${i18n.tr.login.unauthorized}: ${status}`;
 		} else {
 			console.log("login and user retrieval successful");
 			goto("/userLand/userLandingpage");
@@ -61,12 +61,12 @@ async function submitData(): Promise<void> {
 let username = $state("");
 let password = $state("");
 let showAlert = $state(false);
-let alertMessage: string = $state($_("login.badCredentials"));
+let alertMessage: string = $state(i18n.tr.login.badCredentials);
 </script>
 
 {#if showAlert}
 	<AlertMessage
-		title={$_("login.alertMessageTitle")}
+		title={i18n.tr.login.alertMessageTitle}
 		message={alertMessage}
 		lastpage={`${base}/userLand/userLogin`}
 		onclick={() => {
@@ -80,7 +80,7 @@ let alertMessage: string = $state($_("login.badCredentials"));
 		<Heading
 			tag="h3"
 			class="m-2 mb-3 p-2 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-			>{$_("login.heading")}</Heading
+			>{i18n.tr.login.heading}</Heading
 		>
 
 		<form
@@ -91,14 +91,14 @@ let alertMessage: string = $state($_("login.badCredentials"));
 				<Label
 					for={"username"}
 					class="font-semibold text-gray-700 dark:text-gray-400"
-					>{$_("login.usernameLabel")}</Label
+					>{i18n.tr.login.usernameLabel}</Label
 				>
 				<Input
 					type="email"
 					bind:value={username}
 					autocomplete="username"
 					id="username"
-					placeholder={$_("login.usernameLabel")}
+					placeholder={i18n.tr.login.usernameLabel}
 					required
 				/>
 			</div>
@@ -106,34 +106,34 @@ let alertMessage: string = $state($_("login.badCredentials"));
 				<Label
 					for={"password"}
 					class="font-semibold text-gray-700 dark:text-gray-400"
-					>{$_("login.passwordLabel")}</Label
+					>{i18n.tr.login.passwordLabel}</Label
 				>
 				<Input
 					type="password"
 					bind:value={password}
 					autocomplete="current-password"
 					id="password"
-					placeholder={$_("login.passwordLabel")}
+					placeholder={i18n.tr.login.passwordLabel}
 					required
 				/>
 				<a href={`${base}/forgotPassword`} class="text-primary-700 dark:text-primary-500">
-					{$_("login.forgotPassword")}
+					{i18n.tr.login.forgotPassword}
 			</div>
 
 			<Button
 				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
-				type="submit">{$_("login.submitButtonLabel")}</Button
+				type="submit">{i18n.tr.login.submitButtonLabel}</Button
 			>
 		</form>
 	</Card>
 
 	<span class="container mx-auto w-full text-gray-700 dark:text-gray-400"
-		>{$_("login.notRegistered")}</span
+		>{i18n.tr.login.notRegistered}</span
 	>
 	<a
 		href={`${base}/signup`}
 		class="text-primary-700 hover:underline dark:text-primary-500"
 	>
-		{$_("login.registerNew")}
+		{i18n.tr.login.registerNew}
 	</a>
 </div>

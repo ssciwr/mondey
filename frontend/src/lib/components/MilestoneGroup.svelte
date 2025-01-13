@@ -9,6 +9,7 @@ import {
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
@@ -17,7 +18,6 @@ import {
 	RectangleListOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
-import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
 function computeProgress(
@@ -44,7 +44,7 @@ function computeProgress(
 }
 
 async function setup(): Promise<any> {
-	if ($locale === undefined || $locale === null) {
+	if (i18n.locale === undefined || i18n.locale === null) {
 		console.log("locale not set");
 		return [];
 	}
@@ -54,7 +54,7 @@ async function setup(): Promise<any> {
 	if (currentChild.id === null || currentChild.id === undefined) {
 		console.log("Error when retrieving child data");
 		showAlert = true;
-		alertMessage = $_("childData.alertMessageRetrieving");
+		alertMessage = i18n.tr.childData.alertMessageRetrieving;
 		data = [];
 		return data;
 	}
@@ -73,7 +73,7 @@ async function setup(): Promise<any> {
 		console.log("Error when retrieving answer data");
 		showAlert = true;
 		alertMessage =
-			$_("milestone.alertMessageRetrieving") + answerSession.error.detail;
+			i18n.tr.milestone.alertMessageRetrieving + answerSession.error.detail;
 		data = [];
 		return data;
 	}
@@ -82,15 +82,15 @@ async function setup(): Promise<any> {
 		console.log("Error when retrieving milestone group data");
 		showAlert = true;
 		alertMessage =
-			$_("milestone.alertMessageRetrieving") + milestonegroups.error.detail;
+			i18n.tr.milestone.alertMessageRetrieving + milestonegroups.error.detail;
 		data = [];
 		return data;
 	}
 
 	data = milestonegroups.data.map((item) => {
 		const res = {
-			header: item.text ? item.text[$locale].title : undefined,
-			summary: item.text?.[$locale]?.desc,
+			header: item.text ? item.text[i18n.locale].title : undefined,
+			summary: item.text?.[i18n.locale]?.desc,
 			image: null,
 			progress: computeProgress(item.milestones, answerSession.data),
 			events: {
@@ -116,7 +116,7 @@ const breadcrumbdata: any[] = [
 		},
 	},
 	{
-		label: $_("milestone.groupOverviewLabel"),
+		label: i18n.tr.milestone.groupOverviewLabel,
 		symbol: RectangleListOutline,
 	},
 ];
@@ -127,7 +127,7 @@ function searchByStatus(data: any[], key: string): any[] {
 	}
 	return data.filter((item) => {
 		// button label contains info about completion status => use for search
-		if (key === $_("search.complete")) {
+		if (key === i18n.tr.search.complete) {
 			return item.progress === 1;
 		}
 		return item.progress < 1;
@@ -188,30 +188,30 @@ let promise = $state(setup());
 let data: any[] = $state([]);
 const searchData: any[] = [
 	{
-		label: $_("search.allLabel"),
-		placeholder: $_("search.allPlaceholder"),
+		label: i18n.tr.search.allLabel,
+		placeholder: i18n.tr.search.allPlaceholder,
 		filterFunction: searchAll,
 	},
 	{
-		label: $_("search.descriptionLabel"),
-		placeholder: $_("search.descriptionPlaceholder"),
+		label: i18n.tr.search.descriptionLabel,
+		placeholder: i18n.tr.search.descriptionPlaceholder,
 		filterFunction: searchBySurveyDescription,
 	},
 	{
-		label: $_("search.surveyLabel"),
-		placeholder: $_("search.surveyPlaceholder"),
+		label: i18n.tr.search.surveyLabel,
+		placeholder: i18n.tr.search.surveyPlaceholder,
 		filterFunction: searchBySurveyTitle,
 	},
 	{
-		label: $_("search.statusLabel"),
-		placeholder: $_("search.statusPlaceholder"),
+		label: i18n.tr.search.statusLabel,
+		placeholder: i18n.tr.search.statusPlaceholder,
 		filterFunction: searchByStatus,
 	},
 ];
 </script>
 
 {#await promise}
-<Spinner /> <p>{$_("userData.loadingMessage")}</p>
+<Spinner /> <p>{i18n.tr.userData.loadingMessage}</p>
 {:then data}
 <div class="flex flex-col md:rounded-t-lg">
 	<Breadcrumbs data={breadcrumbdata} />
@@ -226,7 +226,7 @@ const searchData: any[] = [
 	</div>
 </div>
 {:catch error}
-	<AlertMessage message={`{$_("milestone.alertMessageError")} {error}`} onclick={() => {
+	<AlertMessage message={`${i18n.tr.milestone.alertMessageError} ${error}`} onclick={() => {
 		activeTabChildren.set("milestoneOverview");
 		showAlert = false;
 	}}/>

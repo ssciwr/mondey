@@ -2,12 +2,12 @@
 import { page } from "$app/stores";
 import { verifyVerify } from "$lib/client/services.gen";
 import UserLogin from "$lib/components/UserLogin.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import {
 	CheckCircleOutline,
 	ExclamationCircleOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
-import { _ } from "svelte-i18n";
 
 onMount(async () => {
 	const { data, error } = await verifyVerify({
@@ -29,7 +29,7 @@ let success: boolean = $state(false);
         <div class="flex flex-row">
             <CheckCircleOutline size="xl" color="green" class="m-2"/>
             <div class="m-2 p-2">
-                {$_('registration.emailValidationMessage')}
+                {i18n.tr.registration.emailValidationMessage}
             </div>
         </div>
         <UserLogin/>
@@ -37,7 +37,7 @@ let success: boolean = $state(false);
         <div class="flex flex-row">
         <ExclamationCircleOutline size="xl" color="red" class="m-2"/>
         <div class="m-2 p-2">
-            {$_('registration.emailValidationError')}
+            {i18n.tr.registration.emailValidationError}
         </div>
         </div>
     {/if}

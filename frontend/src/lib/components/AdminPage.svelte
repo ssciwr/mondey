@@ -9,6 +9,7 @@ import Questions from "$lib/components/Admin/Questions.svelte";
 import SubmittedMilestoneImages from "$lib/components/Admin/SubmittedMilestoneImages.svelte";
 import Translations from "$lib/components/Admin/Translations.svelte";
 import Users from "$lib/components/Admin/Users.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { TabItem, Tabs } from "flowbite-svelte";
 import {
@@ -20,7 +21,6 @@ import {
 	UsersOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
-import { _ } from "svelte-i18n";
 
 onMount(async () => {
 	await user.load();
@@ -32,56 +32,56 @@ onMount(async () => {
     <TabItem open>
         <div slot="title" class="flex items-center gap-2">
             <BadgeCheckOutline size="md"/>
-            {$_("admin.milestones")}
+            {i18n.tr.admin.milestones}
         </div>
         <MilestoneGroups/>
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">
             <ScaleBalancedOutline size="md"/>
-            {$_("admin.expected-age")}
+            {i18n.tr.admin.expectedAge}
         </div>
         <MilestoneExpectedAges/>
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">
             <FileImageOutline size="md"/>
-            {$_("admin.submitted-images")}
+            {i18n.tr.admin.submittedImages}
         </div>
         <SubmittedMilestoneImages/>
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">
             <UsersOutline size="md"/>
-            {$_("admin.users")}
+            {i18n.tr.admin.users}
         </div>
         <Users/>
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">
             <ClipboardListOutline size="md"/>
-            {$_("admin.user-questions")}
+            {i18n.tr.admin.userQuestions}
         </div>
         <Questions kind={"user"}/>
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">
             <ClipboardListOutline size="md"/>
-            {$_("admin.child-questions")}
+            {i18n.tr.admin.childQuestions}
         </div>
         <Questions kind={"child"}/>
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">
             <LanguageOutline size="md"/>
-            {$_("admin.translations")}
+            {i18n.tr.admin.translations}
         </div>
         <Translations/>
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">
             <LanguageOutline size="md"/>
-            {$_("admin.languages")}
+            {i18n.tr.admin.languages}
         </div>
         <Languages/>
     </TabItem>

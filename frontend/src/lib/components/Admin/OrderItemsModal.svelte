@@ -1,6 +1,11 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
+import { type ItemOrder } from "$lib/client/types.gen";
+import CancelButton from "$lib/components/Admin/CancelButton.svelte";
+import SaveButton from "$lib/components/Admin/SaveButton.svelte";
+import { i18n } from "$lib/i18n.svelte";
+import { Modal } from "flowbite-svelte";
 import type { DndEvent } from "svelte-dnd-action";
 import { dndzone } from "svelte-dnd-action";
 import { flip } from "svelte/animate";
@@ -10,12 +15,6 @@ const flipDurationMs = 100;
 function handleDnd(e: CustomEvent<DndEvent>) {
 	items = e.detail.items as Array<Item>;
 }
-
-import { type ItemOrder } from "$lib/client/types.gen";
-import CancelButton from "$lib/components/Admin/CancelButton.svelte";
-import SaveButton from "$lib/components/Admin/SaveButton.svelte";
-import { Modal } from "flowbite-svelte";
-import { _ } from "svelte-i18n";
 
 type Item = { id: number; text: string };
 
@@ -45,7 +44,7 @@ async function post() {
 }
 </script>
 
-<Modal title={$_('admin.reorder')} bind:open autoclose outsideclose size="lg">
+<Modal title={i18n.tr.admin.reorder} bind:open autoclose outsideclose size="lg">
     <section use:dndzone="{{items, flipDurationMs}}" onconsider={handleDnd} onfinalize={handleDnd}>
         {#each items as item(item.id)}
             <div animate:flip="{{duration: flipDurationMs}}"

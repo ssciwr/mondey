@@ -4,17 +4,17 @@
 import { getChildImage, getChildren } from "$lib/client/services.gen";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { type CardElement, type CardStyle } from "$lib/util";
 import { Heading, Spinner } from "flowbite-svelte";
-import { _ } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
 function createStyle(data: CardElement[]): CardStyle[] {
 	return data.map((item) => ({
 		card:
-			item.header === $_("childData.newChildHeading")
+			item.header === i18n.tr.childData.newChildHeading
 				? {
 						class:
 							"hover:cursor-pointer m-2 max-w-prose bg-primary-700 dark:bg-primary-600 hover:bg-primary-800 dark:hover:bg-primary-700",
@@ -27,14 +27,14 @@ function createStyle(data: CardElement[]): CardStyle[] {
 						horizontal: false,
 					},
 		header:
-			item.header === $_("childData.newChildHeading")
+			item.header === i18n.tr.childData.newChildHeading
 				? {
 						class:
 							"mb-2 text-2xl font-bold tracking-tight text-white dark:text-white",
 					}
 				: null,
 		summary:
-			item.header === $_("childData.newChildHeading")
+			item.header === i18n.tr.childData.newChildHeading
 				? {
 						class:
 							"mb-3 flex font-normal leading-tight text-white dark:text-white",
@@ -60,13 +60,14 @@ function searchName(data: CardElement[], key: string): CardElement[] {
 	});
 	return res;
 }
+
 async function setup(): Promise<CardElement[]> {
 	const children = await getChildren();
 
 	if (children.error) {
 		console.log("Error when retrieving child data");
 		showAlert = true;
-		alertMessage = $_("childData.alertMessageRetrieving");
+		alertMessage = i18n.tr.childData.alertMessageRetrieving;
 	} else {
 		const childrenData = await Promise.all(
 			(children.data || []).map(async (child): Promise<CardElement> => {
@@ -97,8 +98,8 @@ async function setup(): Promise<CardElement[]> {
 		data = [
 			...childrenData,
 			{
-				header: $_("childData.newChildHeading"),
-				summary: $_("childData.newChildHeadingLong"),
+				header: i18n.tr.childData.newChildHeading,
+				summary: i18n.tr.childData.newChildHeadingLong,
 				events: {
 					onclick: () => {
 						currentChild.id = null;
@@ -114,25 +115,25 @@ async function setup(): Promise<CardElement[]> {
 }
 
 let showAlert = $state(false);
-let alertMessage = $state($_("childData.alertMessageError"));
+let alertMessage = $state(i18n.tr.childData.alertMessageError);
 let data: CardElement[] = $state([]);
 let style: CardStyle[] = $state([]);
 const promise = $state(setup());
 const searchData = [
 	{
-		label: $_("childData.searchNameLabel"),
-		placeholder: $_("childData.searchNamePlaceholder"),
+		label: i18n.tr.childData.searchNameLabel,
+		placeholder: i18n.tr.childData.searchNamePlaceholder,
 		filterFunction: searchName,
 	},
 ];
 </script>
 
 {#await promise}
-	<Spinner /> <p>{$_("userData.loadingMessage")}</p>
+	<Spinner /> <p>{i18n.tr.userData.loadingMessage}</p>
 {:then data}
 	{#if showAlert}
 		<AlertMessage
-			title={$_("childData.alertMessageTitle")}
+			title={i18n.tr.childData.alertMessageTitle}
 			message={alertMessage}
 			onclick={() => {
 				showAlert = false;
@@ -145,12 +146,12 @@ const searchData = [
 		<Heading
 			tag="h1"
 			class="m-2 mb-2 p-4 "
-			color="text-gray-700 dark:text-gray-400">{$_("childData.overviewLabel")}</Heading
+			color="text-gray-700 dark:text-gray-400">{i18n.tr.childData.overviewLabel}</Heading
 		>
 
 		<div class="cols-1 grid w-full gap-y-8 p-2">
 			<p class="w-auto p-2 text-lg text-gray-700 dark:text-gray-400">
-				{$_("childData.overviewSummary")}
+				{i18n.tr.childData.overviewSummary}
 			</p>
 			<GalleryDisplay
 				{data}

@@ -5,8 +5,8 @@ import { submitMilestoneImage } from "$lib/client/services.gen";
 import CancelButton from "$lib/components/Admin/CancelButton.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { Checkbox, Modal } from "flowbite-svelte";
-import { _ } from "svelte-i18n";
 
 let {
 	open = $bindable(false),
@@ -36,9 +36,9 @@ export async function submitImage() {
 }
 </script>
 
-<Modal title={$_('milestone.submit-image')} bind:open outsideclose size="lg">
+<Modal title={i18n.tr.milestone.submitImage} bind:open outsideclose size="lg">
     <div class="mb-2">
-        <p>{$_('milestone.submit-image-text')}</p>
+        <p>{i18n.tr.milestone.submitImageText}</p>
     </div>
     {#if milestoneId}
         <div class="mb-5">
@@ -50,10 +50,10 @@ export async function submitImage() {
                     bind:image
             />
         </div>
-        <Checkbox bind:checked={agreeToConditions}>{$_('milestone.submit-image-conditions')}</Checkbox>
+        <Checkbox bind:checked={agreeToConditions}>{i18n.tr.milestone.submitImageConditions}</Checkbox>
     {/if}
     <svelte:fragment slot="footer">
-        <SaveButton text={$_("milestone.submit-image")} disabled={!agreeToConditions} onclick={() => {open = false; submitImage()}}/>
+        <SaveButton text={i18n.tr.milestone.submitImage} disabled={!agreeToConditions} onclick={() => {open = false; submitImage()}}/>
         <CancelButton onclick={() => {open = false;}}/>
     </svelte:fragment>
 </Modal>

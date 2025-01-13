@@ -4,7 +4,7 @@ import CardDisplay from "$lib/components//DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import FrontPageAbout from "$lib/components/FrontPageAbout.svelte";
 import FrontPageCard from "$lib/components/FrontPageCard.svelte";
-import { _ } from "svelte-i18n";
+import { i18n } from "$lib/i18n.svelte";
 import FrontPageAccordion from "./FrontPageAccordion.svelte";
 import FrontPageBookmarks from "./FrontPageBookmarks.svelte";
 
@@ -12,32 +12,32 @@ let { items = [] } = $props();
 
 const bookmarks = [
 	{
-		titleKey: $_("frontpageBookmarks.headingMotor"),
-		contentKey: $_("frontpageBookmarks.summaryMotor"),
+		titleKey: i18n.tr.frontpageBookmarks.headingMotor,
+		contentKey: i18n.tr.frontpageBookmarks.summaryMotor,
 	},
 	{
-		titleKey: $_("frontpageBookmarks.headingFineMotor"),
-		contentKey: $_("frontpageBookmarks.summaryFineMotor"),
+		titleKey: i18n.tr.frontpageBookmarks.headingFineMotor,
+		contentKey: i18n.tr.frontpageBookmarks.summaryFineMotor,
 	},
 	{
-		titleKey: $_("frontpageBookmarks.headingThinking"),
-		contentKey: $_("frontpageBookmarks.summaryThinking"),
+		titleKey: i18n.tr.frontpageBookmarks.headingThinking,
+		contentKey: i18n.tr.frontpageBookmarks.summaryThinking,
 	},
 	{
-		titleKey: $_("frontpageBookmarks.headingLanguage"),
-		contentKey: $_("frontpageBookmarks.summaryLanguage"),
+		titleKey: i18n.tr.frontpageBookmarks.headingLanguage,
+		contentKey: i18n.tr.frontpageBookmarks.summaryLanguage,
 	},
 	{
-		titleKey: $_("frontpageBookmarks.headingSocialDevelopment"),
-		contentKey: $_("frontpageBookmarks.summarySocialDevelopment"),
+		titleKey: i18n.tr.frontpageBookmarks.headingSocialDevelopment,
+		contentKey: i18n.tr.frontpageBookmarks.summarySocialDevelopment,
 	},
 	{
-		titleKey: $_("frontpageBookmarks.headingInnerStates"),
-		contentKey: $_("frontpageBookmarks.summaryInnerStates"),
+		titleKey: i18n.tr.frontpageBookmarks.headingInnerStates,
+		contentKey: i18n.tr.frontpageBookmarks.summaryInnerStates,
 	},
 	{
-		titleKey: $_("frontpageBookmarks.headingSchool"),
-		contentKey: $_("frontpageBookmarks.summarySchool"),
+		titleKey: i18n.tr.frontpageBookmarks.headingSchool,
+		contentKey: i18n.tr.frontpageBookmarks.summarySchool,
 	},
 ];
 </script>
@@ -49,7 +49,7 @@ const bookmarks = [
 />
 
 <div class="flex mt-7 flex-col text-center justify-center items-center space-y-6">
-  <h1 class="text-2xl dark:text-white justify-center text-center text-balance max-w-prose font-bold text-gray-700">{$_('frontpageBookmarks.title')}</h1>
+  <h1 class="text-2xl dark:text-white justify-center text-center text-balance max-w-prose font-bold text-gray-700">{i18n.tr.frontpageBookmarks.title}</h1>
    <FrontPageBookmarks {bookmarks} />
   </div>
 
