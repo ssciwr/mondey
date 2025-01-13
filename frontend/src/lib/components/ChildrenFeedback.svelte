@@ -24,6 +24,10 @@ import {
 	Modal,
 	Spinner,
 	TabItem,
+	Table,
+	TableBody,
+	TableBodyCell,
+	TableBodyRow,
 	Tabs,
 } from "flowbite-svelte";
 import {
@@ -58,16 +62,23 @@ const intervalSize = 4;
 let currentSessionIndices = $state([0, intervalSize]);
 let relevant_sessionkeys = $state([] as number[]);
 const milestonePresentation = [
-	{ icon: CheckCircleSolid, color: "green", text: $_("milestone.recommendOk") },
+	{
+		icon: CheckCircleSolid,
+		color: "green",
+		text: $_("milestone.recommendOk"),
+		short: $_("milestone.recommendOkShort"),
+	},
 	{
 		icon: ExclamationCircleSolid,
 		color: "orange",
 		text: $_("milestone.recommendWatch"),
+		short: $_("milestone.recommendWatchShort"),
 	},
 	{
 		icon: CloseCircleSolid,
 		color: "red",
 		text: $_("milestone.recommmendHelp"),
+		short: $_("milestone.recommendHelpShort"),
 	},
 ];
 const breadcrumbdata: any[] = [
@@ -326,30 +337,33 @@ let promise = $state(setup());
 
 
 		<Modal classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-400" title={$_("milestone.info")} bind:open={showMoreInfo} dismissable={true}>
+			<p class ="text-gray-700 dark:text-gray-400">{$_("milestone.feedbackExplanationDetailed")}</p>
 			<p class ="text-gray-700 dark:text-gray-400">{$_("milestone.feedbackDetailsMilestoneGroup")}</p>
 			<p class ="text-gray-700 dark:text-gray-400">{$_("milestone.feedbackDetailsMilestone")}</p>
 		</Modal>
 
-		<Accordion>
-			<AccordionItem>
-				<span slot="header" class="text-gray-700 dark:text-gray-400 flex items-center justify-center">
-					<span class="font-bold">
-						{$_("milestone.legend")}
-					</span>
-				</span>
-				<div class="flex flex-col text-gray-700 dark:text-gray-400 items-start p-2 m-2 space-y-6 justify-center">
-					{#each milestonePresentation as milestone}
-						<div class="mx-2 px-2 w-full flex flex-row items-center">
-							<svelte:component this={milestone.icon} color={milestone.color} size="xl" class="mx-2"/>
-							<p>{milestone.text}</p>
-						</div>
-						<Hr classHr="mx-2 px-2 items-end w-full"/>
-					{/each}
-				</div>
-			</AccordionItem>
-		</Accordion>
+		<Table striped={true}>
+			<TableBody tableBodyClass="divide-y">
+			{#each milestonePresentation as milestone}
+				<TableBodyRow class="text-gray-700 dark:text-gray-400 flex flex-col md:flex-row">
+					<TableBodyCell><svelte:component this={milestone.icon} color={milestone.color} size="xl" class="mx-2"/></TableBodyCell>
+					<TableBodyCell class="font-bold justify-start mr-auto">{milestone.short}</TableBodyCell>
+					<TableBodyCell class="break-words whitespace-normal md:justify-start justify-center md:mr-auto mx-auto">{milestone.text}</TableBodyCell>
+					<TableBodyCell class="md:ml-auto mx-auto md:justify-start justify-center"><Button class="m-2 p-2 pb-4 md:w-24 justify-center" onclick={() => {
+					}}>{$_("milestone.moreInfoOnLegend")}</Button></TableBodyCell>
+				</TableBodyRow>
+			{/each}
+			</TableBody>
+		</Table>
+		<Hr classHr= "mx-2"/>
+	</div>
+
+	<div class ="m-2 p-2 pb-4 ">
+
+		<p class = "justify-center font-bold m-2 p-2">{$_("milestone.selectFeedback")}</p>
 
 		<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory} >{$_("milestone.showHistory")}</Checkbox>
+
 		<Hr classHr= "mx-2"/>
 	</div>
 
