@@ -183,14 +183,10 @@ def test_get_milestone_answers_child1_current_answer_session(user_client: TestCl
         "1": {
             "milestone_id": 1,
             "answer": 3,
-            "included_in_milestone_statistics": False,
-            "included_in_milestonegroup_statistics": False,
         },
         "2": {
             "milestone_id": 2,
             "answer": 2,
-            "included_in_milestone_statistics": False,
-            "included_in_milestonegroup_statistics": False,
         },
     }
     assert _is_approx_now(response.json()["created_at"])
@@ -207,8 +203,6 @@ def test_update_milestone_answer_no_current_answer_session(
     new_answer = {
         "milestone_id": 4,
         "answer": 2,
-        "included_in_milestone_statistics": False,
-        "included_in_milestonegroup_statistics": False,
     }
     response = user_client.put(
         f"/users/milestone-answers/{current_answer_session['id']}", json=new_answer
@@ -224,14 +218,10 @@ def test_update_milestone_answer_update_existing_answer(user_client: TestClient)
     assert current_answer_session["answers"]["1"] == {
         "milestone_id": 1,
         "answer": 3,
-        "included_in_milestone_statistics": False,
-        "included_in_milestonegroup_statistics": False,
     }
     new_answer = {
         "milestone_id": 1,
         "answer": 2,
-        "included_in_milestone_statistics": False,
-        "included_in_milestonegroup_statistics": False,
     }
     response = user_client.put(
         f"/users/milestone-answers/{current_answer_session['id']}", json=new_answer

@@ -282,6 +282,7 @@ def test_calculate_milestonegroup_statistics(statistics_session):
 
     all_answers = statistics_session.exec(answer_query).all()
     for answer in all_answers:
+        print(answer)
         assert answer.included_in_milestonegroup_statistics is False
 
     milestone_group = statistics_session.exec(
@@ -292,10 +293,6 @@ def test_calculate_milestonegroup_statistics(statistics_session):
         statistics_session,
         milestone_group.id,
     )
-
-    all_answers = statistics_session.exec(answer_query).all()
-    for answer in all_answers:
-        assert answer.included_in_milestonegroup_statistics is True
 
     assert score.milestone_group_id == 1
     # no change for these ages
@@ -338,6 +335,10 @@ def test_calculate_milestonegroup_statistics(statistics_session):
 
     # check that calling the statistics anew with already integrated answers doesn´t change anything.
     # we need to check against the old result, not the new one because this is not written into the database
+    all_answers = statistics_session.exec(answer_query).all()
+    for answer in all_answers:
+        assert answer.included_in_milestonegroup_statistics is True
+
     old_stats = statistics_session.get(MilestoneGroupAgeScoreCollection, 1)
     new_stats = calculate_milestonegroup_statistics_by_age(
         statistics_session,

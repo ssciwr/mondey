@@ -195,6 +195,7 @@ def calculate_milestone_statistics_by_age(
     one for each month, or None if there are no answers for the milestoneg and no previous statistics.
     """
     session_expired_days: int = 7
+    # TODO: when the answersession eventually has an expired flag, this can go again.
 
     # get the newest statistics for the milestone
     last_statistics = session.get(MilestoneAgeScoreCollection, milestone_id)

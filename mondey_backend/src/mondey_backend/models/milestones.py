@@ -147,8 +147,6 @@ class SubmittedMilestoneImagePublic(SQLModel):
 class MilestoneAnswerPublic(SQLModel):
     milestone_id: int
     answer: int
-    included_in_milestone_statistics: bool = False
-    included_in_milestonegroup_statistics: bool = False
 
 
 class MilestoneAnswer(SQLModel, table=True):
