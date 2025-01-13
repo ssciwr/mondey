@@ -542,16 +542,6 @@ export const MilestoneAnswerPublicSchema = {
         answer: {
             type: 'integer',
             title: 'Answer'
-        },
-        included_in_milestone_statistics: {
-            type: 'boolean',
-            title: 'Included In Milestone Statistics',
-            default: false
-        },
-        included_in_milestonegroup_statistics: {
-            type: 'boolean',
-            title: 'Included In Milestonegroup Statistics',
-            default: false
         }
     },
     type: 'object',
