@@ -470,7 +470,7 @@ def statistics_session(session):
         MilestoneAnswerSession(
             child_id=1,
             user_id=3,
-            created_at=datetime.datetime(today.year, last_month.month, 20),
+            created_at=datetime.datetime(last_month.year, last_month.month, 20),
         )
     )
     session.add(
