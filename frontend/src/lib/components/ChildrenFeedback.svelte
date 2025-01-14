@@ -61,7 +61,6 @@ let showMoreInfo = $state(false);
 const intervalSize = 4;
 let currentSessionIndices = $state([0, intervalSize]);
 let relevant_sessionkeys = $state([] as number[]);
-let current_minscore = $state(2);
 let milestonePresentation = $state([
 	{
 		icon: CheckCircleSolid,
@@ -228,6 +227,13 @@ function makeTitle(aid: number): string {
 	return aid === sessionkeys[0]
 		? $_("milestone.current")
 		: formatDate(answerSessions[aid].created_at);
+}
+
+function scrollToBottom() {
+	window.scrollTo({
+		top: document.body.scrollHeight,
+		behavior: "smooth",
+	});
 }
 
 async function setup() {
@@ -400,6 +406,7 @@ let promise = $state(setup());
 			{#if showHistory === true}
 				<Button size="md" type="button" class="md:w-16 md:h-8" on:click={() => {
 					promise = loadLast();
+					scrollToBottom();
 				}}><ArrowLeftOutline class="w-4 h-4" /></Button>
 			{/if}
 			<div class="flex flex-col md:flex-row justify-between">
@@ -445,6 +452,7 @@ let promise = $state(setup());
 			{#if showHistory === true}
 				<Button size="md" type="button" class="md:w-16 md:h-8" on:click={() => {
 					promise = loadNext();
+					scrollToBottom();
 				}}><ArrowRightOutline class="w-4 h-4" /></Button>
 			{/if}
 		</Tabs>
