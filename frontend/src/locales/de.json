@@ -23,9 +23,9 @@
 		"submit-image-text": "Haben Sie ein Bild von Ihrem Kind bei diesem Meilenstein, das Sie gerne beisteuern und veröffentlichen möchten? Wenn ja, können Sie es hier einreichen.",
 		"submit-image-conditions": "Ich bin damit einverstanden, dass dieses Bild veröffentlicht und den Benutzern als eines der Meilensteinbilder auf dieser Website angezeigt wird, sofern es von den Site-Administratoren genehmigt wird.",
 		"feedbackTitle": "Feedback zur Entwicklung",
-		"recommendOk": "Das Kind hat für sämtliche Meilensteine altergemäße Bewertungen erhalten.",
+		"recommendOk": "Das Kind hat für sämtliche Meilensteingruppen altergemäße Bewertungen erhalten.",
 		"recommendOkShort": "Alles im grünen Bereich!",
-		"recommendWatch": "Das Kind hat für einige Meilensteine leicht unterdurchschnittliche Bewertungen erhalten.",
+		"recommendWatch": "Das Kind hat für einige Meilensteingruppen leicht unterdurchschnittliche Bewertungen erhalten.",
 		"recommendWatchShort": "Aufgepasst!",
 		"recommmendHelp": "Entwicklung des Kindes ist deutlich unterdurchschnittlich.",
 		"recommendHelpShort": "Enwicklungsverzögerung!",
@@ -43,7 +43,9 @@
 		"toTheMilestone": "Zum Meilenstein",
 		"older": "Weiter zurück",
 		"newer": "Weiter vor",
-		"notEnoughDataYet": "Noch nicht genügend Daten für Feedback"
+		"notEnoughDataYet": "Noch nicht genügend Daten für Feedback",
+		"summaryScore": "Gesamtergebnis:",
+		"printPage": "Protokol drucken"
 	},
 	"search": {
 		"allLabel": "Alle",

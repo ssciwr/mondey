@@ -243,21 +243,25 @@ let promise = $state(setup());
 </script>
 
 {#snippet summaryEvaluation(aid: number)}
-<div class="flex flex-col md:flex-row items-center justify-center w-full m-2 p-2 text-gray-700 dark:text-gray-400">
-	{#if Math.min(...(Object.values(summary[aid]) as number[])) === 1}
-		<CheckCircleSolid  size="xl" class="text-feedback-0 mr-2 pr-2"/>
-		{$_("milestone.recommendOk")}
-	{:else if Math.min(...(Object.values(summary[aid]) as number[])) === 0}
-	<BellActiveSolid size="xl" class="text-feedback-1 mr-2 pr-2"/>
-	{$_("milestone.recommendWatch")}
-	{:else if Math.min(...(Object.values(summary[aid]) as number[])) === -1}
-		<CloseCircleSolid size="xl" class="text-feedback-2 mr-2 pr-2"/>
-		{$_("milestone.recommmendHelp")}
-	{:else}
-		<CloseCircleSolid size="xl" color = "gray" />
-		{$_("milestone.notEnoughDataYet")}
-	{/if}
-</div>
+	<div class="flex flex-col md:flex-row items-center justify-center w-full m-2 p-2 text-gray-700 dark:text-gray-400">
+		{#if Math.min(...(Object.values(summary[aid]) as number[])) === 1}
+			<CheckCircleSolid  size="xl" class="text-feedback-0 mr-2 pr-2"/>
+			<span class="font-bold mx-2 px-2 items-center justify-center">{$_("milestone.summaryScore")}</span>
+			{$_("milestone.recommendOk")}
+		{:else if Math.min(...(Object.values(summary[aid]) as number[])) === 0}
+			<BellActiveSolid size="xl" class="text-feedback-1 mr-2 pr-2"/>
+			<span class="font-bold mx-2 px-2 items-center justify-center">{$_("milestone.summaryScore")}</span>
+			{$_("milestone.recommendWatch")}
+		{:else if Math.min(...(Object.values(summary[aid]) as number[])) === -1}
+			<CloseCircleSolid size="xl" class="text-feedback-2 mr-2 pr-2"/>
+			<span class="font-bold mx-2 px-2 items-center justify-center"> {$_("milestone.summaryScore")}</span>
+			{$_("milestone.recommmendHelp")}
+		{:else}
+			<CloseCircleSolid size="xl" color = "gray" />
+			<span class="font-bold mx-2 px-2 items-center justify-center">{$_("milestone.summaryScore")}</span>
+			{$_("milestone.notEnoughDataYet")}
+		{/if}
+	</div>
 <Hr classHr="mx-2"/>
 
 {/snippet}
@@ -338,106 +342,116 @@ let promise = $state(setup());
 		</div>
 	{:then}
 
-	<Heading tag="h2" class = "text-gray-700 dark:text-gray-400 items-center p-2 m-2 pb-4">{$_("milestone.feedbackTitle")} </Heading>
+		<Heading tag="h2" class = "text-gray-700 dark:text-gray-400 items-center p-2 m-2 pb-4">{$_("milestone.feedbackTitle")} </Heading>
 
-	<div class ="m-2 p-2 pb-4 ">
-		<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md">{$_("milestone.feedbackExplanation")}</p>
+		<div class ="m-2 p-2 pb-4 ">
+			<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md">{$_("milestone.feedbackExplanation")}</p>
 
-		<Modal class = "m-2 p-2" classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-400" title={$_("milestone.info")} bind:open={showMoreInfo} dismissable={true}>
-			<p class ="text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md">{$_("milestone.feedbackExplanationDetailed")}</p>
-			<p class ="text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md">{$_("milestone.feedbackDetailsMilestoneGroup")}</p>
-			<p class ="text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md" >{$_("milestone.feedbackDetailsMilestone")}</p>
-		</Modal>
+			<Modal class = "m-2 p-2" classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-400" title={$_("milestone.info")} bind:open={showMoreInfo} dismissable={true}>
+				<p class ="text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md">{$_("milestone.feedbackExplanationDetailed")}</p>
+				<p class ="text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md">{$_("milestone.feedbackDetailsMilestoneGroup")}</p>
+				<p class ="text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md" >{$_("milestone.feedbackDetailsMilestone")}</p>
+			</Modal>
 
-		<Accordion class="p-2 m-2">
-			<AccordionItem>
-			<span class="text-gray-700 dark:text-gray-400" slot="header">{$_("milestone.legend")}</span>
-			<Table striped={true}>
-				<TableBody tableBodyClass="divide-y">
-					{#each milestonePresentation as milestone}
-						<TableBodyRow class="text-gray-700 dark:text-gray-400 flex flex-col md:flex-row font-medium text-sm md:text-md items-center justify-center m-2 p-2">
+			<Accordion class="p-2 m-2">
+				<AccordionItem>
+				<span class="text-gray-700 dark:text-gray-400" slot="header">{$_("milestone.legend")}</span>
+				<Table striped={false}>
+					<TableBody tableBodyClass="divide-y">
+						{#each milestonePresentation as milestone}
+							<TableBodyRow class="text-gray-700 dark:text-gray-400 flex flex-col md:flex-row font-medium text-sm md:text-md items-center justify-center m-2 p-2">
 
-							<TableBodyCell class="flex flex-col w-32 justify-center"><svelte:component this={milestone.icon}  size="xl" class={milestone.class} /></TableBodyCell>
+								<TableBodyCell class="flex flex-col w-32 justify-center"><svelte:component this={milestone.icon}  size="xl" class={milestone.class} /></TableBodyCell>
 
-							<TableBodyCell class="flex flex-col font-bold justify-center mr-auto pr-auto">{milestone.short}</TableBodyCell>
+								<TableBodyCell class="flex flex-col font-bold justify-center mr-auto pr-auto">{milestone.short}</TableBodyCell>
 
-							<TableBodyCell class="flex flex-col justify-end w-32"><Button class="m-2 p-2 w-full justify-center" onclick={() => {milestone.showExplanation=true;}}>{$_("milestone.moreInfoOnLegend")}</Button></TableBodyCell>
-						</TableBodyRow>
-						<Modal class = "m-2 p-2" classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-400" bind:open={milestone.showExplanation} dismissable={true} title={milestone.short}>
-							{milestone.text}
-						</Modal>
-					{/each}
-				</TableBody>
-			</Table>
+								<TableBodyCell class="flex flex-col justify-end w-32"><Button class="m-2 p-2 w-full justify-center" onclick={() => {milestone.showExplanation=true;}}>{$_("milestone.moreInfoOnLegend")}</Button></TableBodyCell>
+							</TableBodyRow>
+							<Modal class = "m-2 p-2" classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-400" bind:open={milestone.showExplanation} dismissable={true} title={milestone.short}>
+								{milestone.text}
+							</Modal>
+						{/each}
+					</TableBody>
+				</Table>
 
-		</AccordionItem>
-		</Accordion>
+			</AccordionItem>
+			</Accordion>
 
-		<Button class = "m-2 p-2 pb-4 mb-4 items-center justify-center md:w-1/6" onclick = {() => {
-			showMoreInfo = true;
-		}}>{$_("milestone.moreInfoOnEval")}</Button>
-
-		<Hr classHr= "mx-2"/>
-	</div>
-
-	<div class ="m-2 p-2 pb-4 ">
-
-		<p class = "justify-center font-bold m-2 p-2 text-gray-700 dark:text-gray-400">{$_("milestone.selectFeedback")}</p>
-
-		<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory} >{$_("milestone.showHistory")}</Checkbox>
-
-		<Hr classHr= "mx-2"/>
-	</div>
-
-	<Tabs defaultClass="m-2 p-2 pb-4 items-center flex flex-wrap justify-between w-full text-gray-700 dark:text-gray-400">
-		{#if showHistory === true}
-			<Button size="md" type="button" class="md:w-16 md:h-8" on:click={() => {
-				promise = loadLast();
-			}}><ArrowLeftOutline class="w-4 h-4" /></Button>
-		{/if}
-		<div class="flex flex-col md:flex-row justify-between">
-			{#if relevant_sessionkeys.length=== 0}
-				<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{$_("milestone.noFeedback")}</p>
-			{:else}
-				{#each relevant_sessionkeys as aid}
-					{#if showHistory === true || aid === sessionkeys[0]}
-						<TabItem defaultClass="font-bold m-2 p-2" title={makeTitle(aid)} open={aid === relevant_sessionkeys[0] }>
-					        {@render summaryEvaluation(aid)}
-							<Accordion class="p-2 m-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-								{#each Object.entries(summary[aid]) as [mid, score]}
-									<div class="flex flex-col">
-									<AccordionItem activeClass="flex flex-col m-2 rounded-xl text-white dark:text-white bg-primary-700 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-600 items-center justify-between w-full font-medium text-left" inactiveClass="flex flex-col rounded-xl text-white dark:text-white bg-primary-800 dark:bg-primary-800 hover:bg-primary-700 dark:hover:bg-primary-700  items-center justify-between w-full font-medium text-left m-2">
-										<span slot="header" class="items-center flex justify-center space-x-2">
-											{@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
-										</span>
-										<div class="flex-row justify-between">
-											{#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
-												{@render evaluation(
-													milestoneGroups[aid][Number(mid)].milestones.find((element: any) =>
-													{
-														return element.id === Number(ms_id);
-													}),
-													Number(ms_score),
-													true
-												)}
-												<Hr classHr="mx-2"/>
-											{/each}
-										</div>
-									</AccordionItem>
-									</div>
-								{/each}
-							</Accordion>
-						</TabItem>
-					{/if}
-				{/each}
-			{/if}
+			<div class="flex items-center justify-center w-full m-2 p-2">
+				<Button class = "m-2 p-2 pb-4 mb-4 items-center justify-center md:w-1/6" onclick = {() => {
+					showMoreInfo = true;
+				}}>{$_("milestone.moreInfoOnEval")}
+				</Button>
+			</div>
 		</div>
-		{#if showHistory === true}
-			<Button size="md" type="button" class="md:w-16 md:h-8" on:click={() => {
-				promise = loadNext();
-			}}><ArrowRightOutline class="w-4 h-4" /></Button>
-		{/if}
-	</Tabs>
+
+		<Hr classHr= "w-full mx-2"/>
+
+		<div class ="m-2 p-2 pb-4 ">
+
+			<p class = "justify-center font-bold m-2 p-2 text-gray-700 dark:text-gray-400">{$_("milestone.selectFeedback")}</p>
+
+			<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory} >{$_("milestone.showHistory")}</Checkbox>
+
+			<Hr classHr= "mx-2"/>
+		</div>
+
+		<Tabs defaultClass="m-2 p-2 pb-4 items-center flex flex-wrap justify-between w-full text-gray-700 dark:text-gray-400">
+			{#if showHistory === true}
+				<Button size="md" type="button" class="md:w-16 md:h-8" on:click={() => {
+					promise = loadLast();
+				}}><ArrowLeftOutline class="w-4 h-4" /></Button>
+			{/if}
+			<div class="flex flex-col md:flex-row justify-between">
+				{#if relevant_sessionkeys.length=== 0}
+					<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{$_("milestone.noFeedback")}</p>
+				{:else}
+					{#each relevant_sessionkeys as aid}
+						{#if showHistory === true || aid === sessionkeys[0]}
+							<TabItem defaultClass="font-bold m-2 p-2" title={makeTitle(aid)} open={aid === relevant_sessionkeys[0] }>
+
+								{@render summaryEvaluation(aid)}
+
+								<Accordion class="p-2 m-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+									{#each Object.entries(summary[aid]) as [mid, score]}
+										<div class="flex flex-col">
+										<AccordionItem activeClass="flex flex-col m-2 rounded-xl text-white dark:text-white bg-primary-700 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-600 items-center justify-between w-full font-medium text-left" inactiveClass="flex flex-col rounded-xl text-white dark:text-white bg-primary-800 dark:bg-primary-800 hover:bg-primary-700 dark:hover:bg-primary-700  items-center justify-between w-full font-medium text-left m-2">
+											<span slot="header" class="items-center flex justify-center space-x-2">
+												{@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
+											</span>
+											<div class="flex-row justify-between">
+												{#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
+													{@render evaluation(
+														milestoneGroups[aid][Number(mid)].milestones.find((element: any) =>
+														{
+															return element.id === Number(ms_id);
+														}),
+														Number(ms_score),
+														true
+													)}
+													<Hr classHr="mx-2"/>
+												{/each}
+											</div>
+										</AccordionItem>
+										</div>
+									{/each}
+								</Accordion>
+							</TabItem>
+						{/if}
+					{/each}
+				{/if}
+			</div>
+
+			{#if showHistory === true}
+				<Button size="md" type="button" class="md:w-16 md:h-8" on:click={() => {
+					promise = loadNext();
+				}}><ArrowRightOutline class="w-4 h-4" /></Button>
+			{/if}
+		</Tabs>
+
+		<div class="flex items-center justify-center w-full m-2 p-2 mb-4 pb-4">
+			<Button class="md:w-64 md:h-8  m-2 p-2" onclick={() => window.print()}>{$_("milestone.printPage")}</Button>
+		</div>
 	{:catch error}
 		<AlertMessage
 			message = {`${alertMessage} ${error}`}
