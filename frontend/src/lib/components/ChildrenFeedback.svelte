@@ -231,8 +231,8 @@ function makeTitle(aid: number): string {
 
 function scrollToBottom() {
 	window.scrollTo({
-		top: document.body.scrollHeight,
-		behavior: "smooth",
+		top: document.body.scrollHeight * 0.35,
+		behavior: "instant",
 	});
 }
 
