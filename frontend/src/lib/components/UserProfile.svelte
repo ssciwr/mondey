@@ -2,20 +2,20 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { base } from "$app/paths";
+import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { Button, Heading, Popover } from "flowbite-svelte";
-import { _ } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 let { triggeredBy = "" } = $props();
 let showAlert: boolean = $state(false);
-let alertMessage: string = $state($_("login.alertMessageError"));
+let alertMessage: string = $state(i18n.tr.login.alertMessageError);
 </script>
 
 <Popover {triggeredBy} class="text-gray-700 dark:text-gray-400">
 	{#if showAlert}
 		<AlertMessage
-			title={$_("login.alertMessageTitle")}
+			title={i18n.tr.login.alertMessageTitle}
 			message={alertMessage}
 			onclick={() => {
 				showAlert = false;
@@ -34,12 +34,12 @@ let alertMessage: string = $state($_("login.alertMessageError"));
 				size="lg"
 				type="button"
 				href="{base}/userLand/userLandingpage"
-				>{$_("login.profileAccess")}</Button
+				>{i18n.tr.login.profileAccess}</Button
 			>
 			<Button class="m-2 w-full" on:click={async () => {
 				const response = await user.logout();
 				if (response.error) {
-					alertMessage = $_("login.alertMessageError");
+					alertMessage = i18n.tr.login.alertMessageError;
 					showAlert = true;
 				} else {
 					console.log("Logout successful");
@@ -50,7 +50,7 @@ let alertMessage: string = $state($_("login.alertMessageError"));
 				}
 
 			}} size="lg" type="button"
-				>{$_("login.profileButtonLabelLogout")}</Button
+				>{i18n.tr.login.profileButtonLabelLogout}</Button
 			>
 		</div>
 	{:else}
@@ -58,13 +58,13 @@ let alertMessage: string = $state($_("login.alertMessageError"));
 			class="mx-auto mb-6 flex flex-col items-center justify-center space-y-6"
 		>
 			<Heading tag="h3" class="mx-auto flex w-full justify-center"
-				>{$_("login.profileTitleDefault")}</Heading
+				>{i18n.tr.login.profileTitleDefault}</Heading
 			>
 			<Button
 				type="button"
 				class="m-2 w-full"
 				href="{base}/userLand/userLogin"
-				size="lg">{$_("login.profileButtonLabelDefault")}</Button
+				size="lg">{i18n.tr.login.profileButtonLabelDefault}</Button
 			>
 		</div>
 	{/if}

@@ -1,7 +1,7 @@
 <script lang="ts">
+import { i18n } from "$lib/i18n.svelte";
 import { Button } from "flowbite-svelte";
 import { CheckCircleOutline } from "flowbite-svelte-icons";
-import { _ } from "svelte-i18n";
 </script>
 
 <div
@@ -9,7 +9,7 @@ import { _ } from "svelte-i18n";
 >
 	<CheckCircleOutline size="xl" color="green" class="m-2" />
 	<div class="m-2 p-2">
-		{$_('registration.successMessage')}
+		{i18n.tr.registration.successMessage}
 	</div>
 </div>
 <Button
@@ -17,5 +17,5 @@ import { _ } from "svelte-i18n";
 	class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
 	href="/"
 >
-	{$_('registration.goHome')}
+	{i18n.tr.registration.goHome}
 </Button>

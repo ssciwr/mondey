@@ -2,10 +2,14 @@ import datetime
 
 import numpy as np
 import pytest
+from sqlmodel import col
 from sqlmodel import select
 
+from mondey_backend.models.milestones import MilestoneAgeScoreCollection
 from mondey_backend.models.milestones import MilestoneAnswer
+from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroup
+from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
 from mondey_backend.routers.statistics import _add_sample
 from mondey_backend.routers.statistics import _finalize_statistics
 from mondey_backend.routers.statistics import _get_statistics_by_age
@@ -200,6 +204,23 @@ def test_get_score_statistics_by_age_no_data(statistics_session):
 
 
 def test_calculate_milestone_statistics_by_age(statistics_session):
+    expiration_date = datetime.datetime.now() - datetime.timedelta(days=7)
+    answers_query = (
+        select(MilestoneAnswer)
+        .join(
+            MilestoneAnswerSession,
+            col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
+        )
+        .where(MilestoneAnswer.milestone_id == 1)
+        .where(~col(MilestoneAnswer.included_in_milestone_statistics))
+        .where(col(MilestoneAnswerSession.created_at) <= expiration_date)
+    )
+
+    # originally, the relevant answers have not been integrated into the statistics yet
+    all_answers = statistics_session.exec(answers_query).all()
+    for answer in all_answers:
+        assert answer.included_in_milestone_statistics is False
+
     # calculate_milestone_statistics_by_age
     mscore = calculate_milestone_statistics_by_age(statistics_session, 1)
 
@@ -224,8 +245,46 @@ def test_calculate_milestone_statistics_by_age(statistics_session):
         else:
             assert mscore.scores[age].expected_score == 4
 
+    # all answers for milestone 1 are now included into the answersesssion
+    # if they come from expired milestonesessions
+
+    all_answers = statistics_session.exec(answers_query).all()
+    for answer in all_answers:
+        assert answer.included_in_milestone_statistics is True
+
+    # the new result is not written into the database, so in order to check
+    # that data is not taken into account twice, we need to check against the
+    # old result, not the new one.
+    old = statistics_session.get(MilestoneAgeScoreCollection, 1)
+
+    mscore2 = calculate_milestone_statistics_by_age(statistics_session, 1)
+    for s1, s2 in zip(mscore2.scores, old.scores, strict=True):
+        assert s1.age == s2.age
+        assert s1.count == s2.count
+        assert np.isclose(s1.avg_score, s2.avg_score)
+        assert np.isclose(s1.stddev_score, s2.stddev_score)
+        assert np.isclose(s1.expected_score, s2.expected_score)
+
 
 def test_calculate_milestonegroup_statistics(statistics_session):
+    expiration_date = datetime.datetime.now() - datetime.timedelta(days=7)
+
+    answer_query = (
+        select(MilestoneAnswer)
+        .join(
+            MilestoneAnswerSession,
+            col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
+        )
+        .where(MilestoneAnswer.milestone_group_id == 1)
+        .where(~col(MilestoneAnswer.included_in_milestonegroup_statistics))
+        .where(MilestoneAnswerSession.created_at <= expiration_date)
+    )
+
+    all_answers = statistics_session.exec(answer_query).all()
+    for answer in all_answers:
+        print(answer)
+        assert answer.included_in_milestonegroup_statistics is False
+
     milestone_group = statistics_session.exec(
         select(MilestoneGroup).where(MilestoneGroup.id == 1)
     ).first()
@@ -273,3 +332,21 @@ def test_calculate_milestonegroup_statistics(statistics_session):
             assert score.scores[age].count == 0
         if age > 12:
             assert np.isclose(score.scores[age].avg_score, 3.0)
+
+    # check that calling the statistics anew with already integrated answers doesn´t change anything.
+    # we need to check against the old result, not the new one because this is not written into the database
+    all_answers = statistics_session.exec(answer_query).all()
+    for answer in all_answers:
+        assert answer.included_in_milestonegroup_statistics is True
+
+    old_stats = statistics_session.get(MilestoneGroupAgeScoreCollection, 1)
+    new_stats = calculate_milestonegroup_statistics_by_age(
+        statistics_session,
+        milestone_group.id,
+    )
+    for new_score, old_score in zip(new_stats.scores, old_stats.scores, strict=True):
+        assert new_score.age == old_score.age
+        assert new_score.count == old_score.count
+        assert np.isclose(new_score.avg_score, old_score.avg_score)
+        assert np.isclose(new_score.stddev_score, old_score.stddev_score)
+        assert new_score.milestone_group_id == old_score.milestone_group_id

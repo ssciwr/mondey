@@ -11,6 +11,7 @@ import {
 	getSummaryFeedbackForAnswersession,
 } from "$lib/client";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren } from "$lib/stores/componentStore";
 import { user } from "$lib/stores/userStore.svelte";
@@ -36,12 +37,11 @@ import {
 	ExclamationCircleSolid,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
-import { _, locale } from "svelte-i18n";
 import AlertMessage from "./AlertMessage.svelte";
 
 let showAlert = $state(false);
 let alertMessage = $state(
-	$_("childData.alertMessageError") as string | ValidationError[] | undefined,
+	i18n.tr.childData.alertMessageError as string | ValidationError[] | undefined,
 );
 
 let milestoneGroups = $state(
@@ -60,22 +60,22 @@ let relevant_sessionkeys = $state([] as number[]);
 let milestonePresentation = $state([
 	{
 		icon: CheckCircleSolid,
-		text: $_("milestone.recommendOk"),
-		short: $_("milestone.recommendOkShort"),
+		text: i18n.tr.milestone.recommendOk,
+		short: i18n.tr.milestone.recommendOkShort,
 		class: "text-feedback-0 w-16",
 		showExplanation: false,
 	},
 	{
 		icon: ExclamationCircleSolid,
-		text: $_("milestone.recommendWatch"),
-		short: $_("milestone.recommendWatchShort"),
+		text: i18n.tr.milestone.recommendWatch,
+		short: i18n.tr.milestone.recommendWatchShort,
 		class: "text-feedback-1 w-16",
 		showExplanation: false,
 	},
 	{
 		icon: CloseCircleSolid,
-		text: $_("milestone.recommmendHelp"),
-		short: $_("milestone.recommendHelpShort"),
+		text: i18n.tr.milestone.recommmendHelp,
+		short: i18n.tr.milestone.recommendHelpShort,
 		class: "text-feedback-2 w-16 ",
 		showExplanation: false,
 	},
@@ -89,7 +89,7 @@ const breadcrumbdata: any[] = [
 		symbol: UserSettingsOutline,
 	},
 	{
-		label: $_("milestone.feedbackTitle"),
+		label: i18n.tr.milestone.feedbackTitle,
 		onclick: () => {
 			activeTabChildren.set("childrenFeedback");
 		},
@@ -213,13 +213,13 @@ async function loadNext() {
 function generateReport(): string {
 	let report = "";
 	// add title
-	report += `<h1>${$_("milestone.reportTitle")}</h1>\n\n`;
+	report += `<h1>${i18n.tr.milestone.reportTitle}</h1>\n\n`;
 	// add today's date
-	report += `${$_("milestone.date")}: ${new Date().toLocaleDateString()} \n\n`;
+	report += `${i18n.tr.milestone.date}: ${new Date().toLocaleDateString()} \n\n`;
 
 	// add name and age of child in the beginning
-	report += `${$_("milestone.child")}: ${currentChild.name}\n`;
-	report += `${$_("milestone.born")}: ${currentChild.month}/${currentChild.year} \n\n`;
+	report += `${i18n.tr.milestone.child}: ${currentChild.name}\n`;
+	report += `${i18n.tr.milestone.born}: ${currentChild.month}/${currentChild.year} \n\n`;
 
 	// iterate over all answersessions
 
@@ -227,22 +227,22 @@ function generateReport(): string {
 		// aid : value
 
 		const min = Math.min(...(Object.values(values) as number[]));
-		report += `<h2>${$_("milestone.timeperiod")}: ${makeTitle(Number(aid))}</h2> \n`;
-		report += `<strong>${$_("milestone.summaryScore")}:</strong> ${min === 1 ? $_("milestone.recommendOk") : min === 0 ? $_("milestone.recommendWatch") : min === -1 ? $_("milestone.recommmendHelp") : $_("milestone.notEnoughDataYet")} \n\n`;
+		report += `<h2>${i18n.tr.milestone.timeperiod}: ${makeTitle(Number(aid))}</h2> \n`;
+		report += `<strong>${i18n.tr.milestone.summaryScore}:</strong> ${min === 1 ? i18n.tr.milestone.recommendOk : min === 0 ? i18n.tr.milestone.recommendWatch : min === -1 ? i18n.tr.milestone.recommmendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
 
 		for (let [mid, score] of Object.entries(values)) {
 			// mid : score
-			report += `<h3>  ${milestoneGroups[aid][Number(mid)].text[$locale as string].title}</h3>`;
-			report += `    ${score === 1 ? $_("milestone.recommendOkMs") : score === 0 ? $_("milestone.recommendWatchMs") : score === -1 ? $_("milestone.recommmendHelp") : $_("milestone.notEnoughDataYet")} \n\n`;
+			report += `<h3>  ${milestoneGroups[aid][Number(mid)].text[i18n.locale].title}</h3>`;
+			report += `    ${score === 1 ? i18n.tr.milestone.recommendOkMs : score === 0 ? i18n.tr.milestone.recommendWatchMs : score === -1 ? i18n.tr.milestone.recommmendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
 
 			for (let [ms_id, ms_score] of Object.entries(detailed[aid][mid])) {
 				// ms_id : ms_score
 				report += `    <strong>${
 					milestoneGroups[aid][Number(mid)].milestones.find((element: any) => {
 						return element.id === Number(ms_id);
-					}).text[$locale as string].title
+					}).text[i18n.locale].title
 				}:</strong>`;
-				report += ` ${ms_score === 1 ? $_("milestone.recommendOkShort") : ms_score === 0 ? $_("milestone.recommendWatchShort") : ms_score === -1 ? $_("milestone.recommendHelpShort") : $_("milestone.notEnoughDataYet")} \n`;
+				report += ` ${ms_score === 1 ? i18n.tr.milestone.recommendOkShort : ms_score === 0 ? i18n.tr.milestone.recommendWatchShort : ms_score === -1 ? i18n.tr.milestone.recommendHelpShort : i18n.tr.milestone.notEnoughDataYet} \n`;
 			}
 		}
 
@@ -274,7 +274,7 @@ function formatDate(date: string): string {
 
 function makeTitle(aid: number): string {
 	return aid === sessionkeys[0]
-		? $_("milestone.current")
+		? i18n.tr.milestone.current
 		: formatDate(answerSessions[aid].created_at);
 }
 
@@ -301,20 +301,20 @@ let promise = $state(setup());
 	<div class="flex flex-col md:flex-row items-center justify-center w-full m-2 p-2 text-gray-700 dark:text-gray-400">
 		{#if Math.min(...(Object.values(summary[aid]) as number[])) === 1}
 			<CheckCircleSolid  size="xl" class="text-feedback-0 mr-2 pr-2"/>
-			<span class="font-bold mx-2 px-2 items-center justify-center">{$_("milestone.summaryScore")}</span>
-			{$_("milestone.recommendOk")}
+			<span class="font-bold mx-2 px-2 items-center justify-center">{i18n.tr.milestone.summaryScore}</span>
+			{i18n.tr.milestone.recommendOk}
 		{:else if Math.min(...(Object.values(summary[aid]) as number[])) === 0}
 			<BellActiveSolid size="xl" class="text-feedback-1 mr-2 pr-2"/>
-			<span class="font-bold mx-2 px-2 items-center justify-center">{$_("milestone.summaryScore")}</span>
-			{$_("milestone.recommendWatch")}
+			<span class="font-bold mx-2 px-2 items-center justify-center">{i18n.tr.milestone.summaryScore}</span>
+			{i18n.tr.milestone.recommendWatch}
 		{:else if Math.min(...(Object.values(summary[aid]) as number[])) === -1}
 			<CloseCircleSolid size="xl" class="text-feedback-2 mr-2 pr-2"/>
-			<span class="font-bold mx-2 px-2 items-center justify-center"> {$_("milestone.summaryScore")}</span>
-			{$_("milestone.recommmendHelp")}
+			<span class="font-bold mx-2 px-2 items-center justify-center"> {i18n.tr.milestone.summaryScore}</span>
+			{i18n.tr.milestone.recommmendHelp}
 		{:else}
 			<CloseCircleSolid size="xl" color = "gray" />
-			<span class="font-bold mx-2 px-2 items-center justify-center">{$_("milestone.summaryScore")}</span>
-			{$_("milestone.notEnoughDataYet")}
+			<span class="font-bold mx-2 px-2 items-center justify-center">{i18n.tr.milestone.summaryScore}</span>
+			{i18n.tr.milestone.notEnoughDataYet}
 		{/if}
 	</div>
 <Hr classHr="mx-2"/>
@@ -328,7 +328,7 @@ let promise = $state(setup());
 			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 				<CheckCircleSolid  size="xl" class="text-feedback-0"/>
 				<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-400": ""}`} >
-					{milestone_or_group?.text[$locale as string].title}
+					{milestone_or_group?.text[i18n.locale].title}
 				</span>
 				<Hr class="mx-2"/>
 			</div>
@@ -336,7 +336,7 @@ let promise = $state(setup());
 			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 				<BellActiveSolid size="xl" class="text-feedback-1"/>
 				<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-400": ""}`} >
-					{milestone_or_group?.text[$locale as string].title}
+					{milestone_or_group?.text[i18n.locale].title}
 				</span>
 				<Hr class="mx-2"/>
 			</div>
@@ -344,9 +344,9 @@ let promise = $state(setup());
 				<span class =  "ml-auto mt-4">
 					<Button id="b1" onclick={()=>{
 						showHelp= true;
-					}}>{$_("milestone.help")}</Button>
-					<Modal class = "m-2 p-2" title={$_("milestone.help")} bind:open={showHelp} dismissable={true}>
-						{milestone_or_group?.text[$locale as string].help}
+					}}>{i18n.tr.milestone.help}</Button>
+					<Modal class = "m-2 p-2" title={i18n.tr.milestone.help} bind:open={showHelp} dismissable={true}>
+						{milestone_or_group?.text[i18n.locale].help}
 					</Modal>
 				</span>
 			{/if}
@@ -354,7 +354,7 @@ let promise = $state(setup());
 			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 				<CloseCircleSolid size="xl" class="text-feedback-2"/>
 				<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-400": ""}`} >
-					{milestone_or_group?.text[$locale as string].title}
+					{milestone_or_group?.text[i18n.locale].title}
 				</span>
 				<Hr class="mx-2"/>
 			</div>
@@ -362,10 +362,9 @@ let promise = $state(setup());
 				<span class =  "ml-auto mt-4">
 					<Button id="b1" onclick={()=>{
 						showHelp= true;
-					}}>{$_("milestone.help")}</Button>
-
-					<Modal class = "m-2 p-2" title={$_("milestone.help")} bind:open={showHelp} dismissable={true}>
-						{milestone_or_group?.text[$locale as string].help}
+					}}>{i18n.tr.milestone.help}</Button>
+					<Modal class = "m-2 p-2" title={i18n.tr.milestone.help} bind:open={showHelp} dismissable={true}>
+						{milestone_or_group?.text[i18n.locale].help}
 					</Modal>
 				</span>
 			{/if}
@@ -373,7 +372,7 @@ let promise = $state(setup());
 		<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 			<CloseCircleSolid color = "gray" size="xl"/>
 			<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-400": ""}`} >
-				{milestone_or_group?.text[$locale as string].title}
+				{milestone_or_group?.text[i18n.locale].title}
 			</span>
 			<Hr class="mx-2"/>
 		</div>
@@ -388,29 +387,29 @@ let promise = $state(setup());
 {#if showAlert}
 	<AlertMessage
 		message = {alertMessage}
-		title = {$_("childData.alertMessageTitle")}
+		title = {i18n.tr.childData.alertMessageTitle}
 	/>
 {:else}
 	{#await promise}
 		<div class = "flex justify-center items-center space-x-2">
-			<Spinner /> <p>{$_("childData.loadingMessage")}</p>
+			<Spinner /> <p>{i18n.tr.childData.loadingMessage}</p>
 		</div>
 	{:then}
 
-		<Heading tag="h2" class = "text-gray-700 dark:text-gray-400 items-center p-2 m-2 pb-4">{$_("milestone.feedbackTitle")} </Heading>
+		<Heading tag="h2" class = "text-gray-700 dark:text-gray-400 items-center p-2 m-2 pb-4">{i18n.tr.milestone.feedbackTitle} </Heading>
 
 		<div class ="m-2 p-2 pb-4 ">
-			<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md">{$_("milestone.feedbackExplanation")}</p>
+			<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md">{i18n.tr.milestone.feedbackExplanation}</p>
 
-			<Modal class = "m-2 p-2" classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-400" title={$_("milestone.info")} bind:open={showMoreInfo} dismissable={true}>
-				<p class ="text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md">{$_("milestone.feedbackExplanationDetailed")}</p>
-				<p class ="text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md">{$_("milestone.feedbackDetailsMilestoneGroup")}</p>
-				<p class ="text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md" >{$_("milestone.feedbackDetailsMilestone")}</p>
+			<Modal class = "m-2 p-2" classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-400" title={i18n.tr.milestone.info} bind:open={showMoreInfo} dismissable={true}>
+				<p class ="text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md">{i18n.tr.milestone.feedbackExplanationDetailed}</p>
+				<p class ="text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md">{i18n.tr.milestone.feedbackDetailsMilestoneGroup}</p>
+				<p class ="text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md" >{i18n.tr.milestone.feedbackDetailsMilestone}</p>
 			</Modal>
 
 			<Accordion class="p-2 m-2 w-full">
 				<AccordionItem >
-					<span slot="header" class="text-gray-700 dark:text-gray-400">{$_("milestone.legend")}</span>
+					<span slot="header" class="text-gray-700 dark:text-gray-400">{i18n.tr.milestone.legend}</span>
 					<div class="w-full flex flex-col md:flex-row items-center justify-start">
 					{#each milestonePresentation as milestone}
 						<div class="text-gray-700 dark:text-gray-400 flex flex-col md:flex-row font-medium text-sm md:text-md items-center justify-start m-2 p-2">
@@ -419,7 +418,7 @@ let promise = $state(setup());
 
 							<span class="font-bold justify-center mr-auto pr-auto">{milestone.short}</span>
 
-							<Button class="m-2 p-2 md:w-24 justify-center" onclick={() => {milestone.showExplanation=true;}}>{$_("milestone.moreInfoOnLegend")}</Button>
+							<Button class="m-2 p-2 md:w-24 justify-center" onclick={() => {milestone.showExplanation=true;}}>{i18n.tr.milestone.moreInfoOnLegend}</Button>
 						</div>
 						<Modal class = "m-2 p-2" classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-400" bind:open={milestone.showExplanation} dismissable={true} title={milestone.short}>
 							{milestone.text}
@@ -432,7 +431,7 @@ let promise = $state(setup());
 			<div class="flex items-center justify-start w-full m-2 p-2">
 				<Button class = "m-2 p-2 pb-4 mb-4 items-center justify-center md:w-1/6 w-5/6" onclick = {() => {
 					showMoreInfo = true;
-				}}>{$_("milestone.moreInfoOnEval")}
+				}}>{i18n.tr.milestone.moreInfoOnEval}
 				</Button>
 			</div>
 		</div>
@@ -441,9 +440,9 @@ let promise = $state(setup());
 
 		<div class ="m-2 p-2 pb-4 ">
 
-			<p class = "justify-center font-bold m-2 p-2 text-gray-700 dark:text-gray-400">{$_("milestone.selectFeedback")}</p>
+			<p class = "justify-center font-bold m-2 p-2 text-gray-700 dark:text-gray-400">{i18n.tr.milestone.selectFeedback}</p>
 
-			<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory} >{$_("milestone.showHistory")}</Checkbox>
+			<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory} >{i18n.tr.milestone.showHistory}</Checkbox>
 
 			<Hr classHr= "mx-2"/>
 		</div>
@@ -457,7 +456,7 @@ let promise = $state(setup());
 			{/if}
 			<div class="flex flex-col md:flex-row justify-between">
 				{#if relevant_sessionkeys.length=== 0}
-					<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{$_("milestone.noFeedback")}</p>
+					<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{i18n.tr.milestone.noFeedback}</p>
 				{:else}
 					{#each relevant_sessionkeys as aid}
 						{#if showHistory === true || aid === sessionkeys[0]}
@@ -502,12 +501,12 @@ let promise = $state(setup());
 		</Tabs>
 
 		<div class="flex items-center justify-start w-full m-2 p-2 mb-4 pb-4">
-			<Button class="md:w-64 md:h-8  m-2 p-2" onclick={printReport}>{$_("milestone.printReport")}</Button>
+			<Button class="md:w-64 md:h-8  m-2 p-2" onclick={printReport}>{i18n.tr.milestone.printReport}</Button>
 		</div>
 	{:catch error}
 		<AlertMessage
 			message = {`${alertMessage} ${error}`}
-			title = {$_("childData.alertMessageTitle")}
+			title = {i18n.tr.childData.alertMessageTitle}
 		/>
 	{/await}
 {/if}

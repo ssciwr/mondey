@@ -7,13 +7,14 @@ import {
 	updateMilestone,
 	uploadMilestoneImage,
 } from "$lib/client/services.gen";
-import type { MilestoneAdmin } from "$lib/client/types.gen";
+import type { MilestoneAdmin, MilestoneText } from "$lib/client/types.gen";
 import CancelButton from "$lib/components/Admin/CancelButton.svelte";
 import DeleteModal from "$lib/components/Admin/DeleteModal.svelte";
 import EditImage from "$lib/components/Admin/EditImage.svelte";
 import MilestoneExpectedAgeModal from "$lib/components/Admin/MilestoneExpectedAgeModal.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import {
 	Button,
 	ButtonGroup,
@@ -23,7 +24,6 @@ import {
 	Range,
 	Textarea,
 } from "flowbite-svelte";
-import { _, locales } from "svelte-i18n";
 
 let {
 	open = $bindable(false),
@@ -35,7 +35,9 @@ let currentMilestoneImageId: number | null = $state(null as number | null);
 let showDeleteMilestoneImageModal: boolean = $state(false);
 let showMilestoneExpectedAgeModal: boolean = $state(false);
 
-const textKeys = ["title", "desc", "obs", "help"];
+const textKeys = ["title", "desc", "obs", "help"] as Array<
+	keyof typeof i18n.tr.admin & keyof MilestoneText
+>;
 
 async function saveChanges() {
 	if (!milestone) {
@@ -75,13 +77,13 @@ async function deleteMilestoneImageAndUpdate() {
 }
 </script>
 
-<Modal title={$_('admin.edit')} bind:open size="xl" outsideclose>
+<Modal title={i18n.tr.admin.edit} bind:open size="xl" outsideclose>
     {#if milestone}
         {#each textKeys as textKey}
-            {@const title = $_(`admin.${textKey}`)}
+            {@const title = i18n.tr.admin[textKey]}
             <div class="mb-5">
                 <Label class="mb-2">{title}</Label>
-                {#each $locales as lang_id}
+                {#each i18n.locales as lang_id}
                     <div class="mb-1">
                         <ButtonGroup class="w-full">
                             <InputAddon>{lang_id}</InputAddon>
@@ -92,12 +94,12 @@ async function deleteMilestoneImageAndUpdate() {
             </div>
         {/each}
         <div class="mb-5">
-            <Label>{`${$_("admin.expected-age")}: ${milestone.expected_age_months}m`}</Label>
-            <Range id="expected-age-months" min="1" max="72" bind:value={milestone.expected_age_months}/>
+            <Label>{`${i18n.tr.admin.expectedAge}: ${milestone.expected_age_months}m`}</Label>
+            <Range id="expectedAge-months" min="1" max="72" bind:value={milestone.expected_age_months}/>
             <Button onclick={() => {showMilestoneExpectedAgeModal = true;}}>View data</Button>
         </div>
         <div class="mb-5">
-            <Label for="img_upload" class="pb-2">{$_('admin.images')}</Label>
+            <Label for="img_upload" class="pb-2">{i18n.tr.admin.images}</Label>
             <div class="flex flex-row">
                 {#each milestone.images as milestoneImage (milestoneImage.id)}
                     <EditImage

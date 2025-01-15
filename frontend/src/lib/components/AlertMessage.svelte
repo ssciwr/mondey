@@ -1,8 +1,8 @@
 <svelte:options runes={true} />
 <script lang='ts'>
+import { i18n } from "$lib/i18n.svelte";
 import { Alert, Button } from "flowbite-svelte";
 import { EyeSolid, InfoCircleSolid } from "flowbite-svelte-icons";
-import { _ } from "svelte-i18n";
 
 let {
 	message = "",
@@ -33,6 +33,6 @@ let {
 		{#if infopage != ''}
 			<Button size="md" href={infopage}><EyeSolid class="me-2 h-4 w-4" />{infotitle}</Button>
 		{/if}
-		<Button size="md" outline href={lastpage} on:click={onclick}>{$_("misc.understood")}</Button>
+		<Button size="md" outline href={lastpage} on:click={onclick}>{i18n.tr.misc.understood}</Button>
 	</div>
 </Alert>

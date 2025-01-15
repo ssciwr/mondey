@@ -4,9 +4,9 @@ import { type RegisterRegisterData } from "$lib/client/types.gen";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import ResearchCodeInput from "$lib/components/DataInput/ResearchCodeInput.svelte";
 import UserVerify from "$lib/components/UserVerify.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
-import { _ } from "svelte-i18n";
 
 async function submitData(): Promise<void> {
 	const userData: RegisterRegisterData = {
@@ -21,7 +21,7 @@ async function submitData(): Promise<void> {
 
 	if (result.error) {
 		console.log("error: ", result.response.status, result.error.detail);
-		alertMessage = `${$_("registration.alertMessageError")}: ${result.error.detail}`;
+		alertMessage = `${i18n.tr.registration.alertMessageError}: ${result.error.detail}`;
 		showAlert = true;
 	} else {
 		console.log("successful transmission: ", result.response.status);
@@ -34,7 +34,7 @@ let password = $state("");
 let passwordConfirm = $state("");
 let showAlert = $state(false);
 let success = $state(false);
-let alertMessage = $state($_("registration.alertMessageMissing"));
+let alertMessage = $state(i18n.tr.registration.alertMessageMissing);
 let researchCodeValid = $state(false);
 let passwordValid = $derived(password !== "" && password === passwordConfirm);
 
@@ -44,7 +44,7 @@ let { researchCode = "" }: { researchCode?: string } = $props();
 <!-- Show big alert message when something is missing -->
 {#if showAlert}
 	<AlertMessage
-		title={$_("registration.alertMessageTitle")}
+		title={i18n.tr.registration.alertMessageTitle}
 		message={alertMessage}
 		infotitle="Was passiert mit den Daten"
 		onclick={() => {
@@ -58,7 +58,7 @@ let { researchCode = "" }: { researchCode?: string } = $props();
 	<Heading
 		tag="h3"
 		class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-		>{$_("registration.heading")}
+		>{i18n.tr.registration.heading}
 	</Heading>
 
 	{#if success === false}
@@ -69,7 +69,7 @@ let { researchCode = "" }: { researchCode?: string } = $props();
 			<Label
 				for={"username"}
 				class="font-semibold text-gray-700 dark:text-gray-400"
-				>{$_("registration.emailLabel")}</Label
+				>{i18n.tr.registration.emailLabel}</Label
 			>
 			<div class="space-y-4">
 				<Input
@@ -78,14 +78,14 @@ let { researchCode = "" }: { researchCode?: string } = $props();
 					type="email"
 					id="email"
 					autocomplete="email"
-					placeholder={$_("registration.emailLabel")}
+					placeholder={i18n.tr.registration.emailLabel}
 				/>
 			</div>
 
 			<Label
 				for={"password"}
 				class="font-semibold text-gray-700 dark:text-gray-400"
-				>{$_("registration.passwordLabel")}</Label
+				>{i18n.tr.registration.passwordLabel}</Label
 			>
 			<div class="space-y-4">
 				<Input
@@ -94,14 +94,14 @@ let { researchCode = "" }: { researchCode?: string } = $props();
 					type="password"
 					id="password"
 					autocomplete="new-password"
-					placeholder={$_("registration.passwordLabel")}
+					placeholder={i18n.tr.registration.passwordLabel}
 				/>
 			</div>
 
 			<Label
 				for={"password_confirm"}
 				class="font-semibold text-gray-700 dark:text-gray-400"
-				>{$_("registration.passwordConfirmLabel")}</Label
+				>{i18n.tr.registration.passwordConfirmLabel}</Label
 			>
 			<div class="space-y-4">
 				<Input
@@ -110,19 +110,19 @@ let { researchCode = "" }: { researchCode?: string } = $props();
 					type="password"
 					id="passwordConfirm"
 					autocomplete="new-password"
-					placeholder={$_("registration.passwordConfirmLabel")}
+					placeholder={i18n.tr.registration.passwordConfirmLabel}
 					color={passwordConfirm === password ? 'base' : 'red'}
 				/>
 			</div>
 
-			<Label class="font-semibold text-gray-700 dark:text-gray-400">{$_("registration.researchCode")}</Label>
+			<Label class="font-semibold text-gray-700 dark:text-gray-400">{i18n.tr.registration.researchCode}</Label>
 			<ResearchCodeInput bind:value={researchCode} bind:valid={researchCodeValid}></ResearchCodeInput>
 
 			<Button
 				type="submit"
 				disabled={!(researchCodeValid && passwordValid)}
 				class="dark:bg-primary-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
-				>{$_("registration.submitButtonLabel")}</Button
+				>{i18n.tr.registration.submitButtonLabel}</Button
 			>
 		</form>
 	{:else}

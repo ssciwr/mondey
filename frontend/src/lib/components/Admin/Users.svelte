@@ -21,8 +21,8 @@ import {
 	usersPatchUser,
 } from "$lib/client/services.gen";
 import type { UserRead } from "$lib/client/types.gen";
+import { i18n } from "$lib/i18n.svelte";
 import { onMount } from "svelte";
-import { _ } from "svelte-i18n";
 
 let users = $state([] as Array<UserRead>);
 let saveDisabled = $state({} as Record<string, boolean>);
@@ -79,7 +79,7 @@ onMount(async () => {
 
 <Card size="xl" class="m-5 w-full">
 	<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">
-		{$_("admin.users")}
+		{i18n.tr.admin.users}
 	</h3>
 	<Table>
 		<TableHead>
@@ -90,7 +90,7 @@ onMount(async () => {
 			<TableHeadCell>Full data access</TableHeadCell>
 			<TableHeadCell>Research Code</TableHeadCell>
 			<TableHeadCell>Admin</TableHeadCell>
-			<TableHeadCell>{$_('admin.actions')}</TableHeadCell>
+			<TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
 		</TableHead>
 		<TableBody>
 			{#each users as user (user.id)}

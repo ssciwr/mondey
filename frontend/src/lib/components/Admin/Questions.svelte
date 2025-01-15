@@ -31,9 +31,9 @@ import EditButton from "$lib/components/Admin/EditButton.svelte";
 import EditQuestionModal from "$lib/components/Admin/EditQuestionModal.svelte";
 import OrderItemsModal from "$lib/components/Admin/OrderItemsModal.svelte";
 import ReorderButton from "$lib/components/Admin/ReorderButton.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { childQuestions, userQuestions } from "$lib/stores/adminStore";
 import { onMount } from "svelte";
-import { _, locale } from "svelte-i18n";
 import type { Writable } from "svelte/store";
 import AlertMessage from "../AlertMessage.svelte";
 
@@ -112,29 +112,29 @@ onMount(async () => {
 });
 </script>
 
-{#if $locale}
+{#if i18n.locale}
 <Card size="xl" class="m-5 w-full">
 	<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">
-		{$_(`admin.${kind}-questions`)}
+		{i18n.tr.admin[`${kind}Questions`]}
 	</h3>
 	<Table>
 		<TableHead>
 			<TableHeadCell>Question</TableHeadCell>
 			<TableHeadCell>Input type</TableHeadCell>
 			<TableHeadCell>Options</TableHeadCell>
-			<TableHeadCell>{$_('admin.actions')}</TableHeadCell>
+			<TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
 		</TableHead>
 		<TableBody>
 			{#each $questions as question, groupIndex (question.id)}
 				<TableBodyRow>
 					<TableBodyCell>
-						{question?.text[$locale]?.question}
+						{question?.text[i18n.locale]?.question}
 					</TableBodyCell>
 					<TableBodyCell>
 						{question?.component}
 					</TableBodyCell>
 					<TableBodyCell>
-						{question?.text[$locale]?.options}
+						{question?.text[i18n.locale]?.options}
 					</TableBodyCell>
 					<TableBodyCell>
 						<EditButton
@@ -160,7 +160,7 @@ onMount(async () => {
 					<AddButton onclick={addQuestion} />
 					<ReorderButton
 						onclick={() => {
-							currentOrderItems = $questions.map((question) => {return {id: question.id, text: question.text[$locale]?.question};});
+							currentOrderItems = $questions.map((question) => {return {id: question.id, text: question.text[i18n.locale]?.question};});
 							showOrderItemsModal = true;
 						}}
 					/>
@@ -181,5 +181,5 @@ onMount(async () => {
 
 <OrderItemsModal bind:open={showOrderItemsModal} items={currentOrderItems} endpoint={order} callback={refresh}/>
 {:else}
-	<AlertMessage title={$_("userData.alertMessageTitle")} message={$_("userData.alertMessageError")} />
+	<AlertMessage title={i18n.tr.userData.alertMessageTitle} message={i18n.tr.userData.alertMessageError} />
 {/if}

@@ -12,10 +12,10 @@ import {
 } from "$lib/client/types.gen";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading } from "flowbite-svelte";
-import { _, locale } from "svelte-i18n";
 
 async function submitData() {
 	const response = await updateCurrentUserAnswers({
@@ -27,7 +27,7 @@ async function submitData() {
 			"Error when sending user question answers: ",
 			response.error.detail,
 		);
-		alertMessage = $_("userData.alertMessageError");
+		alertMessage = i18n.tr.userData.alertMessageError;
 		showAlert = true;
 	} else {
 		// disable all elements to make editing a conscious choice
@@ -45,7 +45,7 @@ async function setup() {
 			userQuestions.error.detail,
 		);
 		showAlert = true;
-		alertMessage = $_("userData.alertMessageError");
+		alertMessage = i18n.tr.userData.alertMessageError;
 	} else {
 		questionnaire = userQuestions.data;
 	}
@@ -59,7 +59,7 @@ async function setup() {
 		);
 
 		showAlert = true;
-		alertMessage = $_("userData.alertMessageError");
+		alertMessage = i18n.tr.userData.alertMessageError;
 	} else {
 		// make map of question_id => answer. Don´t rely on questions and
 		// answers being aligned
@@ -93,14 +93,14 @@ let questionnaire: GetUserQuestionsResponse = $state(
 let answers: { [k: string]: UserAnswerPublic } = $state({});
 let showAlert: boolean = $state(false);
 let disableEdit: boolean = $state(false);
-let alertMessage: string = $state($_("userData.alertMessageMissing"));
+let alertMessage: string = $state(i18n.tr.userData.alertMessageMissing);
 let promise = $state(setup());
 </script>
 
 <!-- Show big alert message when something is missing -->
 {#if showAlert}
 	<AlertMessage
-		title={$_("userData.alertMessageTitle")}
+		title={i18n.tr.userData.alertMessageTitle}
 		message={alertMessage}
 		onclick={() => {
 			showAlert = false;
@@ -109,16 +109,15 @@ let promise = $state(setup());
 {/if}
 
 <!-- The actual content -->
-{#if $locale}
 	{#await promise}
-		<p>{$_("userData.loadingMessage")}</p>
+		<p>{i18n.tr.userData.loadingMessage}</p>
 	{:then { questionnaire, answers }}
 		<div class="container m-1 mx-auto w-full max-w-xl">
 			<Card class="container m-1 mx-auto w-full max-w-xl">
 				<Heading
 					tag="h3"
 					class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-					>{$_("userData.heading")}</Heading
+					>{i18n.tr.userData.heading}</Heading
 				>
 				<form
 					class="m-1 mx-auto w-full flex-col space-y-6"
@@ -131,12 +130,12 @@ let promise = $state(setup());
 							bind:value={answers[element.id].answer}
 							bind:additionalValue={answers[element.id]
 								.additional_answer}
-							label={element?.text[$locale].question}
+							label={element?.text[i18n.locale].question}
 							textTrigger={element.additional_option}
 							required={true}
 							additionalRequired={true}
 							id={"input_" + String(i)}
-							items={element.text[$locale].options_json === "" ? null : JSON.parse(element.text[$locale].options_json)}
+							items={element.text[i18n.locale].options_json === "" ? null : JSON.parse(element.text[i18n.locale].options_json)}
 							disabled={disableEdit}
 						/>
 						{/if}
@@ -150,13 +149,13 @@ let promise = $state(setup());
 							}}
 						>
 							<div class="flex items-center justify-center">
-								{$_("userData.changeData")}
+								{i18n.tr.userData.changeData}
 							</div>
 						</Button>
 					{:else}
 						<Button
 							class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
-							type="submit">{$_("userData.submitButtonLabel")}</Button
+							type="submit">{i18n.tr.userData.submitButtonLabel}</Button
 						>
 					{/if}
 				</form>
@@ -164,19 +163,10 @@ let promise = $state(setup());
 		</div>
 	{:catch error}
 		<AlertMessage
-			title={$_("userData.alertMessageTitle")}
+			title={i18n.tr.userData.alertMessageTitle}
 			message={error.message}
 			onclick={() => {
 				showAlert = false;
 			}}
 		/>
 	{/await}
-{:else}
-	<AlertMessage
-		title={$_("userData.alertMessageTitle")}
-		message={$_("userData.alertMessageError")}
-		onclick={() => {
-			showAlert = false;
-		}}
-	/>
-{/if}
