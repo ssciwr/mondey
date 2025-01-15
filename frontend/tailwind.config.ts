@@ -57,6 +57,9 @@ export default {
 					1: "#FFCA67",
 					2: "#E9715F",
 				},
+				"feedback-background": {
+					0: "#f3ddb0",
+				},
 			},
 			fontSize: {
 				xs: ".75rem",

@@ -270,7 +270,7 @@ let promise = $state(setup());
 
 
 {#snippet evaluation( milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, value: number, isMilestone: boolean,)}
-	<div class=" space-x-2 space-y-4 p-2 m-2 flex flex-col">
+	<div class={`rounded-lg space-x-2 space-y-4 p-2 m-2 flex flex-col ${(value === 0 || value === -1) && isMilestone=== true ? "bg-feedback-background-0" : ""}`}>
 		{#if value === 1}
 			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 				<CheckCircleSolid  size="xl" class="text-feedback-0"/>
@@ -358,7 +358,7 @@ let promise = $state(setup());
 			<Accordion class="p-2 m-2 w-full">
 				<AccordionItem >
 					<span slot="header" class="text-gray-700 dark:text-gray-400">{$_("milestone.legend")}</span>
-					<div class="w-full flex flex-col md:flex-row items-center justify-center">
+					<div class="w-full flex flex-col md:flex-row items-center justify-start">
 					{#each milestonePresentation as milestone}
 						<div class="text-gray-700 dark:text-gray-400 flex flex-col md:flex-row font-medium text-sm md:text-md items-center justify-start m-2 p-2">
 
@@ -419,19 +419,17 @@ let promise = $state(setup());
 											<span slot="header" class="items-center flex justify-center space-x-2">
 												{@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
 											</span>
-											<div class="flex-row justify-between">
-												{#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
-													{@render evaluation(
-														milestoneGroups[aid][Number(mid)].milestones.find((element: any) =>
-														{
-															return element.id === Number(ms_id);
-														}),
-														Number(ms_score),
-														true
-													)}
-													<Hr classHr="mx-2"/>
-												{/each}
-											</div>
+											{#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
+												{@render evaluation(
+													milestoneGroups[aid][Number(mid)].milestones.find((element: any) =>
+													{
+														return element.id === Number(ms_id);
+													}),
+													Number(ms_score),
+													true
+												)}
+												<Hr classHr="mx-2"/>
+											{/each}
 										</AccordionItem>
 										</div>
 									{/each}
