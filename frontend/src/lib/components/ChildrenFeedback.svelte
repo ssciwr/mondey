@@ -210,6 +210,57 @@ async function loadNext() {
 	await loadDetailedFeedback(relevant_sessionkeys);
 }
 
+function generateReport(): string {
+	let report = "";
+	// add today's date
+	report += `${$_("milestone.date")}: ${new Date().toLocaleDateString()} \n\n`;
+
+	// add name and age of child in the beginning
+	report += `${$_("milestone.child")}: ${currentChild.name}\n`;
+	report += `${$_("milestone.born")}: ${currentChild.month}/${currentChild.year} \n\n`;
+
+	// iterate over all answersessions
+
+	for (let [aid, values] of Object.entries(summary)) {
+		// aid : value
+
+		const min = Math.min(...(Object.values(values) as number[]));
+		report += `${$_("milestone.timeperiod")}: ${makeTitle(Number(aid))} \n`;
+		report += `${$_("milestone.summaryScore")}: ${min === 1 ? $_("milestone.recommendOk") : min === 0 ? $_("milestone.recommendWatch") : min === -1 ? $_("milestone.recommmendHelp") : $_("milestone.notEnoughDataYet")} \n\n`;
+
+		for (let [mid, score] of Object.entries(values)) {
+			// mid : score
+			report += `  ${milestoneGroups[aid][Number(mid)].text[$locale as string].title} \n`;
+			report += `    ${score === 1 ? $_("milestone.recommendOk") : score === 0 ? $_("milestone.recommendWatch") : score === -1 ? $_("milestone.recommmendHelp") : $_("milestone.notEnoughDataYet")} \n\n`;
+
+			for (let [ms_id, ms_score] of Object.entries(detailed[aid][mid])) {
+				// ms_id : ms_score
+				report += `    ${
+					milestoneGroups[aid][Number(mid)].milestones.find((element: any) => {
+						return element.id === Number(ms_id);
+					}).text[$locale as string].title
+				} \n`;
+				report += `      ${ms_score === 1 ? $_("milestone.recommendOk") : ms_score === 0 ? $_("milestone.recommendWatch") : ms_score === -1 ? $_("milestone.recommmendHelp") : $_("milestone.notEnoughDataYet")} \n\n`;
+			}
+		}
+
+		report += "\n\n";
+	}
+
+	return report;
+}
+
+function printReport() {
+	const report = generateReport();
+	const printWindow = window.open("", "", "height=600,width=800");
+	if (printWindow === null) {
+		return;
+	}
+	printWindow.document.write(`<pre>${report}</pre>`);
+	printWindow.document.close();
+	printWindow.print();
+}
+
 function formatDate(date: string): string {
 	const dateObj = new Date(date);
 	return [
@@ -449,7 +500,7 @@ let promise = $state(setup());
 		</Tabs>
 
 		<div class="flex items-center justify-start w-full m-2 p-2 mb-4 pb-4">
-			<Button class="md:w-64 md:h-8  m-2 p-2" onclick={() => window.print()}>{$_("milestone.printPage")}</Button>
+			<Button class="md:w-64 md:h-8  m-2 p-2" onclick={printReport}>{$_("milestone.printReport")}</Button>
 		</div>
 	{:catch error}
 		<AlertMessage

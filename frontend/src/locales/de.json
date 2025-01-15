@@ -45,7 +45,11 @@
 		"newer": "Weiter vor",
 		"notEnoughDataYet": "Noch nicht genügend Daten für Feedback",
 		"summaryScore": "Gesamtergebnis:",
-		"printPage": "Protokol drucken"
+		"printReport": "Protokol drucken",
+		"timeperiod": "Zeitraum",
+		"born": "Geboren (Monat)",
+		"child": "Kind",
+		"date": "Datum"
 	},
 	"search": {
 		"allLabel": "Alle",
