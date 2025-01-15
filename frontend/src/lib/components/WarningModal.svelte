@@ -1,9 +1,9 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
+import { i18n } from "$lib/i18n.svelte";
 import { Button, Modal } from "flowbite-svelte";
 import ExclamationCircleOutline from "flowbite-svelte-icons/ExclamationCircleOutline.svelte";
-import { _ } from "svelte-i18n";
 
 let { open = $bindable(false), text }: { open: boolean; text: string } =
 	$props();
@@ -15,6 +15,6 @@ let { open = $bindable(false), text }: { open: boolean; text: string } =
 		<h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
 			{text}
 		</h3>
-		<Button color="alternative">{$_('misc.understood')}</Button>
+		<Button color="alternative">{i18n.tr.misc.understood}</Button>
 	</div>
 </Modal>

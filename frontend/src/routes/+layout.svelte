@@ -4,11 +4,10 @@ import { base } from "$app/paths";
 import logo_dark from "$lib/assets/mondey_dark.svg";
 import logo_light from "$lib/assets/mondey_light.svg";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
+import Footer from "$lib/components/Navigation/Footer.svelte";
 import FunctionalIcon from "$lib/components/Navigation/FunctionalIcon.svelte";
 import UserProfile from "$lib/components/UserProfile.svelte";
-import "$lib/i18n";
-import Footer from "$lib/components/Navigation/Footer.svelte";
-import { getTranslations } from "$lib/i18n";
+import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import {
 	Avatar,
@@ -21,15 +20,14 @@ import {
 } from "flowbite-svelte";
 import { MoonSolid, SunSolid } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
-import { _ } from "svelte-i18n";
 
 import "../app.css";
 
 let { children } = $props();
 
 onMount(async () => {
+	await i18n.load();
 	await user.load();
-	getTranslations();
 });
 </script>
 
@@ -44,9 +42,9 @@ onMount(async () => {
 	</NavBrand>
 	<NavHamburger />
 	<NavUl ulClass="hidden flex min-[320px]:flex-col sm:flex-col md:flex-row items-center lg:mt-8 lg:space-x-14 md:mt-8 md:space-x-7 text-lg ">
-		<NavLi class = "hover:cursor-pointer" href={base}>{$_("misc.latest")}</NavLi>
-		<NavLi class = "hover:cursor-pointer" href={base}>{$_("misc.downloads")}</NavLi>
-		<NavLi class = "hover:cursor-pointer" href={base}>{$_("misc.contact")}</NavLi>
+		<NavLi class = "hover:cursor-pointer" href={base}>{i18n.tr.misc.latest}</NavLi>
+		<NavLi class = "hover:cursor-pointer" href={base}>{i18n.tr.misc.downloads}</NavLi>
+		<NavLi class = "hover:cursor-pointer" href={base}>{i18n.tr.misc.contact}</NavLi>
 
 		<FunctionalIcon tooltip={'Darkmode ein- oder ausschalten'}>
 			<DarkMode class="apply-icon-style">

@@ -20,6 +20,7 @@ import {
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
@@ -30,7 +31,6 @@ import {
 	TrashBinOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
-import { _, locale } from "svelte-i18n";
 
 // questions and answers about child that are not part of the child object
 let questionnaire: GetChildQuestionsResponse = $state(
@@ -57,9 +57,9 @@ let {
 let disableEdit: boolean = $state(false);
 let disableImageDelete: boolean = $state(false);
 let imageDeleted: boolean = $state(false);
-let alertMessage: string = $state($_("childData.alertMessageMissing"));
+let alertMessage: string = $state(i18n.tr.childData.alertMessageMissing);
 let showAlert = $state(false);
-let childLabel = $derived(name ? name : $_("childData.newChildHeadingLong"));
+let childLabel = $derived(name ? name : i18n.tr.childData.newChildHeadingLong);
 let breadcrumbdata = $derived([
 	{
 		label: childLabel,
@@ -83,7 +83,7 @@ async function setup(): Promise<{
 			(questions.error as ErrorModel).detail,
 		);
 		showAlert = true;
-		alertMessage = $_("childData.alertMessageError");
+		alertMessage = i18n.tr.childData.alertMessageError;
 	} else {
 		questionnaire = questions.data;
 	}
@@ -94,7 +94,7 @@ async function setup(): Promise<{
 		if (child.error) {
 			console.log("Error when getting child: ", child.error.detail);
 			showAlert = true;
-			alertMessage = $_("childData.alertMessageError");
+			alertMessage = i18n.tr.childData.alertMessageError;
 		} else {
 			name = child.data.name ?? null;
 			birthyear = child.data.birth_year;
@@ -116,7 +116,7 @@ async function setup(): Promise<{
 				currentAnswers.error.detail,
 			);
 			showAlert = true;
-			alertMessage = $_("childData.alertMessageError");
+			alertMessage = i18n.tr.childData.alertMessageError;
 		} else {
 			answers = currentAnswers.data;
 			disableEdit = true;
@@ -158,7 +158,7 @@ async function submitChildData(): Promise<void> {
 		if (new_child.error) {
 			showAlert = true;
 			alertMessage =
-				$_("childData.alertMessageCreate") + new_child.error.detail;
+				i18n.tr.childData.alertMessageCreate + new_child.error.detail;
 			return;
 		}
 		currentChild.id = new_child.data.id;
@@ -179,7 +179,7 @@ async function submitChildData(): Promise<void> {
 
 		if (response.error) {
 			showAlert = true;
-			alertMessage = `${$_("childData.alertMessageUpdate")} ${response.error.detail}`;
+			alertMessage = `${i18n.tr.childData.alertMessageUpdate} ${response.error.detail}`;
 			return;
 		}
 	}
@@ -197,7 +197,7 @@ async function submitChildData(): Promise<void> {
 			"Error when sending user question answers: ",
 			response.error.detail,
 		);
-		alertMessage = `${$_("childData.alertMessageError")} ${response.error.detail}`;
+		alertMessage = `${i18n.tr.childData.alertMessageError} ${response.error.detail}`;
 		showAlert = true;
 		return;
 	}
@@ -207,7 +207,7 @@ async function submitImageData(): Promise<void> {
 	if (currentChild.id === null) {
 		console.log("no child id, no image to upload");
 		showAlert = true;
-		alertMessage = $_("childData.alertMessageError");
+		alertMessage = i18n.tr.childData.alertMessageError;
 		return;
 	}
 
@@ -221,7 +221,7 @@ async function submitImageData(): Promise<void> {
 		if (response.error) {
 			console.log("error during file delete: ", response.error.detail);
 			showAlert = true;
-			alertMessage = `${$_("childData.alertMessageUpdate")} ${response.error.detail}`;
+			alertMessage = `${i18n.tr.childData.alertMessageUpdate} ${response.error.detail}`;
 			return;
 		}
 	} else if (image instanceof File && imageDeleted === false) {
@@ -237,7 +237,7 @@ async function submitImageData(): Promise<void> {
 		if (response.error) {
 			console.log("error during file upload: ", response.error.detail);
 			showAlert = true;
-			alertMessage = `${$_("childData.alertMessageError")} ${response.error.detail}`;
+			alertMessage = `${i18n.tr.childData.alertMessageError} ${response.error.detail}`;
 			return;
 		}
 	} else {
@@ -259,16 +259,16 @@ async function submitData(): Promise<void> {
 }
 </script>
 
-{#if $locale}
+{#if i18n.locale}
 <Breadcrumbs data={breadcrumbdata} />
 {#await promise}
 <div class = "flex justify-center items-center ">
-<Spinner /> <p>{$_("childData.loadingMessage")}</p>
+<Spinner /> <p>{i18n.tr.childData.loadingMessage}</p>
 </div>
 {:then { questionnaire, answers }}
 	{#if showAlert}
 		<AlertMessage
-			title={$_("childData.alertMessageTitle")}
+			title={i18n.tr.childData.alertMessageTitle}
 			message={alertMessage}
 			onclick={() => {
 				showAlert = false;
@@ -284,7 +284,7 @@ async function submitData(): Promise<void> {
 				>
 				{#if showAlert}
 					<AlertMessage
-						title={$_("childData.alertMessageTitle")}
+						title={i18n.tr.childData.alertMessageTitle}
 						message={alertMessage}
 						onclick={() => {
 							showAlert = false;
@@ -298,9 +298,9 @@ async function submitData(): Promise<void> {
 					<DataInput
 						component={componentTable["input"]}
 						bind:value={name}
-						label={$_("childData.childName")}
+						label={i18n.tr.childData.childName}
 						required={true}
-						placeholder={$_("childData.pleaseEnter")}
+						placeholder={i18n.tr.childData.pleaseEnter}
 						disabled={disableEdit}
 						id="child_name"
 						kwargs = {{type: "text"}}
@@ -309,9 +309,9 @@ async function submitData(): Promise<void> {
 					<DataInput
 						component={componentTable["input"]}
 						bind:value={birthmonth}
-						label={$_("childData.childBirthMonth")}
+						label={i18n.tr.childData.childBirthMonth}
 						required={true}
-						placeholder={$_("childData.pleaseEnterNumber")}
+						placeholder={i18n.tr.childData.pleaseEnterNumber}
 						disabled={disableEdit}
 						id="child_birthmonth"
 						kwargs = {{type: "number", min: 0, max:12, step: '1'}}
@@ -320,9 +320,9 @@ async function submitData(): Promise<void> {
 					<DataInput
 						component={componentTable["input"]}
 						bind:value={birthyear}
-						label={$_("childData.childBirthYear")}
+						label={i18n.tr.childData.childBirthYear}
 						required={true}
-						placeholder={$_("childData.pleaseEnterNumber")}
+						placeholder={i18n.tr.childData.pleaseEnterNumber}
 						disabled={disableEdit}
 						id="child_birthyear"
 						kwargs = {{type: "number", min: 2007, step: '1'}}
@@ -331,9 +331,9 @@ async function submitData(): Promise<void> {
 					<DataInput
 						component={componentTable["fileupload"]}
 						bind:value={image}
-						label={image !== null ? $_("childData.imageOfChildChange") : $_("childData.imageOfChildNew")}
+						label={image !== null ? i18n.tr.childData.imageOfChildChange : i18n.tr.childData.imageOfChildNew}
 						required={false}
-						placeholder={$_("childData.noFileChosen")}
+						placeholder={i18n.tr.childData.noFileChosen}
 						disabled={disableEdit}
 						id="child_image"
 						kwargs = {{accept: ".jpg, .jpeg, .png", clearable: true}}
@@ -342,9 +342,9 @@ async function submitData(): Promise<void> {
 					<DataInput
 						component={Input}
 						bind:value={color}
-						label={$_("childData.childColor")}
+						label={i18n.tr.childData.childColor}
 						required={false}
-						placeholder={$_("childData.chooseColor")}
+						placeholder={i18n.tr.childData.chooseColor}
 						disabled={disableEdit}
 						id="child_color"
 						kwargs = {{type: "color"}}
@@ -364,12 +364,12 @@ async function submitData(): Promise<void> {
 							}}
 						>
 							<div class="flex items-center justify-center">
-								<TrashBinOutline size='md'/> {$_("childData.deleteImageButton")}
+								<TrashBinOutline size='md'/> {i18n.tr.childData.deleteImageButton}
 							</div>
 						</Button>
 					{:else if disableImageDelete === true}
 						<p class="text-center text-sm text-gray-700 dark:text-gray-400 flex items-center justify-center">
-							<CheckCircleOutline size="lg" color="green"/> {$_("childData.imageOfChildChangeDelete")}
+							<CheckCircleOutline size="lg" color="green"/> {i18n.tr.childData.imageOfChildChangeDelete}
 						</p>
 					{/if}
 
@@ -379,15 +379,15 @@ async function submitData(): Promise<void> {
 							bind:value={answers[element.id].answer}
 							bind:additionalValue={answers[element.id]
 								.additional_answer}
-							label={element?.text?.[$locale].question}
+							label={element?.text?.[i18n.locale].question}
 							textTrigger={element.additional_option}
 							required={element.component === 'fileupload' ? false : true}
 							additionalRequired={true}
 							id={"input_" + String(i)}
-							items={element?.text?.[$locale].options_json === ""
+							items={element?.text?.[i18n.locale].options_json === ""
 								? undefined
 								: JSON.parse(
-										element?.text?.[$locale].options_json ?? '',
+										element?.text?.[i18n.locale].options_json ?? '',
 									)}
 							disabled={disableEdit}
 							placeholder=""
@@ -402,14 +402,14 @@ async function submitData(): Promise<void> {
 							}}
 						>
 							<div class="flex items-center justify-center">
-								{$_("childData.changeData")}
+								{i18n.tr.childData.changeData}
 							</div>
 						</Button>
 					{:else}
 						<Button
 							class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
 							type="submit"
-							>{$_("childData.submitButtonLabel")}</Button
+							>{i18n.tr.childData.submitButtonLabel}</Button
 						>
 					{/if}
 					{#if currentChild.id !== null}
@@ -422,7 +422,7 @@ async function submitData(): Promise<void> {
 							}}
 							>
 							<PlayOutline size='sm'/>
-							{$_("childData.nextButtonLabel")}
+							{i18n.tr.childData.nextButtonLabel}
 						</Button>
 						<Button
 							class=" w-full text-center text-sm text-white"
@@ -433,7 +433,7 @@ async function submitData(): Promise<void> {
 							}}
 							>
 							<PlayOutline size='sm'/>
-							{$_("childData.feedbackButtonLabel")}
+							{i18n.tr.childData.feedbackButtonLabel}
 						</Button>
 						<Hr hrClass="my-8"/>
 						<Button
@@ -444,7 +444,7 @@ async function submitData(): Promise<void> {
 								if (currentChild.id === null) {
 									console.log("no child id, no child to delete");
 									showAlert = true;
-									alertMessage = $_("childData.alertMessageError");
+									alertMessage = i18n.tr.childData.alertMessageError;
 									return;
 								}
 
@@ -457,7 +457,7 @@ async function submitData(): Promise<void> {
 								if (response.error) {
 									console.log("Error when deleting child");
 									showAlert = true;
-									alertMessage=$_("childData.alertMessageError") + response.error.detail;
+									alertMessage=i18n.tr.childData.alertMessageError + response.error.detail;
 								}
 								else {
 									activeTabChildren.update((value) => {
@@ -466,7 +466,7 @@ async function submitData(): Promise<void> {
 									currentChild.id = null;
 								}
 							}}
-							><TrashBinOutline size='sm'/> {$_("childData.deleteButtonLabel")}</Button
+							><TrashBinOutline size='sm'/> {i18n.tr.childData.deleteButtonLabel}</Button
 						>
 					{/if}
 				</form>
@@ -475,7 +475,7 @@ async function submitData(): Promise<void> {
 	{/if}
 {:catch error}
 	<AlertMessage
-		title={$_("childData.alertMessageTitle")}
+		title={i18n.tr.childData.alertMessageTitle}
 		message={error.message}
 		onclick={() => {
 			showAlert = false;
@@ -484,8 +484,8 @@ async function submitData(): Promise<void> {
 {/await}
 {:else}
 	<AlertMessage
-		title={$_("childData.alertMessageTitle")}
-		message={$_("childData.alertMessageError")}
+		title={i18n.tr.childData.alertMessageTitle}
+		message={i18n.tr.childData.alertMessageError}
 		onclick={() => {
 			showAlert = false;
 		}}

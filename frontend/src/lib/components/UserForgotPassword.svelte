@@ -5,15 +5,15 @@ import { base } from "$app/paths";
 import { type ResetForgotPasswordData, resetForgotPassword } from "$lib/client";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input } from "flowbite-svelte";
-import { _ } from "svelte-i18n";
 
 const maildata = {
 	component: Input,
 	type: "email",
 	props: {
-		placeholder: $_("forgotPw.placeholder"),
+		placeholder: i18n.tr.forgotPw.placeholder,
 		id: "email",
 		required: true,
 	},
@@ -22,13 +22,13 @@ const maildata = {
 let userEmail = $state("");
 let confirmEmail = $state("");
 
-let alertMessage: string = $state($_("forgotPw.formatError"));
+let alertMessage: string = $state(i18n.tr.forgotPw.formatError);
 let showAlert: boolean = $state(false);
 let showSuccess = $state(false);
 
 async function submitData(): Promise<void> {
 	if (userEmail !== confirmEmail) {
-		alertMessage = $_("forgotPw.confirmError");
+		alertMessage = i18n.tr.forgotPw.confirmError;
 		showAlert = true;
 		return;
 	}
@@ -42,7 +42,7 @@ async function submitData(): Promise<void> {
 
 	if (response.error) {
 		console.log("error: ", response.error);
-		alertMessage = $_("forgotPw.sendError");
+		alertMessage = i18n.tr.forgotPw.sendError;
 		showAlert = true;
 	} else {
 		console.log("successful transmission of forgot password email");
@@ -54,7 +54,7 @@ async function submitData(): Promise<void> {
 
 {#if showAlert}
 	<AlertMessage
-		title={$_('forgotPw.alertTitle')}
+		title={i18n.tr.forgotPw.alertTitle}
 		message={alertMessage}
 		lastpage={`${base}/forgotPassword`}
 		onclick={() => {
@@ -67,7 +67,7 @@ async function submitData(): Promise<void> {
 	<Heading
 		tag="h3"
 		class="m-2 p-2 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-		>{$_('forgotPw.heading')}</Heading
+		>{i18n.tr.forgotPw.heading}</Heading
 	>
 	{#if showSuccess === false}
 		<form onsubmit={preventDefault(submitData)}>
@@ -85,7 +85,7 @@ async function submitData(): Promise<void> {
 			</div>
 
 			<div class="m-2 flex w-full items-center justify-center p-2">
-				<Button size="md" type="submit">{$_('forgotPw.pending')}</Button>
+				<Button size="md" type="submit">{i18n.tr.forgotPw.pending}</Button>
 			</div>
 		</form>
 	{:else}
@@ -96,7 +96,7 @@ async function submitData(): Promise<void> {
 				type="button"
 				on:click={(event) => {
 					goto(`/${base}`);
-				}}>{$_('forgotPw.success')}</Button
+				}}>{i18n.tr.forgotPw.success}</Button
 			>
 		</div>
 	{/if}
