@@ -24,10 +24,6 @@ import {
 	Modal,
 	Spinner,
 	TabItem,
-	Table,
-	TableBody,
-	TableBodyCell,
-	TableBodyRow,
 	Tabs,
 } from "flowbite-svelte";
 import {
@@ -359,32 +355,29 @@ let promise = $state(setup());
 				<p class ="text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md" >{$_("milestone.feedbackDetailsMilestone")}</p>
 			</Modal>
 
-			<Accordion class="p-2 m-2">
-				<AccordionItem>
-				<span class="text-gray-700 dark:text-gray-400" slot="header">{$_("milestone.legend")}</span>
-				<Table striped={false}>
-					<TableBody tableBodyClass="divide-y">
-						{#each milestonePresentation as milestone}
-							<TableBodyRow class="text-gray-700 dark:text-gray-400 flex flex-col md:flex-row font-medium text-sm md:text-md items-center justify-center m-2 p-2">
+			<Accordion class="p-2 m-2 w-full">
+				<AccordionItem >
+					<span slot="header" class="text-gray-700 dark:text-gray-400">{$_("milestone.legend")}</span>
+					<div class="w-full flex flex-col md:flex-row items-center justify-center">
+					{#each milestonePresentation as milestone}
+						<div class="text-gray-700 dark:text-gray-400 flex flex-col md:flex-row font-medium text-sm md:text-md items-center justify-start m-2 p-2">
 
-								<TableBodyCell class="flex flex-col w-32 justify-center"><svelte:component this={milestone.icon}  size="xl" class={milestone.class} /></TableBodyCell>
+							<svelte:component this={milestone.icon}  size="xl" class={milestone.class} />
 
-								<TableBodyCell class="flex flex-col font-bold justify-center mr-auto pr-auto">{milestone.short}</TableBodyCell>
+							<span class="font-bold justify-center mr-auto pr-auto">{milestone.short}</span>
 
-								<TableBodyCell class="flex flex-col justify-end w-32"><Button class="m-2 p-2 w-full justify-center" onclick={() => {milestone.showExplanation=true;}}>{$_("milestone.moreInfoOnLegend")}</Button></TableBodyCell>
-							</TableBodyRow>
-							<Modal class = "m-2 p-2" classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-400" bind:open={milestone.showExplanation} dismissable={true} title={milestone.short}>
-								{milestone.text}
-							</Modal>
-						{/each}
-					</TableBody>
-				</Table>
-
-			</AccordionItem>
+							<Button class="m-2 p-2 md:w-24 justify-center" onclick={() => {milestone.showExplanation=true;}}>{$_("milestone.moreInfoOnLegend")}</Button>
+						</div>
+						<Modal class = "m-2 p-2" classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-400" bind:open={milestone.showExplanation} dismissable={true} title={milestone.short}>
+							{milestone.text}
+						</Modal>
+					{/each}
+					</div>
+				</AccordionItem>
 			</Accordion>
 
-			<div class="flex items-center justify-center w-full m-2 p-2">
-				<Button class = "m-2 p-2 pb-4 mb-4 items-center justify-center md:w-1/6" onclick = {() => {
+			<div class="flex items-center justify-start w-full m-2 p-2">
+				<Button class = "m-2 p-2 pb-4 mb-4 items-center justify-center md:w-1/6 w-5/6" onclick = {() => {
 					showMoreInfo = true;
 				}}>{$_("milestone.moreInfoOnEval")}
 				</Button>
@@ -457,7 +450,7 @@ let promise = $state(setup());
 			{/if}
 		</Tabs>
 
-		<div class="flex items-center justify-center w-full m-2 p-2 mb-4 pb-4">
+		<div class="flex items-center justify-start w-full m-2 p-2 mb-4 pb-4">
 			<Button class="md:w-64 md:h-8  m-2 p-2" onclick={() => window.print()}>{$_("milestone.printPage")}</Button>
 		</div>
 	{:catch error}
