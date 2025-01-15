@@ -212,6 +212,8 @@ async function loadNext() {
 
 function generateReport(): string {
 	let report = "";
+	// add title
+	report += `<h1>${$_("milestone.reportTitle")}</h1>\n\n`;
 	// add today's date
 	report += `${$_("milestone.date")}: ${new Date().toLocaleDateString()} \n\n`;
 
@@ -225,26 +227,26 @@ function generateReport(): string {
 		// aid : value
 
 		const min = Math.min(...(Object.values(values) as number[]));
-		report += `${$_("milestone.timeperiod")}: ${makeTitle(Number(aid))} \n`;
-		report += `${$_("milestone.summaryScore")}: ${min === 1 ? $_("milestone.recommendOk") : min === 0 ? $_("milestone.recommendWatch") : min === -1 ? $_("milestone.recommmendHelp") : $_("milestone.notEnoughDataYet")} \n\n`;
+		report += `<h2>${$_("milestone.timeperiod")}: ${makeTitle(Number(aid))}</h2> \n`;
+		report += `<strong>${$_("milestone.summaryScore")}:</strong> ${min === 1 ? $_("milestone.recommendOk") : min === 0 ? $_("milestone.recommendWatch") : min === -1 ? $_("milestone.recommmendHelp") : $_("milestone.notEnoughDataYet")} \n\n`;
 
 		for (let [mid, score] of Object.entries(values)) {
 			// mid : score
-			report += `  ${milestoneGroups[aid][Number(mid)].text[$locale as string].title} \n`;
-			report += `    ${score === 1 ? $_("milestone.recommendOk") : score === 0 ? $_("milestone.recommendWatch") : score === -1 ? $_("milestone.recommmendHelp") : $_("milestone.notEnoughDataYet")} \n\n`;
+			report += `<h3>  ${milestoneGroups[aid][Number(mid)].text[$locale as string].title}</h3>`;
+			report += `    ${score === 1 ? $_("milestone.recommendOkMs") : score === 0 ? $_("milestone.recommendWatchMs") : score === -1 ? $_("milestone.recommmendHelp") : $_("milestone.notEnoughDataYet")} \n\n`;
 
 			for (let [ms_id, ms_score] of Object.entries(detailed[aid][mid])) {
 				// ms_id : ms_score
-				report += `    ${
+				report += `    <strong>${
 					milestoneGroups[aid][Number(mid)].milestones.find((element: any) => {
 						return element.id === Number(ms_id);
 					}).text[$locale as string].title
-				} \n`;
-				report += `      ${ms_score === 1 ? $_("milestone.recommendOk") : ms_score === 0 ? $_("milestone.recommendWatch") : ms_score === -1 ? $_("milestone.recommmendHelp") : $_("milestone.notEnoughDataYet")} \n\n`;
+				}:</strong>`;
+				report += ` ${ms_score === 1 ? $_("milestone.recommendOkShort") : ms_score === 0 ? $_("milestone.recommendWatchShort") : ms_score === -1 ? $_("milestone.recommendHelpShort") : $_("milestone.notEnoughDataYet")} \n`;
 			}
 		}
 
-		report += "\n\n";
+		report += "\n";
 	}
 
 	return report;

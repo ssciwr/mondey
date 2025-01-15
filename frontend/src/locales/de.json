@@ -26,6 +26,8 @@
 		"recommendOk": "Das Kind hat für sämtliche Meilensteingruppen altergemäße Bewertungen erhalten.",
 		"recommendOkShort": "Alles im grünen Bereich!",
 		"recommendWatch": "Das Kind hat für einige Meilensteingruppen leicht unterdurchschnittliche Bewertungen erhalten.",
+		"recommendOkMs": "Das Kind hat für sämtliche Meilensteine altergemäße Bewertungen erhalten.",
+		"recommendWatchMs": "Das Kind hat für einige Meilensteine leicht unterdurchschnittliche Bewertungen erhalten.",
 		"recommendWatchShort": "Aufgepasst!",
 		"recommmendHelp": "Entwicklung des Kindes ist deutlich unterdurchschnittlich.",
 		"recommendHelpShort": "Enwicklungsverzögerung!",
@@ -49,7 +51,8 @@
 		"timeperiod": "Zeitraum",
 		"born": "Geboren (Monat)",
 		"child": "Kind",
-		"date": "Datum"
+		"date": "Datum",
+		"reportTitle": "Entwicklungsbericht"
 	},
 	"search": {
 		"allLabel": "Alle",
