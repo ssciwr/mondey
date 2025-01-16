@@ -22,6 +22,7 @@ export const translationIds = {
 		info: "Information",
 		next: "Weiter",
 		prev: "Zurück",
+		moreInfoOnLegend: "Mehr Info",
 		autoNext: "Automatisch weiter",
 		groupOverviewLabel: "Übersicht Meilensteingruppen",
 		alertMessageRetrieving: "Fehler beim Abrufen der Meilensteine",
@@ -31,16 +32,27 @@ export const translationIds = {
 			"Haben Sie ein Bild von Ihrem Kind bei diesem Meilenstein, das Sie gerne beisteuern und veröffentlichen möchten? Wenn ja, können Sie es hier einreichen.",
 		submitImageConditions:
 			"Ich bin damit einverstanden, dass dieses Bild veröffentlicht und den Benutzern als eines der Meilensteinbilder auf dieser Website angezeigt wird, sofern es von den Site-Administratoren genehmigt wird.",
-		recommendOk: "Entwicklung des Kindes ist altersgemäß.",
+		recommendOk:
+			"Das Kind hat für sämtliche Meilensteingruppen altergemäße Bewertungen erhalten.",
+		recommendOkShort: "Alles im grünen Bereich!",
 		recommendWatch:
-			"Entwicklung des Kindes ist leicht verzögert und sollte beobachtet werden um gegebenfalls gezielt einzelne Bereiche zu fördern.",
+			"Das Kind hat für einige Meilensteingruppen leicht unterdurchschnittliche Bewertungen erhalten.",
+		recommendOkMs:
+			"Das Kind hat für sämtliche Meilensteine altergemäße Bewertungen erhalten.",
+		recommendWatchMs:
+			"Das Kind hat für einige Meilensteine leicht unterdurchschnittliche Bewertungen erhalten.",
+		recommendWatchShort: "Aufgepasst!",
 		recommmendHelp:
-			"Entwicklung des Kindes ist signifikant verzögert und sollte gefördert werden. Professionelle Hilfe kann notwendig sein.",
+			"Entwicklung des Kindes ist deutlich unterdurchschnittlich.",
+		recommendHelpShort: "Enwicklungsverzögerung!",
 		showHistory: "Feedback zu vorherigen Beobachtungszeiträumen anzeigen",
-		moreInfoOnEval: "Mehr Informationen zur Erstellung der Bewertung",
+		moreInfoOnEval: "Mehr Informationen zur Bewertung",
 		legend: "Erklärung zu den einzelnen Symbolen",
+		selectFeedback: "Wählen sie nun zu welchem Zeitpunkt sie Feedback möchten",
 		feedbackExplanation:
-			"Hier sehen sie wie sich das Kind im Vergleich zum Durchschnitt entwickelt. Die Farben und Symbole zeigen an, ob das Kind altersgemäß entwickelt ist oder ob es in einzelnen Bereichen Unterstützung benötigt. Durch setzen des Hakens unten können sie vergangene Beobachtungszeiträume einsehen und so die Entwicklung des Kindes über einen längeren Zeitraum verfolgen. Es werden standardmäßig nur die Bewertungen der Meilensteingruppen angezeigt. Für eine genauere Analyse können sie die Bewertungen der einzelnen Meilensteine einsehen indem sie auf die jeweilige Meilensteingruppe klicken. Beachten sie bitte die zusätzlichen Informationen und die Erklärung zu den Symbolen.",
+			"Das Feedback basiert auf einem Vergleich Ihrer Einschätzungen mit den Einschätzungen anderer Nutzer und folgt einer einfachen Regel:",
+		feedbackExplanationDetailed:
+			"Die Farben und Symbole zeigen an, ob das Kind altersgemäß entwickelt ist oder ob es in einzelnen Bereichen Unterstützung benötigt. Durch setzen des Hakens unten können sie vergangene Beobachtungszeiträume einsehen und so die Entwicklung des Kindes über einen längeren Zeitraum verfolgen. Es werden standardmäßig nur die Bewertungen der Meilensteingruppen angezeigt. Für eine genauere Analyse können sie die Bewertungen der einzelnen Meilensteine einsehen indem sie auf die jeweilige Meilensteingruppe klicken. Beachten sie bitte die zusätzlichen Informationen und die Erklärung zu den Symbolen.",
 		feedbackDetailsMilestoneGroup:
 			"Zu jeder Meilensteingruppe wird der Durchschnitt und die Standardabweichung der erreichten Punktzahl aller für das Kindesalter relevanten Meilensteine dieser Gruppe berechnet. Danach wird der Durchschnitt des der erreichten Punktzahl des Kindes mit dem Durchschnitt der Gruppe verglichen. Wenn der Durchschnitt des Kindes zwei Standardabweichungen unter dem Gruppendurchschnitt liegt, wird das Kind als 'Entwicklung verzögert' eingestuft (rot), wenn es zwei bis eine Standardabweichung unterhalb des Gruppendurchschnitts liegt, wird es als 'Entwicklung leicht verzögert' eingestuft (gelb). Wenn die Durchschnittszahl des Kindes innerhalb einer Standardabweichung des Gruppendurchschnitts oder darüber liegt, wird es als 'Entwicklung altersgemäß' eingestuft (grün). Statistisch liegen ungefähr 67% aller Kinder liegen innerhalb einer Standardabweichung um den Gruppendurchschnitt und 95% innerhalb von zwei Standardabweichungen. Zur Bewertung dieser Einstufungen ist es sinnvoll, die Bewertung der einzelnen Meilensteine miteinzubeziehen",
 		feedbackDetailsMilestone:
@@ -53,6 +65,13 @@ export const translationIds = {
 		older: "Weiter zurück",
 		newer: "Weiter vor",
 		notEnoughDataYet: "Noch nicht genügend Daten für Feedback",
+		summaryScore: "Gesamtergebnis:",
+		printReport: "Protokol drucken",
+		timeperiod: "Zeitraum",
+		born: "Geboren (Monat)",
+		child: "Kind",
+		date: "Datum",
+		reportTitle: "Entwicklungsbericht",
 	},
 	search: {
 		allLabel: "Alle",
