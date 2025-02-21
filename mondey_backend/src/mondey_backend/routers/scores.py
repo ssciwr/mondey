@@ -179,8 +179,9 @@ def compute_milestonegroup_feedback_detailed(
 ) -> dict[int, dict[int, int]]:
     """
     Compute the per-milestone (detailed) feedback for all answers in a given answersession.
-    This is done by comparing the given answer per milestone against the mean and standard deviation of the known population of children for the child's age. If this statistics is outdated (older than a week currently) or is
-    missing, it is recomputed and updated in the database. See `compute_feedback_simple` for the feedback logic.
+    This is done by comparing the given answer per milestone against the mean and standard deviation of the known population of children for the child's age.
+    If this statistics is outdated (older than a week currently) or is missing, it is recomputed and updated in the database.
+    See `compute_feedback_simple` for the feedback logic.
     Return a dictionary mapping milestonegroup -> [milestone -> feedback].
     Parameters
     ----------

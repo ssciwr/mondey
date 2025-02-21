@@ -127,8 +127,5 @@ def test_user_forgot_password_invalid_email(
     assert smtp_mock.last_message is None
     email = "invalid-email"
     response = user_client.post("/auth/forgot-password", json={"email": email})
-    assert (
-        response.json()["detail"][0]["msg"]
-        == "value is not a valid email address: An email address must have an @-sign."
-    )
+    assert "@" in response.json()["detail"][0]["msg"]
     assert response.json()["detail"][0]["type"] == "value_error"

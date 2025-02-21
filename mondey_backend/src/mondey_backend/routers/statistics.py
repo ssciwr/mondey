@@ -23,29 +23,30 @@ from .utils import _get_expected_age_from_scores
 # we are using Welford's method here. This necessitates recording the count.
 def _add_sample(
     count: int,
-    mean: float | int,
-    m2: float | int,
-    new_value: float | int,
-) -> tuple[int, float | int, float | int]:
+    mean: float,
+    m2: float,
+    new_value: float,
+) -> tuple[int, float, float]:
     """
-    Add a sample to the the current statistics. This function uses an online algorithm to compute the mean (directly) and an intermediate for the variance. This uses Welford's method with a slight
-    modification to avoid numerical instability. See https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
-    for details.
+    Add a sample to the the current statistics.
+    This function uses an online algorithm to compute the mean (directly) and an intermediate for the variance.
+    This uses Welford's method with a slight modification to avoid numerical instability.
+    See https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
 
     Parameters
     ----------
     count : int
         number of samples added so far.
-    mean : float | int
+    mean : float
         current mean of the samples.
-    m2 : float | int
+    m2 : float
         intermediate value for the variance computation.
-    new_value : float | int
+    new_value : float
         new sample to be added to the statistics.
 
     Returns
     -------
-    tuple[float | int, float | int, float | int]
+    tuple[int, float, float]
         updated count, mean, and m2 values.
     """
     count += 1
@@ -58,25 +59,27 @@ def _add_sample(
 
 def _finalize_statistics(
     count: int | np.ndarray,
-    mean: float | int | np.ndarray,
-    m2: float | int | np.ndarray,
-) -> tuple[float | int | np.ndarray, float | np.ndarray, float | np.ndarray]:
+    mean: float | np.ndarray,
+    m2: float | np.ndarray,
+) -> tuple[int | np.ndarray, float | np.ndarray, float | np.ndarray]:
     """
-    Compute the mean and standard deviation from the intermediate values. This function is used to finalize the statistics after a batch of new samples have been added. If arrays are supplied, they all need to have the
-    same shape. Values for the standard deviation for which the count is less than 2 are set to zero.
+    Compute the mean and standard deviation from the intermediate values.
+    This function is used to finalize the statistics after a batch of new samples have been added.
+    If arrays are supplied, they all need to have the same shape.
+    Values for the standard deviation for which the count is less than 2 are set to zero.
 
     Parameters
     ----------
     count : int | np.ndarray
         Current counts of samples. If ndarray, it contains the number of samples for each entry.
-    mean : float | int | np.ndarray
+    mean : float | np.ndarray
         Current mean value of the samples. If ndarray, it contains the mean for each entry.
-    m2 : float | int | np.ndarray
+    m2 : float | np.ndarray
         Current intermediate value for variance computation. If ndarray, it contains the intermediate value for each entry.
 
     Returns
     -------
-    tuple[float | int | np.ndarray, float | np.ndarray, float | np.ndarray]
+    tuple[int | np.ndarray, float | np.ndarray, float | np.ndarray]
         updated count, mean, and standard deviation values.
 
     Raises
@@ -93,8 +96,12 @@ def _finalize_statistics(
         else:
             var = m2 / (count - 1)
             return count, mean, np.sqrt(var)
-    elif all(isinstance(x, np.ndarray) for x in [count, mean, m2]):
-        if not all(x.shape == count.shape for x in [mean, m2]):  # type: ignore
+    elif (
+        isinstance(count, np.ndarray)
+        and isinstance(mean, np.ndarray)
+        and isinstance(m2, np.ndarray)
+    ):
+        if count.shape != m2.shape or mean.shape != m2.shape:
             raise ValueError(
                 "Given arrays for statistics computation must have the same shape."
             )
@@ -102,8 +109,8 @@ def _finalize_statistics(
         with np.errstate(invalid="ignore"):
             valid_counts = count >= 2
             variance = m2
-            variance[valid_counts] /= count[valid_counts] - 1  # type: ignore
-            variance[np.invert(valid_counts)] = 0.0  # type: ignore
+            variance[valid_counts] /= count[valid_counts] - 1
+            variance[np.invert(valid_counts)] = 0.0
             return (
                 count,
                 np.nan_to_num(mean),
@@ -158,7 +165,7 @@ def _get_statistics_by_age(
 
     # online algorithm computes variance, compute m2 from stddev
     # we can ignore count-1 <= 0 because stddev is zero in this case
-    m2 = stddev**2 * (count - 1)
+    m2 = np.pow(stddev, 2) * (count - 1)
 
     for answer in answers:
         age = child_ages[answer.answer_session_id]  # type: ignore
@@ -169,9 +176,38 @@ def _get_statistics_by_age(
         avg[age] = new_avg
         m2[age] = new_m2
 
-    count, avg, stddev = _finalize_statistics(count, avg, m2)  # type: ignore
+    count, avg, stddev = _finalize_statistics(count, avg, m2)
 
     return count, avg, stddev
+
+
+def make_stale_sessions_inactive(session: SessionDep) -> None:
+    days_after_which_session_is_stale = 9
+    stale_date = datetime.datetime.now() - datetime.timedelta(
+        days=days_after_which_session_is_stale
+    )
+    for staleMilestoneAnswerSession in session.exec(
+        select(MilestoneAnswerSession)
+        .where(col(MilestoneAnswerSession.active))
+        .where(col(MilestoneAnswerSession.created_at) <= stale_date)
+    ).all():
+        staleMilestoneAnswerSession.active = False
+        session.add(staleMilestoneAnswerSession)
+    session.commit()
+
+
+def update_stats(session: SessionDep) -> None:
+    make_stale_sessions_inactive(session)
+    milestoneAnswerSessions = session.exec(
+        select(MilestoneAnswerSession)
+        .where(~col(MilestoneAnswerSession.active))
+        .where(~col(MilestoneAnswerSession.included_in_statistics))
+    ).all()
+    for milestoneAnswerSession in milestoneAnswerSessions:
+        # todo: update stats
+        milestoneAnswerSession.included_in_statistics = True
+        session.add(milestoneAnswerSession)
+    session.commit()
 
 
 def calculate_milestone_statistics_by_age(
@@ -180,7 +216,8 @@ def calculate_milestone_statistics_by_age(
 ) -> MilestoneAgeScoreCollection | None:
     """
     Calculate the mean, variance of a milestone per age in months.
-    Takes into account only answers from expired sessions. If no statistics exist yet, all answers from expired sessions are considered, else only the ones newer than the last statistics are considered.
+    Takes into account only answers from expired sessions.
+    If no statistics exist yet, all answers from expired sessions are considered, else only the ones newer than the last statistics are considered.
 
     Parameters
     ----------
@@ -192,7 +229,7 @@ def calculate_milestone_statistics_by_age(
     -------
     MilestoneAgeScoreCollection | None
         MilestoneAgeScoreCollection object which contains a list of MilestoneAgeScore objects,
-    one for each month, or None if there are no answers for the milestoneg and no previous statistics.
+    one for each month, or None if there are no answers for the milestone and no previous statistics.
     """
     session_expired_days: int = 7
     # TODO: when the answersession eventually has an expired flag, this can go again.
@@ -210,38 +247,25 @@ def calculate_milestone_statistics_by_age(
     avg_scores = None
     stddev_scores = None
 
-    if last_statistics is None:
-        # no statistics exists yet -> all answers from expired sessions are relevant
-
-        answers_query = (
-            select(MilestoneAnswer)
-            .join(
-                MilestoneAnswerSession,
-                col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
-            )
-            .where(MilestoneAnswer.milestone_id == milestone_id)
-            .where(~col(MilestoneAnswer.included_in_milestone_statistics))
-            .where(MilestoneAnswerSession.created_at < expiration_date)
-        )
-    else:
+    if last_statistics is not None:
         # initialize avg and stddev scores with the last known statistics
         last_scores = last_statistics.scores
         count = np.array([score.count for score in last_scores])
         avg_scores = np.array([score.avg_score for score in last_scores])
         stddev_scores = np.array([score.stddev_score for score in last_scores])
 
-        # we calculate the statistics with an online algorithm, so we only consider new data
-        # that has not been included in the last statistics but which stems from sessions that are expired
-        answers_query = (
-            select(MilestoneAnswer)
-            .join(
-                MilestoneAnswerSession,
-                col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
-            )
-            .where(MilestoneAnswer.milestone_id == milestone_id)
-            .where(~col(MilestoneAnswer.included_in_milestone_statistics))
-            .where(col(MilestoneAnswerSession.created_at) <= expiration_date)
+    # we calculate the statistics with an online algorithm, so we only consider new data
+    # that has not been included in the last statistics but which stems from sessions that are expired
+    answers_query = (
+        select(MilestoneAnswer)
+        .join(
+            MilestoneAnswerSession,
+            col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
         )
+        .where(col(MilestoneAnswer.milestone_id) == milestone_id)
+        .where(~col(MilestoneAnswer.included_in_milestone_statistics))
+        .where(col(MilestoneAnswerSession.created_at) <= expiration_date)
+    )
 
     answers = session.exec(answers_query).all()
 
@@ -287,7 +311,8 @@ def calculate_milestonegroup_statistics_by_age(
 ) -> MilestoneGroupAgeScoreCollection | None:
     """
     Calculate the mean, variance of a milestonegroup per age in months.
-    Takes into account only answers from expired sessions. If no statistics exist yet, all answers from expired sessions are considered, else only the ones newer than the last statistics are considered.
+    Takes into account only answers from expired sessions.
+    If no statistics exist yet, all answers from expired sessions are considered, else only the ones newer than the last statistics are considered.
 
     Parameters
     ----------
@@ -316,23 +341,7 @@ def calculate_milestonegroup_statistics_by_age(
     count = None
     avg_scores = None
     stddev_scores = None
-    # we have 2 kinds of querys that need to be executed depending on the existence of a statistics object
-    if last_statistics is None:
-        # no statistics exists yet -> all answers from expired sessions are relevant
-        answer_query = (
-            select(MilestoneAnswer)
-            .join(
-                MilestoneAnswerSession,
-                col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
-            )
-            .where(MilestoneAnswer.milestone_group_id == milestonegroup_id)
-            .where(~col(MilestoneAnswer.included_in_milestonegroup_statistics))
-            .where(
-                MilestoneAnswerSession.created_at
-                <= expiration_date  # expired session only
-            )
-        )
-    else:
+    if last_statistics is not None:
         # initialize avg and stddev scores with the last known statistics
         count = np.array(
             [score.count for score in last_statistics.scores], dtype=np.int32
@@ -343,20 +352,21 @@ def calculate_milestonegroup_statistics_by_age(
         stddev_scores = np.array(
             [score.stddev_score for score in last_statistics.scores]
         )
-        # we calculate the statistics with an online algorithm, so we only consider new data
-        # that has not been included in the last statistics but which stems from sessions that are expired
-        # README: same reason for type: ignore as in the function above
-        answer_query = (
-            select(MilestoneAnswer)
-            .join(
-                MilestoneAnswerSession,
-                col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
-            )
-            .where(MilestoneAnswer.milestone_group_id == milestonegroup_id)
-            .where(~col(MilestoneAnswer.included_in_milestonegroup_statistics))
-            .where(MilestoneAnswerSession.created_at <= expiration_date)
+    # we calculate the statistics with an online algorithm, so we only consider new data
+    # that has not been included in the last statistics but which stems from sessions that are expired
+    answer_query = (
+        select(MilestoneAnswer)
+        .join(
+            MilestoneAnswerSession,
+            col(MilestoneAnswer.answer_session_id) == MilestoneAnswerSession.id,
         )
-
+        .where(col(MilestoneAnswer.milestone_group_id) == milestonegroup_id)
+        .where(~col(MilestoneAnswer.included_in_milestonegroup_statistics))
+        .where(
+            col(MilestoneAnswerSession.created_at)
+            <= expiration_date  # expired session only
+        )
+    )
     answers = session.exec(answer_query).all()
 
     if len(answers) == 0:

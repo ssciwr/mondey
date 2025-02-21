@@ -158,8 +158,6 @@ class MilestoneAnswer(SQLModel, table=True):
     )
     milestone_group_id: int = Field(default=None, foreign_key="milestonegroup.id")
     answer: int
-    included_in_milestone_statistics: bool = False
-    included_in_milestonegroup_statistics: bool = False
 
 
 class MilestoneAnswerSession(SQLModel, table=True):
@@ -171,6 +169,8 @@ class MilestoneAnswerSession(SQLModel, table=True):
             "server_default": text("CURRENT_TIMESTAMP"),
         }
     )
+    active: bool = True
+    included_in_statistics: bool = False
     answers: Mapped[dict[int, MilestoneAnswer]] = dict_relationship(key="milestone_id")
 
 
