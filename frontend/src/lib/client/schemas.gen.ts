@@ -6,7 +6,7 @@ export const Body_auth_cookie_login_auth_login_postSchema = {
             anyOf: [
                 {
                     type: 'string',
-                    pattern: '^password$'
+                    pattern: 'password'
                 },
                 {
                     type: 'null'

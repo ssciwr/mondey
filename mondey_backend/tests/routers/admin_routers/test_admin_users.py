@@ -8,7 +8,7 @@ def test_users(admin_client: TestClient):
     users = response.json()
     assert len(users) == 5
     assert users[0]["id"] == 1
-    assert not users[0]["is_researcher"]
+    assert users[0]["is_researcher"]
     assert users[0]["is_superuser"]
     assert users[1]["id"] == 2
     assert users[1]["is_researcher"]

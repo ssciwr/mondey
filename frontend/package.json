@@ -43,7 +43,17 @@
 		"@hey-api/client-fetch": "0.4.3",
 		"@unovis/ts": "1.5.0-beta.0",
 		"cdigit": "^4.0.2",
+		"danfojs": "^1.1.2",
+		"export-to-csv": "^1.4.0",
 		"iso-639-1": "3.1.3",
 		"svelte-dnd-action": "^0.9.57"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"@sveltejs/kit",
+			"core-js",
+			"esbuild",
+			"maplibre-gl"
+		]
 	}
 }
