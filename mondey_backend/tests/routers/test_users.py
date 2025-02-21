@@ -2,9 +2,6 @@ import datetime
 import pathlib
 
 from fastapi.testclient import TestClient
-from sqlmodel import select
-
-from mondey_backend.models.milestones import MilestoneAnswer
 
 
 def _is_approx_now(iso_date_string: str, delta=datetime.timedelta(hours=1)) -> bool:
@@ -167,33 +164,40 @@ def test_get_milestone_answers_child8_child_does_not_exist(admin_client: TestCli
     assert response.status_code == 404
 
 
-def test_get_milestone_answers_child3_no_current_answer_session(
+def test_get_milestone_answers_child3_current_answer_session(
     admin_client: TestClient,
 ):
     response = admin_client.get("/users/milestone-answers/3")
     assert response.status_code == 200
-    assert response.json()["id"] == 4
+    assert response.json()["id"] == 3
     assert response.json()["child_id"] == 3
-    assert _is_approx_now(response.json()["created_at"])
-    assert response.json()["answers"] == {}
-
-
-def test_get_milestone_answers_child1_current_answer_session(user_client: TestClient):
-    response = user_client.get("/users/milestone-answers/1")
-    assert response.status_code == 200
-    assert response.json()["id"] == 2
-    assert response.json()["child_id"] == 1
     assert response.json()["answers"] == {
-        "1": {
-            "milestone_id": 1,
-            "answer": 3,
-        },
-        "2": {
-            "milestone_id": 2,
+        "5": {
+            "milestone_id": 5,
             "answer": 2,
         },
     }
     assert _is_approx_now(response.json()["created_at"])
+
+
+def test_get_milestone_answers_child1_no_current_answer_session(
+    user_client: TestClient,
+):
+    response = user_client.get("/users/milestone-answers/1")
+    assert response.status_code == 200
+    assert response.json()["id"] == 4
+    assert response.json()["child_id"] == 1
+    assert _is_approx_now(response.json()["created_at"])
+    assert response.json()["answers"] == {
+        "1": {
+            "milestone_id": 1,
+            "answer": -1,
+        },
+        "2": {
+            "milestone_id": 2,
+            "answer": -1,
+        },
+    }
 
 
 def test_update_milestone_answer_no_current_answer_session(
@@ -221,7 +225,7 @@ def test_update_milestone_answer_update_existing_answer(user_client: TestClient)
     current_answer_session = user_client.get("/users/milestone-answers/1").json()
     assert current_answer_session["answers"]["1"] == {
         "milestone_id": 1,
-        "answer": 3,
+        "answer": -1,
     }
     new_answer = {
         "milestone_id": 1,
@@ -375,15 +379,6 @@ def test_update_current_child_answers_no_prexisting(
 
 
 def test_get_summary_feedback_for_session(user_client: TestClient, session):
-    answers = session.exec(
-        select(MilestoneAnswer).where(MilestoneAnswer.answer_session_id == 1)
-    ).all()
-    for answer in answers:
-        answer.included_in_milestone_statistics = False
-        answer.included_in_milestonegroup_statistics = False
-        session.merge(answer)
-    session.commit()
-
     response = user_client.get("/users/feedback/answersession=1/summary")
     assert response.status_code == 200
     assert response.json() == {"1": 1}
@@ -395,14 +390,6 @@ def test_get_summary_feedback_for_session_invalid(user_client: TestClient):
 
 
 def test_get_detailed_feedback_for_session(user_client: TestClient, session):
-    answers = session.exec(
-        select(MilestoneAnswer).where(MilestoneAnswer.answer_session_id == 1)
-    ).all()
-    for answer in answers:
-        answer.included_in_milestone_statistics = False
-        answer.included_in_milestonegroup_statistics = False
-        session.merge(answer)
-    session.commit()
     response = user_client.get("/users/feedback/answersession=1/detailed")
     assert response.status_code == 200
     assert response.json() == {"1": {"1": 1, "2": 1}}

@@ -149,6 +149,8 @@ def create_router() -> APIRouter:
         )
         if milestone_answer_session.user_id != current_active_user.id:
             raise HTTPException(401)
+        if milestone_answer_session.expired:
+            raise HTTPException(401, "Answer session has expired")
         milestone_answer = milestone_answer_session.answers.get(answer.milestone_id)
         if milestone_answer is None:
             raise HTTPException(401)

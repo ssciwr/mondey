@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
-from datetime import timedelta
 from enum import Enum
 from typing import cast
 
@@ -15,8 +13,6 @@ from ..models.milestones import MilestoneAgeScoreCollection
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneGroupAgeScore
 from ..models.milestones import MilestoneGroupAgeScoreCollection
-from .statistics import calculate_milestone_statistics_by_age
-from .statistics import calculate_milestonegroup_statistics_by_age
 from .utils import get_child_age_in_months
 
 
@@ -88,7 +84,6 @@ def compute_milestonegroup_feedback_summary(
     by first calculating the mean score over all milestones that belong to the milestonegroup that
     are relevant for the child when the given answersession was created. The mean is then
     compared against the mean and standard deviation over the known population of children for the child's age.
-    When the statistics is outdated (older than a week currently) or there is none, it is recomputed and updated in the database.
     See `compute_feedback_simple` for the feedback logic.
 
     Parameters
@@ -123,53 +118,35 @@ def compute_milestonegroup_feedback_summary(
     logger.debug(f"  child age in months: {age}")
     # extract milestonegroups
     groups = set(answer.milestone_group_id for answer in answersession.answers.values())
-    today = datetime.now()
 
     # for each milestonegroup, get the statistics, compute the current mean, and compute the feedback
-    # if the statistics is older than a week, we update it with the current data
     feedback: dict[int, int] = {}
     for group in groups:
         logger.debug(f"  group: {group}")
         stats = session.get(MilestoneGroupAgeScoreCollection, group)
-        logger.debug(f"  old stats: {stats}")
-        if stats is not None:
+        if stats is None:
+            logger.debug("  no stats")
+            feedback[group] = TrafficLight.invalid.value
+        else:
+            logger.debug(f"  stats: {stats}")
             for i, score in enumerate(stats.scores):
                 if score.count > 0:
                     logger.debug(
-                        f"   old score: , {i}, {score.count}, {score.avg_score}, {score.stddev_score}"
+                        f"   score: , {i}, {score.count}, {score.avg_score}, {score.stddev_score}"
                     )
-
-        if stats is None or stats.created_at < today - timedelta(days=7):
-            new_stats = calculate_milestonegroup_statistics_by_age(session, group)
-
-            if new_stats is None:
-                raise ValueError("No statistics for milestone group: ", group)
-
-            # update stuff in database
-            for i, new_score in enumerate(new_stats.scores):
-                if new_score.count > 0:
-                    logger.debug(
-                        f"   new_score: , {i}, {new_score.count}, {new_score.avg_score}, {new_score.stddev_score}"
-                    )
-                session.merge(new_score)
-
-            session.merge(new_stats)
-            session.commit()
-            stats = new_stats
-
-        # extract the answers for the current milestone group
-        group_answers = [
-            answer.answer + 1
-            for answer in answersession.answers.values()
-            if answer.milestone_group_id == group
-        ]
-        logger.debug(
-            f'  group answers: , {group_answers}, "mean: ", {np.mean(group_answers)}'
-        )
-        # use the statistics recorded for a certain age as the basis for the feedback computation
-        feedback[group] = compute_feedback_simple(
-            stats.scores[age], float(np.mean(group_answers))
-        )
+            # extract the answers for the current milestone group
+            group_answers = [
+                answer.answer + 1
+                for answer in answersession.answers.values()
+                if answer.milestone_group_id == group
+            ]
+            logger.debug(
+                f'  group answers: , {group_answers}, "mean: ", {np.mean(group_answers)}'
+            )
+            # use the statistics recorded for a certain age as the basis for the feedback computation
+            feedback[group] = compute_feedback_simple(
+                stats.scores[age], float(np.mean(group_answers))
+            )
     logger.debug(f"summary feedback: {feedback}")
     return feedback
 
@@ -179,8 +156,8 @@ def compute_milestonegroup_feedback_detailed(
 ) -> dict[int, dict[int, int]]:
     """
     Compute the per-milestone (detailed) feedback for all answers in a given answersession.
-    This is done by comparing the given answer per milestone against the mean and standard deviation of the known population of children for the child's age. If this statistics is outdated (older than a week currently) or is
-    missing, it is recomputed and updated in the database. See `compute_feedback_simple` for the feedback logic.
+    This is done by comparing the given answer per milestone against the mean and standard deviation of the known population of children for the child's age.
+    See `compute_feedback_simple` for the feedback logic.
     Return a dictionary mapping milestonegroup -> [milestone -> feedback].
     Parameters
     ----------
@@ -214,49 +191,28 @@ def compute_milestonegroup_feedback_detailed(
 
     age = get_child_age_in_months(child, answersession.created_at)
     logger.debug(f"  child age in months: {age}")
-    today = datetime.today()
 
     # for each milestonegroup, get the statistics, compute the current mean, and compute the feedback
     feedback: dict[int, dict[int, int]] = {}
     for milestone_id, answer in answersession.answers.items():
-        # try to get statistics for the current milestone and update it if it's not there
-        # or is too old
+        logger.debug(f"  milestone id: {milestone_id}, answer: {answer.answer + 1}")
         stats = session.get(MilestoneAgeScoreCollection, milestone_id)
-        logger.debug(f"  old stats: {stats}")
-        if stats is not None:
+        logger.debug(f"  stats: {stats}")
+        if answer.milestone_group_id not in feedback:
+            feedback[answer.milestone_group_id] = {}
+        if stats is None:
+            feedback[answer.milestone_group_id][cast(int, answer.milestone_id)] = (
+                TrafficLight.invalid.value
+            )
+        else:
             for i, score in enumerate(stats.scores):
                 if score.count > 0:
                     logger.debug(
-                        f"   old score: {i}, {score.count}, {score.avg_score}, {score.stddev_score}"
+                        f"   score: {i}, {score.count}, {score.avg_score}, {score.stddev_score}"
                     )
-
-        if stats is None or stats.created_at < today - timedelta(days=7):
-            new_stats = calculate_milestone_statistics_by_age(session, milestone_id)
-
-            if new_stats is None:
-                raise ValueError(
-                    "No new statistics could be calculated for milestone: ",
-                    milestone_id,
-                )
-
-            # update stuff in database
-            for i, new_score in enumerate(new_stats.scores):
-                if new_score.count > 0:
-                    logger.debug(
-                        f"   new_score: , {i}, {new_score.count}, {new_score.avg_score}, {new_score.stddev_score}"
-                    )
-                session.merge(new_score)
-
-            session.merge(new_stats)
-            session.commit()
-            stats = new_stats
-
-        if answer.milestone_group_id not in feedback:
-            feedback[answer.milestone_group_id] = {}
-
-        feedback[answer.milestone_group_id][cast(int, answer.milestone_id)] = (
-            compute_feedback_simple(stats.scores[age], answer.answer + 1)
-        )
+            feedback[answer.milestone_group_id][cast(int, answer.milestone_id)] = (
+                compute_feedback_simple(stats.scores[age], answer.answer + 1)
+            )
 
     logger.debug(f" detailed feedback: {feedback}")
 

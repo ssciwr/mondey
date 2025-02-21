@@ -24,6 +24,8 @@ dependencies = [
     "webp",
     "python-dateutil",
     "checkdigit",
+    "apscheduler",
+    "fastapi-injectable",
 ]
 dynamic = ["version"]
 

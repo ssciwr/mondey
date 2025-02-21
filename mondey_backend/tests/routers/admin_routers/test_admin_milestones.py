@@ -230,21 +230,17 @@ def test_get_milestone_age_scores(admin_client_stat: TestClient):
 
     assert response.json()["expected_age"] == 8
 
-    assert response.json()["scores"][7]["avg_score"] == pytest.approx(2.0)
-    assert response.json()["scores"][7]["stddev_score"] == pytest.approx(0.35)
-    assert response.json()["scores"][7]["count"] == 12
+    assert response.json()["scores"][7]["avg_score"] == pytest.approx(0.0)
+    assert response.json()["scores"][7]["stddev_score"] == pytest.approx(0.0)
+    assert response.json()["scores"][7]["count"] == 0
 
-    assert response.json()["scores"][8]["avg_score"] == pytest.approx(3.0)
+    assert response.json()["scores"][8]["avg_score"] == pytest.approx(2.0)
     assert response.json()["scores"][8]["stddev_score"] == pytest.approx(0.0)
-    assert response.json()["scores"][8]["count"] == 12
+    assert response.json()["scores"][8]["count"] == 1
 
-    assert response.json()["scores"][9]["avg_score"] == pytest.approx(3.0)
+    assert response.json()["scores"][9]["avg_score"] == pytest.approx(0.0)
     assert response.json()["scores"][9]["stddev_score"] == pytest.approx(0.0)
-    assert response.json()["scores"][9]["count"] == 12
-
-    assert response.json()["scores"][10]["avg_score"] == pytest.approx(3.0)
-    assert response.json()["scores"][10]["stddev_score"] == pytest.approx(0.0)
-    assert response.json()["scores"][10]["count"] == 12
+    assert response.json()["scores"][9]["count"] == 0
 
 
 def test_get_submitted_milestone_images(admin_client: TestClient):

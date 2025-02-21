@@ -1,19 +1,15 @@
-from datetime import datetime
-from datetime import timedelta
-
-import numpy as np
+import pytest
 from sqlmodel import select
 
 from mondey_backend.models.milestones import MilestoneAgeScore
-from mondey_backend.models.milestones import MilestoneAgeScoreCollection
 from mondey_backend.models.milestones import MilestoneAnswerSession
-from mondey_backend.models.milestones import MilestoneGroupAgeScore
 from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
 from mondey_backend.routers.scores import TrafficLight
 from mondey_backend.routers.scores import compute_feedback_simple
 from mondey_backend.routers.scores import compute_milestonegroup_feedback_detailed
 from mondey_backend.routers.scores import compute_milestonegroup_feedback_summary
 from mondey_backend.routers.utils import get_milestonegroups_for_answersession
+from mondey_backend.statistics import update_stats
 
 
 def test_get_milestonegroups_for_answersession(session):
@@ -24,8 +20,9 @@ def test_get_milestonegroups_for_answersession(session):
 
 
 def test_get_milestonegroups_for_answersession_no_data(session):
-    answersession = session.get(MilestoneAnswerSession, 3)
-    milestonegroups = get_milestonegroups_for_answersession(session, answersession)
+    milestonegroups = get_milestonegroups_for_answersession(
+        session, MilestoneAnswerSession()
+    )
     assert len(milestonegroups) == 0
 
 
@@ -46,124 +43,102 @@ def test_compute_feedback_simple():
     score = 3
     assert compute_feedback_simple(dummy_scores, score) == 1
 
-    dummy_scores = MilestoneGroupAgeScore(
-        milestonegroup_id=1,
-        age_months=8,
-        avg_score=3.0,
-        stddev_score=1.2,
-    )
-
 
 def test_compute_summary_milestonegroup_feedback_for_answersession_with_recompute(
     statistics_session,
 ):
-    old_entries = statistics_session.exec(
-        select(MilestoneGroupAgeScoreCollection)
+    child_age = 8
+    # existing statistics for milestonegroup 1 at age 8 months: [1,2] -> mean = 1.5 +/- 0.5
+    statistics = statistics_session.exec(
+        select(MilestoneGroupAgeScoreCollection).where(
+            MilestoneGroupAgeScoreCollection.milestone_group_id == 1
+        )
     ).all()
-    assert len(old_entries) == 1
-    for entry in old_entries:
-        assert entry.created_at < datetime.now() - timedelta(
-            hours=1
-        )  # can be at max 1 hour old
-
-    # there is an existing statistics for milestonegroup 1, which has milestones 1 and 2
-    # which gives mean = 1.92 and stddev = 0.21, and we have 2 additional answers for these m
-    # milestones with answers 3 and 2 for milestones 1 and 2 respectively. ==> statistics
-    # changes to mean = 2.446 +/- 0.89. The first call updates the statistics with the new
-    # values, the second does not.
+    assert len(statistics) == 1
+    assert statistics[0].scores[child_age].avg_score == pytest.approx(1.5, abs=0.001)
+    assert statistics[0].scores[child_age].stddev_score == pytest.approx(0.5, abs=0.001)
+    # answer session 1 scores: [1, 2] -> mean 1.5 -> green
     feedback = compute_milestonegroup_feedback_summary(
         statistics_session, child_id=1, answersession_id=1
     )
-
-    assert feedback[1] == TrafficLight.yellow.value
+    assert feedback[1] == TrafficLight.green.value
     assert len(feedback) == 1
-
-    # same as above, but for answers 4, 3  -> 3.5 ==> green
+    # answer session 2 scores: [3, 4] -> mean 3.5 -> green
     feedback = compute_milestonegroup_feedback_summary(
         statistics_session, child_id=1, answersession_id=2
     )
-    assert len(feedback) == 1
     assert feedback[1] == TrafficLight.green.value
-    new_entries = statistics_session.exec(
-        select(MilestoneGroupAgeScoreCollection)
-    ).all()
-    assert len(new_entries) == len(old_entries)
-    for old, new in zip(old_entries, new_entries, strict=True):
-        assert new.created_at >= datetime.now() - timedelta(
-            hours=1
-        )  # can be at max 1 hour old
-        assert old.milestone_group_id == new.milestone_group_id
+    assert len(feedback) == 1
+    for update_existing_statistics in [True, False]:
+        update_stats(statistics_session, incremental_update=update_existing_statistics)
+        # updated stats for milestonegroup 1 at age 8 months: [1,2,3,4,3,4] -> mean = 2.83333 +/- ~1.2
+        statistics = statistics_session.exec(
+            select(MilestoneGroupAgeScoreCollection).where(
+                MilestoneGroupAgeScoreCollection.milestone_group_id == 1
+            )
+        ).all()
+        assert len(statistics) == 1
+        assert statistics[0].scores[child_age].avg_score == pytest.approx(
+            2.83333, abs=0.001
+        )
+        assert statistics[0].scores[child_age].stddev_score == pytest.approx(
+            1.2, abs=0.1
+        )
+        # answer session 1 score 1.5 -> yellow
+        feedback = compute_milestonegroup_feedback_summary(
+            statistics_session, child_id=1, answersession_id=1
+        )
+        assert feedback[1] == TrafficLight.yellow.value
+        assert len(feedback) == 1
+        # answer session 2 score 3.5 remain green
+        feedback = compute_milestonegroup_feedback_summary(
+            statistics_session, child_id=1, answersession_id=2
+        )
+        assert feedback[1] == TrafficLight.green.value
+        assert len(feedback) == 1
 
 
 def test_compute_summary_milestonegroup_feedback_for_answersession_no_existing_stat(
     statistics_session,
 ):
-    # there is only 2 answer sfor milestonegroup 2 which only has milestone 7.
-    # these 2 are from 2 answersessions which are 10 days apart so fall into the
-    # same age group => the feedback has only one entry for milestonegroup 2
-    # and because the answers are 3 and 2 -> avg = 2.5 +/- 0.7071 -> green for answer = 3
     feedback = compute_milestonegroup_feedback_summary(
         statistics_session, child_id=3, answersession_id=3
     )
 
     assert len(feedback) == 1
-    assert feedback[2] == TrafficLight.green.value
-
-    #  check that the statistics have been updated
-    statistics = statistics_session.exec(
-        select(MilestoneGroupAgeScoreCollection).where(
-            MilestoneGroupAgeScoreCollection.milestone_group_id == 2
-        )
-    ).all()
-    assert len(statistics) == 1
-    assert statistics[0].created_at >= datetime.now() - timedelta(
-        minutes=1
-    )  # can be at max 1 min old
-
-    assert statistics[0].scores[42].count == 2
-    assert np.isclose(statistics[0].scores[42].avg_score, 2.5)
-    assert np.isclose(statistics[0].scores[42].stddev_score, 0.7071)
-
-    for i, score in enumerate(statistics[0].scores):
-        if i != 42:
-            assert np.isclose(score.avg_score, 0)
-            assert np.isclose(score.stddev_score, 0)
-            assert np.isclose(score.count, 0)
+    assert feedback[2] == TrafficLight.invalid.value
 
 
 def test_compute_detailed_milestonegroup_feedback_for_answersession_with_recompute(
     statistics_session,
 ):
-    old_entries = statistics_session.exec(select(MilestoneAgeScoreCollection)).all()
-    assert len(old_entries) == 2
-    for entry in old_entries:
-        assert entry.created_at < datetime.now() - timedelta(
-            hours=1
-        )  # can be at max 1 hour old
-
+    # initial stats only include answer session 1: all feedback green
     feedback = compute_milestonegroup_feedback_detailed(
         statistics_session, child_id=1, answersession_id=1
     )
     assert len(feedback) == 1
     assert len(feedback[1]) == 2
-    assert feedback[1][1] == TrafficLight.green.red.value
-    assert feedback[1][2] == TrafficLight.green.red.value
-    new_entries = statistics_session.exec(select(MilestoneAgeScoreCollection)).all()
-    assert len(new_entries) == 2
-    for old, new in zip(old_entries, new_entries, strict=True):
-        assert new.created_at >= datetime.now() - timedelta(
-            hours=1
-        )  # can be at max 1 hour old
-        assert old.milestone_id == new.milestone_id
+    assert feedback[1][1] == TrafficLight.green.value
+    assert feedback[1][2] == TrafficLight.green.value
+
+    # updated stats include more answer sessions
+    update_stats(statistics_session, incremental_update=True)
+    feedback = compute_milestonegroup_feedback_detailed(
+        statistics_session, child_id=1, answersession_id=1
+    )
+    assert len(feedback) == 1
+    assert len(feedback[1]) == 2
+    # milestone 1: score 2, mean = 3.33+/-1.2 -> yellow
+    assert feedback[1][1] == TrafficLight.yellow.value
+    # milestone 2: score 1, mean = 2.33+/-1.2 -> yello
+    assert feedback[1][2] == TrafficLight.yellow.value
 
 
 def test_compute_detailed_milestonegroup_feedback_for_answersession_no_existing_stat(
     statistics_session,
 ):
-    # follows the same logic as the corresponding test for the milestonegroup summary feedback
     feedback = compute_milestonegroup_feedback_detailed(
         statistics_session, child_id=3, answersession_id=3
     )
-
     assert len(feedback) == 1
-    assert feedback[2][7] == TrafficLight.green.green.value
+    assert feedback[2][5] == TrafficLight.invalid.value
