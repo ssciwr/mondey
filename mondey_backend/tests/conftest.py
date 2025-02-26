@@ -844,6 +844,20 @@ def active_user2():
     )
 
 
+@pytest.fixture
+def active_research_user_full_data_access():
+    return UserRead(
+        id=5,
+        email="research@mondey.de",
+        is_active=True,
+        is_superuser=False,
+        is_researcher=True,
+        full_data_access=True,
+        research_group_id=123451,  # todo change this id
+        is_verified=True,
+    )
+
+
 @pytest.fixture(scope="function")
 def app(
     static_dir: pathlib.Path,
@@ -892,6 +906,22 @@ def research_client(
 ):
     app.dependency_overrides[current_active_user] = lambda: active_research_user
     app.dependency_overrides[current_active_researcher] = lambda: active_research_user
+    client = TestClient(app)
+    yield client
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def research_client_full_data_access(
+    app: FastAPI,
+    active_research_user_full_data_access: UserRead,
+):
+    app.dependency_overrides[current_active_user] = (
+        lambda: active_research_user_full_data_access
+    )
+    app.dependency_overrides[current_active_researcher] = (
+        lambda: active_research_user_full_data_access
+    )
     client = TestClient(app)
     yield client
     app.dependency_overrides.clear()

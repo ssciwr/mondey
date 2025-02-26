@@ -524,6 +524,16 @@ export type GetMilestoneAgeScoresResponse = (MilestoneAgeScoreCollectionPublic);
 
 export type GetMilestoneAgeScoresError = (HTTPValidationError);
 
+export type UpdateMilestoneAgeScoresData = {
+    path: {
+        update_existing_statistics: boolean;
+    };
+};
+
+export type UpdateMilestoneAgeScoresResponse = (string);
+
+export type UpdateMilestoneAgeScoresError = (HTTPValidationError);
+
 export type GetUserQuestionsAdminResponse = (Array<UserQuestionAdmin>);
 
 export type GetUserQuestionsAdminError = unknown;
@@ -894,6 +904,8 @@ export type VerifyVerifyResponse = (UserRead);
 
 export type VerifyVerifyError = (ErrorModel | HTTPValidationError);
 
-export type AuthResponse = (unknown);
+export type GetResearchDataResponse = (Array<{
+    [key: string]: (string | number);
+}>);
 
-export type AuthError = unknown;
+export type GetResearchDataError = unknown;

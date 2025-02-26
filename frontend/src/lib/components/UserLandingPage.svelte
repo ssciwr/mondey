@@ -12,6 +12,7 @@ import {
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 import AdminPage from "./AdminPage.svelte";
+import ResearchPage from "./ResearchPage.svelte";
 import UserDataInput from "./UserDataInput.svelte";
 
 onMount(user.load);
@@ -60,7 +61,7 @@ onMount(user.load);
 							<AtomOutline size="lg" />
 							<span class="hidden md:inline">{i18n.tr.researcher.label}</span>
 						</div>
-						<Card />
+						<ResearchPage />
 					</TabItem>
 				{/if}
 			</Tabs>
