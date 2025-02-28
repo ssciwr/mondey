@@ -543,15 +543,10 @@ export const MilestoneAgeScoreCollectionPublicSchema = {
             },
             type: 'array',
             title: 'Scores'
-        },
-        created_at: {
-            type: 'string',
-            format: 'date-time',
-            title: 'Created At'
         }
     },
     type: 'object',
-    required: ['milestone_id', 'expected_age', 'scores', 'created_at'],
+    required: ['milestone_id', 'expected_age', 'scores'],
     title: 'MilestoneAgeScoreCollectionPublic'
 } as const;
 
