@@ -184,6 +184,9 @@ def _get_statistics_by_age(
 
 
 def make_any_stale_answer_sessions_inactive(session: SessionDep) -> None:
+    """
+    mark any answersession that is older than 9 days as inactive by setting the expired flag. This includes a grace period of 2 days wrt the normal expiration timedelta of 7 days to avoid setting currently in-use answersessions to expired.
+    """
     days_after_which_session_is_stale = 9
     stale_date = datetime.datetime.now() - datetime.timedelta(
         days=days_after_which_session_is_stale
@@ -199,6 +202,15 @@ def make_any_stale_answer_sessions_inactive(session: SessionDep) -> None:
 
 
 def update_stats(session: SessionDep, incremental_update: bool = True):
+    """Update the recorded statistics of the milestonegroups and milestones.
+    It only uses expired milestoneanswersesssions. If `incremental_update` is True, it will only update the current statistics wit the new answersessions. Else, it will recalculate all statistics completely. The latter may be necessary if admins change the answersessions in the database by hand.
+    Args:
+        session (SessionDep): database session
+        incremental_update (bool, optional): Whether or not to recalculate the statistics completely. Defaults to True.
+
+    Returns:
+        str: Message string indicating successful statistics calculation or update
+    """
     logger = logging.getLogger(__name__)
     logger.debug(
         f"Starting {'incremental' if incremental_update else 'full'} statistics update"

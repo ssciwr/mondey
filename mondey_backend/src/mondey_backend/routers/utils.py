@@ -213,7 +213,7 @@ def _get_answer_session_child_ages_in_months(
 
 
 def _get_expected_age_from_scores(scores: np.ndarray) -> int:
-    # placeholder algorithm: returns first age with avg score > 3
+    # TODO: placeholder algorithm: returns first age with avg score > 3
     return int(np.argmax(scores >= 3.0))
 
 

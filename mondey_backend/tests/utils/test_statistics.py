@@ -213,7 +213,7 @@ def test_calculate_milestone_statistics_by_age(statistics_session):
     assert np.isclose(m2.scores[8].stddev_score, 0.0)
 
     # updated stats (answer sessions 1, 2, 4)
-    update_stats(statistics_session, incremental_update=False)
+    update_stats(statistics_session, incremental_update=True)
     m1 = statistics_session.get(MilestoneAgeScoreCollection, 1)
     m2 = statistics_session.get(MilestoneAgeScoreCollection, 2)
 
