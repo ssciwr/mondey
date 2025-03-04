@@ -88,7 +88,7 @@ def children():
 
     nine_months_ago = today - relativedelta(months=9)
     twenty_months_ago = today - relativedelta(months=20)
-
+    fiftyfive_months_ago = today - relativedelta(months=55)
     return [
         # ~9month old child for user (id 3)
         {
@@ -110,8 +110,8 @@ def children():
         },
         # ~5 year old child for admin user (id 1)
         {
-            "birth_month": 7,
-            "birth_year": today.year - 5,
+            "birth_month": fiftyfive_months_ago.month,
+            "birth_year": fiftyfive_months_ago.year,
             "id": 3,
             "name": "child3",
             "has_image": True,
