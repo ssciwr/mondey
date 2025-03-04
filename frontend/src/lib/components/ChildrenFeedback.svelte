@@ -407,6 +407,7 @@ let promise = $state(setup());
 				<p class ="text-gray-700 dark:text-gray-400 font-medium text-sm md:text-md" >{i18n.tr.milestone.feedbackDetailsMilestone}</p>
 			</Modal>
 
+			<!-- TODO: remove the accordion here and display it all the time -->			
 			<Accordion class="p-2 m-2 w-full">
 				<AccordionItem >
 					<span slot="header" class="text-gray-700 dark:text-gray-400">{i18n.tr.milestone.legend}</span>
@@ -428,6 +429,7 @@ let promise = $state(setup());
 				</AccordionItem>
 			</Accordion>
 
+			<!-- TODO: remove this-->
 			<div class="flex items-center justify-start w-full m-2 p-2">
 				<Button class = "m-2 p-2 pb-4 mb-4 items-center justify-center md:w-1/6 w-5/6" onclick = {() => {
 					showMoreInfo = true;
@@ -442,6 +444,7 @@ let promise = $state(setup());
 
 			<p class = "justify-center font-bold m-2 p-2 text-gray-700 dark:text-gray-400">{i18n.tr.milestone.selectFeedback}</p>
 
+			<!-- TODO: remove this and show history always-->
 			<Checkbox class= "pb-4 m-2 p-2 text-gray-700 dark:text-gray-400" bind:checked={showHistory} >{i18n.tr.milestone.showHistory}</Checkbox>
 
 			<Hr classHr= "mx-2"/>
