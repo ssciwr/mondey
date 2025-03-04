@@ -33,8 +33,8 @@ async def lifespan(app: FastAPI):
     create_mondey_db_and_tables()
     await create_user_db_and_tables()
     scheduler = AsyncIOScheduler()
-    print(f'crontab shit: {app_settings.STATS_CRONTAB}')
     cronexpr = app_settings.STATS_CRONTAB.replace('\"','\'').replace('mon', '1')
+    print(f'crontab shit: {app_settings.STATS_CRONTAB}')
     scheduler.add_job(
         scheduled_update_stats,
         CronTrigger.from_crontab(cronexpr),
