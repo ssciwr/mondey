@@ -16,7 +16,7 @@ services:
       - PORT=${PORT:-80}
       - RELOAD=${RELOAD:-false}
       - LOG_LEVEL=${LOG_LEVEL:-info}
-      - STATS_CRONTAB=${STATS_CRONTAB:-"0 3 * * mon"}
+      - STATS_CRONTAB=${STATS_CRONTAB:-0 3 * * mon}
     logging:
       driver: "local"
       options:
