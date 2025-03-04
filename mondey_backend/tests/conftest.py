@@ -88,7 +88,7 @@ def children():
 
     nine_months_ago = today - relativedelta(months=9)
     twenty_months_ago = today - relativedelta(months=20)
-
+    fiftyfive_months_ago = today - relativedelta(months=55)
     return [
         # ~9month old child for user (id 3)
         {
@@ -110,8 +110,8 @@ def children():
         },
         # ~5 year old child for admin user (id 1)
         {
-            "birth_month": 7,
-            "birth_year": today.year - 5,
+            "birth_month": fiftyfive_months_ago.month,
+            "birth_year": fiftyfive_months_ago.year,
             "id": 3,
             "name": "child3",
             "has_image": True,
@@ -245,6 +245,8 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 child_id=1,
                 user_id=3,
                 created_at=datetime.datetime(last_month.year, last_month.month, 15),
+                expired=True,
+                included_in_statistics=True,
             )
         )
         session.add(
@@ -253,8 +255,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 milestone_id=1,
                 milestone_group_id=1,
                 answer=1,
-                included_in_milestone_statistics=True,
-                included_in_milestonegroup_statistics=True,
             )
         )
         session.add(
@@ -263,12 +263,18 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 milestone_id=2,
                 milestone_group_id=1,
                 answer=0,
-                included_in_milestone_statistics=True,
-                included_in_milestonegroup_statistics=True,
             )
         )
-        # add another (current) milestone answer session for child 1 / user (id 3) with 2 answers to the same questions
-        session.add(MilestoneAnswerSession(child_id=1, user_id=3, created_at=today))
+        # add another (unexpired and not included in stats) milestone answer session for child 1 / user (id 3) with 2 answers to the same questions
+        session.add(
+            MilestoneAnswerSession(
+                child_id=1,
+                user_id=3,
+                created_at=datetime.datetime(last_month.year, last_month.month, 20),
+                expired=False,
+                included_in_statistics=False,
+            )
+        )
         # add two milestone answers
         session.add(
             MilestoneAnswer(
@@ -280,22 +286,93 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 answer_session_id=2, milestone_id=2, milestone_group_id=1, answer=2
             )
         )
-        # add an (expired) milestone answer session for child 3 / admin user (id 1) with 1 answer
+        # add an (un-expired) milestone answer session for child 3 / admin user (id 1) with 1 answer
         session.add(
             MilestoneAnswerSession(
                 child_id=3,
                 user_id=1,
-                created_at=datetime.datetime(today.year - 1, 1, 1),
+                created_at=datetime.datetime.today(),
+                expired=False,
+                included_in_statistics=False,
             )
         )
         session.add(
             MilestoneAnswer(
                 answer_session_id=3,
-                milestone_id=7,
+                milestone_id=5,
                 milestone_group_id=2,
                 answer=2,
             )
         )
+        # add MilestoneAgeScoreCollection for milestone 1
+        session.add(
+            MilestoneAgeScoreCollection(
+                milestone_id=1,
+                expected_age=8,
+                created_at=datetime.datetime(
+                    last_month.year,
+                    last_month.month,
+                    17,
+                ),
+            )
+        )
+        for age in range(0, 73):
+            session.add(
+                MilestoneAgeScore(
+                    age=age,
+                    milestone_id=1,
+                    count=1 if age == 8 else 0,
+                    avg_score=2.0 if age == 8 else 0,
+                    stddev_score=0.0,
+                    expected_score=3 if age >= 8 else 1,
+                )
+            )
+
+        # add MilestoneAgeScoreCollection for milestone 2
+        session.add(
+            MilestoneAgeScoreCollection(
+                milestone_id=2,
+                expected_age=8,
+                created_at=datetime.datetime(
+                    last_month.year,
+                    last_month.month,
+                    17,
+                ),
+            )
+        )
+        for age in range(0, 73):
+            session.add(
+                MilestoneAgeScore(
+                    age=age,
+                    milestone_id=2,
+                    count=1 if age == 8 else 0,
+                    avg_score=1.0 if age == 8 else 0,
+                    stddev_score=0.0,
+                    expected_score=3 if age >= 8 else 1,
+                )
+            )
+
+        # add MilestoneGroupAgeScoreCollection for milestone group 1
+        session.add(
+            MilestoneGroupAgeScoreCollection(
+                milestone_group_id=1,
+                created_at=datetime.datetime(
+                    last_month.year,
+                    last_month.month,
+                    17,
+                ),
+            )
+        )
+        for age in range(0, 73):
+            session.add(
+                MilestoneGroupAgeScore(
+                    age=age,
+                    milestone_group_id=1,
+                    count=2 if age == 8 else 0,
+                    avg_score=1.5 if age == 8 else 0.0,
+                    stddev_score=0.5 if age == 8 else 0.0,
+                )
+            )
         # add a research group (that user with id 3 is part of, and researcher with id 2 has access to)
         session.add(ResearchGroup(id="123451"))
         # add user questions for admin
@@ -484,6 +561,8 @@ def statistics_session(session):
             child_id=1,
             user_id=3,
             created_at=datetime.datetime(last_month.year, last_month.month, 20),
+            expired=True,
+            included_in_statistics=False,
         )
     )
     session.add(
@@ -497,114 +576,21 @@ def statistics_session(session):
         )
     )
 
-    # add another expired answersession for milestone 7 for child 3 that is a bit later
-    # than answersession 3 (the last one for the same child), but still expired
+    # add an expired answersession for child 3 with answers for milestone 7 & 8
     session.add(
         MilestoneAnswerSession(
-            child_id=3, user_id=1, created_at=datetime.datetime(today.year - 1, 1, 10)
+            child_id=3,
+            user_id=1,
+            created_at=datetime.datetime(today.year - 1, 1, 10),
+            expired=True,
+            included_in_statistics=False,
         )
     )
     session.add(
         MilestoneAnswer(
-            answer_session_id=5, milestone_id=7, milestone_group_id=2, answer=1
+            answer_session_id=5, milestone_id=5, milestone_group_id=2, answer=1
         )
     )
-
-    # add MilestoneAgeScoreCollections for milestone 1 and 2. Done such that
-    # answersession 4 added above did not yet factor into its calculation
-    # numbers for avg/stddev in the scores will be arbitrary
-    session.add(
-        MilestoneAgeScoreCollection(
-            milestone_id=1,
-            expected_age=8,
-            created_at=datetime.datetime(
-                last_month.year,
-                last_month.month,
-                17,  # between answersessions -> recompute
-            ),
-        )
-    )
-
-    session.add(
-        MilestoneAgeScoreCollection(
-            milestone_id=2,
-            expected_age=8,
-            created_at=datetime.datetime(
-                last_month.year,
-                last_month.month,
-                17,  # between answersessions -> recompute
-            ),
-        )
-    )
-
-    def sigma(age, lower, upper, value):
-        if age < lower or age >= upper:
-            return 0
-        else:
-            return value
-
-    # add scores for milestone 1 and 2
-    for age in range(0, 73):
-        session.add(
-            MilestoneAgeScore(
-                age=age,
-                milestone_id=1,
-                count=12,
-                avg_score=0.0
-                if age < 5
-                else min(
-                    1 * age - 5, 3
-                ),  # linear increase from some age onward arbitrary numbers here
-                stddev_score=sigma(
-                    age, 5, 8, 0.35
-                ),  # arbitrary numbers here. constant stddev for increasing avg else 0
-                expected_score=3 if age >= 8 else 1,
-            )
-        )
-        session.add(
-            MilestoneAgeScore(
-                age=age,
-                milestone_id=2,
-                count=7,
-                avg_score=0.0 if age < 5 else min(0.5 * age - 2, 3),
-                stddev_score=sigma(age, 5, 10, 0.4),
-                expected_score=3 if age >= 10 else 1,
-            )
-        )
-
-    # add milestonegroup age score collection for milestonegroup 1
-    # which is a month old and hence is. repeats the logic used for the
-    # MilestoneAgeScores
-    session.add(
-        MilestoneGroupAgeScoreCollection(
-            milestone_group_id=1,
-            created_at=datetime.datetime(
-                last_month.year,
-                last_month.month,
-                17,  # between answersessions -> recompute
-            ),
-        )
-    )
-
-    for age in range(0, 73):
-        session.add(
-            MilestoneGroupAgeScore(
-                age=age,
-                milestone_group_id=1,
-                count=4
-                if age
-                in [
-                    5,
-                    6,
-                    7,
-                    8,
-                ]
-                else 0,
-                avg_score=0.0 if age < 5 else min(0.24 * age, 3),
-                stddev_score=sigma(age, 5, 9, 0.21),
-            )
-        )
-
     session.commit()
     yield session
 

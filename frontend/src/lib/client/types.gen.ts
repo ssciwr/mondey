@@ -137,7 +137,6 @@ export type MilestoneAgeScoreCollectionPublic = {
     milestone_id: number;
     expected_age: number;
     scores: Array<MilestoneAgeScore>;
-    created_at: string;
 };
 
 export type MilestoneAnswerPublic = {

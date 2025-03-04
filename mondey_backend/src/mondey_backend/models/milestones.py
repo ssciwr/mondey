@@ -158,8 +158,6 @@ class MilestoneAnswer(SQLModel, table=True):
     )
     milestone_group_id: int = Field(default=None, foreign_key="milestonegroup.id")
     answer: int
-    included_in_milestone_statistics: bool = False
-    included_in_milestonegroup_statistics: bool = False
 
 
 class MilestoneAnswerSession(SQLModel, table=True):
@@ -171,6 +169,8 @@ class MilestoneAnswerSession(SQLModel, table=True):
             "server_default": text("CURRENT_TIMESTAMP"),
         }
     )
+    expired: bool
+    included_in_statistics: bool
     answers: Mapped[dict[int, MilestoneAnswer]] = dict_relationship(key="milestone_id")
 
 
@@ -214,7 +214,6 @@ class MilestoneAgeScoreCollectionPublic(SQLModel):
     milestone_id: int
     expected_age: int
     scores: list[MilestoneAgeScore]
-    created_at: datetime.datetime
 
 
 class MilestoneGroupAgeScore(SQLModel, table=True):
@@ -235,8 +234,3 @@ class MilestoneGroupAgeScoreCollection(SQLModel, table=True):
         default=None, primary_key=True, foreign_key="milestonegroup.id"
     )
     scores: Mapped[list[MilestoneGroupAgeScore]] = back_populates("collection")
-    created_at: datetime.datetime = Field(
-        sa_column_kwargs={
-            "server_default": text("CURRENT_TIMESTAMP"),
-        }
-    )

@@ -41,7 +41,7 @@ def test_create_research_group(admin_client: TestClient):
     assert response.status_code == 200
     new_research_group = response.json()
     assert verhoeff.validate(str(new_research_group["id"]))
-    assert admin_client.get("/admin/research-groups/").json() == [
-        research_group,
-        new_research_group,
-    ]
+    new_groups = admin_client.get("/admin/research-groups/").json()
+    assert len(new_groups) == 2
+    assert research_group in new_groups
+    assert new_research_group in new_groups

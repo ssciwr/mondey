@@ -22,9 +22,10 @@ def test_get_milestonegroups_for_answersession(session):
 
 
 def test_get_answer_session_child_ages_in_months(session):
-    child_ages = _get_answer_session_child_ages_in_months(session)
+    answer_sessions = session.exec(select(MilestoneAnswerSession)).all()
+    child_ages = _get_answer_session_child_ages_in_months(session, answer_sessions)
 
     assert len(child_ages) == 3
     assert child_ages[1] == 8
-    assert child_ages[2] == 9
-    assert child_ages[3] == 42
+    assert child_ages[2] == 8
+    assert child_ages[3] == 55

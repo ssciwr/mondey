@@ -47,10 +47,8 @@ def test_get_milestone_groups_child3(
     response = admin_client.get("/milestone-groups/3")
     assert response.status_code == 200
     assert len(response.json()) == 2
-    # child 3 age is ~60 months old, so no milestones
     milestone_group1["milestones"] = []
-    # and first last milestone from group2 (24m):
-    milestone_group2["milestones"] = []
+    milestone_group2["milestones"] = milestone_group2["milestones"][1:]
 
     assert response.json() == [milestone_group2, milestone_group1]
 

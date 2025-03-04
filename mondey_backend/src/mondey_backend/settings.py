@@ -19,6 +19,7 @@ class AppSettings(BaseSettings):
     RELOAD: bool = True
     LOG_LEVEL: str = "debug"
     COOKIE_SECURE: bool = False
+    STATS_CRONTAB: str = "0 3 * * mon"
 
 
 app_settings = AppSettings()

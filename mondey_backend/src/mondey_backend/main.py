@@ -5,9 +5,12 @@ import pathlib
 from contextlib import asynccontextmanager
 
 import uvicorn
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi_injectable.util import get_injected_obj
 
 from .databases.mondey import create_mondey_db_and_tables
 from .databases.users import create_user_db_and_tables
@@ -18,13 +21,25 @@ from .routers import questions
 from .routers import research
 from .routers import users
 from .settings import app_settings
+from .statistics import update_stats
+
+
+def scheduled_update_stats():
+    return get_injected_obj(update_stats)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_mondey_db_and_tables()
     await create_user_db_and_tables()
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(
+        scheduled_update_stats,
+        CronTrigger.from_crontab(app_settings.STATS_CRONTAB),
+    )
+    scheduler.start()
     yield
+    scheduler.shutdown()
 
 
 def create_app() -> FastAPI:

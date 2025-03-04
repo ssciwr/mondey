@@ -4,6 +4,7 @@ import datetime
 import logging
 import pathlib
 from collections.abc import Iterable
+from collections.abc import Sequence
 from typing import TypeVar
 
 import numpy as np
@@ -144,13 +145,18 @@ def get_or_create_current_milestone_answer_session(
         .where(col(MilestoneAnswerSession.child_id) == child.id)
         .order_by(col(MilestoneAnswerSession.created_at).desc())
     ).first()
-    if milestone_answer_session is None or _session_has_expired(
-        milestone_answer_session
-    ):
+    if milestone_answer_session and _session_has_expired(milestone_answer_session):
+        milestone_answer_session.expired = True
+        session.add(milestone_answer_session)
+        session.commit()
+        session.refresh(milestone_answer_session)
+    if milestone_answer_session is None or milestone_answer_session.expired:
         milestone_answer_session = MilestoneAnswerSession(
             child_id=child.id,
             user_id=current_active_user.id,
             created_at=datetime.datetime.now(),
+            expired=False,
+            included_in_statistics=False,
         )
         add(session, milestone_answer_session)
         delta_months = 6
@@ -195,9 +201,9 @@ def get_db_child(
     return child
 
 
-def _get_answer_session_child_ages_in_months(session: SessionDep) -> dict[int, int]:
-    answer_sessions = session.exec(select(MilestoneAnswerSession)).all()
-
+def _get_answer_session_child_ages_in_months(
+    session: SessionDep, answer_sessions: Sequence[MilestoneAnswerSession]
+) -> dict[int, int]:
     return {
         answer_session.id: get_child_age_in_months(  # type: ignore
             get(session, Child, answer_session.child_id), answer_session.created_at
@@ -207,8 +213,8 @@ def _get_answer_session_child_ages_in_months(session: SessionDep) -> dict[int, i
 
 
 def _get_expected_age_from_scores(scores: np.ndarray) -> int:
-    # placeholder algorithm: returns first age with avg score > 3
-    return np.argmax(scores >= 3.0)
+    # TODO: placeholder algorithm: returns first age with avg score > 3
+    return int(np.argmax(scores >= 3.0))
 
 
 def child_image_path(child_id: int | None) -> pathlib.Path:
@@ -242,12 +248,12 @@ def get_milestonegroups_for_answersession(
 ) -> dict[int, MilestoneGroup]:
     check_for_overlap = (
         select(Milestone.group_id)
-        .where(Milestone.id.in_(answersession.answers.keys()))  # type: ignore
+        .where(col(Milestone.id).in_(answersession.answers.keys()))
         .distinct()
     )
     return {
         m.id: m  # type: ignore
         for m in session.exec(
-            select(MilestoneGroup).where(MilestoneGroup.id.in_(check_for_overlap))  # type: ignore
+            select(MilestoneGroup).where(col(MilestoneGroup.id).in_(check_for_overlap))
         ).all()
     }
