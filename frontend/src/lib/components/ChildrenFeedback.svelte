@@ -34,7 +34,6 @@ import {
 	ChartLineUpOutline,
 	CheckCircleSolid,
 	CloseCircleSolid,
-	ExclamationCircleSolid,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import AlertMessage from "./AlertMessage.svelte";
@@ -51,7 +50,7 @@ let detailed = $state({}) as Record<number, any>;
 let summary = $state({}) as Record<number, any>;
 let answerSessions = $state({}) as Record<number, MilestoneAnswerSessionPublic>;
 let showHelp = $state(false);
-const intervalSize = 4;
+const intervalSize = 6;
 let currentSessionIndices = $state([0, intervalSize]);
 let relevant_sessionkeys = $state([] as number[]);
 let showMoreInfo = $state(false);
@@ -65,7 +64,7 @@ let milestonePresentation = $state([
 		showExplanation: false,
 	},
 	{
-		icon: ExclamationCircleSolid,
+		icon: BellActiveSolid,
 		text: i18n.tr.milestone.recommendWatch,
 		short: i18n.tr.milestone.recommendWatchShort,
 		class: "text-feedback-1 w-16",
@@ -80,6 +79,7 @@ let milestonePresentation = $state([
 	},
 ]);
 
+// data defining where the breadcrumb elements should lead to
 const breadcrumbdata: any[] = [
 	{
 		label: currentChild.name,
@@ -175,7 +175,19 @@ async function loadDetailedFeedback(relevant: number[]): Promise<void> {
 			return;
 		}
 
-		detailed[Number(aid)] = response.data;
+		let res = {} as Record<number, Record<number, number>>;
+
+		// filter out the milestones that are not ideal and only show those
+		for (const [mid, milestones] of Object.entries(response.data)) {
+			res[Number(mid)] = {} as Record<number, number>;
+			for (const [ms_id, ms_score] of Object.entries(milestones)) {
+				if (ms_score <= 0) {
+					res[Number(mid)][Number(ms_id)] = Number(ms_score);
+				}
+			}
+		}
+
+		detailed[Number(aid)] = res;
 	}
 }
 
@@ -211,6 +223,7 @@ async function loadNext() {
 }
 
 function generateReport(): string {
+	// generate a report to be printed out for the entire feedback history
 	let report = "";
 	// add title
 	report += `<h1>${i18n.tr.milestone.reportTitle}</h1>\n\n`;
@@ -221,11 +234,8 @@ function generateReport(): string {
 	report += `${i18n.tr.milestone.child}: ${currentChild.name}\n`;
 	report += `${i18n.tr.milestone.born}: ${currentChild.month}/${currentChild.year} \n\n`;
 
-	// iterate over all answersessions
-
+	// iterate over all answersessions with aid:key
 	for (let [aid, values] of Object.entries(summary)) {
-		// aid : value
-
 		const min = Math.min(...(Object.values(values) as number[]));
 		report += `<h2>${i18n.tr.milestone.timeperiod}: ${makeTitle(Number(aid))}</h2> \n`;
 		report += `<strong>${i18n.tr.milestone.summaryScore}:</strong> ${min === 1 ? i18n.tr.milestone.recommendOk : min === 0 ? i18n.tr.milestone.recommendWatch : min === -1 ? i18n.tr.milestone.recommmendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
@@ -233,7 +243,7 @@ function generateReport(): string {
 		for (let [mid, score] of Object.entries(values)) {
 			// mid : score
 			report += `<h3>  ${milestoneGroups[aid][Number(mid)].text[i18n.locale].title}</h3>`;
-			report += `    ${score === 1 ? i18n.tr.milestone.recommendOkMs : score === 0 ? i18n.tr.milestone.recommendWatchMs : score === -1 ? i18n.tr.milestone.recommmendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
+			report += `    ${score === 1 ? i18n.tr.milestone.recommendOk : score === 0 ? i18n.tr.milestone.recommendWatch : score === -1 ? i18n.tr.milestone.recommmendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
 
 			for (let [ms_id, ms_score] of Object.entries(detailed[aid][mid])) {
 				// ms_id : ms_score
@@ -294,17 +304,23 @@ async function setup() {
 	await loadDetailedFeedback(relevant_sessionkeys);
 }
 
+function makeTextColorInFeedback(value: boolean): string {
+	return value
+		? "text-gray-700 dark:text-gray-700"
+		: "text-gray-700 dark:text-gray-200";
+}
+
 let promise = $state(setup());
 </script>
 
 {#snippet summaryEvaluation(aid: number)}
-	<div class="flex flex-col md:flex-row items-center justify-center w-full m-2 p-2 text-gray-700 dark:text-gray-400">
+	<div class="flex flex-col md:flex-row items-center justify-center w-full m-2 p-2 text-gray-700 dark:text-gray-200">
 		{#if Math.min(...(Object.values(summary[aid]) as number[])) === 1}
-			<CheckCircleSolid  size="xl" class="text-feedback-0 mr-2 pr-2"/>
+			<CheckCircleSolid  size="xl" class="transform scale-150 text-feedback-0 mr-2 pr-2"/>
 			<span class="font-bold mx-2 px-2 items-center justify-center">{i18n.tr.milestone.summaryScore}</span>
 			{i18n.tr.milestone.recommendOk}
 		{:else if Math.min(...(Object.values(summary[aid]) as number[])) === 0}
-			<BellActiveSolid size="xl" class="text-feedback-1 mr-2 pr-2"/>
+			<BellActiveSolid size="xl" class="transform scale-150 text-feedback-1 mr-2 pr-2"/>
 			<span class="font-bold mx-2 px-2 items-center justify-center">{i18n.tr.milestone.summaryScore}</span>
 			{i18n.tr.milestone.recommendWatch}
 		{:else if Math.min(...(Object.values(summary[aid]) as number[])) === -1}
@@ -327,22 +343,22 @@ let promise = $state(setup());
 		{#if value === 1}
 			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 				<CheckCircleSolid  size="xl" class="text-feedback-0"/>
-				<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-400": ""}`} >
+				<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-200": ""}`} >
 					{milestone_or_group?.text[i18n.locale].title}
 				</span>
 				<Hr class="mx-2"/>
 			</div>
 		{:else if value === 0}
-			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
+			<div class="flex flex-col md:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 				<BellActiveSolid size="xl" class="text-feedback-1"/>
-				<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-400": ""}`} >
+				<span class = {`font-bold ${isMilestone? makeTextColorInFeedback(value === 0 || value === -1): ""}`} >
 					{milestone_or_group?.text[i18n.locale].title}
 				</span>
 				<Hr class="mx-2"/>
 			</div>
 			{#if isMilestone}
-				<span class =  "ml-auto mt-4">
-					<Button id="b1" onclick={()=>{
+				<span class =  "ml-auto mt-4 " >
+					<Button class = "bg-gray-500 dark:bg-gray-500 hover:bg-gray-400 dark:hover:bg-gray-400 focus-within:ring-gray-40" id="b1" onclick={()=>{
 						showHelp= true;
 					}}>{i18n.tr.milestone.help}</Button>
 					<Modal class = "m-2 p-2" title={i18n.tr.milestone.help} bind:open={showHelp} dismissable={true}>
@@ -351,16 +367,16 @@ let promise = $state(setup());
 				</span>
 			{/if}
 		{:else if value === -1}
-			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
+			<div class="flex flex-col md:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 				<CloseCircleSolid size="xl" class="text-feedback-2"/>
-				<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-400": ""}`} >
+				<span class = {`font-bold ${isMilestone? makeTextColorInFeedback(value === 0 || value === -1) : ""}`} >
 					{milestone_or_group?.text[i18n.locale].title}
 				</span>
 				<Hr class="mx-2"/>
 			</div>
 			{#if isMilestone}
 				<span class =  "ml-auto mt-4">
-					<Button id="b1" onclick={()=>{
+					<Button class = "bg-gray-500 dark:bg-gray-500 hover:bg-gray-400 dark:hover:bg-gray-400 focus-within:ring-gray-40" id="b1" onclick={()=>{
 						showHelp= true;
 					}}>{i18n.tr.milestone.help}</Button>
 					<Modal class = "m-2 p-2" title={i18n.tr.milestone.help} bind:open={showHelp} dismissable={true}>
@@ -371,7 +387,7 @@ let promise = $state(setup());
 		{:else }
 		<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 			<CloseCircleSolid color = "gray" size="xl"/>
-			<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-400": ""}`} >
+			<span class = {`font-bold ${isMilestone? makeTextColorInFeedback(value === 0 || value === -1): ""}`} >
 				{milestone_or_group?.text[i18n.locale].title}
 			</span>
 			<Hr class="mx-2"/>
@@ -395,14 +411,15 @@ let promise = $state(setup());
 			<Spinner /> <p>{i18n.tr.childData.loadingMessage}</p>
 		</div>
 	{:then}
-		<Heading tag="h2" class = "text-gray-700 dark:text-gray-400 items-center p-2 m-2 pb-4">{i18n.tr.milestone.feedbackTitle} </Heading>
+		<Heading tag="h2" class = "text-gray-700 dark:text-gray-200 items-center p-2 m-2 pb-4">{i18n.tr.milestone.feedbackTitle} </Heading>
 
-		<div class="m-2 w-full">
-			<p class="mb-4 text-gray-700 dark:text-gray-400 text-sm md:text-md">{i18n.tr.milestone.feedbackExplanation}</p>
+		<!-- Legend -->
+		<div class="m-2 w-full mb-4 text-gray-700 dark:text-gray-200 mb-4 pb-4">
+			<p class="mb-4 pb-4">{i18n.tr.milestone.feedbackExplanation}</p>
 			<div class ="grid grid-cols-[auto_1fr_2fr] gap-4">
 				{#each milestonePresentation as milestone}
 					<div class="flex justify-center">
-					<svelte:component this={milestone.icon} size="xl" class={milestone.class} />
+						<svelte:component this={milestone.icon} size="xl" class={milestone.class} />
 					</div>
 					<span class="font-bold">{milestone.short}</span>
 					<span>{milestone.text}</span>
@@ -413,24 +430,28 @@ let promise = $state(setup());
 			</div>
 		  </div>
 
-		<Hr classHr= "w-full mx-2"/>
-		<div class="text-gray-700 dark:text-gray-400 flex flex-cols">
-			{i18n.tr.milestone.selectFeedback}
-			<Button size="md" type="button" on:click={() => {
+		<!-- Buttton that enables the explanation modal for the feedback. -->
+		<div class="text-gray-700 dark:text-gray-200 flex flex-cols justify-between m-2 mb-4 pb-4">
+			<Heading tag="h4" class="text-gray-700 dark:text-gray-200">{i18n.tr.milestone.selectFeedback}</Heading>
+
+			<Button class="bg-gray-500 dark:bg-gray-500 hover:bg-gray-400 focus-within:ring-gray-40 font-bold" size="md" type="button" on:click={() => {
 				showMoreInfo = true;
 			}}
 			>{i18n.tr.milestone.moreInfoOnEval}</Button>
 		</div>
-		<Tabs defaultClass="m-2 p-2 pb-4 items-center flex flex-wrap justify-between w-full text-gray-700 dark:text-gray-400">
 
-			<Button size="md" type="button" class="md:w-16 md:h-8" on:click={() => {
-				promise = loadLast();
-				scrollToBottom();
-			}}><ArrowLeftOutline class="w-4 h-4" /></Button>
+		<!-- Modal that shows the explanation of the feedback when the above button is clicked			 -->
+		<Modal class = "m-2 p-2" classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-200" title={i18n.tr.milestone.info} bind:open={showMoreInfo} dismissable={true}>
+			<p class ="text-gray-700 dark:text-gray-200 font-medium ">{i18n.tr.milestone.feedbackExplanationDetailed}</p>
+			<p class ="text-gray-700 dark:text-gray-200 font-medium ">{i18n.tr.milestone.feedbackDetailsMilestone}</p>
+			<p class ="text-gray-700 dark:text-gray-200 font-medium " >{i18n.tr.milestone.feedbackDetailsEval}</p>
+		</Modal>
 
+		<!--Main tabs component that displays the feedback for the milestones and milestonegroups -->
+		<Tabs defaultClass="m-2 p-2 pb-4 items-center flex flex-wrap justify-between w-full text-gray-700 dark:text-gray-200">
 			<div class="flex flex-col md:flex-row justify-between">
 				{#if relevant_sessionkeys.length=== 0}
-					<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-400">{i18n.tr.milestone.noFeedback}</p>
+					<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-200">{i18n.tr.milestone.noFeedback}</p>
 				{:else}
 					{#each relevant_sessionkeys as aid}
 						<TabItem defaultClass="font-bold m-2 p-2" title={makeTitle(aid)} open={aid === relevant_sessionkeys[0] }>
@@ -440,7 +461,7 @@ let promise = $state(setup());
 							<Accordion class="p-2 m-2 grid grid-cols-1 md:grid-cols-3 gap-4">
 								{#each Object.entries(summary[aid]) as [mid, score]}
 									<div class="flex flex-col">
-									<AccordionItem activeClass="flex flex-col m-2 rounded-xl text-white dark:text-white bg-primary-700 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-600 items-center justify-between w-full font-medium text-left" inactiveClass="flex flex-col rounded-xl text-white dark:text-white bg-primary-800 dark:bg-primary-800 hover:bg-primary-700 dark:hover:bg-primary-700  items-center justify-between w-full font-medium text-left m-2">
+									<AccordionItem activeClass="flex flex-col m-2 rounded-xl text-white dark:text-white bg-primary-700 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-600 items-center justify-between w-full font-medium text-left" inactiveClass="flex flex-col rounded-xl text-white dark:text-white bg-primary-800 dark:bg-primary-800 hover:bg-primary-700 dark:hover:bg-primary-700 items-center justify-between w-full font-medium text-left m-2">
 										<span slot="header" class="items-center flex justify-center space-x-2">
 											{@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
 										</span>
@@ -463,15 +484,10 @@ let promise = $state(setup());
 					{/each}
 				{/if}
 			</div>
-
-			<Button size="md" type="button" class="md:w-16 md:h-8" on:click={() => {
-				promise = loadNext();
-				scrollToBottom();
-			}}><ArrowRightOutline class="w-4 h-4" /></Button>
 		</Tabs>
 
-		<div class="flex items-center justify-start w-full m-2 p-2 mb-4 pb-4">
-			<Button class="md:w-64 md:h-8  m-2 p-2" onclick={printReport}>{i18n.tr.milestone.printReport}</Button>
+		<div class="flex items-center justify-center w-full m-2 p-2 mb-4 pb-4">
+			<Button class="md:w-64 md:h-8  m-2 p-2 bg-gray-500 dark:bg-gray-500 hover:bg-gray-400 focus-within:ring-gray-40" onclick={printReport}>{i18n.tr.milestone.printReport}</Button>
 		</div>
 	{:catch error}
 		<AlertMessage
