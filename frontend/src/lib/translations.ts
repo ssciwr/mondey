@@ -72,7 +72,7 @@ export const translationIds = {
 		child: "Kind",
 		date: "Datum",
 		reportTitle: "Entwicklungsbericht",
-		feedbackTitle: "Feedback zur Entwicklung des Kindes"
+		feedbackTitle: "Feedback zur Entwicklung des Kindes",
 	},
 	search: {
 		allLabel: "Alle",
