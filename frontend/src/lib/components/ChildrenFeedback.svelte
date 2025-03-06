@@ -57,28 +57,27 @@ const breakpoints = {
 	"2xl": 1536,
 };
 
-// TODO: make this reactive such that the page reloads when the width changes 
+// TODO: make this reactive such that the page reloads when the width changes
 // not done here yet
 let windowidth = $state(window.innerWidth);
 let numShownAnswersessions = $derived.by(() => {
 	if (windowidth >= breakpoints["2xl"]) {
 		return 10;
-	}  
+	}
 	if (windowidth >= breakpoints.xl) {
 		return 8;
-	}  
+	}
 	if (windowidth >= breakpoints.lg) {
 		return 6;
-	}  
+	}
 	if (windowidth >= breakpoints.md) {
 		return 4;
-	}  
+	}
 	if (windowidth >= breakpoints.sm) {
 		return 3;
 	}
 	return 2;
 });
-
 
 let currentSessionIndices = $state([0, numShownAnswersessions]); // lower and upper bond for currently shown indices
 let relevant_sessionkeys = $state([] as number[]); // keys of the answersessions that are currently shown
@@ -270,12 +269,16 @@ function generateReport(): string {
 			report += `<h3>  ${milestoneGroups[Number(aid)][Number(mid)].text[i18n.locale].title}</h3>`;
 			report += `    ${score === 1 ? i18n.tr.milestone.recommendOk : score === 0 ? i18n.tr.milestone.recommendWatch : score === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
 
-			for (let [ms_id, ms_score] of Object.entries(detailed[Number(aid)][mid])) {
+			for (let [ms_id, ms_score] of Object.entries(
+				detailed[Number(aid)][mid],
+			)) {
 				// ms_id : ms_score
 				report += `    <strong>${
-					milestoneGroups[Number(aid)][Number(mid)].milestones.find((element: any) => {
-						return element.id === Number(ms_id);
-					}).text[i18n.locale].title
+					milestoneGroups[Number(aid)][Number(mid)].milestones.find(
+						(element: any) => {
+							return element.id === Number(ms_id);
+						},
+					).text[i18n.locale].title
 				}:</strong>`;
 				report += ` ${ms_score === 1 ? i18n.tr.milestone.recommendOkShort : ms_score === 0 ? i18n.tr.milestone.recommendWatchShort : ms_score === -1 ? i18n.tr.milestone.recommendHelpShort : i18n.tr.milestone.notEnoughDataYet} \n`;
 			}
@@ -369,7 +372,7 @@ let promise = $state(setup());
 
 <!--Snippet defining how to render detailed milestone feedback with help button-->
 {#snippet milestoneHelpButton(milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined)}
-	<span class =  "m-2 p-2 justify-center" >
+	<span class =  "flex w-full m-2 p-2 justify-center" >
 		<Button class = "bg-gray-500 dark:bg-gray-500 hover:bg-gray-400 dark:hover:bg-gray-400 focus-within:ring-gray-40" id="b1" onclick={()=>{
 			showHelp= true;
 		}}>{i18n.tr.milestone.help}</Button>
@@ -413,6 +416,35 @@ let promise = $state(setup());
 	</div>
 {/snippet}
 
+<!-- Individual element in the main tabs component of the page: Accordion display of milestone group feedback with detailed feedback for suboptimal milestones available on click -->
+{#snippet milestoneGroupsEval(aid: number)}
+	<Accordion class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+		{#each Object.entries(summary[aid]) as [mid, score]}
+			<div class="flex flex-col">
+				<AccordionItem 
+				activeClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-primary-700 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-600 items-center justify-between w-full font-medium text-left p-1" 
+				inactiveClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-primary-800 dark:bg-primary-800 hover:bg-primary-700 dark:hover:bg-primary-700 items-center justify-between w-full font-medium text-left p-1"
+			  	>
+			  		<span slot="header" class="items-center flex justify-center py-1">
+						{@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
+					</span>
+					{#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
+						{@render evaluation(
+							milestoneGroups[aid][Number(mid)].milestones.find((element: any) =>
+							{
+								return element.id === Number(ms_id);
+							}),
+							Number(ms_score),
+							true
+						)}
+						<Hr classHr="w-full my-1"/>
+					{/each}
+				</AccordionItem>
+			</div>
+		{/each}
+	</Accordion>
+{/snippet}
+
 <!-- Legend: a grid view with symbol | shorthand(bold) | explanation  on larger screens and | symbol | shorthand on smaller screens -->
 {#snippet legend()}
 	<div class="m-2 w-full text-gray-700 dark:text-gray-200 mb-4 pb-4">
@@ -451,34 +483,7 @@ let promise = $state(setup());
 	</Modal>
 {/snippet}
 
-<!-- Individual element in the main tabs component of the page: Accordion display of milestone group feedback with detailed feedback for suboptimal milestones available on click -->
-{#snippet milestoneGroupsEval(aid: number)}
-	<Accordion class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-4">
-		{#each Object.entries(summary[aid]) as [mid, score]}
-			<div class="flex flex-col">
-				<AccordionItem 
-				activeClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-primary-700 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-600 items-center justify-between w-full font-medium text-left p-1" 
-				inactiveClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-primary-800 dark:bg-primary-800 hover:bg-primary-700 dark:hover:bg-primary-700 items-center justify-between w-full font-medium text-left p-1"
-			  	>
-			  		<span slot="header" class="items-center flex justify-center py-1">
-						{@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
-					</span>
-					{#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
-						{@render evaluation(
-							milestoneGroups[aid][Number(mid)].milestones.find((element: any) =>
-							{
-								return element.id === Number(ms_id);
-							}),
-							Number(ms_score),
-							true
-						)}
-						<Hr classHr="w-full my-1"/>
-					{/each}
-				</AccordionItem>
-			</div>
-		{/each}
-	</Accordion>
-{/snippet}
+
 
 <!--topmost navigation element that lets us go back to children overview and child data-->
 <Breadcrumbs data={breadcrumbdata} />
@@ -506,7 +511,7 @@ let promise = $state(setup());
 
 		<!--Main tabs component that displays the feedback for the milestones and milestonegroups -->
 		<Tabs tabStyle="full" class="m-2 p-2 pb-4 items-center justify-center flex flex-wrap w-full text-gray-700 dark:text-gray-200 rounded-lg divide-x rtl:divide-x-reverse divide-gray-200 shadow-sm dark:divide-gray-700">
-			<div class="flex flex-col md:flex-row justify-between text-sm md:text-base">
+			<div class="flex flex-col md:flex-row justify-between text-sm md:text-base ">
 				{#if relevant_sessionkeys.length=== 0}
 					<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-200">{i18n.tr.milestone.noFeedback}</p>
 				{:else}
