@@ -54,7 +54,7 @@ export default {
 				},
 				feedback: {
 					0: "#98CB6A",
-					1: "#FFCA67",
+					1: "#F59C2F",
 					2: "#E9715F",
 				},
 				"feedback-background": {

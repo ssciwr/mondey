@@ -19,7 +19,6 @@ import {
 	Accordion,
 	AccordionItem,
 	Button,
-	Checkbox,
 	Heading,
 	Hr,
 	Modal,
@@ -28,8 +27,7 @@ import {
 	Tabs,
 } from "flowbite-svelte";
 import {
-	ArrowLeftOutline,
-	ArrowRightOutline,
+	ExclamationCircleSolid,
 	BellActiveSolid,
 	ChartLineUpOutline,
 	CheckCircleSolid,
@@ -51,8 +49,38 @@ let summary = $state({}) as Record<number, any>; // summary feedback for each mi
 let answerSessions = $state({}) as Record<number, MilestoneAnswerSessionPublic>;
 
 // helpers
-const intervalSize = 6; // hardcoded number of answersessions to show at once
-let currentSessionIndices = $state([0, intervalSize]); // lower and upper bond for currently shown indices
+const breakpoints = {
+	sm: 640,
+	md: 768,
+	lg: 1024,
+	xl: 1280,
+	"2xl": 1536,
+};
+
+// TODO: make this reactive such that the page reloads when the width changes 
+// not done here yet
+let windowidth = $state(window.innerWidth);
+let numShownAnswersessions = $derived.by(() => {
+	if (windowidth >= breakpoints["2xl"]) {
+		return 10;
+	}  
+	if (windowidth >= breakpoints.xl) {
+		return 8;
+	}  
+	if (windowidth >= breakpoints.lg) {
+		return 6;
+	}  
+	if (windowidth >= breakpoints.md) {
+		return 4;
+	}  
+	if (windowidth >= breakpoints.sm) {
+		return 3;
+	}
+	return 2;
+});
+
+
+let currentSessionIndices = $state([0, numShownAnswersessions]); // lower and upper bond for currently shown indices
 let relevant_sessionkeys = $state([] as number[]); // keys of the answersessions that are currently shown
 let showMoreInfo = $state(false);
 let showHelp = $state(false);
@@ -75,7 +103,7 @@ let milestonePresentation = $state([
 		showExplanation: false,
 	},
 	{
-		icon: CloseCircleSolid,
+		icon: ExclamationCircleSolid,
 		text: i18n.tr.milestone.recommendHelp,
 		short: i18n.tr.milestone.recommendHelpShort,
 		class: "text-feedback-2 w-16 ",
@@ -216,45 +244,6 @@ async function loadDetailedFeedback(relevant: number[]): Promise<void> {
 }
 
 /**
- * Load the last chunk of answersessions and feedbacks from the database. A chunk always has length 'intervalSize'.
- * @return {Promise<void>} nothing
- */
-async function loadLast(): Promise<void> {
-	currentSessionIndices = [
-		Math.max(currentSessionIndices[0] - intervalSize, 0),
-		Math.max(currentSessionIndices[1] - intervalSize, intervalSize),
-	];
-	relevant_sessionkeys = sessionkeys.slice(
-		currentSessionIndices[0],
-		currentSessionIndices[1],
-	);
-
-	await loadSummaryFeedback(relevant_sessionkeys);
-	await loadDetailedFeedback(relevant_sessionkeys);
-}
-
-/**
- * Load the next chunk of answersessions and feedbacks from the database. A chunk always has length 'intervalSize'.
- * @return {Promise<void>} nothing
- */
-async function loadNext(): Promise<void> {
-	currentSessionIndices = [
-		Math.min(
-			currentSessionIndices[0] + intervalSize,
-			Math.max(sessionkeys.length - intervalSize, 0),
-		),
-		Math.min(currentSessionIndices[1] + intervalSize, sessionkeys.length),
-	];
-	relevant_sessionkeys = sessionkeys.slice(
-		currentSessionIndices[0],
-		currentSessionIndices[1],
-	);
-
-	await loadSummaryFeedback(relevant_sessionkeys);
-	await loadDetailedFeedback(relevant_sessionkeys);
-}
-
-/**
  * Generate a printable report from the feedback by concatenating all the feedbacks into a single formatted string.
  * @summary If the description is long, write your summary here. Otherwise, feel free to remove this.
  * @return {string} Report as a single string
@@ -278,13 +267,13 @@ function generateReport(): string {
 
 		for (let [mid, score] of Object.entries(values)) {
 			// mid : score
-			report += `<h3>  ${milestoneGroups[aid][Number(mid)].text[i18n.locale].title}</h3>`;
+			report += `<h3>  ${milestoneGroups[Number(aid)][Number(mid)].text[i18n.locale].title}</h3>`;
 			report += `    ${score === 1 ? i18n.tr.milestone.recommendOk : score === 0 ? i18n.tr.milestone.recommendWatch : score === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
 
-			for (let [ms_id, ms_score] of Object.entries(detailed[aid][mid])) {
+			for (let [ms_id, ms_score] of Object.entries(detailed[Number(aid)][mid])) {
 				// ms_id : ms_score
 				report += `    <strong>${
-					milestoneGroups[aid][Number(mid)].milestones.find((element: any) => {
+					milestoneGroups[Number(aid)][Number(mid)].milestones.find((element: any) => {
 						return element.id === Number(ms_id);
 					}).text[i18n.locale].title
 				}:</strong>`;
@@ -357,30 +346,30 @@ let promise = $state(setup());
 
 <!--Snippet defining how to display the summary evaluation depending on the value retrieved-->
 {#snippet summaryEvaluationElement(symbol: any, color: string, text: string)}
-	<svelte:component this={symbol} size="xl" class={`transform scale-150 mr-2 pr-2 ${color}`} />
-	<span class="font-bold mx-2 px-2 items-center justify-center">{i18n.tr.milestone.summaryScore}</span>
-	{text}
+	<svelte:component this={symbol} size="xl" class={`transform scale-150 ${color}`} />
+	<span class="font-bold p-2 items-center justify-center">{i18n.tr.milestone.summaryScore}</span>
+	<span class="font-normal p-2 items-center justify-center">{text}</span> 
 {/snippet}
 
 <!--Snippet that shows the evaluation for the whole answersession: uses the minimum of the milestonegroup currently-->
 {#snippet summaryEvaluation(aid: number)}
-	<div class="flex flex-col md:flex-row items-center justify-center w-full m-2 p-2 text-gray-700 dark:text-gray-200">
+	<div class="flex flex-col md:flex-row space-y-2 space-x-2 items-center justify-center w-full text-gray-700 dark:text-gray-200 m-2 p-2 mb-4 pb-4 text-sm md:text-base">
 		{#if Math.min(...(Object.values(summary[aid]) as number[])) === 1}
 			{@render summaryEvaluationElement(CheckCircleSolid, "text-feedback-0", i18n.tr.milestone.recommendOk)}
 		{:else if Math.min(...(Object.values(summary[aid]) as number[])) === 0}
 			{@render summaryEvaluationElement(BellActiveSolid, "text-feedback-1", i18n.tr.milestone.recommendWatch)}
 		{:else if Math.min(...(Object.values(summary[aid]) as number[])) === -1}
-			{@render summaryEvaluationElement(CloseCircleSolid, "text-feedback-2", i18n.tr.milestone.recommendHelp)}
+			{@render summaryEvaluationElement(ExclamationCircleSolid, "text-feedback-2", i18n.tr.milestone.recommendHelp)}
 		{:else}
 			{@render summaryEvaluationElement(CloseCircleSolid, "gray", i18n.tr.milestone.notEnoughDataYet)}
 		{/if}
 	</div>
-<Hr classHr="mx-2"/>
+	<Hr classHr="w-full my-1"/>
 {/snippet}
 
 <!--Snippet defining how to render detailed milestone feedback with help button-->
 {#snippet milestoneHelpButton(milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined)}
-	<span class =  "ml-auto mt-4 justify-center" >
+	<span class =  "m-2 p-2 justify-center" >
 		<Button class = "bg-gray-500 dark:bg-gray-500 hover:bg-gray-400 dark:hover:bg-gray-400 focus-within:ring-gray-40" id="b1" onclick={()=>{
 			showHelp= true;
 		}}>{i18n.tr.milestone.help}</Button>
@@ -392,20 +381,20 @@ let promise = $state(setup());
 
 <!--element of the detailed evaluation which shows how the child fared in each milestonegroup-->
 {#snippet evaluationElement(symbol: any, milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, color: string, isMilestone: boolean = false)}
-	<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
+	<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center justify-center m-2 p-2">
 		<svelte:component this={symbol} size="xl" class={`${color}`} />
 		{#if color !== "gray"}
-			<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-200": ""}`} >
+			<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-700": ""}`} >
 				{milestone_or_group?.text[i18n.locale].title}
 			</span>
 		{/if}
-		<Hr class="mx-2"/>
+		<Hr class="w-full my-1"/>
 	</div>
 {/snippet}
 
 <!--Snippet defining how the evaluation for each milestonegroup is shown. 'grade' is the evaluation we get from the backend-->
 {#snippet evaluation( milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, grade: number, isMilestone: boolean,)}
-	<div class={`rounded-lg space-x-2 space-y-4 p-2 m-2 flex flex-col ${(grade === 0 || grade === -1) && isMilestone=== true ? "bg-feedback-background-0" : ""}`}>
+	<div class={`rounded-lg space-x-2 space-y-2 justify-center p-2 m-2 flex flex-col text-sm md:text-base ${(grade === 0 || grade === -1) && isMilestone=== true ? "bg-feedback-background-0" : ""}`}>
 		{#if grade === 1}
 			{@render evaluationElement(CheckCircleSolid, milestone_or_group, "text-feedback-0", isMilestone)}
 		{:else if grade === 0}
@@ -414,7 +403,7 @@ let promise = $state(setup());
 				{@render milestoneHelpButton(milestone_or_group)}
 			{/if}
 		{:else if grade === -1}
-			{@render evaluationElement(CloseCircleSolid, milestone_or_group, "text-feedback-2", isMilestone)}
+			{@render evaluationElement(ExclamationCircleSolid, milestone_or_group, "text-feedback-2", isMilestone)}
 			{#if isMilestone}
 				{@render milestoneHelpButton(milestone_or_group)}
 			{/if}
@@ -426,17 +415,17 @@ let promise = $state(setup());
 
 <!-- Legend: a grid view with symbol | shorthand(bold) | explanation  on larger screens and | symbol | shorthand on smaller screens -->
 {#snippet legend()}
-	<div class="m-2 w-full mb-4 text-gray-700 dark:text-gray-200 mb-4 pb-4">
-		<p class="mb-4 pb-4">{i18n.tr.milestone.feedbackExplanation}</p>
+	<div class="m-2 w-full text-gray-700 dark:text-gray-200 mb-4 pb-4">
+		<p class="mb-4 pb-4 text-sm md:text-base">{i18n.tr.milestone.feedbackExplanation}</p>
 		<div class ="grid grid-cols-[auto_1fr_2fr] gap-4">
 			{#each milestonePresentation as milestone}
 				<div class="flex justify-center">
 					<svelte:component this={milestone.icon} size="xl" class={milestone.class} />
 				</div>
-				<span class="font-bold">{milestone.short}</span>
-				<span class="hidden sm:block">{milestone.text}</span>
+				<span class="font-bold text-sm md:text-base">{milestone.short}</span>
+				<span class="hidden sm:block text-sm md:text-base">{milestone.text}</span>
 			<div class="col-span-3">
-				<Hr classHr="w-full my-2" />
+				<Hr classHr="w-full my-1" />
 			</div>
 			{/each}
 		</div>
@@ -445,10 +434,10 @@ let promise = $state(setup());
 
 <!-- Middle part of the page with a buttton that enables the explanation modal for the feedback, and a heading that tells people what they can do next -->
 {#snippet explanationModal()}
-	<div class="text-gray-700 dark:text-gray-200 flex flex-cols justify-between m-2 mb-4 pb-4">
-		<Heading tag="h4" class="text-gray-700 dark:text-gray-200">{i18n.tr.milestone.selectFeedback}</Heading>
+	<div class=" flex flex-col md:flex-row items-center text-gray-700 dark:text-gray-200 justify-between m-2 mb-4 pb-4 space-y-2">
+		<h5 class="flex flex-auto font-bold text-md md:text-xl text-gray-700 dark:text-gray-200 m-2 p-2">{i18n.tr.milestone.selectFeedback}</h5>
 
-		<Button class="bg-gray-500 dark:bg-gray-500 hover:bg-gray-400 focus-within:ring-gray-40 font-bold" size="md" type="button" on:click={() => {
+		<Button class="flex flex-auto bg-gray-500 dark:bg-gray-500 hover:bg-gray-400 dark:hover:bg-gray-400 font-bold text-sm md:text-base" size="md" type="button" on:click={() => {
 			showMoreInfo = true;
 		}}
 		>{i18n.tr.milestone.moreInfoOnEval}</Button>
@@ -456,20 +445,22 @@ let promise = $state(setup());
 
 	<!-- Modal that shows the explanation of the feedback when the above button is clicked			 -->
 	<Modal class = "m-2 p-2" classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-200" title={i18n.tr.milestone.info} bind:open={showMoreInfo} dismissable={true}>
-		<p class ="text-gray-700 dark:text-gray-200 font-medium ">{i18n.tr.milestone.feedbackExplanationDetailed}</p>
-		<p class ="text-gray-700 dark:text-gray-200 font-medium ">{i18n.tr.milestone.feedbackDetailsMilestone}</p>
-		<p class ="text-gray-700 dark:text-gray-200 font-medium " >{i18n.tr.milestone.feedbackDetailsEval}</p>
+		<p class ="text-gray-700 dark:text-gray-200 font-medium text-sm md:text-base">{i18n.tr.milestone.feedbackExplanationDetailed}</p>
+		<p class ="text-gray-700 dark:text-gray-200 font-medium text-sm md:text-base">{i18n.tr.milestone.feedbackDetailsMilestone}</p>
+		<p class ="text-gray-700 dark:text-gray-200 font-medium text-sm md:text-base" >{i18n.tr.milestone.feedbackDetailsEval}</p>
 	</Modal>
 {/snippet}
 
-<!-- Individual element in the main tabs component of the page: Accordion display of milestone group feedback with detailed feedback for 
- suboptimal milestones available on click-->
+<!-- Individual element in the main tabs component of the page: Accordion display of milestone group feedback with detailed feedback for suboptimal milestones available on click -->
 {#snippet milestoneGroupsEval(aid: number)}
-	<Accordion class="p-2 m-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+	<Accordion class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-4">
 		{#each Object.entries(summary[aid]) as [mid, score]}
 			<div class="flex flex-col">
-				<AccordionItem activeClass="flex flex-col m-2 rounded-xl text-white dark:text-white bg-primary-700 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-600 items-center justify-between w-full font-medium text-left" inactiveClass="flex flex-col rounded-xl text-white dark:text-white bg-primary-800 dark:bg-primary-800 hover:bg-primary-700 dark:hover:bg-primary-700 items-center justify-between w-full font-medium text-left m-2">
-					<span slot="header" class="items-center flex justify-center space-x-2">
+				<AccordionItem 
+				activeClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-primary-700 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-600 items-center justify-between w-full font-medium text-left p-1" 
+				inactiveClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-primary-800 dark:bg-primary-800 hover:bg-primary-700 dark:hover:bg-primary-700 items-center justify-between w-full font-medium text-left p-1"
+			  	>
+			  		<span slot="header" class="items-center flex justify-center py-1">
 						{@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
 					</span>
 					{#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
@@ -481,7 +472,7 @@ let promise = $state(setup());
 							Number(ms_score),
 							true
 						)}
-						<Hr classHr="mx-2"/>
+						<Hr classHr="w-full my-1"/>
 					{/each}
 				</AccordionItem>
 			</div>
@@ -507,20 +498,20 @@ let promise = $state(setup());
 			<Spinner /> <p>{i18n.tr.childData.loadingMessage}</p>
 		</div>
 	{:then}
-		<Heading tag="h2" class = "text-gray-700 dark:text-gray-200 items-center p-2 m-2 pb-4">{i18n.tr.milestone.feedbackTitle} </Heading>
+		<Heading tag="h2" class = "text-xl md:text-4xl text-gray-700 dark:text-gray-200 items-center p-2 m-2 pb-4">{i18n.tr.milestone.feedbackTitle} </Heading>
 
 		{@render legend()}
 
 		{@render explanationModal()}
 
 		<!--Main tabs component that displays the feedback for the milestones and milestonegroups -->
-		<Tabs defaultClass="m-2 p-2 pb-4 items-center flex flex-wrap justify-between w-full text-gray-700 dark:text-gray-200">
-			<div class="flex flex-col md:flex-row justify-between">
+		<Tabs tabStyle="full" class="m-2 p-2 pb-4 items-center justify-center flex flex-wrap w-full text-gray-700 dark:text-gray-200 rounded-lg divide-x rtl:divide-x-reverse divide-gray-200 shadow-sm dark:divide-gray-700">
+			<div class="flex flex-col md:flex-row justify-between text-sm md:text-base">
 				{#if relevant_sessionkeys.length=== 0}
 					<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-200">{i18n.tr.milestone.noFeedback}</p>
 				{:else}
 					{#each relevant_sessionkeys as aid}
-						<TabItem defaultClass="font-bold m-2 p-2" title={makeTitle(aid)} open={aid === relevant_sessionkeys[0] }>
+						<TabItem defaultClass="font-bold m-1 p-0" title={makeTitle(aid)} open={aid === relevant_sessionkeys[0] }>
 
 							{@render summaryEvaluation(aid)}
 

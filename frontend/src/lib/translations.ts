@@ -40,7 +40,7 @@ export const translationIds = {
 		recommendWatchShort: "Aufgepasst!",
 		recommendHelp:
 			"Das Kind erreicht Werte, die deutlich unter dem Altersdurchschnitt liegen.",
-		recommendHelpShort: "Enwicklungsverzögerung",
+		recommendHelpShort: "Enwicklungsverzögerung!",
 		showHistory: "Feedback zu vorherigen Beobachtungszeiträumen anzeigen",
 		moreInfoOnEval: "Mehr Info zur Bewertung",
 		legend: "Erklärung zu den einzelnen Symbolen",
