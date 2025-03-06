@@ -373,7 +373,7 @@ let promise = $state(setup());
 <!--Snippet defining how to render detailed milestone feedback with help button-->
 {#snippet milestoneHelpButton(milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined)}
 	<span class =  "flex w-full m-2 p-2 justify-center" >
-		<Button class = "bg-gray-500 dark:bg-gray-500 hover:bg-gray-400 dark:hover:bg-gray-400 focus-within:ring-gray-40" id="b1" onclick={()=>{
+		<Button class = "bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 focus-within:ring-additional-color-40" id="b1" onclick={()=>{
 			showHelp= true;
 		}}>{i18n.tr.milestone.help}</Button>
 		<Modal class = "m-2 p-2" title={i18n.tr.milestone.help} bind:open={showHelp} dismissable={true}>
@@ -418,7 +418,7 @@ let promise = $state(setup());
 
 <!-- Individual element in the main tabs component of the page: Accordion display of milestone group feedback with detailed feedback for suboptimal milestones available on click -->
 {#snippet milestoneGroupsEval(aid: number)}
-	<Accordion class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+	<Accordion class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 		{#each Object.entries(summary[aid]) as [mid, score]}
 			<div class="flex flex-col">
 				<AccordionItem 
@@ -510,13 +510,16 @@ let promise = $state(setup());
 		{@render explanationModal()}
 
 		<!--Main tabs component that displays the feedback for the milestones and milestonegroups -->
-		<Tabs tabStyle="full" class="m-2 p-2 pb-4 items-center justify-center flex flex-wrap w-full text-gray-700 dark:text-gray-200 rounded-lg divide-x rtl:divide-x-reverse divide-gray-200 shadow-sm dark:divide-gray-700">
+		<Tabs tabStyle="full" defaultClass="justify-center flex rounded-lg divide-x rtl:divide-x-reverse divide-gray-200 shadow-sm dark:divide-gray-700">
 			<div class="flex flex-col md:flex-row justify-between text-sm md:text-base ">
 				{#if relevant_sessionkeys.length=== 0}
 					<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-200">{i18n.tr.milestone.noFeedback}</p>
 				{:else}
 					{#each relevant_sessionkeys as aid}
-						<TabItem defaultClass="font-bold m-1 p-0" title={makeTitle(aid)} open={aid === relevant_sessionkeys[0] }>
+						<TabItem defaultClass="font-bold m-1 p-0" 
+						activeClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600 border-1" 
+						inactiveClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 border-additional-color-600 dark:border-additional-color-600 border-1"
+						title={makeTitle(aid)} open={aid === relevant_sessionkeys[0] }>
 
 							{@render summaryEvaluation(aid)}
 
@@ -529,7 +532,7 @@ let promise = $state(setup());
 
 		<!--Button to print the report out into pdf or physical copy-->
 		<div class="flex items-center justify-center w-full m-2 p-2 mb-4 pb-4">
-			<Button class="md:w-64 md:h-8  m-2 p-2 bg-gray-500 dark:bg-gray-500 hover:bg-gray-400 focus-within:ring-gray-40" onclick={printReport}>{i18n.tr.milestone.printReport}</Button>
+			<Button class="md:w-64 md:h-8  m-2 p-2 bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 focus-within:ring-additional-color-40" onclick={printReport}>{i18n.tr.milestone.printReport}</Button>
 		</div>
 	{:catch error}
 		<AlertMessage
