@@ -43,7 +43,7 @@ export default {
 					600: "#7C9E9D",
 					700: "#698584",
 					800: "#556C6B",
-					900: "4D6261",
+					900: "#4D6261",
 				},
 
 				"milestone-answer": {
@@ -54,7 +54,7 @@ export default {
 				},
 				feedback: {
 					0: "#98CB6A",
-					1: "#FFCA67",
+					1: "#F59C2F",
 					2: "#E9715F",
 				},
 				"feedback-background": {
