@@ -27,11 +27,11 @@ import {
 	Tabs,
 } from "flowbite-svelte";
 import {
-	ExclamationCircleSolid,
 	BellActiveSolid,
 	ChartLineUpOutline,
 	CheckCircleSolid,
 	CloseCircleSolid,
+	ExclamationCircleSolid,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import AlertMessage from "./AlertMessage.svelte";
@@ -57,28 +57,27 @@ const breakpoints = {
 	"2xl": 1536,
 };
 
-// TODO: make this reactive such that the page reloads when the width changes 
+// TODO: make this reactive such that the page reloads when the width changes
 // not done here yet
 let windowidth = $state(window.innerWidth);
 let numShownAnswersessions = $derived.by(() => {
 	if (windowidth >= breakpoints["2xl"]) {
 		return 10;
-	}  
+	}
 	if (windowidth >= breakpoints.xl) {
 		return 8;
-	}  
+	}
 	if (windowidth >= breakpoints.lg) {
 		return 6;
-	}  
+	}
 	if (windowidth >= breakpoints.md) {
 		return 4;
-	}  
+	}
 	if (windowidth >= breakpoints.sm) {
 		return 3;
 	}
 	return 2;
 });
-
 
 let currentSessionIndices = $state([0, numShownAnswersessions]); // lower and upper bond for currently shown indices
 let relevant_sessionkeys = $state([] as number[]); // keys of the answersessions that are currently shown
@@ -270,12 +269,16 @@ function generateReport(): string {
 			report += `<h3>  ${milestoneGroups[Number(aid)][Number(mid)].text[i18n.locale].title}</h3>`;
 			report += `    ${score === 1 ? i18n.tr.milestone.recommendOk : score === 0 ? i18n.tr.milestone.recommendWatch : score === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
 
-			for (let [ms_id, ms_score] of Object.entries(detailed[Number(aid)][mid])) {
+			for (let [ms_id, ms_score] of Object.entries(
+				detailed[Number(aid)][mid],
+			)) {
 				// ms_id : ms_score
 				report += `    <strong>${
-					milestoneGroups[Number(aid)][Number(mid)].milestones.find((element: any) => {
-						return element.id === Number(ms_id);
-					}).text[i18n.locale].title
+					milestoneGroups[Number(aid)][Number(mid)].milestones.find(
+						(element: any) => {
+							return element.id === Number(ms_id);
+						},
+					).text[i18n.locale].title
 				}:</strong>`;
 				report += ` ${ms_score === 1 ? i18n.tr.milestone.recommendOkShort : ms_score === 0 ? i18n.tr.milestone.recommendWatchShort : ms_score === -1 ? i18n.tr.milestone.recommendHelpShort : i18n.tr.milestone.notEnoughDataYet} \n`;
 			}
@@ -348,7 +351,7 @@ let promise = $state(setup());
 {#snippet summaryEvaluationElement(symbol: any, color: string, text: string)}
 	<svelte:component this={symbol} size="xl" class={`transform scale-150 ${color}`} />
 	<span class="font-bold p-2 items-center justify-center">{i18n.tr.milestone.summaryScore}</span>
-	<span class="font-normal p-2 items-center justify-center">{text}</span> 
+	<span class="font-normal p-2 items-center justify-center">{text}</span>
 {/snippet}
 
 <!--Snippet that shows the evaluation for the whole answersession: uses the minimum of the milestonegroup currently-->
@@ -456,8 +459,8 @@ let promise = $state(setup());
 	<Accordion class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-4">
 		{#each Object.entries(summary[aid]) as [mid, score]}
 			<div class="flex flex-col">
-				<AccordionItem 
-				activeClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-primary-700 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-600 items-center justify-between w-full font-medium text-left p-1" 
+				<AccordionItem
+				activeClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-primary-700 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-600 items-center justify-between w-full font-medium text-left p-1"
 				inactiveClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-primary-800 dark:bg-primary-800 hover:bg-primary-700 dark:hover:bg-primary-700 items-center justify-between w-full font-medium text-left p-1"
 			  	>
 			  		<span slot="header" class="items-center flex justify-center py-1">
