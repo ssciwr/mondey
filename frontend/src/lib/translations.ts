@@ -38,7 +38,7 @@ export const translationIds = {
 		recommendWatch:
 			"Das Kind hat für einige Meilensteine leicht unterdurchschnittliche Werte erhalten.",
 		recommendWatchShort: "Aufgepasst!",
-		recommmendHelp:
+		recommendHelp:
 			"Das Kind erreicht Werte, die deutlich unter dem Altersdurchschnitt liegen.",
 		recommendHelpShort: "Enwicklungsverzögerung",
 		showHistory: "Feedback zu vorherigen Beobachtungszeiträumen anzeigen",

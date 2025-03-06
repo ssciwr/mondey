@@ -76,7 +76,7 @@ let milestonePresentation = $state([
 	},
 	{
 		icon: CloseCircleSolid,
-		text: i18n.tr.milestone.recommmendHelp,
+		text: i18n.tr.milestone.recommendHelp,
 		short: i18n.tr.milestone.recommendHelpShort,
 		class: "text-feedback-2 w-16 ",
 		showExplanation: false,
@@ -274,12 +274,12 @@ function generateReport(): string {
 	for (let [aid, values] of Object.entries(summary)) {
 		const min = Math.min(...(Object.values(values) as number[]));
 		report += `<h2>${i18n.tr.milestone.timeperiod}: ${makeTitle(Number(aid))}</h2> \n`;
-		report += `<strong>${i18n.tr.milestone.summaryScore}:</strong> ${min === 1 ? i18n.tr.milestone.recommendOk : min === 0 ? i18n.tr.milestone.recommendWatch : min === -1 ? i18n.tr.milestone.recommmendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
+		report += `<strong>${i18n.tr.milestone.summaryScore}:</strong> ${min === 1 ? i18n.tr.milestone.recommendOk : min === 0 ? i18n.tr.milestone.recommendWatch : min === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
 
 		for (let [mid, score] of Object.entries(values)) {
 			// mid : score
 			report += `<h3>  ${milestoneGroups[aid][Number(mid)].text[i18n.locale].title}</h3>`;
-			report += `    ${score === 1 ? i18n.tr.milestone.recommendOk : score === 0 ? i18n.tr.milestone.recommendWatch : score === -1 ? i18n.tr.milestone.recommmendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
+			report += `    ${score === 1 ? i18n.tr.milestone.recommendOk : score === 0 ? i18n.tr.milestone.recommendWatch : score === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
 
 			for (let [ms_id, ms_score] of Object.entries(detailed[aid][mid])) {
 				// ms_id : ms_score
@@ -340,7 +340,7 @@ function makeTitle(aid: number): string {
 
 /**
  * Load the data and get everything ready to render the page
- * @return { Promise<void>} nothign
+ * @return { Promise<void>} nothing
  */
 async function setup(): Promise<void> {
 	await loadAnswersessions();
@@ -355,93 +355,77 @@ async function setup(): Promise<void> {
 let promise = $state(setup());
 </script>
 
+<!--Snippet defining how to display the summary evaluation depending on the value retrieved-->
+{#snippet summaryEvaluationElement(symbol: any, color: string, text: string)}
+	<svelte:component this={symbol} size="xl" class={`transform scale-150 mr-2 pr-2 ${color}`} />
+	<span class="font-bold mx-2 px-2 items-center justify-center">{i18n.tr.milestone.summaryScore}</span>
+	{text}
+{/snippet}
+
 <!--Snippet that shows the evaluation for the whole answersession: uses the minimum of the milestonegroup currently-->
 {#snippet summaryEvaluation(aid: number)}
 	<div class="flex flex-col md:flex-row items-center justify-center w-full m-2 p-2 text-gray-700 dark:text-gray-200">
 		{#if Math.min(...(Object.values(summary[aid]) as number[])) === 1}
-			<CheckCircleSolid  size="xl" class="transform scale-150 text-feedback-0 mr-2 pr-2"/>
-			<span class="font-bold mx-2 px-2 items-center justify-center">{i18n.tr.milestone.summaryScore}</span>
-			{i18n.tr.milestone.recommendOk}
+			{@render summaryEvaluationElement(CheckCircleSolid, "text-feedback-0", i18n.tr.milestone.recommendOk)}
 		{:else if Math.min(...(Object.values(summary[aid]) as number[])) === 0}
-			<BellActiveSolid size="xl" class="transform scale-150 text-feedback-1 mr-2 pr-2"/>
-			<span class="font-bold mx-2 px-2 items-center justify-center">{i18n.tr.milestone.summaryScore}</span>
-			{i18n.tr.milestone.recommendWatch}
+			{@render summaryEvaluationElement(BellActiveSolid, "text-feedback-1", i18n.tr.milestone.recommendWatch)}
 		{:else if Math.min(...(Object.values(summary[aid]) as number[])) === -1}
-			<CloseCircleSolid size="xl" class="text-feedback-2 mr-2 pr-2"/>
-			<span class="font-bold mx-2 px-2 items-center justify-center"> {i18n.tr.milestone.summaryScore}</span>
-			{i18n.tr.milestone.recommmendHelp}
+			{@render summaryEvaluationElement(CloseCircleSolid, "text-feedback-2", i18n.tr.milestone.recommendHelp)}
 		{:else}
-			<CloseCircleSolid size="xl" color = "gray" />
-			<span class="font-bold mx-2 px-2 items-center justify-center">{i18n.tr.milestone.summaryScore}</span>
-			{i18n.tr.milestone.notEnoughDataYet}
+			{@render summaryEvaluationElement(CloseCircleSolid, "gray", i18n.tr.milestone.notEnoughDataYet)}
 		{/if}
 	</div>
 <Hr classHr="mx-2"/>
+{/snippet}
+
+<!--Snippet defining how to render detailed milestone feedback with help button-->
+{#snippet milestoneHelpButton(milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined)}
+	<span class =  "ml-auto mt-4 justify-center" >
+		<Button class = "bg-gray-500 dark:bg-gray-500 hover:bg-gray-400 dark:hover:bg-gray-400 focus-within:ring-gray-40" id="b1" onclick={()=>{
+			showHelp= true;
+		}}>{i18n.tr.milestone.help}</Button>
+		<Modal class = "m-2 p-2" title={i18n.tr.milestone.help} bind:open={showHelp} dismissable={true}>
+			{milestone_or_group?.text[i18n.locale].help}
+		</Modal>
+	</span>
+{/snippet}
+
+<!--element of the detailed evaluation which shows how the child fared in each milestonegroup-->
+{#snippet evaluationElement(symbol: any, milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, color: string, isMilestone: boolean = false)}
+	<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
+		<svelte:component this={symbol} size="xl" class={`${color}`} />
+		{#if color !== "gray"}
+			<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-200": ""}`} >
+				{milestone_or_group?.text[i18n.locale].title}
+			</span>
+		{/if}
+		<Hr class="mx-2"/>
+	</div>
 {/snippet}
 
 <!--Snippet defining how the evaluation for each milestonegroup is shown. 'grade' is the evaluation we get from the backend-->
 {#snippet evaluation( milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, grade: number, isMilestone: boolean,)}
 	<div class={`rounded-lg space-x-2 space-y-4 p-2 m-2 flex flex-col ${(grade === 0 || grade === -1) && isMilestone=== true ? "bg-feedback-background-0" : ""}`}>
 		{#if grade === 1}
-			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
-				<CheckCircleSolid  size="xl" class="text-feedback-0"/>
-				<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-200": ""}`} >
-					{milestone_or_group?.text[i18n.locale].title}
-				</span>
-				<Hr class="mx-2"/>
-			</div>
+			{@render evaluationElement(CheckCircleSolid, milestone_or_group, "text-feedback-0", isMilestone)}
 		{:else if grade === 0}
-			<div class="flex flex-col md:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
-				<BellActiveSolid size="xl" class="text-feedback-1"/>
-				<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-700": ""}`} >
-					{milestone_or_group?.text[i18n.locale].title}
-				</span>
-				<Hr class="mx-2"/>
-			</div>
+			{@render evaluationElement(BellActiveSolid, milestone_or_group, "text-feedback-1", isMilestone)}
 			{#if isMilestone}
-				<span class =  "ml-auto mt-4 " >
-					<Button class = "bg-gray-500 dark:bg-gray-500 hover:bg-gray-400 dark:hover:bg-gray-400 focus-within:ring-gray-40" id="b1" onclick={()=>{
-						showHelp= true;
-					}}>{i18n.tr.milestone.help}</Button>
-					<Modal class = "m-2 p-2" title={i18n.tr.milestone.help} bind:open={showHelp} dismissable={true}>
-						{milestone_or_group?.text[i18n.locale].help}
-					</Modal>
-				</span>
+				{@render milestoneHelpButton(milestone_or_group)}
 			{/if}
 		{:else if grade === -1}
-			<div class="flex flex-col md:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
-				<CloseCircleSolid size="xl" class="text-feedback-2"/>
-				<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-700" : ""}`} >
-					{milestone_or_group?.text[i18n.locale].title}
-				</span>
-				<Hr class="mx-2"/>
-			</div>
+			{@render evaluationElement(CloseCircleSolid, milestone_or_group, "text-feedback-2", isMilestone)}
 			{#if isMilestone}
-				<span class =  "ml-auto mt-4">
-					<Button class = "bg-gray-500 dark:bg-gray-500 hover:bg-gray-400 dark:hover:bg-gray-400 focus-within:ring-gray-40" id="b1" onclick={()=>{
-						showHelp= true;
-					}}>{i18n.tr.milestone.help}</Button>
-					<Modal class = "m-2 p-2" title={i18n.tr.milestone.help} bind:open={showHelp} dismissable={true}>
-						{milestone_or_group?.text[i18n.locale].help}
-					</Modal>
-				</span>
+				{@render milestoneHelpButton(milestone_or_group)}
 			{/if}
 		{:else }
-		<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
-			<CloseCircleSolid color = "gray" size="xl"/>
-			<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-700": ""}`} >
-				{milestone_or_group?.text[i18n.locale].title}
-			</span>
-			<Hr class="mx-2"/>
-		</div>
-
+			{@render evaluationElement(CloseCircleSolid, milestone_or_group, "gray", isMilestone)}
 		{/if}
 	</div>
 {/snippet}
 
-<!-- Legend -->
-<!-- A grid view with symbol | shorthand(bold) | explanation  on larger screens and | symbol | shorthand on smaller screens -->
-{#snippet legend }
+<!-- Legend: a grid view with symbol | shorthand(bold) | explanation  on larger screens and | symbol | shorthand on smaller screens -->
+{#snippet legend()}
 	<div class="m-2 w-full mb-4 text-gray-700 dark:text-gray-200 mb-4 pb-4">
 		<p class="mb-4 pb-4">{i18n.tr.milestone.feedbackExplanation}</p>
 		<div class ="grid grid-cols-[auto_1fr_2fr] gap-4">
@@ -459,8 +443,8 @@ let promise = $state(setup());
 	</div>
 {/snippet}
 
-<!-- Central part of the page with a buttton that enables the explanation modal for the feedback, and a heading that tells people what they can do next -->
-{#snippet explanationModal}
+<!-- Middle part of the page with a buttton that enables the explanation modal for the feedback, and a heading that tells people what they can do next -->
+{#snippet explanationModal()}
 	<div class="text-gray-700 dark:text-gray-200 flex flex-cols justify-between m-2 mb-4 pb-4">
 		<Heading tag="h4" class="text-gray-700 dark:text-gray-200">{i18n.tr.milestone.selectFeedback}</Heading>
 
@@ -478,9 +462,9 @@ let promise = $state(setup());
 	</Modal>
 {/snippet}
 
-<!-- The main element of the page: Accordion display of milestone group feedback with detailed feedback for 
+<!-- Individual element in the main tabs component of the page: Accordion display of milestone group feedback with detailed feedback for 
  suboptimal milestones available on click-->
-{#snippet milestoneGroupsEval(aid)}
+{#snippet milestoneGroupsEval(aid: number)}
 	<Accordion class="p-2 m-2 grid grid-cols-1 md:grid-cols-3 gap-4">
 		{#each Object.entries(summary[aid]) as [mid, score]}
 			<div class="flex flex-col">
@@ -525,9 +509,9 @@ let promise = $state(setup());
 	{:then}
 		<Heading tag="h2" class = "text-gray-700 dark:text-gray-200 items-center p-2 m-2 pb-4">{i18n.tr.milestone.feedbackTitle} </Heading>
 
-		{@render legend}
+		{@render legend()}
 
-		{@render explanationModal}
+		{@render explanationModal()}
 
 		<!--Main tabs component that displays the feedback for the milestones and milestonegroups -->
 		<Tabs defaultClass="m-2 p-2 pb-4 items-center flex flex-wrap justify-between w-full text-gray-700 dark:text-gray-200">
