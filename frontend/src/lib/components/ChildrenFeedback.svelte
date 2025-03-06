@@ -27,11 +27,11 @@ import {
 	Tabs,
 } from "flowbite-svelte";
 import {
-	ExclamationCircleSolid,
 	BellActiveSolid,
 	ChartLineUpOutline,
 	CheckCircleSolid,
 	CloseCircleSolid,
+	ExclamationCircleSolid,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import AlertMessage from "./AlertMessage.svelte";
@@ -351,7 +351,7 @@ let promise = $state(setup());
 {#snippet summaryEvaluationElement(symbol: any, color: string, text: string)}
 	<svelte:component this={symbol} size="xl" class={`transform scale-150 ${color}`} />
 	<span class="font-bold p-2 items-center justify-center">{i18n.tr.milestone.summaryScore}</span>
-	<span class="font-normal p-2 items-center justify-center">{text}</span> 
+	<span class="font-normal p-2 items-center justify-center">{text}</span>
 {/snippet}
 
 <!--Snippet that shows the evaluation for the whole answersession: uses the minimum of the milestonegroup currently-->
@@ -421,8 +421,8 @@ let promise = $state(setup());
 	<Accordion class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 		{#each Object.entries(summary[aid]) as [mid, score]}
 			<div class="flex flex-col">
-				<AccordionItem 
-				activeClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-primary-700 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-600 items-center justify-between w-full font-medium text-left p-1" 
+				<AccordionItem
+				activeClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-primary-700 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-600 items-center justify-between w-full font-medium text-left p-1"
 				inactiveClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-primary-800 dark:bg-primary-800 hover:bg-primary-700 dark:hover:bg-primary-700 items-center justify-between w-full font-medium text-left p-1"
 			  	>
 			  		<span slot="header" class="items-center flex justify-center py-1">
