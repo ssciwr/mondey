@@ -38,7 +38,7 @@ import {
 } from "flowbite-svelte-icons";
 import AlertMessage from "./AlertMessage.svelte";
 
-let showAlert = $state(false);
+// data needed for displaying the page's content
 let alertMessage = $state(
 	i18n.tr.childData.alertMessageError as string | ValidationError[] | undefined,
 );
@@ -46,15 +46,19 @@ let milestoneGroups = $state(
 	{} as Record<number, Record<number, MilestoneGroupPublic>>,
 );
 let sessionkeys = $state([] as number[]);
-let detailed = $state({}) as Record<number, any>;
-let summary = $state({}) as Record<number, any>;
+let detailed = $state({}) as Record<number, any>; // detailed feedback for each milestone
+let summary = $state({}) as Record<number, any>; // summary feedback for each milestonegroup
 let answerSessions = $state({}) as Record<number, MilestoneAnswerSessionPublic>;
-let showHelp = $state(false);
-const intervalSize = 6;
-let currentSessionIndices = $state([0, intervalSize]);
-let relevant_sessionkeys = $state([] as number[]);
-let showMoreInfo = $state(false);
 
+// helpers
+const intervalSize = 6; // hardcoded number of answersessions to show at once
+let currentSessionIndices = $state([0, intervalSize]); // lower and upper bond for currently shown indices
+let relevant_sessionkeys = $state([] as number[]); // keys of the answersessions that are currently shown
+let showMoreInfo = $state(false);
+let showHelp = $state(false);
+let showAlert = $state(false);
+
+// data defining the legend for the feedback
 let milestonePresentation = $state([
 	{
 		icon: CheckCircleSolid,
@@ -97,6 +101,16 @@ const breadcrumbdata: any[] = [
 	},
 ];
 
+// functions needed for making decisions about page rendering and for doing some
+// data preprocessing:
+// TODO: for performance reasons, we could consider moving some of these functions to the backend,
+// but this can be done once performance becomes a problem.
+
+/**
+ * Get the answersessions for the child we are concerned with from the database.
+ * @summary Get the answersessions for the child we are concerned with from the database, set the sessionkeys as a sorted and reversed list of keys that we get from the response, and set the relevant_sessionkeys to be the interval of sessionkeys that we want to show.
+ * @return {Promise<void>} nothing
+ */
 async function loadAnswersessions(): Promise<void> {
 	user.load;
 	await currentChild.load_data();
@@ -126,6 +140,11 @@ async function loadAnswersessions(): Promise<void> {
 	relevant_sessionkeys = sessionkeys.slice(currentSessionIndices[0], maxindex);
 }
 
+/**
+ * Load the summary feedback for the relevant answersessions.
+ * @param {number[]} relevant - Relevant session keys,i.e., those that are currently displayed
+ * @return {Promise<void>} nothing
+ */
 async function loadSummaryFeedback(relevant: number[]): Promise<void> {
 	for (const aid of relevant) {
 		const milestoneGroupResponse = await getMilestonegroupsForSession({
@@ -161,6 +180,11 @@ async function loadSummaryFeedback(relevant: number[]): Promise<void> {
 	}
 }
 
+/**
+ * load the detailed feedback from the database for the child, i.e., the feedback on the milestones themselves, not just the groups.
+ * @param {number[]} relevant - Relevant session keys,i.e., those that are currently displayed
+ * @return {Promise<void>} nothing
+ */
 async function loadDetailedFeedback(relevant: number[]): Promise<void> {
 	for (const aid of relevant) {
 		const response = await getDetailedFeedbackForAnswersession({
@@ -191,7 +215,11 @@ async function loadDetailedFeedback(relevant: number[]): Promise<void> {
 	}
 }
 
-async function loadLast() {
+/**
+ * Load the last chunk of answersessions and feedbacks from the database. A chunk always has length 'intervalSize'.
+ * @return {Promise<void>} nothing
+ */
+async function loadLast(): Promise<void> {
 	currentSessionIndices = [
 		Math.max(currentSessionIndices[0] - intervalSize, 0),
 		Math.max(currentSessionIndices[1] - intervalSize, intervalSize),
@@ -205,7 +233,11 @@ async function loadLast() {
 	await loadDetailedFeedback(relevant_sessionkeys);
 }
 
-async function loadNext() {
+/**
+ * Load the next chunk of answersessions and feedbacks from the database. A chunk always has length 'intervalSize'.
+ * @return {Promise<void>} nothing
+ */
+async function loadNext(): Promise<void> {
 	currentSessionIndices = [
 		Math.min(
 			currentSessionIndices[0] + intervalSize,
@@ -222,8 +254,12 @@ async function loadNext() {
 	await loadDetailedFeedback(relevant_sessionkeys);
 }
 
+/**
+ * Generate a printable report from the feedback by concatenating all the feedbacks into a single formatted string.
+ * @summary If the description is long, write your summary here. Otherwise, feel free to remove this.
+ * @return {string} Report as a single string
+ */
 function generateReport(): string {
-	// generate a report to be printed out for the entire feedback history
 	let report = "";
 	// add title
 	report += `<h1>${i18n.tr.milestone.reportTitle}</h1>\n\n`;
@@ -262,7 +298,11 @@ function generateReport(): string {
 	return report;
 }
 
-function printReport() {
+/**
+ * Print the report generated by the generateReport function, which is called internally.
+ * @return {void} Nothing
+ */
+function printReport(): void {
 	const report = generateReport();
 	const printWindow = window.open("", "", "height=600,width=800");
 	if (printWindow === null) {
@@ -273,6 +313,11 @@ function printReport() {
 	printWindow.print();
 }
 
+/**
+ * Function for formatting a given datetime string into a more readable format.
+ * @param {string} date - The date to format.
+ * @return {string} The formatted date: day - month - year
+ */
 function formatDate(date: string): string {
 	const dateObj = new Date(date);
 	return [
@@ -282,20 +327,22 @@ function formatDate(date: string): string {
 	].join("-");
 }
 
+/**
+ * Create a title for the answersession, using the created_at field of the answersession data.
+ * @param {number} aid - The id of the answersession to create a title from.
+ * @return {ReturnValueDataTypeHere} Brief description of the returning value here.
+ */
 function makeTitle(aid: number): string {
 	return aid === sessionkeys[0]
 		? i18n.tr.milestone.current
 		: formatDate(answerSessions[aid].created_at);
 }
 
-function scrollToBottom() {
-	window.scrollTo({
-		top: document.body.scrollHeight * 0.35,
-		behavior: "instant",
-	});
-}
-
-async function setup() {
+/**
+ * Load the data and get everything ready to render the page
+ * @return { Promise<void>} nothign
+ */
+async function setup(): Promise<void> {
 	await loadAnswersessions();
 	if (Object.keys(answerSessions).length === 0) {
 		return;
@@ -304,15 +351,11 @@ async function setup() {
 	await loadDetailedFeedback(relevant_sessionkeys);
 }
 
-function makeTextColorInFeedback(value: boolean): string {
-	return value
-		? "text-gray-700 dark:text-gray-700"
-		: "text-gray-700 dark:text-gray-200";
-}
-
+// create a promise that will be resolved when the data is loaded
 let promise = $state(setup());
 </script>
 
+<!--Snippet that shows the evaluation for the whole answersession: uses the minimum of the milestonegroup currently-->
 {#snippet summaryEvaluation(aid: number)}
 	<div class="flex flex-col md:flex-row items-center justify-center w-full m-2 p-2 text-gray-700 dark:text-gray-200">
 		{#if Math.min(...(Object.values(summary[aid]) as number[])) === 1}
@@ -334,13 +377,12 @@ let promise = $state(setup());
 		{/if}
 	</div>
 <Hr classHr="mx-2"/>
-
 {/snippet}
 
-
-{#snippet evaluation( milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, value: number, isMilestone: boolean,)}
-	<div class={`rounded-lg space-x-2 space-y-4 p-2 m-2 flex flex-col ${(value === 0 || value === -1) && isMilestone=== true ? "bg-feedback-background-0" : ""}`}>
-		{#if value === 1}
+<!--Snippet defining how the evaluation for each milestonegroup is shown. 'grade' is the evaluation we get from the backend-->
+{#snippet evaluation( milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, grade: number, isMilestone: boolean,)}
+	<div class={`rounded-lg space-x-2 space-y-4 p-2 m-2 flex flex-col ${(grade === 0 || grade === -1) && isMilestone=== true ? "bg-feedback-background-0" : ""}`}>
+		{#if grade === 1}
 			<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 				<CheckCircleSolid  size="xl" class="text-feedback-0"/>
 				<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-200": ""}`} >
@@ -348,10 +390,10 @@ let promise = $state(setup());
 				</span>
 				<Hr class="mx-2"/>
 			</div>
-		{:else if value === 0}
+		{:else if grade === 0}
 			<div class="flex flex-col md:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 				<BellActiveSolid size="xl" class="text-feedback-1"/>
-				<span class = {`font-bold ${isMilestone? makeTextColorInFeedback(value === 0 || value === -1): ""}`} >
+				<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-700": ""}`} >
 					{milestone_or_group?.text[i18n.locale].title}
 				</span>
 				<Hr class="mx-2"/>
@@ -366,10 +408,10 @@ let promise = $state(setup());
 					</Modal>
 				</span>
 			{/if}
-		{:else if value === -1}
+		{:else if grade === -1}
 			<div class="flex flex-col md:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 				<CloseCircleSolid size="xl" class="text-feedback-2"/>
-				<span class = {`font-bold ${isMilestone? makeTextColorInFeedback(value === 0 || value === -1) : ""}`} >
+				<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-700" : ""}`} >
 					{milestone_or_group?.text[i18n.locale].title}
 				</span>
 				<Hr class="mx-2"/>
@@ -387,7 +429,7 @@ let promise = $state(setup());
 		{:else }
 		<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center m-2 p-2">
 			<CloseCircleSolid color = "gray" size="xl"/>
-			<span class = {`font-bold ${isMilestone? makeTextColorInFeedback(value === 0 || value === -1): ""}`} >
+			<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-700": ""}`} >
 				{milestone_or_group?.text[i18n.locale].title}
 			</span>
 			<Hr class="mx-2"/>
@@ -397,55 +439,95 @@ let promise = $state(setup());
 	</div>
 {/snippet}
 
+<!-- Legend -->
+<!-- A grid view with symbol | shorthand(bold) | explanation  on larger screens and | symbol | shorthand on smaller screens -->
+{#snippet legend }
+	<div class="m-2 w-full mb-4 text-gray-700 dark:text-gray-200 mb-4 pb-4">
+		<p class="mb-4 pb-4">{i18n.tr.milestone.feedbackExplanation}</p>
+		<div class ="grid grid-cols-[auto_1fr_2fr] gap-4">
+			{#each milestonePresentation as milestone}
+				<div class="flex justify-center">
+					<svelte:component this={milestone.icon} size="xl" class={milestone.class} />
+				</div>
+				<span class="font-bold">{milestone.short}</span>
+				<span class="hidden sm:block">{milestone.text}</span>
+			<div class="col-span-3">
+				<Hr classHr="w-full my-2" />
+			</div>
+			{/each}
+		</div>
+	</div>
+{/snippet}
 
+<!-- Central part of the page with a buttton that enables the explanation modal for the feedback, and a heading that tells people what they can do next -->
+{#snippet explanationModal}
+	<div class="text-gray-700 dark:text-gray-200 flex flex-cols justify-between m-2 mb-4 pb-4">
+		<Heading tag="h4" class="text-gray-700 dark:text-gray-200">{i18n.tr.milestone.selectFeedback}</Heading>
+
+		<Button class="bg-gray-500 dark:bg-gray-500 hover:bg-gray-400 focus-within:ring-gray-40 font-bold" size="md" type="button" on:click={() => {
+			showMoreInfo = true;
+		}}
+		>{i18n.tr.milestone.moreInfoOnEval}</Button>
+	</div>
+
+	<!-- Modal that shows the explanation of the feedback when the above button is clicked			 -->
+	<Modal class = "m-2 p-2" classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-200" title={i18n.tr.milestone.info} bind:open={showMoreInfo} dismissable={true}>
+		<p class ="text-gray-700 dark:text-gray-200 font-medium ">{i18n.tr.milestone.feedbackExplanationDetailed}</p>
+		<p class ="text-gray-700 dark:text-gray-200 font-medium ">{i18n.tr.milestone.feedbackDetailsMilestone}</p>
+		<p class ="text-gray-700 dark:text-gray-200 font-medium " >{i18n.tr.milestone.feedbackDetailsEval}</p>
+	</Modal>
+{/snippet}
+
+<!-- The main element of the page: Accordion display of milestone group feedback with detailed feedback for 
+ suboptimal milestones available on click-->
+{#snippet milestoneGroupsEval(aid)}
+	<Accordion class="p-2 m-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+		{#each Object.entries(summary[aid]) as [mid, score]}
+			<div class="flex flex-col">
+				<AccordionItem activeClass="flex flex-col m-2 rounded-xl text-white dark:text-white bg-primary-700 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-600 items-center justify-between w-full font-medium text-left" inactiveClass="flex flex-col rounded-xl text-white dark:text-white bg-primary-800 dark:bg-primary-800 hover:bg-primary-700 dark:hover:bg-primary-700 items-center justify-between w-full font-medium text-left m-2">
+					<span slot="header" class="items-center flex justify-center space-x-2">
+						{@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
+					</span>
+					{#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
+						{@render evaluation(
+							milestoneGroups[aid][Number(mid)].milestones.find((element: any) =>
+							{
+								return element.id === Number(ms_id);
+							}),
+							Number(ms_score),
+							true
+						)}
+						<Hr classHr="mx-2"/>
+					{/each}
+				</AccordionItem>
+			</div>
+		{/each}
+	</Accordion>
+{/snippet}
+
+<!--topmost navigation element that lets us go back to children overview and child data-->
 <Breadcrumbs data={breadcrumbdata} />
 
 {#if showAlert}
 	<AlertMessage
-		message = {alertMessage}
+		message = {`${alertMessage}`}
 		title = {i18n.tr.childData.alertMessageTitle}
+		onclick={() => {
+			showAlert = false;
+		}}
 	/>
 {:else}
 	{#await promise}
+		<!-- show a loading symbol if the data is not yet available-->
 		<div class = "flex justify-center items-center space-x-2">
 			<Spinner /> <p>{i18n.tr.childData.loadingMessage}</p>
 		</div>
 	{:then}
 		<Heading tag="h2" class = "text-gray-700 dark:text-gray-200 items-center p-2 m-2 pb-4">{i18n.tr.milestone.feedbackTitle} </Heading>
 
-		<!-- Legend -->
-		<div class="m-2 w-full mb-4 text-gray-700 dark:text-gray-200 mb-4 pb-4">
-			<p class="mb-4 pb-4">{i18n.tr.milestone.feedbackExplanation}</p>
-			<div class ="grid grid-cols-[auto_1fr_2fr] gap-4">
-				{#each milestonePresentation as milestone}
-					<div class="flex justify-center">
-						<svelte:component this={milestone.icon} size="xl" class={milestone.class} />
-					</div>
-					<span class="font-bold">{milestone.short}</span>
-					<span>{milestone.text}</span>
-				<div class="col-span-3">
-					<Hr classHr="w-full my-2" />
-				</div>
-				{/each}
-			</div>
-		  </div>
+		{@render legend}
 
-		<!-- Buttton that enables the explanation modal for the feedback. -->
-		<div class="text-gray-700 dark:text-gray-200 flex flex-cols justify-between m-2 mb-4 pb-4">
-			<Heading tag="h4" class="text-gray-700 dark:text-gray-200">{i18n.tr.milestone.selectFeedback}</Heading>
-
-			<Button class="bg-gray-500 dark:bg-gray-500 hover:bg-gray-400 focus-within:ring-gray-40 font-bold" size="md" type="button" on:click={() => {
-				showMoreInfo = true;
-			}}
-			>{i18n.tr.milestone.moreInfoOnEval}</Button>
-		</div>
-
-		<!-- Modal that shows the explanation of the feedback when the above button is clicked			 -->
-		<Modal class = "m-2 p-2" classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-200" title={i18n.tr.milestone.info} bind:open={showMoreInfo} dismissable={true}>
-			<p class ="text-gray-700 dark:text-gray-200 font-medium ">{i18n.tr.milestone.feedbackExplanationDetailed}</p>
-			<p class ="text-gray-700 dark:text-gray-200 font-medium ">{i18n.tr.milestone.feedbackDetailsMilestone}</p>
-			<p class ="text-gray-700 dark:text-gray-200 font-medium " >{i18n.tr.milestone.feedbackDetailsEval}</p>
-		</Modal>
+		{@render explanationModal}
 
 		<!--Main tabs component that displays the feedback for the milestones and milestonegroups -->
 		<Tabs defaultClass="m-2 p-2 pb-4 items-center flex flex-wrap justify-between w-full text-gray-700 dark:text-gray-200">
@@ -458,34 +540,14 @@ let promise = $state(setup());
 
 							{@render summaryEvaluation(aid)}
 
-							<Accordion class="p-2 m-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-								{#each Object.entries(summary[aid]) as [mid, score]}
-									<div class="flex flex-col">
-									<AccordionItem activeClass="flex flex-col m-2 rounded-xl text-white dark:text-white bg-primary-700 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-600 items-center justify-between w-full font-medium text-left" inactiveClass="flex flex-col rounded-xl text-white dark:text-white bg-primary-800 dark:bg-primary-800 hover:bg-primary-700 dark:hover:bg-primary-700 items-center justify-between w-full font-medium text-left m-2">
-										<span slot="header" class="items-center flex justify-center space-x-2">
-											{@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
-										</span>
-										{#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
-											{@render evaluation(
-												milestoneGroups[aid][Number(mid)].milestones.find((element: any) =>
-												{
-													return element.id === Number(ms_id);
-												}),
-												Number(ms_score),
-												true
-											)}
-											<Hr classHr="mx-2"/>
-										{/each}
-									</AccordionItem>
-									</div>
-								{/each}
-							</Accordion>
+							{@render milestoneGroupsEval(aid)}
 						</TabItem>
 					{/each}
 				{/if}
 			</div>
 		</Tabs>
 
+		<!--Button to print the report out into pdf or physical copy-->
 		<div class="flex items-center justify-center w-full m-2 p-2 mb-4 pb-4">
 			<Button class="md:w-64 md:h-8  m-2 p-2 bg-gray-500 dark:bg-gray-500 hover:bg-gray-400 focus-within:ring-gray-40" onclick={printReport}>{i18n.tr.milestone.printReport}</Button>
 		</div>
@@ -493,6 +555,9 @@ let promise = $state(setup());
 		<AlertMessage
 			message = {`${alertMessage} ${error}`}
 			title = {i18n.tr.childData.alertMessageTitle}
+			onclick={() => {
+				showAlert = false;
+			}}
 		/>
 	{/await}
 {/if}
