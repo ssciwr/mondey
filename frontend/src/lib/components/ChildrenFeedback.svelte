@@ -516,8 +516,8 @@ let promise = $state(setup());
 					<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-200">{i18n.tr.milestone.noFeedback}</p>
 				{:else}
 					{#each relevant_sessionkeys as aid}
-						<TabItem defaultClass="font-bold m-1 p-0" 
-						activeClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600 border-1" 
+						<TabItem defaultClass="font-bold m-1 p-0"
+						activeClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600 border-1"
 						inactiveClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 border-additional-color-600 dark:border-additional-color-600 border-1"
 						title={makeTitle(aid)} open={aid === relevant_sessionkeys[0] }>
 
