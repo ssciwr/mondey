@@ -5,6 +5,7 @@ import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
 import { user } from "$lib/stores/userStore.svelte";
 import { Button, Card, TabItem, Tabs } from "flowbite-svelte";
 import {
+	AdjustmentsVerticalOutline,
 	AtomOutline,
 	CogSolid,
 	GridPlusSolid,
@@ -13,6 +14,7 @@ import {
 import { onMount } from "svelte";
 import AdminPage from "./AdminPage.svelte";
 import UserDataInput from "./UserDataInput.svelte";
+import UserSettings from "./UserSettings.svelte";
 
 onMount(user.load);
 </script>
@@ -63,6 +65,16 @@ onMount(user.load);
 						<Card />
 					</TabItem>
 				{/if}
+				<TabItem>
+					<div
+						slot="title"
+						class="flex items-center gap-2 text-lg"
+					>
+						<AdjustmentsVerticalOutline size="lg" />
+						<span class="hidden md:inline">{i18n.tr.userData.settings}</span>
+					</div>
+					<UserSettings />
+				</TabItem>
 			</Tabs>
 		</div>
 	{:else}

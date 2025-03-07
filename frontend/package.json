@@ -15,28 +15,28 @@
 	},
 	"devDependencies": {
 		"@hey-api/openapi-ts": "0.55.2",
-		"@playwright/test": "^1.49.1",
-		"@sveltejs/adapter-static": "^3.0.6",
-		"@sveltejs/kit": "^2.8.0",
-		"@sveltejs/vite-plugin-svelte": "^4.0.0",
-		"@tailwindcss/typography": "^0.5.15",
-		"@testing-library/svelte": "^5.2.4",
+		"@playwright/test": "^1.50.1",
+		"@sveltejs/adapter-static": "^3.0.8",
+		"@sveltejs/kit": "^2.18.0",
+		"@sveltejs/vite-plugin-svelte": "^4.0.4",
+		"@tailwindcss/typography": "^0.5.16",
+		"@testing-library/svelte": "^5.2.7",
 		"@types/eslint": "^9.6.1",
-		"@types/node": "^22.10.2",
-		"@vitest/coverage-v8": "^2.1.4",
+		"@types/node": "^22.13.9",
+		"@vitest/coverage-v8": "^2.1.9",
 		"autoprefixer": "^10.4.20",
 		"flowbite": "^2.5.2",
-		"flowbite-svelte": "^0.47.3",
+		"flowbite-svelte": "^0.47.4",
 		"flowbite-svelte-icons": "2.0.2",
-		"globals": "^15.12.0",
+		"globals": "^15.15.0",
 		"jsdom": "^25.0.1",
-		"svelte": "^5.1.16",
-		"svelte-check": "^4.0.7",
-		"tailwindcss": "^3.4.14",
-		"typescript": "^5.6.3",
-		"typescript-eslint": "^8.14.0",
-		"vite": "^5.4.11",
-		"vitest": "^2.1.4"
+		"svelte": "^5.22.5",
+		"svelte-check": "^4.1.4",
+		"tailwindcss": "^3.4.17",
+		"typescript": "^5.8.2",
+		"typescript-eslint": "^8.26.0",
+		"vite": "^5.4.14",
+		"vitest": "^2.1.9"
 	},
 	"type": "module",
 	"dependencies": {
@@ -44,6 +44,6 @@
 		"@unovis/ts": "1.5.0-beta.0",
 		"cdigit": "^4.0.2",
 		"iso-639-1": "3.1.3",
-		"svelte-dnd-action": "^0.9.52"
+		"svelte-dnd-action": "^0.9.57"
 	}
 }
