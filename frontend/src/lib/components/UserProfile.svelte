@@ -53,19 +53,5 @@ let alertMessage: string = $state(i18n.tr.login.alertMessageError);
 				>{i18n.tr.login.profileButtonLabelLogout}</Button
 			>
 		</div>
-	{:else}
-		<div
-			class="mx-auto mb-6 flex flex-col items-center justify-center space-y-6"
-		>
-			<Heading tag="h3" class="mx-auto flex w-full justify-center"
-				>{i18n.tr.login.profileTitleDefault}</Heading
-			>
-			<Button
-				type="button"
-				class="m-2 w-full"
-				href="{base}/userLand/userLogin"
-				size="lg">{i18n.tr.login.profileButtonLabelDefault}</Button
-			>
-		</div>
 	{/if}
 </Popover>
