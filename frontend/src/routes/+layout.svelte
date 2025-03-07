@@ -20,6 +20,9 @@ onMount(async () => {
 });
 </script>
 
+<svelte:head>
+	<title>MONDEY :: Milestones of Normal Development in Early Years</title>
+</svelte:head>
 
 <Navbar>
 	<NavBrand href={base}>
