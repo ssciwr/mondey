@@ -36,5 +36,4 @@ export const componentTable: ComponentTable = {
 };
 
 // used in userlandingpage to make it single page
-export const activeTabPersonal = writable("userDataInput");
-export const activeTabChildren = writable("childrenGallery");
+export const activePage = writable("userDataInput");

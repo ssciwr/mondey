@@ -11,7 +11,7 @@ import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { activeTabChildren } from "$lib/stores/componentStore";
+import { activePage } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
 import { Spinner } from "flowbite-svelte";
 import {
@@ -95,7 +95,7 @@ async function setup(): Promise<any> {
 			progress: computeProgress(item.milestones, answerSession.data),
 			events: {
 				onclick: () => {
-					activeTabChildren.set("milestoneOverview");
+					activePage.set("milestoneOverview");
 					contentStore.milestoneGroup = item.id;
 					contentStore.milestoneGroupData = item;
 				},
@@ -112,7 +112,7 @@ const breadcrumbdata: any[] = [
 		label: currentChild.name,
 		symbol: UserSettingsOutline,
 		onclick: () => {
-			activeTabChildren.set("childrenRegistration");
+			activePage.set("childrenRegistration");
 		},
 	},
 	{
@@ -227,7 +227,7 @@ const searchData: any[] = [
 </div>
 {:catch error}
 	<AlertMessage message={`${i18n.tr.milestone.alertMessageError} ${error}`} onclick={() => {
-		activeTabChildren.set("milestoneOverview");
+		activePage.set("milestoneOverview");
 		showAlert = false;
 	}}/>
 {/await}

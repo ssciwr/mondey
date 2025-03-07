@@ -22,7 +22,7 @@ import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
+import { activePage, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Hr, Input, Spinner } from "flowbite-svelte";
 import {
@@ -255,7 +255,7 @@ async function submitData(): Promise<void> {
 
 	// disable all elements to make editing a conscious choice amd go back to childrenGallery
 	console.log("submission of child data successful.");
-	activeTabChildren.set("childrenGallery");
+	activePage.set("childrenGallery");
 }
 </script>
 
@@ -418,7 +418,7 @@ async function submitData(): Promise<void> {
 							type="button"
 							color="green"
 							on:click={() => {
-								activeTabChildren.set("milestoneGroup");
+								activePage.set("milestoneGroup");
 							}}
 							>
 							<PlayOutline size='sm'/>
@@ -429,7 +429,7 @@ async function submitData(): Promise<void> {
 							color = "yellow"
 							type ="button"
 							onclick={() => {
-								activeTabChildren.set("childrenFeedback");
+								activePage.set("childrenFeedback");
 							}}
 							>
 							<PlayOutline size='sm'/>
@@ -460,7 +460,7 @@ async function submitData(): Promise<void> {
 									alertMessage=i18n.tr.childData.alertMessageError + response.error.detail;
 								}
 								else {
-									activeTabChildren.update((value) => {
+									activePage.update((value) => {
 										return "childrenGallery";
 									});
 									currentChild.id = null;

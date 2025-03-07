@@ -13,7 +13,7 @@ import {
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { activeTabChildren } from "$lib/stores/componentStore";
+import { activePage } from "$lib/stores/componentStore";
 import { user } from "$lib/stores/userStore.svelte";
 import {
 	Accordion,
@@ -84,14 +84,14 @@ const breadcrumbdata: any[] = [
 	{
 		label: currentChild.name,
 		onclick: () => {
-			activeTabChildren.set("childrenRegistration");
+			activePage.set("childrenRegistration");
 		},
 		symbol: UserSettingsOutline,
 	},
 	{
 		label: i18n.tr.milestone.feedbackTitle,
 		onclick: () => {
-			activeTabChildren.set("childrenFeedback");
+			activePage.set("childrenFeedback");
 		},
 		symbol: ChartLineUpOutline,
 	},

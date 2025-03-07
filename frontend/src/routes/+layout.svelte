@@ -18,7 +18,6 @@ import {
 	NavUl,
 	Navbar,
 } from "flowbite-svelte";
-import { MoonSolid, SunSolid } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 
 import "../app.css";
@@ -41,28 +40,21 @@ onMount(async () => {
 		<img src={logo_dark} class="mt-6 hidden h-12 dark:block" alt="MONDEY Logo" />
 	</NavBrand>
 	<NavHamburger />
-	<NavUl ulClass="hidden flex min-[320px]:flex-col sm:flex-col md:flex-row items-center lg:mt-8 lg:space-x-14 md:mt-8 md:space-x-7 text-lg ">
+	<NavUl ulClass="flex flex-col space-y-2 md:flex-row md:space-x-6 md:justify-right items-center">
+		{#if user.data !== null}
 
-		{#if user.id !== null}
 			<FunctionalIcon>
 				<Avatar rounded class="apply-icon-style" id="avatar" />
 			</FunctionalIcon>
 
 			<UserProfile triggeredBy="#avatar" />
 		{:else}
-			<div
-				class="mx-auto mb-6 flex flex-col items-center justify-center space-y-6"
+			<Button
+				type="button"
+				class="m-2 w-full"
+				href="{base}/userLand/userLogin"
+				size="lg">{i18n.tr.login.profileButtonLabelDefault}</Button
 			>
-				<Heading tag="h3" class="mx-auto flex w-full justify-center"
-					>{i18n.tr.login.profileTitleDefault}</Heading
-				>
-				<Button
-					type="button"
-					class="m-2 w-full"
-					href="{base}/userLand/userLogin"
-					size="lg">{i18n.tr.login.profileButtonLabelDefault}</Button
-				>
-			</div>
 		{/if}
 		<LocaleChooser />
 	</NavUl>

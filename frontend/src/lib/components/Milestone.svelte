@@ -11,7 +11,7 @@ import SubmitMilestoneImageModal from "$lib/components/DataInput/SubmitMilestone
 import MilestoneButton from "$lib/components/MilestoneButton.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { activeTabChildren } from "$lib/stores/componentStore";
+import { activePage } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
 import { Accordion, AccordionItem, Button, Checkbox } from "flowbite-svelte";
 import {
@@ -83,7 +83,7 @@ async function nextMilestone() {
 		currentMilestoneIndex + 1 ===
 		contentStore.milestoneGroupData.milestones.length
 	) {
-		activeTabChildren.set("milestoneOverview");
+		activePage.set("milestoneOverview");
 		return;
 	}
 	currentMilestoneIndex += 1;
@@ -148,21 +148,21 @@ const breadcrumbdata = $derived([
 	{
 		label: currentChild.name,
 		onclick: () => {
-			activeTabChildren.set("childrenRegistration");
+			activePage.set("childrenRegistration");
 		},
 		symbol: UserSettingsOutline,
 	},
 	{
 		label: i18n.tr.milestone.groupOverviewLabel,
 		onclick: () => {
-			activeTabChildren.set("milestoneGroup");
+			activePage.set("milestoneGroup");
 		},
 		symbol: RectangleListOutline,
 	},
 	{
 		label: contentStore.milestoneGroupData.text[i18n.locale].title,
 		onclick: () => {
-			activeTabChildren.set("milestoneOverview");
+			activePage.set("milestoneOverview");
 		},
 		symbol: GridOutline,
 	},

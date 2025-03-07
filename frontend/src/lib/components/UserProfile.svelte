@@ -29,29 +29,6 @@ let alertMessage: string = $state(i18n.tr.login.alertMessageError);
 			<p class="m-2 w-full rounded-lg p-2 font-semibold">
 				{user.data?.email}
 			</p>
-			<Button
-				class="m-2 w-full"
-				size="lg"
-				type="button"
-				href="{base}/userLand/userLandingpage"
-				>{i18n.tr.login.profileAccess}</Button
-			>
-			<Button class="m-2 w-full" on:click={async () => {
-				const response = await user.logout();
-				if (response.error) {
-					alertMessage = i18n.tr.login.alertMessageError;
-					showAlert = true;
-				} else {
-					console.log("Logout successful");
-					user.data = null;
-					currentChild.id = null;
-					currentChild.data = null;
-					goto(`/${base}`);
-				}
-
-			}} size="lg" type="button"
-				>{i18n.tr.login.profileButtonLabelLogout}</Button
-			>
 		</div>
 	{/if}
 </Popover>

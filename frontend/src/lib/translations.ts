@@ -195,6 +195,7 @@ export const translationIds = {
 		submitButtonLabel: "Abschließen",
 		changeData: "Daten vollständig, zum bearbeiten klicken",
 		loadingMessage: "Daten werden geladen",
+		settingsLabel: "Einstellungen",
 	},
 	childData: {
 		newChildHeading: "Neu",
