@@ -195,6 +195,11 @@ export const translationIds = {
 		submitButtonLabel: "Abschließen",
 		changeData: "Daten vollständig, zum bearbeiten klicken",
 		loadingMessage: "Daten werden geladen",
+		settings: "Einstellungen",
+		changeEmail: "E-Mail Adresse ändern",
+		changePassword: "Passwort ändern",
+		newPassword: "Neues Passwort",
+		newPasswordConfirm: "Neues Passwort bestätigen",
 	},
 	childData: {
 		newChildHeading: "Neu",
