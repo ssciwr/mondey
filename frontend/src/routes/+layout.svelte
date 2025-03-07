@@ -7,14 +7,7 @@ import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import Footer from "$lib/components/Navigation/Footer.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";
-import {
-	Avatar,
-	Button,
-	NavBrand,
-	NavHamburger,
-	NavUl,
-	Navbar,
-} from "flowbite-svelte";
+import { Button, NavBrand, NavHamburger, NavUl, Navbar } from "flowbite-svelte";
 import { onMount } from "svelte";
 
 import "../app.css";
@@ -27,9 +20,6 @@ onMount(async () => {
 });
 </script>
 
-<svelte:head>
-	<title>MONDEY :: Milestones of Normal Development in Early Years</title>
-</svelte:head>
 
 <Navbar>
 	<NavBrand href={base}>
