@@ -49,10 +49,11 @@ activePage.set("userDataInput");
 {:else}
 	{#if user.data}
 		{#if user.data.is_verified === true}
-			<div class = "flex flex-row items-start" >
+			<div class = "flex flex-row items-start text-sm" >
 				<Sidebar class= "m-2 p-2 ">
 					<SidebarWrapper>
 						<SidebarGroup>
+							<SidebarItem label = {user.data.email}/>
 							<SidebarItem label = {i18n.tr.userData.label} onclick = {() => {
 								activePage.set("userDataInput");
 							}}>
@@ -121,8 +122,9 @@ activePage.set("userDataInput");
 						</SidebarGroup>
 					</SidebarWrapper>
 				</Sidebar >
-
-				<svelte:component this={componentTable[$activePage]} class = "m-2 p-2"/>
+				<div class = "m-2 p-2">
+					<svelte:component this={componentTable[$activePage]}/>
+				</div>
 			</div>
 		{:else}
 			<UserVerify />

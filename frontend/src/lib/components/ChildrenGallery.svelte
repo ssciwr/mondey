@@ -141,7 +141,7 @@ const searchData = [
 		/>
 	{/if}
 
-	<div class="container m-2 mx-auto w-full pb-4 md:rounded-t-lg">
+	<div class="m-2 mx-auto w-full pb-4 md:rounded-t-lg">
 
 		<Heading
 			tag="h1"

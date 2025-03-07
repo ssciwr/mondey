@@ -5,7 +5,6 @@ import logo_dark from "$lib/assets/mondey_dark.svg";
 import logo_light from "$lib/assets/mondey_light.svg";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import Footer from "$lib/components/Navigation/Footer.svelte";
-import FunctionalIcon from "$lib/components/Navigation/FunctionalIcon.svelte";
 import UserProfile from "$lib/components/UserProfile.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";
@@ -42,12 +41,7 @@ onMount(async () => {
 	<NavHamburger />
 	<NavUl ulClass="flex flex-col space-y-2 md:flex-row md:space-x-6 md:justify-right items-center">
 		{#if user.data !== null}
-
-			<FunctionalIcon>
-				<Avatar rounded class="apply-icon-style" id="avatar" />
-			</FunctionalIcon>
-
-			<UserProfile triggeredBy="#avatar" />
+			<Avatar rounded class="apply-icon-style" id="avatar" />
 		{:else}
 			<Button
 				type="button"
