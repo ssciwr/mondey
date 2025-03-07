@@ -1,6 +1,11 @@
 <svelte:options runes={true} />
 <script lang="ts">
+import {
+	type UsersPatchCurrentUserData,
+	usersPatchCurrentUser,
+} from "$lib/client";
 import { i18n } from "$lib/i18n.svelte";
+import { preventDefault } from "$lib/util";
 import { Button, Heading, Input, Label, Modal } from "flowbite-svelte";
 
 let new_email = null as string | null;
