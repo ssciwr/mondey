@@ -5,20 +5,9 @@ import logo_dark from "$lib/assets/mondey_dark.svg";
 import logo_light from "$lib/assets/mondey_light.svg";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import Footer from "$lib/components/Navigation/Footer.svelte";
-import FunctionalIcon from "$lib/components/Navigation/FunctionalIcon.svelte";
-import UserProfile from "$lib/components/UserProfile.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";
-import {
-	Avatar,
-	DarkMode,
-	NavBrand,
-	NavHamburger,
-	NavLi,
-	NavUl,
-	Navbar,
-} from "flowbite-svelte";
-import { MoonSolid, SunSolid } from "flowbite-svelte-icons";
+import { Button, NavBrand, NavHamburger, NavUl, Navbar } from "flowbite-svelte";
 import { onMount } from "svelte";
 
 import "../app.css";
@@ -41,30 +30,21 @@ onMount(async () => {
 		<img src={logo_dark} class="mt-6 hidden h-12 dark:block" alt="MONDEY Logo" />
 	</NavBrand>
 	<NavHamburger />
-	<NavUl ulClass="hidden flex min-[320px]:flex-col sm:flex-col md:flex-row items-center lg:mt-8 lg:space-x-14 md:mt-8 md:space-x-7 text-lg ">
-		<NavLi class = "hover:cursor-pointer" href={base}>{i18n.tr.misc.latest}</NavLi>
-		<NavLi class = "hover:cursor-pointer" href={base}>{i18n.tr.misc.downloads}</NavLi>
-		<NavLi class = "hover:cursor-pointer" href={base}>{i18n.tr.misc.contact}</NavLi>
-
-		<FunctionalIcon tooltip={'Darkmode ein- oder ausschalten'}>
-			<DarkMode class="apply-icon-style">
-				<MoonSolid slot="darkIcon" />
-				<SunSolid slot="lightIcon" />
-			</DarkMode>
-		</FunctionalIcon>
-
-		<FunctionalIcon>
-			<Avatar rounded class="apply-icon-style" id="avatar" />
-		</FunctionalIcon>
-
-		<UserProfile triggeredBy="#avatar" />
-
+	<NavUl ulClass="flex flex-col space-y-2 md:flex-row md:space-x-6 md:justify-right items-center">
+		{#if user.data === null}
+			<Button
+				type="button"
+				class="m-2 w-full"
+				href="{base}/userLand/userLogin"
+				size="lg">{i18n.tr.login.profileButtonLabelDefault}</Button
+			>
+		{/if}
 		<LocaleChooser />
 	</NavUl>
 </Navbar>
 
 <div
-	class="flex-auto  items-center justify-center overflow-y-auto pb-20 md:mx-[max(10vw,2rem)] md:my-[max(2vw,2rem)]"
+	class="flex-auto items-center justify-center overflow-y-auto pb-2 mb-2"
 >
 	{@render children?.()}
 </div>
