@@ -198,8 +198,12 @@ export const translationIds = {
 		settings: "Einstellungen",
 		changeEmail: "E-Mail Adresse ändern",
 		changePassword: "Passwort ändern",
+		newEmail: "Neue E-Mail Adresse",
+		newEmailConfirm: "Neue E-Mail Adresse bestätigen",
 		newPassword: "Neues Passwort",
 		newPasswordConfirm: "Neues Passwort bestätigen",
+		confirmChange: "Änderungen bestätigen",
+		confirmChangeSuccess: "Änderungen erfolgreich",
 	},
 	childData: {
 		newChildHeading: "Neu",
