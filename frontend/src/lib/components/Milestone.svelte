@@ -19,6 +19,7 @@ import {
 	ArrowRightOutline,
 	EditOutline,
 	GridOutline,
+	GridPlusSolid,
 	InfoCircleSolid,
 	QuestionCircleSolid,
 	RectangleListOutline,
@@ -145,6 +146,13 @@ let currentImageIndex = $state(0);
 let showSubmitMilestoneImageModal = $state(false);
 const promise = setup();
 const breadcrumbdata = $derived([
+	{
+		label: i18n.tr.childData.overviewLabel,
+		onclick: () => {
+			activePage.set("childrenGallery");
+		},
+		symbol: GridPlusSolid,
+	},
 	{
 		label: currentChild.name,
 		onclick: () => {

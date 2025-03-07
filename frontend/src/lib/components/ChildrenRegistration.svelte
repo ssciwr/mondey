@@ -27,6 +27,7 @@ import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Hr, Input, Spinner } from "flowbite-svelte";
 import {
 	CheckCircleOutline,
+	GridPlusSolid,
 	PlayOutline,
 	TrashBinOutline,
 	UserSettingsOutline,
@@ -62,8 +63,18 @@ let showAlert = $state(false);
 let childLabel = $derived(name ? name : i18n.tr.childData.newChildHeadingLong);
 let breadcrumbdata = $derived([
 	{
+		label: i18n.tr.childData.overviewLabel,
+		onclick: () => {
+			activePage.set("childrenGallery");
+		},
+		symbol: GridPlusSolid,
+	},
+	{
 		label: childLabel,
 		symbol: UserSettingsOutline,
+		onclick: () => {
+			activePage.set("childrenRegistration");
+		},
 	},
 ]);
 

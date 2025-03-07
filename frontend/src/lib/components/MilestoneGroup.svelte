@@ -15,6 +15,7 @@ import { activePage } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
 import { Spinner } from "flowbite-svelte";
 import {
+	GridPlusSolid,
 	RectangleListOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
@@ -109,6 +110,13 @@ async function setup(): Promise<any> {
 
 const breadcrumbdata: any[] = [
 	{
+		label: i18n.tr.childData.overviewLabel,
+		onclick: () => {
+			activePage.set("childrenGallery");
+		},
+		symbol: GridPlusSolid,
+	},
+	{
 		label: currentChild.name,
 		symbol: UserSettingsOutline,
 		onclick: () => {
@@ -118,6 +126,9 @@ const breadcrumbdata: any[] = [
 	{
 		label: i18n.tr.milestone.groupOverviewLabel,
 		symbol: RectangleListOutline,
+		onclick: () => {
+			activePage.set("milestoneGroup");
+		},
 	},
 ];
 

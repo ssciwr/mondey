@@ -35,6 +35,7 @@ import {
 	CheckCircleSolid,
 	CloseCircleSolid,
 	ExclamationCircleSolid,
+	GridPlusSolid,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import AlertMessage from "./AlertMessage.svelte";
@@ -81,6 +82,13 @@ let milestonePresentation = $state([
 	},
 ]);
 const breadcrumbdata: any[] = [
+	{
+		label: i18n.tr.childData.overviewLabel,
+		onclick: () => {
+			activePage.set("childrenGallery");
+		},
+		symbol: GridPlusSolid,
+	},
 	{
 		label: currentChild.name,
 		onclick: () => {
