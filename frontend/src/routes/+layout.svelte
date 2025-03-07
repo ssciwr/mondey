@@ -5,13 +5,11 @@ import logo_dark from "$lib/assets/mondey_dark.svg";
 import logo_light from "$lib/assets/mondey_light.svg";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import Footer from "$lib/components/Navigation/Footer.svelte";
-import UserProfile from "$lib/components/UserProfile.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import {
 	Avatar,
 	Button,
-	Heading,
 	NavBrand,
 	NavHamburger,
 	NavUl,
@@ -40,9 +38,7 @@ onMount(async () => {
 	</NavBrand>
 	<NavHamburger />
 	<NavUl ulClass="flex flex-col space-y-2 md:flex-row md:space-x-6 md:justify-right items-center">
-		{#if user.data !== null}
-			<Avatar rounded class="apply-icon-style" id="avatar" />
-		{:else}
+		{#if user.data === null}
 			<Button
 				type="button"
 				class="m-2 w-full"
@@ -55,7 +51,7 @@ onMount(async () => {
 </Navbar>
 
 <div
-	class="flex-auto items-center justify-center overflow-y-auto pb-20 md:mx-[max(10vw,2rem)] md:my-[max(2vw,2rem)]"
+	class="flex-auto items-center justify-center overflow-y-auto pb-2 mb-2"
 >
 	{@render children?.()}
 </div>

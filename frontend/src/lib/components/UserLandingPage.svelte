@@ -7,7 +7,7 @@ import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activePage, componentTable } from "$lib/stores/componentStore";
 import { user } from "$lib/stores/userStore.svelte";
-import { Button, Card, TabItem, Tabs } from "flowbite-svelte";
+import { Button } from "flowbite-svelte";
 import {
 	Sidebar,
 	SidebarGroup,
@@ -49,11 +49,11 @@ activePage.set("userDataInput");
 {:else}
 	{#if user.data}
 		{#if user.data.is_verified === true}
-			<div class = "flex flex-row items-start text-sm" >
-				<Sidebar class= "m-2 p-2 ">
+			<div class = "flex flex-row items-start text-sm md:text-base" >
+				<Sidebar class= "max-md:hidden m-2 p-2 ">
 					<SidebarWrapper>
 						<SidebarGroup>
-							<SidebarItem label = {user.data.email}/>
+							<SidebarItem label = {user.data.email} class = "font-bold"/>
 							<SidebarItem label = {i18n.tr.userData.label} onclick = {() => {
 								activePage.set("userDataInput");
 							}}>
