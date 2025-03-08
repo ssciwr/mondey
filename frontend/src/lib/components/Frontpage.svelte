@@ -1,4 +1,3 @@
-<svelte:options runes={true} />
 <script lang='ts'>
 import CardDisplay from "$lib/components//DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
