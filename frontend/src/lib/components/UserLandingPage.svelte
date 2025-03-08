@@ -26,6 +26,9 @@ import {
 	ProfileCardSolid,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
+import AdminPage from "./AdminPage.svelte";
+import UserDataInput from "./UserDataInput.svelte";
+import UserSettings from "./UserSettings.svelte";
 
 let showAlert: boolean = $state(false);
 let alertMessage: string = $state(i18n.tr.login.alertMessageError);
@@ -94,6 +97,7 @@ activePage.set("userDataInput");
 					<svelte:fragment slot="icon">
 						<AdjustmentsVerticalOutline size="lg" />
 					</svelte:fragment>
+					<UserSettings />
 				</SidebarItem>
 
 				<SidebarItem label = {i18n.tr.login.profileButtonLabelLogout} onclick = {async () => {
