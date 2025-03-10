@@ -1,50 +1,68 @@
 <svelte:options runes={true} />
 <script lang="ts">
+import {
+	authCookieLogin,
+	usersCurrentUser,
+	usersPatchCurrentUser,
+} from "$lib/client/services.gen";
+import { type AuthCookieLoginData } from "$lib/client/types.gen";
 import { i18n } from "$lib/i18n.svelte";
 import { preventDefault } from "$lib/util";
-import { Button, Heading, Input, Label, Modal } from "flowbite-svelte";
+import { Button, Heading, Input, Modal } from "flowbite-svelte";
 import AlertMessage from "./AlertMessage.svelte";
 
-let new_email = $state(null) as string | null;
-let new_email_repeat = $state(null) as string | null;
 let new_password = $state(null) as string | null;
 let new_password_repeat = $state(null) as string | null;
-let current_password = $state(null) as string | null;
-let showSuccessMail = $state(false);
+let currentPassword = $state(null) as string | null;
+let currentPasswordValid = $state(false);
 let showSuccessPassword = $state(false);
 let showAlert = $state(false);
 let alertMessage = $state(i18n.tr.forgotPw.formatError);
 
-function submitNewEmail() {
-	if (new_email === null || new_email === "") {
-		console.log("email is empty");
+async function submitCurrentPassword(): Promise<boolean> {
+	if (currentPassword === null || currentPassword === "") {
+		console.log("password is empty");
 		showAlert = true;
-		alertMessage = i18n.tr.settings.emailEmpty;
-		return;
+		alertMessage = i18n.tr.settings.passwordEmpty;
+		return false;
 	}
 
-	if (new_email !== new_email_repeat) {
-		console.log("emails do not match");
+	console.log(`password submit clicked ${currentPassword}`);
+	const currentUser = await usersCurrentUser();
+
+	if (currentUser.error || !currentUser.data) {
+		console.log("error: ", currentUser.error);
+		alertMessage = i18n.tr.settings.oldPasswordWrong;
 		showAlert = true;
-		alertMessage = i18n.tr.settings.emailsDontMatch;
-		return;
+		return false;
 	}
 
-	console.log(`email changed ${new_email} ${new_email_repeat}`);
+	const response = await authCookieLogin({
+		body: {
+			username: currentUser.data.email,
+			password: currentPassword,
+		},
+	});
 
-	// FIXME: this is the wrong endpoint. Needs verification first
-	// see: https://owasp.org/www-community/pages/controls/Changing_Registered_Email_Address_For_An_Account
-	const response = {};
 	if (response.error) {
 		console.log("error: ", response.error);
-		alertMessage = i18n.tr.forgotPw.sendError;
+		alertMessage = i18n.tr.settings.oldPasswordWrong;
 		showAlert = true;
-	} else {
-		showSuccessMail = true;
+		return false;
 	}
+
+	currentPasswordValid = true;
+	currentPassword = "";
+	return true;
 }
 
-function submitNewPassword() {
+async function submitNewPassword() {
+	const currentPasswordStatus = submitCurrentPassword();
+
+	if (!currentPasswordStatus) {
+		return;
+	}
+
 	if (new_password === null || new_password === "") {
 		console.log("password is empty");
 		showAlert = true;
@@ -60,10 +78,15 @@ function submitNewPassword() {
 	}
 
 	console.log(
-		`password change clicked ${current_password} ${new_password} ${new_password_repeat}`,
+		`password change clicked ${currentPassword} ${new_password} ${new_password_repeat}`,
 	);
 
-	const response = {};
+	const response = await usersPatchCurrentUser({
+		body: {
+			password: new_password,
+		},
+	});
+
 	if (response.error) {
 		console.log("error: ", response.error);
 		alertMessage = i18n.tr.forgotPw.sendError;
@@ -76,7 +99,7 @@ function submitNewPassword() {
 
 {#if showAlert}
 	<AlertMessage
-		id="alertMessage_settings"
+		id="alertMessageSettings"
 		title={i18n.tr.forgotPw.alertTitle}
 		message={alertMessage}
 		onclick={() => {
@@ -86,28 +109,10 @@ function submitNewPassword() {
 {/if}
 
 <div class="m-2 p-2 flex flex-col space-y-2 text-gray-700 dark:text-gray-400 ">
-    <Heading tag="h2" class="font-bold text-gray-700 dark:text-gray-400">{i18n.tr.settings.settings}</Heading>
-
-	<Heading tag="h4" class="font-bold text-gray-700 dark:text-gray-400">{i18n.tr.settings.changeEmail}</Heading>
-    <form class = "space-y-4 mb-2 pb-2" onsubmit={preventDefault(submitNewEmail)}>
-
-        <Input id="change-email" type="email" placeholder={i18n.tr.settings.newEmail} bind:value={new_email}/>
-
-        <Input id="change-email-confirm" type="email" placeholder={i18n.tr.settings.newEmailConfirm} bind:value={new_email_repeat}/>
-
-        <Button id="changeEmailSubmitButton" size="lg" type="submit">{i18n.tr.settings.changeEmail}</Button>
-	</form>
-
-	<div class = "flex flex-row pb-2 mb-2 items-center">
-		<Modal id="emailChangeSuccessModal" class = "m-2 p-2" title={i18n.tr.settings.confirmChange} bind:open={showSuccessMail} dismissable={true}>
-			{i18n.tr.settings.confirmChangeSuccess}
-		</Modal>
-	</div>
-
 	<Heading tag="h4" class="font-bold text-gray-700 dark:text-gray-400">{i18n.tr.settings.changePassword}</Heading>
     <form class = "space-y-4 mb-2 pb-2" onsubmit={preventDefault(submitNewPassword)}>
         <Input
-            bind:value={current_password}
+            bind:value={currentPassword}
             type="password"
             id="old_password"
             placeholder={i18n.tr.settings.oldPassword}

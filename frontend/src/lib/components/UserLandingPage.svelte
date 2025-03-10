@@ -71,7 +71,7 @@ onMount(user.load);
 						class="flex items-center gap-2 text-lg"
 					>
 						<AdjustmentsVerticalOutline size="lg" />
-						<span class="hidden md:inline">{i18n.tr.userData.settings}</span>
+						<span class="hidden md:inline">{i18n.tr.settings.settings}</span>
 					</div>
 					<UserSettings />
 				</TabItem>

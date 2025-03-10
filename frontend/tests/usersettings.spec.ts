@@ -36,14 +36,6 @@ test.describe("", () => {
 test("usersettings_display-settings-form", async ({ page }) => {
 	// Check that both forms are present
 	await expect(page.getByText(`${i18n.tr.settings.settings}`)).toBeVisible();
-	await expect(page.getByText(`${i18n.tr.settings.changeEmail}`)).toBeVisible();
-	await expect(
-		page.getByPlaceholder(`${i18n.tr.settings.newEmail}`),
-	).toBeVisible();
-	await expect(
-		page.getByPlaceholder(`${i18n.tr.settings.newEmailConfirm}`),
-	).toBeVisible();
-
 	await expect(
 		page.getByText(`${i18n.tr.settings.changePassword}`),
 	).toBeVisible();
@@ -58,46 +50,14 @@ test("usersettings_display-settings-form", async ({ page }) => {
 	).toBeVisible();
 });
 
-test("usersettings_emails-do-not-match", async ({ page }) => {
-	await page.getByPlaceholder(`${i18n.tr.settings.newEmail}`).fill("e@mail.de");
-	await page
-		.getByPlaceholder(`${i18n.tr.settings.newEmailConfirm}`)
-		.fill("e.unequalmail.de");
-	await page.locator("#changeEmailSubmitButton").click();
-	await expect(page.locator("#alertMessage_settings")).toBeVisible();
-	await expect(page.locator("#alertMessage_settings").textContent()).toBe(
-		`${i18n.tr.settings.emailsDontMatch}`,
-	);
-});
-
-test("usersettings_emails-are-empty", async ({ page }) => {
-	await page.getByPlaceholder(`${i18n.tr.settings.newEmail}`).fill("");
-	await page
-		.getByPlaceholder(`${i18n.tr.settings.newEmailConfirm}`)
-		.fill("a@b.com");
-	await page.locator("#changeEmailSubmitButton").click();
-	await expect(page.locator("#alertMessage_settings")).toBeVisible();
-	await expect(page.locator("#alertMessage_settings").textContent()).toBe(
-		`${i18n.tr.settings.emailEmpty}`,
-	);
-});
-
-test("usersettings_successful-email-update", async ({ page }) => {
-	// TODO
-});
-
-test("usersettings_error-on-email-update", async ({ page }) => {
-	// TODO
-});
-
 test("usersettings_password-do-not-match", async ({ page }) => {
 	await page.getByPlaceholder(`${i18n.tr.settings.newEmail}`).fill("123");
 	await page
 		.getByPlaceholder(`${i18n.tr.settings.newEmailConfirm}`)
 		.fill("456");
 	await page.locator("#changeEmailSubmitButton").click();
-	await expect(page.locator("#alertMessage_settings")).toBeVisible();
-	await expect(page.locator("#alertMessage_settings").textContent()).toBe(
+	await expect(page.locator("#alertMessageSettings")).toBeVisible();
+	await expect(page.locator("#alertMessageSettings").textContent()).toBe(
 		`${i18n.tr.settings.passwordEmpty}`,
 	);
 });
@@ -108,8 +68,8 @@ test("usersettings_password-are-empty", async ({ page }) => {
 		.getByPlaceholder(`${i18n.tr.settings.newEmailConfirm}`)
 		.fill("45667");
 	await page.locator("#changeEmailSubmitButton").click();
-	await expect(page.locator("#alertMessage_settings")).toBeVisible();
-	await expect(page.locator("#alertMessage_settings").textContent()).toBe(
+	await expect(page.locator("#alertMessageSettings")).toBeVisible();
+	await expect(page.locator("#alertMessageSettings").textContent()).toBe(
 		`${i18n.tr.settings.passwordsDontMatch}`,
 	);
 });
