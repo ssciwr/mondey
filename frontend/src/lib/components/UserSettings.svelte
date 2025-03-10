@@ -72,8 +72,6 @@ function submitNewPassword() {
 }
 </script>
 
-
-
 {#if showAlert}
 	<AlertMessage
 		title={i18n.tr.forgotPw.alertTitle}
@@ -95,7 +93,7 @@ function submitNewPassword() {
 	</form>
 
 	<div class = "flex flex-row pb-2 mb-2 items-center">
-		<Modal class = "m-2 p-2" title={i18n.tr.userData.confirmChange} bind:open={showSuccessMail} dismissable={true}>
+		<Modal id="emailChangeSuccessModal" class = "m-2 p-2" title={i18n.tr.userData.confirmChange} bind:open={showSuccessMail} dismissable={true}>
 			{i18n.tr.userData.confirmChangeSuccess}
 		</Modal>
 	</div>
@@ -126,7 +124,7 @@ function submitNewPassword() {
     </form>
 
 	<div class = "flex flex-row pb-2 mb-2 items-center">
-		<Modal class = "m-2 p-2" title={i18n.tr.userData.confirmChange} bind:open={showSuccessPassword} dismissable={true}>
+		<Modal id="passwordChangeSuccessModal" class = "m-2 p-2" title={i18n.tr.userData.confirmChange} bind:open={showSuccessPassword} dismissable={true}>
 			{i18n.tr.userData.confirmChangeSuccess}
 		</Modal>
 	</div>

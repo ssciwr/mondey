@@ -23,14 +23,14 @@ onMount(user.load);
 	{#if user.data.is_verified === true}
 		<div class="m-2 p-2">
 			<Tabs tabStyle="underline">
-				<TabItem open={true}>
+				<TabItem id="userdataTab" open={true}>
 					<div slot="title" class="flex items-center gap-2 text-lg">
 						<ProfileCardSolid size="lg" />
 						<span class="hidden md:inline">{i18n.tr.userData.label}</span>
 					</div>
 					<UserDataInput />
 				</TabItem>
-				<TabItem onclick = {() =>{
+				<TabItem id="childrenTab" onclick = {() =>{
 					activeTabChildren.set("childrenGallery");
 				}}>
 					<div slot="title" class="flex items-center gap-2 text-lg">
@@ -42,7 +42,7 @@ onMount(user.load);
 					/>
 				</TabItem>
 				{#if user.data.is_superuser}
-					<TabItem>
+					<TabItem id="adminTab">
 						<div
 							slot="title"
 							class="flex items-center gap-2 text-lg"
@@ -54,7 +54,7 @@ onMount(user.load);
 					</TabItem>
 				{/if}
 				{#if user.data.is_researcher}
-					<TabItem>
+					<TabItem id="researcherTab">
 						<div
 							slot="title"
 							class="flex items-center gap-2 text-lg"
@@ -65,7 +65,7 @@ onMount(user.load);
 						<Card />
 					</TabItem>
 				{/if}
-				<TabItem>
+				<TabItem id="settingsTab">
 					<div
 						slot="title"
 						class="flex items-center gap-2 text-lg"
