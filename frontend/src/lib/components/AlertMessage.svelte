@@ -5,6 +5,7 @@ import { Alert, Button } from "flowbite-svelte";
 import { EyeSolid, InfoCircleSolid } from "flowbite-svelte-icons";
 
 let {
+	id = "alertMessage",
 	message = "",
 	title = "",
 	infotitle = "",
@@ -14,6 +15,7 @@ let {
 		console.log(event);
 	},
 }: {
+	id?: string;
 	message?: string;
 	title?: string;
 	infotitle?: string;
@@ -23,7 +25,7 @@ let {
 } = $props();
 </script>
 
-<Alert class="m-4 p-4">
+<Alert id={`${id}`} class="m-4 p-4">
 	<div class="flex items-center gap-3">
 		<InfoCircleSolid class="h-5 w-5" />
 		<span class="text-lg font-medium"> {title} </span>
