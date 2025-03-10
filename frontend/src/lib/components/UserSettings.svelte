@@ -5,94 +5,83 @@ import {
 	usersCurrentUser,
 	usersPatchCurrentUser,
 } from "$lib/client/services.gen";
-import { type AuthCookieLoginData } from "$lib/client/types.gen";
 import { i18n } from "$lib/i18n.svelte";
 import { preventDefault } from "$lib/util";
 import { Button, Heading, Input, Modal } from "flowbite-svelte";
 import AlertMessage from "./AlertMessage.svelte";
 
-let new_password = $state(null) as string | null;
-let new_password_repeat = $state(null) as string | null;
+let newPassword = $state(null) as string | null;
+let newPasswordRepeat = $state(null) as string | null;
 let currentPassword = $state(null) as string | null;
 let currentPasswordValid = $state(false);
-let showSuccessPassword = $state(false);
+let passwordChangeSuccess = $state(false);
 let showAlert = $state(false);
-let alertMessage = $state(i18n.tr.forgotPw.formatError);
+let alertMessage = $state(i18n.tr.settings.defaultAlertMessage);
 
-async function submitCurrentPassword(): Promise<boolean> {
+async function submitNewPassword() {
+	currentPasswordValid = false;
+	passwordChangeSuccess = false;
+	showAlert = false;
+
 	if (currentPassword === null || currentPassword === "") {
-		console.log("password is empty");
 		showAlert = true;
 		alertMessage = i18n.tr.settings.passwordEmpty;
-		return false;
+		return;
 	}
 
-	console.log(`password submit clicked ${currentPassword}`);
+	if (newPassword === null || newPassword === "") {
+		showAlert = true;
+		alertMessage = i18n.tr.settings.passwordEmpty;
+		return;
+	}
+
+	if (newPassword !== newPasswordRepeat) {
+		showAlert = true;
+		alertMessage = i18n.tr.settings.passwordsDontMatch;
+		return;
+	}
+
+	if (newPassword === currentPassword) {
+		showAlert = true;
+		alertMessage = i18n.tr.settings.passwordsTheSame;
+		return;
+	}
+
 	const currentUser = await usersCurrentUser();
 
 	if (currentUser.error || !currentUser.data) {
-		console.log("error: ", currentUser.error);
-		alertMessage = i18n.tr.settings.oldPasswordWrong;
+		alertMessage = i18n.tr.settings.getUserError;
 		showAlert = true;
-		return false;
+		return;
 	}
 
-	const response = await authCookieLogin({
+	const verifyResponse = await authCookieLogin({
 		body: {
 			username: currentUser.data.email,
 			password: currentPassword,
 		},
 	});
 
-	if (response.error) {
-		console.log("error: ", response.error);
+	if (verifyResponse.error) {
 		alertMessage = i18n.tr.settings.oldPasswordWrong;
 		showAlert = true;
-		return false;
+		return;
 	}
 
 	currentPasswordValid = true;
-	currentPassword = "";
-	return true;
-}
 
-async function submitNewPassword() {
-	const currentPasswordStatus = submitCurrentPassword();
-
-	if (!currentPasswordStatus) {
-		return;
-	}
-
-	if (new_password === null || new_password === "") {
-		console.log("password is empty");
-		showAlert = true;
-		alertMessage = i18n.tr.settings.passwordEmpty;
-		return;
-	}
-
-	if (new_password !== new_password_repeat) {
-		console.log("passwords do not match");
-		showAlert = true;
-		alertMessage = i18n.tr.settings.passwordsDontMatch;
-		return;
-	}
-
-	console.log(
-		`password change clicked ${currentPassword} ${new_password} ${new_password_repeat}`,
-	);
-
-	const response = await usersPatchCurrentUser({
+	const patchResponse = await usersPatchCurrentUser({
 		body: {
-			password: new_password,
+			password: newPassword,
 		},
 	});
 
-	if (response.error) {
-		console.log("error: ", response.error);
-		alertMessage = i18n.tr.forgotPw.sendError;
+	if (patchResponse.error) {
+		alertMessage = i18n.tr.settings.sendError;
 		showAlert = true;
+		passwordChangeSuccess = false;
 	} else {
-		showSuccessPassword = true;
+		passwordChangeSuccess = true;
 	}
 }
 </script>
@@ -100,7 +89,7 @@ async function submitNewPassword() {
 {#if showAlert}
 	<AlertMessage
 		id="alertMessageSettings"
-		title={i18n.tr.forgotPw.alertTitle}
+		title={i18n.tr.settings.alertTitle}
 		message={alertMessage}
 		onclick={() => {
 			showAlert = false;
@@ -114,30 +103,35 @@ async function submitNewPassword() {
         <Input
             bind:value={currentPassword}
             type="password"
-            id="old_password"
-            placeholder={i18n.tr.settings.oldPassword}
+            id="oldPassword"
+            placeholder={i18n.tr.settings.enterPassword}
         />
 
         <Input
-            bind:value={new_password}
+            bind:value={newPassword}
             type="password"
-            id="new_password"
+            id="newPassword"
             placeholder={i18n.tr.settings.newPassword}
         />
 
         <Input
-            bind:value={new_password_repeat}
+            bind:value={newPasswordRepeat}
             type="password"
-            id="new_password-confirm"
+            id="newPasswordConfirm"
             placeholder={i18n.tr.settings.newPasswordConfirm}
         />
 
-        <Button id="changePasswordSubmitButton" size="lg" type="submit">{i18n.tr.settings.changePassword}</Button>
+        <Button id="changePasswordSubmitButton" size="lg" type="submit">{i18n.tr.settings.confirmChange}</Button>
     </form>
 
-	<div class = "flex flex-row pb-2 mb-2 items-center">
-		<Modal id="passwordChangeSuccessModal" class = "m-2 p-2" title={i18n.tr.settings.confirmChange} bind:open={showSuccessPassword} dismissable={true}>
-			{i18n.tr.settings.confirmChangeSuccess}
-		</Modal>
-	</div>
+	<Modal id="passwordChangeSuccessModal" classBody="flex flex-col pb-2 mb-2 items-center" bind:open={passwordChangeSuccess} dismissable={false}>
+			<span class="mb-2 pb-2">{i18n.tr.settings.confirmPasswordChangeSuccess}</span>
+			<Button id="ModalCloseButton" type="button" on:click={()=>{
+				newPassword=null;
+				newPasswordRepeat=null;
+				currentPassword = "";
+				currentPasswordValid = false;
+				passwordChangeSuccess = false;
+			}}>{i18n.tr.settings.closeWindow}</Button>
+	</Modal>
 </div>
