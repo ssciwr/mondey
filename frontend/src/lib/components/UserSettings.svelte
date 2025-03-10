@@ -26,25 +26,25 @@ async function submitNewPassword() {
 
 	if (currentPassword === null || currentPassword === "") {
 		showAlert = true;
-		alertMessage = i18n.tr.settings.passwordEmptyError;
+		alertMessage = i18n.tr.settings.emptyPasswordError;
 		return;
 	}
 
 	if (newPassword === null || newPassword === "") {
 		showAlert = true;
-		alertMessage = i18n.tr.settings.passwordEmptyError;
+		alertMessage = i18n.tr.settings.emptyPasswordError;
 		return;
 	}
 
 	if (newPassword !== newPasswordRepeat) {
 		showAlert = true;
-		alertMessage = i18n.tr.settings.passwordsDontMatchError;
+		alertMessage = i18n.tr.settings.nonMatchingPasswordsError;
 		return;
 	}
 
 	if (newPassword === currentPassword) {
 		showAlert = true;
-		alertMessage = i18n.tr.settings.passwordsTheSameError;
+		alertMessage = i18n.tr.settings.samePasswordsError;
 		return;
 	}
 
