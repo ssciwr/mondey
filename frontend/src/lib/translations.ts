@@ -195,6 +195,8 @@ export const translationIds = {
 		submitButtonLabel: "Abschließen",
 		changeData: "Daten vollständig, zum bearbeiten klicken",
 		loadingMessage: "Daten werden geladen",
+	},
+	settings: {
 		settings: "Einstellungen",
 		changeEmail: "E-Mail Adresse ändern",
 		changePassword: "Passwort ändern",
@@ -205,6 +207,10 @@ export const translationIds = {
 		newPasswordConfirm: "Neues Passwort bestätigen",
 		confirmChange: "Änderungen bestätigen",
 		confirmChangeSuccess: "Überprüfen sie ihr Email Postfach",
+		emailEmpty: "Bitte geben sie eine E-Mail Adresse an",
+		emailsDontMatch: "E-Mail Adressen stimmen nicht überein",
+		passwordEmpty: "Das Passwort darf nicht leer sein",
+		passwordsDontMatch: "Passwörter stimmen nicht überein",
 	},
 	childData: {
 		newChildHeading: "Neu",
