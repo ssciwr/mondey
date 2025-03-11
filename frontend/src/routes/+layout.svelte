@@ -38,8 +38,9 @@ onMount(async () => {
 				href="{base}/userLand/userLogin"
 				size="lg">{i18n.tr.login.profileButtonLabelDefault}</Button
 			>
+			<LocaleChooser />
 		{/if}
-		<LocaleChooser />
+
 	</NavUl>
 </Navbar>
 

@@ -23,9 +23,11 @@ import {
 	AtomOutline,
 	CogSolid,
 	GridPlusSolid,
+	LanguageOutline,
 	ProfileCardSolid,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
+import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 
 let showAlert: boolean = $state(false);
 let alertMessage: string = $state(i18n.tr.login.alertMessageError);
@@ -83,6 +85,7 @@ activePage.set("userDataInput");
 						</svelte:fragment>
 					</SidebarItem>
 				{/if}
+
 			</SidebarGroup>
 			<SidebarGroup border>
 				<SidebarItem label = {i18n.tr.userData.settingsLabel} onclick = {
@@ -93,6 +96,14 @@ activePage.set("userDataInput");
 				}>
 					<svelte:fragment slot="icon">
 						<AdjustmentsVerticalOutline size="lg" />
+					</svelte:fragment>
+				</SidebarItem>
+				<SidebarItem>
+					<svelte:fragment slot="icon">
+						<LanguageOutline size="lg" />
+					</svelte:fragment>
+					<svelte:fragment slot="subtext">
+						<LocaleChooser />
 					</svelte:fragment>
 				</SidebarItem>
 
