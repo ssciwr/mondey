@@ -95,4 +95,3 @@ proxy: {
 ```
 
 3.2.2: And set `VITE_MONDEY_API_URL=http://localhost:5173/api` in `/frontend/.env`
-
