@@ -10,7 +10,6 @@ import { user } from "$lib/stores/userStore.svelte";
 import { hideDomain } from "@unovis/ts/components/axis/style";
 import { Button } from "flowbite-svelte";
 import {
-	CloseButton,
 	Drawer,
 	Sidebar,
 	SidebarGroup,
@@ -25,6 +24,7 @@ import {
 	GridPlusSolid,
 	LanguageOutline,
 	ProfileCardSolid,
+	BarsOutline
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
@@ -37,7 +37,7 @@ let hideDrawer: boolean = $state(true);
 onMount(user.load);
 
 // set this initially to user data such that the user data page is shown first
-activePage.set("userDataInput");
+activePage.set("childrenGallery");
 </script>
 
 <!-- navigation menu definition-->
@@ -150,10 +150,10 @@ activePage.set("userDataInput");
 				</div>
 
 				<!-- mobile version: drawer instead of fixed sidebar-->
-				<Button size = "xl" id="drawerButton" class="fixed left-0 top-1/2 -translate-y-1/2  h-24 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-600 p-2 rounded-r-lg md:hidden shadow-lg"
-				onclick={()=>{hideDrawer = !hideDrawer}}><ArrowRightToBracketOutline  size="lg"/></Button>
+				<button id="drawerButton" class="fixed right-4 top-4 h-24 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-600 p-2 rounded-r-lg md:hidden shadow-lg"
+				onclick={()=>{hideDrawer = !hideDrawer}}> <BarsOutline size="lg" /></button>
 
-				<Drawer transitionType="fly" transitionParams={{duration: 200}} bind:hidden = {hideDrawer} id="menuDrawer">
+				<Drawer transitionType="fly" placement="right" transitionParams={{duration: 200}} bind:hidden = {hideDrawer} id="menuDrawer">
 					{@render sidebarNav()}
 				</Drawer>
 

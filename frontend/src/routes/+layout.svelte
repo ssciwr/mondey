@@ -11,6 +11,7 @@ import { Button, NavBrand, NavHamburger, NavUl, Navbar } from "flowbite-svelte";
 import { onMount } from "svelte";
 
 import "../app.css";
+import {LanguageOutline} from "flowbite-svelte-icons";
 
 let { children } = $props();
 
@@ -38,7 +39,7 @@ onMount(async () => {
 				href="{base}/userLand/userLogin"
 				size="lg">{i18n.tr.login.profileButtonLabelDefault}</Button
 			>
-			<LocaleChooser />
+			<LocaleChooser withIcon={true}/>
 		{/if}
 
 	</NavUl>
