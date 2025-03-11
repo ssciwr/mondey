@@ -23,10 +23,14 @@ import {
 	GridPlusSolid,
 	LanguageOutline,
 	ProfileCardSolid,
-	BarsOutline
+	BarsOutline,
+    SunOutline,
+
+
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
+import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 
 let showAlert: boolean = $state(false);
 let alertMessage: string = $state(i18n.tr.login.alertMessageError);
@@ -99,12 +103,13 @@ activePage.set("childrenGallery");
 				</SidebarItem>
 				<SidebarItem>
 					<svelte:fragment slot="icon">
-						<LanguageOutline size="lg" />
+						<SunOutline />
 					</svelte:fragment>
 					<svelte:fragment slot="subtext">
-						<LocaleChooser />
+						<DarkModeChooser />
 					</svelte:fragment>
 				</SidebarItem>
+
 
 				<SidebarItem label = {i18n.tr.login.profileButtonLabelLogout} onclick = {async () => {
 					const response = await user.logout();
@@ -122,6 +127,14 @@ activePage.set("childrenGallery");
 				}}>
 					<svelte:fragment slot="icon">
 						<ArrowRightToBracketOutline size="lg" />
+					</svelte:fragment>
+				</SidebarItem>
+				<SidebarItem>
+					<svelte:fragment slot="icon">
+						<LanguageOutline size="lg" />
+					</svelte:fragment>
+					<svelte:fragment slot="subtext">
+						<LocaleChooser />
 					</svelte:fragment>
 				</SidebarItem>
 			</SidebarGroup>
@@ -149,8 +162,8 @@ activePage.set("childrenGallery");
 				</div>
 
 				<!-- mobile version: drawer instead of fixed sidebar-->
-				<button id="drawerButton" class="fixed right-4 top-4 h-24 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-600 p-2 rounded-r-lg md:hidden shadow-lg"
-				onclick={()=>{hideDrawer = !hideDrawer}}> <BarsOutline size="lg" /></button>
+				<button id="drawerButton" class="fixed right-6 top-0 h-24 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-600 p-2 rounded-r-lg md:hidden shadow-lg"
+				onclick={()=>{hideDrawer = !hideDrawer}}> <BarsOutline size="xl" /></button>
 
 				<Drawer transitionType="fly" placement="right" transitionParams={{duration: 200}} bind:hidden = {hideDrawer} id="menuDrawer">
 					{@render sidebarNav()}

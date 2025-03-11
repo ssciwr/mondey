@@ -13,6 +13,11 @@ import { onMount } from "svelte";
 
 import "../app.css";
 import FunctionalIcon from "$lib/components/Navigation/FunctionalIcon.svelte";
+import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
+
+import { page } from '$app/stores';
+const isUserLand = $page.url.pathname.includes('/userLandingpage');
+// Done this way because, other approaches to the layout (like a different +layout for userLand) would largely duplicate this one, but it is still hardcoded.
 
 let { children } = $props();
 
@@ -31,29 +36,34 @@ onMount(async () => {
 		<img src={logo_light} class="mt-6 block h-12 dark:hidden" alt="MONDEY Logo" />
 		<img src={logo_dark} class="mt-6 hidden h-12 dark:block" alt="MONDEY Logo" />
 	</NavBrand>
-	<NavHamburger />
-	<NavUl ulClass="flex flex-col space-y-2 md:flex-row md:space-x-6 md:justify-right items-center">
-		<NavLi class = "hover:cursor-pointer" href={base}>{i18n.tr.misc.latest}</NavLi>
-		<NavLi class = "hover:cursor-pointer" href={base}>{i18n.tr.misc.downloads}</NavLi>
-		<NavLi class = "hover:cursor-pointer" href={base}>{i18n.tr.misc.contact}</NavLi>
+	{#if false === isUserLand}
+		<NavHamburger />
+		<NavUl ulClass="flex flex-col md:flex-row md:space-x-6 md:justify-right items-center">
+			<NavLi class = "hover:cursor-pointer" href={base}>{i18n.tr.misc.latest}</NavLi>
+			<NavLi class = "hover:cursor-pointer" href={base}>{i18n.tr.misc.downloads}</NavLi>
+			<NavLi class = "hover:cursor-pointer" href={base}>{i18n.tr.misc.contact}</NavLi>
 
-		<FunctionalIcon tooltip={'Darkmode ein- oder ausschalten'}>
-			<DarkMode class="apply-icon-style">
-				<MoonSolid slot="darkIcon" />
-				<SunSolid slot="lightIcon" />
-			</DarkMode>
-		</FunctionalIcon>
-		{#if user.data === null}
-			<Button
-				type="button"
-				class="m-2 w-full"
-				href="{base}/userLand/userLogin"
-				size="lg">{i18n.tr.login.profileButtonLabelDefault}</Button
-			>
+			<DarkModeChooser />
+			{#if user.data === null}
+				<Button
+					type="button"
+					class="m-2 w-full"
+					href="{base}/userLand/userLogin"
+					size="lg">{i18n.tr.login.profileButtonLabelDefault}</Button
+				>
+			{:else}
+				<Button
+						type="button"
+						class="m-2 w-full"
+						href="{base}/userLand/userLandingpage"
+						size="lg">{i18n.tr.registration.goHome}</Button
+				>
+			{/if}
+
 			<LocaleChooser withIcon={true}/>
-		{/if}
 
-	</NavUl>
+		</NavUl>
+	{/if}
 </Navbar>
 
 <div

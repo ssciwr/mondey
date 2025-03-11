@@ -11,12 +11,11 @@ import { Button, Card, Tooltip } from "flowbite-svelte";
   <div class="justify-center mb-1 items-center mt-2 space-x-2">
 
 
-      <Button class="text-bold text-md w-44 dark:bg-gray-100 hover:bg-gray-600 dark:hover:bg-gray-600 hover:text-white bg-white text-gray-700" onclick ={() => {
+      <Button class="text-bold text-md w-44 mb-2 dark:bg-gray-100 hover:bg-gray-600 dark:hover:bg-gray-600 hover:text-white bg-white text-gray-700" onclick ={() => {
         goto("/signup");
       }}>{i18n.tr.frontpage.buttonLabel}</Button>
-      <Tooltip>{i18n.tr.frontpage.toolTip}</Tooltip>
 
-      <Button class="text-bold text-md w-44 dark:text-white transition-colors hover:text-gray-900 max-lg:hover:bg-primary-800 dark:hover:text-gray-900 hover:bg-gray-100 hover:dark:bg-gray-800 bg-primary-600 text-white" onclick ={() => {
+      <Button class="text-bold text-md w-44 dark:text-white transition-colors hover:bg-gray-600 dark:hover:bg-gray-600 hover:text-white  max-lg:hover:bg-primary-800  bg-primary-600 text-white" onclick ={() => {
         goto("/userLand/userLogin");
         }}>
           {i18n.tr.login.profileButtonLabelDefault}
