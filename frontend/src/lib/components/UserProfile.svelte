@@ -50,7 +50,7 @@ let alertMessage: string = $state(i18n.tr.login.alertMessageError);
 				}
 
 			}} size="lg" type="button"
-				>{i18n.tr.login.profileButtonLabelLogout}</Button
+				>{user.isTestAccount ? i18n.tr.login.profileButtonLabelEndTestSession : i18n.tr.login.profileButtonLabelLogout}</Button
 			>
 		</div>
 	{:else}

@@ -51,12 +51,31 @@ def send_reset_password_link(email: str, token: str) -> None:
         s.send_message(msg)
 
 
+def is_test_account_user(user: User) -> bool:
+    if not hasattr(user, 'email'):
+        return False
+    return 'tester@testaccount.com' in user.email
+
+
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     reset_password_token_secret = app_settings.SECRET
     verification_token_secret = app_settings.SECRET
 
     async def on_after_register(self, user: User, request: Request | None = None):
         logging.info(f"User {user.email} registered.")
+        detail = "Yes" if is_test_account_user(user) else "No"
+        logging.warning(
+            f"User registering... {user.email} {detail}"
+        )
+        if is_test_account_user(user):
+            async with async_session_maker() as user_session:
+                logging.warning(
+                    f"Updating test user to verified {user.email}"
+                )
+                user_db = await user_session.get(User, user.id)
+                if user_db is not None:
+                    user_db.is_verified = True
+                await user_session.commit()
         with Session(mondey_engine) as mondey_session:
             if mondey_session.get(ResearchGroup, user.research_group_id) is None:
                 logging.warning(
@@ -78,6 +97,10 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     async def on_after_request_verify(
         self, user: User, token: str, request: Request | None = None
     ):
+        logging.info('Checking if user is test...')
+        logging.info(is_test_account_user(user))
+        if is_test_account_user(user):
+            return
         logging.info(
             f"Verification requested for user {user.id}. Verification token: {token}"
         )

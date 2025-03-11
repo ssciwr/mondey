@@ -69,4 +69,11 @@ onMount(async () => {
 	{@render children?.()}
 </div>
 
+<div class="fixed bottom-0 left-0 right-0 m-4 rounded-lg bg-white border-solid border-4 p-8 border-gray-300">
+<h2 class="text-lg"><strong>{i18n.tr.login.demoAccountNotification}</strong>
+	<button class="float-right btn-primary">{i18n.tr.frontpage.buttonLabel}</button>
+</h2>
+
+</div>
+
 <Footer/>

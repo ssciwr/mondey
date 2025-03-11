@@ -56,6 +56,9 @@ function createUser() {
 		get isResearcher() {
 			return currentUser?.is_researcher;
 		},
+		get isTestAccount() {
+			return currentUser?.email?.indexOf('tester@testaccount.com') !== -1;
+		},
 		set data(user: UserRead | null) {
 			currentUser = user;
 		},

@@ -176,10 +176,12 @@ export const translationIds = {
 		selectPlaceholder: "Bitte auswählen",
 		profileButtonLabelDefault: "Einloggen oder Registrieren",
 		profileButtonLabelLogout: "Logout",
+		profileButtonLabelEndTestSession: "Session Beenden",
 		profileTitleDefault: "Willkommen!",
 		profileAccess: "Ihr Profil",
 		registerNew: "Als neuer Benutzer registrieren",
 		forgotPassword: "Passwort vergessen?",
+		demoAccountNotification: "Demo-Konto Mode: Nichts wird gespeichert" // Dodgy German? The English Intent is: Demo mode active: Nothing being permanently saved
 	},
 	userData: {
 		label: "Persönliche Daten",
