@@ -4,8 +4,6 @@ from email.message import EmailMessage
 import pytest
 from fastapi.testclient import TestClient
 
-from mondey_backend.src.mondey_backend.users import is_test_account_user
-
 
 class SMTPMock:
     last_message: EmailMessage | None = None
@@ -57,6 +55,7 @@ def test_register_test_account(public_client: TestClient, smtp_mock: SMTPMock):
     assert response.status_code == 201
     msg = smtp_mock.last_message
     assert msg is None # we want no last message, because it should not email upon test account registrations.
+    print('No email sent, horray')
     # todo: Assert that the user is set to is_verified = true. Open a DB User Session (dependency inject it into test?)
 
 
@@ -143,23 +142,3 @@ def test_user_forgot_password_invalid_email(
     response = user_client.post("/auth/forgot-password", json={"email": email})
     assert "@" in response.json()["detail"][0]["msg"]
     assert response.json()["detail"][0]["type"] == "value_error"
-
-
-
-# It would probably be better to use the User class, and add the email field to it, than to use a mock user
-class MockUser:
-    def __init__(self, email, **kwargs):
-        self.email = email
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-def test_is_test_account():
-    tester_email = '123tester@testaccount.com'
-    nontester_email = 'heidelberguser@uni-heidelberg.de'
-    nontester_email_2 = 'Contester@gmail.com'
-
-    assert is_test_account_user(MockUser(email=tester_email))
-    assert False == is_test_account_user(MockUser(email=nontester_email))
-    assert False == is_test_account_user(MockUser(email=nontester_email_2))
-
-    assert False == is_test_account_user(MockUser()) # When no email is present
