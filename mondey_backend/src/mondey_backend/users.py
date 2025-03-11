@@ -63,10 +63,6 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
 
     async def on_after_register(self, user: User, request: Request | None = None):
         logging.info(f"User {user.email} registered.")
-        detail = "Yes" if is_test_account_user(user) else "No"
-        logging.warning(
-            f"User registering... {user.email} {detail}"
-        )
         if is_test_account_user(user):
             async with async_session_maker() as user_session:
                 logging.warning(

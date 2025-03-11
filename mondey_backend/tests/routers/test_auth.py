@@ -48,6 +48,18 @@ def test_register_new_user(public_client: TestClient, smtp_mock: SMTPMock):
     response = public_client.post("/auth/verify", json={"token": token})
     assert response.status_code == 200
 
+def test_register_test_account(public_client: TestClient, smtp_mock: SMTPMock):
+    assert smtp_mock.last_message is None
+    email = "2349812.12234987tester@testaccount.com"
+    response = public_client.post(
+        "/auth/register", json={"email": email, "password": "p1"}
+    )
+    assert response.status_code == 201
+    msg = smtp_mock.last_message
+    assert msg is None # we want no last message, because it should not email upon test account registrations.
+    # todo: Assert that the user is set to is_verified = true. Open a DB User Session (dependency inject it into test?)
+
+
 
 def test_register_new_user_invalid_research_code_ignored(
     admin_client: TestClient, smtp_mock: SMTPMock
