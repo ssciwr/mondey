@@ -70,9 +70,13 @@ pip install .
 cd ..
 mondey-backend
 ```
+(run the last command above in the `mondey/mondey-backend` folder itself)
+
+
 
 3. install and run the frontend development server:
 
+3.1: Run the frontend
 ```sh
 cd frontend
 pnpm install
@@ -80,3 +84,15 @@ pnpm run dev
 ```
 
 The website is then served at http://localhost:5173/.
+
+3.2: If you encounter CORS/login/API connection from frontend issues, do the below: Implement this CORS workaround so your frontend and backend requests connect after login (if you see HTTP 401 or "Unauthorised", it could be CORS)
+
+3.2.1: Add the below code to `vite.config.ts` in the existing 'server' section after "strictPort: true":
+```
+proxy: {
+			'/api': 'http://localhost:8000',
+		},
+```
+
+3.2.2: And set `VITE_MONDEY_API_URL=http://localhost:5173/api` in `/frontend/.env`
+
