@@ -202,8 +202,8 @@ export const translationIds = {
 		enterPassword: "Bitte aktuelles Passwort eingeben",
 		getUserError: "kein aktiver Benutzer",
 		oldPasswordWrong: "Das angegbene Passwort ist falsch",
-		newPassword: "Neues Passwort",
-		newPasswordConfirm: "Neues Passwort bestätigen",
+		newPassword: "Bitte neues Passwort",
+		newPasswordConfirm: "Bitte neues Passwort bestätigen",
 		confirmChange: "Änderungen bestätigen",
 		confirmPasswordChangeSuccess: "Änderung des Passworts erfolgreich",
 		emptyPasswordError: "Das Passwort darf nicht leer sein",
@@ -213,6 +213,7 @@ export const translationIds = {
 		sendError: "Beim Senden der Daten ist ein Fehler aufgetreten",
 		defaultAlertMessage: "Ein Fehler ist aufgetreten",
 		alertTitle: "Fehler",
+		placeholder: "Bitte ausfüllen",
 	},
 	childData: {
 		newChildHeading: "Neu",

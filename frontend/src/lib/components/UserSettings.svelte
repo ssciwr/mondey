@@ -8,7 +8,7 @@ import {
 } from "$lib/client/services.gen";
 import { i18n } from "$lib/i18n.svelte";
 import { preventDefault } from "$lib/util";
-import { Button, Heading, Input, Modal } from "flowbite-svelte";
+import { Button, Heading, Input, Label, Modal } from "flowbite-svelte";
 import AlertMessage from "./AlertMessage.svelte";
 
 let newPassword = $state(null) as string | null;
@@ -99,32 +99,54 @@ async function submitNewPassword() {
 {/if}
 
 <div class="m-2 p-2 flex flex-col space-y-2 text-gray-700 dark:text-gray-400">
-	<Heading tag="h4" class="font-bold text-gray-700 dark:text-gray-400" id="changePasswordHeading"
-		>{i18n.tr.settings.changePassword}</Heading
+	<Heading
+		tag="h4"
+		class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
+		id="changePasswordHeading">{i18n.tr.settings.changePassword}</Heading
 	>
 	<form
-		class="space-y-4 mb-2 pb-2"
+		class="m-2 mx-auto w-full flex-col space-y-6"
 		onsubmit={preventDefault(submitNewPassword)}
 	>
+		<Label
+			class="font-semibold text-gray-700 dark:text-gray-400"
+			id="oldPasswordLabel"
+			for="oldPassword">{i18n.tr.settings.enterPassword}</Label
+		>
 		<Input
 			bind:value={currentPassword}
 			type="password"
 			id="oldPassword"
-			placeholder={i18n.tr.settings.enterPassword}
+			required
+			placeholder={i18n.tr.settings.placeholder}
+			autocomplete="current-password"
 		/>
 
+		<Label
+			class="font-semibold text-gray-700 dark:text-gray-400"
+			id="newPasswordLabel"
+			for="newPassword">{i18n.tr.settings.newPassword}</Label
+		>
 		<Input
 			bind:value={newPassword}
 			type="password"
 			id="newPassword"
-			placeholder={i18n.tr.settings.newPassword}
+			required
+			placeholder={i18n.tr.settings.placeholder}
 		/>
 
+		<Label
+			class="font-semibold text-gray-700 dark:text-gray-400"
+			id="newPasswordConfirmLabel"
+			for="newPasswordConfirm"
+			>{i18n.tr.settings.newPasswordConfirm}</Label
+		>
 		<Input
 			bind:value={newPasswordRepeat}
 			type="password"
 			id="newPasswordConfirm"
-			placeholder={i18n.tr.settings.newPasswordConfirm}
+			required
+			placeholder={i18n.tr.settings.placeholder}
 		/>
 
 		<Button id="changePasswordSubmitButton" size="lg" type="submit"
