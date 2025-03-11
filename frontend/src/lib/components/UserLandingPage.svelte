@@ -7,7 +7,6 @@ import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activePage, componentTable } from "$lib/stores/componentStore";
 import { user } from "$lib/stores/userStore.svelte";
-import { hideDomain } from "@unovis/ts/components/axis/style";
 import { Button } from "flowbite-svelte";
 import {
 	Drawer,

@@ -8,7 +8,7 @@ export default {
 		"./src/**/*.{html,js,svelte,ts}",
 		"./node_modules/flowbite-svelte/**/*.{html,js,svelte,ts}",
 	],
-	darkMode: "media",
+	darkMode: "selector",
 	// ensure svelte compiler doesn't optimize these away if it doesn't realise we are using them
 	safelist: [
 		"bg-milestone-answer-0",
