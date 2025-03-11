@@ -3,12 +3,9 @@ import { i18n } from "$lib/i18n.svelte";
 import { Dropdown, DropdownItem } from "flowbite-svelte";
 import { ChevronDownOutline, LanguageOutline } from "flowbite-svelte-icons";
 
-let {
-	withIcon = false
-}: { withIcon?: boolean} = $props();
+let { withIcon = false }: { withIcon?: boolean } = $props();
 
 let dropdownOpen = $state(false);
-
 </script>
 
 <div class="flex m-1 p-1">

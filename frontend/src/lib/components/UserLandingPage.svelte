@@ -2,6 +2,8 @@
 import { goto } from "$app/navigation";
 import { base } from "$app/paths";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
+import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
+import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import UserVerify from "$lib/components/UserVerify.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
@@ -19,18 +21,14 @@ import {
 	AdjustmentsVerticalOutline,
 	ArrowRightToBracketOutline,
 	AtomOutline,
+	BarsOutline,
 	CogSolid,
 	GridPlusSolid,
 	LanguageOutline,
 	ProfileCardSolid,
-	BarsOutline,
-    SunOutline,
-
-
+	SunOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
-import LocaleChooser from "$lib/components/LocaleChooser.svelte";
-import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 
 let showAlert: boolean = $state(false);
 let alertMessage: string = $state(i18n.tr.login.alertMessageError);

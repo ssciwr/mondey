@@ -7,14 +7,21 @@ import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import Footer from "$lib/components/Navigation/Footer.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";
-import {Button, NavBrand, NavHamburger, NavUl, Navbar, NavLi} from "flowbite-svelte";
+import {
+	Button,
+	NavBrand,
+	NavHamburger,
+	NavLi,
+	NavUl,
+	Navbar,
+} from "flowbite-svelte";
 import { onMount } from "svelte";
 
 import "../app.css";
 import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 
-import { page } from '$app/stores'
-let isUserLand = $derived($page.url.pathname.includes('userLandingpage'))
+import { page } from "$app/stores";
+let isUserLand = $derived($page.url.pathname.includes("userLandingpage"));
 // Done this way because, other approaches to the layout (like a different +layout for userLand) would largely duplicate this one, but it is still hardcoded.
 
 let { children } = $props();

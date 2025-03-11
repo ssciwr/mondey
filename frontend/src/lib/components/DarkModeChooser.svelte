@@ -1,7 +1,7 @@
 <script>
-import {DarkMode} from "flowbite-svelte";
-import {MoonSolid, SunSolid} from "flowbite-svelte-icons";
 import FunctionalIcon from "$lib/components/Navigation/FunctionalIcon.svelte";
+import { DarkMode } from "flowbite-svelte";
+import { MoonSolid, SunSolid } from "flowbite-svelte-icons";
 </script>
 
 <FunctionalIcon tooltip={'Darkmode ein- oder ausschalten'}>
