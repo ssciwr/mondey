@@ -7,12 +7,10 @@ import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import Footer from "$lib/components/Navigation/Footer.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";
-import {Button, NavBrand, NavHamburger, NavUl, Navbar, NavLi, DarkMode} from "flowbite-svelte";
-import { MoonSolid, SunSolid } from "flowbite-svelte-icons";
+import {Button, NavBrand, NavHamburger, NavUl, Navbar, NavLi} from "flowbite-svelte";
 import { onMount } from "svelte";
 
 import "../app.css";
-import FunctionalIcon from "$lib/components/Navigation/FunctionalIcon.svelte";
 import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 
 import { page } from '$app/stores';
