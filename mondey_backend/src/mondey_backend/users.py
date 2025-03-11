@@ -93,14 +93,12 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     async def on_after_request_verify(
         self, user: User, token: str, request: Request | None = None
     ):
-        logging.info('Checking if user is test...')
-        logging.info(is_test_account_user(user))
         if is_test_account_user(user):
             return
         logging.info(
             f"Verification requested for user {user.id}. Verification token: {token}"
         )
-        # send_email_validation_link(user.email, token)
+        send_email_validation_link(user.email, token)
 
 
 async def get_user_manager(
