@@ -174,7 +174,7 @@ export const translationIds = {
 		adminRole: "Admin",
 		submitButtonLabel: "Absenden",
 		selectPlaceholder: "Bitte auswählen",
-		profileButtonLabelDefault: "Einloggen oder Registrieren",
+		profileButtonLabelDefault: "Einloggen",
 		profileButtonLabelLogout: "Logout",
 		profileTitleDefault: "Willkommen!",
 		profileAccess: "Ihr Profil",

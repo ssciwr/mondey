@@ -7,11 +7,12 @@ import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import Footer from "$lib/components/Navigation/Footer.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";
-import { Button, NavBrand, NavHamburger, NavUl, Navbar } from "flowbite-svelte";
+import {Button, NavBrand, NavHamburger, NavUl, Navbar, NavLi, DarkMode} from "flowbite-svelte";
+import { MoonSolid, SunSolid } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 
 import "../app.css";
-import {LanguageOutline} from "flowbite-svelte-icons";
+import FunctionalIcon from "$lib/components/Navigation/FunctionalIcon.svelte";
 
 let { children } = $props();
 
@@ -32,6 +33,16 @@ onMount(async () => {
 	</NavBrand>
 	<NavHamburger />
 	<NavUl ulClass="flex flex-col space-y-2 md:flex-row md:space-x-6 md:justify-right items-center">
+		<NavLi class = "hover:cursor-pointer" href={base}>{i18n.tr.misc.latest}</NavLi>
+		<NavLi class = "hover:cursor-pointer" href={base}>{i18n.tr.misc.downloads}</NavLi>
+		<NavLi class = "hover:cursor-pointer" href={base}>{i18n.tr.misc.contact}</NavLi>
+
+		<FunctionalIcon tooltip={'Darkmode ein- oder ausschalten'}>
+			<DarkMode class="apply-icon-style">
+				<MoonSolid slot="darkIcon" />
+				<SunSolid slot="lightIcon" />
+			</DarkMode>
+		</FunctionalIcon>
 		{#if user.data === null}
 			<Button
 				type="button"
