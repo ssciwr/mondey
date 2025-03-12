@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import pathlib
 from contextlib import asynccontextmanager
@@ -21,21 +22,22 @@ from .routers import questions
 from .routers import research
 from .routers import users
 from .settings import app_settings
-from .statistics import update_stats
+from .statistics import async_update_stats
 
 
-def scheduled_update_stats():
-    return get_injected_obj(update_stats)
+async def scheduled_update_stats():
+    get_injected_obj(async_update_stats)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_mondey_db_and_tables()
     await create_user_db_and_tables()
+    # FOr one off manual invokations: await scheduled_update_stats()
     scheduler = AsyncIOScheduler()
     scheduler.add_job(
-        scheduled_update_stats,
-        CronTrigger.from_crontab(app_settings.STATS_CRONTAB),
+        lambda: asyncio.run(scheduled_update_stats), # Review appreciated of this approach
+        CronTrigger.from_crontab(app_settings.STATS_CRONTAB) # "* * * * *" to test cronjob immediately in real scenario
     )
     scheduler.start()
     yield

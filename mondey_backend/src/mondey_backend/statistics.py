@@ -4,6 +4,7 @@ import datetime
 import logging
 from collections import defaultdict
 from collections.abc import Sequence
+from typing import List
 
 import numpy as np
 from sqlmodel import col
@@ -18,6 +19,11 @@ from mondey_backend.models.milestones import MilestoneGroupAgeScore
 from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
 from mondey_backend.routers.utils import _get_answer_session_child_ages_in_months
 from mondey_backend.routers.utils import _get_expected_age_from_scores
+
+from mondey_backend.models.users import User
+from mondey_backend.users import is_test_account_user
+
+from mondey_backend.dependencies import UserAsyncSessionDep
 
 
 # see: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
@@ -182,10 +188,20 @@ def _get_statistics_by_age(
 
     return count, avg, stddev
 
-
-def make_any_stale_answer_sessions_inactive(session: SessionDep) -> None:
+async def get_test_account_user_ids(user_session: UserAsyncSessionDep) -> List[int]:
     """
-    mark any answersession that is older than 9 days as inactive by setting the expired flag. This includes a grace period of 2 days wrt the normal expiration timedelta of 7 days to avoid setting currently in-use answersessions to expired.
+        Lists user IDs that are identified as test accounts
+    """
+    users = await user_session.execute(select(User))
+    users_as_list = users.scalars().all() # IIRC this converts to python list object from Cursor.
+    test_user_ids = [user.id for user in users_as_list if is_test_account_user(user)]
+    logging.warning('Test user IDs: ' + str(test_user_ids))
+    return test_user_ids
+
+def make_any_stale_answer_sessions_inactive(session: SessionDep, test_account_user_ids_to_exclude: List[int]) -> None:
+    """
+    mark any answersession that is older than 9 days as inactive by setting the expired flag. Delete any older than 9 days which are test account answersessions.
+    This includes a grace period of 2 days wrt the normal expiration timedelta of 7 days to avoid setting currently in-use answersessions to expired.
     """
     days_after_which_session_is_stale = 9
     stale_date = datetime.datetime.now() - datetime.timedelta(
@@ -196,12 +212,19 @@ def make_any_stale_answer_sessions_inactive(session: SessionDep) -> None:
         .where(~col(MilestoneAnswerSession.expired))
         .where(col(MilestoneAnswerSession.created_at) <= stale_date)
     ).all():
-        stale_milestone_answer_session.expired = True
-        session.add(stale_milestone_answer_session)
+        # Now, if it is a test account one, delete it rather than set it to expired? It will cascade to the milestone_answers?
+        # Can we soft-delete it, have a "deleted" variable instead?
+        if stale_milestone_answer_session.user_id in test_account_user_ids_to_exclude \
+                and stale_milestone_answer_session.user_id is not None:
+            # Below is dangerous as it deletes data.
+            stale_milestone_answer_session.delete()
+        else:
+            stale_milestone_answer_session.expired = True
+            session.add(stale_milestone_answer_session)
     session.commit()
 
 
-def update_stats(session: SessionDep, incremental_update: bool = True):
+async def async_update_stats(session: SessionDep, user_session: UserAsyncSessionDep, incremental_update: bool = True):
     """Update the recorded statistics of the milestonegroups and milestones.
     It only uses expired milestoneanswersesssions. If `incremental_update` is True, it will only update the current statistics wit the new answersessions. Else, it will recalculate all statistics completely. The latter may be necessary if admins change the answersessions in the database by hand.
     Args:
@@ -216,7 +239,10 @@ def update_stats(session: SessionDep, incremental_update: bool = True):
         f"Starting {'incremental' if incremental_update else 'full'} statistics update"
     )
 
-    make_any_stale_answer_sessions_inactive(session)
+    # We gather these first then exclude later so that we don't do a FK join on the user_id<->email for stale+filtering
+    test_account_user_ids_to_exclude = await get_test_account_user_ids(user_session)
+
+    make_any_stale_answer_sessions_inactive(session, test_account_user_ids_to_exclude)
 
     # get MilestoneAnswerSessions to be used for calculating statistics
     answer_session_filter = select(MilestoneAnswerSession).where(
@@ -227,6 +253,12 @@ def update_stats(session: SessionDep, incremental_update: bool = True):
             ~col(MilestoneAnswerSession.included_in_statistics)
         )
     milestone_answer_sessions = session.exec(answer_session_filter).all()
+
+    # We exclude post-query because I don't think you can just run python functions through SQL (or at least not efficiently):
+    milestone_answer_sessions = [milestone_answer_session for milestone_answer_session
+                                 in milestone_answer_sessions
+                                 if milestone_answer_session.id not in test_account_user_ids_to_exclude]
+
     child_ages = _get_answer_session_child_ages_in_months(
         session, milestone_answer_sessions
     )
@@ -278,6 +310,7 @@ def update_stats(session: SessionDep, incremental_update: bool = True):
         session.add(milestone_answer_session)
 
     session.commit()
+    logger.warning('Milestone sessions used for calculating stats: ' + str(len(milestone_answer_sessions)))
     logger.debug("  - done")
     return f"{'Incremental' if incremental_update else 'Full'} statistics update complete using {len(milestone_answer_sessions)} answer sessions."
 
