@@ -35,7 +35,6 @@ async def scheduled_update_stats():
 async def lifespan(app: FastAPI):
     create_mondey_db_and_tables()
     await create_user_db_and_tables()
-    # FOr one off manual invokations:
     await scheduled_update_stats()
     scheduler = AsyncIOScheduler()
     scheduler.add_job(
