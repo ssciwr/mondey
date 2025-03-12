@@ -66,7 +66,7 @@ cd mondey
 
 ```sh
 cd mondey_backend
-pip install .
+pip install -e .
 cd ..
 mondey-backend
 ```
