@@ -1,8 +1,8 @@
 <script>
 import FunctionalIcon from "$lib/components/Navigation/FunctionalIcon.svelte";
+import { i18n } from "$lib/i18n.svelte";
 import { DarkMode } from "flowbite-svelte";
 import { MoonSolid, SunSolid } from "flowbite-svelte-icons";
-import { i18n } from "$lib/i18n.svelte";
 </script>
 
 <FunctionalIcon tooltip={i18n.tr.frontpage.toggleDarkmode}>
