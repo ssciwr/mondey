@@ -288,6 +288,7 @@ export const translationIds = {
 		summary: "Hier sind Sie genau richtig!",
 		buttonLabel: "Anmeldung",
 		toolTip: "Anmelden oder ein neues Konto erstellen",
+		toggleDarkmode: "Darkmode ein- oder ausschalten"
 	},
 	frontpageAbout: {
 		heading: "Was ist MONDEY?",
