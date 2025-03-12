@@ -66,13 +66,17 @@ cd mondey
 
 ```sh
 cd mondey_backend
-pip install .
+pip install -e .
 cd ..
 mondey-backend
 ```
+(run the last command above in the `mondey/mondey-backend` folder itself)
+
+
 
 3. install and run the frontend development server:
 
+3.1: Run the frontend
 ```sh
 cd frontend
 pnpm install
