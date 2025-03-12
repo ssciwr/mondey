@@ -12,6 +12,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi_injectable.util import get_injected_obj
+from fastapi_injectable.decorator import injectable
 
 from .databases.mondey import create_mondey_db_and_tables
 from .databases.users import create_user_db_and_tables
@@ -26,8 +27,9 @@ from .statistics import async_update_stats
 
 
 async def scheduled_update_stats():
-    update_stats_func = get_injected_obj(async_update_stats)
+    update_stats_func = injectable(async_update_stats)
     await update_stats_func()
+    # Based on async dependency injection here: https://github.com/JasperSui/fastapi-injectable/blob/main/test/test_injectable.py
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -37,8 +39,8 @@ async def lifespan(app: FastAPI):
     await scheduled_update_stats()
     scheduler = AsyncIOScheduler()
     scheduler.add_job(
-        lambda: asyncio.run(scheduled_update_stats), # Review appreciated of this approach
-        CronTrigger.from_crontab(app_settings.STATS_CRONTAB) # "* * * * *" to test cronjob immediately in real scenario
+        lambda: asyncio.run(scheduled_update_stats()), # Review appreciated of this approach
+        CronTrigger.from_crontab(app_settings.STATS_CRONTAB)
     )
     scheduler.start()
     yield
