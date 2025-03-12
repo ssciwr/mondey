@@ -26,14 +26,15 @@ from .statistics import async_update_stats
 
 
 async def scheduled_update_stats():
-    get_injected_obj(async_update_stats)
-
+    update_stats_func = get_injected_obj(async_update_stats)
+    await update_stats_func()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_mondey_db_and_tables()
     await create_user_db_and_tables()
-    # FOr one off manual invokations: await scheduled_update_stats()
+    # FOr one off manual invokations:
+    await scheduled_update_stats()
     scheduler = AsyncIOScheduler()
     scheduler.add_job(
         lambda: asyncio.run(scheduled_update_stats), # Review appreciated of this approach
