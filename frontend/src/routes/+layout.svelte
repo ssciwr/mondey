@@ -13,7 +13,7 @@ import {
 	NavHamburger,
 	NavLi,
 	NavUl,
-	Navbar,
+	Navbar, Button,
 } from "flowbite-svelte";
 import { onMount } from "svelte";
 
@@ -77,11 +77,15 @@ onMount(async () => {
 	{@render children?.()}
 </div>
 
-<div class="fixed bottom-0 left-0 right-0 m-4 rounded-lg bg-white border-solid border-4 p-8 border-gray-300">
-<h2 class="text-lg"><strong>{i18n.tr.login.demoAccountNotification}</strong>
-	<button class="float-right btn-primary">{i18n.tr.frontpage.buttonLabel}</button>
-</h2>
-
+<div class="fixed bottom-0 left-0 right-0 m-4 rounded-xl bg-white dark:bg-gray-700 border-solid border-4 p-8 border-gray-400 dark:border-gray-600 dark:text-white">
+	<div class="flex flex-col md:flex-row md:items-center md:justify-between">
+		<h2 class="text-lg mb-4 md:mb-0">
+			<strong>{i18n.tr.login.demoAccountNotification}</strong>
+		</h2>
+		<div class="flex justify-center md:justify-end">
+			<Button class="text-bold text-md  w-full bg-primary-700 text-white dark:bg-white dark:text-gray-700  hover:opacity-80  hover:text-white">{i18n.tr.frontpage.buttonLabel}</Button>
+		</div>
+	</div>
 </div>
 
 <Footer/>
