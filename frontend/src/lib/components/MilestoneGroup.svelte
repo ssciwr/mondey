@@ -88,6 +88,7 @@ async function setup(): Promise<any> {
 	}
 
 	data = milestonegroups.data.map((item) => {
+		console.log('Milestones groups iteration: ', item)
 		const res = {
 			header: item.text ? item.text[i18n.locale].title : undefined,
 			summary: item.text?.[i18n.locale]?.desc,
@@ -208,21 +209,30 @@ const searchData: any[] = [
 		filterFunction: searchByStatus,
 	},
 ];
+
+let validMilestoneGroups = $derived(data.filter((item) => item.milestones?.length > 0))
 </script>
 
 {#await promise}
 <Spinner /> <p>{i18n.tr.userData.loadingMessage}</p>
 {:then data}
+
 <div class="flex flex-col md:rounded-t-lg">
 	<Breadcrumbs data={breadcrumbdata} />
 	<div class="grid gap-y-8">
-		<GalleryDisplay
-			data={data}
+		{#if validMilestoneGroups.length > 0}
+				<GalleryDisplay
+			data={validMilestoneGroups}
 			itemComponent={CardDisplay}
 			componentProps={createStyle(data)}
 			withSearch={true}
 			{searchData}
-		/>
+				/>
+			{:else}
+			<AlertMessage
+					title={i18n.tr.milestone.noRelevantMilestones}
+			/>
+		{/if}
 	</div>
 </div>
 {:catch error}
