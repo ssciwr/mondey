@@ -26,6 +26,7 @@ export const translationIds = {
 		autoNext: "Automatisch weiter",
 		groupOverviewLabel: "Übersicht Meilensteingruppen",
 		alertMessageRetrieving: "Fehler beim Abrufen der Meilensteine",
+		alertMessageNoRelevantMilestones: "Sie mussen zuerst Meilensteine zusetzen, die für das Alter des Kindes +/- 6 Monaten relevant gelten. Entfern des Kindes und nachdem Sie die Milesteine zusetzt haben, mach mal das hier wieder.",
 		alertMessageError: "Ein Fehler ist aufgetreten",
 		submitImage: "Bild einreichen",
 		submitImageText:
