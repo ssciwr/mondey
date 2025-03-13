@@ -241,8 +241,6 @@ async def async_update_stats(session: SessionDep, user_session: UserAsyncSession
 
     # We gather these first then exclude later so that we don't do a FK join on the user_id<->email for stale+filtering
     test_account_user_ids_to_exclude = await get_test_account_user_ids(user_session)
-    logging.warning('Test account IDs to exclude:')
-    logging.warning(test_account_user_ids_to_exclude)
     make_any_stale_answer_sessions_inactive(session, test_account_user_ids_to_exclude)
 
     # get MilestoneAnswerSessions to be used for calculating statistics
@@ -254,8 +252,6 @@ async def async_update_stats(session: SessionDep, user_session: UserAsyncSession
             ~col(MilestoneAnswerSession.included_in_statistics)
         )
     milestone_answer_sessions = session.exec(answer_session_filter).all()
-    logging.warning('Milestone answer sessions:')
-    logging.warning(len(milestone_answer_sessions))
 
     # We exclude post-query because I don't think you can just run python functions through SQL (or at least not efficiently):
     milestone_answer_sessions = [milestone_answer_session for milestone_answer_session
