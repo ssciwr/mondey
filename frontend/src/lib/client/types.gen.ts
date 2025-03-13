@@ -791,17 +791,17 @@ export type UpdateCurrentChildAnswersResponse = (unknown);
 
 export type UpdateCurrentChildAnswersError = (HTTPValidationError);
 
-export type GetExpiredMilestoneAnswerSessionsData = {
+export type GetMilestoneAnswerSessionsInStatisticsData = {
     path: {
         child_id: number;
     };
 };
 
-export type GetExpiredMilestoneAnswerSessionsResponse = ({
+export type GetMilestoneAnswerSessionsInStatisticsResponse = ({
     [key: string]: MilestoneAnswerSessionPublic;
 });
 
-export type GetExpiredMilestoneAnswerSessionsError = (HTTPValidationError);
+export type GetMilestoneAnswerSessionsInStatisticsError = (HTTPValidationError);
 
 export type GetMilestonegroupsForSessionData = {
     path: {

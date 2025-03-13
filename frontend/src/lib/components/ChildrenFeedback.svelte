@@ -1,12 +1,13 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import {
+	type GetSummaryFeedbackForAnswersessionResponse,
 	type MilestoneAnswerSessionPublic,
 	type MilestoneGroupPublic,
 	type MilestonePublic,
 	type ValidationError,
 	getDetailedFeedbackForAnswersession,
-	getExpiredMilestoneAnswerSessions,
+	getMilestoneAnswerSessionsInStatistics,
 	getMilestonegroupsForSession,
 	getSummaryFeedbackForAnswersession,
 } from "$lib/client";
@@ -43,7 +44,6 @@ let alertMessage = $state(
 let milestoneGroups = $state(
 	{} as Record<number, Record<number, MilestoneGroupPublic>>,
 );
-let sessionkeys = $state([] as number[]);
 let detailed = $state({}) as Record<number, any>; // detailed feedback for each milestone
 let summary = $state({}) as Record<number, any>; // summary feedback for each milestonegroup
 let answerSessions = $state({}) as Record<number, MilestoneAnswerSessionPublic>;
@@ -57,9 +57,13 @@ const breakpoints = {
 	"2xl": 1536,
 };
 
-// TODO: make this reactive such that the page reloads when the width changes
-// not done here yet
+// adjustment of displayed data based on current windowwidth
 let windowidth = $state(window.innerWidth);
+
+window.addEventListener("resize", () => {
+	windowidth = window.innerWidth;
+});
+
 let numShownAnswersessions = $derived.by(() => {
 	if (windowidth >= breakpoints["2xl"]) {
 		return 10;
@@ -79,14 +83,29 @@ let numShownAnswersessions = $derived.by(() => {
 	return 2;
 });
 
-let currentSessionIndices = $state([0, numShownAnswersessions]); // lower and upper bond for currently shown indices
-let relevant_sessionkeys = $state([] as number[]); // keys of the answersessions that are currently shown
+let relevant_sessionkeys = $derived.by(() => {
+	const upper_limit = Math.min(
+		numShownAnswersessions,
+		Object.keys(answerSessions).length,
+	);
+	return Object.keys(answerSessions)
+		.sort()
+		.map((x) => Number(x))
+		.reverse()
+		.slice(0, upper_limit);
+}); // record the keys of the answersessions that are currently displayed
+
+// other helper state variables
 let showMoreInfo = $state(false);
 let showHelp = $state(false);
 let showAlert = $state(false);
 
+// promises to load the data and steer page loading
+let sessionPromise = $state(loadAnswersessions());
+let stillLoading = $state(true);
+
 // data defining the legend for the feedback
-let milestonePresentation = $state([
+let milestonePresentation = [
 	{
 		icon: CheckCircleSolid,
 		text: i18n.tr.milestone.recommendOk,
@@ -108,7 +127,7 @@ let milestonePresentation = $state([
 		class: "text-feedback-2 w-16 ",
 		showExplanation: false,
 	},
-]);
+];
 
 // data defining where the breadcrumb elements should lead to
 const breadcrumbdata: any[] = [
@@ -130,24 +149,23 @@ const breadcrumbdata: any[] = [
 
 // functions needed for making decisions about page rendering and for doing some
 // data preprocessing:
-// TODO: for performance reasons, we could consider moving some of these functions to the backend,
-// but this can be done once performance becomes a problem.
-
 /**
  * Get the answersessions for the child we are concerned with from the database.
  * @summary Get the answersessions for the child we are concerned with from the database, set the sessionkeys as a sorted and reversed list of keys that we get from the response, and set the relevant_sessionkeys to be the interval of sessionkeys that we want to show.
  * @return {Promise<void>} nothing
  */
 async function loadAnswersessions(): Promise<void> {
-	user.load;
+	if (!user.data) {
+		await user.load;
+	}
 	await currentChild.load_data();
-
 	if (currentChild.id === null || user.id === null) {
 		showAlert = true;
 		return;
 	}
 
-	const responseAnswerSessions = await getExpiredMilestoneAnswerSessions({
+	// load all answersessions initially
+	const responseAnswerSessions = await getMilestoneAnswerSessionsInStatistics({
 		path: { child_id: currentChild.id as number },
 	});
 
@@ -156,153 +174,119 @@ async function loadAnswersessions(): Promise<void> {
 		alertMessage = responseAnswerSessions.error.detail;
 		return;
 	}
-
 	answerSessions = responseAnswerSessions.data;
-
-	sessionkeys = Object.keys(answerSessions)
-		.sort()
-		.map((x) => Number(x))
-		.reverse();
-	const maxindex = Math.min(currentSessionIndices[1], sessionkeys.length);
-	relevant_sessionkeys = sessionkeys.slice(currentSessionIndices[0], maxindex);
+	await loadData(relevant_sessionkeys[0]);
 }
 
 /**
  * Load the summary feedback for the relevant answersessions.
- * @param {number[]} relevant - Relevant session keys,i.e., those that are currently displayed
- * @return {Promise<void>} nothing
+ * @param {number} requested_answersession - Answersessionkey for which we want to load the summary feedback
+ * @return {Promise<Promise< GetSummaryFeedbackForAnswersessionResponse | null>>} The summary feedback for the requested answersession
  */
-async function loadSummaryFeedback(relevant: number[]): Promise<void> {
-	for (const aid of relevant) {
-		const milestoneGroupResponse = await getMilestonegroupsForSession({
-			path: {
-				answersession_id: Number(aid),
-			},
-		});
-
-		if (milestoneGroupResponse.error) {
-			showAlert = true;
-			alertMessage = milestoneGroupResponse.error.detail;
-			return;
-		}
-
-		milestoneGroups[Number(aid)] = {};
-		for (const m of Object.values(milestoneGroupResponse.data)) {
-			milestoneGroups[Number(aid)][m.id] = m;
-		}
-
-		const responseFeedback = await getSummaryFeedbackForAnswersession({
-			path: {
-				answersession_id: Number(aid),
-			},
-		});
-
-		if (responseFeedback.error) {
-			showAlert = true;
-			alertMessage = responseFeedback.error.detail;
-			return;
-		}
-
-		summary[Number(aid)] = responseFeedback.data;
+async function loadSummaryFeedbackFor(
+	requested_answersession: number,
+): Promise<GetSummaryFeedbackForAnswersessionResponse | null> {
+	if (
+		requested_answersession in summary &&
+		requested_answersession in milestoneGroups
+	) {
+		return summary[requested_answersession];
 	}
+
+	const milestoneGroupResponse = await getMilestonegroupsForSession({
+		path: {
+			answersession_id: requested_answersession,
+		},
+	});
+
+	if (milestoneGroupResponse.error) {
+		showAlert = true;
+		alertMessage = milestoneGroupResponse.error.detail;
+		return null;
+	}
+
+	milestoneGroups[requested_answersession] = {};
+	for (const m of Object.values(milestoneGroupResponse.data)) {
+		milestoneGroups[requested_answersession][m.id] = m;
+	}
+
+	const responseFeedback = await getSummaryFeedbackForAnswersession({
+		path: {
+			answersession_id: requested_answersession,
+		},
+	});
+
+	if (responseFeedback.error) {
+		showAlert = true;
+		alertMessage = responseFeedback.error.detail;
+		return null;
+	}
+
+	return responseFeedback.data;
 }
 
 /**
  * load the detailed feedback from the database for the child, i.e., the feedback on the milestones themselves, not just the groups.
- * @param {number[]} relevant - Relevant session keys,i.e., those that are currently displayed
- * @return {Promise<void>} nothing
+ * @param {number} requested_answersession - Answersessionkey for which we want to load the summary feedback
+ * @return {Promise<Record<number, Record<number, number>> | null>} The detailed feedback for the requested answersession
  */
-async function loadDetailedFeedback(relevant: number[]): Promise<void> {
-	for (const aid of relevant) {
-		const response = await getDetailedFeedbackForAnswersession({
-			path: {
-				answersession_id: Number(aid),
-			},
-		});
+async function loadDetailedFeedbackFor(
+	requested_answersession: number,
+): Promise<Record<number, Record<number, number>> | null> {
+	if (requested_answersession in detailed) {
+		return detailed[requested_answersession];
+	}
 
-		if (response.error) {
-			showAlert = true;
-			alertMessage = response.error.detail;
-			return;
-		}
+	const response = await getDetailedFeedbackForAnswersession({
+		path: {
+			answersession_id: requested_answersession,
+		},
+	});
 
-		let res = {} as Record<number, Record<number, number>>;
+	if (response.error) {
+		showAlert = true;
+		alertMessage = response.error.detail;
+		return null;
+	}
 
-		// filter out the milestones that are not ideal and only show those
-		for (const [mid, milestones] of Object.entries(response.data)) {
-			res[Number(mid)] = {} as Record<number, number>;
-			for (const [ms_id, ms_score] of Object.entries(milestones)) {
-				if (ms_score <= 0) {
-					res[Number(mid)][Number(ms_id)] = Number(ms_score);
-				}
+	let res = {} as Record<number, Record<number, number>>;
+
+	// filter out the milestones that are not ideal and only show those
+	for (const [mid, milestones] of Object.entries(response.data)) {
+		res[Number(mid)] = {} as Record<number, number>;
+		for (const [ms_id, ms_score] of Object.entries(milestones)) {
+			if (ms_score <= 0) {
+				res[Number(mid)][Number(ms_id)] = Number(ms_score);
 			}
 		}
-
-		detailed[Number(aid)] = res;
 	}
+
+	return res;
 }
 
 /**
- * Generate a printable report from the feedback by concatenating all the feedbacks into a single formatted string.
- * @summary If the description is long, write your summary here. Otherwise, feel free to remove this.
- * @return {string} Report as a single string
+ * Load the data and get everything ready to render the page
+ * @return { Promise<void>} nothing
  */
-function generateReport(): string {
-	let report = "";
-	// add title
-	report += `<h1>${i18n.tr.milestone.reportTitle}</h1>\n\n`;
-	// add today's date
-	report += `${i18n.tr.milestone.date}: ${new Date().toLocaleDateString()} \n\n`;
-
-	// add name and age of child in the beginning
-	report += `${i18n.tr.milestone.child}: ${currentChild.name}\n`;
-	report += `${i18n.tr.milestone.born}: ${currentChild.month}/${currentChild.year} \n\n`;
-
-	// iterate over all answersessions with aid:key
-	for (let [aid, values] of Object.entries(summary)) {
-		const min = Math.min(...(Object.values(values) as number[]));
-		report += `<h2>${i18n.tr.milestone.timeperiod}: ${makeTitle(Number(aid))}</h2> \n`;
-		report += `<strong>${i18n.tr.milestone.summaryScore}:</strong> ${min === 1 ? i18n.tr.milestone.recommendOk : min === 0 ? i18n.tr.milestone.recommendWatch : min === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
-
-		for (let [mid, score] of Object.entries(values)) {
-			// mid : score
-			report += `<h3>  ${milestoneGroups[Number(aid)][Number(mid)].text[i18n.locale].title}</h3>`;
-			report += `    ${score === 1 ? i18n.tr.milestone.recommendOk : score === 0 ? i18n.tr.milestone.recommendWatch : score === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
-
-			for (let [ms_id, ms_score] of Object.entries(
-				detailed[Number(aid)][mid],
-			)) {
-				// ms_id : ms_score
-				report += `    <strong>${
-					milestoneGroups[Number(aid)][Number(mid)].milestones.find(
-						(element: any) => {
-							return element.id === Number(ms_id);
-						},
-					).text[i18n.locale].title
-				}:</strong>`;
-				report += ` ${ms_score === 1 ? i18n.tr.milestone.recommendOkShort : ms_score === 0 ? i18n.tr.milestone.recommendWatchShort : ms_score === -1 ? i18n.tr.milestone.recommendHelpShort : i18n.tr.milestone.notEnoughDataYet} \n`;
-			}
-		}
-
-		report += "\n";
-	}
-
-	return report;
-}
-
-/**
- * Print the report generated by the generateReport function, which is called internally.
- * @return {void} Nothing
- */
-function printReport(): void {
-	const report = generateReport();
-	const printWindow = window.open("", "", "height=600,width=800");
-	if (printWindow === null) {
+async function loadData(aid: number | null): Promise<void> {
+	if (aid === null) {
 		return;
 	}
-	printWindow.document.write(`<pre>${report}</pre>`);
-	printWindow.document.close();
-	printWindow.print();
+
+	const summary_ = await loadSummaryFeedbackFor(aid);
+	if (summary_ === null) {
+		showAlert = true;
+		alertMessage = `Something went wrong when loading the summary feedback for ${aid}`;
+		return;
+	}
+	summary[aid] = summary_;
+
+	const detailed_ = await loadDetailedFeedbackFor(aid);
+	if (detailed_ === null) {
+		showAlert = true;
+		alertMessage = `Something went wrong when loading the detailed feedback for ${aid}`;
+	}
+	detailed[aid] = detailed_;
 }
 
 /**
@@ -325,27 +309,122 @@ function formatDate(date: string): string {
  * @return {ReturnValueDataTypeHere} Brief description of the returning value here.
  */
 function makeTitle(aid: number): string {
-	return aid === sessionkeys[0]
+	return aid === relevant_sessionkeys[0]
 		? i18n.tr.milestone.current
 		: formatDate(answerSessions[aid].created_at);
 }
 
 /**
- * Load the data and get everything ready to render the page
- * @return { Promise<void>} nothing
+ * Generate a printable report from the feedback by concatenating all the feedbacks into a single formatted string.
+ * @return { Promise<string | null>} Report as a single string or null if error
  */
-async function setup(): Promise<void> {
-	await loadAnswersessions();
-	if (Object.keys(answerSessions).length === 0) {
-		return;
+async function generateReport(): Promise<string | null> {
+	// load all data again
+	const responseAnswerSessions = await getMilestoneAnswerSessionsInStatistics({
+		path: { child_id: currentChild.id as number },
+	});
+
+	if (responseAnswerSessions.error) {
+		showAlert = true;
+		alertMessage = responseAnswerSessions.error.detail;
+		return null;
 	}
-	await loadSummaryFeedback(relevant_sessionkeys);
-	await loadDetailedFeedback(relevant_sessionkeys);
+
+	const allAnswerSessions = responseAnswerSessions.data;
+	const allSessionkeys = Object.keys(allAnswerSessions)
+		.sort()
+		.map((x) => Number(x))
+		.reverse();
+
+	for (const aid of allSessionkeys) {
+		if (!(aid in summary)) {
+			const summary_ = await loadSummaryFeedbackFor(aid);
+			summary[aid] = summary_;
+		}
+		if (!(aid in detailed)) {
+			const detailed_ = await loadDetailedFeedbackFor(aid);
+
+			if (detailed_ === null) {
+				return null;
+			}
+
+			detailed[aid] = detailed_;
+		}
+	}
+
+	let report = "";
+	// add title
+	report += `<h1>${i18n.tr.milestone.reportTitle}</h1>\n\n`;
+	// add today's date
+	report += `${i18n.tr.milestone.date}: ${formatDate(new Date().toLocaleDateString())} \n\n`;
+
+	// add name and age of child in the beginning
+	report += `${i18n.tr.milestone.child}: ${currentChild.name}\n`;
+	report += `${i18n.tr.milestone.born}: ${currentChild.month}/${currentChild.year} \n\n`;
+
+	// iterate over all answersessions with aid:key
+	for (let [aid, values] of Object.entries(summary)) {
+		const min = Math.min(...(Object.values(values) as number[]));
+		report += `<h2>${i18n.tr.milestone.timeperiod}: ${makeTitle(Number(aid))}</h2> \n`;
+		report += `<strong>${i18n.tr.milestone.summaryScore}:</strong> ${min === 1 ? i18n.tr.milestone.recommendOk : min === 0 ? i18n.tr.milestone.recommendWatch : min === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
+
+		for (let [mid, score] of Object.entries(values)) {
+			// mid : score
+			report += `<h3>  ${milestoneGroups[Number(aid)][Number(mid)].text[i18n.locale].title}</h3>`;
+			report += `    ${score === 1 ? i18n.tr.milestone.recommendOk : score === 0 ? i18n.tr.milestone.recommendWatch : score === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
+
+			for (let [ms_id, ms_score] of Object.entries(
+				detailed[Number(aid)][mid],
+			)) {
+				// ms_id : ms_score
+				report += `    <strong>${
+					milestoneGroups[Number(aid)][Number(mid)]?.milestones?.find(
+						(element: any) => {
+							return element.id === Number(ms_id);
+						},
+					)?.text[i18n.locale].title
+				}:</strong>`;
+				report += ` ${ms_score === 1 ? i18n.tr.milestone.recommendOkShort : ms_score === 0 ? i18n.tr.milestone.recommendWatchShort : ms_score === -1 ? i18n.tr.milestone.recommendHelpShort : i18n.tr.milestone.notEnoughDataYet} \n`;
+			}
+		}
+
+		report += "\n";
+	}
+
+	// delete the data again that is not necessary for displaying the page to save memory
+	for (let aid of Object.keys(answerSessions)) {
+		if (!(Number(aid) in relevant_sessionkeys)) {
+			delete summary[Number(aid)];
+			delete detailed[Number(aid)];
+			delete milestoneGroups[Number(aid)];
+		}
+	}
+	return report;
 }
 
-// create a promise that will be resolved when the data is loaded
-let promise = $state(setup());
+/**
+ * Print the report generated by the generateReport function, which is called internally.
+ * @return {Promise<void>} Nothing
+ */
+async function printReport(): Promise<void> {
+	const report = await generateReport();
+	if (report === null) {
+		return;
+	}
+
+	const printWindow = window.open("", "", "height=600,width=800");
+	if (printWindow === null) {
+		return;
+	}
+	printWindow.document.write(`<pre>${report}</pre>`);
+	printWindow.document.close();
+	printWindow.print();
+}
 </script>
+
+<!----------------------------------------------------------------------------->
+<!--------------------- Markup section: snippets for page --------------------->
+<!----------------------------------------------------------------------------->
 
 <!--Snippet defining how to display the summary evaluation depending on the value retrieved-->
 {#snippet summaryEvaluationElement(symbol: any, color: string, text: string)}
@@ -356,6 +435,7 @@ let promise = $state(setup());
 
 <!--Snippet that shows the evaluation for the whole answersession: uses the minimum of the milestonegroup currently-->
 {#snippet summaryEvaluation(aid: number)}
+	<!-- summary is set to the minimum reached evaluation to draw attention to them.-->
 	<div class="flex flex-col md:flex-row space-y-2 space-x-2 items-center justify-center w-full text-gray-700 dark:text-gray-200 m-2 p-2 mb-4 pb-4 text-sm md:text-base">
 		{#if Math.min(...(Object.values(summary[aid]) as number[])) === 1}
 			{@render summaryEvaluationElement(CheckCircleSolid, "text-feedback-0", i18n.tr.milestone.recommendOk)}
@@ -371,7 +451,7 @@ let promise = $state(setup());
 {/snippet}
 
 <!--Snippet defining how to render detailed milestone feedback with help button-->
-{#snippet milestoneHelpButton(milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined)}
+{#snippet milestoneHelpButton(milestone_or_group: MilestonePublic | undefined)}
 	<span class =  "flex w-full m-2 p-2 justify-center" >
 		<Button class = "text-sm md:text-base bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 focus-within:ring-additional-color-40" id="b1" onclick={()=>{
 			showHelp= true;
@@ -403,12 +483,12 @@ let promise = $state(setup());
 		{:else if grade === 0}
 			{@render evaluationElement(BellActiveSolid, milestone_or_group, "text-feedback-1", isMilestone)}
 			{#if isMilestone}
-				{@render milestoneHelpButton(milestone_or_group)}
+				{@render milestoneHelpButton(milestone_or_group as MilestonePublic)}
 			{/if}
 		{:else if grade === -1}
 			{@render evaluationElement(ExclamationCircleSolid, milestone_or_group, "text-feedback-2", isMilestone)}
 			{#if isMilestone}
-				{@render milestoneHelpButton(milestone_or_group)}
+				{@render milestoneHelpButton(milestone_or_group as MilestonePublic)}
 			{/if}
 		{:else }
 			{@render evaluationElement(CloseCircleSolid, milestone_or_group, "gray", isMilestone)}
@@ -424,8 +504,8 @@ let promise = $state(setup());
 				<AccordionItem
 				activeClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-primary-700 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-600 items-center justify-between w-full font-medium text-left p-1"
 				inactiveClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-primary-800 dark:bg-primary-800 hover:bg-primary-700 dark:hover:bg-primary-700 items-center justify-between w-full font-medium text-left p-1"
-			  	>
-			  		<span slot="header" class="items-center flex justify-center py-1">
+				>
+					<span slot="header" class="items-center flex justify-center py-1">
 						{@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
 					</span>
 					{#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
@@ -475,7 +555,7 @@ let promise = $state(setup());
 		>{i18n.tr.milestone.moreInfoOnEval}</Button>
 	</div>
 
-	<!-- Modal that shows the explanation of the feedback when the above button is clicked			 -->
+	<!-- Modal that shows the explanation of the feedback when the above button is clicked -->
 	<Modal class = "m-2 p-2" classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-200" title={i18n.tr.milestone.info} bind:open={showMoreInfo} dismissable={true}>
 		<p class ="text-gray-700 dark:text-gray-200 font-medium text-sm md:text-base">{i18n.tr.milestone.feedbackExplanationDetailed}</p>
 		<p class ="text-gray-700 dark:text-gray-200 font-medium text-sm md:text-base">{i18n.tr.milestone.feedbackDetailsMilestone}</p>
@@ -484,6 +564,9 @@ let promise = $state(setup());
 {/snippet}
 
 
+<!------------------------------------------------------------------------------------------------->
+<!---------------------------------------- Markup section: actual page ---------------------------->
+<!------------------------------------------------------------------------------------------------->
 
 <!--topmost navigation element that lets us go back to children overview and child data-->
 <Breadcrumbs data={breadcrumbdata} />
@@ -497,7 +580,7 @@ let promise = $state(setup());
 		}}
 	/>
 {:else}
-	{#await promise}
+	{#await sessionPromise}
 		<!-- show a loading symbol if the data is not yet available-->
 		<div class = "flex justify-center items-center space-x-2">
 			<Spinner /> <p>{i18n.tr.childData.loadingMessage}</p>
@@ -515,15 +598,23 @@ let promise = $state(setup());
 				{#if relevant_sessionkeys.length=== 0}
 					<p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-200">{i18n.tr.milestone.noFeedback}</p>
 				{:else}
-					{#each relevant_sessionkeys as aid}
+					{#each relevant_sessionkeys.slice(0, Math.min(numShownAnswersessions, relevant_sessionkeys.length)) as aid}
 						<TabItem defaultClass="font-bold m-1 p-0"
 						activeClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600 border-1"
 						inactiveClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 border-additional-color-600 dark:border-additional-color-600 border-1"
-						title={makeTitle(aid)} open={aid === relevant_sessionkeys[0] }>
-
-							{@render summaryEvaluation(aid)}
-
-							{@render milestoneGroupsEval(aid)}
+						title={makeTitle(aid)}
+						open={aid === relevant_sessionkeys[0]}
+						>
+							{#await loadData(aid)}
+								<!-- show a loading symbol if the data is not yet available-->
+								<div class = "flex justify-center items-center space-x-2">
+									<Spinner /> <p>{i18n.tr.childData.loadingMessage}</p>
+								</div>
+							{:then _}
+								<!-- render feedback only once the promise has been resolved-->
+								{@render summaryEvaluation(aid)}
+								{@render milestoneGroupsEval(aid)}
+							{/await}
 						</TabItem>
 					{/each}
 				{/if}
@@ -532,7 +623,7 @@ let promise = $state(setup());
 
 		<!--Button to print the report out into pdf or physical copy-->
 		<div class="flex items-center justify-center w-full m-2 p-2 mb-4 pb-4">
-			<Button class="text-sm md:text-base md:w-64 md:h-8  m-2 p-2 bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 focus-within:ring-additional-color-40" onclick={printReport}>{i18n.tr.milestone.printReport}</Button>
+			<Button class="text-sm md:text-base md:w-64 md:h-8  m-2 p-2 bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 focus-within:ring-additional-color-40" onclick={async () => {await printReport();}}>{i18n.tr.milestone.printReport}</Button>
 		</div>
 	{:catch error}
 		<AlertMessage
