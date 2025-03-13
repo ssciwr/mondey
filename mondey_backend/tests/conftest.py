@@ -117,6 +117,15 @@ def children():
             "has_image": True,
             "color": "#ffffff",
         },
+        # ~9month old child for test account user (id 5)
+        {
+            "id": 4,
+            "name": "child4 (test account user)",
+            "birth_year": nine_months_ago.year,
+            "birth_month": nine_months_ago.month,
+            "has_image": False,
+            "color": "#c0c0c0",
+        },
     ]
 
 
@@ -126,6 +135,7 @@ async def user_session(
     active_research_user: UserRead,
     active_user: UserRead,
     active_user2: UserRead,
+    active_test_account_user: UserRead,
     monkeypatch: pytest.MonkeyPatch,
 ):
     # use a new in-memory SQLite user database for each test
@@ -141,6 +151,7 @@ async def user_session(
             active_research_user,
             active_user,
             active_user2,
+            active_test_account_user,
         ]:
             user = User(hashed_password="abc")
             for k, v in user_read.model_dump().items():
@@ -235,13 +246,14 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         session.add(SubmittedMilestoneImage(milestone_id=1, user_id=1))
         session.add(SubmittedMilestoneImage(milestone_id=2, user_id=2))
         session.commit()
-        for child, user_id in zip(children, [3, 3, 1], strict=False):
+        for child, user_id in zip(children, [3, 3, 1, 5], strict=False):
             session.add(Child.model_validate(child, update={"user_id": user_id}))
         today = datetime.datetime.today()
         last_month = today - relativedelta(months=1)
         # add an (expired) milestone answer session for child 1 / user (id 3) with 2 answers
         session.add(
             MilestoneAnswerSession(
+                id=1,
                 child_id=1,
                 user_id=3,
                 created_at=datetime.datetime(last_month.year, last_month.month, 15),
@@ -268,6 +280,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         # add another (unexpired and not included in stats) milestone answer session for child 1 / user (id 3) with 2 answers to the same questions
         session.add(
             MilestoneAnswerSession(
+                id=2,
                 child_id=1,
                 user_id=3,
                 created_at=datetime.datetime(last_month.year, last_month.month, 20),
@@ -289,6 +302,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         # add an (un-expired) milestone answer session for child 3 / admin user (id 1) with 1 answer
         session.add(
             MilestoneAnswerSession(
+                id=3,
                 child_id=3,
                 user_id=1,
                 created_at=datetime.datetime.today(),
@@ -302,6 +316,33 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 milestone_id=5,
                 milestone_group_id=2,
                 answer=2,
+            )
+        )
+        # add an (expired) milestone answer session for child 4 / test account user (id 5) with 2 answers
+        session.add(
+            MilestoneAnswerSession(
+                id=99,
+                child_id=4,
+                user_id=5,
+                created_at=datetime.datetime(last_month.year, last_month.month, 15),
+                expired=True,
+                included_in_statistics=True,
+            )
+        )
+        session.add(
+            MilestoneAnswer(
+                answer_session_id=99,
+                milestone_id=1,
+                milestone_group_id=1,
+                answer=1,
+            )
+        )
+        session.add(
+            MilestoneAnswer(
+                answer_session_id=99,
+                milestone_id=2,
+                milestone_group_id=1,
+                answer=0,
             )
         )
         # add MilestoneAgeScoreCollection for milestone 1
@@ -558,6 +599,7 @@ def statistics_session(session):
     # this answersession is not part of the statistics yet
     session.add(
         MilestoneAnswerSession(
+            id=4,
             child_id=1,
             user_id=3,
             created_at=datetime.datetime(last_month.year, last_month.month, 20),
@@ -579,6 +621,7 @@ def statistics_session(session):
     # add an expired answersession for child 3 with answers for milestone 7 & 8
     session.add(
         MilestoneAnswerSession(
+            id=5,
             child_id=3,
             user_id=1,
             created_at=datetime.datetime(today.year - 1, 1, 10),
@@ -835,6 +878,20 @@ def active_user2():
     return UserRead(
         id=4,
         email="user2@mondey.de",
+        is_active=True,
+        is_superuser=False,
+        is_researcher=False,
+        full_data_access=False,
+        research_group_id=0,
+        is_verified=True,
+    )
+
+
+@pytest.fixture
+def active_test_account_user():
+    return UserRead(
+        id=5,
+        email="abc123@test.account",
         is_active=True,
         is_superuser=False,
         is_researcher=False,
