@@ -244,7 +244,6 @@ async function loadDetailedFeedback(relevant: number[]): Promise<void> {
 
 /**
  * Generate a printable report from the feedback by concatenating all the feedbacks into a single formatted string.
- * @summary If the description is long, write your summary here. Otherwise, feel free to remove this.
  * @return {string} Report as a single string
  */
 function generateReport(): string {
