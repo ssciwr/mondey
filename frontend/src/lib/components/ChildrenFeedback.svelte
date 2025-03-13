@@ -331,74 +331,65 @@ async function generateReport(): Promise<string | null> {
 	}
 
 	const allAnswerSessions = responseAnswerSessions.data;
-	const allSessionkeys = Object.keys(allAnswerSessions)
-		.sort()
-		.map((x) => Number(x))
-		.reverse();
 
-	for (const aid of allSessionkeys) {
-		if (!(aid in summary)) {
-			const summary_ = await loadSummaryFeedbackFor(aid);
-			summary[aid] = summary_;
-		}
-		if (!(aid in detailed)) {
-			const detailed_ = await loadDetailedFeedbackFor(aid);
+	// await everything being loaded, then generate the report
+	const report = await Promise.all(
+		Object.keys(allAnswerSessions).map((aid) => loadData(Number(aid))),
+	).then(() => {
+		const allSessionkeys = Object.keys(allAnswerSessions)
+			.sort()
+			.map((x) => Number(x))
+			.reverse();
 
-			if (detailed_ === null) {
-				return null;
+		let report = "";
+		// add title
+		report += `<h1>${i18n.tr.milestone.reportTitle}</h1>\n\n`;
+		// add today's date
+		report += `${i18n.tr.milestone.date}: ${formatDate(new Date().toLocaleDateString())} \n\n`;
+
+		// add name and age of child in the beginning
+		report += `${i18n.tr.milestone.child}: ${currentChild.name}\n`;
+		report += `${i18n.tr.milestone.born}: ${currentChild.month}/${currentChild.year} \n\n`;
+
+		// iterate over all answersessions with aid:key
+		for (let aid of allSessionkeys) {
+			const min = Math.min(...(Object.values(summary[aid]) as number[]));
+			report += `<h2>${i18n.tr.milestone.timeperiod}: ${makeTitle(Number(aid))}</h2> \n`;
+			report += `<strong>${i18n.tr.milestone.summaryScore}:</strong> ${min === 1 ? i18n.tr.milestone.recommendOk : min === 0 ? i18n.tr.milestone.recommendWatch : min === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
+
+			for (let [mid, score] of Object.entries(summary[aid])) {
+				// mid : score
+				report += `<h3>  ${milestoneGroups[Number(aid)][Number(mid)].text[i18n.locale].title}</h3>`;
+				report += `    ${score === 1 ? i18n.tr.milestone.recommendOk : score === 0 ? i18n.tr.milestone.recommendWatch : score === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
+
+				for (let [ms_id, ms_score] of Object.entries(
+					detailed[Number(aid)][mid],
+				)) {
+					// ms_id : ms_score
+					report += `    <strong>${
+						milestoneGroups[Number(aid)][Number(mid)]?.milestones?.find(
+							(element: any) => {
+								return element.id === Number(ms_id);
+							},
+						)?.text[i18n.locale].title
+					}:</strong>`;
+					report += ` ${ms_score === 1 ? i18n.tr.milestone.recommendOkShort : ms_score === 0 ? i18n.tr.milestone.recommendWatchShort : ms_score === -1 ? i18n.tr.milestone.recommendHelpShort : i18n.tr.milestone.notEnoughDataYet} \n`;
+				}
 			}
 
-			detailed[aid] = detailed_;
+			report += "\n";
 		}
-	}
 
-	let report = "";
-	// add title
-	report += `<h1>${i18n.tr.milestone.reportTitle}</h1>\n\n`;
-	// add today's date
-	report += `${i18n.tr.milestone.date}: ${formatDate(new Date().toLocaleDateString())} \n\n`;
-
-	// add name and age of child in the beginning
-	report += `${i18n.tr.milestone.child}: ${currentChild.name}\n`;
-	report += `${i18n.tr.milestone.born}: ${currentChild.month}/${currentChild.year} \n\n`;
-
-	// iterate over all answersessions with aid:key
-	for (let [aid, values] of Object.entries(summary)) {
-		const min = Math.min(...(Object.values(values) as number[]));
-		report += `<h2>${i18n.tr.milestone.timeperiod}: ${makeTitle(Number(aid))}</h2> \n`;
-		report += `<strong>${i18n.tr.milestone.summaryScore}:</strong> ${min === 1 ? i18n.tr.milestone.recommendOk : min === 0 ? i18n.tr.milestone.recommendWatch : min === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
-
-		for (let [mid, score] of Object.entries(values)) {
-			// mid : score
-			report += `<h3>  ${milestoneGroups[Number(aid)][Number(mid)].text[i18n.locale].title}</h3>`;
-			report += `    ${score === 1 ? i18n.tr.milestone.recommendOk : score === 0 ? i18n.tr.milestone.recommendWatch : score === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
-
-			for (let [ms_id, ms_score] of Object.entries(
-				detailed[Number(aid)][mid],
-			)) {
-				// ms_id : ms_score
-				report += `    <strong>${
-					milestoneGroups[Number(aid)][Number(mid)]?.milestones?.find(
-						(element: any) => {
-							return element.id === Number(ms_id);
-						},
-					)?.text[i18n.locale].title
-				}:</strong>`;
-				report += ` ${ms_score === 1 ? i18n.tr.milestone.recommendOkShort : ms_score === 0 ? i18n.tr.milestone.recommendWatchShort : ms_score === -1 ? i18n.tr.milestone.recommendHelpShort : i18n.tr.milestone.notEnoughDataYet} \n`;
+		// delete the data again that is not necessary for displaying the page to save memory
+		for (let aid of Object.keys(answerSessions)) {
+			if (!(Number(aid) in relevant_sessionkeys)) {
+				delete summary[Number(aid)];
+				delete detailed[Number(aid)];
+				delete milestoneGroups[Number(aid)];
 			}
 		}
-
-		report += "\n";
-	}
-
-	// delete the data again that is not necessary for displaying the page to save memory
-	for (let aid of Object.keys(answerSessions)) {
-		if (!(Number(aid) in relevant_sessionkeys)) {
-			delete summary[Number(aid)];
-			delete detailed[Number(aid)];
-			delete milestoneGroups[Number(aid)];
-		}
-	}
+		return report;
+	});
 	return report;
 }
 
