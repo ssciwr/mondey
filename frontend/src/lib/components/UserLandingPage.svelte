@@ -98,6 +98,9 @@ activePage.set("childrenGallery");
 					<svelte:fragment slot="icon">
 						<AdjustmentsVerticalOutline size="lg" />
 					</svelte:fragment>
+					<svelte:fragment slot="subtext">
+						{i18n.tr.settings.settings}
+					</svelte:fragment>
 				</SidebarItem>
 				<SidebarItem>
 					<svelte:fragment slot="icon">

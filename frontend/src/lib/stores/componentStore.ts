@@ -11,6 +11,7 @@ import MilestoneOverview from "$lib/components/MilestoneOverview.svelte";
 import UserDataInput from "$lib/components/UserDataInput.svelte";
 import { Card, Input, MultiSelect, Select, Textarea } from "flowbite-svelte";
 import { writable } from "svelte/store";
+import UserSettings from "$lib/components/UserSettings.svelte";
 
 interface ComponentTable {
 	[key: string]: any; // README: flowbite components are not yet svelte5 => 'Component' type which should be used instead of 'any' here throws errors for flowbite components.
@@ -33,6 +34,7 @@ export const componentTable: ComponentTable = {
 	textarea: Textarea,
 	adminPage: AdminPage,
 	researchPage: Card,
+	settings: UserSettings,
 };
 
 // used in userlandingpage to make it single page
