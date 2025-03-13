@@ -256,7 +256,7 @@ async def async_update_stats(session: SessionDep, user_session: UserAsyncSession
     # We exclude post-query because I don't think you can just run python functions through SQL (or at least not efficiently):
     milestone_answer_sessions = [milestone_answer_session for milestone_answer_session
                                  in milestone_answer_sessions
-                                 if milestone_answer_session.id not in test_account_user_ids_to_exclude]
+                                 if milestone_answer_session.user_id not in test_account_user_ids_to_exclude]
 
     child_ages = _get_answer_session_child_ages_in_months(
         session, milestone_answer_sessions

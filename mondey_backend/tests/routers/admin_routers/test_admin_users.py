@@ -20,7 +20,7 @@ def test_users(admin_client: TestClient):
     assert not users[3]["is_researcher"]
     assert not users[3]["is_superuser"]
     assert users[4]["id"] == 5
-    assert "test.account" in users[4]["email"]
+    assert "tester@testaccount.com" in users[4]["email"]
     assert not users[4]["is_researcher"]
     assert not users[4]["is_superuser"]
 

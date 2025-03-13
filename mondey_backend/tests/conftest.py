@@ -319,6 +319,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             )
         )
         # add an (expired) milestone answer session for child 4 / test account user (id 5) with 2 answers
+
         session.add(
             MilestoneAnswerSession(
                 id=99,
@@ -891,7 +892,7 @@ def active_user2():
 def active_test_account_user():
     return UserRead(
         id=5,
-        email="abc123@test.account",
+        email="abc123tester@testaccount.com",
         is_active=True,
         is_superuser=False,
         is_researcher=False,
