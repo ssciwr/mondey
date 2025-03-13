@@ -5,6 +5,7 @@ import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
 import { user } from "$lib/stores/userStore.svelte";
 import { Button, Card, TabItem, Tabs } from "flowbite-svelte";
 import {
+	AdjustmentsVerticalOutline,
 	AtomOutline,
 	CogSolid,
 	GridPlusSolid,
@@ -13,6 +14,7 @@ import {
 import { onMount } from "svelte";
 import AdminPage from "./AdminPage.svelte";
 import UserDataInput from "./UserDataInput.svelte";
+import UserSettings from "./UserSettings.svelte";
 
 onMount(user.load);
 </script>
@@ -21,14 +23,14 @@ onMount(user.load);
 	{#if user.data.is_verified === true}
 		<div class="m-2 p-2">
 			<Tabs tabStyle="underline">
-				<TabItem open={true}>
+				<TabItem id="userdataTab" open={true}>
 					<div slot="title" class="flex items-center gap-2 text-lg">
 						<ProfileCardSolid size="lg" />
 						<span class="hidden md:inline">{i18n.tr.userData.label}</span>
 					</div>
 					<UserDataInput />
 				</TabItem>
-				<TabItem onclick = {() =>{
+				<TabItem id="childrenTab" onclick = {() =>{
 					activeTabChildren.set("childrenGallery");
 				}}>
 					<div slot="title" class="flex items-center gap-2 text-lg">
@@ -40,7 +42,7 @@ onMount(user.load);
 					/>
 				</TabItem>
 				{#if user.data.is_superuser}
-					<TabItem>
+					<TabItem id="adminTab">
 						<div
 							slot="title"
 							class="flex items-center gap-2 text-lg"
@@ -52,7 +54,7 @@ onMount(user.load);
 					</TabItem>
 				{/if}
 				{#if user.data.is_researcher}
-					<TabItem>
+					<TabItem id="researcherTab">
 						<div
 							slot="title"
 							class="flex items-center gap-2 text-lg"
@@ -63,6 +65,16 @@ onMount(user.load);
 						<Card />
 					</TabItem>
 				{/if}
+				<TabItem id="settingsTab">
+					<div
+						slot="title"
+						class="flex items-center gap-2 text-lg"
+					>
+						<AdjustmentsVerticalOutline size="lg" />
+						<span class="hidden md:inline">{i18n.tr.settings.settings}</span>
+					</div>
+					<UserSettings />
+				</TabItem>
 			</Tabs>
 		</div>
 	{:else}

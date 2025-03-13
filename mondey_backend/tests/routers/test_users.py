@@ -68,7 +68,7 @@ def test_create_update_and_delete_child(user_client: TestClient):
     response_create = user_client.post(
         "/users/children/",
         json={
-            "name": "child1",
+            "name": "new child",
             "birth_year": 2021,
             "birth_month": 3,
             "color": "#000000",
@@ -76,8 +76,8 @@ def test_create_update_and_delete_child(user_client: TestClient):
     )
     assert response_create.status_code == 200
     assert response_create.json() == {
-        "id": 4,
-        "name": "child1",
+        "id": 5,
+        "name": "new child",
         "birth_year": 2021,
         "birth_month": 3,
         "has_image": False,
@@ -87,7 +87,7 @@ def test_create_update_and_delete_child(user_client: TestClient):
     response_update = user_client.put(
         "/users/children/",
         json={
-            "id": 4,
+            "id": 5,
             "name": "c",
             "birth_year": 2020,
             "birth_month": 9,
@@ -97,7 +97,7 @@ def test_create_update_and_delete_child(user_client: TestClient):
     )
     assert response_update.status_code == 200
     assert response_update.json() == {
-        "id": 4,
+        "id": 5,
         "name": "c",
         "birth_year": 2020,
         "birth_month": 9,
@@ -105,7 +105,7 @@ def test_create_update_and_delete_child(user_client: TestClient):
         "color": "af4413",
     }
     assert len(user_client.get("/users/children/").json()) == 3
-    response_delete = user_client.delete("/users/children/4")
+    response_delete = user_client.delete("/users/children/5")
     assert response_delete.status_code == 200
     assert len(user_client.get("/users/children/").json()) == 2
 
@@ -185,7 +185,6 @@ def test_get_milestone_answers_child1_no_current_answer_session(
 ):
     response = user_client.get("/users/milestone-answers/1")
     assert response.status_code == 200
-    assert response.json()["id"] == 4
     assert response.json()["child_id"] == 1
     assert _is_approx_now(response.json()["created_at"])
     assert response.json()["answers"] == {

@@ -92,6 +92,8 @@ def test_get_score_statistics_by_age(session):
         1: 5,
         2: 3,
         3: 8,
+        4: 11,
+        99: 60,
     }
 
     count, avg, stddev = _get_statistics_by_age(answers, child_ages)
@@ -189,7 +191,7 @@ def test_get_score_statistics_by_age_no_data(statistics_session):
     assert np.all(np.isclose(avg, 0))
     assert np.all(np.isclose(stddev, 0))
 
-    child_ages = {1: 5, 2: 3, 3: 8}
+    child_ages = {1: 5, 2: 3, 3: 8, 4: 11, 99: 60}
     answers = []  # no answers ==> empty answers
     count, avg, stddev = _get_statistics_by_age(answers, child_ages)
     assert np.all(count == 0)
