@@ -14,37 +14,58 @@
     }
 
     .text-btn {
-        @apply py-2 px-5 rounded-md
+        @apply py-2 px-5 rounded-md;
+        min-width: 12rem;
     }
 
     .text-primary {
-        color: cornflowerblue;
+        color: #2757ac;
     }
 
     .bg-primary {
-        background-color: cornflowerblue;
+        background-color: #2757ac;
+    }
+
+    .btn-primary-alt {
+        background-color: rgb(124, 158, 157);
+        border: 2px solid rgb(124, 158, 157);
+        @apply btn text-btn text-white font-semibold bg-additional-color-600 rounded-lg shadow-md hover:bg-additional-color-700 focus:outline-none focus:ring focus:ring-blue-400 focus:ring-opacity-75;
+    }
+
+    .btn-primary-alt:hover {
+        border: 2px solid rgb(124, 158, 157);
+    }
+
+    .btn-secondary-alt { /* This should be considered the default class to use for buttons */
+        border: 2px solid rgb(124, 158, 157);
+        @apply btn text-btn bg-white text-additional-color-700 font-semibold rounded-lg shadow-md hover:bg-additional-color-700 hover:text-white focus:outline-none focus:ring focus:ring-blue-400 focus:ring-opacity-75;
+    }
+    .btn-secondary-alt:hover {
+        background-color: rgb(124, 158, 157);
+        color: white;
     }
 
     /* Main classes, for direct use */
     .btn-primary {
-        background-color:cornflowerblue;
-        border: 2px solid cornflowerblue;
-        @apply btn text-btn text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring focus:ring-violet-400 focus:ring-opacity-75;
+        background-color: #2757ac;
+        border: 2px solid #2757ac;
+        @apply btn text-btn text-white font-semibold rounded-lg shadow-md hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-400 focus:ring-opacity-75;
     }
     .btn-primary:hover {
-        border: 2px solid rgb(26, 86, 219)
+        border: 2px solid rgb(118, 169, 250)
     }
 
     .btn-secondary { /* This should be considered the default class to use for buttons */
-        border: 2px solid cornflowerblue;
-        @apply btn text-btn bg-white text-primary font-semibold rounded-md shadow-md hover:bg-blue-700 hover:text-white focus:outline-none focus:ring focus:ring-violet-400 focus:ring-opacity-75;
+        border: 2px solid #2757ac;
+        @apply btn text-btn bg-white text-primary font-semibold rounded-lg shadow-md hover:bg-blue-400 hover:text-white focus:outline-none focus:ring focus:ring-blue-400 focus:ring-opacity-75;
     }
     .btn-secondary:hover {
-        border: 2px solid rgb(26,86, 219)
+        border: 2px solid rgb(118, 169, 250)
     }
+
     .btn-danger {
         border: 2px solid rgb(200, 30, 30);
-        @apply btn text-btn bg-red-700 text-white font-semibold rounded-md shadow-md hover:bg-red-500 focus:outline-none focus:ring focus:ring-violet-400 focus:ring-opacity-75;
+        @apply btn text-btn bg-white text-red-700 font-semibold rounded-lg shadow-md hover:bg-red-500 hover:text-white focus:outline-none focus:ring focus:ring-red-400 focus:ring-opacity-75;
     }
     .btn-danger:hover {
         border: 2px solid rgb(240, 82, 82)

@@ -1,6 +1,7 @@
 <style>
     div, button {
         margin-bottom: 100px;
+        display: block;
     }
 </style>
 
@@ -42,6 +43,20 @@ btn-danger:
 <button class="btn-danger">
     Delete Item
 </button>
+
+<hr />
+
+btn-primary:
+<button class="btn-primary-alt">
+    Submit Form
+</button>
+
+btn-secondary:
+<button class="btn-secondary-alt">
+    Learn More
+</button>
+
+<hr />
 
 <h1 class="h1">Layout examples</h1>
 panel:
