@@ -79,6 +79,7 @@
         background-color: rgba(200,30,30,0.6);
     }
     .btn-icon {
+        min-width: unset;
         @apply btn py-2 px-2; /* Just applies symmetrical vertical/horizontal padding for typically square/round icons */
     }
 
@@ -128,4 +129,14 @@
     .btn-danger svg {
         @apply inline-block align-middle;
     }
+
+    @media only screen and (min-device-width : 320px) and (max-device-width : 480px) {
+        .btn {
+            min-width:100%;
+        }
+        .btn-icon {
+            min-width: unset;
+        }
+    }
+
 }

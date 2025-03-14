@@ -283,143 +283,24 @@ async function submitData(): Promise<void> {
 				<Heading
 					tag="h3"
 					class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-					>{childLabel}</Heading
-				>
-				{#if showAlert}
-					<AlertMessage
-						title={i18n.tr.childData.alertMessageTitle}
-						message={alertMessage}
-						onclick={() => {
-							showAlert = false;
-						}}
-					/>
-				{/if}
-				<form
-					class="m-1 mx-auto w-full flex-col space-y-6"
-					onsubmit={preventDefault(submitData)}
-				>
-					<DataInput
-						component={componentTable["input"]}
-						bind:value={name}
-						label={i18n.tr.childData.childName}
-						required={true}
-						placeholder={i18n.tr.childData.pleaseEnter}
-						disabled={disableEdit}
-						id="child_name"
-						kwargs = {{type: "text"}}
-						/>
-
-					<DataInput
-						component={componentTable["input"]}
-						bind:value={birthmonth}
-						label={i18n.tr.childData.childBirthMonth}
-						required={true}
-						placeholder={i18n.tr.childData.pleaseEnterNumber}
-						disabled={disableEdit}
-						id="child_birthmonth"
-						kwargs = {{type: "number", min: 0, max:12, step: '1'}}
-						/>
-
-					<DataInput
-						component={componentTable["input"]}
-						bind:value={birthyear}
-						label={i18n.tr.childData.childBirthYear}
-						required={true}
-						placeholder={i18n.tr.childData.pleaseEnterNumber}
-						disabled={disableEdit}
-						id="child_birthyear"
-						kwargs = {{type: "number", min: 2007, step: '1'}}
-						/>
-
-					<DataInput
-						component={componentTable["fileupload"]}
-						bind:value={image}
-						label={image !== null ? i18n.tr.childData.imageOfChildChange : i18n.tr.childData.imageOfChildNew}
-						required={false}
-						placeholder={i18n.tr.childData.noFileChosen}
-						disabled={disableEdit}
-						id="child_image"
-						kwargs = {{accept: ".jpg, .jpeg, .png", clearable: true}}
-						/>
-
-					<DataInput
-						component={Input}
-						bind:value={color}
-						label={i18n.tr.childData.childColor}
-						required={false}
-						placeholder={i18n.tr.childData.chooseColor}
-						disabled={disableEdit}
-						id="child_color"
-						kwargs = {{type: "color"}}
-						componentClass="w-1/4 h-12 rounded"
-					/>
-
-					{#if image !== null && disableEdit === false}
-						<Button
-							type="button"
-							class="w-full text-center text-sm text-white"
-							color={"red"}
-							disabled={disableImageDelete}
-							on:click={() => {
-								image = null;
-								disableImageDelete = true;
-								imageDeleted = true;
-							}}
-						>
-							<div class="flex items-center justify-center">
-								<TrashBinOutline size="sm"/> {i18n.tr.childData.deleteImageButton}
-							</div>
-						</Button>
-					{:else if disableImageDelete === true}
-						<p class="text-center text-sm text-gray-700 dark:text-gray-400 flex items-center justify-center">
-							<CheckCircleOutline size="lg" color="green"/> {i18n.tr.childData.imageOfChildChangeDelete}
-						</p>
-					{/if}
-
-					{#each questionnaire as element, i}
-						<DataInput
-							component={element.component ? componentTable[element.component] : undefined}
-							bind:value={answers[element.id].answer}
-							bind:additionalValue={answers[element.id]
-								.additional_answer}
-							label={element?.text?.[i18n.locale].question}
-							textTrigger={element.additional_option}
-							required={element.component === 'fileupload' ? false : true}
-							additionalRequired={true}
-							id={"input_" + String(i)}
-							items={element?.text?.[i18n.locale].options_json === ""
-								? undefined
-								: JSON.parse(
-										element?.text?.[i18n.locale].options_json ?? '',
-									)}
-							disabled={disableEdit}
-							placeholder=""
-						/>
-					{/each}
-					{#if disableEdit === true}
-						<button
-							type="button"
-							class="btn-secondary-alt"
-							onclick={() => {
+					>{childLabel}
+					{#if disableEdit}
+						<small class="justify-end">
+								<button aria-label={i18n.tr.admin.edit}
+										type="button"
+										class="btn-secondary-alt btn-icon"
+										onclick={() => {
 								disableEdit = false;
 							}}
-						>
-								<PenOutline size="md" />
-								{i18n.tr.admin.edit}
-						</button>
-					{:else}
-						<button
-							class="btn-primary-alt"
-							type="submit"
-							>{i18n.tr.childData.submitButtonLabel}</button
-						>
-					{/if}
+								>
+									<PenOutline size="md" />
+								</button>
 
-					{#if currentChild.id !== null && disableEdit === true}
-					<button
-							class="btn-danger"
-
-							onclick={async () => {
+							{#if currentChild.id !== null && disableEdit === true}
+								<button
+										class="btn-danger btn-icon"
+										aria-label={i18n.tr.admin.delete}
+										onclick={async () => {
 								if (currentChild.id === null) {
 									console.log("no child id, no child to delete");
 									showAlert = true;
@@ -445,10 +326,140 @@ async function submitData(): Promise<void> {
 									currentChild.id = null;
 								}
 							}}
-					><TrashBinOutline size="sm"/> {i18n.tr.childData.deleteButtonLabel}</button
-					>
+								><TrashBinOutline size="md"/></button
+								>
+							{/if}
+							<br />
+
+							<span>{i18n.tr.childData.monthYearSubtext} </span>
+							<span class="text-muted">{birthmonth} / {birthyear}</span>
+						</small>
 					{/if}
-					<hr />
+				</Heading
+				>
+				{#if showAlert}
+					<AlertMessage
+						title={i18n.tr.childData.alertMessageTitle}
+						message={alertMessage}
+						onclick={() => {
+							showAlert = false;
+						}}
+					/>
+				{/if}
+				<form
+					class="m-1 mx-auto w-full flex-col space-y-6"
+					onsubmit={preventDefault(submitData)}
+				>
+					{#if disableEdit}
+
+					{:else}
+						<DataInput
+							component={componentTable["input"]}
+							bind:value={name}
+							label={i18n.tr.childData.childName}
+							required={true}
+							placeholder={i18n.tr.childData.pleaseEnter}
+							disabled={disableEdit}
+							id="child_name"
+							kwargs = {{type: "text"}}
+							/>
+
+						<DataInput
+							component={componentTable["input"]}
+							bind:value={birthmonth}
+							label={i18n.tr.childData.childBirthMonth}
+							required={true}
+							placeholder={i18n.tr.childData.pleaseEnterNumber}
+							disabled={disableEdit}
+							id="child_birthmonth"
+							kwargs = {{type: "number", min: 0, max:12, step: '1'}}
+							/>
+
+						<DataInput
+							component={componentTable["input"]}
+							bind:value={birthyear}
+							label={i18n.tr.childData.childBirthYear}
+							required={true}
+							placeholder={i18n.tr.childData.pleaseEnterNumber}
+							disabled={disableEdit}
+							id="child_birthyear"
+							kwargs = {{type: "number", min: 2007, step: '1'}}
+							/>
+
+						<DataInput
+							component={componentTable["fileupload"]}
+							bind:value={image}
+							label={image !== null ? i18n.tr.childData.imageOfChildChange : i18n.tr.childData.imageOfChildNew}
+							required={false}
+							placeholder={i18n.tr.childData.noFileChosen}
+							disabled={disableEdit}
+							id="child_image"
+							kwargs = {{accept: ".jpg, .jpeg, .png", clearable: true}}
+							/>
+
+						<DataInput
+							component={Input}
+							bind:value={color}
+							label={i18n.tr.childData.childColor}
+							required={false}
+							placeholder={i18n.tr.childData.chooseColor}
+							disabled={disableEdit}
+							id="child_color"
+							kwargs = {{type: "color"}}
+							componentClass="w-1/4 h-12 rounded"
+						/>
+
+						{#if image !== null && disableEdit === false}
+							<Button
+								type="button"
+								class="w-full text-center text-sm text-white"
+								color={"red"}
+								disabled={disableImageDelete}
+								on:click={() => {
+									image = null;
+									disableImageDelete = true;
+									imageDeleted = true;
+								}}
+							>
+								<div class="flex items-center justify-center">
+									<TrashBinOutline size="sm"/> {i18n.tr.childData.deleteImageButton}
+								</div>
+							</Button>
+						{:else if disableImageDelete === true}
+							<p class="text-center text-sm text-gray-700 dark:text-gray-400 flex items-center justify-center">
+								<CheckCircleOutline size="lg" color="green"/> {i18n.tr.childData.imageOfChildChangeDelete}
+							</p>
+						{/if}
+					{/if}
+
+					{#each questionnaire as element, i}
+						<DataInput
+							component={element.component ? componentTable[element.component] : undefined}
+							bind:value={answers[element.id].answer}
+							bind:additionalValue={answers[element.id]
+								.additional_answer}
+							label={element?.text?.[i18n.locale].question}
+							textTrigger={element.additional_option}
+							required={element.component === 'fileupload' ? false : true}
+							additionalRequired={true}
+							id={"input_" + String(i)}
+							items={element?.text?.[i18n.locale].options_json === ""
+								? undefined
+								: JSON.parse(
+										element?.text?.[i18n.locale].options_json ?? '',
+									)}
+							disabled={disableEdit}
+							placeholder=""
+						/>
+					{/each}
+					{#if disableEdit === false}
+						<button
+							class="btn-primary-alt"
+							type="submit"
+							>{i18n.tr.childData.submitButtonLabel}</button
+						>
+					{/if}
+
 
 					{#if currentChild.id !== null && disableEdit === true}
 						<button
@@ -465,7 +476,7 @@ async function submitData(): Promise<void> {
 								activeTabChildren.set("milestoneGroup");
 							}}
 						>
-							<FlagOutline size="sm" />
+							<FlagOutline size="md" />
 							{i18n.tr.childData.nextButtonLabel}
 						</button>
 
