@@ -156,7 +156,7 @@ const breadcrumbdata: any[] = [
  */
 async function loadAnswersessions(): Promise<void> {
 	if (!user.data) {
-		await user.load;
+		await user.load();
 	}
 	await currentChild.load_data();
 	if (currentChild.id === null || user.id === null) {
