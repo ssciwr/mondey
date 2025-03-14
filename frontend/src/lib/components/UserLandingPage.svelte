@@ -91,15 +91,13 @@ activePage.set("childrenGallery");
 			<SidebarGroup border>
 				<SidebarItem label = {i18n.tr.userData.settingsLabel} onclick = {
 					() => {
+						console.log('Sidebar was clicked!! settings.')
 						activePage.set("settings");
 						hideDrawer = true;
 					}
 				}>
 					<svelte:fragment slot="icon">
 						<AdjustmentsVerticalOutline size="lg" />
-					</svelte:fragment>
-					<svelte:fragment slot="subtext">
-						{i18n.tr.settings.settings}
 					</svelte:fragment>
 				</SidebarItem>
 				<SidebarItem>
@@ -130,7 +128,7 @@ activePage.set("childrenGallery");
 						<ArrowRightToBracketOutline size="lg" />
 					</svelte:fragment>
 				</SidebarItem>
-				<SidebarItem>
+				<SidebarItem on:click={() => console.log('Locale clicked in sidebar')}>
 					<svelte:fragment slot="icon">
 						<LanguageOutline size="lg" />
 					</svelte:fragment>
@@ -171,6 +169,7 @@ activePage.set("childrenGallery");
 				</Drawer>
 
 				<div class = "m-2 p-2 w-full pl-12 md:pl-2 md:w-auto">
+					Component: {$activePage}
 					<svelte:component this={componentTable[$activePage]}/>
 				</div>
 			</div>
