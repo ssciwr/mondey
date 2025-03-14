@@ -1,3 +1,84 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+
+@layer components {
+    /* Sub classes, not for use in HTML */
+    body {
+        @apply dark:text-white;
+    }
+
+    .btn:hover {
+        cursor: pointer;
+        @apply transition-all duration-100;
+    }
+
+    .text-btn {
+        @apply py-2 px-5 rounded-md
+    }
+
+    .text-primary {
+        color: cornflowerblue;
+    }
+
+    .bg-primary {
+        background-color: cornflowerblue;
+    }
+
+    /* Main classes, for direct use */
+    .btn-primary {
+        background-color:cornflowerblue;
+        border: 2px solid cornflowerblue;
+        @apply btn text-btn text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring focus:ring-violet-400 focus:ring-opacity-75;
+    }
+    .btn-primary:hover {
+        border: 2px solid rgb(26, 86, 219)
+    }
+
+    .btn-secondary { /* This should be considered the default class to use for buttons */
+        border: 2px solid cornflowerblue;
+        @apply btn text-btn bg-white text-primary font-semibold rounded-md shadow-md hover:bg-blue-700 hover:text-white focus:outline-none focus:ring focus:ring-violet-400 focus:ring-opacity-75;
+    }
+    .btn-secondary:hover {
+        border: 2px solid rgb(26,86, 219)
+    }
+    .btn-danger {
+        border: 2px solid rgb(200, 30, 30);
+        @apply btn text-btn bg-red-700 text-white font-semibold rounded-md shadow-md hover:bg-red-500 focus:outline-none focus:ring focus:ring-violet-400 focus:ring-opacity-75;
+    }
+    .btn-danger:hover {
+        border: 2px solid rgb(240, 82, 82)
+    }
+    .btn-icon {
+        @apply btn py-2 px-2; /* Just applies symmetrical vertical/horizontal padding for typically square/round icons */
+    }
+
+
+    /* For Text content */
+    .h1 {
+        @apply mb-2 mt-4 text-xl font-bold text-gray-700 dark:text-white tracking-wide;
+    }
+    .h2 {
+        @apply mb-1 mt-3 text-xl text-gray-700 dark:text-white tracking-wide;
+    }
+    .h3 {
+        @apply mb-1 mt-2 text-lg   font-bold  text-gray-700 dark:text-white tracking-wide;
+    }
+    .text-muted {
+        @apply mb-5 text-base text-gray-600 dark:text-gray-400;
+    }
+    /* For layout */
+    .panel {
+        @apply flex max-w-prose bg-additional-color-400 min-w-full
+        /* we use .panel in order not to clash with tailwind/.card classes. */
+    }
+
+    .panel-centered {
+        @apply panel justify-center text-center
+        /* we use .panel in order not to clash with tailwind/.card classes. */
+    }
+
+    /* Custom/other CSS which is app-wide */
+
+    /* Util classes */
+}
