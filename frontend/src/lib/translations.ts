@@ -216,7 +216,7 @@ export const translationIds = {
 		placeholder: "Bitte ausfüllen",
 	},
 	childData: {
-		newChildHeading: "Neu",
+		newChildHeading: "+ Neu",
 		newChildHeadingLong: "Neues Kind registrieren",
 		overviewLabel: "Kinder",
 		overviewSummary:

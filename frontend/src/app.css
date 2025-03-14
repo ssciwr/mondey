@@ -29,16 +29,22 @@
     .btn-primary-alt {
         background-color: rgb(124, 158, 157);
         border: 2px solid rgb(124, 158, 157);
-        @apply btn text-btn text-white font-semibold bg-additional-color-600 rounded-lg shadow-md hover:bg-additional-color-700 focus:outline-none focus:ring focus:ring-blue-400 focus:ring-opacity-75;
+        @apply btn text-btn text-white font-semibold bg-additional-color-600 rounded-lg shadow-md hover:bg-additional-color-700 focus:outline-none focus:ring focus:ring-additional-color-300 focus:ring-opacity-75;
     }
 
     .btn-primary-alt:hover {
         border: 2px solid rgb(124, 158, 157);
     }
 
+    .bg-special {
+        background-color: rgba(124, 158, 157, 0.15);
+        color:rgba(255,255,255,0.925);
+    }
+
     .btn-secondary-alt { /* This should be considered the default class to use for buttons */
         border: 2px solid rgb(124, 158, 157);
-        @apply btn text-btn bg-white text-additional-color-700 font-semibold rounded-lg shadow-md hover:bg-additional-color-700 hover:text-white focus:outline-none focus:ring focus:ring-blue-400 focus:ring-opacity-75;
+        background-color: #e2fbfb; /* #dbfdfc also good */
+        @apply btn text-btn text-additional-color-700 dark:bg-special font-semibold rounded-lg shadow-md hover:bg-additional-color-700 hover:text-white focus:outline-none focus:ring focus:ring-additional-color-300 focus:ring-opacity-75;
     }
     .btn-secondary-alt:hover {
         background-color: rgb(124, 158, 157);
@@ -65,10 +71,12 @@
 
     .btn-danger {
         border: 2px solid rgb(200, 30, 30);
-        @apply btn text-btn bg-white text-red-700 font-semibold rounded-lg shadow-md hover:bg-red-500 hover:text-white focus:outline-none focus:ring focus:ring-red-400 focus:ring-opacity-75;
+        background-color: rgba(200,30,30,0.1);
+        @apply btn text-btn dark:text-white text-red-700 font-semibold rounded-lg shadow-md hover:bg-red-500 hover:text-white focus:outline-none focus:ring focus:ring-red-400 focus:ring-opacity-75;
     }
     .btn-danger:hover {
-        border: 2px solid rgb(240, 82, 82)
+        border: 2px solid rgb(240, 82, 82);
+        background-color: rgba(200,30,30,0.6);
     }
     .btn-icon {
         @apply btn py-2 px-2; /* Just applies symmetrical vertical/horizontal padding for typically square/round icons */
@@ -102,4 +110,22 @@
     /* Custom/other CSS which is app-wide */
 
     /* Util classes */
+
+    /* For icon alignment with buttons */
+    .btn-primary,
+    .btn-secondary,
+    .btn-primary-alt,
+    .btn-secondary-alt,
+    .btn-danger {
+        @apply inline-flex items-center justify-center gap-2;
+    }
+
+    /* Make sure icons have consistent vertical alignment */
+    .btn-primary svg,
+    .btn-secondary svg,
+    .btn-primary-alt svg,
+    .btn-secondary-alt svg,
+    .btn-danger svg {
+        @apply inline-block align-middle;
+    }
 }

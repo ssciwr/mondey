@@ -26,7 +26,10 @@ import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Hr, Input, Spinner } from "flowbite-svelte";
 import {
+    ChartLineUpOutline,
 	CheckCircleOutline,
+	FlagOutline,
+	PenOutline,
 	PlayOutline,
 	TrashBinOutline,
 	UserSettingsOutline,
@@ -364,7 +367,7 @@ async function submitData(): Promise<void> {
 							}}
 						>
 							<div class="flex items-center justify-center">
-								<TrashBinOutline size='md'/> {i18n.tr.childData.deleteImageButton}
+								<TrashBinOutline size="sm"/> {i18n.tr.childData.deleteImageButton}
 							</div>
 						</Button>
 					{:else if disableImageDelete === true}
@@ -394,53 +397,29 @@ async function submitData(): Promise<void> {
 						/>
 					{/each}
 					{#if disableEdit === true}
-						<Button
+						<button
 							type="button"
-							class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
-							on:click={() => {
+							class="btn-secondary-alt"
+							onclick={() => {
 								disableEdit = false;
 							}}
 						>
-							<div class="flex items-center justify-center">
-								{i18n.tr.childData.changeData}
-							</div>
-						</Button>
+								<PenOutline size="md" />
+								{i18n.tr.admin.edit}
+						</button>
 					{:else}
-						<Button
-							class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+						<button
+							class="btn-primary-alt"
 							type="submit"
-							>{i18n.tr.childData.submitButtonLabel}</Button
+							>{i18n.tr.childData.submitButtonLabel}</button
 						>
 					{/if}
-					{#if currentChild.id !== null}
-						<Button
-							class=" w-full text-center text-sm text-white"
-							type="button"
-							color="green"
-							on:click={() => {
-								activeTabChildren.set("milestoneGroup");
-							}}
-							>
-							<PlayOutline size='sm'/>
-							{i18n.tr.childData.nextButtonLabel}
-						</Button>
-						<Button
-							class=" w-full text-center text-sm text-white"
-							color = "yellow"
-							type ="button"
-							onclick={() => {
-								activeTabChildren.set("childrenFeedback");
-							}}
-							>
-							<PlayOutline size='sm'/>
-							{i18n.tr.childData.feedbackButtonLabel}
-						</Button>
-						<Hr hrClass="my-8"/>
-						<Button
-							class=" w-full text-center text-sm text-white"
-							type="button"
-							color="red"
-							on:click={async () => {
+
+					{#if currentChild.id !== null && disableEdit === true}
+					<button
+							class="btn-danger"
+
+							onclick={async () => {
 								if (currentChild.id === null) {
 									console.log("no child id, no child to delete");
 									showAlert = true;
@@ -466,8 +445,30 @@ async function submitData(): Promise<void> {
 									currentChild.id = null;
 								}
 							}}
-							><TrashBinOutline size='sm'/> {i18n.tr.childData.deleteButtonLabel}</Button
+					><TrashBinOutline size="sm"/> {i18n.tr.childData.deleteButtonLabel}</button
+					>
+					{/if}
+					<hr />
+
+					{#if currentChild.id !== null && disableEdit === true}
+						<button
+							class="btn-secondary-alt"
+							onclick={() => {
+								activeTabChildren.set("childrenFeedback");
+							}}>
+							<ChartLineUpOutline size="md" />
+							{i18n.tr.childData.feedbackButtonLabel}
+						</button>
+						<button
+								class="btn-primary-alt"
+								onclick={() => {
+								activeTabChildren.set("milestoneGroup");
+							}}
 						>
+							<FlagOutline size="sm" />
+							{i18n.tr.childData.nextButtonLabel}
+						</button>
+
 					{/if}
 				</form>
 			</Card>
