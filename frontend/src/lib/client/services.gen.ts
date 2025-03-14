@@ -616,7 +616,7 @@ export const updateCurrentChildAnswers = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Get Milestone Answer Sessions In Statistics
+ * Get Expired Milestone Answer Sessions
  */
 export const getExpiredMilestoneAnswerSessions = <ThrowOnError extends boolean = false>(options: Options<GetExpiredMilestoneAnswerSessionsData, ThrowOnError>) => {
     return (options?.client ?? client).get<GetExpiredMilestoneAnswerSessionsResponse, GetExpiredMilestoneAnswerSessionsError, ThrowOnError>({
