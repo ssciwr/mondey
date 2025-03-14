@@ -38,7 +38,7 @@ let {
 	on:click={data?.events?.['onclick'] ?? (()=>{})}
 >
 	{#if data.header}
-		<h5 class="mb-2 text-2xl font-bold tracking-tight" {...styleProps.header}>
+		<h5 class="mb-2 text-2xl font-bold tracking-tight " {...styleProps.header}>
 			{data.header}
 		</h5>
 	{/if}

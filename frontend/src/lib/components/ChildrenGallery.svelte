@@ -1,5 +1,13 @@
 <svelte:options runes={true} />
 
+<style>
+	:global(.child-card) {
+		transition: all 0.15s ease-out;
+	}
+	:global(.child-card:hover) {
+		margin-left:18px!important;
+	}
+</style>
 <script lang="ts">
 import { getChildImage, getChildren } from "$lib/client/services.gen";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
@@ -11,39 +19,60 @@ import { type CardElement, type CardStyle } from "$lib/util";
 import { Heading, Spinner } from "flowbite-svelte";
 import AlertMessage from "./AlertMessage.svelte";
 
+/* From stackoverflow: https://stackoverflow.com/a/41491220 | SudoPlz | CC BY-SA 4.0
+* Ensures that we use a high contrast color given we are allowing unlimited colors to be selected by the user
+* */
+function isDark(bgColor: string): boolean {
+	if (!bgColor) return false; // either a kid with an image but no color(so bg is white, not dark), or "Add new kid"
+	let color = (bgColor.charAt(0) === '#') ? bgColor.substring(1, 7) : bgColor;
+	let r = parseInt(color.substring(0, 2), 16); // hexToR
+	let g = parseInt(color.substring(2, 4), 16); // hexToG
+	let b = parseInt(color.substring(4, 6), 16); // hexToB
+	return ((r * 0.299) + (g * 0.587) + (b * 0.114)) <= 186;
+}
+
+
 function createStyle(data: CardElement[]): CardStyle[] {
-	return data.map((item) => ({
-		card:
-			item.header === i18n.tr.childData.newChildHeading
-				? {
-						class:
-							"hover:cursor-pointer m-2 max-w-prose bg-primary-700 dark:bg-primary-600 hover:bg-primary-800 dark:hover:bg-primary-700",
-						horizontal: false,
-					}
-				: {
-						class:
-							"hover:cursor-pointer m-2 max-w-prose text-gray-700 hover:text-white dark:text-white hover:dark:text-gray-400 hover:bg-primary-800 dark:hover:bg-primary-700",
-						style: item.color ? `background-color: ${item.color};` : "",
-						horizontal: false,
-					},
-		header:
-			item.header === i18n.tr.childData.newChildHeading
-				? {
-						class:
-							"mb-2 text-2xl font-bold tracking-tight text-white dark:text-white",
-					}
-				: null,
-		summary:
-			item.header === i18n.tr.childData.newChildHeading
-				? {
-						class:
-							"mb-3 flex font-normal leading-tight text-white dark:text-white",
-					}
-				: null,
-		button: null,
-		progress: null,
-		auxilliary: null,
-	}));
+	return data.map((item) => {
+			const contextualTextColor = isDark(item.color) ? 'text-white' : 'text-black';
+				return ({
+					card:
+							item.header === i18n.tr.childData.newChildHeading
+									? {
+										class:
+												"child-card hover:cursor-pointer m-2 max-w-prose bg-primary-700 dark:bg-primary-600 hover:bg-primary-800 dark:hover:bg-primary-700",
+										horizontal: false,
+									}
+									: {
+										class:
+												"child-card hover:cursor-pointer m-2 max-w-prose text-gray-700 hover:text-white dark:text-white hover:dark:text-gray-400 hover:bg-primary-800 dark:hover:bg-primary-700",
+										style: item.color ? `background-color: ${item.color};` : "background-color: white", // default to white for image ones, even on hover.
+										horizontal: false,
+									},
+					header:
+							item.header === i18n.tr.childData.newChildHeading
+									? {
+										class:
+												"mb-2 text-2xl font-bold tracking-tight text-white dark:text-white",
+									}
+									: {
+										class: "mb-2 text-2xl font-bold tracking-tight " + contextualTextColor
+									},
+					summary:
+							item.header === i18n.tr.childData.newChildHeading
+									? {
+										class:
+												"mb-3 flex font-normal leading-tight text-white dark:text-white",
+									}
+									: {
+										class: "opacity-60 " + contextualTextColor
+									},
+					button: null,
+					progress: null,
+					auxilliary: null,
+				})
+			}
+	);
 }
 
 function searchName(data: CardElement[], key: string): CardElement[] {
@@ -81,7 +110,7 @@ async function setup(): Promise<CardElement[]> {
 				return {
 					header: child.name,
 					image,
-					summary: null,
+					summary: child.birth_month + '/' + child.birth_year,
 					color: child.color,
 					events: {
 						onclick: async () => {
@@ -98,7 +127,7 @@ async function setup(): Promise<CardElement[]> {
 		data = [
 			...childrenData,
 			{
-				header: i18n.tr.childData.newChildHeading,
+				header:  i18n.tr.childData.newChildHeading,
 				summary: i18n.tr.childData.newChildHeadingLong,
 				events: {
 					onclick: () => {
