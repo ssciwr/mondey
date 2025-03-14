@@ -426,7 +426,6 @@ export const deleteResearchGroup = <ThrowOnError extends boolean = false>(option
 export const usersCurrentUser = <ThrowOnError extends boolean = false>(options?: Options<unknown, ThrowOnError>) => {
     return (options?.client ?? client).get<UsersCurrentUserResponse, UsersCurrentUserError, ThrowOnError>({
         ...options,
-        credentials: "include",
         url: '/users/me'
     });
 };
@@ -687,7 +686,6 @@ export const authCookieLogout = <ThrowOnError extends boolean = false>(options?:
 export const registerRegister = <ThrowOnError extends boolean = false>(options: Options<RegisterRegisterData, ThrowOnError>) => {
     return (options?.client ?? client).post<RegisterRegisterResponse, RegisterRegisterError, ThrowOnError>({
         ...options,
-        credentials: "include",
         url: '/auth/register'
     });
 };
