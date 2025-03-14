@@ -1,10 +1,11 @@
 <script lang="ts">
 import babyFlower from "$lib/assets/babyFlower.jpg";
-import { registerRegister } from "$lib/client/services.gen";
+import {authCookieLogin, registerRegister} from "$lib/client/services.gen";
 import { i18n } from "$lib/i18n.svelte";
 import {Button, Card} from "flowbite-svelte";
-import type {RegisterRegisterData, UserCreate, ValidationError} from "$lib/client/index.js";
+import type {AuthCookieLoginData, RegisterRegisterData, UserCreate, ValidationError} from "$lib/client/index.js";
 import {goto} from "$app/navigation";
+import {refresh} from "$lib/utils/Login";
 
 let showAlert = $state(false);
 let alertMessage = $state(
@@ -31,7 +32,27 @@ const registerTestUser = async () => {
     showAlert = true;
   } else {
     success = true;
-    await goto('/userLand/userLandingpage')
+    console.log('Successful response:', result.response)
+    const loginData: AuthCookieLoginData = {
+      body: {
+        username: testAccountData.email,
+        password: testAccountData.password,
+      },
+    };
+
+    const authReturn = await authCookieLogin(loginData);
+
+    if (authReturn.error) {
+      showAlert = true;
+      alertMessage = i18n.tr.login.badCredentials + authReturn.error.detail;
+      console.log("error during login ", authReturn.error.detail);
+    } else {
+      const status: string = await refresh();
+      if (status !== "success") {
+        alertMessage = `${i18n.tr.login.badCredentials}`;
+      }
+      await goto('/userLand/userLandingpage')
+    }
   }
 }
 

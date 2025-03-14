@@ -100,7 +100,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
         logging.info(
             f"Verification requested for user {user.id}. Verification token: {token}"
         )
-        send_email_validation_link(user.email, token)
+        # send_email_validation_link(user.email, token)
 
 
 async def get_user_manager(

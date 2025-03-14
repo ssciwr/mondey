@@ -28,6 +28,8 @@ async function refresh(): Promise<string> {
 	return "success";
 }
 
+export const refreshLogin = refresh()
+
 // functionality
 async function submitData(): Promise<void> {
 	const loginData: AuthCookieLoginData = {
