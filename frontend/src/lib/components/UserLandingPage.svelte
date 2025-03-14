@@ -169,7 +169,6 @@ activePage.set("childrenGallery");
 				</Drawer>
 
 				<div class = "m-2 p-2 w-full pl-12 md:pl-2 md:w-auto">
-					Component: {$activePage}
 					<svelte:component this={componentTable[$activePage]}/>
 				</div>
 			</div>
