@@ -397,3 +397,15 @@ def test_get_detailed_feedback_for_session(user_client: TestClient, session):
 def test_get_detailed_feedback_for_session_invalid(user_client: TestClient):
     response = user_client.get("/users/feedback/answersession=12/detailed")
     assert response.status_code == 404
+
+
+def test_get_milestone_answer_sessions_for_statistics(user_client: TestClient, session):
+    response = user_client.get("/users/milestone-answers-sessions/2")
+    assert response.status_code == 200
+    assert response.json() == {}
+
+    response = user_client.get("/users/milestone-answers-sessions/1")
+
+    assert response.status_code == 200
+    assert len(list(response.json().keys())) == 1
+    assert list(response.json().keys())[0] == "1"
