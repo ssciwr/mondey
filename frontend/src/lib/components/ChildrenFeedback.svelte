@@ -7,7 +7,7 @@ import {
 	type MilestonePublic,
 	type ValidationError,
 	getDetailedFeedbackForAnswersession,
-	getMilestoneAnswerSessionsInStatistics,
+	getExpiredMilestoneAnswerSessions,
 	getMilestonegroupsForSession,
 	getSummaryFeedbackForAnswersession,
 } from "$lib/client";
@@ -165,7 +165,7 @@ async function loadAnswersessions(): Promise<void> {
 	}
 
 	// load all answersessions initially
-	const responseAnswerSessions = await getMilestoneAnswerSessionsInStatistics({
+	const responseAnswerSessions = await getExpiredMilestoneAnswerSessions({
 		path: { child_id: currentChild.id as number },
 	});
 
@@ -320,7 +320,7 @@ function makeTitle(aid: number): string {
  */
 async function generateReport(): Promise<string | null> {
 	// load all data again
-	const responseAnswerSessions = await getMilestoneAnswerSessionsInStatistics({
+	const responseAnswerSessions = await getExpiredMilestoneAnswerSessions({
 		path: { child_id: currentChild.id as number },
 	});
 

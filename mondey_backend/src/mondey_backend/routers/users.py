@@ -236,7 +236,7 @@ def create_router() -> APIRouter:
         "/milestone-answers-sessions/{child_id}",
         response_model=dict[int, MilestoneAnswerSessionPublic],
     )
-    def get_milestone_answer_sessions_in_statistics(
+    def get_expired_milestone_answer_sessions(
         session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
     ) -> dict[int, MilestoneAnswerSessionPublic]:
         milestone_answer_sessions = {
@@ -246,7 +246,6 @@ def create_router() -> APIRouter:
                     (col(MilestoneAnswerSession.user_id) == current_active_user.id)
                     & (col(MilestoneAnswerSession.child_id) == child_id)
                     & col(MilestoneAnswerSession.expired)
-                    & col(MilestoneAnswerSession.included_in_statistics)
                 )
             ).all()
         }
