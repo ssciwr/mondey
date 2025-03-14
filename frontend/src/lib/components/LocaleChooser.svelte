@@ -1,13 +1,13 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import { i18n } from "$lib/i18n.svelte";
-import { onMount } from "svelte";
 import { Dropdown, DropdownItem } from "flowbite-svelte";
 import { ChevronDownOutline, LanguageOutline } from "flowbite-svelte-icons";
+import { onMount } from "svelte";
 
 let { withIcon = false }: { withIcon?: boolean } = $props();
 
-let buttonId = '';
+let buttonId = "";
 onMount(() => {
 	buttonId = `locale-${Math.random().toString(20)}`;
 });

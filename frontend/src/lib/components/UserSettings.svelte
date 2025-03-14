@@ -18,12 +18,10 @@ let currentPasswordValid = $state(false);
 let passwordChangeSuccess = $state(false);
 let showAlert = $state(false);
 
-
 console.log("i18n at initialization:", i18n);
-console.log('i18n settings: ', i18n.tr.settings)
+console.log("i18n settings: ", i18n.tr.settings);
 
 let alertMessage = $state(i18n.tr.settings.defaultAlertMessage);
-
 
 async function submitNewPassword() {
 	currentPasswordValid = false;
