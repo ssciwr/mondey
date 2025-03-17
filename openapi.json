@@ -117,45 +117,6 @@
 				}
 			}
 		},
-		"/milestone-groups/{answersession_id}": {
-			"get": {
-				"tags": ["milestones"],
-				"summary": "Get Milestone Groups For Answersession",
-				"operationId": "get_milestone_groups_for_answersession",
-				"parameters": [
-					{
-						"name": "answersession_id",
-						"in": "path",
-						"required": true,
-						"schema": { "type": "integer", "title": "Answersession Id" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Successful Response",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/MilestoneGroupPublic"
-									},
-									"title": "Response Get Milestone Groups For Answersession Milestone Groups  Answersession Id  Get"
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Validation Error",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-							}
-						}
-					}
-				}
-			}
-		},
 		"/submitted-milestone-images/{milestone_id}": {
 			"post": {
 				"tags": ["milestones"],
@@ -2381,7 +2342,7 @@
 				"properties": {
 					"grant_type": {
 						"anyOf": [
-							{ "type": "string", "pattern": "password" },
+							{ "type": "string", "pattern": "^password$" },
 							{ "type": "null" }
 						],
 						"title": "Grant Type"
@@ -2482,7 +2443,11 @@
 				"properties": {
 					"name": { "type": "string", "title": "Name", "default": "" },
 					"birth_year": { "type": "integer", "title": "Birth Year" },
-					"birth_month": { "type": "integer", "title": "Birth Month" }
+					"birth_month": { "type": "integer", "title": "Birth Month" },
+					"color": {
+						"anyOf": [{ "type": "string" }, { "type": "null" }],
+						"title": "Color"
+					}
 				},
 				"type": "object",
 				"required": ["birth_year", "birth_month"],
@@ -2493,6 +2458,10 @@
 					"name": { "type": "string", "title": "Name", "default": "" },
 					"birth_year": { "type": "integer", "title": "Birth Year" },
 					"birth_month": { "type": "integer", "title": "Birth Month" },
+					"color": {
+						"anyOf": [{ "type": "string" }, { "type": "null" }],
+						"title": "Color"
+					},
 					"id": { "type": "integer", "title": "Id" },
 					"has_image": { "type": "boolean", "title": "Has Image" }
 				},
@@ -2682,15 +2651,10 @@
 						"items": { "$ref": "#/components/schemas/MilestoneAgeScore" },
 						"type": "array",
 						"title": "Scores"
-					},
-					"created_at": {
-						"type": "string",
-						"format": "date-time",
-						"title": "Created At"
 					}
 				},
 				"type": "object",
-				"required": ["milestone_id", "expected_age", "scores", "created_at"],
+				"required": ["milestone_id", "expected_age", "scores"],
 				"title": "MilestoneAgeScoreCollectionPublic"
 			},
 			"MilestoneAnswerPublic": {
