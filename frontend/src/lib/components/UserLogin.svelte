@@ -75,7 +75,7 @@ let alertMessage: string = $state(i18n.tr.login.badCredentials);
 	/>
 {/if}
 
-<div class="container m-2 mx-auto w-full max-w-xl">
+<div class="container m-2 mx-auto w-full max-w-xl p-6">
 	<Card class="container m-2 mx-auto mb-6 w-full max-w-xl pb-6">
 		<Heading
 			tag="h3"

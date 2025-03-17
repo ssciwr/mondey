@@ -96,9 +96,10 @@ function toggleDrawer() {
 {:else}
 	<!-- Mobile Navigation -->
 
-		<div class="z-10 fixed" style="top:1.5rem;right:1.5rem;">
+		<div class="z-10 fixed" style="top:1.8rem;right:1.5rem;">
 			<BarsOutline size="xl" class="cursor-pointer" onclick={toggleDrawer} />
 		</div>
+	<div style="min-height:5rem"></div>
 
 	<!-- Mobile Drawer -->
 	<Drawer placement="right" bind:hidden={hideDrawer} id="sidebar">
