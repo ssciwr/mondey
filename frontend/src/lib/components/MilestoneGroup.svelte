@@ -11,10 +11,11 @@ import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { activeTabChildren } from "$lib/stores/componentStore";
+import { activePage } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
 import { Spinner } from "flowbite-svelte";
 import {
+	GridPlusSolid,
 	RectangleListOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
@@ -95,7 +96,7 @@ async function setup(): Promise<any> {
 			progress: computeProgress(item.milestones, answerSession.data),
 			events: {
 				onclick: () => {
-					activeTabChildren.set("milestoneOverview");
+					activePage.set("milestoneOverview");
 					contentStore.milestoneGroup = item.id;
 					contentStore.milestoneGroupData = item;
 				},
@@ -109,15 +110,25 @@ async function setup(): Promise<any> {
 
 const breadcrumbdata: any[] = [
 	{
+		label: i18n.tr.childData.overviewLabel,
+		onclick: () => {
+			activePage.set("childrenGallery");
+		},
+		symbol: GridPlusSolid,
+	},
+	{
 		label: currentChild.name,
 		symbol: UserSettingsOutline,
 		onclick: () => {
-			activeTabChildren.set("childrenRegistration");
+			activePage.set("childrenRegistration");
 		},
 	},
 	{
 		label: i18n.tr.milestone.groupOverviewLabel,
 		symbol: RectangleListOutline,
+		onclick: () => {
+			activePage.set("milestoneGroup");
+		},
 	},
 ];
 
@@ -227,7 +238,7 @@ const searchData: any[] = [
 </div>
 {:catch error}
 	<AlertMessage message={`${i18n.tr.milestone.alertMessageError} ${error}`} onclick={() => {
-		activeTabChildren.set("milestoneOverview");
+		activePage.set("milestoneOverview");
 		showAlert = false;
 	}}/>
 {/await}
