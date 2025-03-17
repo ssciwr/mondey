@@ -30,6 +30,8 @@ import { onMount } from "svelte";
 import AlertMessage from "./AlertMessage.svelte";
 import Breadcrumbs from "./Navigation/Breadcrumbs.svelte";
 
+let featureActiveAutomatischWeiter = false; // in case they change their mind. If still here in May, refactor this out.
+
 onMount(() => {
 	if (contentStore.milestoneGroupData?.milestones) {
 		currentMilestone =
@@ -271,9 +273,11 @@ const breadcrumbdata = $derived([
 						<ArrowRightOutline class="ms-2 h-5 w-5 text-gray-700 dark:text-gray-400" />
 					</Button>
 				</div>
-				<Checkbox class="m-1 justify-center" bind:checked={autoGoToNextMilestone}>
-					<p class="text-xs">{i18n.tr.milestone.autoNext}</p>
-				</Checkbox>
+				{#if featureActiveAutomatischWeiter}
+					<Checkbox class="m-1 justify-center" bind:checked={autoGoToNextMilestone}>
+						<p class="text-xs">{i18n.tr.milestone.autoNext}</p>
+					</Checkbox>
+				{/if}
 			</div>
 		</div>
 	{/if}
