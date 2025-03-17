@@ -1,6 +1,14 @@
+<script>
+    import {alertStoreSvelte} from "$lib/stores/alertStore.svelte";
+    import { ArrowRightAltSolid } from "flowbite-svelte-icons";
+
+    let testElementIsVisible = $state(true)
+</script>
+
 <style>
-    div, button {
+    div, .sample-button {
         margin-bottom: 100px;
+        margin-top:30px;
         display: block;
     }
 </style>
@@ -30,29 +38,29 @@ text-muted
 </div>
 
 btn-primary:
-<button class="btn-primary">
+<button class="btn-primary sample-button">
     Submit Form
 </button>
 
 btn-secondary:
-<button class="btn-secondary">
+<button class="btn-secondary sample-button">
     Learn More
 </button>
 
 btn-danger:
-<button class="btn-danger">
+<button class="btn-danger sample-button">
     Delete Item
 </button>
 
 <hr />
 
 btn-primary:
-<button class="btn-primary-alt">
+<button class="btn-primary-alt sample-button">
     Submit Form
 </button>
 
 btn-secondary:
-<button class="btn-secondary-alt">
+<button class="btn-secondary-alt sample-button">
     Learn More
 </button>
 
@@ -73,6 +81,34 @@ panel-centred:
     <div>
         <h1 class="h1">Centered Panel Example</h1>
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.</p>
-        <button class="btn-secondary">Contact Us</button>
+        <button class="btn-secondary-alt"><ArrowRightAltSolid />  Contact Us</button>
     </div>
+</div>
+
+alert:
+<div class="panel">
+    {#if testElementIsVisible}
+        <h1 class="h1">Here is sample usage of the button classes and alerts.</h1>
+    {/if}
+    <button class="btn-primary-alt" onclick={() => alertStoreSvelte.showAlert("Great news", "A normal alert message")}>
+        Make alert appear
+    </button>
+    <div>
+        <button class="btn-danger" onclick={() => alertStoreSvelte.showAlert("Fehler", "An error alert message, such as " +
+         "caused by awaiting a promise which fails (more for devs to debug)", true)}>
+            Make error appear
+        </button>
+    </div>
+    <div>
+        <button class="btn-secondary-alt" onclick={() => alertStoreSvelte.showAlert("Click on my option to hide the title",
+        "A normal alert message", false,
+        () => {
+            console.log('Button waas clicked..')
+            testElementIsVisible = false
+        })}>
+            Alert with call back option
+        </button>
+        <span class="text-muted">(which does something when you click "Verstanden")</span>
+    </div>
+
 </div>

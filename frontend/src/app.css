@@ -16,6 +16,7 @@
     .text-btn {
         @apply py-2 px-5 rounded-md;
         min-width: 12rem;
+        margin:0.25rem;
     }
 
     .text-primary {
@@ -95,11 +96,13 @@
         @apply mb-1 mt-2 text-lg   font-bold  text-gray-700 dark:text-white tracking-wide;
     }
     .text-muted {
-        @apply mb-5 text-base text-gray-600 dark:text-gray-400;
+        @apply mb-5 text-base text-gray-500 dark:text-gray-400;
     }
     /* For layout */
     .panel {
-        @apply flex max-w-prose bg-additional-color-400 min-w-full
+        background-color:white;
+        border: 1px solid rgb(100,100,100);
+        @apply max-w-prose shadow-xl  min-w-full p-6 rounded-xl
         /* we use .panel in order not to clash with tailwind/.card classes. */
     }
 

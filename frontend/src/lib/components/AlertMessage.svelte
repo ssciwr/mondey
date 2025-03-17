@@ -1,8 +1,8 @@
 <svelte:options runes={true} />
 <script lang='ts'>
 import { i18n } from "$lib/i18n.svelte";
-import { Alert, Button } from "flowbite-svelte";
-import { EyeSolid, InfoCircleSolid } from "flowbite-svelte-icons";
+import {Alert, ArrowKeyRight, Button} from "flowbite-svelte";
+import { EyeSolid, InfoCircleSolid, ExclamationCircleSolid } from "flowbite-svelte-icons";
 
 let {
 	id = "alertMessage",
@@ -11,6 +11,7 @@ let {
 	infotitle = "",
 	lastpage = "",
 	infopage = "",
+	isError = false,
 	onclick = (event = undefined) => {
 		console.log(event);
 	},
@@ -21,20 +22,35 @@ let {
 	infotitle?: string;
 	lastpage?: string;
 	infopage?: string;
+	isError?: boolean; // We keep this as an optional prop for backward compatibility with existing <AlertMessage> usage.
 	onclick?: (event: Event | undefined) => void | Promise<void>;
 } = $props();
+
+const color = isError ? 'red' : 'blue'
 </script>
 
-<Alert id={`${id}`} class="m-4 p-4">
-	<div class="flex items-center gap-3">
-		<InfoCircleSolid class="h-5 w-5" />
-		<span class="text-lg font-medium"> {title} </span>
+<Alert color={color} border id={`${id}`} class="m-4 p-6">
+
+	<div class="mb-4 mt-2" >
+		{#if isError}
+			<ExclamationCircleSolid style="display:inline" />
+		{:else}
+			<InfoCircleSolid style="display:inline" />
+		{/if}
+		&nbsp;
+		<span class="text-lg font-medium">
+			{title}
+		</span>
+		<p>
+	 		{message}
+		</p>
 	</div>
-	<p class="mb-4 mt-2">{message}</p>
 	<div class="flex gap-2">
 		{#if infopage != ''}
-			<Button size="md" href={infopage}><EyeSolid class="me-2 h-4 w-4" />{infotitle}</Button>
+			<a class={(isError) ? "btn-danger" : "btn-primary-alt"} href={infopage}><EyeSolid class="me-2 h-4 w-4" />{infotitle}</a>
 		{/if}
-		<Button size="md" outline href={lastpage} on:click={onclick}>{i18n.tr.misc.understood}</Button>
+		<a class={(isError) ? "btn-danger" : "btn-primary-alt"} href={lastpage} on:click={onclick}>
+			{i18n.tr.misc.understood}
+		</a>
 	</div>
 </Alert>

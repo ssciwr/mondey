@@ -21,7 +21,7 @@ import {
 import { MoonSolid, SunSolid } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
-import { alertStore } from "$lib/stores/alertStore";
+import { alertStoreSvelte } from "$lib/stores/alertStore.svelte";
 
 import "../app.css";
 
@@ -71,16 +71,19 @@ onMount(async () => {
 	{@render children?.()}
 </div>
 
-{#if alertStore.isAlertShown}
+{#if alertStoreSvelte.isAlertShown}
 	<AlertMessage
 			id="alertMessageSettings"
-			title={i18n.tr.settings.alertTitle}
-			message={alertStore.message || alertStore.error}
+			title={alertStoreSvelte.title}
+			message={alertStoreSvelte.message}
+			isError={alertStoreSvelte.isError}
 			onclick={() => {
-             alertStore.hideAlert();
-             if (alertStore.callback) {
-                alertStore.callback();
+				console.log('Callback clicked.')
+			 if (alertStoreSvelte.callback) {
+                alertStoreSvelte.callback();
              }
+             alertStoreSvelte.hideAlert();
+
           }}
 	/>
 {/if}
