@@ -1,7 +1,7 @@
 <svelte:options runes={true} />
 <script lang='ts'>
 import { i18n } from "$lib/i18n.svelte";
-import {Alert, ArrowKeyRight, Button} from "flowbite-svelte";
+import {Alert} from "flowbite-svelte";
 import { EyeSolid, InfoCircleSolid, ExclamationCircleSolid } from "flowbite-svelte-icons";
 
 let {
