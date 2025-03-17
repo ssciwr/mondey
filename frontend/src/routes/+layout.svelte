@@ -39,7 +39,7 @@ onMount(async () => {
 </svelte:head>
 
 <div style="position:fixed;padding-top:1rem;padding-bottom:1rem;left:0px;right:0px"
-	 class="bg-white md:hidden w-full text-center flex justify-center items-center">
+	 class="bg-white dark:bg-gray-800 md:hidden w-full text-center flex justify-center items-center">
 	<img src={logo_light} class="block h-14 dark:hidden" alt="MONDEY Logo" />
 	<img src={logo_dark} class="hidden h-14 dark:block" alt="MONDEY Logo" />
 </div>
