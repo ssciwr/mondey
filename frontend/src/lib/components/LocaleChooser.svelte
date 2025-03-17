@@ -1,10 +1,10 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import { i18n } from "$lib/i18n.svelte";
+import { preventDefault } from "$lib/util";
 import { Dropdown, DropdownItem } from "flowbite-svelte";
 import { ChevronDownOutline, LanguageOutline } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
-import {preventDefault} from "$lib/util";
 
 let { withIcon = false }: { withIcon?: boolean } = $props();
 
