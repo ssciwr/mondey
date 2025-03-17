@@ -36,7 +36,6 @@ let dropdownOpen = $state(false);
 					event.preventDefault(); // prevent it acting as a "#" link in sidebar
 					i18n.locale = locale;
 					dropdownOpen = false;
-					console.log('End locale change on click')
 				}}
 			>
 				{locale}

@@ -91,7 +91,6 @@ activePage.set("childrenGallery");
 			<SidebarGroup border>
 				<SidebarItem label = {i18n.tr.userData.settingsLabel} onclick = {
 					() => {
-						console.log('Sidebar was clicked!! settings.')
 						activePage.set("settings");
 						hideDrawer = true;
 					}
