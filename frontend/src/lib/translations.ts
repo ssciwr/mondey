@@ -173,7 +173,7 @@ export const translationIds = {
 		adminRole: "Admin",
 		submitButtonLabel: "Absenden",
 		selectPlaceholder: "Bitte auswählen",
-		profileButtonLabelDefault: "Einloggen oder Registrieren",
+		profileButtonLabelDefault: "Einloggen",
 		profileButtonLabelLogout: "Logout",
 		profileButtonLabelEndTestSession: "Session Beenden",
 		profileTitleDefault: "Willkommen!",
@@ -196,6 +196,7 @@ export const translationIds = {
 		submitButtonLabel: "Abschließen",
 		changeData: "Daten vollständig, zum bearbeiten klicken",
 		loadingMessage: "Daten werden geladen",
+		settingsLabel: "Einstellungen",
 	},
 	settings: {
 		settings: "Einstellungen",
@@ -288,6 +289,7 @@ export const translationIds = {
 		summary: "Hier sind Sie genau richtig!",
 		buttonLabel: "Anmeldung",
 		toolTip: "Anmelden oder ein neues Konto erstellen",
+		toggleDarkmode: "Darkmode ein- oder ausschalten",
 	},
 	frontpageAbout: {
 		heading: "Was ist MONDEY?",

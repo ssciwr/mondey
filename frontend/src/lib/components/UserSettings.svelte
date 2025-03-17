@@ -17,6 +17,7 @@ let currentPassword = $state(null) as string | null;
 let currentPasswordValid = $state(false);
 let passwordChangeSuccess = $state(false);
 let showAlert = $state(false);
+
 let alertMessage = $state(i18n.tr.settings.defaultAlertMessage);
 
 async function submitNewPassword() {
