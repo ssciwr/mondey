@@ -27,10 +27,16 @@
         background-color: #2757ac;
     }
 
+    .bg-primary-alt {
+        background-color: rgb(124, 158, 157)
+    }
+    .bg-text-alt {
+        color: rgb(124, 158, 157)
+    }
+
     .btn-primary-alt {
-        background-color: rgb(124, 158, 157);
         border: 2px solid rgb(124, 158, 157);
-        @apply btn text-btn text-white font-semibold bg-additional-color-600 rounded-lg shadow-md hover:bg-additional-color-700 focus:outline-none focus:ring focus:ring-additional-color-300 focus:ring-opacity-75;
+        @apply btn text-btn bg-primary-alt text-white font-semibold bg-additional-color-600 rounded-lg shadow-md hover:bg-additional-color-700 focus:outline-none focus:ring focus:ring-additional-color-300 focus:ring-opacity-75;
     }
 
     .btn-primary-alt:hover {
