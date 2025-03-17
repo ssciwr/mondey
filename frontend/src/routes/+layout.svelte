@@ -37,11 +37,17 @@ onMount(async () => {
 	<title>MONDEY :: Milestones of Normal Development in Early Years</title>
 </svelte:head>
 
+<div style="position:fixed;padding-top:1rem;padding-bottom:1rem;left:0px;right:0px;margin: 0 auto" class="block bg-white md:hidden w-full text-center flex justify-center items-center">
+	<img src={logo_light} class="block h-14 dark:hidden" alt="MONDEY Logo" />
+	<img src={logo_dark} class="hidden h-14 dark:block" alt="MONDEY Logo" />
+</div>
 <Navbar>
-	<NavBrand href={base}>
-		<img src={logo_light} class="mt-6 block h-12 dark:hidden" alt="MONDEY Logo" />
-		<img src={logo_dark} class="mt-6 hidden h-12 dark:block" alt="MONDEY Logo" />
-	</NavBrand>
+	<div class="hidden md:block">
+		<NavBrand href={base} style="display:block" class="text-center max-sm:flex max-sm:justify-center">
+			<img src={logo_light} class="mt-6 block h-12 dark:hidden" alt="MONDEY Logo" />
+			<img src={logo_dark} class="mt-6 hidden h-12 dark:block" alt="MONDEY Logo" />
+		</NavBrand>
+	</div>
 	<NavHamburger />
 	<NavUl ulClass="hidden flex min-[320px]:flex-col sm:flex-col md:flex-row items-center lg:mt-8 lg:space-x-14 md:mt-8 md:space-x-7 text-lg ">
 		<NavLi class = "hover:cursor-pointer" href={base}>{i18n.tr.misc.latest}</NavLi>

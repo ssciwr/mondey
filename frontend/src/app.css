@@ -44,7 +44,7 @@
 
     .btn-secondary-alt { /* This should be considered the default class to use for buttons */
         border: 2px solid rgb(124, 158, 157);
-        background-color: #e2fbfb; /* #dbfdfc also good */
+        background-color: #ebfafa; /* #dbfdfc also good | #e2fbfb; */
         @apply btn text-btn text-additional-color-700 dark:bg-special font-semibold rounded-lg shadow-md hover:bg-additional-color-700 hover:text-white focus:outline-none focus:ring focus:ring-additional-color-300 focus:ring-opacity-75;
     }
     .btn-secondary-alt:hover {
