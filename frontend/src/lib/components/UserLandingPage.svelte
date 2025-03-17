@@ -127,7 +127,7 @@ activePage.set("childrenGallery");
 						<ArrowRightToBracketOutline size="lg" />
 					</svelte:fragment>
 				</SidebarItem>
-				<SidebarItem on:click={() => console.log('Locale clicked in sidebar')}>
+				<SidebarItem>
 					<svelte:fragment slot="icon">
 						<LanguageOutline size="lg" />
 					</svelte:fragment>

@@ -4,10 +4,11 @@ import { i18n } from "$lib/i18n.svelte";
 import { Dropdown, DropdownItem } from "flowbite-svelte";
 import { ChevronDownOutline, LanguageOutline } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
+import {preventDefault} from "$lib/util";
 
 let { withIcon = false }: { withIcon?: boolean } = $props();
 
-let buttonId = "";
+let buttonId = $state("");
 onMount(() => {
 	buttonId = `locale-${Math.random().toString(20)}`;
 });
@@ -32,11 +33,10 @@ let dropdownOpen = $state(false);
 		{#each i18n.locales as locale}
 			<DropdownItem
 				class="flex items-center"
-				on:click={(event) => {
-					event.preventDefault(); // prevent it acting as a "#" link in sidebar
+				on:click={preventDefault(() => {
 					i18n.locale = locale;
 					dropdownOpen = false;
-				}}
+				})}
 			>
 				{locale}
 			</DropdownItem>
