@@ -6,6 +6,21 @@ export function preventDefault(fn: (event: Event) => void) {
 	};
 }
 
+// Approximate, prefer tailwind CSS to this. From: https://stackoverflow.com/questions/11381673/detecting-a-mobile-browser
+// Needs to be called from onMount because of window.
+export function isMobile():boolean {
+		if (window === undefined) {
+			throw new Error("Run this function from onMount as it needs to access window.");
+		}
+		let ViewportWidth  = window.innerWidth
+		let ViewportHeight = window.innerHeight
+
+		let smallerEdgeSize = Math.min(ViewportWidth,ViewportHeight)
+		let largerEdgeSize  = Math.max(ViewportWidth,ViewportHeight)
+
+		return (smallerEdgeSize <= 480) && (largerEdgeSize <= 896)
+}
+
 export type EventHandler = (event: Event | undefined) => void | Promise<void>;
 export type CardElement = {
 	header: string | undefined | null;
