@@ -18,7 +18,7 @@ export const translationIds = {
 			"Das Kind zeigt das Verhalten mehrmals sicher und genau wie beschrieben.",
 		milestones: "Meilensteine",
 		observation: "Beobachtungshinweise",
-		help: "Förderhilfen",
+		help: "Fördern",
 		info: "Information",
 		next: "Weiter",
 		prev: "Zurück",
@@ -33,30 +33,26 @@ export const translationIds = {
 		submitImageConditions:
 			"Ich bin damit einverstanden, dass dieses Bild veröffentlicht und den Benutzern als eines der Meilensteinbilder auf dieser Website angezeigt wird, sofern es von den Site-Administratoren genehmigt wird.",
 		recommendOk:
-			"Das Kind hat für sämtliche Meilensteingruppen altergemäße Bewertungen erhalten.",
+			"Das Kind hat für sämtliche Meilensteine altersgemäße Bewertungen erhalten.",
 		recommendOkShort: "Alles im grünen Bereich!",
 		recommendWatch:
-			"Das Kind hat für einige Meilensteingruppen leicht unterdurchschnittliche Bewertungen erhalten.",
-		recommendOkMs:
-			"Das Kind hat für sämtliche Meilensteine altergemäße Bewertungen erhalten.",
-		recommendWatchMs:
-			"Das Kind hat für einige Meilensteine leicht unterdurchschnittliche Bewertungen erhalten.",
+			"Das Kind hat für einige Meilensteine leicht unterdurchschnittliche Werte erhalten.",
 		recommendWatchShort: "Aufgepasst!",
-		recommmendHelp:
-			"Entwicklung des Kindes ist deutlich unterdurchschnittlich.",
+		recommendHelp:
+			"Das Kind erreicht Werte, die deutlich unter dem Altersdurchschnitt liegen.",
 		recommendHelpShort: "Enwicklungsverzögerung!",
 		showHistory: "Feedback zu vorherigen Beobachtungszeiträumen anzeigen",
-		moreInfoOnEval: "Mehr Informationen zur Bewertung",
+		moreInfoOnEval: "Mehr Info zur Bewertung",
 		legend: "Erklärung zu den einzelnen Symbolen",
 		selectFeedback: "Wählen sie nun zu welchem Zeitpunkt sie Feedback möchten",
 		feedbackExplanation:
-			"Das Feedback basiert auf einem Vergleich Ihrer Einschätzungen mit den Einschätzungen anderer Nutzer und folgt einer einfachen Regel:",
+			"Das Feedback basiert auf einem Vergleich Ihrer Einschätzungen mit den Einschätzungen anderer Nutzer, die und folgt einer einfachen Regel:",
 		feedbackExplanationDetailed:
-			"Die Farben und Symbole zeigen an, ob das Kind altersgemäß entwickelt ist oder ob es in einzelnen Bereichen Unterstützung benötigt. Durch setzen des Hakens unten können sie vergangene Beobachtungszeiträume einsehen und so die Entwicklung des Kindes über einen längeren Zeitraum verfolgen. Es werden standardmäßig nur die Bewertungen der Meilensteingruppen angezeigt. Für eine genauere Analyse können sie die Bewertungen der einzelnen Meilensteine einsehen indem sie auf die jeweilige Meilensteingruppe klicken. Beachten sie bitte die zusätzlichen Informationen und die Erklärung zu den Symbolen.",
-		feedbackDetailsMilestoneGroup:
-			"Zu jeder Meilensteingruppe wird der Durchschnitt und die Standardabweichung der erreichten Punktzahl aller für das Kindesalter relevanten Meilensteine dieser Gruppe berechnet. Danach wird der Durchschnitt des der erreichten Punktzahl des Kindes mit dem Durchschnitt der Gruppe verglichen. Wenn der Durchschnitt des Kindes zwei Standardabweichungen unter dem Gruppendurchschnitt liegt, wird das Kind als 'Entwicklung verzögert' eingestuft (rot), wenn es zwei bis eine Standardabweichung unterhalb des Gruppendurchschnitts liegt, wird es als 'Entwicklung leicht verzögert' eingestuft (gelb). Wenn die Durchschnittszahl des Kindes innerhalb einer Standardabweichung des Gruppendurchschnitts oder darüber liegt, wird es als 'Entwicklung altersgemäß' eingestuft (grün). Statistisch liegen ungefähr 67% aller Kinder liegen innerhalb einer Standardabweichung um den Gruppendurchschnitt und 95% innerhalb von zwei Standardabweichungen. Zur Bewertung dieser Einstufungen ist es sinnvoll, die Bewertung der einzelnen Meilensteine miteinzubeziehen",
+			"Liegt der Mittelwerte des Kindes im Bereich von plus/minus einer Standardabweichung des Mittelwertes für gleichaltrige Kinder, ist alles im grünen Bereich.",
 		feedbackDetailsMilestone:
-			"Einzelne Meilensteine werden nach demselben Schema bewertet, allerdings sind hier Durchschnitt und Standardabweichung für den jeweiligen Meilenstein relevant. Beachten sie, dass die Bewertung einzelner Meilensteine nicht diesselbe sein muss wie für die ganze Gruppe - einzelne Meilensteine können gegebenenfalls signifikant verzögert sein ohne dass die ganze Meilensteingruppe als entwicklungsverzögert bewertet wird. In solchen Fällen ist besondere Aufmerksamkeit notwendig.",
+			"Wir stellen für jeden Meilenstein einzeln fest, ob die konkrete Einschätzung des Kindes mehr als 2 Standardabweichungen unterhalb des Mittelwerts für gleichaltrige Kinder liegt. Ist das der Fall, springt die Ampel auf gelb und der Meilenstein wird angezeigt. Bitte machen Sie sich aber noch keine Sorgen! Ein gelbes Ampelsignal soll Sie lediglich nur dazu anregen, auf bestimmte Kompetenzen verstärkt zu achten und das Kind darin zu stärken.",
+		feedbackDetailsEval:
+			"Wenn der empirische Mittelwert mehr als zwei Standardabweichungen unter dem Mittelwert für gleichaltrige Kinder liegt, springt die Ampel auf rot. Das bedeutet, dass nur 2,35% aller Kinder einen niedrigeren Wert erreicht haben als das beobachtete Kind. Es besteht ein erhöhtes Risiko für Entwicklungsverzögerung. Sie sollten einen Experten / eine Expertin aufsuchen, um abklären zu lassen, ob Handlungsbedarf besteht.",
 		disableHelp: "Ausblenden",
 		noFeedback:
 			"Kein Feedback verfügbar. Sie müssen ein Kind länger als eine Woche beobachten und regelmäßig Meilensteine bewerten um Feedback zu erhalten.",
@@ -72,6 +68,7 @@ export const translationIds = {
 		child: "Kind",
 		date: "Datum",
 		reportTitle: "Entwicklungsbericht",
+		feedbackTitle: "Feedback zur Entwicklung des Kindes",
 	},
 	search: {
 		allLabel: "Alle",
@@ -174,7 +171,7 @@ export const translationIds = {
 		adminRole: "Admin",
 		submitButtonLabel: "Absenden",
 		selectPlaceholder: "Bitte auswählen",
-		profileButtonLabelDefault: "Einloggen oder Registrieren",
+		profileButtonLabelDefault: "Einloggen",
 		profileButtonLabelLogout: "Logout",
 		profileTitleDefault: "Willkommen!",
 		profileAccess: "Ihr Profil",
@@ -195,6 +192,7 @@ export const translationIds = {
 		submitButtonLabel: "Abschließen",
 		changeData: "Daten vollständig, zum bearbeiten klicken",
 		loadingMessage: "Daten werden geladen",
+		settingsLabel: "Einstellungen",
 	},
 	settings: {
 		settings: "Einstellungen",
@@ -288,6 +286,7 @@ export const translationIds = {
 		summary: "Hier sind Sie genau richtig!",
 		buttonLabel: "Anmeldung",
 		toolTip: "Anmelden oder ein neues Konto erstellen",
+		toggleDarkmode: "Darkmode ein- oder ausschalten",
 	},
 	frontpageAbout: {
 		heading: "Was ist MONDEY?",

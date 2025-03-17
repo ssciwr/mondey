@@ -47,6 +47,10 @@ The certificates needs renewing every three months, which can be done manually u
 0 0 * * 0 docker run -it --rm -v/etc/letsencrypt:/etc/letsencrypt -v/var/www/certbot:/var/www/certbot certbot/certbot certonly --webroot --webroot-path /var/www/certbot/ -n -d mondey.lkeegan.dev
 ```
 
+To check that the production website SSL certificates are configured correctly:
+
+https://decoder.link/sslchecker/mondey.lkeegan.dev/443
+
 ### Give users admin rights
 
 To make an existing user with email `user@domain.com` into an admin, modify the users database, e.g.

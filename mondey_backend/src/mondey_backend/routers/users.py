@@ -25,7 +25,6 @@ from ..models.users import UserUpdate
 from ..users import fastapi_users
 from .scores import compute_milestonegroup_feedback_detailed
 from .scores import compute_milestonegroup_feedback_summary
-from .utils import _session_has_expired
 from .utils import add
 from .utils import child_image_path
 from .utils import get
@@ -246,9 +245,9 @@ def create_router() -> APIRouter:
                 select(MilestoneAnswerSession).where(
                     (col(MilestoneAnswerSession.user_id) == current_active_user.id)
                     & (col(MilestoneAnswerSession.child_id) == child_id)
+                    & col(MilestoneAnswerSession.expired)
                 )
             ).all()
-            if _session_has_expired(mas)
         }
         return milestone_answer_sessions  # type: ignore
 

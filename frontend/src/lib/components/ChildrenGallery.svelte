@@ -14,7 +14,7 @@ import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { activeTabChildren } from "$lib/stores/componentStore";
+import { activePage } from "$lib/stores/componentStore";
 import { type CardElement, type CardStyle } from "$lib/util";
 import { Heading, Spinner } from "flowbite-svelte";
 import AlertMessage from "./AlertMessage.svelte";
@@ -116,7 +116,7 @@ async function setup(): Promise<CardElement[]> {
 						onclick: async () => {
 							currentChild.id = child.id;
 							await currentChild.load_data();
-							activeTabChildren.set("childrenRegistration");
+							activePage.set("childrenRegistration");
 						},
 					},
 				};
@@ -132,7 +132,7 @@ async function setup(): Promise<CardElement[]> {
 				events: {
 					onclick: () => {
 						currentChild.id = null;
-						activeTabChildren.set("childrenRegistration");
+						activePage.set("childrenRegistration");
 					},
 				},
 			},
@@ -170,7 +170,7 @@ const searchData = [
 		/>
 	{/if}
 
-	<div class="container m-2 mx-auto w-full pb-4 md:rounded-t-lg">
+	<div class="m-2 mx-auto w-full pb-4 md:rounded-t-lg">
 
 		<Heading
 			tag="h1"

@@ -22,15 +22,15 @@ import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
+import { activePage, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Hr, Input, Spinner } from "flowbite-svelte";
 import {
     ChartLineUpOutline,
 	CheckCircleOutline,
+	GridPlusSolid,
 	FlagOutline,
-	PenOutline,
-	PlayOutline,
+    PenOutline,
 	TrashBinOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
@@ -65,8 +65,18 @@ let showAlert = $state(false);
 let childLabel = $derived(name ? name : i18n.tr.childData.newChildHeadingLong);
 let breadcrumbdata = $derived([
 	{
+		label: i18n.tr.childData.overviewLabel,
+		onclick: () => {
+			activePage.set("childrenGallery");
+		},
+		symbol: GridPlusSolid,
+	},
+	{
 		label: childLabel,
 		symbol: UserSettingsOutline,
+		onclick: () => {
+			activePage.set("childrenRegistration");
+		},
 	},
 ]);
 
@@ -258,7 +268,7 @@ async function submitData(): Promise<void> {
 
 	// disable all elements to make editing a conscious choice amd go back to childrenGallery
 	console.log("submission of child data successful.");
-	activeTabChildren.set("childrenGallery");
+	activePage.set("childrenGallery");
 }
 </script>
 
@@ -280,27 +290,27 @@ async function submitData(): Promise<void> {
 	{:else}
 		<div class="container m-2 mx-auto w-full pb-4">
 			<Card class="container m-1 mx-auto w-full max-w-xl">
-				<Heading
-					tag="h3"
-					class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-					>{childLabel}
-					{#if disableEdit}
-						<small class="justify-end">
-								<button aria-label={i18n.tr.admin.edit}
-										type="button"
-										class="btn-secondary-alt btn-icon"
-										onclick={() => {
+                <Heading
+                        tag="h3"
+                        class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
+                >{childLabel}
+                    {#if disableEdit}
+                        <small class="justify-end">
+                            <button aria-label={i18n.tr.admin.edit}
+                                    type="button"
+                                    class="btn-secondary-alt btn-icon"
+                                    onclick={() => {
 								disableEdit = false;
 							}}
-								>
-									<PenOutline size="md" />
-								</button>
+                            >
+                                <PenOutline size="md" />
+                            </button>
 
-							{#if currentChild.id !== null && disableEdit === true}
-								<button
-										class="btn-danger btn-icon"
-										aria-label={i18n.tr.admin.delete}
-										onclick={async () => {
+                            {#if currentChild.id !== null && disableEdit === true}
+                                <button
+                                        class="btn-danger btn-icon"
+                                        aria-label={i18n.tr.admin.delete}
+                                        onclick={async () => {
 								if (currentChild.id === null) {
 									console.log("no child id, no child to delete");
 									showAlert = true;
@@ -320,23 +330,23 @@ async function submitData(): Promise<void> {
 									alertMessage=i18n.tr.childData.alertMessageError + response.error.detail;
 								}
 								else {
-									activeTabChildren.update((value) => {
+									activePage.update((value) => {
 										return "childrenGallery";
 									});
 									currentChild.id = null;
 								}
 							}}
-								><TrashBinOutline size="md"/></button
-								>
-							{/if}
-							<br />
+                                ><TrashBinOutline size="md"/></button
+                                >
+                            {/if}
+                            <br />
 
-							<span>{i18n.tr.childData.monthYearSubtext} </span>
-							<span class="text-muted">{birthmonth} / {birthyear}</span>
-						</small>
-					{/if}
-				</Heading
-				>
+                            <span>{i18n.tr.childData.monthYearSubtext} </span>
+                            <span class="text-muted">{birthmonth} / {birthyear}</span>
+                        </small>
+                    {/if}
+                </Heading
+                >
 				{#if showAlert}
 					<AlertMessage
 						title={i18n.tr.childData.alertMessageTitle}
@@ -465,7 +475,7 @@ async function submitData(): Promise<void> {
 						<button
 							class="btn-secondary-alt"
 							onclick={() => {
-								activeTabChildren.set("childrenFeedback");
+								activePage.set("childrenFeedback");
 							}}>
 							<ChartLineUpOutline size="md" />
 							{i18n.tr.childData.feedbackButtonLabel}
@@ -473,7 +483,7 @@ async function submitData(): Promise<void> {
 						<button
 								class="btn-primary-alt"
 								onclick={() => {
-								activeTabChildren.set("milestoneGroup");
+								activePage.set("milestoneGroup");
 							}}
 						>
 							<FlagOutline size="md" />
