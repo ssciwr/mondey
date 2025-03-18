@@ -13,7 +13,7 @@ import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activePage } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
-import { Accordion, AccordionItem, Button, Checkbox } from "flowbite-svelte";
+import { Accordion, AccordionItem, Button } from "flowbite-svelte";
 import {
 	ArrowLeftOutline,
 	ArrowRightOutline,
@@ -106,7 +106,7 @@ function selectAnswer(answer: number) {
 		milestone_id: currentMilestone.id,
 		answer: answer,
 	};
-	if (selectedAnswer !== undefined && autoGoToNextMilestone) {
+	if (selectedAnswer !== undefined) {
 		nextMilestone();
 	}
 }
@@ -141,7 +141,6 @@ let selectedAnswer = $derived(
 );
 let showAlert = $state(false);
 let alertMessage = $state("");
-let autoGoToNextMilestone = $state(false);
 let currentImageIndex = $state(0);
 let showSubmitMilestoneImageModal = $state(false);
 const promise = setup();
@@ -191,11 +190,11 @@ const breadcrumbdata = $derived([
 
 		<Breadcrumbs data={breadcrumbdata} />
 
-		<div class="flex w-full flex-col md:flex-row">
-			<div class="relative w-full h-48 md:h-96 md:w-48 lg:w-72 xl:w-96 overflow-hidden">
+		<div class="flex w-full flex-col md:flex-row pt-3">
+			<div class="relative w-full h-48 md:h-96 md:w-24 lg:w-60 xl:w-72 overflow-hidden mt-1.5">
 				{#each currentMilestone.images as image, imageIndex}
 					<img
-							class={`absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
+							class={` min-w-20 absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
 							src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${image.id}.webp`}
 							alt=""
 					/>
@@ -238,7 +237,7 @@ const breadcrumbdata = $derived([
 					</AccordionItem>
 				</Accordion>
 			</div>
-			<div class="m-1 flex flex-col justify-items-stretch rounded-lg">
+			<div class="m-1 mt-0 flex flex-col justify-items-stretch rounded-lg">
 				{#each [0, 1, 2, 3] as answerIndex}
 					<MilestoneButton
 						index={answerIndex}
@@ -271,9 +270,6 @@ const breadcrumbdata = $derived([
 						<ArrowRightOutline class="ms-2 h-5 w-5 text-gray-700 dark:text-gray-400" />
 					</Button>
 				</div>
-				<Checkbox class="m-1 justify-center" bind:checked={autoGoToNextMilestone}>
-					<p class="text-xs">{i18n.tr.milestone.autoNext}</p>
-				</Checkbox>
 			</div>
 		</div>
 	{/if}

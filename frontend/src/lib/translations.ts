@@ -220,7 +220,7 @@ export const translationIds = {
 		placeholder: "Bitte ausfüllen",
 	},
 	childData: {
-		newChildHeading: "Neu",
+		newChildHeading: "+ Neu",
 		newChildHeadingLong: "Neues Kind registrieren",
 		overviewLabel: "Kinder",
 		overviewSummary:
@@ -260,6 +260,7 @@ export const translationIds = {
 		childColor: "Hintergrundfarbe für Icon wählen",
 		chooseColor: "Farbe wählen",
 		feedbackButtonLabel: "Feedback zur Entwicklung",
+		monthYearSubtext: "Monat/Jahr",
 	},
 	forgotPw: {
 		heading: "Passwort vergessen?",
