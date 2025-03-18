@@ -6,7 +6,6 @@ export function preventDefault(fn: (event: Event) => void) {
 	};
 }
 
-
 export type EventHandler = (event: Event | undefined) => void | Promise<void>;
 export type CardElement = {
 	header: string | undefined | null;

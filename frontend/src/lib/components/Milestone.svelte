@@ -13,7 +13,7 @@ import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activePage } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
-import { Accordion, AccordionItem, Button} from "flowbite-svelte";
+import { Accordion, AccordionItem, Button } from "flowbite-svelte";
 import {
 	ArrowLeftOutline,
 	ArrowRightOutline,

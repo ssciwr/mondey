@@ -6,14 +6,21 @@ import logo_light from "$lib/assets/mondey_light.svg";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import Footer from "$lib/components/Navigation/Footer.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStoreSvelte } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import {
 	Button,
+	Drawer,
+	Modal,
 	NavBrand,
 	NavHamburger,
 	NavLi,
 	NavUl,
-	Navbar, Drawer, SidebarWrapper, SidebarItem, Sidebar, SidebarGroup, Modal,
+	Navbar,
+	Sidebar,
+	SidebarGroup,
+	SidebarItem,
+	SidebarWrapper,
 } from "flowbite-svelte";
 import {
 	BarsOutline,
@@ -22,13 +29,12 @@ import {
 	SunOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
-import { alertStoreSvelte } from "$lib/stores/alertStore.svelte";
 
 import "../app.css";
 import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 
+import { afterNavigate } from "$app/navigation";
 import { page } from "$app/stores";
-import { afterNavigate } from '$app/navigation';
 
 let isUserLand = $derived($page.url.pathname.includes("userLandingpage"));
 afterNavigate(() => {
