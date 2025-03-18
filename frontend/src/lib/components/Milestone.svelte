@@ -193,11 +193,11 @@ const breadcrumbdata = $derived([
 
 		<Breadcrumbs data={breadcrumbdata} />
 
-		<div class="flex w-full flex-col md:flex-row">
-			<div class="relative w-full h-48 md:h-96 md:w-48 lg:w-72 xl:w-96 overflow-hidden">
+		<div class="flex w-full flex-col md:flex-row pt-3">
+			<div class="relative w-full h-48 md:h-96 md:w-24 lg:w-60 xl:w-72 overflow-hidden mt-1.5">
 				{#each currentMilestone.images as image, imageIndex}
 					<img
-							class={`absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
+							class={` min-w-20 absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
 							src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${image.id}.webp`}
 							alt=""
 					/>
@@ -240,7 +240,7 @@ const breadcrumbdata = $derived([
 					</AccordionItem>
 				</Accordion>
 			</div>
-			<div class="m-1 flex flex-col justify-items-stretch rounded-lg">
+			<div class="m-1 mt-0 flex flex-col justify-items-stretch rounded-lg">
 				{#each [0, 1, 2, 3] as answerIndex}
 					<MilestoneButton
 						index={answerIndex}

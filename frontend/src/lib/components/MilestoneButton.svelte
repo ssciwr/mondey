@@ -20,12 +20,13 @@ let {
 } = $props();
 
 let bg_color = `bg-milestone-answer-${index}`;
+const text_color = index < 2 ? 'dark:text-black' : 'dark:text-white';
 </script>
 
 <button
 	type="button"
 	onclick={onClick}
-	class={`${bg_color} ${selected ? 'opacity-100 outline-none ring-4 ring-blue-400' : 'opacity-50 hover:opacity-80'} border-1 m-1 rounded-lg border border-gray-200 px-5 py-3 text-center font-medium md:my-2`}
+	class={`${bg_color} ${text_color} ${selected ? 'opacity-100 outline-none ring-4 ring-blue-400' : 'opacity-75 hover:opacity-100'} border-1 m-1 rounded-lg border border-gray-200 px-5 py-3 text-center font-medium md:my- `}
 >
 	{@render children?.()}
 </button>
