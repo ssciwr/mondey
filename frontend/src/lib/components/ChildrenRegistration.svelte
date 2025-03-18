@@ -298,7 +298,7 @@ async function submitData(): Promise<void> {
                         <small class="justify-end">
                             <button aria-label={i18n.tr.admin.edit}
                                     type="button"
-                                    class="btn-secondary-alt btn-icon"
+                                    class="btn-secondary btn-icon"
                                     onclick={() => {
 								disableEdit = false;
 							}}
@@ -464,7 +464,7 @@ async function submitData(): Promise<void> {
 					{/each}
 					{#if disableEdit === false}
 						<button
-							class="btn-primary-alt"
+							class="btn-primary"
 							type="submit"
 							>{i18n.tr.childData.submitButtonLabel}</button
 						>
@@ -473,7 +473,7 @@ async function submitData(): Promise<void> {
 
 					{#if currentChild.id !== null && disableEdit === true}
 						<button
-							class="btn-secondary-alt"
+							class="btn-secondary"
 							onclick={() => {
 								activePage.set("childrenFeedback");
 							}}>
@@ -481,7 +481,7 @@ async function submitData(): Promise<void> {
 							{i18n.tr.childData.feedbackButtonLabel}
 						</button>
 						<button
-								class="btn-primary-alt"
+								class="btn-primary"
 								onclick={() => {
 								activePage.set("milestoneGroup");
 							}}

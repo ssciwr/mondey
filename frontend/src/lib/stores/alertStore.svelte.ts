@@ -10,6 +10,7 @@ function createAlertStore() {
     let alertTitle = $state<string>("");
     let alertMessage = $state<string>("");
     let alertIsError = $state<boolean>(false);
+    let alertIsAwaitError = $state<boolean>(false);
     let alertCallback = $state<AlertCallback | null>(null);
 
     return {
@@ -26,18 +27,21 @@ function createAlertStore() {
         get isError() {
             return alertIsError;
         },
+        get isAwaitError() {
+            return alertIsAwaitError
+        },
         get callback() {
             return alertCallback;
         },
 
         // Method to set alert state
-        showAlert(title: string, message: string, isError: boolean | undefined = false, onClick: AlertCallback | null = null) {
+        showAlert(title: string, message: string, isError: boolean | undefined = false, isAwaitError: boolean | undefined = false, onClick: AlertCallback | null = null) {
             showAlert = true;
             alertTitle = title;
             alertMessage = message;
             alertIsError = isError;
+            alertIsAwaitError = isAwaitError;
             alertCallback = onClick;
-            console.log('SEt alert callback to: ', onClick)
         },
 
         // Method to hide alert and reset state so that they do not reappear as stale alerts.
@@ -46,6 +50,7 @@ function createAlertStore() {
             alertTitle = "";
             alertMessage = "";
             alertIsError = false
+            alertIsAwaitError = false;
             alertCallback = null;
         }
     };

@@ -40,7 +40,7 @@ function createStyle(data: CardElement[]): CardStyle[] {
 							item.header === i18n.tr.childData.newChildHeading
 									? {
 										class:
-												"bg-primary-alt dark:bg-primary-alt child-card hover:cursor-pointer m-2 max-w-prose hover:bg-additional-color-800 dark:hover:bg-additional-color-700 ",
+												"bg-primary dark:bg-primary child-card hover:cursor-pointer m-2 max-w-prose hover:bg-additional-color-800 dark:hover:bg-additional-color-700 ",
 										horizontal: false,
 									}
 									: {

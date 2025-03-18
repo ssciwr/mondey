@@ -13,7 +13,7 @@ import {
 	NavHamburger,
 	NavLi,
 	NavUl,
-	Navbar, Drawer, SidebarWrapper, SidebarItem, Sidebar, SidebarGroup,
+	Navbar, Drawer, SidebarWrapper, SidebarItem, Sidebar, SidebarGroup, Modal,
 } from "flowbite-svelte";
 import {
 	BarsOutline,
@@ -50,6 +50,8 @@ onMount(async () => {
 function toggleDrawer() {
 	hideDrawer = !hideDrawer;
 }
+
+const asAlert = false;
 </script>
 
 <svelte:head>
@@ -181,6 +183,8 @@ function toggleDrawer() {
 </div>
 
 {#if alertStoreSvelte.isAlertShown}
+
+	{#if asAlert}
 	<AlertMessage
 			id="alertMessageSettings"
 			title={alertStoreSvelte.title}
@@ -195,6 +199,20 @@ function toggleDrawer() {
 
           }}
 	/>
+		{:else}
+		<Modal color={alertStoreSvelte.isError ? 'red' : alertStoreSvelte.isAwaitError ? 'yellow' : 'default'} title={alertStoreSvelte.title} bind:open={alertStoreSvelte.isAlertShown} autoclose>
+
+			<p class="text-base">{alertStoreSvelte.message}</p>
+			<svelte:fragment slot="footer">
+				<button class="btn-primary" on:click={() => {
+					if (alertStoreSvelte.callback) {
+						alertStoreSvelte.callback();
+					}
+            		alertStoreSvelte.hideAlert();
+				}}>{i18n.tr.misc.understood}</button>
+			</svelte:fragment>
+		</Modal>
+		{/if}
 {/if}
 
 
