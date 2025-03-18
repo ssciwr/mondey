@@ -30,7 +30,12 @@ import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 
 import { page } from "$app/stores";
 import {isMobile} from "$lib/util";
+import { afterNavigate } from '$app/navigation';
+
 let isUserLand = $derived($page.url.pathname.includes("userLandingpage"));
+afterNavigate(() => {
+	hideDrawer = true;
+});
 // Done this way because, other approaches to the layout (like a different +layout for userLand) would largely duplicate this one, but it is still hardcoded.
 
 let { children } = $props();
@@ -53,8 +58,10 @@ function toggleDrawer() {
 
 <div style="position:fixed;padding-top:1rem;padding-bottom:1rem;left:0px;right:0px"
 	 class="bg-white dark:bg-gray-800 md:hidden w-full text-center flex justify-center items-center">
-	<img src={logo_light} class="block h-14 dark:hidden" alt="MONDEY Logo" />
-	<img src={logo_dark} class="hidden h-14 dark:block" alt="MONDEY Logo" />
+	<a href="/">
+		<img src={logo_light} class="block h-14 dark:hidden" alt="MONDEY Logo" />
+		<img src={logo_dark} class="hidden h-14 dark:block" alt="MONDEY Logo" />
+	</a>
 </div>
 <!-- Desktop Navigation -->
 {#if false === isMobilePhone}
@@ -94,73 +101,77 @@ function toggleDrawer() {
 		{/if}
 	</Navbar>
 {:else}
-	<!-- Mobile Navigation -->
+	<!-- on all mobilep ages to account for fixed header -->
+	<div style="min-height:5rem"></div>
 
+	{#if false === isUserLand}
+		<!-- Mobile Navigation -->
 		<div class="z-10 fixed" style="top:1.8rem;right:1.5rem;">
 			<BarsOutline size="xl" class="cursor-pointer" onclick={toggleDrawer} />
 		</div>
-	<div style="min-height:5rem"></div>
 
-	<!-- Mobile Drawer -->
-	<Drawer placement="right" bind:hidden={hideDrawer} id="sidebar">
-			<Sidebar>
-				<SidebarWrapper>
-					<SidebarGroup>
-						<!-- Navigation Items -->
-						<SidebarItem label={i18n.tr.misc.latest} href={base}>
-							<svelte:fragment slot="icon">
-								<BarsOutline size="lg" />
-							</svelte:fragment>
-						</SidebarItem>
-						<SidebarItem label={i18n.tr.misc.downloads} href={base}>
-							<svelte:fragment slot="icon">
-								<BarsOutline size="lg" />
-							</svelte:fragment>
-						</SidebarItem>
-						<SidebarItem label={i18n.tr.misc.contact} href={base}>
-							<svelte:fragment slot="icon">
-								<BarsOutline size="lg" />
-							</svelte:fragment>
-						</SidebarItem>
-
-						<!-- User Profile/Login -->
-						{#if user.data === null}
-							<SidebarItem label={i18n.tr.login.profileButtonLabelDefault} href="{base}/userLand/userLogin">
+		<!-- Mobile Drawer -->
+		<Drawer placement="right" bind:hidden={hideDrawer} id="sidebar">
+				<Sidebar>
+					<SidebarWrapper>
+						<SidebarGroup>
+							<!-- Navigation Items -->
+							<SidebarItem label={i18n.tr.misc.latest} href={base}>
 								<svelte:fragment slot="icon">
-									<ProfileCardSolid size="lg" />
+									<BarsOutline size="lg" />
 								</svelte:fragment>
 							</SidebarItem>
-						{:else}
-							<SidebarItem label={i18n.tr.registration.goHome} href="{base}/userLand/userLandingpage">
+							<SidebarItem label={i18n.tr.misc.downloads} href={base}>
 								<svelte:fragment slot="icon">
-									<ProfileCardSolid size="lg" />
+									<BarsOutline size="lg" />
 								</svelte:fragment>
 							</SidebarItem>
-						{/if}
-					</SidebarGroup>
-					<SidebarGroup border>
-						<!-- Settings -->
-						<SidebarItem>
-							<svelte:fragment slot="icon">
-								<SunOutline />
-							</svelte:fragment>
-							<svelte:fragment slot="subtext">
-								<DarkModeChooser />
-							</svelte:fragment>
-						</SidebarItem>
+							<SidebarItem label={i18n.tr.misc.contact} href={base}>
+								<svelte:fragment slot="icon">
+									<BarsOutline size="lg" />
+								</svelte:fragment>
+							</SidebarItem>
 
-						<SidebarItem>
-							<svelte:fragment slot="icon">
-								<LanguageOutline size="lg" />
-							</svelte:fragment>
-							<svelte:fragment slot="subtext">
-								<LocaleChooser />
-							</svelte:fragment>
-						</SidebarItem>
-					</SidebarGroup>
-				</SidebarWrapper>
-			</Sidebar>
-	</Drawer>
+							{#if user.data === null}
+								<SidebarItem label={i18n.tr.login.profileButtonLabelDefault}
+											 href="/userLand/userLogin">
+									<svelte:fragment slot="icon">
+										<ProfileCardSolid size="lg" />
+									</svelte:fragment>
+								</SidebarItem>
+							{:else}
+								<SidebarItem label={i18n.tr.registration.goHome}
+								href="/userLand/userLandingpage">
+									<svelte:fragment slot="icon">
+										<ProfileCardSolid size="lg" />
+									</svelte:fragment>
+								</SidebarItem>
+							{/if}
+						</SidebarGroup>
+						<SidebarGroup border>
+							<!-- Settings -->
+							<SidebarItem>
+								<svelte:fragment slot="icon">
+									<SunOutline />
+								</svelte:fragment>
+								<svelte:fragment slot="subtext">
+									<DarkModeChooser />
+								</svelte:fragment>
+							</SidebarItem>
+
+							<SidebarItem>
+								<svelte:fragment slot="icon">
+									<LanguageOutline size="lg" />
+								</svelte:fragment>
+								<svelte:fragment slot="subtext">
+									<LocaleChooser />
+								</svelte:fragment>
+							</SidebarItem>
+						</SidebarGroup>
+					</SidebarWrapper>
+				</Sidebar>
+		</Drawer>
+	{/if}
 {/if}
 
 <div
