@@ -27,9 +27,14 @@
         background-color: #2757ac;
     }
 
+    .text-base {
+        @apply text-gray-900 dark:text-gray-100;
+    }
+
     .bg-primary-alt {
         background-color: rgb(124, 158, 157)
     }
+
     .bg-text-alt {
         color: rgb(124, 158, 157)
     }
