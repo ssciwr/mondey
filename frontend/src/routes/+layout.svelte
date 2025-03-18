@@ -22,7 +22,6 @@ import {
 	SunOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
 import { alertStoreSvelte } from "$lib/stores/alertStore.svelte";
 
 import "../app.css";
