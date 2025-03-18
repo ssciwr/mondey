@@ -27,7 +27,7 @@ import {
 	LanguageOutline,
 	ProfileCardSolid,
 	SunOutline,
-    UserOutline,
+	UserOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 
