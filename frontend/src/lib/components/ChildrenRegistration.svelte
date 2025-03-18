@@ -26,11 +26,11 @@ import { activePage, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Hr, Input, Spinner } from "flowbite-svelte";
 import {
-    ChartLineUpOutline,
+	ChartLineUpOutline,
 	CheckCircleOutline,
-	GridPlusSolid,
 	FlagOutline,
-    PenOutline,
+	GridPlusSolid,
+	PenOutline,
 	TrashBinOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";

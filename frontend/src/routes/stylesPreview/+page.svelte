@@ -1,8 +1,8 @@
 <script>
-    import {alertStoreSvelte} from "$lib/stores/alertStore.svelte";
-    import { ArrowRightAltSolid } from "flowbite-svelte-icons";
+import { alertStoreSvelte } from "$lib/stores/alertStore.svelte";
+import { ArrowRightAltSolid } from "flowbite-svelte-icons";
 
-    let testElementIsVisible = $state(true)
+let testElementIsVisible = $state(true);
 </script>
 
 <style>

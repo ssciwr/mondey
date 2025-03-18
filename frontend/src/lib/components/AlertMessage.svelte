@@ -1,8 +1,12 @@
 <svelte:options runes={true} />
 <script lang='ts'>
 import { i18n } from "$lib/i18n.svelte";
-import {Alert} from "flowbite-svelte";
-import { EyeSolid, InfoCircleSolid, ExclamationCircleSolid } from "flowbite-svelte-icons";
+import { Alert } from "flowbite-svelte";
+import {
+	ExclamationCircleSolid,
+	EyeSolid,
+	InfoCircleSolid,
+} from "flowbite-svelte-icons";
 
 let {
 	id = "alertMessage",
@@ -26,7 +30,7 @@ let {
 	onclick?: (event: Event | undefined) => void | Promise<void>;
 } = $props();
 
-const color = isError ? 'red' : 'blue'
+const color = isError ? "red" : "blue";
 </script>
 
 <Alert color={color} border id={`${id}`} class="m-4 p-6">

@@ -254,7 +254,7 @@ export const translationIds = {
 		childColor: "Hintergrundfarbe für Icon wählen",
 		chooseColor: "Farbe wählen",
 		feedbackButtonLabel: "Feedback zur Entwicklung",
-		monthYearSubtext: "Monat/Jahr"
+		monthYearSubtext: "Monat/Jahr",
 	},
 	forgotPw: {
 		heading: "Passwort vergessen?",
