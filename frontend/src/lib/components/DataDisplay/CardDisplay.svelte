@@ -65,20 +65,24 @@ let {
 	{/if}
 
 	{#if data.progress}
-		<Progressbar
-			labelInside ={styleProps.progress?.labelInside}
-			progress={String(100 * data.progress)}
-			animate={true}
-			color={data.progress === 1 ? styleProps.progress?.completeColor : styleProps.progress?.color}
-			size={styleProps.progress?.size}
-			divClass={styleProps.progress?.divClass}
-			labelInsideClass={styleProps.progress?.labelInsideClass}
-		/>
+		<div class="rounded-lg bg-white p-2 pb-4">
+			<Progressbar
+				labelInside ={styleProps.progress?.labelInside}
+				progress={String(100 * data.progress)}
+				animate={true}
+				color={data.progress === 1 ? styleProps.progress?.completeColor : styleProps.progress?.color}
+				size={styleProps.progress?.size}
+				divClass={styleProps.progress?.divClass}
+				labelInsideClass={`{styleProps.progress?.labelInsideClass} text-black`}
+			/>
+		</div>
 	{/if}
 
 	{#if data.auxilliary}
-		<div class="mb-4 mt-auto flex w-full justify-center">
-			<data.auxilliary {...styleProps.auxilliary} />
+		<div class="mb-4 mt-auto flex w-full justify-center ">
+			<div class="bg-white p-1 rounded-full">
+				<data.auxilliary {...styleProps.auxilliary} />
+			</div>
 		</div>
 	{/if}
 </Card>
