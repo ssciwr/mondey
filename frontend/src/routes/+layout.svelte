@@ -13,7 +13,7 @@ import {
 	NavHamburger,
 	NavLi,
 	NavUl,
-	Navbar, Button,
+	Navbar,
 } from "flowbite-svelte";
 import { onMount } from "svelte";
 
