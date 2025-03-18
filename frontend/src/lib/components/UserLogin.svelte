@@ -117,7 +117,7 @@ let alertMessage: string = $state(i18n.tr.login.badCredentials);
 					required
 				/>
 				<a href={`${base}/forgotPassword`} class="text-primary-700 dark:text-primary-500">
-					{i18n.tr.login.forgotPassword}
+					{i18n.tr.login.forgotPassword} </a>
 			</div>
 
 			<Button
