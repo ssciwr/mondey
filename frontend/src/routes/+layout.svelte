@@ -27,6 +27,7 @@ import {
 	LanguageOutline,
 	ProfileCardSolid,
 	SunOutline,
+    UserOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 
@@ -60,11 +61,11 @@ const asAlert = false;
 	<title>MONDEY :: Milestones of Normal Development in Early Years</title>
 </svelte:head>
 
-<div style="position:fixed;padding-top:1rem;padding-bottom:1rem;left:0px;right:0px"
-	 class="bg-white dark:bg-gray-800 md:hidden w-full text-center flex justify-center items-center">
+<div style="position:fixed;padding-top:1.1rem;padding-bottom:1rem;left:0px;right:0px;border-bottom:1px solid lightgray"
+	 class="bg-white dark:bg-gray-800 md:hidden w-full text-center flex justify-center items-center shadow-lg">
 	<a href="/">
-		<img src={logo_light} class="block h-14 dark:hidden" alt="MONDEY Logo" />
-		<img src={logo_dark} class="hidden h-14 dark:block" alt="MONDEY Logo" />
+		<img src={logo_light} class="block h-10 dark:hidden" alt="MONDEY Logo" />
+		<img src={logo_dark} class="hidden h-10 dark:block" alt="MONDEY Logo" />
 	</a>
 </div>
 <!-- Desktop Navigation -->
@@ -112,9 +113,17 @@ const asAlert = false;
 	<div style="min-height:5rem"></div>
 
 	{#if false === isUserLand}
+		<!-- Mobile Log in -->
+		<div class="z-10 fixed" style="top:0.8rem;left:1rem;">
+			<a class="btn-primary btn-icon" href="/userLand/userLogin">
+				<UserOutline />
+			</a>
+		</div>
 		<!-- Mobile Navigation -->
-		<div class="z-10 fixed" style="top:1.8rem;right:1.5rem;">
-			<BarsOutline size="xl" class="cursor-pointer" onclick={toggleDrawer} />
+		<div class="z-10 fixed" style="top:0.8rem;right:1rem;">
+			<div class="btn-primary btn-icon">
+				<BarsOutline  class="cursor-pointer" onclick={toggleDrawer} />
+			</div>
 		</div>
 
 		<!-- Mobile Drawer -->
