@@ -106,7 +106,7 @@ function selectAnswer(answer: number) {
 		milestone_id: currentMilestone.id,
 		answer: answer,
 	};
-	if (selectedAnswer !== undefined && autoGoToNextMilestone) {
+	if (selectedAnswer !== undefined) {
 		nextMilestone();
 	}
 }
@@ -141,7 +141,6 @@ let selectedAnswer = $derived(
 );
 let showAlert = $state(false);
 let alertMessage = $state("");
-let autoGoToNextMilestone = true; // was previously an option
 let currentImageIndex = $state(0);
 let showSubmitMilestoneImageModal = $state(false);
 const promise = setup();
