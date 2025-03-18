@@ -1,12 +1,7 @@
 <svelte:options runes={true} />
 
 <style>
-	:global(.child-card) {
-		transition: all 0.15s ease-out;
-	}
-	:global(.child-card:hover) {
-		margin-left:18px!important;
-	}
+
 </style>
 <script lang="ts">
 import { getChildImage, getChildren } from "$lib/client/services.gen";

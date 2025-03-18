@@ -3,25 +3,17 @@
 import { base } from "$app/paths";
 import logo_dark from "$lib/assets/mondey_dark.svg";
 import logo_light from "$lib/assets/mondey_light.svg";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import Footer from "$lib/components/Navigation/Footer.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import { alertStoreSvelte } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import {
 	Button,
-	Drawer,
-	Modal,
 	NavBrand,
 	NavHamburger,
 	NavLi,
 	NavUl,
-	Navbar,
-	Sidebar,
-	SidebarGroup,
-	SidebarItem,
-	SidebarWrapper,
+	Navbar, Drawer, SidebarWrapper, SidebarItem, Sidebar, SidebarGroup, Modal,
 } from "flowbite-svelte";
 import {
 	BarsOutline,
@@ -30,13 +22,14 @@ import {
 	SunOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
+import AlertMessage from "$lib/components/AlertMessage.svelte";
+import { alertStoreSvelte } from "$lib/stores/alertStore.svelte";
 
 import "../app.css";
 import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 
-import { afterNavigate } from "$app/navigation";
 import { page } from "$app/stores";
-import { isMobile } from "$lib/util";
+import { afterNavigate } from '$app/navigation';
 
 let isUserLand = $derived($page.url.pathname.includes("userLandingpage"));
 afterNavigate(() => {
@@ -46,12 +39,10 @@ afterNavigate(() => {
 
 let { children } = $props();
 let hideDrawer = $state(true);
-let isMobilePhone = $state(false);
 
 onMount(async () => {
 	await i18n.load();
 	await user.load();
-	isMobilePhone = isMobile();
 });
 function toggleDrawer() {
 	hideDrawer = !hideDrawer;
@@ -72,9 +63,9 @@ const asAlert = false;
 	</a>
 </div>
 <!-- Desktop Navigation -->
-{#if false === isMobilePhone}
+<div class="hidden md:block">
 	<Navbar>
-		<div class="hidden md:block">
+		<div>
 			<NavBrand href={base}>
 				<img src={logo_light} class="mt-6 block h-12 dark:hidden" alt="MONDEY Logo" />
 				<img src={logo_dark} class="mt-6 hidden h-12 dark:block" alt="MONDEY Logo" />
@@ -108,8 +99,11 @@ const asAlert = false;
 			</NavUl>
 		{/if}
 	</Navbar>
-{:else}
-	<!-- on all mobilep ages to account for fixed header -->
+</div>
+
+<!-- Mobile Layout -->
+<div class="md:hidden">
+	<!-- Spacer to account for fixed header -->
 	<div style="min-height:5rem"></div>
 
 	{#if false === isUserLand}
@@ -120,106 +114,85 @@ const asAlert = false;
 
 		<!-- Mobile Drawer -->
 		<Drawer placement="right" bind:hidden={hideDrawer} id="sidebar">
-				<Sidebar>
-					<SidebarWrapper>
-						<SidebarGroup>
-							<!-- Navigation Items -->
-							<SidebarItem label={i18n.tr.misc.latest} href={base}>
-								<svelte:fragment slot="icon">
-									<BarsOutline size="lg" />
-								</svelte:fragment>
-							</SidebarItem>
-							<SidebarItem label={i18n.tr.misc.downloads} href={base}>
-								<svelte:fragment slot="icon">
-									<BarsOutline size="lg" />
-								</svelte:fragment>
-							</SidebarItem>
-							<SidebarItem label={i18n.tr.misc.contact} href={base}>
-								<svelte:fragment slot="icon">
-									<BarsOutline size="lg" />
-								</svelte:fragment>
-							</SidebarItem>
+			<Sidebar>
+				<SidebarWrapper>
+					<SidebarGroup>
+						<!-- Navigation Items -->
+						<SidebarItem label={i18n.tr.misc.latest} href={base}>
+							<svelte:fragment slot="icon">
+								<BarsOutline size="lg" />
+							</svelte:fragment>
+						</SidebarItem>
+						<SidebarItem label={i18n.tr.misc.downloads} href={base}>
+							<svelte:fragment slot="icon">
+								<BarsOutline size="lg" />
+							</svelte:fragment>
+						</SidebarItem>
+						<SidebarItem label={i18n.tr.misc.contact} href={base}>
+							<svelte:fragment slot="icon">
+								<BarsOutline size="lg" />
+							</svelte:fragment>
+						</SidebarItem>
 
-							{#if user.data === null}
-								<SidebarItem label={i18n.tr.login.profileButtonLabelDefault}
-											 href="/userLand/userLogin">
-									<svelte:fragment slot="icon">
-										<ProfileCardSolid size="lg" />
-									</svelte:fragment>
-								</SidebarItem>
-							{:else}
-								<SidebarItem label={i18n.tr.registration.goHome}
-								href="/userLand/userLandingpage">
-									<svelte:fragment slot="icon">
-										<ProfileCardSolid size="lg" />
-									</svelte:fragment>
-								</SidebarItem>
-							{/if}
-						</SidebarGroup>
-						<SidebarGroup border>
-							<!-- Settings -->
-							<SidebarItem>
+						{#if user.data === null}
+							<SidebarItem label={i18n.tr.login.profileButtonLabelDefault}
+										 href="/userLand/userLogin">
 								<svelte:fragment slot="icon">
-									<SunOutline />
-								</svelte:fragment>
-								<svelte:fragment slot="subtext">
-									<DarkModeChooser />
+									<ProfileCardSolid size="lg" />
 								</svelte:fragment>
 							</SidebarItem>
+						{:else}
+							<SidebarItem label={i18n.tr.registration.goHome}
+										 href="/userLand/userLandingpage">
+								<svelte:fragment slot="icon">
+									<ProfileCardSolid size="lg" />
+								</svelte:fragment>
+							</SidebarItem>
+						{/if}
+					</SidebarGroup>
+					<SidebarGroup border>
+						<!-- Settings -->
+						<SidebarItem>
+							<svelte:fragment slot="icon">
+								<SunOutline />
+							</svelte:fragment>
+							<svelte:fragment slot="subtext">
+								<DarkModeChooser />
+							</svelte:fragment>
+						</SidebarItem>
 
-							<SidebarItem>
-								<svelte:fragment slot="icon">
-									<LanguageOutline size="lg" />
-								</svelte:fragment>
-								<svelte:fragment slot="subtext">
-									<LocaleChooser />
-								</svelte:fragment>
-							</SidebarItem>
-						</SidebarGroup>
-					</SidebarWrapper>
-				</Sidebar>
+						<SidebarItem>
+							<svelte:fragment slot="icon">
+								<LanguageOutline size="lg" />
+							</svelte:fragment>
+							<svelte:fragment slot="subtext">
+								<LocaleChooser />
+							</svelte:fragment>
+						</SidebarItem>
+					</SidebarGroup>
+				</SidebarWrapper>
+			</Sidebar>
 		</Drawer>
 	{/if}
-{/if}
+</div>
 
 <div
-	class="flex-auto items-center justify-center overflow-y-auto pb-2 mb-2"
+		class="flex-auto items-center justify-center overflow-y-auto pb-2 mb-2"
 >
 	{@render children?.()}
 </div>
 
-{#if alertStoreSvelte.isAlertShown}
-
-	{#if asAlert}
-	<AlertMessage
-			id="alertMessageSettings"
-			title={alertStoreSvelte.title}
-			message={alertStoreSvelte.message}
-			isError={alertStoreSvelte.isError}
-			onclick={() => {
-				console.log('Callback clicked.')
-			 if (alertStoreSvelte.callback) {
-                alertStoreSvelte.callback();
-             }
-             alertStoreSvelte.hideAlert();
-
-          }}
-	/>
-		{:else}
-		<Modal color={alertStoreSvelte.isError ? 'red' : alertStoreSvelte.isAwaitError ? 'yellow' : 'default'} title={alertStoreSvelte.title} bind:open={alertStoreSvelte.isAlertShown} autoclose>
-
-			<p class="text-base">{alertStoreSvelte.message}</p>
-			<svelte:fragment slot="footer">
-				<button class="btn-primary" on:click={() => {
-					if (alertStoreSvelte.callback) {
-						alertStoreSvelte.callback();
-					}
-            		alertStoreSvelte.hideAlert();
-				}}>{i18n.tr.misc.understood}</button>
-			</svelte:fragment>
-		</Modal>
-		{/if}
-{/if}
+<Modal bind:open={alertStoreSvelte.isAlertShown} color={alertStoreSvelte.isError ? 'red' : alertStoreSvelte.isAwaitError ? 'yellow' : 'default'} title={alertStoreSvelte.title} autoclose>
+	<p class="text-base">{alertStoreSvelte.message}</p>
+	<svelte:fragment slot="footer">
+		<button class="btn-primary" onclick={() => {
+			if (alertStoreSvelte.callback) {
+				alertStoreSvelte.callback();
+			}
+			alertStoreSvelte.hideAlert();
+		}}>{i18n.tr.misc.understood}</button>
+	</svelte:fragment>
+</Modal>
 
 
 <Footer/>
