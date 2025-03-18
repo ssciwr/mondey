@@ -101,8 +101,14 @@ let testElementIsVisible = $state(true);
             </button>
         </div>
         <div>
+            <button class="btn-danger" onclick={() => alertStoreSvelte.showAlert("Fehler", "An error alert message, such as " +
+             "caused by awaiting a promise which fails (more for devs to debug)", false, true)}>
+                Make async-error appear
+            </button>
+        </div>
+        <div>
             <button class="btn-secondary" onclick={() => alertStoreSvelte.showAlert("Click on my option to hide the title",
-            "A normal alert message", false,
+            "A normal alert message", false, false,
             () => {
                 console.log('Button waas clicked..')
                 testElementIsVisible = false
