@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import pathlib
 from contextlib import asynccontextmanager
@@ -10,7 +11,7 @@ from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi_injectable.util import get_injected_obj
+from fastapi_injectable.decorator import injectable
 
 from .databases.mondey import create_mondey_db_and_tables
 from .databases.users import create_user_db_and_tables
@@ -21,20 +22,25 @@ from .routers import questions
 from .routers import research
 from .routers import users
 from .settings import app_settings
-from .statistics import update_stats
+from .statistics import async_update_stats
 
 
-def scheduled_update_stats():
-    return get_injected_obj(update_stats)
+async def scheduled_update_stats():
+    update_stats_func = injectable(async_update_stats)
+    await update_stats_func()
+    # Based on async dependency injection here: https://github.com/JasperSui/fastapi-injectable/blob/main/test/test_injectable.py
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_mondey_db_and_tables()
     await create_user_db_and_tables()
+    # For manual invocation: await scheduled_update_stats()
     scheduler = AsyncIOScheduler()
     scheduler.add_job(
-        scheduled_update_stats,
+        lambda: asyncio.run(
+            scheduled_update_stats()
+        ),  # Review appreciated of this approach
         CronTrigger.from_crontab(app_settings.STATS_CRONTAB),
     )
     scheduler.start()

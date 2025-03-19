@@ -26,6 +26,10 @@ export const translationIds = {
 		autoNext: "Automatisch weiter",
 		groupOverviewLabel: "Übersicht Meilensteingruppen",
 		alertMessageRetrieving: "Fehler beim Abrufen der Meilensteine",
+		alertMessageNoRelevantMilestones:
+			"Sie mussen zuerst Meilensteine hinzufügen, die für das Alter des Kindes +/- 6 Monaten relevant sind. Bitte versuchen sie es erneut, nachdem Meilensteine hinzugefügt wurden",
+		noRelevantMilestones:
+			"Es gibt keine Meilensteine, die für das Alter des Kindes +/- 6 Monate relevant sind",
 		alertMessageError: "Ein Fehler ist aufgetreten",
 		submitImage: "Bild einreichen",
 		submitImageText:
@@ -173,10 +177,12 @@ export const translationIds = {
 		selectPlaceholder: "Bitte auswählen",
 		profileButtonLabelDefault: "Einloggen",
 		profileButtonLabelLogout: "Logout",
+		profileButtonLabelEndTestSession: "Session Beenden",
 		profileTitleDefault: "Willkommen!",
 		profileAccess: "Ihr Profil",
 		registerNew: "Als neuer Benutzer registrieren",
 		forgotPassword: "Passwort vergessen?",
+		demoAccountNotification: "Demo-Konto Mode: Nichts wird gespeichert", // Dodgy German? The English Intent is: Demo mode active: Nothing being permanently saved
 	},
 	userData: {
 		label: "Persönliche Daten",
@@ -295,6 +301,7 @@ export const translationIds = {
 		summary2:
 			"Sie bewerten, wie gut das Kind bestimmte Alltagshandlungen ausführen kann. Auf dieser Basis bietet MONDEY Ihnen Feedback zum Entwicklungsstand des Kindes.",
 		alt: "Ein kleines Kind hält ein Gänseblümchen in der Hand",
+		tryDemo: "Ausprobieren",
 	},
 	frontpageBookmarks: {
 		title: "Welche Entwicklungsbereiche werden erfasst?",

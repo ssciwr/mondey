@@ -36,9 +36,9 @@ import { onMount } from "svelte";
 import "../app.css";
 
 import { afterNavigate } from "$app/navigation";
-import { page } from "$app/state";
+import { page } from "$app/stores";
 
-let isUserLand = $derived(page.url.pathname.includes("userLandingpage"));
+let isUserLand = $derived($page.url.pathname.includes("userLandingpage"));
 afterNavigate(() => {
 	hideDrawer = true;
 });

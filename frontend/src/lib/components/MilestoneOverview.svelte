@@ -93,7 +93,10 @@ async function setup(): Promise<void> {
 			contentStore.milestoneGroupData,
 		);
 		showAlert = true;
-		alertMessage = i18n.tr.milestone.alertMessageRetrieving;
+		alertMessage =
+			contentStore.milestoneGroupData.milestones.length === 0
+				? i18n.tr.milestone.alertMessageNoRelevantMilestones
+				: i18n.tr.milestone.alertMessageRetrieving;
 	} else {
 		let milestoneAnswerSession = undefined;
 		const response = await getCurrentMilestoneAnswerSession({

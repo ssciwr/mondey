@@ -3,6 +3,10 @@ from email.message import EmailMessage
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlmodel import select
+
+from mondey_backend.dependencies import UserAsyncSessionDep
+from mondey_backend.models.users import User
 
 
 class SMTPMock:
@@ -45,6 +49,29 @@ def test_register_new_user(public_client: TestClient, smtp_mock: SMTPMock):
     token = msg.get_content().split("\n\n")[1].rsplit("/")[-1]
     response = public_client.post("/auth/verify", json={"token": token})
     assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_register_test_account(
+    public_client: TestClient, smtp_mock: SMTPMock, user_session: UserAsyncSessionDep
+):
+    assert smtp_mock.last_message is None
+    email = "2349812.12234987tester@testaccount.com"
+    response = public_client.post(
+        "/auth/register", json={"email": email, "password": "p1"}
+    )
+    assert response.status_code == 201
+    msg = smtp_mock.last_message
+    assert (
+        msg is None
+    )  # we want no last message, because it should not email upon test account registrations.
+
+    user_query = select(User).where(User.email == email)
+    result = await user_session.execute(user_query)
+    user = result.scalars().first()
+
+    assert user is not None
+    assert user.is_verified is True
 
 
 def test_register_new_user_invalid_research_code_ignored(

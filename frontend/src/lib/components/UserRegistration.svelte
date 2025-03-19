@@ -5,10 +5,16 @@ import AlertMessage from "$lib/components/AlertMessage.svelte";
 import ResearchCodeInput from "$lib/components/DataInput/ResearchCodeInput.svelte";
 import UserVerify from "$lib/components/UserVerify.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { user } from "$lib/stores/userStore.svelte";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
 
 async function submitData(): Promise<void> {
+	if (user.data) {
+		// if anonymous test account or otherwise logged in, log them out first.
+		await user.logout();
+	}
+
 	const userData: RegisterRegisterData = {
 		body: {
 			email: email,

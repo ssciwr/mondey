@@ -9,7 +9,7 @@ from mondey_backend.routers.scores import compute_feedback_simple
 from mondey_backend.routers.scores import compute_milestonegroup_feedback_detailed
 from mondey_backend.routers.scores import compute_milestonegroup_feedback_summary
 from mondey_backend.routers.utils import get_milestonegroups_for_answersession
-from mondey_backend.statistics import update_stats
+from mondey_backend.statistics import async_update_stats
 
 
 def test_get_milestonegroups_for_answersession(session):
@@ -44,8 +44,9 @@ def test_compute_feedback_simple():
     assert compute_feedback_simple(dummy_scores, score) == 1
 
 
-def test_compute_summary_milestonegroup_feedback_for_answersession_with_recompute(
-    statistics_session,
+@pytest.mark.asyncio
+async def test_compute_summary_milestonegroup_feedback_for_answersession_with_recompute(
+    statistics_session, user_session
 ):
     child_age = 8
     # existing statistics for milestonegroup 1 at age 8 months: [1,2] -> mean = 1.5 +/- 0.5
@@ -70,7 +71,11 @@ def test_compute_summary_milestonegroup_feedback_for_answersession_with_recomput
     assert feedback[1] == TrafficLight.green.value
     assert len(feedback) == 1
     for update_existing_statistics in [True, False]:
-        update_stats(statistics_session, incremental_update=update_existing_statistics)
+        await async_update_stats(
+            statistics_session,
+            user_session,
+            incremental_update=update_existing_statistics,
+        )
         # updated stats for milestonegroup 1 at age 8 months: [1,2,3,4,3,4] -> mean = 2.83333 +/- ~1.2
         statistics = statistics_session.exec(
             select(MilestoneGroupAgeScoreCollection).where(
@@ -109,8 +114,9 @@ def test_compute_summary_milestonegroup_feedback_for_answersession_no_existing_s
     assert feedback[2] == TrafficLight.invalid.value
 
 
-def test_compute_detailed_milestonegroup_feedback_for_answersession_with_recompute(
-    statistics_session,
+@pytest.mark.asyncio
+async def test_compute_detailed_milestonegroup_feedback_for_answersession_with_recompute(
+    statistics_session, user_session
 ):
     # initial stats only include answer session 1: all feedback green
     feedback = compute_milestonegroup_feedback_detailed(
@@ -122,7 +128,7 @@ def test_compute_detailed_milestonegroup_feedback_for_answersession_with_recompu
     assert feedback[1][2] == TrafficLight.green.value
 
     # updated stats include more answer sessions
-    update_stats(statistics_session, incremental_update=True)
+    await async_update_stats(statistics_session, user_session, incremental_update=True)
     feedback = compute_milestonegroup_feedback_detailed(
         statistics_session, child_id=1, answersession_id=1
     )
