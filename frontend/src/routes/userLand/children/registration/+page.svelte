@@ -67,16 +67,13 @@ let breadcrumbdata = $derived([
 	{
 		label: i18n.tr.childData.overviewLabel,
 		onclick: () => {
-			activePage.set("childrenGallery");
+			goto("/userLand/children/gallery");
 		},
 		symbol: GridPlusSolid,
 	},
 	{
 		label: childLabel,
 		symbol: UserSettingsOutline,
-		onclick: () => {
-			activePage.set("childrenRegistration");
-		},
 	},
 ]);
 
@@ -268,7 +265,7 @@ async function submitData(): Promise<void> {
 
 	// disable all elements to make editing a conscious choice amd go back to childrenGallery
 	console.log("submission of child data successful.");
-	activePage.set("childrenGallery");
+	goto("/userLand/children/gallery");
 }
 </script>
 

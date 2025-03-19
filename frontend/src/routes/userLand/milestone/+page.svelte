@@ -84,7 +84,7 @@ async function nextMilestone() {
 		currentMilestoneIndex + 1 ===
 		contentStore.milestoneGroupData.milestones.length
 	) {
-		activePage.set("milestoneOverview");
+		goto("/userLand/milestone/overview");
 		return;
 	}
 	currentMilestoneIndex += 1;
@@ -148,14 +148,14 @@ const breadcrumbdata = $derived([
 	{
 		label: i18n.tr.childData.overviewLabel,
 		onclick: () => {
-			activePage.set("childrenGallery");
+			goto("/userLand/children/gallery");
 		},
 		symbol: GridPlusSolid,
 	},
 	{
 		label: currentChild.name,
 		onclick: () => {
-			activePage.set("childrenRegistration");
+			goto(`/userLand/children/registration/${currentChild.id}`);
 		},
 		symbol: UserSettingsOutline,
 	},
@@ -169,7 +169,7 @@ const breadcrumbdata = $derived([
 	{
 		label: contentStore.milestoneGroupData.text[i18n.locale].title,
 		onclick: () => {
-			activePage.set("milestoneOverview");
+			goto("/userLand/milestone/overview");
 		},
 		symbol: GridOutline,
 	},

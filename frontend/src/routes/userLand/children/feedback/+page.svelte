@@ -148,14 +148,14 @@ const breadcrumbdata: any[] = [
 	{
 		label: i18n.tr.childData.overviewLabel,
 		onclick: () => {
-			activePage.set("childrenGallery");
+			goto("/userLand/children/gallery");
 		},
 		symbol: GridPlusSolid,
 	},
 	{
 		label: currentChild.name,
 		onclick: () => {
-			activePage.set("childrenRegistration");
+			goto(`/userLand/children/registration/${currentChild.id}`);
 		},
 		symbol: UserSettingsOutline,
 	},

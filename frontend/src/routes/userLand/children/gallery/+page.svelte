@@ -109,7 +109,7 @@ async function setup(): Promise<CardElement[]> {
 						onclick: async () => {
 							currentChild.id = child.id;
 							await currentChild.load_data();
-							activePage.set("childrenRegistration");
+							goto(`/userLand/children/registration/${child.id}`);
 						},
 					},
 				};
@@ -125,7 +125,7 @@ async function setup(): Promise<CardElement[]> {
 				events: {
 					onclick: () => {
 						currentChild.id = null;
-						activePage.set("childrenRegistration");
+						goto("/userLand/children/registration"); // Register a new child via new form data
 					},
 				},
 			},

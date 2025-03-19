@@ -96,7 +96,7 @@ async function setup(): Promise<any> {
 			progress: computeProgress(item.milestones, answerSession.data),
 			events: {
 				onclick: () => {
-					activePage.set("milestoneOverview");
+					goto("/userLand/milestone/overview");
 					contentStore.milestoneGroup = item.id;
 					contentStore.milestoneGroupData = item;
 				},
@@ -112,7 +112,7 @@ const breadcrumbdata: any[] = [
 	{
 		label: i18n.tr.childData.overviewLabel,
 		onclick: () => {
-			activePage.set("childrenGallery");
+			goto("/userLand/children/gallery");
 		},
 		symbol: GridPlusSolid,
 	},
@@ -120,7 +120,7 @@ const breadcrumbdata: any[] = [
 		label: currentChild.name,
 		symbol: UserSettingsOutline,
 		onclick: () => {
-			activePage.set("childrenRegistration");
+			goto(`/userLand/children/registration/${currentChild.id}`);
 		},
 	},
 	{
@@ -249,7 +249,7 @@ let validMilestoneGroups = $derived(
     </div>
 {:catch error}
     <AlertMessage message={`${i18n.tr.milestone.alertMessageError} ${error}`} onclick={() => {
-		activePage.set("milestoneOverview");
+		goto("/userLand/milestone/overview");
 		showAlert = false;
 	}}/>
 {/await}

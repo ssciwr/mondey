@@ -195,7 +195,7 @@ const breadcrumbdata: any[] = [
 	{
 		label: currentChild.name,
 		onclick: () => {
-			activePage.set("childrenRegistration");
+			goto(`/userLand/children/registration/${currentChild.id}`);
 		},
 		symbol: UserSettingsOutline,
 	},
@@ -209,7 +209,7 @@ const breadcrumbdata: any[] = [
 	{
 		label: contentStore.milestoneGroupData.text[i18n.locale].title,
 		onclick: () => {
-			activePage.set("milestoneOverview");
+			goto("/userLand/milestone/overview");
 		},
 		symbol: GridOutline,
 	},
