@@ -52,9 +52,12 @@ def send_reset_password_link(email: str, token: str) -> None:
 
 
 def is_test_account_user(user: User) -> bool:
-    if not hasattr(user, 'email'):
+    # A bit over-explicit but I wanted to implement the use of pytest.raises and it could help prevent an annoying bug.
+    if type(user) is str:
+        raise TypeError("Passed in the User object, not their email directly")
+    if not hasattr(user, "email"):
         return False
-    return 'tester@testaccount.com' in user.email
+    return "tester@testaccount.com" in user.email
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
@@ -65,9 +68,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
         logging.info(f"User {user.email} registered.")
         if is_test_account_user(user):
             async with async_session_maker() as user_session:
-                logging.warning(
-                    f"Updating test user to verified {user.email}"
-                )
+                logging.warning(f"Updating test user to verified {user.email}")
                 user_db = await user_session.get(User, user.id)
                 if user_db is not None:
                     user_db.is_verified = True

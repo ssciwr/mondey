@@ -5,7 +5,6 @@ import type {
 	AuthCookieLoginData,
 	RegisterRegisterData,
 	UserCreate,
-	ValidationError,
 } from "$lib/client/index.js";
 import { authCookieLogin, registerRegister } from "$lib/client/services.gen";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
