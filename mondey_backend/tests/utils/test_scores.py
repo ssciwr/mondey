@@ -71,7 +71,9 @@ async def test_compute_summary_milestonegroup_feedback_for_answersession_with_re
     assert feedback[1] == TrafficLight.green.value
     assert len(feedback) == 1
     for update_existing_statistics in [True, False]:
-        await async_update_stats(statistics_session, incremental_update=update_existing_statistics)
+        await async_update_stats(
+            statistics_session, incremental_update=update_existing_statistics
+        )
         # updated stats for milestonegroup 1 at age 8 months: [1,2,3,4,3,4] -> mean = 2.83333 +/- ~1.2
         statistics = statistics_session.exec(
             select(MilestoneGroupAgeScoreCollection).where(

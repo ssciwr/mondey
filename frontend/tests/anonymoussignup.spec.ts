@@ -1,4 +1,4 @@
-import {expect, test} from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 /*
 // Just mocking how we could do this, if we have the backend running in a playwright context.

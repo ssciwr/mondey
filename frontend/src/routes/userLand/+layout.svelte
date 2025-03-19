@@ -1,10 +1,9 @@
 <svelte:options runes={true} />
 <script>
-import {user} from "$lib/stores/userStore.svelte";
-import {i18n} from "$lib/i18n.svelte";
-import {goto} from "$app/navigation";
-import {Button} from "flowbite-svelte";
-
+import { goto } from "$app/navigation";
+import { i18n } from "$lib/i18n.svelte";
+import { user } from "$lib/stores/userStore.svelte";
+import { Button } from "flowbite-svelte";
 
 let { children } = $props();
 </script>

@@ -7,7 +7,6 @@ from sqlmodel import select
 
 from mondey_backend.dependencies import UserAsyncSessionDep
 from mondey_backend.models.users import User
-
 from mondey_backend.src.mondey_backend.users import is_test_account_user
 
 
@@ -160,7 +159,6 @@ def test_user_forgot_password_invalid_email(
     assert response.json()["detail"][0]["type"] == "value_error"
 
 
-
 # It would probably be better to use the User class, and add the email field to it, than to use a mock user
 class MockUser:
     def __init__(self, email, **kwargs):
@@ -168,13 +166,14 @@ class MockUser:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+
 def test_is_test_account():
-    tester_email = '123tester@testaccount.com'
-    nontester_email = 'heidelberguser@uni-heidelberg.de'
-    nontester_email_2 = 'Contester@gmail.com'
+    tester_email = "123tester@testaccount.com"
+    nontester_email = "heidelberguser@uni-heidelberg.de"
+    nontester_email_2 = "Contester@gmail.com"
 
     assert is_test_account_user(MockUser(email=tester_email))
-    assert False == is_test_account_user(MockUser(email=nontester_email))
-    assert False == is_test_account_user(MockUser(email=nontester_email_2))
+    assert is_test_account_user(MockUser(email=nontester_email)) == False
+    assert is_test_account_user(MockUser(email=nontester_email_2)) == False
 
-    assert False == is_test_account_user(MockUser()) # When no email is present
+    assert is_test_account_user(MockUser()) == False  # When no email is present
