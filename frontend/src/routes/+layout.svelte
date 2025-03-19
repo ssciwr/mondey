@@ -90,14 +90,14 @@ const asAlert = false;
 					<Button
 							type="button"
 							class="m-2 w-full"
-							href="{base}/userLand/userLogin"
+							href="{base}/login"
 							size="lg">{i18n.tr.login.profileButtonLabelDefault}</Button
 					>
 				{:else}
 					<Button
 							type="button"
 							class="m-2 w-full"
-							href="{base}/userLand/userLandingpage"
+							href="{base}/userLand/children/gallery"
 							size="lg">{i18n.tr.registration.goHome}</Button
 					>
 				{/if}
@@ -116,7 +116,7 @@ const asAlert = false;
 	{#if false === isUserLand}
 		<!-- Mobile Log in -->
 		<div class="z-10 fixed" style="top:0.8rem;left:1rem;">
-			<a class="btn-primary btn-icon" href="/userLand/userLogin">
+			<a class="btn-primary btn-icon" href="/login">
 				<UserOutline />
 			</a>
 		</div>
@@ -151,14 +151,14 @@ const asAlert = false;
 
 						{#if user.data === null}
 							<SidebarItem label={i18n.tr.login.profileButtonLabelDefault}
-										 href="/userLand/userLogin">
+										 href="/login">
 								<svelte:fragment slot="icon">
 									<ProfileCardSolid size="lg" />
 								</svelte:fragment>
 							</SidebarItem>
 						{:else}
 							<SidebarItem label={i18n.tr.registration.goHome}
-										 href="/userLand/userLandingpage">
+										 href="/userLand/children/gallery">
 								<svelte:fragment slot="icon">
 									<ProfileCardSolid size="lg" />
 								</svelte:fragment>

@@ -51,7 +51,7 @@ async function submitData(): Promise<void> {
 			alertMessage = `${i18n.tr.login.unauthorized}: ${status}`;
 		} else {
 			console.log("login and user retrieval successful");
-			goto("/userLand/userLandingpage");
+			goto("/userLand/children/gallery");
 		}
 	}
 }
@@ -68,7 +68,7 @@ let alertMessage: string = $state(i18n.tr.login.badCredentials);
 	<AlertMessage
 		title={i18n.tr.login.alertMessageTitle}
 		message={alertMessage}
-		lastpage={`${base}/userLand/userLogin`}
+		lastpage={`${base}/login`}
 		onclick={() => {
 			showAlert = false;
 		}}
