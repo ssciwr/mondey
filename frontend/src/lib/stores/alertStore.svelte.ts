@@ -64,4 +64,4 @@ function createAlertStore() {
 	};
 }
 
-export const alertStoreSvelte = createAlertStore();
+export const alertStore = createAlertStore();

@@ -7,7 +7,7 @@ import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import Footer from "$lib/components/Navigation/Footer.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import { alertStoreSvelte } from "$lib/stores/alertStore.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 
 import {
@@ -197,14 +197,14 @@ const asAlert = false;
 	{@render children?.()}
 </div>
 
-<Modal bind:open={alertStoreSvelte.isAlertShown} color={alertStoreSvelte.isError ? 'red' : alertStoreSvelte.isAwaitError ? 'yellow' : 'default'} title={alertStoreSvelte.title} autoclose>
-	<p class="text-base">{alertStoreSvelte.message}</p>
+<Modal bind:open={alertStore.isAlertShown} color={alertStore.isError ? 'red' : alertStore.isAwaitError ? 'yellow' : 'default'} title={alertStore.title} autoclose>
+	<p class="text-base">{alertStore.message}</p>
 	<svelte:fragment slot="footer">
 		<button class="btn-primary" onclick={() => {
-			if (alertStoreSvelte.callback) {
-				alertStoreSvelte.callback();
+			if (alertStore.callback) {
+				alertStore.callback();
 			}
-			alertStoreSvelte.hideAlert();
+			alertStore.hideAlert();
 		}}>{i18n.tr.misc.understood}</button>
 	</svelte:fragment>
 </Modal>

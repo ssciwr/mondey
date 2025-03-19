@@ -10,6 +10,7 @@ import AlertMessage from "$lib/components/AlertMessage.svelte";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { type CardElement, type CardStyle } from "$lib/util";
 import { Heading, Spinner } from "flowbite-svelte";
@@ -140,8 +141,6 @@ async function setup(): Promise<CardElement[]> {
 	return data;
 }
 
-let showAlert = $state(false);
-let alertMessage = $state(i18n.tr.childData.alertMessageError);
 let data: CardElement[] = $state([]);
 let style: CardStyle[] = $state([]);
 const promise = $state(setup());
@@ -157,15 +156,6 @@ const searchData = [
 {#await promise}
     <Spinner /> <p>{i18n.tr.userData.loadingMessage}</p>
 {:then data}
-    {#if showAlert}
-        <AlertMessage
-                title={i18n.tr.childData.alertMessageTitle}
-                message={alertMessage}
-                onclick={() => {
-				showAlert = false;
-			}}
-        />
-    {/if}
 
     <div class="m-2 mx-auto w-full pb-4 md:rounded-t-lg">
 
@@ -188,11 +178,5 @@ const searchData = [
         </div>
     </div>
 {:catch error}
-    <AlertMessage
-            title={"Error in server request"}
-            message={error.message}
-            onclick={() => {
-			showAlert = false;
-		}}
-    />
+    {alertStore.showAlert(i18n.tr.childData.alertMessageTitle, error.message, true, true)}
 {/await}
