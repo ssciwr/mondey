@@ -46,7 +46,7 @@ def test_compute_feedback_simple():
 
 @pytest.mark.asyncio
 async def test_compute_summary_milestonegroup_feedback_for_answersession_with_recompute(
-    statistics_session,
+    statistics_session, user_session
 ):
     child_age = 8
     # existing statistics for milestonegroup 1 at age 8 months: [1,2] -> mean = 1.5 +/- 0.5
@@ -72,7 +72,9 @@ async def test_compute_summary_milestonegroup_feedback_for_answersession_with_re
     assert len(feedback) == 1
     for update_existing_statistics in [True, False]:
         await async_update_stats(
-            statistics_session, incremental_update=update_existing_statistics
+            statistics_session,
+            user_session,
+            incremental_update=update_existing_statistics,
         )
         # updated stats for milestonegroup 1 at age 8 months: [1,2,3,4,3,4] -> mean = 2.83333 +/- ~1.2
         statistics = statistics_session.exec(
@@ -114,7 +116,7 @@ def test_compute_summary_milestonegroup_feedback_for_answersession_no_existing_s
 
 @pytest.mark.asyncio
 async def test_compute_detailed_milestonegroup_feedback_for_answersession_with_recompute(
-    statistics_session,
+    statistics_session, user_session
 ):
     # initial stats only include answer session 1: all feedback green
     feedback = compute_milestonegroup_feedback_detailed(
@@ -126,7 +128,7 @@ async def test_compute_detailed_milestonegroup_feedback_for_answersession_with_r
     assert feedback[1][2] == TrafficLight.green.value
 
     # updated stats include more answer sessions
-    await async_update_stats(statistics_session, incremental_update=True)
+    await async_update_stats(statistics_session, user_session, incremental_update=True)
     feedback = compute_milestonegroup_feedback_detailed(
         statistics_session, child_id=1, answersession_id=1
     )
