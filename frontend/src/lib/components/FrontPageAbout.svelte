@@ -30,11 +30,9 @@ const registerTestUser = async () => {
 	const result = await registerRegister(registerRequestTestAccountData);
 
 	if (result.error) {
-		console.log("error: ", result.response.status, result.error.detail);
 		alertMessage = `${i18n.tr.registration.alertMessageError}: ${result.error.detail}`;
 		showAlert = true;
 	} else {
-		console.log("Successful response:", result.response);
 		const loginData: AuthCookieLoginData = {
 			body: {
 				username: testAccountData.email,

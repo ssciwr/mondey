@@ -89,7 +89,6 @@ async function setup(): Promise<any> {
 	}
 
 	data = milestonegroups.data.map((item) => {
-		console.log('Milestones groups iteration: ', item)
 		const res = {
 			header: item.text ? item.text[i18n.locale].title : undefined,
 			summary: item.text?.[i18n.locale]?.desc,
@@ -221,7 +220,9 @@ const searchData: any[] = [
 	},
 ];
 
-let validMilestoneGroups = $derived(data.filter((item) => item.milestones?.length > 0))
+let validMilestoneGroups = $derived(
+	data.filter((item) => item.milestones?.length > 0),
+);
 </script>
 
 {#await promise}
