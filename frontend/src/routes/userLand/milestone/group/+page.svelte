@@ -127,7 +127,7 @@ const breadcrumbdata: any[] = [
 		label: i18n.tr.milestone.groupOverviewLabel,
 		symbol: RectangleListOutline,
 		onclick: () => {
-			activePage.set("milestoneGroup");
+			goto("/userLand/milestone/group");
 		},
 	},
 ];

@@ -154,6 +154,7 @@ async function setup(): Promise<{
 }
 
 async function submitChildData(): Promise<void> {
+	console.log("SubmitChild Data was called.");
 	if (currentChild.id === null) {
 		// make new child if we don´t have one already
 		const new_child = await createChild({
@@ -174,7 +175,7 @@ async function submitChildData(): Promise<void> {
 		}
 		currentChild.id = new_child.data.id;
 	} else {
-		console.log("updating existing child");
+		console.log("updating existing child", currentChild.id);
 
 		// update existing child
 		const response = await updateChild({
@@ -258,6 +259,7 @@ async function submitImageData(): Promise<void> {
 }
 
 async function submitData(): Promise<void> {
+	console.log("Submit data called.");
 	// submit child data
 	await submitChildData();
 
@@ -470,23 +472,23 @@ async function submitData(): Promise<void> {
 
 
                         {#if currentChild.id !== null && disableEdit === true}
-                            <button
+                            <a
                                     class="btn-secondary"
                                     onclick={() => {
-            goto('/userLand/children/feedback')
-        }}>
+                                        goto(`/userLand/children/feedback?id=${currentChild.id}`)
+                                    }}>
                                 <ChartLineUpOutline size="md" />
                                 {i18n.tr.childData.feedbackButtonLabel}
-                            </button>
-                            <button
+                            </a>
+                            <a
                                     class="btn-primary"
                                     onclick={() => {
-            goto('/userLand/milestone/group')
-        }}
+                                        goto(`/userLand/milestone/group?id=${currentChild.id}`)
+                                    }}
                             >
                                 <FlagOutline size="md" />
                                 {i18n.tr.childData.nextButtonLabel}
-                            </button>
+                            </a>
 
                         {/if}
                     </form>

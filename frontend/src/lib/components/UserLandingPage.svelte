@@ -1,10 +1,11 @@
 <script lang="ts">
-import { goto } from "$app/navigation";
+import { afterNavigate, goto } from "$app/navigation";
 import { base } from "$app/paths";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import UserVerify from "$lib/components/UserVerify.svelte";
+import UserlandSidebar from "$lib/components/UserlandSidebar.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activePage, componentTable } from "$lib/stores/componentStore";
@@ -39,106 +40,11 @@ onMount(user.load);
 
 // set this initially to user data such that the user data page is shown first
 activePage.set("childrenGallery");
+
+afterNavigate(() => {
+	hideDrawer = true;
+});
 </script>
-
-<!-- navigation menu definition-->
-{#snippet sidebarNav()}
-	<Sidebar>
-		<SidebarWrapper>
-			<SidebarGroup>
-				<SidebarItem label = {user.data.email} class = "font-bold"/>
-				<SidebarItem label = {i18n.tr.userData.label} onclick = {() => {
-					activePage.set("userDataInput");
-					hideDrawer = true;
-				}}>
-					<svelte:fragment slot="icon">
-						<ProfileCardSolid size="lg" />
-					</svelte:fragment>
-				</SidebarItem>
-
-				<SidebarItem label = {i18n.tr.childData.overviewLabel} onclick = {() => {
-					activePage.set("childrenGallery");
-					hideDrawer = true;
-				}}>
-					<svelte:fragment slot="icon">
-						<GridPlusSolid size="lg" />
-					</svelte:fragment>
-				</SidebarItem>
-
-				{#if user.data.is_superuser}
-					<SidebarItem label = {i18n.tr.admin.label} onclick = {() => {
-						activePage.set("adminPage");
-						hideDrawer = true;
-					}}>
-						<svelte:fragment slot="icon">
-							<CogSolid size="lg" />
-						</svelte:fragment>
-					</SidebarItem>
-				{/if}
-
-				{#if user.data.is_researcher}
-					<SidebarItem label = {i18n.tr.researcher.label}  onclick = {() => {
-						activePage.set("researchPage");
-						hideDrawer = true;
-					}}>
-						<svelte:fragment slot="icon">
-							<AtomOutline size="lg" />
-						</svelte:fragment>
-					</SidebarItem>
-				{/if}
-
-			</SidebarGroup>
-			<SidebarGroup border>
-				<SidebarItem label = {i18n.tr.userData.settingsLabel} onclick = {
-					() => {
-						activePage.set("settings");
-						hideDrawer = true;
-					}
-				}>
-					<svelte:fragment slot="icon">
-						<AdjustmentsVerticalOutline size="lg" />
-					</svelte:fragment>
-				</SidebarItem>
-				<SidebarItem>
-					<svelte:fragment slot="icon">
-						<SunOutline />
-					</svelte:fragment>
-					<svelte:fragment slot="subtext">
-						<DarkModeChooser />
-					</svelte:fragment>
-				</SidebarItem>
-
-
-				<SidebarItem label = {i18n.tr.login.profileButtonLabelLogout} onclick = {async () => {
-					const response = await user.logout();
-					if (response.error) {
-						alertMessage = i18n.tr.login.alertMessageError;
-						showAlert = true;
-					} else {
-						console.log("Logout successful");
-						user.data = null;
-						currentChild.id = null;
-						currentChild.data = null;
-						hideDrawer = true;
-						goto(`/${base}`);
-					}
-				}}>
-					<svelte:fragment slot="icon">
-						<ArrowRightToBracketOutline size="lg" />
-					</svelte:fragment>
-				</SidebarItem>
-				<SidebarItem>
-					<svelte:fragment slot="icon">
-						<LanguageOutline size="lg" />
-					</svelte:fragment>
-					<svelte:fragment slot="subtext">
-						<LocaleChooser />
-					</svelte:fragment>
-				</SidebarItem>
-			</SidebarGroup>
-		</SidebarWrapper>
-	</Sidebar >
-{/snippet}
 
 
 {#if showAlert}
@@ -156,7 +62,7 @@ activePage.set("childrenGallery");
 
 				<!-- desktop version: only sidebar-->
 				<div class = "max-md:hidden m-2 p-2 ">
-					{@render sidebarNav()}
+					<UserlandSidebar setHideDrawer={(to) => { hideDrawer = to }} />
 				</div>
 
 				<!-- mobile version: drawer instead of fixed sidebar-->
@@ -164,7 +70,7 @@ activePage.set("childrenGallery");
 				onclick={()=>{hideDrawer = !hideDrawer}}> <BarsOutline size="lg" /></button>
 
 				<Drawer transitionType="fly" placement="right" transitionParams={{duration: 200}} bind:hidden = {hideDrawer} id="menuDrawer">
-					{@render sidebarNav()}
+					<UserlandSidebar setHideDrawer={(to) => { hideDrawer = to }} />
 				</Drawer>
 
 				<div class = "m-2 p-2 w-full pl-12 md:pl-2 md:w-auto">
