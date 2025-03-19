@@ -128,10 +128,10 @@ async function setup(): Promise<void> {
 					summary: item?.text?.[i18n.locale]?.desc ?? "",
 					events: {
 						onclick: () => {
-							activePage.set("milestone");
 							contentStore.milestone = item.id;
 							contentStore.milestoneData = item;
 							contentStore.milestoneIndex = idx;
+							goto("/userLand/milestone");
 						},
 					},
 					auxilliary: complete ? CheckCircleSolid : ExclamationCircleSolid,
@@ -202,7 +202,7 @@ const breadcrumbdata: any[] = [
 	{
 		label: i18n.tr.milestone.groupOverviewLabel,
 		onclick: () => {
-			activePage.set("milestoneGroup");
+			goto("/userLand/milestone/group");
 		},
 		symbol: RectangleListOutline,
 	},

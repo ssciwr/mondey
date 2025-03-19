@@ -61,7 +61,7 @@ async function submitData(): Promise<void> {
                 {i18n.tr.forgotPw.successReset}
             </div>
         </div>
-        <Button href="/userLand/userLogin" size="md">{i18n.tr.forgotPw.goToLogin}</Button>
+        <Button href="/login" size="md">{i18n.tr.forgotPw.goToLogin}</Button>
     {:else}
     <Card class="container m-2 mx-auto w-full max-w-xl items-center justify-center p-2">
 

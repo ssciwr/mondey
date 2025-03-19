@@ -1,6 +1,7 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import { goto } from "$app/navigation";
+import { page } from "$app/state";
 import {
 	type MilestoneAnswerSessionPublic,
 	type MilestonePublic,
@@ -20,6 +21,7 @@ import {
 	RectangleListOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
+import { get } from "svelte/store"; // is this needed in svelte 5? Because now page is in $app/state we might not need to <store>get it?
 
 function computeProgress(
 	milestones: MilestonePublic[] | undefined,
@@ -50,6 +52,13 @@ async function setup(): Promise<any> {
 		return [];
 	}
 
+	const childId = page.url.searchParams.get("id");
+
+	// Set currentChild.id if the parameter exists
+	if (childId) {
+		currentChild.id = Number.parseInt(childId);
+	}
+
 	await currentChild.load_data();
 
 	if (currentChild.id === null || currentChild.id === undefined) {
@@ -60,8 +69,6 @@ async function setup(): Promise<any> {
 		return data;
 	}
 
-	console.log("currentChild", currentChild);
-	console.log("child data: ", currentChild.name);
 	const milestonegroups = await getMilestoneGroups({
 		path: { child_id: currentChild.id },
 	});
@@ -220,9 +227,9 @@ const searchData: any[] = [
 	},
 ];
 
-let validMilestoneGroups = $derived(
-	data.filter((item) => item.milestones?.length > 0),
-);
+$effect(() => {
+	console.log("Data now: ", data);
+});
 </script>
 
 {#await promise}
@@ -232,19 +239,13 @@ let validMilestoneGroups = $derived(
     <div class="flex flex-col md:rounded-t-lg">
         <Breadcrumbs data={breadcrumbdata} />
         <div class="grid gap-y-8">
-            {#if validMilestoneGroups.length > 0}
                 <GalleryDisplay
-                        data={validMilestoneGroups}
+                        data={data}
                         itemComponent={CardDisplay}
                         componentProps={createStyle(data)}
                         withSearch={true}
                         {searchData}
                 />
-            {:else}
-                <AlertMessage
-                        title={i18n.tr.milestone.noRelevantMilestones}
-                />
-            {/if}
         </div>
     </div>
 {:catch error}

@@ -100,6 +100,7 @@ async function setup(): Promise<{
 	}
 
 	if (currentChild.id !== null) {
+		console.log("Current child ID is: ", currentChild.id);
 		const child = await getChild({ path: { child_id: currentChild.id } });
 
 		if (child.error) {

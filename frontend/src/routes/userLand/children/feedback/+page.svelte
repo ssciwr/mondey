@@ -162,7 +162,7 @@ const breadcrumbdata: any[] = [
 	{
 		label: i18n.tr.milestone.feedbackTitle,
 		onclick: () => {
-			activePage.set("childrenFeedback");
+			goto("/userLand/children/feedback");
 		},
 		symbol: ChartLineUpOutline,
 	},

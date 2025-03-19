@@ -221,9 +221,9 @@ const searchData: any[] = [
 	},
 ];
 
-let validMilestoneGroups = $derived(
+let validMilestoneGroups = ["1", "2", "3"]; /* $derived(
 	data.filter((item) => item.milestones?.length > 0),
-);
+);*/
 </script>
 
 {#await promise}
@@ -235,7 +235,7 @@ let validMilestoneGroups = $derived(
 	<div class="grid gap-y-8">
 		{#if validMilestoneGroups.length > 0}
 				<GalleryDisplay
-			data={validMilestoneGroups}
+			data={data}
 			itemComponent={CardDisplay}
 			componentProps={createStyle(data)}
 			withSearch={true}

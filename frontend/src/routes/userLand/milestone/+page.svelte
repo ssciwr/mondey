@@ -11,6 +11,7 @@ import {
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import SubmitMilestoneImageModal from "$lib/components/DataInput/SubmitMilestoneImageModal.svelte";
 import MilestoneButton from "$lib/components/MilestoneButton.svelte";
+import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { contentStore } from "$lib/stores/contentStore.svelte";
@@ -28,7 +29,6 @@ import {
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
-import Breadcrumbs from "./Navigation/Breadcrumbs.svelte";
 
 onMount(() => {
 	if (contentStore.milestoneGroupData?.milestones) {
@@ -162,7 +162,7 @@ const breadcrumbdata = $derived([
 	{
 		label: i18n.tr.milestone.groupOverviewLabel,
 		onclick: () => {
-			activePage.set("milestoneGroup");
+			goto("/userLand/milestone/group");
 		},
 		symbol: RectangleListOutline,
 	},
