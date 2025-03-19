@@ -3,11 +3,13 @@
 import { base } from "$app/paths";
 import logo_dark from "$lib/assets/mondey_dark.svg";
 import logo_light from "$lib/assets/mondey_light.svg";
+import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import Footer from "$lib/components/Navigation/Footer.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStoreSvelte } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
+
 import {
 	Button,
 	Drawer,
@@ -38,6 +40,15 @@ import { afterNavigate } from "$app/navigation";
 import { page } from "$app/stores";
 
 let isUserLand = $derived($page.url.pathname.includes("userLandingpage"));
+afterNavigate(() => {
+	hideDrawer = true;
+});
+// Done this way because, other approaches to the layout (like a different +layout for userLand) would largely duplicate this one, but it is still hardcoded.
+
+import { afterNavigate } from "$app/navigation";
+import { page } from "$app/state";
+
+let isUserLand = $derived(page.url.pathname.includes("userLandingpage"));
 afterNavigate(() => {
 	hideDrawer = true;
 });

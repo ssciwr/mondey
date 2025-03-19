@@ -1,8 +1,4 @@
 <svelte:options runes={true} />
-
-<style>
-
-</style>
 <script lang="ts">
 import { getChildImage, getChildren } from "$lib/client/services.gen";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
@@ -28,7 +24,7 @@ function isDark(bgColor: string): boolean {
 
 function createStyle(data: CardElement[]): CardStyle[] {
 	return data.map((item) => {
-		const contextualTextColor = isDark(item.color)
+		const contextualTextColor = isDark(item.color as string)
 			? "text-white"
 			: "text-black";
 		return {
@@ -54,8 +50,7 @@ function createStyle(data: CardElement[]): CardStyle[] {
 								"mb-2 text-2xl font-bold tracking-tight text-white dark:text-white",
 						}
 					: {
-							class:
-								"mb-2 text-2xl font-bold tracking-tight " + contextualTextColor,
+							class: `mb-2 text-2xl font-bold tracking-tight ${contextualTextColor}`,
 						},
 			summary:
 				item.header === i18n.tr.childData.newChildHeading
@@ -64,7 +59,7 @@ function createStyle(data: CardElement[]): CardStyle[] {
 								"mb-3 flex font-normal leading-tight text-white dark:text-white",
 						}
 					: {
-							class: "opacity-60 " + contextualTextColor,
+							class: `opacity-60 ${contextualTextColor}`,
 						},
 			button: null,
 			progress: null,
@@ -108,7 +103,7 @@ async function setup(): Promise<CardElement[]> {
 				return {
 					header: child.name,
 					image,
-					summary: child.birth_month + "/" + child.birth_year,
+					summary: `${child.birth_month}/${child.birth_year}`,
 					color: child.color,
 					events: {
 						onclick: async () => {
