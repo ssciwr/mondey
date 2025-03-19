@@ -2,6 +2,20 @@ type AlertCallback = () => void;
 
 /**
  * Creates a centralized alert store with proper typing
+ * What this will do is show an alert on the page when you call showAlert.
+ *
+ * However note that if you use it in a await-data-catch pattern like this:
+ *
+ * await promise...
+ *  <Spinner>
+ * then data...
+ * <div>{data}</div>
+ * catch error..
+ * showAlert(error.message,...)
+ *
+ * --> Then it will show for errors related to the promise/await, but it won't show for errors during interactive page
+ * use (by design). E.g. if you have something in the data - div bit which throws an Exception, by default, no alert
+ * will show. You need to manually catch and invoke with specific (and translated) errors to use this.
  */
 function createAlertStore() {
 	// State variables with proper types
