@@ -27,9 +27,9 @@ export const translationIds = {
 		groupOverviewLabel: "Übersicht Meilensteingruppen",
 		alertMessageRetrieving: "Fehler beim Abrufen der Meilensteine",
 		alertMessageNoRelevantMilestones:
-			"Sie mussen zuerst Meilensteine zusetzen, die für das Alter des Kindes +/- 6 Monaten relevant gelten. Entfern des Kindes und nachdem Sie die Milesteine zusetzt haben, mach mal das hier wieder.",
+			"Sie mussen zuerst Meilensteine hinzufügen, die für das Alter des Kindes +/- 6 Monaten relevant sind. Bitte versuchen sie es erneut, nachdem Meilensteine hinzugefügt wurden",
 		noRelevantMilestones:
-			"Es gibt kein Meilensteine, die für das Alter des Kindes +/- 6 Monaten relevant gelten.",
+			"Es gibt keine Meilensteine, die für das Alter des Kindes +/- 6 Monate relevant sind",
 		alertMessageError: "Ein Fehler ist aufgetreten",
 		submitImage: "Bild einreichen",
 		submitImageText:
