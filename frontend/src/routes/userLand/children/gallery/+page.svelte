@@ -1,3 +1,7 @@
+<!--
+This file could possibly be better one directory up as +page.svelte, since it is just the general children overview.
+-->
+
 <svelte:options runes={true} />
 <script lang="ts">
 import { goto } from "$app/navigation";

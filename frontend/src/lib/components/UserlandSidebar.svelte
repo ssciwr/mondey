@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 import { i18n } from "$lib/i18n.svelte";
 import {
 	AdjustmentsVerticalOutline,
@@ -11,7 +11,7 @@ import {
 	SunOutline,
 } from "flowbite-svelte-icons";
 
-import { afterNavigate, goto } from "$app/navigation";
+import { goto } from "$app/navigation";
 import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
@@ -33,29 +33,20 @@ let alertMessage = $state(i18n.tr.login.alertMessageError);
     <SidebarWrapper>
         <SidebarGroup>
             <SidebarItem label = {user.data.email} class = "font-bold"/>
-            <SidebarItem label = {i18n.tr.userData.label} onclick = {() => {
-                    goto('/userLand/dataInput')
-                    hideDrawer = true;
-                }}>
+            <SidebarItem label = {i18n.tr.userData.label} href="/userLand/dataInput">
                 <svelte:fragment slot="icon">
                     <ProfileCardSolid size="lg" />
                 </svelte:fragment>
             </SidebarItem>
 
-            <SidebarItem label = {i18n.tr.childData.overviewLabel} onclick = {() => {
-                    goto('/userLand/children/gallery')
-                    hideDrawer = true;
-                }}>
+            <SidebarItem label = {i18n.tr.childData.overviewLabel} href="/userLand/children/gallery">
                 <svelte:fragment slot="icon">
                     <GridPlusSolid size="lg" />
                 </svelte:fragment>
             </SidebarItem>
 
             {#if user.data.is_superuser}
-                <SidebarItem label = {i18n.tr.admin.label} onclick = {() => {
-                        goto("/userLand/admin")
-                        setHideDrawer(true)
-                    }}>
+                <SidebarItem label = {i18n.tr.admin.label} href="/userLand/admin">
                     <svelte:fragment slot="icon">
                         <CogSolid size="lg" />
                     </svelte:fragment>
@@ -63,10 +54,7 @@ let alertMessage = $state(i18n.tr.login.alertMessageError);
             {/if}
 
             {#if user.data.is_researcher}
-                <SidebarItem label = {i18n.tr.researcher.label}  onclick = {() => {
-                        goto('/userLand/research')
-                        setHideDrawer(true)
-                    }}>
+                <SidebarItem label = {i18n.tr.researcher.label} href="/userLand/research">
                     <svelte:fragment slot="icon">
                         <AtomOutline size="lg" />
                     </svelte:fragment>
@@ -75,12 +63,7 @@ let alertMessage = $state(i18n.tr.login.alertMessageError);
 
         </SidebarGroup>
         <SidebarGroup border>
-            <SidebarItem label = {i18n.tr.userData.settingsLabel} onclick = {
-                    () => {
-                        goto('/userLand/settings')
-                        setHideDrawer(true)
-                    }
-                }>
+            <SidebarItem label = {i18n.tr.userData.settingsLabel} href="/userLand/settings">
                 <svelte:fragment slot="icon">
                     <AdjustmentsVerticalOutline size="lg" />
                 </svelte:fragment>

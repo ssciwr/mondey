@@ -4,7 +4,6 @@ import AlertMessage from "$lib/components/AlertMessage.svelte";
 import UserVerify from "$lib/components/UserVerify.svelte";
 import UserlandSidebar from "$lib/components/UserlandSidebar.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import { activePage, componentTable } from "$lib/stores/componentStore";
 import { user } from "$lib/stores/userStore.svelte";
 import { Button } from "flowbite-svelte";
 import { Drawer } from "flowbite-svelte";
@@ -18,12 +17,11 @@ let hideDrawer: boolean = $state(true);
 // get user state
 onMount(user.load);
 
-// set this initially to user data such that the user data page is shown first
-activePage.set("childrenGallery");
-
 afterNavigate(() => {
 	hideDrawer = true;
 });
+
+let { children } = $props();
 </script>
 
 
@@ -54,7 +52,7 @@ afterNavigate(() => {
                 </Drawer>
 
                 <div class = "m-2 p-2 w-full pl-12 md:pl-2 md:w-auto">
-                    <svelte:component this={componentTable[$activePage]}/>
+                    {@render children?.()}
                 </div>
             </div>
         {:else}
