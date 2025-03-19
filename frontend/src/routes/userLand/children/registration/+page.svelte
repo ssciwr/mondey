@@ -1,6 +1,7 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
+import { goto } from "$app/navigation";
 import {
 	type ChildAnswerPublic,
 	type ChildCreate,
@@ -472,7 +473,7 @@ async function submitData(): Promise<void> {
                             <button
                                     class="btn-secondary"
                                     onclick={() => {
-            activePage.set("childrenFeedback");
+            goto('/userLand/children/feedback')
         }}>
                                 <ChartLineUpOutline size="md" />
                                 {i18n.tr.childData.feedbackButtonLabel}
@@ -480,7 +481,7 @@ async function submitData(): Promise<void> {
                             <button
                                     class="btn-primary"
                                     onclick={() => {
-            activePage.set("milestoneGroup");
+            goto('/userLand/milestone/group')
         }}
                             >
                                 <FlagOutline size="md" />

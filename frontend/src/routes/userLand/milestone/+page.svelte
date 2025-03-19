@@ -1,6 +1,7 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
+import { goto } from "$app/navigation";
 import {
 	type MilestoneAnswerSessionPublic,
 	type MilestonePublic,
@@ -12,7 +13,6 @@ import SubmitMilestoneImageModal from "$lib/components/DataInput/SubmitMilestone
 import MilestoneButton from "$lib/components/MilestoneButton.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { activePage } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
 import { Accordion, AccordionItem, Button } from "flowbite-svelte";
 import {
@@ -155,7 +155,7 @@ const breadcrumbdata = $derived([
 	{
 		label: currentChild.name,
 		onclick: () => {
-			goto(`/userLand/children/registration/${currentChild.id}`);
+			goto(`/userLand/children/registration?id=${currentChild.id}`);
 		},
 		symbol: UserSettingsOutline,
 	},

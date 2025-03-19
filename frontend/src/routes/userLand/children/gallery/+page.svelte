@@ -1,12 +1,12 @@
 <svelte:options runes={true} />
 <script lang="ts">
+import { goto } from "$app/navigation";
 import { getChildImage, getChildren } from "$lib/client/services.gen";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { activePage } from "$lib/stores/componentStore";
 import { type CardElement, type CardStyle } from "$lib/util";
 import { Heading, Spinner } from "flowbite-svelte";
 
@@ -109,7 +109,7 @@ async function setup(): Promise<CardElement[]> {
 						onclick: async () => {
 							currentChild.id = child.id;
 							await currentChild.load_data();
-							goto(`/userLand/children/registration/${child.id}`);
+							goto(`/userLand/children/registration?id=${child.id}`);
 						},
 					},
 				};

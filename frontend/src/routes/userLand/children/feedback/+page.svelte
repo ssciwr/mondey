@@ -1,5 +1,6 @@
 <svelte:options runes={true} />
 <script lang="ts">
+import { goto } from "$app/navigation";
 import {
 	type GetSummaryFeedbackForAnswersessionResponse,
 	type MilestoneAnswerSessionPublic,
@@ -15,7 +16,6 @@ import AlertMessage from "$lib/components/AlertMessage.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { activePage } from "$lib/stores/componentStore";
 import { user } from "$lib/stores/userStore.svelte";
 import {
 	Accordion,
@@ -155,7 +155,7 @@ const breadcrumbdata: any[] = [
 	{
 		label: currentChild.name,
 		onclick: () => {
-			goto(`/userLand/children/registration/${currentChild.id}`);
+			goto(`/userLand/children/registration?id=${currentChild.id}`);
 		},
 		symbol: UserSettingsOutline,
 	},
