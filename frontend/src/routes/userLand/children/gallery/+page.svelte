@@ -1,4 +1,3 @@
-<!-- Deprecated -->
 <svelte:options runes={true} />
 <script lang="ts">
 import { getChildImage, getChildren } from "$lib/client/services.gen";
@@ -152,44 +151,44 @@ const searchData = [
 </script>
 
 {#await promise}
-	<Spinner /> <p>{i18n.tr.userData.loadingMessage}</p>
+    <Spinner /> <p>{i18n.tr.userData.loadingMessage}</p>
 {:then data}
-	{#if showAlert}
-		<AlertMessage
-			title={i18n.tr.childData.alertMessageTitle}
-			message={alertMessage}
-			onclick={() => {
+    {#if showAlert}
+        <AlertMessage
+                title={i18n.tr.childData.alertMessageTitle}
+                message={alertMessage}
+                onclick={() => {
 				showAlert = false;
 			}}
-		/>
-	{/if}
+        />
+    {/if}
 
-	<div class="m-2 mx-auto w-full pb-4 md:rounded-t-lg">
+    <div class="m-2 mx-auto w-full pb-4 md:rounded-t-lg">
 
-		<Heading
-			tag="h1"
-			class="m-2 mb-2 p-4 "
-			color="text-gray-700 dark:text-gray-400">{i18n.tr.childData.overviewLabel}</Heading
-		>
+        <Heading
+                tag="h1"
+                class="m-2 mb-2 p-4 "
+                color="text-gray-700 dark:text-gray-400">{i18n.tr.childData.overviewLabel}</Heading
+        >
 
-		<div class="cols-1 grid w-full gap-y-8 p-2">
-			<p class="w-auto p-2 text-lg text-gray-700 dark:text-gray-400">
-				{i18n.tr.childData.overviewSummary}
-			</p>
-			<GalleryDisplay
-				{data}
-				itemComponent={CardDisplay}
-				componentProps={style}
-				{searchData}
-			/>
-		</div>
-	</div>
+        <div class="cols-1 grid w-full gap-y-8 p-2">
+            <p class="w-auto p-2 text-lg text-gray-700 dark:text-gray-400">
+                {i18n.tr.childData.overviewSummary}
+            </p>
+            <GalleryDisplay
+                    {data}
+                    itemComponent={CardDisplay}
+                    componentProps={style}
+                    {searchData}
+            />
+        </div>
+    </div>
 {:catch error}
-	<AlertMessage
-		title={"Error in server request"}
-		message={error.message}
-		onclick={() => {
+    <AlertMessage
+            title={"Error in server request"}
+            message={error.message}
+            onclick={() => {
 			showAlert = false;
 		}}
-	/>
+    />
 {/await}

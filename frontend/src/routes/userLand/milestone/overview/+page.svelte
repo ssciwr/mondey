@@ -1,4 +1,3 @@
-<!-- Deprecated -->
 <svelte:options runes={true} />
 <script lang="ts">
 import {
@@ -218,24 +217,24 @@ const breadcrumbdata: any[] = [
 </script>
 
 {#await promise}
-	<p>{i18n.tr.userData.loadingMessage}</p>
+    <p>{i18n.tr.userData.loadingMessage}</p>
 {:then}
-	{#if showAlert}
-		<AlertMessage message={alertMessage} />
-	{:else}
-		<div class="mx-auto flex flex-col md:rounded-t-lg">
-			<Breadcrumbs data={breadcrumbdata} />
-			<div class="grid gap-y-4 p-4">
-				<GalleryDisplay
-					data={data}
-					itemComponent={CardDisplay}
-					componentProps={createStyle(data)}
-					withSearch={true}
-					{searchData}
-				/>
-			</div>
-		</div>
-	{/if}
+    {#if showAlert}
+        <AlertMessage message={alertMessage} />
+    {:else}
+        <div class="mx-auto flex flex-col md:rounded-t-lg">
+            <Breadcrumbs data={breadcrumbdata} />
+            <div class="grid gap-y-4 p-4">
+                <GalleryDisplay
+                        data={data}
+                        itemComponent={CardDisplay}
+                        componentProps={createStyle(data)}
+                        withSearch={true}
+                        {searchData}
+                />
+            </div>
+        </div>
+    {/if}
 {:catch error}
-<AlertMessage message={error} />
+    <AlertMessage message={error} />
 {/await}

@@ -1,4 +1,3 @@
-<!-- Deprecated -->
 <svelte:options runes={true} />
 <script lang="ts">
 import {
@@ -227,29 +226,29 @@ let validMilestoneGroups = $derived(
 </script>
 
 {#await promise}
-<Spinner /> <p>{i18n.tr.userData.loadingMessage}</p>
+    <Spinner /> <p>{i18n.tr.userData.loadingMessage}</p>
 {:then data}
 
-<div class="flex flex-col md:rounded-t-lg">
-	<Breadcrumbs data={breadcrumbdata} />
-	<div class="grid gap-y-8">
-		{#if validMilestoneGroups.length > 0}
-				<GalleryDisplay
-			data={validMilestoneGroups}
-			itemComponent={CardDisplay}
-			componentProps={createStyle(data)}
-			withSearch={true}
-			{searchData}
-				/>
-			{:else}
-			<AlertMessage
-					title={i18n.tr.milestone.noRelevantMilestones}
-			/>
-		{/if}
-	</div>
-</div>
+    <div class="flex flex-col md:rounded-t-lg">
+        <Breadcrumbs data={breadcrumbdata} />
+        <div class="grid gap-y-8">
+            {#if validMilestoneGroups.length > 0}
+                <GalleryDisplay
+                        data={validMilestoneGroups}
+                        itemComponent={CardDisplay}
+                        componentProps={createStyle(data)}
+                        withSearch={true}
+                        {searchData}
+                />
+            {:else}
+                <AlertMessage
+                        title={i18n.tr.milestone.noRelevantMilestones}
+                />
+            {/if}
+        </div>
+    </div>
 {:catch error}
-	<AlertMessage message={`${i18n.tr.milestone.alertMessageError} ${error}`} onclick={() => {
+    <AlertMessage message={`${i18n.tr.milestone.alertMessageError} ${error}`} onclick={() => {
 		activePage.set("milestoneOverview");
 		showAlert = false;
 	}}/>
