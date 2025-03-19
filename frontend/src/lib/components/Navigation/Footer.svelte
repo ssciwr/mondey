@@ -11,10 +11,17 @@ import {
 import { FacebookSolid, InstagramSolid } from "flowbite-svelte-icons";
 </script>
 
+
+
   <Footer footerType="socialmedia" class="bg-zinc-700">
+    <div class="w-full text-center min-w-full">
+      <a href="/">
+        <img class="h-16 sm:block lg:hidden inline" src={logo_dark} alt="MONDEY logo"/>
+      </a>
+    </div>
     <div class="flex justify-between items-center px-1">
       <div class="mb-2 mr-5 lg:ml-11 md:ml-10 max-sm:mr-3 max-sm:ml-1">
-        <FooterBrand class="flex" href="/" src={logo_dark} alt="MONDEY logo"/>
+        <FooterBrand imgClass="me-3 h-16 hidden lg:block" class="flex" href="/" src={logo_dark} alt="MONDEY logo"/>
       </div>
       <div class="grid grid-cols-2 gap-9 sm:grid-cols-2 min-md:mr-20 lg:mr-20 ml-3">
         <div>

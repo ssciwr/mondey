@@ -9,6 +9,7 @@ import Milestone from "$lib/components/Milestone.svelte";
 import MilestoneGroup from "$lib/components/MilestoneGroup.svelte";
 import MilestoneOverview from "$lib/components/MilestoneOverview.svelte";
 import UserDataInput from "$lib/components/UserDataInput.svelte";
+import UserSettings from "$lib/components/UserSettings.svelte";
 import { Card, Input, MultiSelect, Select, Textarea } from "flowbite-svelte";
 import { writable } from "svelte/store";
 
@@ -33,8 +34,8 @@ export const componentTable: ComponentTable = {
 	textarea: Textarea,
 	adminPage: AdminPage,
 	researchPage: Card,
+	settings: UserSettings,
 };
 
 // used in userlandingpage to make it single page
-export const activeTabPersonal = writable("userDataInput");
-export const activeTabChildren = writable("childrenGallery");
+export const activePage = writable("userDataInput");

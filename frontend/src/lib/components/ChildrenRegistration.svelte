@@ -22,12 +22,15 @@ import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { activeTabChildren, componentTable } from "$lib/stores/componentStore";
+import { activePage, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Hr, Input, Spinner } from "flowbite-svelte";
 import {
+	ChartLineUpOutline,
 	CheckCircleOutline,
-	PlayOutline,
+	FlagOutline,
+	GridPlusSolid,
+	PenOutline,
 	TrashBinOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
@@ -62,8 +65,18 @@ let showAlert = $state(false);
 let childLabel = $derived(name ? name : i18n.tr.childData.newChildHeadingLong);
 let breadcrumbdata = $derived([
 	{
+		label: i18n.tr.childData.overviewLabel,
+		onclick: () => {
+			activePage.set("childrenGallery");
+		},
+		symbol: GridPlusSolid,
+	},
+	{
 		label: childLabel,
 		symbol: UserSettingsOutline,
+		onclick: () => {
+			activePage.set("childrenRegistration");
+		},
 	},
 ]);
 
@@ -255,7 +268,7 @@ async function submitData(): Promise<void> {
 
 	// disable all elements to make editing a conscious choice amd go back to childrenGallery
 	console.log("submission of child data successful.");
-	activeTabChildren.set("childrenGallery");
+	activePage.set("childrenGallery");
 }
 </script>
 
@@ -277,11 +290,63 @@ async function submitData(): Promise<void> {
 	{:else}
 		<div class="container m-2 mx-auto w-full pb-4">
 			<Card class="container m-1 mx-auto w-full max-w-xl">
-				<Heading
-					tag="h3"
-					class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
-					>{childLabel}</Heading
-				>
+                <Heading
+                        tag="h3"
+                        class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
+                >{childLabel}
+                    {#if disableEdit}
+                        <small class="justify-end">
+                            <button aria-label={i18n.tr.admin.edit}
+                                    type="button"
+                                    class="btn-secondary btn-icon"
+                                    onclick={() => {
+								disableEdit = false;
+							}}
+                            >
+                                <PenOutline size="md" />
+                            </button>
+
+                            {#if currentChild.id !== null && disableEdit === true}
+                                <button
+                                        class="btn-danger btn-icon"
+                                        aria-label={i18n.tr.admin.delete}
+                                        onclick={async () => {
+								if (currentChild.id === null) {
+									console.log("no child id, no child to delete");
+									showAlert = true;
+									alertMessage = i18n.tr.childData.alertMessageError;
+									return;
+								}
+
+								const response = await deleteChild({
+									path: {
+										child_id: currentChild.id,
+									}
+								});
+
+								if (response.error) {
+									console.log("Error when deleting child");
+									showAlert = true;
+									alertMessage=i18n.tr.childData.alertMessageError + response.error.detail;
+								}
+								else {
+									activePage.update((value) => {
+										return "childrenGallery";
+									});
+									currentChild.id = null;
+								}
+							}}
+                                ><TrashBinOutline size="md"/></button
+                                >
+                            {/if}
+                            <br />
+
+                            <span>{i18n.tr.childData.monthYearSubtext} </span>
+                            <span class="text-muted">{birthmonth} / {birthyear}</span>
+                        </small>
+                    {/if}
+                </Heading
+                >
 				{#if showAlert}
 					<AlertMessage
 						title={i18n.tr.childData.alertMessageTitle}
@@ -295,82 +360,86 @@ async function submitData(): Promise<void> {
 					class="m-1 mx-auto w-full flex-col space-y-6"
 					onsubmit={preventDefault(submitData)}
 				>
-					<DataInput
-						component={componentTable["input"]}
-						bind:value={name}
-						label={i18n.tr.childData.childName}
-						required={true}
-						placeholder={i18n.tr.childData.pleaseEnter}
-						disabled={disableEdit}
-						id="child_name"
-						kwargs = {{type: "text"}}
+					{#if disableEdit}
+
+					{:else}
+						<DataInput
+							component={componentTable["input"]}
+							bind:value={name}
+							label={i18n.tr.childData.childName}
+							required={true}
+							placeholder={i18n.tr.childData.pleaseEnter}
+							disabled={disableEdit}
+							id="child_name"
+							kwargs = {{type: "text"}}
+							/>
+
+						<DataInput
+							component={componentTable["input"]}
+							bind:value={birthmonth}
+							label={i18n.tr.childData.childBirthMonth}
+							required={true}
+							placeholder={i18n.tr.childData.pleaseEnterNumber}
+							disabled={disableEdit}
+							id="child_birthmonth"
+							kwargs = {{type: "number", min: 0, max:12, step: '1'}}
+							/>
+
+						<DataInput
+							component={componentTable["input"]}
+							bind:value={birthyear}
+							label={i18n.tr.childData.childBirthYear}
+							required={true}
+							placeholder={i18n.tr.childData.pleaseEnterNumber}
+							disabled={disableEdit}
+							id="child_birthyear"
+							kwargs = {{type: "number", min: 2007, step: '1'}}
+							/>
+
+						<DataInput
+							component={componentTable["fileupload"]}
+							bind:value={image}
+							label={image !== null ? i18n.tr.childData.imageOfChildChange : i18n.tr.childData.imageOfChildNew}
+							required={false}
+							placeholder={i18n.tr.childData.noFileChosen}
+							disabled={disableEdit}
+							id="child_image"
+							kwargs = {{accept: ".jpg, .jpeg, .png", clearable: true}}
+							/>
+
+						<DataInput
+							component={Input}
+							bind:value={color}
+							label={i18n.tr.childData.childColor}
+							required={false}
+							placeholder={i18n.tr.childData.chooseColor}
+							disabled={disableEdit}
+							id="child_color"
+							kwargs = {{type: "color"}}
+							componentClass="w-1/4 h-12 rounded"
 						/>
 
-					<DataInput
-						component={componentTable["input"]}
-						bind:value={birthmonth}
-						label={i18n.tr.childData.childBirthMonth}
-						required={true}
-						placeholder={i18n.tr.childData.pleaseEnterNumber}
-						disabled={disableEdit}
-						id="child_birthmonth"
-						kwargs = {{type: "number", min: 0, max:12, step: '1'}}
-						/>
-
-					<DataInput
-						component={componentTable["input"]}
-						bind:value={birthyear}
-						label={i18n.tr.childData.childBirthYear}
-						required={true}
-						placeholder={i18n.tr.childData.pleaseEnterNumber}
-						disabled={disableEdit}
-						id="child_birthyear"
-						kwargs = {{type: "number", min: 2007, step: '1'}}
-						/>
-
-					<DataInput
-						component={componentTable["fileupload"]}
-						bind:value={image}
-						label={image !== null ? i18n.tr.childData.imageOfChildChange : i18n.tr.childData.imageOfChildNew}
-						required={false}
-						placeholder={i18n.tr.childData.noFileChosen}
-						disabled={disableEdit}
-						id="child_image"
-						kwargs = {{accept: ".jpg, .jpeg, .png", clearable: true}}
-						/>
-
-					<DataInput
-						component={Input}
-						bind:value={color}
-						label={i18n.tr.childData.childColor}
-						required={false}
-						placeholder={i18n.tr.childData.chooseColor}
-						disabled={disableEdit}
-						id="child_color"
-						kwargs = {{type: "color"}}
-						componentClass="w-1/4 h-12 rounded"
-					/>
-
-					{#if image !== null && disableEdit === false}
-						<Button
-							type="button"
-							class="w-full text-center text-sm text-white"
-							color={"red"}
-							disabled={disableImageDelete}
-							on:click={() => {
-								image = null;
-								disableImageDelete = true;
-								imageDeleted = true;
-							}}
-						>
-							<div class="flex items-center justify-center">
-								<TrashBinOutline size='md'/> {i18n.tr.childData.deleteImageButton}
-							</div>
-						</Button>
-					{:else if disableImageDelete === true}
-						<p class="text-center text-sm text-gray-700 dark:text-gray-400 flex items-center justify-center">
-							<CheckCircleOutline size="lg" color="green"/> {i18n.tr.childData.imageOfChildChangeDelete}
-						</p>
+						{#if image !== null && disableEdit === false}
+							<Button
+								type="button"
+								class="w-full text-center text-sm text-white"
+								color={"red"}
+								disabled={disableImageDelete}
+								on:click={() => {
+									image = null;
+									disableImageDelete = true;
+									imageDeleted = true;
+								}}
+							>
+								<div class="flex items-center justify-center">
+									<TrashBinOutline size="sm"/> {i18n.tr.childData.deleteImageButton}
+								</div>
+							</Button>
+						{:else if disableImageDelete === true}
+							<p class="text-center text-sm text-gray-700 dark:text-gray-400 flex items-center justify-center">
+								<CheckCircleOutline size="lg" color="green"/> {i18n.tr.childData.imageOfChildChangeDelete}
+							</p>
+						{/if}
 					{/if}
 
 					{#each questionnaire as element, i}
@@ -393,81 +462,34 @@ async function submitData(): Promise<void> {
 							placeholder=""
 						/>
 					{/each}
-					{#if disableEdit === true}
-						<Button
-							type="button"
-							class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
-							on:click={() => {
-								disableEdit = false;
-							}}
-						>
-							<div class="flex items-center justify-center">
-								{i18n.tr.childData.changeData}
-							</div>
-						</Button>
-					{:else}
-						<Button
-							class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+					{#if disableEdit === false}
+						<button
+							class="btn-primary"
 							type="submit"
-							>{i18n.tr.childData.submitButtonLabel}</Button
+							>{i18n.tr.childData.submitButtonLabel}</button
 						>
 					{/if}
-					{#if currentChild.id !== null}
-						<Button
-							class=" w-full text-center text-sm text-white"
-							type="button"
-							color="green"
-							on:click={() => {
-								activeTabChildren.set("milestoneGroup");
-							}}
-							>
-							<PlayOutline size='sm'/>
-							{i18n.tr.childData.nextButtonLabel}
-						</Button>
-						<Button
-							class=" w-full text-center text-sm text-white"
-							color = "yellow"
-							type ="button"
+
+
+					{#if currentChild.id !== null && disableEdit === true}
+						<button
+							class="btn-secondary"
 							onclick={() => {
-								activeTabChildren.set("childrenFeedback");
-							}}
-							>
-							<PlayOutline size='sm'/>
+								activePage.set("childrenFeedback");
+							}}>
+							<ChartLineUpOutline size="md" />
 							{i18n.tr.childData.feedbackButtonLabel}
-						</Button>
-						<Hr hrClass="my-8"/>
-						<Button
-							class=" w-full text-center text-sm text-white"
-							type="button"
-							color="red"
-							on:click={async () => {
-								if (currentChild.id === null) {
-									console.log("no child id, no child to delete");
-									showAlert = true;
-									alertMessage = i18n.tr.childData.alertMessageError;
-									return;
-								}
-
-								const response = await deleteChild({
-									path: {
-										child_id: currentChild.id,
-									}
-								});
-
-								if (response.error) {
-									console.log("Error when deleting child");
-									showAlert = true;
-									alertMessage=i18n.tr.childData.alertMessageError + response.error.detail;
-								}
-								else {
-									activeTabChildren.update((value) => {
-										return "childrenGallery";
-									});
-									currentChild.id = null;
-								}
+						</button>
+						<button
+								class="btn-primary"
+								onclick={() => {
+								activePage.set("milestoneGroup");
 							}}
-							><TrashBinOutline size='sm'/> {i18n.tr.childData.deleteButtonLabel}</Button
 						>
+							<FlagOutline size="md" />
+							{i18n.tr.childData.nextButtonLabel}
+						</button>
+
 					{/if}
 				</form>
 			</Card>

@@ -14,7 +14,7 @@ import {
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { activeTabChildren } from "$lib/stores/componentStore";
+import { activePage } from "$lib/stores/componentStore";
 import { user } from "$lib/stores/userStore.svelte";
 import {
 	Accordion,
@@ -28,11 +28,12 @@ import {
 	Tabs,
 } from "flowbite-svelte";
 import {
-	BellActiveSolid,
 	ChartLineUpOutline,
 	CheckCircleSolid,
 	CloseCircleSolid,
 	ExclamationCircleSolid,
+	GridPlusSolid,
+	QuestionCircleSolid,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import AlertMessage from "./AlertMessage.svelte";
@@ -114,7 +115,7 @@ let milestonePresentation = [
 		showExplanation: false,
 	},
 	{
-		icon: BellActiveSolid,
+		icon: QuestionCircleSolid,
 		text: i18n.tr.milestone.recommendWatch,
 		short: i18n.tr.milestone.recommendWatchShort,
 		class: "text-feedback-1 w-16",
@@ -132,16 +133,23 @@ let milestonePresentation = [
 // data defining where the breadcrumb elements should lead to
 const breadcrumbdata: any[] = [
 	{
+		label: i18n.tr.childData.overviewLabel,
+		onclick: () => {
+			activePage.set("childrenGallery");
+		},
+		symbol: GridPlusSolid,
+	},
+	{
 		label: currentChild.name,
 		onclick: () => {
-			activeTabChildren.set("childrenRegistration");
+			activePage.set("childrenRegistration");
 		},
 		symbol: UserSettingsOutline,
 	},
 	{
 		label: i18n.tr.milestone.feedbackTitle,
 		onclick: () => {
-			activeTabChildren.set("childrenFeedback");
+			activePage.set("childrenFeedback");
 		},
 		symbol: ChartLineUpOutline,
 	},
@@ -431,7 +439,7 @@ async function printReport(): Promise<void> {
 		{#if Math.min(...(Object.values(summary[aid]) as number[])) === 1}
 			{@render summaryEvaluationElement(CheckCircleSolid, "text-feedback-0", i18n.tr.milestone.recommendOk)}
 		{:else if Math.min(...(Object.values(summary[aid]) as number[])) === 0}
-			{@render summaryEvaluationElement(BellActiveSolid, "text-feedback-1", i18n.tr.milestone.recommendWatch)}
+			{@render summaryEvaluationElement(QuestionCircleSolid, "text-feedback-1", i18n.tr.milestone.recommendWatch)}
 		{:else if Math.min(...(Object.values(summary[aid]) as number[])) === -1}
 			{@render summaryEvaluationElement(ExclamationCircleSolid, "text-feedback-2", i18n.tr.milestone.recommendHelp)}
 		{:else}
@@ -472,7 +480,7 @@ async function printReport(): Promise<void> {
 		{#if grade === 1}
 			{@render evaluationElement(CheckCircleSolid, milestone_or_group, "text-feedback-0", isMilestone)}
 		{:else if grade === 0}
-			{@render evaluationElement(BellActiveSolid, milestone_or_group, "text-feedback-1", isMilestone)}
+			{@render evaluationElement(QuestionCircleSolid, milestone_or_group, "text-feedback-1", isMilestone)}
 			{#if isMilestone}
 				{@render milestoneHelpButton(milestone_or_group as MilestonePublic)}
 			{/if}
