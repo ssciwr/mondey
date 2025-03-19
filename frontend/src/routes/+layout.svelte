@@ -3,11 +3,13 @@
 import { base } from "$app/paths";
 import logo_dark from "$lib/assets/mondey_dark.svg";
 import logo_light from "$lib/assets/mondey_light.svg";
+import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import Footer from "$lib/components/Navigation/Footer.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStoreSvelte } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
+
 import {
 	Button,
 	Drawer,
@@ -32,12 +34,11 @@ import {
 import { onMount } from "svelte";
 
 import "../app.css";
-import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 
 import { afterNavigate } from "$app/navigation";
-import { page } from "$app/stores";
+import { page } from "$app/state";
 
-let isUserLand = $derived($page.url.pathname.includes("userLandingpage"));
+let isUserLand = $derived(page.url.pathname.includes("userLandingpage"));
 afterNavigate(() => {
 	hideDrawer = true;
 });

@@ -51,7 +51,7 @@ let {
 }: {
 	name: string | null | undefined;
 	image: File | boolean | null;
-	color: string;
+	color: string | null | undefined;
 	birthyear: number | null;
 	birthmonth: number | null;
 } = $props();
@@ -113,7 +113,7 @@ async function setup(): Promise<{
 			birthyear = child.data.birth_year;
 			birthmonth = child.data.birth_month;
 			image = child.data.has_image ? true : null;
-			color = child.data.color;
+			color = child.data.color ?? null;
 		}
 
 		// get existing answers
