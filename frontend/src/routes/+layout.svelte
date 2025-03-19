@@ -34,21 +34,11 @@ import {
 import { onMount } from "svelte";
 
 import "../app.css";
-import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 
 import { afterNavigate } from "$app/navigation";
 import { page } from "$app/stores";
 
 let isUserLand = $derived($page.url.pathname.includes("userLandingpage"));
-afterNavigate(() => {
-	hideDrawer = true;
-});
-// Done this way because, other approaches to the layout (like a different +layout for userLand) would largely duplicate this one, but it is still hardcoded.
-
-import { afterNavigate } from "$app/navigation";
-import { page } from "$app/state";
-
-let isUserLand = $derived(page.url.pathname.includes("userLandingpage"));
 afterNavigate(() => {
 	hideDrawer = true;
 });
