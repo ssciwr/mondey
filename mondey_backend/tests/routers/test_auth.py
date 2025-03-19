@@ -8,8 +8,6 @@ from sqlmodel import select
 from mondey_backend.dependencies import UserAsyncSessionDep
 from mondey_backend.models.users import User
 
-from mondey_backend.src.mondey_backend.users import is_test_account_user
-
 
 class SMTPMock:
     last_message: EmailMessage | None = None
@@ -52,8 +50,11 @@ def test_register_new_user(public_client: TestClient, smtp_mock: SMTPMock):
     response = public_client.post("/auth/verify", json={"token": token})
     assert response.status_code == 200
 
+
 @pytest.mark.asyncio
-async def test_register_test_account(public_client: TestClient, smtp_mock: SMTPMock, user_session: UserAsyncSessionDep):
+async def test_register_test_account(
+    public_client: TestClient, smtp_mock: SMTPMock, user_session: UserAsyncSessionDep
+):
     assert smtp_mock.last_message is None
     email = "2349812.12234987tester@testaccount.com"
     response = public_client.post(
@@ -61,7 +62,9 @@ async def test_register_test_account(public_client: TestClient, smtp_mock: SMTPM
     )
     assert response.status_code == 201
     msg = smtp_mock.last_message
-    assert msg is None  # we want no last message, because it should not email upon test account registrations.
+    assert (
+        msg is None
+    )  # we want no last message, because it should not email upon test account registrations.
 
     user_query = select(User).where(User.email == email)
     result = await user_session.execute(user_query)
@@ -69,7 +72,6 @@ async def test_register_test_account(public_client: TestClient, smtp_mock: SMTPM
 
     assert user is not None
     assert user.is_verified is True
-
 
 
 def test_register_new_user_invalid_research_code_ignored(
@@ -154,23 +156,3 @@ def test_user_forgot_password_invalid_email(
     response = user_client.post("/auth/forgot-password", json={"email": email})
     assert "@" in response.json()["detail"][0]["msg"]
     assert response.json()["detail"][0]["type"] == "value_error"
-
-
-
-# It would probably be better to use the User class, and add the email field to it, than to use a mock user
-class MockUser:
-    def __init__(self, email, **kwargs):
-        self.email = email
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-def test_is_test_account():
-    tester_email = '123tester@testaccount.com'
-    nontester_email = 'heidelberguser@uni-heidelberg.de'
-    nontester_email_2 = 'Contester@gmail.com'
-
-    assert is_test_account_user(MockUser(email=tester_email))
-    assert False == is_test_account_user(MockUser(email=nontester_email))
-    assert False == is_test_account_user(MockUser(email=nontester_email_2))
-
-    assert False == is_test_account_user(MockUser()) # When no email is present
