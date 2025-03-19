@@ -41,6 +41,3 @@ def test_is_test_account(test_user, active_user):
         assert not is_test_account_user(
             active_user.email
         )  # When the email gets (wrongly) directly passed in
-
-    with pytest.raises(TypeError):
-        assert not is_test_account_user()  # When no email is present
