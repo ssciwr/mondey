@@ -75,7 +75,7 @@ let alertMessage: string = $state(i18n.tr.login.badCredentials);
 	/>
 {/if}
 
-<div class="container m-2 mx-auto w-full max-w-xl p-6">
+<div class="container m-2 mx-auto w-full max-w-xl">
 	<Card class="container m-2 mx-auto mb-6 w-full max-w-xl pb-6">
 		<Heading
 			tag="h3"
@@ -117,7 +117,7 @@ let alertMessage: string = $state(i18n.tr.login.badCredentials);
 					required
 				/>
 				<a href={`${base}/forgotPassword`} class="text-primary-700 dark:text-primary-500">
-					{i18n.tr.login.forgotPassword} </a>
+					{i18n.tr.login.forgotPassword}
 			</div>
 
 			<Button

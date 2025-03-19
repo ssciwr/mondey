@@ -10,7 +10,7 @@ import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { activePage } from "$lib/stores/componentStore";
+import { activeTabChildren } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
 import {
 	CheckCircleSolid,
@@ -125,7 +125,7 @@ async function setup(): Promise<void> {
 					summary: item?.text?.[i18n.locale]?.desc ?? "",
 					events: {
 						onclick: () => {
-							activePage.set("milestone");
+							activeTabChildren.set("milestone");
 							contentStore.milestone = item.id;
 							contentStore.milestoneData = item;
 							contentStore.milestoneIndex = idx;
@@ -192,21 +192,21 @@ const breadcrumbdata: any[] = [
 	{
 		label: currentChild.name,
 		onclick: () => {
-			activePage.set("childrenRegistration");
+			activeTabChildren.set("childrenRegistration");
 		},
 		symbol: UserSettingsOutline,
 	},
 	{
 		label: i18n.tr.milestone.groupOverviewLabel,
 		onclick: () => {
-			activePage.set("milestoneGroup");
+			activeTabChildren.set("milestoneGroup");
 		},
 		symbol: RectangleListOutline,
 	},
 	{
 		label: contentStore.milestoneGroupData.text[i18n.locale].title,
 		onclick: () => {
-			activePage.set("milestoneOverview");
+			activeTabChildren.set("milestoneOverview");
 		},
 		symbol: GridOutline,
 	},
