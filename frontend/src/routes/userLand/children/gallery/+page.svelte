@@ -93,8 +93,12 @@ async function setup(): Promise<CardElement[]> {
 
 	if (children.error) {
 		console.log("Error when retrieving child data");
-		showAlert = true;
-		alertMessage = i18n.tr.childData.alertMessageRetrieving;
+		alertStore.showAlert(
+			i18n.tr.childData.alertMessageTitle,
+			i18n.tr.childData.alertMessageRetrieving,
+			true,
+			true,
+		);
 	} else {
 		const childrenData = await Promise.all(
 			(children.data || []).map(async (child): Promise<CardElement> => {
