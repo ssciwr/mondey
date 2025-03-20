@@ -182,7 +182,12 @@ async function loadAnswersessions(): Promise<void> {
 	}
 	await currentChild.load_data();
 	if (currentChild.id === null || user.id === null) {
-		showAlert = true;
+		alertStore.showAlert(
+			i18n.tr.childData.alertMessageTitle, 
+			i18n.tr.childData.alertMessageError, 
+			true, 
+			true
+		);
 		return;
 	}
 
@@ -192,8 +197,12 @@ async function loadAnswersessions(): Promise<void> {
 	});
 
 	if (responseAnswerSessions.error) {
-		showAlert = true;
-		alertMessage = responseAnswerSessions.error.detail;
+		alertStore.showAlert(
+			i18n.tr.childData.alertMessageTitle, 
+			responseAnswerSessions.error.detail, 
+			true, 
+			true
+		);
 		return;
 	}
 	answerSessions = responseAnswerSessions.data;
@@ -222,8 +231,12 @@ async function loadSummaryFeedbackFor(
 	});
 
 	if (milestoneGroupResponse.error) {
-		showAlert = true;
-		alertMessage = milestoneGroupResponse.error.detail;
+		alertStore.showAlert(
+			i18n.tr.childData.alertMessageTitle, 
+			milestoneGroupResponse.error.detail, 
+			true, 
+			true
+		);
 		return null;
 	}
 
@@ -239,8 +252,12 @@ async function loadSummaryFeedbackFor(
 	});
 
 	if (responseFeedback.error) {
-		showAlert = true;
-		alertMessage = responseFeedback.error.detail;
+		alertStore.showAlert(
+			i18n.tr.childData.alertMessageTitle, 
+			responseFeedback.error.detail, 
+			true, 
+			true
+		);
 		return null;
 	}
 
@@ -266,8 +283,12 @@ async function loadDetailedFeedbackFor(
 	});
 
 	if (response.error) {
-		showAlert = true;
-		alertMessage = response.error.detail;
+		alertStore.showAlert(
+			i18n.tr.childData.alertMessageTitle, 
+			response.error.detail, 
+			true, 
+			true
+		);
 		return null;
 	}
 
