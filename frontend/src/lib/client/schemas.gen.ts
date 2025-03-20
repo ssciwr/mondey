@@ -338,6 +338,11 @@ export const ChildQuestionPublicSchema = {
             type: 'string',
             title: 'Additional Option',
             default: ''
+        },
+        required: {
+            type: 'boolean',
+            title: 'Required',
+            default: false
         }
     },
     type: 'object',
@@ -1108,6 +1113,11 @@ export const UserQuestionPublicSchema = {
             type: 'string',
             title: 'Additional Option',
             default: ''
+        },
+        required: {
+            type: 'boolean',
+            title: 'Required',
+            default: false
         }
     },
     type: 'object',

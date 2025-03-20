@@ -450,7 +450,7 @@ async function submitData(): Promise<void> {
 								.additional_answer}
 							label={element?.text?.[i18n.locale].question}
 							textTrigger={element.additional_option}
-							required={element.component === 'fileupload' ? false : true}
+							required={(element.component === 'fileupload' || element.required === false) ? false : true}
 							additionalRequired={true}
 							id={"input_" + String(i)}
 							items={element?.text?.[i18n.locale].options_json === ""

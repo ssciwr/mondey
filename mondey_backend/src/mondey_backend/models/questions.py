@@ -38,6 +38,7 @@ class QuestionPublic(SQLModel):
     type: str = "text"
     text: dict[str, QuestionTextPublic] = {}
     additional_option: str = ""
+    required: bool = False
 
 
 class UserQuestionText(QuestionTextBase, table=True):
