@@ -18,7 +18,7 @@ import {
 	updateCurrentChildAnswers,
 	uploadChildImage,
 } from "$lib/client";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
@@ -61,8 +61,6 @@ let {
 let disableEdit: boolean = $state(false);
 let disableImageDelete: boolean = $state(false);
 let imageDeleted: boolean = $state(false);
-let alertMessage: string = $state(i18n.tr.childData.alertMessageMissing);
-let showAlert = $state(false);
 let childLabel = $derived(name ? name : i18n.tr.childData.newChildHeadingLong);
 let breadcrumbdata = $derived([
 	{
@@ -93,8 +91,7 @@ async function setup(): Promise<{
 			"Error when getting userquestions: ",
 			(questions.error as ErrorModel).detail,
 		);
-		showAlert = true;
-		alertMessage = i18n.tr.childData.alertMessageError;
+		alertStore.showAlert(i18n.tr.childData.alertMessageTitle, i18n.tr.childData.alertMessageError, true);
 	} else {
 		questionnaire = questions.data;
 	}
@@ -105,8 +102,7 @@ async function setup(): Promise<{
 
 		if (child.error) {
 			console.log("Error when getting child: ", child.error.detail);
-			showAlert = true;
-			alertMessage = i18n.tr.childData.alertMessageError;
+			alertStore.showAlert(i18n.tr.childData.alertMessageTitle, i18n.tr.childData.alertMessageError, true);
 		} else {
 			name = child.data.name ?? null;
 			birthyear = child.data.birth_year;
@@ -127,8 +123,7 @@ async function setup(): Promise<{
 				"Error when getting current answers for child: ",
 				currentAnswers.error.detail,
 			);
-			showAlert = true;
-			alertMessage = i18n.tr.childData.alertMessageError;
+			alertStore.showAlert(i18n.tr.childData.alertMessageTitle, i18n.tr.childData.alertMessageError, true);
 		} else {
 			answers = currentAnswers.data;
 			disableEdit = true;
@@ -169,9 +164,8 @@ async function submitChildData(): Promise<void> {
 		});
 
 		if (new_child.error) {
-			showAlert = true;
-			alertMessage =
-				i18n.tr.childData.alertMessageCreate + new_child.error.detail;
+			alertStore.showAlert(i18n.tr.childData.alertMessageTitle, 
+				i18n.tr.childData.alertMessageCreate + new_child.error.detail, true);
 			return;
 		}
 		currentChild.id = new_child.data.id;
@@ -191,8 +185,8 @@ async function submitChildData(): Promise<void> {
 		});
 
 		if (response.error) {
-			showAlert = true;
-			alertMessage = `${i18n.tr.childData.alertMessageUpdate} ${response.error.detail}`;
+			alertStore.showAlert(i18n.tr.childData.alertMessageTitle, 
+				`${i18n.tr.childData.alertMessageUpdate} ${response.error.detail}`, true);
 			return;
 		}
 	}
@@ -210,8 +204,8 @@ async function submitChildData(): Promise<void> {
 			"Error when sending user question answers: ",
 			response.error.detail,
 		);
-		alertMessage = `${i18n.tr.childData.alertMessageError} ${response.error.detail}`;
-		showAlert = true;
+		alertStore.showAlert(i18n.tr.childData.alertMessageTitle, 
+			`${i18n.tr.childData.alertMessageError} ${response.error.detail}`, true);
 		return;
 	}
 }
@@ -219,8 +213,7 @@ async function submitChildData(): Promise<void> {
 async function submitImageData(): Promise<void> {
 	if (currentChild.id === null) {
 		console.log("no child id, no image to upload");
-		showAlert = true;
-		alertMessage = i18n.tr.childData.alertMessageError;
+		alertStore.showAlert(i18n.tr.childData.alertMessageTitle, i18n.tr.childData.alertMessageError, true);
 		return;
 	}
 
@@ -233,8 +226,8 @@ async function submitImageData(): Promise<void> {
 
 		if (response.error) {
 			console.log("error during file delete: ", response.error.detail);
-			showAlert = true;
-			alertMessage = `${i18n.tr.childData.alertMessageUpdate} ${response.error.detail}`;
+			alertStore.showAlert(i18n.tr.childData.alertMessageTitle, 
+				`${i18n.tr.childData.alertMessageUpdate} ${response.error.detail}`, true);
 			return;
 		}
 	} else if (image instanceof File && imageDeleted === false) {
@@ -249,8 +242,8 @@ async function submitImageData(): Promise<void> {
 
 		if (response.error) {
 			console.log("error during file upload: ", response.error.detail);
-			showAlert = true;
-			alertMessage = `${i18n.tr.childData.alertMessageError} ${response.error.detail}`;
+			alertStore.showAlert(i18n.tr.childData.alertMessageTitle, 
+				`${i18n.tr.childData.alertMessageError} ${response.error.detail}`, true);
 			return;
 		}
 	} else {
@@ -280,15 +273,6 @@ async function submitData(): Promise<void> {
             <Spinner /> <p>{i18n.tr.childData.loadingMessage}</p>
         </div>
     {:then { questionnaire, answers }}
-        {#if showAlert}
-            <AlertMessage
-                    title={i18n.tr.childData.alertMessageTitle}
-                    message={alertMessage}
-                    onclick={() => {
-        showAlert = false;
-    }}
-            />
-        {:else}
             <div class="container m-2 mx-auto w-full pb-4">
                 <Card class="container m-1 mx-auto w-full max-w-xl">
                     <Heading
@@ -327,8 +311,8 @@ async function submitData(): Promise<void> {
 
                         if (response.error) {
                             console.log("Error when deleting child");
-                            showAlert = true;
-                            alertMessage=i18n.tr.childData.alertMessageError + response.error.detail;
+                            alertStore.showAlert(i18n.tr.childData.alertMessageTitle, 
+                                i18n.tr.childData.alertMessageError + response.error.detail, true);
                         }
                         else {
                             activePage.update((value) => {
@@ -348,15 +332,6 @@ async function submitData(): Promise<void> {
                         {/if}
                     </Heading
                     >
-                    {#if showAlert}
-                        <AlertMessage
-                                title={i18n.tr.childData.alertMessageTitle}
-                                message={alertMessage}
-                                onclick={() => {
-                showAlert = false;
-            }}
-                        />
-                    {/if}
                     <form
                             class="m-1 mx-auto w-full flex-col space-y-6"
                             onsubmit={preventDefault(submitData)}
@@ -495,22 +470,9 @@ async function submitData(): Promise<void> {
                     </form>
                 </Card>
             </div>
-        {/if}
     {:catch error}
-        <AlertMessage
-                title={i18n.tr.childData.alertMessageTitle}
-                message={error.message}
-                onclick={() => {
-            showAlert = false;
-        }}
-        />
+        {alertStore.showAlert(i18n.tr.childData.alertMessageTitle, error.message, true, true)}
     {/await}
 {:else}
-    <AlertMessage
-            title={i18n.tr.childData.alertMessageTitle}
-            message={i18n.tr.childData.alertMessageError}
-            onclick={() => {
-                showAlert = false;
-            }}
-    />
+    {alertStore.showAlert(i18n.tr.childData.alertMessageTitle, i18n.tr.childData.alertMessageError, true)}
 {/if}
