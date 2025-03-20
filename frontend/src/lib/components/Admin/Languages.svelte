@@ -4,7 +4,7 @@
 import { createLanguage, deleteLanguage } from "$lib/client/services.gen";
 import AddButton from "$lib/components/Admin/AddButton.svelte";
 import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
-import DeleteModal from "$lib/components/Admin/DeleteModal.svelte";
+import DeleteModal from "$lib/components/DeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import type { SelectOptionType } from "flowbite-svelte";
 import {
