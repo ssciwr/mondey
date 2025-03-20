@@ -10,7 +10,7 @@ import {
 	type GetUserQuestionsResponse,
 	type UserAnswerPublic,
 } from "$lib/client/types.gen";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { componentTable } from "$lib/stores/componentStore";
@@ -27,8 +27,7 @@ async function submitData() {
 			"Error when sending user question answers: ",
 			response.error.detail,
 		);
-		alertMessage = i18n.tr.userData.alertMessageError;
-		showAlert = true;
+		alertStore.showAlert(i18n.tr.userData.alertMessageTitle, i18n.tr.userData.alertMessageError, true);
 	} else {
 		// disable all elements to make editing a conscious choice
 		disableEdit = true;
@@ -44,8 +43,7 @@ async function setup() {
 			"Error when getting userquestions: ",
 			userQuestions.error.detail,
 		);
-		showAlert = true;
-		alertMessage = i18n.tr.userData.alertMessageError;
+		alertStore.showAlert(i18n.tr.userData.alertMessageTitle, i18n.tr.userData.alertMessageError, true);
 	} else {
 		questionnaire = userQuestions.data;
 	}
@@ -58,8 +56,7 @@ async function setup() {
 			currentAnswers?.error?.detail,
 		);
 
-		showAlert = true;
-		alertMessage = i18n.tr.userData.alertMessageError;
+		alertStore.showAlert(i18n.tr.userData.alertMessageTitle, i18n.tr.userData.alertMessageError, true);
 	} else {
 		// make map of question_id => answer. Don´t rely on questions and
 		// answers being aligned
@@ -91,22 +88,10 @@ let questionnaire: GetUserQuestionsResponse = $state(
 	[] as GetUserQuestionsResponse,
 );
 let answers: { [k: string]: UserAnswerPublic } = $state({});
-let showAlert: boolean = $state(false);
 let disableEdit: boolean = $state(false);
-let alertMessage: string = $state(i18n.tr.userData.alertMessageMissing);
 let promise = $state(setup());
 </script>
 
-<!-- Show big alert message when something is missing -->
-{#if showAlert}
-    <AlertMessage
-            title={i18n.tr.userData.alertMessageTitle}
-            message={alertMessage}
-            onclick={() => {
-			showAlert = false;
-		}}
-    />
-{/if}
 
 <!-- The actual content -->
 {#await promise}
@@ -162,11 +147,5 @@ let promise = $state(setup());
         </Card>
     </div>
 {:catch error}
-    <AlertMessage
-            title={i18n.tr.userData.alertMessageTitle}
-            message={error.message}
-            onclick={() => {
-				showAlert = false;
-			}}
-    />
+    {alertStore.showAlert(i18n.tr.userData.alertMessageTitle, error.message, true, true)}
 {/await}
