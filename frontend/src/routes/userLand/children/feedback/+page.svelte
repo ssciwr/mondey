@@ -15,7 +15,7 @@ import {
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte.ts";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import {
@@ -664,7 +664,7 @@ async function printReport(): Promise<void> {
 {:catch error}
     {alertStore.showAlert(
         i18n.tr.childData.alertMessageTitle,
-        `${error}`,
+        `${error.message}`,
         true,
         true
     )}

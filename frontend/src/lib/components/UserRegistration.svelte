@@ -1,10 +1,10 @@
 <script lang="ts">
 import { registerRegister } from "$lib/client/services.gen";
 import { type RegisterRegisterData } from "$lib/client/types.gen";
-import { alertStore } from "$lib/stores/alertStore.svelte";
 import ResearchCodeInput from "$lib/components/DataInput/ResearchCodeInput.svelte";
 import UserVerify from "$lib/components/UserVerify.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
@@ -28,10 +28,10 @@ async function submitData(): Promise<void> {
 	if (result.error) {
 		console.log("error: ", result.response.status, result.error.detail);
 		alertStore.showAlert(
-			i18n.tr.registration.alertMessageTitle, 
-			`${i18n.tr.registration.alertMessageError}: ${result.error.detail}`, 
-			true, 
-			false
+			i18n.tr.registration.alertMessageTitle,
+			`${i18n.tr.registration.alertMessageError}: ${result.error.detail} ${i18n.tr.registration.infoTitle}`,
+			true,
+			false,
 		);
 	} else {
 		console.log("successful transmission: ", result.response.status);

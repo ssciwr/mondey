@@ -28,7 +28,7 @@ onMount(async () => {
 		await user.load();
 		await refreshMilestoneGroups();
 	} catch (error) {
-		alertStore.showAlert(error.message, "", true);
+		alertStore.showAlert(error.message, "", true, true);
 	}
 });
 </script>

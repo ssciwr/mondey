@@ -38,7 +38,14 @@ import "../app.css";
 import { afterNavigate } from "$app/navigation";
 import { page } from "$app/stores";
 
-let isUserLand = $derived($page.url.pathname.includes("userLandingpage"));
+/* So basically it's not ideal to detect user being in the userland this way, but the main menu for non-logged in users
+does make sense to be here.
+
+Best would be to refactor to have a static non-logged in part (e.g. "/") and have this user part just for logged in
+users with only the logged in stuff, so no intermixing in files like this. However, that refactor isn't worth the
+time/risk necessarily.
+ */
+let isUserLand = $derived($page.url.pathname.includes("userLand/"));
 afterNavigate(() => {
 	hideDrawer = true;
 });
