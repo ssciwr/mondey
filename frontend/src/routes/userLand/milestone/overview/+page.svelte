@@ -5,7 +5,7 @@ import {
 	type MilestonePublic,
 	getCurrentMilestoneAnswerSession,
 } from "$lib/client";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
@@ -77,8 +77,7 @@ async function setup(): Promise<void> {
 	console.log("setup overview");
 
 	if (i18n.locale === undefined || i18n.locale === null) {
-		showAlert = true;
-		alertMessage = i18n.tr.userData.alertMessageError;
+		alertStore.showAlert(i18n.tr.userData.alertMessageError, i18n.tr.userData.alertMessageError, true);
 		console.log("No locale");
 		return;
 	}
@@ -92,11 +91,10 @@ async function setup(): Promise<void> {
 			"Error when retrieving milestone groups ",
 			contentStore.milestoneGroupData,
 		);
-		showAlert = true;
-		alertMessage =
-			contentStore.milestoneGroupData.milestones.length === 0
-				? i18n.tr.milestone.alertMessageNoRelevantMilestones
-				: i18n.tr.milestone.alertMessageRetrieving;
+		const message = contentStore.milestoneGroupData.milestones.length === 0
+			? i18n.tr.milestone.alertMessageNoRelevantMilestones
+			: i18n.tr.milestone.alertMessageRetrieving;
+		alertStore.showAlert(i18n.tr.milestone.alertMessageError, message, true);
 	} else {
 		let milestoneAnswerSession = undefined;
 		const response = await getCurrentMilestoneAnswerSession({
@@ -105,8 +103,11 @@ async function setup(): Promise<void> {
 
 		if (response.error) {
 			console.log("Error when retrieving milestone answer session");
-			showAlert = true;
-			alertMessage = `${i18n.tr.milestone.alertMessageRetrieving} ${response.error.detail}`;
+			alertStore.showAlert(
+				i18n.tr.milestone.alertMessageError, 
+				`${i18n.tr.milestone.alertMessageRetrieving} ${response.error.detail}`, 
+				true
+			);
 			return;
 		}
 
@@ -158,8 +159,6 @@ function createStyle(data: any[]) {
 	});
 }
 
-let showAlert = $state(false);
-let alertMessage = $state(i18n.tr.milestone.alertMessageError);
 const promise = setup();
 let data = $state([]);
 
@@ -219,22 +218,18 @@ const breadcrumbdata: any[] = [
 {#await promise}
     <p>{i18n.tr.userData.loadingMessage}</p>
 {:then}
-    {#if showAlert}
-        <AlertMessage message={alertMessage} />
-    {:else}
-        <div class="mx-auto flex flex-col md:rounded-t-lg">
-            <Breadcrumbs data={breadcrumbdata} />
-            <div class="grid gap-y-4 p-4">
-                <GalleryDisplay
-                        data={data}
-                        itemComponent={CardDisplay}
-                        componentProps={createStyle(data)}
-                        withSearch={true}
-                        {searchData}
-                />
-            </div>
+    <div class="mx-auto flex flex-col md:rounded-t-lg">
+        <Breadcrumbs data={breadcrumbdata} />
+        <div class="grid gap-y-4 p-4">
+            <GalleryDisplay
+                    data={data}
+                    itemComponent={CardDisplay}
+                    componentProps={createStyle(data)}
+                    withSearch={true}
+                    {searchData}
+            />
         </div>
-    {/if}
+    </div>
 {:catch error}
-    <AlertMessage message={error} />
+    {alertStore.showAlert(i18n.tr.milestone.alertMessageError, error, true, true)}
 {/await}
