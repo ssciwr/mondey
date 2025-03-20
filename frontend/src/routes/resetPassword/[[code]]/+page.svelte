@@ -20,13 +20,21 @@ onMount(() => {
 		$page.params.code === null ||
 		$page.params.code === ""
 	) {
-		alertStore.showAlert(i18n.tr.forgotPw.error, i18n.tr.forgotPw.codeError, true);
+		alertStore.showAlert(
+			i18n.tr.forgotPw.error,
+			i18n.tr.forgotPw.codeError,
+			true,
+		);
 	}
 });
 
 async function submitData(): Promise<void> {
 	if (pw !== confirmPw) {
-		alertStore.showAlert(i18n.tr.forgotPw.error, i18n.tr.forgotPw.confirmError, true);
+		alertStore.showAlert(
+			i18n.tr.forgotPw.error,
+			i18n.tr.forgotPw.confirmError,
+			true,
+		);
 		return;
 	}
 
@@ -41,10 +49,19 @@ async function submitData(): Promise<void> {
 		}
 
 		console.log(error);
-		alertStore.showAlert(i18n.tr.forgotPw.error, i18n.tr.forgotPw.sendError, true);
+		alertStore.showAlert(
+			i18n.tr.forgotPw.error,
+			i18n.tr.forgotPw.sendError,
+			true,
+		);
 		success = false;
 	} catch (error) {
-		alertStore.showAlert(i18n.tr.forgotPw.error, i18n.tr.forgotPw.sendError, true, true);
+		alertStore.showAlert(
+			i18n.tr.forgotPw.error,
+			i18n.tr.forgotPw.sendError,
+			true,
+			true,
+		);
 		success = false;
 	}
 }

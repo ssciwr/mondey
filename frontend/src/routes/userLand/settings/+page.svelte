@@ -6,8 +6,8 @@ import {
 	usersCurrentUser,
 	usersPatchCurrentUser,
 } from "$lib/client/services.gen";
-import { alertStore } from "$lib/stores/alertStore.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { preventDefault } from "$lib/util";
 import { Button, Heading, Input, Label, Modal } from "flowbite-svelte";
 
@@ -22,29 +22,54 @@ async function submitNewPassword() {
 	passwordChangeSuccess = false;
 
 	if (currentPassword === null || currentPassword === "") {
-		alertStore.showAlert(i18n.tr.settings.alertTitle, i18n.tr.settings.emptyPasswordError, true, false);
+		alertStore.showAlert(
+			i18n.tr.settings.alertTitle,
+			i18n.tr.settings.emptyPasswordError,
+			true,
+			false,
+		);
 		return;
 	}
 
 	if (newPassword === null || newPassword === "") {
-		alertStore.showAlert(i18n.tr.settings.alertTitle, i18n.tr.settings.emptyPasswordError, true, false);
+		alertStore.showAlert(
+			i18n.tr.settings.alertTitle,
+			i18n.tr.settings.emptyPasswordError,
+			true,
+			false,
+		);
 		return;
 	}
 
 	if (newPassword !== newPasswordRepeat) {
-		alertStore.showAlert(i18n.tr.settings.alertTitle, i18n.tr.settings.nonMatchingPasswordsError, true, false);
+		alertStore.showAlert(
+			i18n.tr.settings.alertTitle,
+			i18n.tr.settings.nonMatchingPasswordsError,
+			true,
+			false,
+		);
 		return;
 	}
 
 	if (newPassword === currentPassword) {
-		alertStore.showAlert(i18n.tr.settings.alertTitle, i18n.tr.settings.samePasswordsError, true, false);
+		alertStore.showAlert(
+			i18n.tr.settings.alertTitle,
+			i18n.tr.settings.samePasswordsError,
+			true,
+			false,
+		);
 		return;
 	}
 
 	const currentUser = await usersCurrentUser();
 
 	if (currentUser.error || !currentUser.data) {
-		alertStore.showAlert(i18n.tr.settings.alertTitle, i18n.tr.settings.getUserError, true, false);
+		alertStore.showAlert(
+			i18n.tr.settings.alertTitle,
+			i18n.tr.settings.getUserError,
+			true,
+			false,
+		);
 		return;
 	}
 
@@ -56,7 +81,12 @@ async function submitNewPassword() {
 	});
 
 	if (verifyResponse.error) {
-		alertStore.showAlert(i18n.tr.settings.alertTitle, i18n.tr.settings.oldPasswordWrong, true, false);
+		alertStore.showAlert(
+			i18n.tr.settings.alertTitle,
+			i18n.tr.settings.oldPasswordWrong,
+			true,
+			false,
+		);
 		return;
 	}
 
@@ -69,7 +99,12 @@ async function submitNewPassword() {
 	});
 
 	if (patchResponse.error) {
-		alertStore.showAlert(i18n.tr.settings.alertTitle, i18n.tr.settings.sendError, true, false);
+		alertStore.showAlert(
+			i18n.tr.settings.alertTitle,
+			i18n.tr.settings.sendError,
+			true,
+			false,
+		);
 		passwordChangeSuccess = false;
 	} else {
 		passwordChangeSuccess = true;

@@ -1,9 +1,9 @@
 <script lang="ts">
 import { afterNavigate, goto } from "$app/navigation";
-import { alertStore } from "$lib/stores/alertStore.svelte";
 import UserVerify from "$lib/components/UserVerify.svelte";
 import UserlandSidebar from "$lib/components/UserlandSidebar.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { Button } from "flowbite-svelte";
 import { Drawer } from "flowbite-svelte";

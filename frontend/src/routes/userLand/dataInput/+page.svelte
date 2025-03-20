@@ -10,9 +10,9 @@ import {
 	type GetUserQuestionsResponse,
 	type UserAnswerPublic,
 } from "$lib/client/types.gen";
-import { alertStore } from "$lib/stores/alertStore.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading } from "flowbite-svelte";
@@ -27,7 +27,11 @@ async function submitData() {
 			"Error when sending user question answers: ",
 			response.error.detail,
 		);
-		alertStore.showAlert(i18n.tr.userData.alertMessageTitle, i18n.tr.userData.alertMessageError, true);
+		alertStore.showAlert(
+			i18n.tr.userData.alertMessageTitle,
+			i18n.tr.userData.alertMessageError,
+			true,
+		);
 	} else {
 		// disable all elements to make editing a conscious choice
 		disableEdit = true;
@@ -43,7 +47,11 @@ async function setup() {
 			"Error when getting userquestions: ",
 			userQuestions.error.detail,
 		);
-		alertStore.showAlert(i18n.tr.userData.alertMessageTitle, i18n.tr.userData.alertMessageError, true);
+		alertStore.showAlert(
+			i18n.tr.userData.alertMessageTitle,
+			i18n.tr.userData.alertMessageError,
+			true,
+		);
 	} else {
 		questionnaire = userQuestions.data;
 	}
@@ -56,7 +64,11 @@ async function setup() {
 			currentAnswers?.error?.detail,
 		);
 
-		alertStore.showAlert(i18n.tr.userData.alertMessageTitle, i18n.tr.userData.alertMessageError, true);
+		alertStore.showAlert(
+			i18n.tr.userData.alertMessageTitle,
+			i18n.tr.userData.alertMessageError,
+			true,
+		);
 	} else {
 		// make map of question_id => answer. Don´t rely on questions and
 		// answers being aligned

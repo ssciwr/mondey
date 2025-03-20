@@ -3,9 +3,9 @@
 import { goto } from "$app/navigation";
 import { base } from "$app/paths";
 import { type ResetForgotPasswordData, resetForgotPassword } from "$lib/client";
-import { alertStore } from "$lib/stores/alertStore.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input } from "flowbite-svelte";
 
@@ -26,7 +26,12 @@ let showSuccess = $state(false);
 
 async function submitData(): Promise<void> {
 	if (userEmail !== confirmEmail) {
-		alertStore.showAlert(i18n.tr.forgotPw.alertTitle, i18n.tr.forgotPw.confirmError, true, false);
+		alertStore.showAlert(
+			i18n.tr.forgotPw.alertTitle,
+			i18n.tr.forgotPw.confirmError,
+			true,
+			false,
+		);
 		return;
 	}
 
@@ -39,7 +44,12 @@ async function submitData(): Promise<void> {
 
 	if (response.error) {
 		console.log("error: ", response.error);
-		alertStore.showAlert(i18n.tr.forgotPw.alertTitle, i18n.tr.forgotPw.sendError, true, false);
+		alertStore.showAlert(
+			i18n.tr.forgotPw.alertTitle,
+			i18n.tr.forgotPw.sendError,
+			true,
+			false,
+		);
 	} else {
 		console.log("successful transmission of forgot password email");
 		console.log("response: ", response);

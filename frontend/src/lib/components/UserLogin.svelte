@@ -44,7 +44,7 @@ async function submitData(): Promise<void> {
 			i18n.tr.login.alertMessageTitle,
 			i18n.tr.login.badCredentials + authReturn.error.detail,
 			true,
-			false
+			false,
 		);
 		console.log("error during login ", authReturn.error.detail);
 	} else {
@@ -55,7 +55,7 @@ async function submitData(): Promise<void> {
 				i18n.tr.login.alertMessageTitle,
 				`${i18n.tr.login.unauthorized}: ${status}`,
 				true,
-				false
+				false,
 			);
 		} else {
 			console.log("login and user retrieval successful");

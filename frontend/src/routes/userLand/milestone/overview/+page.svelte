@@ -5,11 +5,11 @@ import {
 	type MilestonePublic,
 	getCurrentMilestoneAnswerSession,
 } from "$lib/client";
-import { alertStore } from "$lib/stores/alertStore.svelte";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { contentStore } from "$lib/stores/contentStore.svelte";
 import {
@@ -77,7 +77,11 @@ async function setup(): Promise<void> {
 	console.log("setup overview");
 
 	if (i18n.locale === undefined || i18n.locale === null) {
-		alertStore.showAlert(i18n.tr.userData.alertMessageError, i18n.tr.userData.alertMessageError, true);
+		alertStore.showAlert(
+			i18n.tr.userData.alertMessageError,
+			i18n.tr.userData.alertMessageError,
+			true,
+		);
 		console.log("No locale");
 		return;
 	}
@@ -91,9 +95,10 @@ async function setup(): Promise<void> {
 			"Error when retrieving milestone groups ",
 			contentStore.milestoneGroupData,
 		);
-		const message = contentStore.milestoneGroupData.milestones.length === 0
-			? i18n.tr.milestone.alertMessageNoRelevantMilestones
-			: i18n.tr.milestone.alertMessageRetrieving;
+		const message =
+			contentStore.milestoneGroupData.milestones.length === 0
+				? i18n.tr.milestone.alertMessageNoRelevantMilestones
+				: i18n.tr.milestone.alertMessageRetrieving;
 		alertStore.showAlert(i18n.tr.milestone.alertMessageError, message, true);
 	} else {
 		let milestoneAnswerSession = undefined;
@@ -104,9 +109,9 @@ async function setup(): Promise<void> {
 		if (response.error) {
 			console.log("Error when retrieving milestone answer session");
 			alertStore.showAlert(
-				i18n.tr.milestone.alertMessageError, 
-				`${i18n.tr.milestone.alertMessageRetrieving} ${response.error.detail}`, 
-				true
+				i18n.tr.milestone.alertMessageError,
+				`${i18n.tr.milestone.alertMessageRetrieving} ${response.error.detail}`,
+				true,
 			);
 			return;
 		}
