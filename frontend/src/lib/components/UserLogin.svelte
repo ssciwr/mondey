@@ -12,6 +12,8 @@ import { user } from "$lib/stores/userStore.svelte";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
 
+import { page } from "$app/stores";
+
 async function refresh(): Promise<string> {
 	const returned = await usersCurrentUser();
 	if (returned.error) {
@@ -59,7 +61,12 @@ async function submitData(): Promise<void> {
 			);
 		} else {
 			console.log("login and user retrieval successful");
-			goto("/userLand/children/gallery");
+			const intendedPath = $page.url.searchParams.get("intendedpath");
+			if (intendedPath !== null) {
+				goto(intendedPath);
+			} else {
+				goto("/userLand/children/gallery");
+			}
 		}
 	}
 }
