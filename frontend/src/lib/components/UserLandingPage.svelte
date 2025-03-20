@@ -1,7 +1,7 @@
 <script lang="ts">
 import { afterNavigate, goto } from "$app/navigation";
 import { base } from "$app/paths";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import UserVerify from "$lib/components/UserVerify.svelte";
@@ -31,8 +31,6 @@ import {
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 
-let showAlert: boolean = $state(false);
-let alertMessage: string = $state(i18n.tr.login.alertMessageError);
 let hideDrawer: boolean = $state(true);
 
 // get user state
@@ -47,15 +45,6 @@ afterNavigate(() => {
 </script>
 
 
-{#if showAlert}
-<AlertMessage
-	title={i18n.tr.login.alertMessageTitle}
-	message={alertMessage}
-	onclick={() => {
-		showAlert = false;
-	}}
-/>
-{:else}
 	{#if user.data}
 		{#if user.data.is_verified === true}
 			<div class = "flex flex-row items-start text-sm md:text-base" >
@@ -96,4 +85,3 @@ afterNavigate(() => {
 			{i18n.tr.registration.goHome}
 		</Button>
 	{/if}
-{/if}
