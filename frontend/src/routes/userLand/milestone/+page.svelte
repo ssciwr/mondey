@@ -277,7 +277,7 @@ const breadcrumbdata = $derived([
         {/if}
     </div>
 {:catch error}
-    {alertStore.showAlert(i18n.tr.milestone.alertMessageError, error.message, true, true, () => goto("/userLand/milestone/overview")}
+    {alertStore.showAlert(i18n.tr.milestone.alertMessageError, error.message, true, true, () => goto("/userLand/milestone/overview"))}
 {/await}
 
 {#key showSubmitMilestoneImageModal}
