@@ -6,7 +6,7 @@ import {
 	usersCurrentUser,
 	usersPatchCurrentUser,
 } from "$lib/client/services.gen";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { preventDefault } from "$lib/util";
 import { Button, Heading, Input, Label, Modal } from "flowbite-svelte";
@@ -16,44 +16,35 @@ let newPasswordRepeat = $state(null) as string | null;
 let currentPassword = $state(null) as string | null;
 let currentPasswordValid = $state(false);
 let passwordChangeSuccess = $state(false);
-let showAlert = $state(false);
-
-let alertMessage = $state(i18n.tr.settings.defaultAlertMessage);
 
 async function submitNewPassword() {
 	currentPasswordValid = false;
 	passwordChangeSuccess = false;
-	showAlert = false;
 
 	if (currentPassword === null || currentPassword === "") {
-		showAlert = true;
-		alertMessage = i18n.tr.settings.emptyPasswordError;
+		alertStore.showAlert(i18n.tr.settings.alertTitle, i18n.tr.settings.emptyPasswordError, true, false);
 		return;
 	}
 
 	if (newPassword === null || newPassword === "") {
-		showAlert = true;
-		alertMessage = i18n.tr.settings.emptyPasswordError;
+		alertStore.showAlert(i18n.tr.settings.alertTitle, i18n.tr.settings.emptyPasswordError, true, false);
 		return;
 	}
 
 	if (newPassword !== newPasswordRepeat) {
-		showAlert = true;
-		alertMessage = i18n.tr.settings.nonMatchingPasswordsError;
+		alertStore.showAlert(i18n.tr.settings.alertTitle, i18n.tr.settings.nonMatchingPasswordsError, true, false);
 		return;
 	}
 
 	if (newPassword === currentPassword) {
-		showAlert = true;
-		alertMessage = i18n.tr.settings.samePasswordsError;
+		alertStore.showAlert(i18n.tr.settings.alertTitle, i18n.tr.settings.samePasswordsError, true, false);
 		return;
 	}
 
 	const currentUser = await usersCurrentUser();
 
 	if (currentUser.error || !currentUser.data) {
-		alertMessage = i18n.tr.settings.getUserError;
-		showAlert = true;
+		alertStore.showAlert(i18n.tr.settings.alertTitle, i18n.tr.settings.getUserError, true, false);
 		return;
 	}
 
@@ -65,8 +56,7 @@ async function submitNewPassword() {
 	});
 
 	if (verifyResponse.error) {
-		alertMessage = i18n.tr.settings.oldPasswordWrong;
-		showAlert = true;
+		alertStore.showAlert(i18n.tr.settings.alertTitle, i18n.tr.settings.oldPasswordWrong, true, false);
 		return;
 	}
 
@@ -79,8 +69,7 @@ async function submitNewPassword() {
 	});
 
 	if (patchResponse.error) {
-		alertMessage = i18n.tr.settings.sendError;
-		showAlert = true;
+		alertStore.showAlert(i18n.tr.settings.alertTitle, i18n.tr.settings.sendError, true, false);
 		passwordChangeSuccess = false;
 	} else {
 		passwordChangeSuccess = true;
@@ -88,16 +77,6 @@ async function submitNewPassword() {
 }
 </script>
 
-{#if showAlert}
-    <AlertMessage
-            id="alertMessageSettings"
-            title={i18n.tr.settings.alertTitle}
-            message={alertMessage}
-            onclick={() => {
-			showAlert = false;
-		}}
-    />
-{/if}
 
 <div class="m-2 p-2 flex flex-col space-y-2 text-gray-700 dark:text-gray-400">
     <Heading
