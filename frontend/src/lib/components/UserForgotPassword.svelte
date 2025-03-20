@@ -3,7 +3,7 @@
 import { goto } from "$app/navigation";
 import { base } from "$app/paths";
 import { type ResetForgotPasswordData, resetForgotPassword } from "$lib/client";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { preventDefault } from "$lib/util";
@@ -22,14 +22,11 @@ const maildata = {
 let userEmail = $state("");
 let confirmEmail = $state("");
 
-let alertMessage: string = $state(i18n.tr.forgotPw.formatError);
-let showAlert: boolean = $state(false);
 let showSuccess = $state(false);
 
 async function submitData(): Promise<void> {
 	if (userEmail !== confirmEmail) {
-		alertMessage = i18n.tr.forgotPw.confirmError;
-		showAlert = true;
+		alertStore.showAlert(i18n.tr.forgotPw.alertTitle, i18n.tr.forgotPw.confirmError, true, false);
 		return;
 	}
 
@@ -42,8 +39,7 @@ async function submitData(): Promise<void> {
 
 	if (response.error) {
 		console.log("error: ", response.error);
-		alertMessage = i18n.tr.forgotPw.sendError;
-		showAlert = true;
+		alertStore.showAlert(i18n.tr.forgotPw.alertTitle, i18n.tr.forgotPw.sendError, true, false);
 	} else {
 		console.log("successful transmission of forgot password email");
 		console.log("response: ", response);
@@ -52,16 +48,6 @@ async function submitData(): Promise<void> {
 }
 </script>
 
-{#if showAlert}
-	<AlertMessage
-		title={i18n.tr.forgotPw.alertTitle}
-		message={alertMessage}
-		lastpage={`${base}/forgotPassword`}
-		onclick={() => {
-			showAlert = false;
-		}}
-	/>
-{/if}
 
 <Card class="container m-2 mx-auto w-full max-w-xl items-center justify-center p-2">
 	<Heading
