@@ -1,34 +1,13 @@
 <script lang="ts">
 import { afterNavigate, goto } from "$app/navigation";
-import { base } from "$app/paths";
-import { alertStore } from "$lib/stores/alertStore.svelte";
-import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
-import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import UserVerify from "$lib/components/UserVerify.svelte";
 import UserlandSidebar from "$lib/components/UserlandSidebar.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activePage, componentTable } from "$lib/stores/componentStore";
 import { user } from "$lib/stores/userStore.svelte";
 import { Button } from "flowbite-svelte";
-import {
-	Drawer,
-	Sidebar,
-	SidebarGroup,
-	SidebarItem,
-	SidebarWrapper,
-} from "flowbite-svelte";
-import {
-	AdjustmentsVerticalOutline,
-	ArrowRightToBracketOutline,
-	AtomOutline,
-	BarsOutline,
-	CogSolid,
-	GridPlusSolid,
-	LanguageOutline,
-	ProfileCardSolid,
-	SunOutline,
-} from "flowbite-svelte-icons";
+import { Drawer } from "flowbite-svelte";
+import { BarsOutline } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 
 let hideDrawer: boolean = $state(true);
@@ -37,6 +16,7 @@ let hideDrawer: boolean = $state(true);
 onMount(user.load);
 
 // set this initially to user data such that the user data page is shown first
+// todo: Remove this before #242 is PR merged, just here to compare and test the old version and new version of routing.
 activePage.set("childrenGallery");
 
 afterNavigate(() => {
