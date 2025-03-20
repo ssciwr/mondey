@@ -19,6 +19,7 @@ import {
 } from "$lib/client";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
+import DeleteModal from "$lib/components/DeleteModal.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
@@ -60,6 +61,7 @@ let {
 let disableEdit: boolean = $state(false);
 let disableImageDelete: boolean = $state(false);
 let imageDeleted: boolean = $state(false);
+let showDeleteModal: boolean = $state(false);
 let alertMessage: string = $state(i18n.tr.childData.alertMessageMissing);
 let showAlert = $state(false);
 let childLabel = $derived(name ? name : i18n.tr.childData.newChildHeadingLong);
@@ -270,6 +272,32 @@ async function submitData(): Promise<void> {
 	console.log("submission of child data successful.");
 	activePage.set("childrenGallery");
 }
+
+const deleteCurrentChild = async () => {
+	if (currentChild.id === null) {
+		console.log("no child id, no child to delete");
+		showAlert = true;
+		alertMessage = i18n.tr.childData.alertMessageError;
+		return;
+	}
+
+	const response = await deleteChild({
+		path: {
+			child_id: currentChild.id,
+		},
+	});
+
+	if (response.error) {
+		console.log("Error when deleting child");
+		showAlert = true;
+		alertMessage = i18n.tr.childData.alertMessageError + response.error.detail;
+	} else {
+		activePage.update((value) => {
+			return "childrenGallery";
+		});
+		currentChild.id = null;
+	}
+};
 </script>
 
 {#if i18n.locale}
@@ -310,36 +338,12 @@ async function submitData(): Promise<void> {
                                 <button
                                         class="btn-danger btn-icon"
                                         aria-label={i18n.tr.admin.delete}
-                                        onclick={async () => {
-								if (currentChild.id === null) {
-									console.log("no child id, no child to delete");
-									showAlert = true;
-									alertMessage = i18n.tr.childData.alertMessageError;
-									return;
-								}
-
-								const response = await deleteChild({
-									path: {
-										child_id: currentChild.id,
-									}
-								});
-
-								if (response.error) {
-									console.log("Error when deleting child");
-									showAlert = true;
-									alertMessage=i18n.tr.childData.alertMessageError + response.error.detail;
-								}
-								else {
-									activePage.update((value) => {
-										return "childrenGallery";
-									});
-									currentChild.id = null;
-								}
-							}}
+                                        onclick={() => showDeleteModal = true}
                                 ><TrashBinOutline size="md"/></button
                                 >
                             {/if}
-                            <br />
+							<DeleteModal bind:open={showDeleteModal} onclick={deleteCurrentChild}></DeleteModal>
+							<br />
 
                             <span>{i18n.tr.childData.monthYearSubtext} </span>
                             <span class="text-muted">{birthmonth} / {birthyear}</span>
