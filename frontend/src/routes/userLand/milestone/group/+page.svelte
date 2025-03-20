@@ -8,11 +8,11 @@ import {
 	getCurrentMilestoneAnswerSession,
 	getMilestoneGroups,
 } from "$lib/client";
-import { alertStore } from "$lib/stores/alertStore.svelte";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { contentStore } from "$lib/stores/contentStore.svelte";
 import { Spinner } from "flowbite-svelte";
@@ -63,7 +63,12 @@ async function setup(): Promise<any> {
 
 	if (currentChild.id === null || currentChild.id === undefined) {
 		console.log("Error when retrieving child data");
-		alertStore.showAlert(i18n.tr.childData.alertTitle, i18n.tr.childData.alertMessageRetrieving, true, false);
+		alertStore.showAlert(
+			i18n.tr.milestone.alertMessageError,
+			i18n.tr.childData.alertMessageRetrieving,
+			true,
+			false,
+		);
 		data = [];
 		return data;
 	}
@@ -78,14 +83,24 @@ async function setup(): Promise<any> {
 
 	if (answerSession.error) {
 		console.log("Error when retrieving answer data");
-		alertStore.showAlert(i18n.tr.milestone.alertTitle, i18n.tr.milestone.alertMessageRetrieving + answerSession.error.detail, true, false);
+		alertStore.showAlert(
+			i18n.tr.milestone.alertMessageError,
+			i18n.tr.milestone.alertMessageRetrieving + answerSession.error.detail,
+			true,
+			false,
+		);
 		data = [];
 		return data;
 	}
 
 	if (milestonegroups.error) {
 		console.log("Error when retrieving milestone group data");
-		alertStore.showAlert(i18n.tr.milestone.alertTitle, i18n.tr.milestone.alertMessageRetrieving + milestonegroups.error.detail, true, false);
+		alertStore.showAlert(
+			i18n.tr.milestone.alertMessageError,
+			i18n.tr.milestone.alertMessageRetrieving + milestonegroups.error.detail,
+			true,
+			false,
+		);
 		data = [];
 		return data;
 	}
@@ -242,10 +257,5 @@ $effect(() => {
         </div>
     </div>
 {:catch error}
-    <div class="flex flex-col items-center justify-center">
-        <p class="text-red-500">{i18n.tr.milestone.alertMessageError} {error}</p>
-        <Button on:click={() => goto("/userLand/milestone/overview")}>
-            {i18n.tr.general.back}
-        </Button>
-    </div>
+    {alertStore.showAlert(i18n.tr.milestone.alertMessageError, '', true, true, () => goto("/userLand/milestone/overview"))}
 {/await}

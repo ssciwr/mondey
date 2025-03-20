@@ -18,10 +18,10 @@ import {
 	updateCurrentChildAnswers,
 	uploadChildImage,
 } from "$lib/client";
-import { alertStore } from "$lib/stores/alertStore.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activePage, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
@@ -91,7 +91,11 @@ async function setup(): Promise<{
 			"Error when getting userquestions: ",
 			(questions.error as ErrorModel).detail,
 		);
-		alertStore.showAlert(i18n.tr.childData.alertMessageTitle, i18n.tr.childData.alertMessageError, true);
+		alertStore.showAlert(
+			i18n.tr.childData.alertMessageTitle,
+			i18n.tr.childData.alertMessageError,
+			true,
+		);
 	} else {
 		questionnaire = questions.data;
 	}
@@ -102,7 +106,11 @@ async function setup(): Promise<{
 
 		if (child.error) {
 			console.log("Error when getting child: ", child.error.detail);
-			alertStore.showAlert(i18n.tr.childData.alertMessageTitle, i18n.tr.childData.alertMessageError, true);
+			alertStore.showAlert(
+				i18n.tr.childData.alertMessageTitle,
+				i18n.tr.childData.alertMessageError,
+				true,
+			);
 		} else {
 			name = child.data.name ?? null;
 			birthyear = child.data.birth_year;
@@ -123,7 +131,11 @@ async function setup(): Promise<{
 				"Error when getting current answers for child: ",
 				currentAnswers.error.detail,
 			);
-			alertStore.showAlert(i18n.tr.childData.alertMessageTitle, i18n.tr.childData.alertMessageError, true);
+			alertStore.showAlert(
+				i18n.tr.childData.alertMessageTitle,
+				i18n.tr.childData.alertMessageError,
+				true,
+			);
 		} else {
 			answers = currentAnswers.data;
 			disableEdit = true;
@@ -164,8 +176,11 @@ async function submitChildData(): Promise<void> {
 		});
 
 		if (new_child.error) {
-			alertStore.showAlert(i18n.tr.childData.alertMessageTitle, 
-				i18n.tr.childData.alertMessageCreate + new_child.error.detail, true);
+			alertStore.showAlert(
+				i18n.tr.childData.alertMessageTitle,
+				i18n.tr.childData.alertMessageCreate + new_child.error.detail,
+				true,
+			);
 			return;
 		}
 		currentChild.id = new_child.data.id;
@@ -185,8 +200,11 @@ async function submitChildData(): Promise<void> {
 		});
 
 		if (response.error) {
-			alertStore.showAlert(i18n.tr.childData.alertMessageTitle, 
-				`${i18n.tr.childData.alertMessageUpdate} ${response.error.detail}`, true);
+			alertStore.showAlert(
+				i18n.tr.childData.alertMessageTitle,
+				`${i18n.tr.childData.alertMessageUpdate} ${response.error.detail}`,
+				true,
+			);
 			return;
 		}
 	}
@@ -204,8 +222,11 @@ async function submitChildData(): Promise<void> {
 			"Error when sending user question answers: ",
 			response.error.detail,
 		);
-		alertStore.showAlert(i18n.tr.childData.alertMessageTitle, 
-			`${i18n.tr.childData.alertMessageError} ${response.error.detail}`, true);
+		alertStore.showAlert(
+			i18n.tr.childData.alertMessageTitle,
+			`${i18n.tr.childData.alertMessageError} ${response.error.detail}`,
+			true,
+		);
 		return;
 	}
 }
@@ -213,7 +234,11 @@ async function submitChildData(): Promise<void> {
 async function submitImageData(): Promise<void> {
 	if (currentChild.id === null) {
 		console.log("no child id, no image to upload");
-		alertStore.showAlert(i18n.tr.childData.alertMessageTitle, i18n.tr.childData.alertMessageError, true);
+		alertStore.showAlert(
+			i18n.tr.childData.alertMessageTitle,
+			i18n.tr.childData.alertMessageError,
+			true,
+		);
 		return;
 	}
 
@@ -226,8 +251,11 @@ async function submitImageData(): Promise<void> {
 
 		if (response.error) {
 			console.log("error during file delete: ", response.error.detail);
-			alertStore.showAlert(i18n.tr.childData.alertMessageTitle, 
-				`${i18n.tr.childData.alertMessageUpdate} ${response.error.detail}`, true);
+			alertStore.showAlert(
+				i18n.tr.childData.alertMessageTitle,
+				`${i18n.tr.childData.alertMessageUpdate} ${response.error.detail}`,
+				true,
+			);
 			return;
 		}
 	} else if (image instanceof File && imageDeleted === false) {
@@ -242,8 +270,11 @@ async function submitImageData(): Promise<void> {
 
 		if (response.error) {
 			console.log("error during file upload: ", response.error.detail);
-			alertStore.showAlert(i18n.tr.childData.alertMessageTitle, 
-				`${i18n.tr.childData.alertMessageError} ${response.error.detail}`, true);
+			alertStore.showAlert(
+				i18n.tr.childData.alertMessageTitle,
+				`${i18n.tr.childData.alertMessageError} ${response.error.detail}`,
+				true,
+			);
 			return;
 		}
 	} else {
@@ -298,8 +329,8 @@ async function submitData(): Promise<void> {
                                             onclick={async () => {
                         if (currentChild.id === null) {
                             console.log("no child id, no child to delete");
-                            showAlert = true;
-                            alertMessage = i18n.tr.childData.alertMessageError;
+                            alertStore.showAlert(i18n.tr.childData.alertMessageTitle,
+                                i18n.tr.childData.alertMessageError, true);
                             return;
                         }
 
@@ -311,7 +342,7 @@ async function submitData(): Promise<void> {
 
                         if (response.error) {
                             console.log("Error when deleting child");
-                            alertStore.showAlert(i18n.tr.childData.alertMessageTitle, 
+                            alertStore.showAlert(i18n.tr.childData.alertMessageTitle,
                                 i18n.tr.childData.alertMessageError + response.error.detail, true);
                         }
                         else {
