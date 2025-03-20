@@ -8,7 +8,7 @@ import {
 	getCurrentMilestoneAnswerSession,
 	getMilestoneGroups,
 } from "$lib/client";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
@@ -63,8 +63,7 @@ async function setup(): Promise<any> {
 
 	if (currentChild.id === null || currentChild.id === undefined) {
 		console.log("Error when retrieving child data");
-		showAlert = true;
-		alertMessage = i18n.tr.childData.alertMessageRetrieving;
+		alertStore.showAlert(i18n.tr.childData.alertTitle, i18n.tr.childData.alertMessageRetrieving, true, false);
 		data = [];
 		return data;
 	}
@@ -79,18 +78,14 @@ async function setup(): Promise<any> {
 
 	if (answerSession.error) {
 		console.log("Error when retrieving answer data");
-		showAlert = true;
-		alertMessage =
-			i18n.tr.milestone.alertMessageRetrieving + answerSession.error.detail;
+		alertStore.showAlert(i18n.tr.milestone.alertTitle, i18n.tr.milestone.alertMessageRetrieving + answerSession.error.detail, true, false);
 		data = [];
 		return data;
 	}
 
 	if (milestonegroups.error) {
 		console.log("Error when retrieving milestone group data");
-		showAlert = true;
-		alertMessage =
-			i18n.tr.milestone.alertMessageRetrieving + milestonegroups.error.detail;
+		alertStore.showAlert(i18n.tr.milestone.alertTitle, i18n.tr.milestone.alertMessageRetrieving + milestonegroups.error.detail, true, false);
 		data = [];
 		return data;
 	}
@@ -200,8 +195,6 @@ export function createStyle(data: any[]) {
 	});
 }
 
-let showAlert = $state(false);
-let alertMessage = $state("");
 let promise = $state(setup());
 let data: any[] = $state([]);
 const searchData: any[] = [
@@ -249,8 +242,10 @@ $effect(() => {
         </div>
     </div>
 {:catch error}
-    <AlertMessage message={`${i18n.tr.milestone.alertMessageError} ${error}`} onclick={() => {
-		goto("/userLand/milestone/overview");
-		showAlert = false;
-	}}/>
+    <div class="flex flex-col items-center justify-center">
+        <p class="text-red-500">{i18n.tr.milestone.alertMessageError} {error}</p>
+        <Button on:click={() => goto("/userLand/milestone/overview")}>
+            {i18n.tr.general.back}
+        </Button>
+    </div>
 {/await}
