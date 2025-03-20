@@ -15,9 +15,9 @@ import {
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte.ts";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte.ts";
 import {
 	Accordion,
 	AccordionItem,
@@ -113,7 +113,6 @@ let relevant_sessionkeys = $derived.by(() => {
 // other helper state variables
 let showMoreInfo = $state(false);
 let showHelp = $state(false);
-let showAlert = $state(false);
 
 // promises to load the data and steer page loading
 let sessionPromise = $state(loadAnswersessions());
@@ -183,10 +182,10 @@ async function loadAnswersessions(): Promise<void> {
 	await currentChild.load_data();
 	if (currentChild.id === null || user.id === null) {
 		alertStore.showAlert(
-			i18n.tr.childData.alertMessageTitle, 
-			i18n.tr.childData.alertMessageError, 
-			true, 
-			true
+			i18n.tr.childData.alertMessageTitle,
+			i18n.tr.childData.alertMessageError,
+			true,
+			false,
 		);
 		return;
 	}
@@ -198,10 +197,10 @@ async function loadAnswersessions(): Promise<void> {
 
 	if (responseAnswerSessions.error) {
 		alertStore.showAlert(
-			i18n.tr.childData.alertMessageTitle, 
-			responseAnswerSessions.error.detail, 
-			true, 
-			true
+			i18n.tr.childData.alertMessageTitle,
+			responseAnswerSessions.error.detail,
+			true,
+			false,
 		);
 		return;
 	}
@@ -232,10 +231,10 @@ async function loadSummaryFeedbackFor(
 
 	if (milestoneGroupResponse.error) {
 		alertStore.showAlert(
-			i18n.tr.childData.alertMessageTitle, 
-			milestoneGroupResponse.error.detail, 
-			true, 
-			true
+			i18n.tr.childData.alertMessageTitle,
+			milestoneGroupResponse.error.detail,
+			true,
+			false,
 		);
 		return null;
 	}
@@ -253,10 +252,10 @@ async function loadSummaryFeedbackFor(
 
 	if (responseFeedback.error) {
 		alertStore.showAlert(
-			i18n.tr.childData.alertMessageTitle, 
-			responseFeedback.error.detail, 
-			true, 
-			true
+			i18n.tr.childData.alertMessageTitle,
+			responseFeedback.error.detail,
+			true,
+			false,
 		);
 		return null;
 	}
@@ -284,10 +283,10 @@ async function loadDetailedFeedbackFor(
 
 	if (response.error) {
 		alertStore.showAlert(
-			i18n.tr.childData.alertMessageTitle, 
-			response.error.detail, 
-			true, 
-			true
+			i18n.tr.childData.alertMessageTitle,
+			response.error.detail,
+			true,
+			false,
 		);
 		return null;
 	}
@@ -318,16 +317,24 @@ async function loadData(aid: number | null): Promise<void> {
 
 	const summary_ = await loadSummaryFeedbackFor(aid);
 	if (summary_ === null) {
-		showAlert = true;
 		alertMessage = `Something went wrong when loading the summary feedback for ${aid}`;
+		alertStore.showAlert(
+			i18n.tr.childData.alertMessageTitle,
+			alertMessage,
+			true,
+		);
 		return;
 	}
 	summary[aid] = summary_;
 
 	const detailed_ = await loadDetailedFeedbackFor(aid);
 	if (detailed_ === null) {
-		showAlert = true;
 		alertMessage = `Something went wrong when loading the detailed feedback for ${aid}`;
+		alertStore.showAlert(
+			i18n.tr.childData.alertMessageTitle,
+			alertMessage,
+			true,
+		);
 	}
 	detailed[aid] = detailed_;
 }
@@ -368,8 +375,12 @@ async function generateReport(): Promise<string | null> {
 	});
 
 	if (responseAnswerSessions.error) {
-		showAlert = true;
 		alertMessage = responseAnswerSessions.error.detail;
+		alertStore.showAlert(
+			i18n.tr.childData.alertMessageTitle,
+			alertMessage,
+			true,
+		);
 		return null;
 	}
 
@@ -605,58 +616,56 @@ async function printReport(): Promise<void> {
 <!--topmost navigation element that lets us go back to children overview and child data-->
 <Breadcrumbs data={breadcrumbdata} />
 
-{:else}
-    {#await sessionPromise}
-        <!-- show a loading symbol if the data is not yet available-->
-        <div class = "flex justify-center items-center space-x-2">
-            <Spinner /> <p>{i18n.tr.childData.loadingMessage}</p>
+{#await sessionPromise}
+    <!-- show a loading symbol if the data is not yet available-->
+    <div class = "flex justify-center items-center space-x-2">
+        <Spinner /> <p>{i18n.tr.childData.loadingMessage}</p>
+    </div>
+{:then}
+    <Heading tag="h2" class = "text-xl md:text-4xl text-gray-700 dark:text-gray-200 items-center p-2 m-2 pb-4">{i18n.tr.milestone.feedbackTitle} </Heading>
+
+    {@render legend()}
+
+    {@render explanationModal()}
+
+    <!--Main tabs component that displays the feedback for the milestones and milestonegroups -->
+    <Tabs tabStyle="full" defaultClass="justify-center flex rounded-lg divide-x rtl:divide-x-reverse divide-gray-200 shadow-sm dark:divide-gray-700">
+        <div class="flex flex-col md:flex-row justify-between text-sm md:text-base ">
+            {#if relevant_sessionkeys.length=== 0}
+                <p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-200">{i18n.tr.milestone.noFeedback}</p>
+            {:else}
+                {#each relevant_sessionkeys.slice(0, Math.min(numShownAnswersessions, relevant_sessionkeys.length)) as aid}
+                    <TabItem defaultClass="font-bold m-1 p-0"
+                             activeClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600 border-1"
+                             inactiveClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 border-additional-color-600 dark:border-additional-color-600 border-1"
+                             title={makeTitle(aid)}
+                             open={aid === relevant_sessionkeys[0]}
+                    >
+                        {#await loadData(aid)}
+                            <!-- show a loading symbol if the data is not yet available-->
+                            <div class = "flex justify-center items-center space-x-2">
+                                <Spinner /> <p>{i18n.tr.childData.loadingMessage}</p>
+                            </div>
+                        {:then _}
+                            <!-- render feedback only once the promise has been resolved-->
+                            {@render summaryEvaluation(aid)}
+                            {@render milestoneGroupsEval(aid)}
+                        {/await}
+                    </TabItem>
+                {/each}
+            {/if}
         </div>
-    {:then}
-        <Heading tag="h2" class = "text-xl md:text-4xl text-gray-700 dark:text-gray-200 items-center p-2 m-2 pb-4">{i18n.tr.milestone.feedbackTitle} </Heading>
+    </Tabs>
 
-        {@render legend()}
-
-        {@render explanationModal()}
-
-        <!--Main tabs component that displays the feedback for the milestones and milestonegroups -->
-        <Tabs tabStyle="full" defaultClass="justify-center flex rounded-lg divide-x rtl:divide-x-reverse divide-gray-200 shadow-sm dark:divide-gray-700">
-            <div class="flex flex-col md:flex-row justify-between text-sm md:text-base ">
-                {#if relevant_sessionkeys.length=== 0}
-                    <p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-200">{i18n.tr.milestone.noFeedback}</p>
-                {:else}
-                    {#each relevant_sessionkeys.slice(0, Math.min(numShownAnswersessions, relevant_sessionkeys.length)) as aid}
-                        <TabItem defaultClass="font-bold m-1 p-0"
-                                 activeClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600 border-1"
-                                 inactiveClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 border-additional-color-600 dark:border-additional-color-600 border-1"
-                                 title={makeTitle(aid)}
-                                 open={aid === relevant_sessionkeys[0]}
-                        >
-                            {#await loadData(aid)}
-                                <!-- show a loading symbol if the data is not yet available-->
-                                <div class = "flex justify-center items-center space-x-2">
-                                    <Spinner /> <p>{i18n.tr.childData.loadingMessage}</p>
-                                </div>
-                            {:then _}
-                                <!-- render feedback only once the promise has been resolved-->
-                                {@render summaryEvaluation(aid)}
-                                {@render milestoneGroupsEval(aid)}
-                            {/await}
-                        </TabItem>
-                    {/each}
-                {/if}
-            </div>
-        </Tabs>
-
-        <!--Button to print the report out into pdf or physical copy-->
-        <div class="flex items-center justify-center w-full m-2 p-2 mb-4 pb-4">
-            <Button class="text-sm md:text-base md:w-64 md:h-8  m-2 p-2 bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 focus-within:ring-additional-color-40" onclick={async () => {await printReport();}}>{i18n.tr.milestone.printReport}</Button>
-        </div>
-    {:catch error}
-        {alertStore.showAlert(
-            i18n.tr.childData.alertMessageTitle, 
-            `${error}`, 
-            true, 
-            true
-        )}
-    {/await}
-{/if}
+    <!--Button to print the report out into pdf or physical copy-->
+    <div class="flex items-center justify-center w-full m-2 p-2 mb-4 pb-4">
+        <Button class="text-sm md:text-base md:w-64 md:h-8  m-2 p-2 bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 focus-within:ring-additional-color-40" onclick={async () => {await printReport();}}>{i18n.tr.milestone.printReport}</Button>
+    </div>
+{:catch error}
+    {alertStore.showAlert(
+        i18n.tr.childData.alertMessageTitle,
+        `${error}`,
+        true,
+        true
+    )}
+{/await}
