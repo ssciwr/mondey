@@ -8,7 +8,7 @@ import {
 	getCurrentMilestoneAnswerSession,
 	updateMilestoneAnswer,
 } from "$lib/client";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import SubmitMilestoneImageModal from "$lib/components/DataInput/SubmitMilestoneImageModal.svelte";
 import MilestoneButton from "$lib/components/MilestoneButton.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
@@ -123,8 +123,12 @@ async function setup() {
 
 	if (response.error) {
 		console.log("Error when retrieving milestone answer session");
-		showAlert = true;
-		alertMessage = `${i18n.tr.milestone.alertMessageRetrieving} ${response.error.detail}`;
+		alertStore.showAlert(
+			i18n.tr.milestone.alertTitle,
+			`${i18n.tr.milestone.alertMessageRetrieving} ${response.error.detail}`,
+			true,
+			false
+		);
 		milestoneAnswerSession = undefined;
 	} else {
 		milestoneAnswerSession = response.data;
@@ -139,8 +143,6 @@ let currentMilestone = $state(undefined as MilestonePublic | undefined);
 let selectedAnswer = $derived(
 	milestoneAnswerSession?.answers?.[`${currentMilestone?.id}`]?.answer,
 );
-let showAlert = $state(false);
-let alertMessage = $state("");
 let currentImageIndex = $state(0);
 let showSubmitMilestoneImageModal = $state(false);
 const promise = setup();
@@ -275,7 +277,12 @@ const breadcrumbdata = $derived([
         {/if}
     </div>
 {:catch error}
-    <AlertMessage message={i18n.tr.milestone.alertMessageError + ": "+ error} />
+    <div class="flex flex-col items-center justify-center p-4">
+        <p class="text-red-500 mb-4">{i18n.tr.milestone.alertMessageError}: {error}</p>
+        <Button on:click={() => goto("/userLand/milestone/overview")}>
+            {i18n.tr.general.back}
+        </Button>
+    </div>
 {/await}
 
 {#key showSubmitMilestoneImageModal}
