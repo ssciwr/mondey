@@ -17,6 +17,7 @@ import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte.ts";
 import {
 	Accordion,
 	AccordionItem,
@@ -583,14 +584,6 @@ async function printReport(): Promise<void> {
 <!--topmost navigation element that lets us go back to children overview and child data-->
 <Breadcrumbs data={breadcrumbdata} />
 
-{#if showAlert}
-    <AlertMessage
-            message = {`${alertMessage}`}
-            title = {i18n.tr.childData.alertMessageTitle}
-            onclick={() => {
-			showAlert = false;
-		}}
-    />
 {:else}
     {#await sessionPromise}
         <!-- show a loading symbol if the data is not yet available-->
@@ -638,12 +631,11 @@ async function printReport(): Promise<void> {
             <Button class="text-sm md:text-base md:w-64 md:h-8  m-2 p-2 bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 focus-within:ring-additional-color-40" onclick={async () => {await printReport();}}>{i18n.tr.milestone.printReport}</Button>
         </div>
     {:catch error}
-        <AlertMessage
-                message = {`${alertMessage} ${error}`}
-                title = {i18n.tr.childData.alertMessageTitle}
-                onclick={() => {
-				showAlert = false;
-			}}
-        />
+        {alertStore.showAlert(
+            i18n.tr.childData.alertMessageTitle, 
+            `${error}`, 
+            true, 
+            true
+        )}
     {/await}
 {/if}
