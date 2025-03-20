@@ -8,11 +8,11 @@ import {
 	getCurrentMilestoneAnswerSession,
 	updateMilestoneAnswer,
 } from "$lib/client";
-import { alertStore } from "$lib/stores/alertStore.svelte";
 import SubmitMilestoneImageModal from "$lib/components/DataInput/SubmitMilestoneImageModal.svelte";
 import MilestoneButton from "$lib/components/MilestoneButton.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { contentStore } from "$lib/stores/contentStore.svelte";
 import { Accordion, AccordionItem, Button } from "flowbite-svelte";
@@ -124,10 +124,10 @@ async function setup() {
 	if (response.error) {
 		console.log("Error when retrieving milestone answer session");
 		alertStore.showAlert(
-			i18n.tr.milestone.alertTitle,
+			i18n.tr.milestone.alertMessageError,
 			`${i18n.tr.milestone.alertMessageRetrieving} ${response.error.detail}`,
 			true,
-			false
+			false,
 		);
 		milestoneAnswerSession = undefined;
 	} else {
@@ -277,12 +277,7 @@ const breadcrumbdata = $derived([
         {/if}
     </div>
 {:catch error}
-    <div class="flex flex-col items-center justify-center p-4">
-        <p class="text-red-500 mb-4">{i18n.tr.milestone.alertMessageError}: {error}</p>
-        <Button on:click={() => goto("/userLand/milestone/overview")}>
-            {i18n.tr.general.back}
-        </Button>
-    </div>
+    {alertStore.showAlert(i18n.tr.milestone.alertMessageError, error.message, true, true, () => goto("/userLand/milestone/overview")}
 {/await}
 
 {#key showSubmitMilestoneImageModal}
