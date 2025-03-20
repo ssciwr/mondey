@@ -1,6 +1,6 @@
 <script lang="ts">
 import { afterNavigate, goto } from "$app/navigation";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import UserVerify from "$lib/components/UserVerify.svelte";
 import UserlandSidebar from "$lib/components/UserlandSidebar.svelte";
 import { i18n } from "$lib/i18n.svelte";
@@ -10,8 +10,6 @@ import { Drawer } from "flowbite-svelte";
 import { BarsOutline } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 
-let showAlert: boolean = $state(false);
-let alertMessage: string = $state(i18n.tr.login.alertMessageError);
 let hideDrawer: boolean = $state(true);
 
 // get user state
@@ -25,15 +23,6 @@ let { children } = $props();
 </script>
 
 
-{#if showAlert}
-    <AlertMessage
-            title={i18n.tr.login.alertMessageTitle}
-            message={alertMessage}
-            onclick={() => {
-		showAlert = false;
-	}}
-    />
-{:else}
     {#if user.data}
         {#if user.data.is_verified === true}
             <div class = "flex flex-row items-start text-sm md:text-base" >
@@ -74,7 +63,6 @@ let { children } = $props();
             {i18n.tr.registration.goHome}
         </Button>
     {/if}
-{/if}
 
 {#if user.isTestAccount}
     <div class="fixed bottom-0 left-0 right-0 m-4 rounded-xl bg-white dark:bg-gray-700 border-solid border-2 shadow-xl p-8 border-gray-400 dark:border-gray-600 dark:text-white">
