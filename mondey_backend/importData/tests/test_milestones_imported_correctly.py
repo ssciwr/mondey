@@ -1,4 +1,4 @@
-from insert_milestones_into_database import process_milestones_csv
+from ..insert_milestones_into_database import process_milestones_csv
 from sqlmodel import Session, select
 from mondey_backend.models.milestones import Milestone, MilestoneGroup, MilestoneGroupText
 
