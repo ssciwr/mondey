@@ -66,7 +66,7 @@ jobs:
           python-version: "3.12"
       - name: Install backend dependencies
         working-directory: ./mondey_backend
-        run: pip install -e .[tests]
+        run: pip install -e .
 
       # Setup Node.js and pnpm for frontend
       - uses: pnpm/action-setup@v4
@@ -92,7 +92,7 @@ jobs:
       # Start backend server
       - name: Start backend server
         working-directory: ./mondey_backend
-        run: python -m mondey_backend.app &
+        run: mondey-backend &
 
       # Wait for backend to start
       - name: Wait for backend to be ready
