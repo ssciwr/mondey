@@ -3,6 +3,7 @@ import csv
 import pathlib
 from sqlmodel import Session, select
 from mondey_backend.models.children import Child, ChildCreate
+from mondey_backend.models.milestones import MilestoneAnswerSession, MilestoneAnswer
 
 
 import pandas as pd
@@ -34,7 +35,7 @@ def map_children_milestones_data():
 
     with SessionLocal() as session:
         milestone_query = select(Milestone)
-        milestones = session.exec(milestone_query).all()
+        milestones = session.execute(milestone_query).scalars().all()
         
         # Create a mapping from coded_key (column name) to milestone_id
         milestone_mapping = {}
@@ -59,9 +60,9 @@ def map_children_milestones_data():
                 child_id = int(row['CASE'])
                 
                 # Check if child already exists
-                existing_child = session.exec(
+                existing_child = session.execute(
                     select(Child).where(Child.id == child_id)
-                ).first()
+                ).scalar_one_or_none()
                 
                 if not existing_child:
                     # Create a new child
