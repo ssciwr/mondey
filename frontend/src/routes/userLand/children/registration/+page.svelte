@@ -489,7 +489,7 @@ const deleteCurrentChild = async () => {
                             <a
                                     class="btn-secondary"
                                     onclick={() => {
-                                        goto(`/userLand/children/feedback?id=${currentChild.id}`)
+                                        goto(`/userLand/children/feedback`)
                                     }}>
                                 <ChartLineUpOutline size="md" />
                                 {i18n.tr.childData.feedbackButtonLabel}
@@ -497,7 +497,7 @@ const deleteCurrentChild = async () => {
                             <a
                                     class="btn-primary"
                                     onclick={() => {
-                                        goto(`/userLand/milestone/group?id=${currentChild.id}`)
+                                        goto(`/userLand/milestone/group`)
                                     }}
                             >
                                 <FlagOutline size="md" />

@@ -155,7 +155,7 @@ const breadcrumbdata: any[] = [
 	{
 		label: currentChild.name,
 		onclick: () => {
-			goto(`/userLand/children/registration?id=${currentChild.id}`);
+			goto("/userLand/children/registration");
 		},
 		symbol: UserSettingsOutline,
 	},

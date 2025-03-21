@@ -52,13 +52,6 @@ async function setup(): Promise<any> {
 		return [];
 	}
 
-	const childId = page.url.searchParams.get("id");
-
-	// Set currentChild.id if the parameter exists
-	if (childId) {
-		currentChild.id = Number.parseInt(childId);
-	}
-
 	await currentChild.load_data();
 
 	if (currentChild.id === null || currentChild.id === undefined) {
@@ -137,7 +130,7 @@ const breadcrumbdata: any[] = [
 		label: currentChild.name,
 		symbol: UserSettingsOutline,
 		onclick: () => {
-			goto(`/userLand/children/registration?id=${currentChild.id}`);
+			goto("/userLand/children/registration");
 		},
 	},
 	{

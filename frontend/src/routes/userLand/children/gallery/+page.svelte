@@ -118,7 +118,7 @@ async function setup(): Promise<CardElement[]> {
 						onclick: async () => {
 							currentChild.id = child.id;
 							await currentChild.load_data();
-							goto(`/userLand/children/registration?id=${child.id}`);
+							goto("/userLand/children/registration");
 						},
 					},
 				};
