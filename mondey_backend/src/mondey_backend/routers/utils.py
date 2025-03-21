@@ -159,17 +159,7 @@ def get_or_create_current_milestone_answer_session(
             included_in_statistics=False,
         )
         add(session, milestone_answer_session)
-        delta_months = 6
-        child_age_months = get_child_age_in_months(child)
-        milestones = session.exec(
-            select(Milestone)
-            .where(
-                child_age_months >= col(Milestone.expected_age_months) - delta_months
-            )
-            .where(
-                child_age_months <= col(Milestone.expected_age_months) + delta_months
-            )
-        ).all()
+        milestones = session.exec(select(Milestone)).all()
         for milestone in milestones:
             session.add(
                 MilestoneAnswer(
