@@ -47,6 +47,7 @@ def test_create_user_question_works(admin_client: TestClient):
             },
         },
         "additional_option": "",
+        "required": False,
     }
 
 
@@ -159,6 +160,7 @@ def test_create_child_question_works(admin_client: TestClient):
             },
         },
         "additional_option": "",
+        "required": False,
     }
 
 
