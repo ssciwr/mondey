@@ -35,3 +35,8 @@ export type CardStyle = {
 	} | null;
 	auxilliary?: { [key: string]: string | boolean | null | undefined } | null;
 };
+
+export type PlotDatum = {
+	age: number;
+	[key: string]: string | number;
+};
