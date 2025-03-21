@@ -98,7 +98,7 @@ jobs:
       - name: Wait for backend to be ready
         run: |
           timeout=30
-          while ! curl -s http://localhost:5173/api/health 2>&1 > /dev/null
+          while ! curl -s http://localhost:5173 2>&1 > /dev/null
           do
             if [ $timeout -le 0 ]; then
               echo "Backend failed to start"
