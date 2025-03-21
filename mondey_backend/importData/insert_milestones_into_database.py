@@ -147,12 +147,13 @@ def process_milestones_csv(csv_path):
             group_id_map[prefix] = milestone_group.id
 
             # Create milestones for this group
-            for milestone_order, (_var, label) in enumerate(milestones, start=1):
+            for milestone_order, (var, label) in enumerate(milestones, start=1):
                 clean_title = clean_milestone_title(label)
 
                 milestone = Milestone(
                     group_id=milestone_group.id,
                     order=milestone_order,
+                    data_import_key=var,
                     expected_age_months=12,  # Default value, since they don't have expected ages in the csv?
                 )
                 session.add(milestone)

@@ -100,6 +100,7 @@ class Milestone(SQLModel, table=True):
     group: MilestoneGroup = back_populates("milestones")
     text: Mapped[dict[str, MilestoneText]] = dict_relationship(key="lang_id")
     images: Mapped[list[MilestoneImage]] = back_populates("milestone")
+    data_import_key: str | None = Field(default=None)
 
 
 class MilestonePublic(SQLModel):
