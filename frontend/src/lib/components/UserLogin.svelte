@@ -2,7 +2,7 @@
 <script lang="ts">
 import { base } from "$app/paths";
 
-import AlertMessage from "$lib/components/AlertMessage.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 
 import { goto } from "$app/navigation";
 import { authCookieLogin, usersCurrentUser } from "$lib/client/services.gen";
@@ -11,6 +11,8 @@ import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
+
+import { page } from "$app/stores";
 
 async function refresh(): Promise<string> {
 	const returned = await usersCurrentUser();
@@ -40,18 +42,31 @@ async function submitData(): Promise<void> {
 	const authReturn = await authCookieLogin(loginData);
 
 	if (authReturn.error) {
-		showAlert = true;
-		alertMessage = i18n.tr.login.badCredentials + authReturn.error.detail;
+		alertStore.showAlert(
+			i18n.tr.login.alertMessageTitle,
+			i18n.tr.login.badCredentials + authReturn.error.detail,
+			true,
+			false,
+		);
 		console.log("error during login ", authReturn.error.detail);
 	} else {
 		const status: string = await refresh();
 		if (status !== "success") {
 			console.log("error during retrieving active users: ", status);
-			showAlert = true;
-			alertMessage = `${i18n.tr.login.unauthorized}: ${status}`;
+			alertStore.showAlert(
+				i18n.tr.login.alertMessageTitle,
+				`${i18n.tr.login.unauthorized}: ${status}`,
+				true,
+				false,
+			);
 		} else {
 			console.log("login and user retrieval successful");
-			goto("/userLand/userLandingpage");
+			const intendedPath = $page.url.searchParams.get("intendedpath");
+			if (intendedPath !== null) {
+				goto(intendedPath);
+			} else {
+				goto("/userLand/children/gallery");
+			}
 		}
 	}
 }
@@ -60,20 +75,8 @@ async function submitData(): Promise<void> {
 
 let username = $state("");
 let password = $state("");
-let showAlert = $state(false);
-let alertMessage: string = $state(i18n.tr.login.badCredentials);
 </script>
 
-{#if showAlert}
-	<AlertMessage
-		title={i18n.tr.login.alertMessageTitle}
-		message={alertMessage}
-		lastpage={`${base}/userLand/userLogin`}
-		onclick={() => {
-			showAlert = false;
-		}}
-	/>
-{/if}
 
 <div class="container m-2 mx-auto w-full max-w-xl p-6">
 	<Card class="container m-2 mx-auto mb-6 w-full max-w-xl pb-6">

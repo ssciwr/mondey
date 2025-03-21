@@ -1,10 +1,10 @@
 <script lang="ts">
 import { registerRegister } from "$lib/client/services.gen";
 import { type RegisterRegisterData } from "$lib/client/types.gen";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
 import ResearchCodeInput from "$lib/components/DataInput/ResearchCodeInput.svelte";
 import UserVerify from "$lib/components/UserVerify.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
@@ -27,8 +27,12 @@ async function submitData(): Promise<void> {
 
 	if (result.error) {
 		console.log("error: ", result.response.status, result.error.detail);
-		alertMessage = `${i18n.tr.registration.alertMessageError}: ${result.error.detail}`;
-		showAlert = true;
+		alertStore.showAlert(
+			i18n.tr.registration.alertMessageTitle,
+			`${i18n.tr.registration.alertMessageError}: ${result.error.detail} ${i18n.tr.registration.infoTitle}`,
+			true,
+			false,
+		);
 	} else {
 		console.log("successful transmission: ", result.response.status);
 		success = true;
@@ -38,26 +42,13 @@ async function submitData(): Promise<void> {
 let email = $state("");
 let password = $state("");
 let passwordConfirm = $state("");
-let showAlert = $state(false);
 let success = $state(false);
-let alertMessage = $state(i18n.tr.registration.alertMessageMissing);
 let researchCodeValid = $state(false);
 let passwordValid = $derived(password !== "" && password === passwordConfirm);
 
 let { researchCode = "" }: { researchCode?: string } = $props();
 </script>
 
-<!-- Show big alert message when something is missing -->
-{#if showAlert}
-	<AlertMessage
-		title={i18n.tr.registration.alertMessageTitle}
-		message={alertMessage}
-		infotitle="Was passiert mit den Daten"
-		onclick={() => {
-			showAlert = false;
-		}}
-	/>
-{/if}
 
 <!-- The actual content -->
 <Card class="container m-2 mx-auto w-full max-w-xl p-2">

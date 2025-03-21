@@ -1,5 +1,7 @@
 <svelte:options runes={true} />
 <script lang="ts">
+import { goto } from "$app/navigation";
+import { page } from "$app/state";
 import {
 	type MilestoneAnswerSessionPublic,
 	type MilestonePublic,
@@ -10,8 +12,8 @@ import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { activePage } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
 import { Spinner } from "flowbite-svelte";
 import {
@@ -19,7 +21,7 @@ import {
 	RectangleListOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
-import AlertMessage from "./AlertMessage.svelte";
+import { get } from "svelte/store"; // is this needed in svelte 5? Because now page is in $app/state we might not need to <store>get it?
 
 function computeProgress(
 	milestones: MilestonePublic[] | undefined,
@@ -54,14 +56,16 @@ async function setup(): Promise<any> {
 
 	if (currentChild.id === null || currentChild.id === undefined) {
 		console.log("Error when retrieving child data");
-		showAlert = true;
-		alertMessage = i18n.tr.childData.alertMessageRetrieving;
+		alertStore.showAlert(
+			i18n.tr.milestone.alertMessageError,
+			i18n.tr.childData.alertMessageRetrieving,
+			true,
+			false,
+		);
 		data = [];
 		return data;
 	}
 
-	console.log("currentChild", currentChild);
-	console.log("child data: ", currentChild.name);
 	const milestonegroups = await getMilestoneGroups({
 		path: { child_id: currentChild.id },
 	});
@@ -72,18 +76,24 @@ async function setup(): Promise<any> {
 
 	if (answerSession.error) {
 		console.log("Error when retrieving answer data");
-		showAlert = true;
-		alertMessage =
-			i18n.tr.milestone.alertMessageRetrieving + answerSession.error.detail;
+		alertStore.showAlert(
+			i18n.tr.milestone.alertMessageError,
+			i18n.tr.milestone.alertMessageRetrieving + answerSession.error.detail,
+			true,
+			false,
+		);
 		data = [];
 		return data;
 	}
 
 	if (milestonegroups.error) {
 		console.log("Error when retrieving milestone group data");
-		showAlert = true;
-		alertMessage =
-			i18n.tr.milestone.alertMessageRetrieving + milestonegroups.error.detail;
+		alertStore.showAlert(
+			i18n.tr.milestone.alertMessageError,
+			i18n.tr.milestone.alertMessageRetrieving + milestonegroups.error.detail,
+			true,
+			false,
+		);
 		data = [];
 		return data;
 	}
@@ -96,7 +106,7 @@ async function setup(): Promise<any> {
 			progress: computeProgress(item.milestones, answerSession.data),
 			events: {
 				onclick: () => {
-					activePage.set("milestoneOverview");
+					goto("/userLand/milestone/overview");
 					contentStore.milestoneGroup = item.id;
 					contentStore.milestoneGroupData = item;
 				},
@@ -112,7 +122,7 @@ const breadcrumbdata: any[] = [
 	{
 		label: i18n.tr.childData.overviewLabel,
 		onclick: () => {
-			activePage.set("childrenGallery");
+			goto("/userLand/children/gallery");
 		},
 		symbol: GridPlusSolid,
 	},
@@ -120,14 +130,14 @@ const breadcrumbdata: any[] = [
 		label: currentChild.name,
 		symbol: UserSettingsOutline,
 		onclick: () => {
-			activePage.set("childrenRegistration");
+			goto("/userLand/children/registration");
 		},
 	},
 	{
 		label: i18n.tr.milestone.groupOverviewLabel,
 		symbol: RectangleListOutline,
 		onclick: () => {
-			activePage.set("milestoneGroup");
+			goto("/userLand/milestone/group");
 		},
 	},
 ];
@@ -193,8 +203,6 @@ export function createStyle(data: any[]) {
 	});
 }
 
-let showAlert = $state(false);
-let alertMessage = $state("");
 let promise = $state(setup());
 let data: any[] = $state([]);
 const searchData: any[] = [
@@ -220,36 +228,27 @@ const searchData: any[] = [
 	},
 ];
 
-let validMilestoneGroups = $derived(
-	data.filter((item) => item.milestones?.length > 0),
-);
+$effect(() => {
+	console.log("Data now: ", data);
+});
 </script>
 
 {#await promise}
-<Spinner /> <p>{i18n.tr.userData.loadingMessage}</p>
+    <Spinner /> <p>{i18n.tr.userData.loadingMessage}</p>
 {:then data}
 
-<div class="flex flex-col md:rounded-t-lg">
-	<Breadcrumbs data={breadcrumbdata} />
-	<div class="grid gap-y-8">
-		{#if validMilestoneGroups.length > 0}
-				<GalleryDisplay
-			data={validMilestoneGroups}
-			itemComponent={CardDisplay}
-			componentProps={createStyle(data)}
-			withSearch={true}
-			{searchData}
-				/>
-			{:else}
-			<AlertMessage
-					title={i18n.tr.milestone.noRelevantMilestones}
-			/>
-		{/if}
-	</div>
-</div>
+    <div class="flex flex-col md:rounded-t-lg">
+        <Breadcrumbs data={breadcrumbdata} />
+        <div class="grid gap-y-8">
+                <GalleryDisplay
+                        data={data}
+                        itemComponent={CardDisplay}
+                        componentProps={createStyle(data)}
+                        withSearch={true}
+                        {searchData}
+                />
+        </div>
+    </div>
 {:catch error}
-	<AlertMessage message={`${i18n.tr.milestone.alertMessageError} ${error}`} onclick={() => {
-		activePage.set("milestoneOverview");
-		showAlert = false;
-	}}/>
+    {alertStore.showAlert(i18n.tr.milestone.alertMessageError, error.message, true, true, () => goto("/userLand/milestone/overview"))}
 {/await}

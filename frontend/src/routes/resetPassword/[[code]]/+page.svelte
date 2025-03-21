@@ -2,9 +2,9 @@
 <script lang="ts">
 import { page } from "$app/stores";
 import { resetResetPassword } from "$lib/client/services.gen";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input } from "flowbite-svelte";
 import { CheckCircleOutline } from "flowbite-svelte-icons";
@@ -12,8 +12,6 @@ import { onMount } from "svelte";
 
 let pw = $state("");
 let confirmPw = $state("");
-let showAlert = $state(false);
-let alertMessage = $state(i18n.tr.forgotPw.confirmError);
 let success: boolean = $state(false);
 
 onMount(() => {
@@ -22,48 +20,63 @@ onMount(() => {
 		$page.params.code === null ||
 		$page.params.code === ""
 	) {
-		alertMessage = i18n.tr.forgotPw.codeError;
-		showAlert = true;
+		alertStore.showAlert(
+			i18n.tr.forgotPw.error,
+			i18n.tr.forgotPw.codeError,
+			true,
+		);
 	}
 });
 
 async function submitData(): Promise<void> {
 	if (pw !== confirmPw) {
-		showAlert = true;
+		alertStore.showAlert(
+			i18n.tr.forgotPw.error,
+			i18n.tr.forgotPw.confirmError,
+			true,
+		);
 		return;
 	}
 
-	const { data, error } = await resetResetPassword({
-		body: { token: $page.params.code, password: pw },
-	});
+	try {
+		const { data, error } = await resetResetPassword({
+			body: { token: $page.params.code, password: pw },
+		});
 
-	if ((!error && data) || error?.detail === "VERIFY_USER_ALREADY_VERIFIED") {
-		success = true;
-		return;
+		if ((!error && data) || error?.detail === "VERIFY_USER_ALREADY_VERIFIED") {
+			success = true;
+			return;
+		}
+
+		console.log(error);
+		alertStore.showAlert(
+			i18n.tr.forgotPw.error,
+			i18n.tr.forgotPw.sendError,
+			true,
+		);
+		success = false;
+	} catch (error) {
+		alertStore.showAlert(
+			i18n.tr.forgotPw.error,
+			i18n.tr.forgotPw.sendError,
+			true,
+			true,
+		);
+		success = false;
 	}
-
-	console.log(error);
-	alertMessage = i18n.tr.forgotPw.sendError;
-	showAlert = true;
-	success = false;
 }
 </script>
 
-{#if showAlert === true}
-    <AlertMessage title={i18n.tr.forgotPw.error} message={alertMessage} onclick={() => {
-        showAlert = false;
-    }}/>
-{:else}
-    {#if success === true}
-        <div class="flex flex-row">
-            <CheckCircleOutline size="xl" color="green" class="m-2"/>
-            <div class="m-2 p-2">
-                {i18n.tr.forgotPw.successReset}
-            </div>
+{#if success === true}
+    <div class="flex flex-row">
+        <CheckCircleOutline size="xl" color="green" class="m-2"/>
+        <div class="m-2 p-2">
+            {i18n.tr.forgotPw.successReset}
         </div>
-        <Button href="/userLand/userLogin" size="md">{i18n.tr.forgotPw.goToLogin}</Button>
-    {:else}
-    <Card class="container m-2 mx-auto w-full max-w-xl items-center justify-center p-2">
+    </div>
+    <Button href="/login" size="md">{i18n.tr.forgotPw.goToLogin}</Button>
+{:else}
+<Card class="container m-2 mx-auto w-full max-w-xl items-center justify-center p-2">
 
         <Heading
             tag="h3"
@@ -82,5 +95,4 @@ async function submitData(): Promise<void> {
             </div>
         </form>
     </Card>
-    {/if}
 {/if}

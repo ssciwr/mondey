@@ -7,7 +7,7 @@ import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import Footer from "$lib/components/Navigation/Footer.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import { alertStoreSvelte } from "$lib/stores/alertStore.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 
 import {
@@ -38,7 +38,14 @@ import "../app.css";
 import { afterNavigate } from "$app/navigation";
 import { page } from "$app/stores";
 
-let isUserLand = $derived($page.url.pathname.includes("userLandingpage"));
+/* So basically it's not ideal to detect user being in the userland this way, but the main menu for non-logged in users
+does make sense to be here.
+
+Best would be to refactor to have a static non-logged in part (e.g. "/") and have this user part just for logged in
+users with only the logged in stuff, so no intermixing in files like this. However, that refactor isn't worth the
+time/risk necessarily.
+ */
+let isUserLand = $derived($page.url.pathname.includes("userLand/"));
 afterNavigate(() => {
 	hideDrawer = true;
 });
@@ -90,14 +97,14 @@ const asAlert = false;
 					<Button
 							type="button"
 							class="m-2 w-full"
-							href="{base}/userLand/userLogin"
+							href="{base}/login"
 							size="lg">{i18n.tr.login.profileButtonLabelDefault}</Button
 					>
 				{:else}
 					<Button
 							type="button"
 							class="m-2 w-full"
-							href="{base}/userLand/userLandingpage"
+							href="{base}/userLand/children/gallery"
 							size="lg">{i18n.tr.registration.goHome}</Button
 					>
 				{/if}
@@ -116,7 +123,7 @@ const asAlert = false;
 	{#if false === isUserLand}
 		<!-- Mobile Log in -->
 		<div class="z-10 fixed" style="top:0.8rem;left:1rem;">
-			<a class="btn-primary btn-icon" href="/userLand/userLogin">
+			<a class="btn-primary btn-icon" href="/login">
 				<UserOutline />
 			</a>
 		</div>
@@ -151,14 +158,14 @@ const asAlert = false;
 
 						{#if user.data === null}
 							<SidebarItem label={i18n.tr.login.profileButtonLabelDefault}
-										 href="/userLand/userLogin">
+										 href="/login">
 								<svelte:fragment slot="icon">
 									<ProfileCardSolid size="lg" />
 								</svelte:fragment>
 							</SidebarItem>
 						{:else}
 							<SidebarItem label={i18n.tr.registration.goHome}
-										 href="/userLand/userLandingpage">
+										 href="/userLand/children/gallery">
 								<svelte:fragment slot="icon">
 									<ProfileCardSolid size="lg" />
 								</svelte:fragment>
@@ -197,14 +204,14 @@ const asAlert = false;
 	{@render children?.()}
 </div>
 
-<Modal bind:open={alertStoreSvelte.isAlertShown} color={alertStoreSvelte.isError ? 'red' : alertStoreSvelte.isAwaitError ? 'yellow' : 'default'} title={alertStoreSvelte.title} autoclose>
-	<p class="text-base">{alertStoreSvelte.message}</p>
+<Modal bind:open={alertStore.isAlertShown} color={alertStore.isError ? 'red' : alertStore.isAwaitError ? 'yellow' : 'default'} title={alertStore.title} autoclose>
+	<p class="text-base">{alertStore.message}</p>
 	<svelte:fragment slot="footer">
 		<button class="btn-primary" onclick={() => {
-			if (alertStoreSvelte.callback) {
-				alertStoreSvelte.callback();
+			if (alertStore.callback) {
+				alertStore.callback();
 			}
-			alertStoreSvelte.hideAlert();
+			alertStore.hideAlert();
 		}}>{i18n.tr.misc.understood}</button>
 	</svelte:fragment>
 </Modal>
