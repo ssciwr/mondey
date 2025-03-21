@@ -41,6 +41,20 @@ async function getTranslations() {
 						data[section_key] = {};
 					}
 				}
+				// use built-in frontend text for any missing / empty entries in de locale json from server
+				if (locale === "de") {
+					for (const [section_key, section] of Object.entries(translationIds)) {
+						for (const [item_key, item] of Object.entries(section)) {
+							if (
+								!(item_key in data[section_key]) ||
+								data[section_key][item_key] === ""
+							) {
+								console.log(section_key, item_key);
+								data[section_key][item_key] = item;
+							}
+						}
+					}
+				}
 				translations[locale] = data;
 			}
 		} catch {
