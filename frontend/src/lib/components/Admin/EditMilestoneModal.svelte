@@ -9,11 +9,11 @@ import {
 } from "$lib/client/services.gen";
 import type { MilestoneAdmin, MilestoneText } from "$lib/client/types.gen";
 import CancelButton from "$lib/components/Admin/CancelButton.svelte";
-import DeleteModal from "$lib/components/Admin/DeleteModal.svelte";
 import EditImage from "$lib/components/Admin/EditImage.svelte";
 import MilestoneExpectedAgeModal from "$lib/components/Admin/MilestoneExpectedAgeModal.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";
+import DeleteModal from "$lib/components/DeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import {
 	Button,

@@ -19,12 +19,12 @@ import type {
 } from "$lib/client/types.gen";
 import AddButton from "$lib/components/Admin/AddButton.svelte";
 import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
-import DeleteModal from "$lib/components/Admin/DeleteModal.svelte";
 import EditButton from "$lib/components/Admin/EditButton.svelte";
 import EditMilestoneGroupModal from "$lib/components/Admin/EditMilestoneGroupModal.svelte";
 import EditMilestoneModal from "$lib/components/Admin/EditMilestoneModal.svelte";
 import OrderItemsModal from "$lib/components/Admin/OrderItemsModal.svelte";
 import ReorderButton from "$lib/components/Admin/ReorderButton.svelte";
+import DeleteModal from "$lib/components/DeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { milestoneGroups } from "$lib/stores/adminStore";
 import {
