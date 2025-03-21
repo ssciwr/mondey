@@ -5,7 +5,7 @@ import { expect, test } from "@playwright/test";
 // Just mocking how we could do this, if we have the backend running in a playwright context.
 test("/ : Anonymous users can log in", async ({ page }) => {
 	await page.goto("/");
-	const button = page.getByText("Try Demo");
+	const button = page.getByText("Ausprobieren");
 	await button.click();
 	await expect(page).toHaveURL("/userLand/children/gallery");
 	await expect(page.getByText("Kinder")).toBeVisible();
