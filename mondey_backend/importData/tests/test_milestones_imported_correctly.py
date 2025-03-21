@@ -1,8 +1,13 @@
-from importData.insert_milestones_into_database import process_milestones_csv
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from insert_milestones_into_database import process_milestones_csv
 from sqlmodel import Session, select
 from mondey_backend.models.milestones import Milestone, MilestoneGroup, MilestoneGroupText
 
-csv_path = "milestones_metadata_(variables).csv"
+# Use a path relative to the importData directory
+csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
+                        "milestones_metadata_(variables).csv")
 
 
 def test_import_works():
