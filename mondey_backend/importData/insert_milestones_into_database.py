@@ -150,6 +150,8 @@ def process_milestones_csv(csv_path):
             for milestone_order, (var, label) in enumerate(milestones, start=1):
                 clean_title = clean_milestone_title(label)
 
+                print("Setting data import key to:", var)
+
                 milestone = Milestone(
                     group_id=milestone_group.id,
                     order=milestone_order,
