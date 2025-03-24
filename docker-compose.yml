@@ -17,6 +17,7 @@ services:
       - RELOAD=${RELOAD:-false}
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - STATS_CRONTAB=${STATS_CRONTAB:-0 3 * * mon}
+      - DEEPL_API_KEY=${DEEPL_API_KEY:-}
     logging:
       driver: "local"
       options:

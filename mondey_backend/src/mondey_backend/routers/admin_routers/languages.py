@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import json
 
+import deepl
 from fastapi import APIRouter
 from fastapi import HTTPException
 
 from ...dependencies import SessionDep
 from ...models.milestones import Language
+from ...settings import app_settings
 from ..utils import add
 from ..utils import get
 from ..utils import i18n_language_path
@@ -44,5 +46,22 @@ def create_router() -> APIRouter:
         with open(i18json_path, "w", encoding="utf-8") as i18json_file:
             json.dump(i18dict, i18json_file, separators=(",", ":"), ensure_ascii=False)
         return {"ok": True}
+
+    @router.post("/translate/", response_model=str)
+    async def translate(text: str, locale: str, source_lang: str = "de"):
+        try:
+            deepl_client = deepl.DeepLClient(app_settings.DEEPL_API_KEY)
+            if locale == "en":
+                # DeepL requires "EN-US" or "EN-GB" instead of "EN", all other languages use the 2-letter code
+                locale = "EN-US"
+            result = deepl_client.translate_text(
+                text,
+                target_lang=locale.upper(),
+                source_lang=source_lang.upper(),
+                formality="prefer_more",
+            )
+            return result.text
+        except Exception as e:
+            raise HTTPException(400, str(e)) from e
 
     return router

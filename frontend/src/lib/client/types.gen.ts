@@ -391,6 +391,18 @@ export type UpdateI18NResponse = (unknown);
 
 export type UpdateI18NError = (HTTPValidationError);
 
+export type TranslateData = {
+    query: {
+        locale: string;
+        source_lang?: string;
+        text: string;
+    };
+};
+
+export type TranslateResponse = (string);
+
+export type TranslateError = (HTTPValidationError);
+
 export type GetMilestoneGroupsAdminResponse = (Array<MilestoneGroupAdmin>);
 
 export type GetMilestoneGroupsAdminError = unknown;
