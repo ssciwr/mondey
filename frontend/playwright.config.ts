@@ -8,7 +8,7 @@ export default defineConfig({
 	workers: process.env.CI ? 1 : undefined,
 	reporter: "html",
 	use: {
-		baseURL: "http://localhost:5678",
+		baseURL: "http://localhost:5173",
 		trace: "on-first-retry",
 	},
 	projects: [
@@ -36,8 +36,8 @@ export default defineConfig({
 		},
 	],
 	webServer: {
-		command: "pnpm exec vite dev --port 5678",
-		port: 5678,
-		reuseExistingServer: false,
+		command: "pnpm exec vite dev --port 5173",
+		port: 5173,
+		reuseExistingServer: true,
 	},
 });
