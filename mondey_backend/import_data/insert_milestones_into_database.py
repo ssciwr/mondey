@@ -5,6 +5,8 @@ import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
+from utils import clear_all_milestones
+from utils import get_import_test_session
 
 from mondey_backend.databases.mondey import create_mondey_db_and_tables
 from mondey_backend.databases.users import create_user_db_and_tables
@@ -49,7 +51,7 @@ def is_milestone(row):
     return len(label) > 10
 
 
-def process_milestones_csv(csv_path):
+def process_milestones_csv(session, csv_path, clear_existing_milestones=False):
     """Process the milestones CSV file and insert data into the database."""
     df = pd.read_csv(csv_path, sep="\t", encoding="utf-16")
     # If we couldn't read the file with any encoding, raise an error
@@ -58,10 +60,22 @@ def process_milestones_csv(csv_path):
             f"Could not read the file {csv_path} with any of the attempted encodings."
         )
 
+    if clear_existing_milestones:
+        clear_all_milestones()
+        # Rather than alter the Session fixture/dependency, I did this to be absolutely sure
+    # the count of milestones if 0 at the time we begin the test.
+
     # Filter for milestone rows (those with IDs containing '_')
     milestone_df = df[df["VAR"].str.contains("_")]
 
-    # Create a database connection
+    # todo: Consider refactoring to just access the normal database, so tests align with the same DB.
+    # Or convert it into a dependency because we might be accessing this special DB relevant for import data
+    # across multiple files, could put it in a class to manage it at least.
+    # Otherwise tests will assert against fixture def session( ... which is the normal DB...)
+    # alternate is a new fixture for accessing the import DB (probably best solution)
+    # I wanted to keep it apart from our normal development to avoid overwriting data.
+    # todo: Remove these notes after deciding
+
     db_url = os.environ.get(
         "DATABASE_URL",
         "sqlite:///./db/mondey.db",  # not the same as the normal DB
@@ -186,6 +200,11 @@ if __name__ == "__main__":
         sys.exit(1)
 
     csv_path = sys.argv[1]
+
+    session = get_import_test_session()
+    # Todo: Check Will the below be the test import DB or the normal DB (/import_data/db or /db ?)
+    # Because the tables are all there, but surely the function below goes to /db not import_data/db?
     create_mondey_db_and_tables()
     asyncio.run(create_user_db_and_tables())
-    process_milestones_csv(csv_path)
+
+    process_milestones_csv(session, csv_path)

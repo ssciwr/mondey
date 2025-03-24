@@ -11,7 +11,7 @@ from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.models.milestones import MilestoneGroupText
 
-# Use a path relative to the importData directory
+# Use a path relative to the import_data directory
 csv_path = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "milestones_metadata_(variables).csv",
