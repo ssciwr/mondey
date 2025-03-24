@@ -74,7 +74,7 @@ const registerTestUser = async () => {
       <p class="mb-3 font-normal max-w-prose text-gray-700 dark:text-gray-400">{i18n.tr.frontpageAbout.summary1}</p>
       <p class="mb-3 font-normal max-w-prose text-gray-700 dark:text-gray-400">{i18n.tr.frontpageAbout.summary2}</p>
 
-        <button class="btn-primary" on:click={() => registerTestUser()}>{i18n.tr.frontpageAbout.tryDemo}</button>
+        <button class="btn-primary" data-test-id="anonymousLogin" on:click={() => registerTestUser()}>{i18n.tr.frontpageAbout.tryDemo}</button>
       </div>
     </Card>
   </div>

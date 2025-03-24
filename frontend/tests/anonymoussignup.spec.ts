@@ -4,7 +4,7 @@ import { expect, test } from "@playwright/test";
 
 test("/ : Anonymous users can log in", async ({ page }) => {
 	await page.goto("/");
-	const button = page.getByText("Ausprobieren");
+	const button = page.getByTestId("anonymousLogin");
 	await button.click();
 	await expect(page).toHaveURL("/userLand/children/gallery");
 	await expect(page.getByText("Kinder")).toBeVisible();
