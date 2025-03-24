@@ -1,15 +1,13 @@
-import asyncio
 import os
 
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
-from utils import clear_all_milestones
-from utils import get_import_test_session
 
 from mondey_backend.databases.mondey import create_mondey_db_and_tables
-from mondey_backend.databases.users import create_user_db_and_tables
+from mondey_backend.import_data.utils import clear_all_milestones
+from mondey_backend.import_data.utils import get_import_test_session
 from mondey_backend.models.milestones import Language
 from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneGroup
@@ -51,7 +49,7 @@ def is_milestone(row):
     return len(label) > 10
 
 
-def process_milestones_csv(session, csv_path, clear_existing_milestones=False):
+def import_milestones_metadata(session, csv_path, clear_existing_milestones=False):
     """Process the milestones CSV file and insert data into the database."""
     df = pd.read_csv(csv_path, sep="\t", encoding="utf-16")
     # If we couldn't read the file with any encoding, raise an error
@@ -196,15 +194,13 @@ if __name__ == "__main__":
     import sys
 
     if len(sys.argv) != 2:
-        print("Usage: python insert_milestones_into_database.py <path_to_csv>")
+        print("Usage: python import_milestones_metadata.py <path_to_csv>")
         sys.exit(1)
 
     csv_path = sys.argv[1]
 
-    session = get_import_test_session()
-    # Todo: Check Will the below be the test import DB or the normal DB (/import_data/db or /db ?)
-    # Because the tables are all there, but surely the function below goes to /db not import_data/db?
-    create_mondey_db_and_tables()
-    asyncio.run(create_user_db_and_tables())
+    import_session, import_engine = get_import_test_session()
+    create_mondey_db_and_tables(optional_engine=import_engine)
+    # asyncio.run(create_user_db_and_tables()) We don't need this for milestones/children, I believe.
 
-    process_milestones_csv(session, csv_path)
+    import_milestones_metadata(import_session, csv_path)
