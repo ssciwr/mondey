@@ -60,3 +60,14 @@ sqlite3 db/users.db
 sqlite> UPDATE user SET is_superuser = 1 WHERE email = 'user@domain.com';
 sqlite> .quit
 ```
+
+### Internationalization
+
+All text on the website is translated into multiple languages, and the translations can be edited from the admin interface.
+In the frontend code, all user-facing text is defined (with placeholder german texts) in [frontend/src/lib/translations.ts](https://github.com/ssciwr/mondey/blob/main/frontend/src/lib/translations.ts).
+When the website is loaded by a user, the translations that were made in the admin interface for all of these texts are downloaded from the server.
+
+_Note: When new text is added to [frontend/src/lib/translations.ts](https://github.com/ssciwr/mondey/blob/main/frontend/src/lib/translations.ts),
+and the deployed website has been updated,
+the translations for this new text need to entered using the admin interface.
+Until this is done the new text will not be visible in the deployed website!_
