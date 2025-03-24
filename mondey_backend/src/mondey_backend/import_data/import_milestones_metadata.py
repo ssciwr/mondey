@@ -1,12 +1,7 @@
-import os
-
 import pandas as pd
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlmodel import SQLModel
 
 from mondey_backend.databases.mondey import create_mondey_db_and_tables
-from mondey_backend.import_data.utils import clear_all_milestones
+from mondey_backend.import_data.utils import clear_all_data
 from mondey_backend.import_data.utils import get_import_test_session
 from mondey_backend.models.milestones import Language
 from mondey_backend.models.milestones import Milestone
@@ -59,135 +54,117 @@ def import_milestones_metadata(session, csv_path, clear_existing_milestones=Fals
         )
 
     if clear_existing_milestones:
-        clear_all_milestones()
+        clear_all_data()
         # Rather than alter the Session fixture/dependency, I did this to be absolutely sure
-    # the count of milestones if 0 at the time we begin the test.
+    # the count of milestones is 0 at the time we begin the test.
 
     # Filter for milestone rows (those with IDs containing '_')
     milestone_df = df[df["VAR"].str.contains("_")]
 
-    # todo: Consider refactoring to just access the normal database, so tests align with the same DB.
-    # Or convert it into a dependency because we might be accessing this special DB relevant for import data
-    # across multiple files, could put it in a class to manage it at least.
-    # Otherwise tests will assert against fixture def session( ... which is the normal DB...)
-    # alternate is a new fixture for accessing the import DB (probably best solution)
-    # I wanted to keep it apart from our normal development to avoid overwriting data.
-    # todo: Remove these notes after deciding
+    # Ensure the German language exists
+    if not session.get(Language, "de"):
+        session.add(Language(id="de"))
+        session.commit()
 
-    db_url = os.environ.get(
-        "DATABASE_URL",
-        "sqlite:///./db/mondey.db",  # not the same as the normal DB
-        # Make sure to refresh and connect to it, it will otherwise appear to be blank!
-    )  # will already have all the tables.
-    engine = create_engine(db_url)
-    SQLModel.metadata.create_all(engine)
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    # Group milestones by their prefixes
+    milestone_groups = {}
+    affix_groups = {}
 
-    with SessionLocal() as session:
-        # Ensure the German language exists
-        if not session.get(Language, "de"):
-            session.add(Language(id="de"))
-            session.commit()
+    # First, identify affixes from the QUESTION column
+    for _, row in milestone_df.iterrows():
+        var = row["VAR"]
+        label = row["LABEL"]
+        question = row.get("QUESTION", "")
 
-        # Group milestones by their prefixes
-        milestone_groups = {}
-        affix_groups = {}
+        # Skip non-milestone rows
+        if not is_milestone(row):
+            print("Skipping" + label)
+            continue
+        else:
+            print("Keeping " + label)
 
-        # First, identify affixes from the QUESTION column
-        for _, row in milestone_df.iterrows():
-            var = row["VAR"]
-            label = row["LABEL"]
-            question = row.get("QUESTION", "")
+        # Check if this is an affix group
+        if (
+            isinstance(question, str)
+            and question.startswith("__")
+            and question.endswith("__")
+        ):
+            affix = question.removeprefix("__").removesuffix("__")
+            if affix not in affix_groups:
+                affix_groups[affix] = []
+            affix_groups[affix].append(var)
 
-            # Skip non-milestone rows
-            if not is_milestone(row):
-                print("Skipping" + label)
-                continue
-            else:
-                print("Keeping " + label)
+    # Now process all milestones and assign them to groups
+    for _, row in milestone_df.iterrows():
+        var = row["VAR"]
+        label = row["LABEL"]
 
-            # Check if this is an affix group
-            if (
-                isinstance(question, str)
-                and question.startswith("__")
-                and question.endswith("__")
-            ):
-                affix = question.removeprefix("__").removesuffix("__")
-                if affix not in affix_groups:
-                    affix_groups[affix] = []
-                affix_groups[affix].append(var)
+        # Skip non-milestone rows
+        if not is_milestone(row):
+            continue
 
-        # Now process all milestones and assign them to groups
-        for _, row in milestone_df.iterrows():
-            var = row["VAR"]
-            label = row["LABEL"]
+        # Get the prefix from the label
+        prefix = extract_milestone_prefix(label)
 
-            # Skip non-milestone rows
-            if not is_milestone(row):
-                continue
+        # Check if it belongs to an affix group
+        for affix, vars_list in affix_groups.items():
+            if var in vars_list:
+                prefix = affix if not prefix else affix + " " + prefix
+                # e.g. "__Denken__ Sehene und Hoeren
+                break
 
-            # Get the prefix from the label
-            prefix = extract_milestone_prefix(label)
+        if prefix:
+            if prefix not in milestone_groups:
+                milestone_groups[prefix] = []
+            milestone_groups[prefix].append((var, label))
 
-            # Check if it belongs to an affix group
-            for affix, vars_list in affix_groups.items():
-                if var in vars_list:
-                    prefix = affix if not prefix else affix + " " + prefix
-                    # e.g. "__Denken__ Sehene und Hoeren
-                    break
+    # Create milestone groups and milestones
+    group_id_map = {}  # To store group_id for each prefix
 
-            if prefix:
-                if prefix not in milestone_groups:
-                    milestone_groups[prefix] = []
-                milestone_groups[prefix].append((var, label))
+    for order, (prefix, milestones) in enumerate(milestone_groups.items(), start=1):
+        # Create milestone group
+        milestone_group = MilestoneGroup(order=order)
+        session.add(milestone_group)
+        session.flush()  # To get the ID
 
-        # Create milestone groups and milestones
-        group_id_map = {}  # To store group_id for each prefix
+        # Create milestone group text
+        milestone_group_text = MilestoneGroupText(
+            group_id=milestone_group.id, lang_id="de", title=prefix, desc=""
+        )
+        session.add(milestone_group_text)
 
-        for order, (prefix, milestones) in enumerate(milestone_groups.items(), start=1):
-            # Create milestone group
-            milestone_group = MilestoneGroup(order=order)
-            session.add(milestone_group)
+        group_id_map[prefix] = milestone_group.id
+
+        # Create milestones for this group
+        for milestone_order, (var, label) in enumerate(milestones, start=1):
+            clean_title = clean_milestone_title(label)
+
+            print("Setting data import key to:", var)
+
+            milestone = Milestone(
+                group_id=milestone_group.id,
+                order=milestone_order,
+                data_import_key=var,
+                expected_age_months=12,  # Default value, since they don't have expected ages in the csv?
+            )
+            session.add(milestone)
             session.flush()  # To get the ID
 
-            # Create milestone group text
-            milestone_group_text = MilestoneGroupText(
-                group_id=milestone_group.id, lang_id="de", title=prefix, desc=""
+            # Create milestone text
+            milestone_text = MilestoneText(
+                milestone_id=milestone.id,
+                lang_id="de",
+                title=clean_title,
+                desc="",
+                obs="",
+                help="",
             )
-            session.add(milestone_group_text)
+            session.add(milestone_text)
 
-            group_id_map[prefix] = milestone_group.id
-
-            # Create milestones for this group
-            for milestone_order, (var, label) in enumerate(milestones, start=1):
-                clean_title = clean_milestone_title(label)
-
-                print("Setting data import key to:", var)
-
-                milestone = Milestone(
-                    group_id=milestone_group.id,
-                    order=milestone_order,
-                    data_import_key=var,
-                    expected_age_months=12,  # Default value, since they don't have expected ages in the csv?
-                )
-                session.add(milestone)
-                session.flush()  # To get the ID
-
-                # Create milestone text
-                milestone_text = MilestoneText(
-                    milestone_id=milestone.id,
-                    lang_id="de",
-                    title=clean_title,
-                    desc="",
-                    obs="",
-                    help="",
-                )
-                session.add(milestone_text)
-
-        session.commit()
-        print(
-            f"Successfully imported {sum(len(m) for m in milestone_groups.values())} milestones in {len(milestone_groups)} groups"
-        )
+    session.commit()
+    print(
+        f"Successfully imported {sum(len(m) for m in milestone_groups.values())} milestones in {len(milestone_groups)} groups"
+    )
 
 
 if __name__ == "__main__":

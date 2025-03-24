@@ -58,13 +58,17 @@ def map_children_milestones_data():
                     select(Child).where(Child.id == child_id)
                 ).scalar_one_or_none()
 
+                # todo: Adapt this so we actually use their real birth month/year... fields:
+                # Note: Latest birth year is 2010.
+                # FK01, FK02 (year, month)
+
                 if not existing_child:
                     # Create a new child
                     child = Child(
                         id=child_id,
                         name=f"Imported Child {child_id}",
-                        birth_year=2020,  # Default values since not in CSV
-                        birth_month=1,  # Default values since not in CSV
+                        birth_year=2020,  # FK01, mapped...
+                        birth_month=1,
                         user_id=1,  # Default user ID
                         has_image=False,
                     )

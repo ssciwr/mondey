@@ -30,8 +30,8 @@ SQL export in the test database.
 
 
 def test_import_works():
-    import_session = get_import_test_session()
-    import_milestones_metadata(milestone_data_csv_path)
+    import_session, import_engine = get_import_test_session()
+    import_milestones_metadata(import_session, milestone_data_csv_path)
     # Assert that a milestone with data_import_key of DE01_02 exists
     milestone_de01_02 = import_session.exec(
         select(Milestone).where(Milestone.data_import_key == "DE01_02")
