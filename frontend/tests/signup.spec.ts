@@ -20,3 +20,18 @@ import { expect, test } from "@playwright/test";
 		await expect(page.locator("[type=submit]")).toBeDisabled();
 	});
 });
+
+/*
+test("/ : A non-existing user account cannot login", async ({ page }) => {
+	await page.goto("/login");
+
+	const isLoggedIn = await page.evaluate(async () => {
+		const { user } = await import("$lib/stores/userStore.svelte");
+		if (user.data === null) {
+			await user.load();
+		}
+		return user.data !== null;
+	});
+	expect(isLoggedIn).toBeTruthy();
+});
+*/
