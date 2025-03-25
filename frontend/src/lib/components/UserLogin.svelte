@@ -32,6 +32,7 @@ async function refresh(): Promise<string> {
 
 // functionality
 async function submitData(): Promise<void> {
+	console.log("Logging user in...");
 	const loginData: AuthCookieLoginData = {
 		body: {
 			username: username,
@@ -39,7 +40,10 @@ async function submitData(): Promise<void> {
 		},
 	};
 
+	console.log("User is logging in...");
+
 	const authReturn = await authCookieLogin(loginData);
+	console.log("Returned auth cookie...");
 
 	if (authReturn.error) {
 		alertStore.showAlert(
@@ -50,6 +54,7 @@ async function submitData(): Promise<void> {
 		);
 		console.log("error during login ", authReturn.error.detail);
 	} else {
+		console.log("Auth succeeded during lgo in, now refreshing...");
 		const status: string = await refresh();
 		if (status !== "success") {
 			console.log("error during retrieving active users: ", status);
@@ -62,7 +67,8 @@ async function submitData(): Promise<void> {
 		} else {
 			console.log("login and user retrieval successful");
 			const intendedPath = $page.url.searchParams.get("intendedpath");
-			if (intendedPath !== null) {
+			if (intendedPath !== null && intendedPath.length > 2) {
+				console.log("Redirecting user to intended path: ", intendedPath);
 				goto(intendedPath);
 			} else {
 				goto("/userLand/children/gallery");
