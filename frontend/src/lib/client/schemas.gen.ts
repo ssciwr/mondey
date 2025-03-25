@@ -287,6 +287,11 @@ export const ChildQuestionAdminSchema = {
             title: 'Additional Option',
             default: ''
         },
+        required: {
+            type: 'boolean',
+            title: 'Required',
+            default: false
+        },
         id: {
             type: 'integer',
             title: 'Id'
@@ -333,6 +338,11 @@ export const ChildQuestionPublicSchema = {
             type: 'string',
             title: 'Additional Option',
             default: ''
+        },
+        required: {
+            type: 'boolean',
+            title: 'Required',
+            default: false
         }
     },
     type: 'object',
@@ -1052,6 +1062,11 @@ export const UserQuestionAdminSchema = {
             title: 'Additional Option',
             default: ''
         },
+        required: {
+            type: 'boolean',
+            title: 'Required',
+            default: false
+        },
         id: {
             type: 'integer',
             title: 'Id'
@@ -1098,6 +1113,11 @@ export const UserQuestionPublicSchema = {
             type: 'string',
             title: 'Additional Option',
             default: ''
+        },
+        required: {
+            type: 'boolean',
+            title: 'Required',
+            default: false
         }
     },
     type: 'object',
