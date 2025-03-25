@@ -6,6 +6,7 @@ test("/login : A non-existing user account cannot login", async ({ page }) => {
 	await page.fill("#username", "fakeUsername@test.com");
 	await page.fill("#password", "8n408sdnk2349");
 
+	// await page.waitForTimeout(2000);
 	await page.getByText("Absenden").click();
 
 	await expect(page.getByText(/Fehler/i)).toBeVisible({ timeout: 60000 });
