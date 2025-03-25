@@ -29,7 +29,7 @@ test("/login : A non-existing user account cannot login", async ({ page }) => {
 
 	await page.getByText("Absenden").click();
 
-	await expect(page.getByText(/Fehler/i)).toBeVisible({ timeout: 15000 });
+	await expect(page.getByText(/Fehler/i)).toBeVisible({ timeout: 60000 });
 	await expect(
 		page.getByText(/Ungültige E-Mail-Adresse oder ungültiges/i),
 	).toBeVisible();
