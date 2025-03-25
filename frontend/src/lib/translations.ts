@@ -143,6 +143,7 @@ export const translationIds = {
 		alertMessageError: "Ein Fehler ist aufgetreten",
 		alertMessagePasswords: "Passwörter stimmen nicht überein",
 		alertMessageTitle: "Fehler",
+		infoTitle: "(Was passiert mit den Daten)",
 		usernameLabel: "Benutzername",
 		passwordLabel: "Passwort",
 		emailLabel: "E-Mail",

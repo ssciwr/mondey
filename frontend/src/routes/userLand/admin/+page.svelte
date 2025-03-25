@@ -10,6 +10,7 @@ import SubmittedMilestoneImages from "$lib/components/Admin/SubmittedMilestoneIm
 import Translations from "$lib/components/Admin/Translations.svelte";
 import Users from "$lib/components/Admin/Users.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { TabItem, Tabs } from "flowbite-svelte";
 import {
@@ -23,8 +24,12 @@ import {
 import { onMount } from "svelte";
 
 onMount(async () => {
-	await user.load();
-	await refreshMilestoneGroups();
+	try {
+		await user.load();
+		await refreshMilestoneGroups();
+	} catch (error) {
+		alertStore.showAlert(error.message, "", true, true);
+	}
 });
 </script>
 

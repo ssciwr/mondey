@@ -50,7 +50,7 @@ const registerTestUser = async () => {
 			if (status !== "success") {
 				alertMessage = `${i18n.tr.login.badCredentials}`;
 			}
-			await goto("/userLand/userLandingpage");
+			await goto("/userLand/children/gallery");
 		}
 	}
 };

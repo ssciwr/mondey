@@ -1,16 +1,16 @@
 <svelte:options runes={true} />
 <script lang="ts">
+import { goto } from "$app/navigation";
 import {
 	type MilestonePublic,
 	getCurrentMilestoneAnswerSession,
 } from "$lib/client";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { activePage } from "$lib/stores/componentStore";
 import { contentStore } from "$lib/stores/contentStore.svelte";
 import {
 	CheckCircleSolid,
@@ -77,8 +77,11 @@ async function setup(): Promise<void> {
 	console.log("setup overview");
 
 	if (i18n.locale === undefined || i18n.locale === null) {
-		showAlert = true;
-		alertMessage = i18n.tr.userData.alertMessageError;
+		alertStore.showAlert(
+			i18n.tr.userData.alertMessageError,
+			i18n.tr.userData.alertMessageError,
+			true,
+		);
 		console.log("No locale");
 		return;
 	}
@@ -92,11 +95,11 @@ async function setup(): Promise<void> {
 			"Error when retrieving milestone groups ",
 			contentStore.milestoneGroupData,
 		);
-		showAlert = true;
-		alertMessage =
+		const message =
 			contentStore.milestoneGroupData.milestones.length === 0
 				? i18n.tr.milestone.alertMessageNoRelevantMilestones
 				: i18n.tr.milestone.alertMessageRetrieving;
+		alertStore.showAlert(i18n.tr.milestone.alertMessageError, message, true);
 	} else {
 		let milestoneAnswerSession = undefined;
 		const response = await getCurrentMilestoneAnswerSession({
@@ -105,8 +108,11 @@ async function setup(): Promise<void> {
 
 		if (response.error) {
 			console.log("Error when retrieving milestone answer session");
-			showAlert = true;
-			alertMessage = `${i18n.tr.milestone.alertMessageRetrieving} ${response.error.detail}`;
+			alertStore.showAlert(
+				i18n.tr.milestone.alertMessageError,
+				`${i18n.tr.milestone.alertMessageRetrieving} ${response.error.detail}`,
+				true,
+			);
 			return;
 		}
 
@@ -128,10 +134,10 @@ async function setup(): Promise<void> {
 					summary: item?.text?.[i18n.locale]?.desc ?? "",
 					events: {
 						onclick: () => {
-							activePage.set("milestone");
 							contentStore.milestone = item.id;
 							contentStore.milestoneData = item;
 							contentStore.milestoneIndex = idx;
+							goto("/userLand/milestone");
 						},
 					},
 					auxilliary: complete ? CheckCircleSolid : ExclamationCircleSolid,
@@ -158,8 +164,6 @@ function createStyle(data: any[]) {
 	});
 }
 
-let showAlert = $state(false);
-let alertMessage = $state(i18n.tr.milestone.alertMessageError);
 const promise = setup();
 let data = $state([]);
 
@@ -195,21 +199,21 @@ const breadcrumbdata: any[] = [
 	{
 		label: currentChild.name,
 		onclick: () => {
-			activePage.set("childrenRegistration");
+			goto("/userLand/children/registration");
 		},
 		symbol: UserSettingsOutline,
 	},
 	{
 		label: i18n.tr.milestone.groupOverviewLabel,
 		onclick: () => {
-			activePage.set("milestoneGroup");
+			goto("/userLand/milestone/group");
 		},
 		symbol: RectangleListOutline,
 	},
 	{
 		label: contentStore.milestoneGroupData.text[i18n.locale].title,
 		onclick: () => {
-			activePage.set("milestoneOverview");
+			goto("/userLand/milestone/overview");
 		},
 		symbol: GridOutline,
 	},
@@ -217,24 +221,20 @@ const breadcrumbdata: any[] = [
 </script>
 
 {#await promise}
-	<p>{i18n.tr.userData.loadingMessage}</p>
+    <p>{i18n.tr.userData.loadingMessage}</p>
 {:then}
-	{#if showAlert}
-		<AlertMessage message={alertMessage} />
-	{:else}
-		<div class="mx-auto flex flex-col md:rounded-t-lg">
-			<Breadcrumbs data={breadcrumbdata} />
-			<div class="grid gap-y-4 p-4">
-				<GalleryDisplay
-					data={data}
-					itemComponent={CardDisplay}
-					componentProps={createStyle(data)}
-					withSearch={true}
-					{searchData}
-				/>
-			</div>
-		</div>
-	{/if}
+    <div class="mx-auto flex flex-col md:rounded-t-lg">
+        <Breadcrumbs data={breadcrumbdata} />
+        <div class="grid gap-y-4 p-4">
+            <GalleryDisplay
+                    data={data}
+                    itemComponent={CardDisplay}
+                    componentProps={createStyle(data)}
+                    withSearch={true}
+                    {searchData}
+            />
+        </div>
+    </div>
 {:catch error}
-<AlertMessage message={error} />
+    {alertStore.showAlert(i18n.tr.milestone.alertMessageError, error, true, true)}
 {/await}

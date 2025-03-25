@@ -73,7 +73,7 @@ let {
 				color={data.progress === 1 ? styleProps.progress?.completeColor : styleProps.progress?.color}
 				size={styleProps.progress?.size}
 				divClass={styleProps.progress?.divClass}
-				labelInsideClass={`{styleProps.progress?.labelInsideClass} text-black`}
+				labelInsideClass={`{styleProps.progress?.labelInsideClass} {data.progress === 1 ? 'text-white' : 'text-black'} rounded-md text-small pl-2`}
 			/>
 		</div>
 	{/if}

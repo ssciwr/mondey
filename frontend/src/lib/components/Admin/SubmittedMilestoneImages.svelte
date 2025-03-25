@@ -9,8 +9,8 @@ import {
 } from "$lib/client/services.gen";
 import type { SubmittedMilestoneImagePublic } from "$lib/client/types.gen";
 import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
-import DeleteModal from "$lib/components/Admin/DeleteModal.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
+import DeleteModal from "$lib/components/DeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { milestoneGroups } from "$lib/stores/adminStore";
 import {
