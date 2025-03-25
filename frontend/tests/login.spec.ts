@@ -8,6 +8,7 @@ test("/login : A non-existing user account cannot login", async ({ page }) => {
 
 	// await page.waitForTimeout(2000);
 	await page.getByText("Absenden").click();
+	await page.getByText("Non-existing button").click();
 
 	await expect(page.getByText(/Fehler/i)).toBeVisible({ timeout: 60000 });
 	await expect(
