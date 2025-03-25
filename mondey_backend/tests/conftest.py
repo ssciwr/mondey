@@ -67,6 +67,11 @@ def static_dir(tmp_path_factory: pytest.TempPathFactory):
         img.save(
             submitted_milestone_images_dir / f"{submitted_milestone_image_id}.webp"
         )
+    # add some i18n json files
+    i18n_dir = static_dir / "i18n"
+    i18n_dir.mkdir()
+    for lang in ["de", "en", "fr"]:
+        (i18n_dir / f"{lang}.json").write_text("{}")
     return static_dir
 
 

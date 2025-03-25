@@ -128,6 +128,44 @@ def update_child_question_text(session: SessionDep, child_question: ChildQuestio
     )
 
 
+def ensure_texts_exist_for_language(session: SessionDep, lang_id: str):
+    for milestone_group_id in session.exec(select(col(MilestoneGroup.id))).all():
+        if not session.get(MilestoneGroupText, (milestone_group_id, lang_id)):
+            session.add(
+                MilestoneGroupText(group_id=milestone_group_id, lang_id=lang_id)
+            )
+    for milestone_id in session.exec(select(col(Milestone.id))).all():
+        if not session.get(MilestoneText, (milestone_id, lang_id)):
+            session.add(MilestoneText(milestone_id=milestone_id, lang_id=lang_id))
+    for child_question_id in session.exec(select(col(ChildQuestion.id))).all():
+        if not session.get(ChildQuestionText, (child_question_id, lang_id)):
+            session.add(
+                ChildQuestionText(child_question_id=child_question_id, lang_id=lang_id)
+            )
+    for user_question_id in session.exec(select(col(UserQuestion.id))).all():
+        if not session.get(UserQuestionText, (user_question_id, lang_id)):
+            session.add(
+                UserQuestionText(user_question_id=user_question_id, lang_id=lang_id)
+            )
+    session.commit()
+
+
+def delete_texts_for_language(session: SessionDep, lang_id: str):
+    text_types: list[type[Text]] = [
+        MilestoneGroupText,
+        MilestoneText,
+        ChildQuestionText,
+        UserQuestionText,
+    ]
+    for text_type in text_types:
+        for milestone_group_text in session.exec(
+            select(text_type).where(col(text_type.lang_id) == lang_id)
+        ).all():
+            session.delete(milestone_group_text)
+    session.commit()
+    i18n_language_path(lang_id).unlink(missing_ok=True)
+
+
 def _session_has_expired(milestone_answer_session: MilestoneAnswerSession) -> bool:
     session_lifetime_days = 7
     return (
