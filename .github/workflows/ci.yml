@@ -113,7 +113,7 @@ jobs:
       # Run the logged-in UI tests
       - name: Run logged-in UI tests
         working-directory: ./frontend
-        run: pnpm test:ui
+        run: pnpm test:ui || exit 1
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
