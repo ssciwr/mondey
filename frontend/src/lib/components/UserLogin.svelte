@@ -44,7 +44,7 @@ async function submitData(): Promise<void> {
 	if (authReturn.error) {
 		alertStore.showAlert(
 			i18n.tr.login.alertMessageTitle,
-			i18n.tr.login.badCredentials + authReturn.error.detail,
+			i18n.tr.login.badCredentials,
 			true,
 			false,
 		);

@@ -44,7 +44,7 @@ const registerTestUser = async () => {
 
 		if (authReturn.error) {
 			showAlert = true;
-			alertMessage = i18n.tr.login.badCredentials + authReturn.error.detail;
+			alertMessage = i18n.tr.login.badCredentials;
 			console.log("error during login ", authReturn.error.detail);
 		} else {
 			const status: string = await refresh();

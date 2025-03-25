@@ -21,17 +21,17 @@ import { expect, test } from "@playwright/test";
 	});
 });
 
-/*
-test("/ : A non-existing user account cannot login", async ({ page }) => {
+test("/login : A non-existing user account cannot login", async ({ page }) => {
 	await page.goto("/login");
 
-	const isLoggedIn = await page.evaluate(async () => {
-		const { user } = await import("$lib/stores/userStore.svelte");
-		if (user.data === null) {
-			await user.load();
-		}
-		return user.data !== null;
-	});
-	expect(isLoggedIn).toBeTruthy();
+	await page.fill("#username", "fakeUsername@test.com");
+	await page.fill("#password", "8n408sdnk2349");
+
+	await page.getByText("Absenden").click();
+
+	await expect(page.getByText(/Fehler/i)).toBeVisible({ timeout: 15000 });
+	await expect(
+		page.getByText(/Ungültige E-Mail-Adresse oder ungültiges/i),
+	).toBeVisible();
+	await expect(page.getByText(/LOGIN_BAD_CREDENTIALS/i)).toHaveCount(0);
 });
-*/
