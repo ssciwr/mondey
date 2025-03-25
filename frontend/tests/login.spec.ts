@@ -3,7 +3,9 @@ import { expect, test } from "@playwright/test";
 test("/login : A non-existing user account cannot login", async ({ page }) => {
 	await page.goto("/login");
 
-	await page.waitForTimeout(5000);
+	const responsePromise = await page.waitForResponse(
+		"http://localhost:5173/api/users/me",
+	);
 
 	await page.fill("#username", "fakeUsername@test.com");
 	await page.fill("#password", "8n408sdnk2349");
