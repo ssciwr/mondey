@@ -78,7 +78,7 @@ def import_milestones_metadata(session, csv_path, clear_existing_milestones=Fals
         )
 
     if clear_existing_milestones:
-        clear_all_data()
+        clear_all_data(session)
         # Rather than alter the Session fixture/dependency, I did this to be absolutely sure
     # the count of milestones is 0 at the time we begin the test.
 
@@ -200,14 +200,21 @@ def import_milestones_metadata(session, csv_path, clear_existing_milestones=Fals
 if __name__ == "__main__":
     import sys
 
-    if len(sys.argv) != 2:
-        print("Usage: python import_milestones_metadata.py <path_to_csv>")
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
+        print(
+            "Usage: python import_milestones_metadata.py <path_to_csv> <?clear_existing_milestones bool>"
+        )
         sys.exit(1)
 
     csv_path = sys.argv[1]
+    clear_existing_milestones = False
+    if len(sys.argv) > 2:
+        clear_existing_milestones = sys.argv[2] == "true"
 
     import_session, import_engine = get_import_test_session()
     create_mondey_db_and_tables(optional_engine=import_engine)
     # asyncio.run(create_user_db_and_tables()) We don't need this for milestones/children, I believe.
 
-    import_milestones_metadata(import_session, csv_path)
+    import_milestones_metadata(
+        import_session, csv_path, clear_existing_milestones=clear_existing_milestones
+    )

@@ -4,6 +4,7 @@ from pathlib import Path
 
 from sqlalchemy import MetaData
 from sqlalchemy import create_engine
+from sqlalchemy import text
 from sqlmodel import Session
 
 script_dir = Path(__file__).parent.parent.parent.parent.absolute()
@@ -15,17 +16,16 @@ db_url = "sqlite:////" + str(database_file_path)  # not the same as the normal D
 engine = create_engine(db_url)
 
 
-def clear_all_data():
+def clear_all_data(session):
     """Clear all data but do not delete the databases."""
     metadata = MetaData()
     metadata.reflect(bind=engine)
 
-    with Session(engine) as session:
-        session.execute("PRAGMA foreign_keys = OFF;")
-        for table in metadata.sorted_tables:
-            session.execute(f"DELETE FROM {table.name};")
-        session.execute("PRAGMA foreign_keys = ON;")
-        session.commit()
+    session.execute(text("PRAGMA foreign_keys = OFF"))
+    for table in metadata.sorted_tables:
+        session.execute(text(f"DELETE FROM {table.name}"))
+    session.execute(text("PRAGMA foreign_keys = ON"))
+    session.commit()
 
 
 def get_import_test_session():
