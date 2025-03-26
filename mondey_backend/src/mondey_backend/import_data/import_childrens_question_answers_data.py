@@ -54,6 +54,9 @@ from mondey_backend.models.milestones import Language
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import ChildQuestionText
+from mondey_backend.src.mondey_backend.import_data.utils import (
+    questions_configured_path,
+)
 
 # todo: Eventually this needs to parse Igor filled-out questions.csv file in order to also set the "required"
 # - also do the requried migration when doing that...
@@ -66,10 +69,53 @@ debug = True
 satisfyPreCommitUnusedImportRemover = type(Language) is str
 
 
+def prepare_options_json(options):
+    """
+    This was generated in CLaude AI chat by the way, to match the examples in conftest and the data format
+    <select> on the frontend appears to take as input (according to Props) for Svelte Flowbite Select.
+    Prepare options JSON with value, name, and disabled properties.
+
+    Args:
+        options (pd.DataFrame): DataFrame with 'Response Code' and 'Response Label' columns
+
+    Returns:
+        tuple: A tuple containing:
+            - options_json (str): JSON string of options
+            - options_str (str): Comma-separated list of options for display
+    """
+    # Filter out invalid options
+    valid_options = options[options["Response Code"] != -9]
+
+    # Prepare options with proper escaping and structure
+    prepared_options = []
+    options_display = []
+
+    for _, row in valid_options.iterrows():
+        # Escape commas and other potential problematic characters in the label
+        escaped_label = row["Response Label"].replace(",", "&#44;")
+
+        option = {
+            "value": str(row["Response Code"]),  # Convert to string
+            "name": escaped_label,
+            "disabled": False,
+        }
+        prepared_options.append(option)
+        options_display.append(escaped_label)
+
+    # Convert to JSON string
+    options_json = json.dumps(prepared_options)
+
+    # Create comma-separated string of options (with escaped labels)
+    options_str = ", ".join(options_display)
+
+    return options_json, options_str
+
+
 def import_childrens_question_answers_data(
     session,
     labels_path: str,
     data_path: str,
+    questions_configured_path: str,
     clear_existing_questions_and_answers: bool = False,
 ) -> list[tuple[str, str]]:
     if debug:
@@ -80,6 +126,7 @@ def import_childrens_question_answers_data(
 
     labels_df = pd.read_csv(labels_path, sep=",", encoding="utf-16")
     data_df = pd.read_csv(data_path, sep="\t", encoding="utf-16")
+    # questions_configured_df = pd.read_csv(questions_configured_path, sep="\t", encoding="utf-16")
 
     if clear_existing_questions_and_answers:
         clear_all_data(session)
@@ -95,6 +142,17 @@ def import_childrens_question_answers_data(
     if debug:
         print("Sample data:")
         print(labels_df.head(5))
+
+    if debug:
+        print(
+            "Now filtering out the milestones, so we only consider manual questions. This is unfortunately hardcoded."
+        )
+
+    labels_df = labels_df.loc[(labels_df.index > 170) & (labels_df.index < 396)]
+
+    if debug:
+        print("Sample data:")
+        print(labels_df.head(100))
 
     for _uj, label_row in (
         labels_df.groupby("Variable").first().reset_index().iterrows()
@@ -135,8 +193,21 @@ def import_childrens_question_answers_data(
                 str(row["Response Code"]): row["Response Label"]
                 for _, row in valid_options.iterrows()
             }
+
+            # We need to store options like this:
+            """
+                        options="[12,22,32]",
+                        question="What else?",
+                        options_json="",
+            """
+            # optiosn json has "name", "value", "disabled".
+            # disabled should always be false. value should be the Response Code as string.
+            # response label should be the name.
+
             if debug:
                 print("Sample options: ", options_dict)
+
+            options_json, options_str = prepare_options_json(options)
 
             # Create ChildQuestion
             child_question = ChildQuestion(
@@ -146,8 +217,8 @@ def import_childrens_question_answers_data(
                 text={
                     "de": ChildQuestionText(
                         question=variable + ": " + variable_label,
-                        options_json=json.dumps(options_dict),
-                        options=", ".join(options_dict.values()),
+                        options_json=options_json,
+                        options=options_str,
                         lang_id=1,  # hardocded: This is the first language, which is German by default, amtching the questions
                     )
                 },
@@ -193,11 +264,12 @@ def import_childrens_question_answers_data(
                     input_type,
                 )
 
-        # For other less common types, skip or handle as needed
     session.commit()
+    # todo: Maybe refactor the above into it's own function, and the below into a second function.
     questions_to_discard = []
     total_answers = 0
     missing = 0
+    # missing_csv_questions = 0
 
     # Process actual data into child answers
     for _, child_row in data_df.iterrows():
@@ -230,6 +302,11 @@ def import_childrens_question_answers_data(
                     print(label_row["Variable Label"])
                 continue
             else:
+                print(
+                    "Discarding question (which was deliberately not saved, maybe because it was a milestone etc): ",
+                    variable,
+                    label_row["Variable Label"],
+                )
                 questions_to_discard.append(variable)
 
             # Get the child's response for this variable
@@ -239,6 +316,8 @@ def import_childrens_question_answers_data(
             if pd.isna(response) or response == -9:
                 continue
 
+            # Todo: FIlter this to not answer milestone questions. Did we at any point filter them?
+
             # Handle Multiple Choice
             if variable_type == "NOMINAL" or variable_type == "ORDINAL":
                 if debug:
@@ -246,7 +325,7 @@ def import_childrens_question_answers_data(
                 response_label = labels_df[
                     (labels_df["Variable"] == variable)
                     & (labels_df["Response Code"] == response)
-                ]  # todo: Fix - empty dataframe.
+                ]
                 if debug:
                     print(
                         "Response/Response label: ", response, "../..", response_label
@@ -338,5 +417,6 @@ if __name__ == "__main__":
         import_session,
         labels_path,
         data_path,
+        questions_configured_path,
         clear_existing_questions_and_answers=clear_existing_questions_and_answers,
     )

@@ -19,6 +19,10 @@ engine = create_engine(db_url)
 labels_path = "labels_encoded.csv"  # originally codeback...xlsx
 data_path = "data.csv"  # originally
 milestones_metadata_path = "milestones_metadata_(variables).csv"  # originally variables
+questions_configured_path = (
+    "questions_configured.csv"  # so this is questions.csv once filled out
+)
+# (with isToParent and isRequired)
 
 
 def clear_all_data(session):
