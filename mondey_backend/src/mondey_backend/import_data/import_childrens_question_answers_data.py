@@ -13,6 +13,32 @@ They are also easy to tell apart because the "Type" will be "TEXT" not "ORDINAL"
 FE01 <-- ORDINAL (e.g. 1, 2, 3, 4, 5, 6, 7 -9) (where these are mapped to 1 = Deutschland, 2 = Sweden, usw).
 FE01_031 <-- TEXT (e.g. "Frankreich")
 
+Notes:
+
+    We use variable + ': ' + variable_label for the question ID (so "FE06: Geburtsjahr") because there are some
+    complexities in the question mapping from the SoSci data, especially:
+    1) For answers, each possibly mappable answer response duplicates the question...
+    e.g.
+    Variable | Name | Code | Label
+    FE04 Geburtsjahr 1 2024
+    FE04 Geburtsjahr 2 2023
+    FE04 Geburtsjahr 3 2022
+
+    ... But more than this...
+
+    The same question might appear again (e.g. in reference to the Parent/Beobachter, not the child):
+    Variable | Name | Code | Label
+    FK04 Geburtsjahr 1 1972
+    FK04 Geburtsjahr 2 1973
+    FK04 Geburtsjahr 3 1974
+
+    So the *same Name*, *same Codes*, but Different Labels if the "Variable" (really "variable ID") is the same.
+    Since variable ID also gets duplicated nAnswers times, the logic keeps within our system the variable tag
+    alongside the label at all times. This way we can be sure we actually have got the respective FE04 vs FK04
+    Geburtsjahr question/answers data, to avoid confusing those two. This way is also more dynamic. No combinations
+    (because of how SoSci exports) should ever have the same variable and name unless they are mapping the same set
+    of answers, like our code processed them. Yes it does mean in the UI the "Variable"(string ID) will appear as a
+    prefix, but that's a great traddeoff to have certainty in the variables being in the actual data.
 """
 
 import json
@@ -70,9 +96,10 @@ def import_childrens_question_answers_data(
         print("Sample data:")
         print(labels_df.head(5))
 
-    for variable, label_row in (
+    for _uj, label_row in (
         labels_df.groupby("Variable").first().reset_index().iterrows()
     ):
+        variable = label_row["Variable"]
         if debug:
             print(label_row)
             print("has variable: ", variable)
@@ -88,9 +115,17 @@ def import_childrens_question_answers_data(
         variable_label = label_row["Variable Label"]
 
         # Handling different variable types
-        if variable_type == "NOMINAL" and input_type == "MC":
+        if (
+            variable_type == "NOMINAL" or variable_type == "ORDINAL"
+        ) and input_type == "MC":
+            if debug:
+                print(
+                    "Handling Multiple Choice with optinos.. should be saved as separated text strings"
+                )
             # Multiple Choice Question
             options = labels_df[labels_df["Variable"] == variable]
+            if debug:
+                print("Options found were: ", options)
 
             # Filter out non-response codes
             valid_options = options[options["Response Code"] != -9]
@@ -110,7 +145,7 @@ def import_childrens_question_answers_data(
                 required=False,
                 text={
                     "de": ChildQuestionText(
-                        question=variable_label,
+                        question=variable + ": " + variable_label,
                         options_json=json.dumps(options_dict),
                         options=", ".join(options_dict.values()),
                         lang_id=1,  # hardocded: This is the first language, which is German by default, amtching the questions
@@ -140,20 +175,42 @@ def import_childrens_question_answers_data(
                 component="text",
                 type="text",
                 required=False,
-                text={"de": ChildQuestionText(question=variable_label, lang_id=1)},
+                text={
+                    "de": ChildQuestionText(
+                        question=variable + ": " + variable_label, lang_id=1
+                    )
+                },
             )
             session.add(child_question)
+            if debug:
+                print("Added text feetex tquestion type..")
+        else:
+            if debug:
+                print(
+                    "Question case was not hanlded... need to pay attention to this..",
+                    variable_label,
+                    variable_type,
+                    input_type,
+                )
 
         # For other less common types, skip or handle as needed
     session.commit()
+    questions_to_discard = []
+    total_answers = 0
+    missing = 0
 
     # Process actual data into child answers
     for _, child_row in data_df.iterrows():
         # Iterate through all variables in labels_df
-        for variable, label_row in (
+        for _j, label_row in (
             labels_df.groupby("Variable").first().reset_index().iterrows()
         ):
             variable_type = label_row["Variable Type"]
+            variable = label_row["Variable"]
+            variable_label = label_row["Variable Label"]
+
+            if variable_label in questions_to_discard:
+                continue
 
             # Find the corresponding ChildQuestion
             query = (
@@ -161,9 +218,10 @@ def import_childrens_question_answers_data(
                 .join(ChildQuestionText)
                 .where(
                     ChildQuestionText.lang_id == 1,
-                    ChildQuestionText.question == label_row["Variable Label"],
+                    ChildQuestionText.question == variable + ": " + variable_label,
                 )
             )
+
             child_question = session.exec(query).first()  # why doesn't this work?
 
             if not child_question:
@@ -171,8 +229,8 @@ def import_childrens_question_answers_data(
                     print("No child question...")
                     print(label_row["Variable Label"])
                 continue
-            elif debug:
-                print("Found Child question...")
+            else:
+                questions_to_discard.append(variable)
 
             # Get the child's response for this variable
             response = child_row.get(variable)
@@ -182,11 +240,18 @@ def import_childrens_question_answers_data(
                 continue
 
             # Handle Multiple Choice
-            if variable_type == "NOMINAL":
+            if variable_type == "NOMINAL" or variable_type == "ORDINAL":
+                if debug:
+                    print("Came across nominal...")
                 response_label = labels_df[
                     (labels_df["Variable"] == variable)
                     & (labels_df["Response Code"] == response)
-                ]
+                ]  # todo: Fix - empty dataframe.
+                if debug:
+                    print(
+                        "Response/Response label: ", response, "../..", response_label
+                    )
+                    print("ANd desired variable: ", variable)
 
                 if not response_label.empty:
                     answer_text = response_label.iloc[0]["Response Label"]
@@ -214,6 +279,7 @@ def import_childrens_question_answers_data(
                         question_id=child_question.id,
                         answer=answer_text,
                     )
+                    total_answers += 1
                     session.add(child_answer)
 
             elif variable_type == "TEXT":
@@ -223,9 +289,24 @@ def import_childrens_question_answers_data(
                     answer=str(response),
                 )
                 # not sure this will work for free text other cases.
+                total_answers += 1
                 session.add(child_answer)
+            else:
+                print("Variable type has no clear processing method! Warning.")
+                print(
+                    variable_type,
+                    "... it has the variable type/label:",
+                    variable_type,
+                    variable_label,
+                )
+                missing += 1
 
     session.commit()
+    print("Total answers saved: ", total_answers)
+    print(
+        "Missing (unable to deal with answers, to which we saved the questions, so wanted the answers): ",
+        missing,
+    )
 
     return free_text_questions
 
