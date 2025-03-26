@@ -17,6 +17,10 @@ from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroupAgeScore
 from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
+from mondey_backend.models.questions import ChildAnswer
+from mondey_backend.models.questions import ChildQuestionText
+from mondey_backend.models.questions import UserAnswer
+from mondey_backend.models.questions import UserQuestionText
 from mondey_backend.models.users import User
 from mondey_backend.routers.utils import _get_answer_session_child_ages_in_months
 from mondey_backend.routers.utils import _get_expected_age_from_scores
@@ -252,21 +256,18 @@ async def async_update_stats(
     make_any_stale_answer_sessions_inactive(session, test_account_user_ids_to_exclude)
 
     # get MilestoneAnswerSessions to be used for calculating statistics
-    answer_session_filter = select(MilestoneAnswerSession).where(
-        col(MilestoneAnswerSession.expired)
+    answer_session_filter = (
+        select(MilestoneAnswerSession)
+        .where(col(MilestoneAnswerSession.expired))
+        .where(
+            col(MilestoneAnswerSession.user_id).not_in(test_account_user_ids_to_exclude)
+        )
     )
     if incremental_update:
         answer_session_filter = answer_session_filter.where(
             ~col(MilestoneAnswerSession.included_in_statistics)
         )
     milestone_answer_sessions = session.exec(answer_session_filter).all()
-
-    # We exclude post-query because I don't think you can just run python functions through SQL (or at least not efficiently):
-    milestone_answer_sessions = [
-        milestone_answer_session
-        for milestone_answer_session in milestone_answer_sessions
-        if milestone_answer_session.user_id not in test_account_user_ids_to_exclude
-    ]
 
     child_ages = _get_answer_session_child_ages_in_months(
         session, milestone_answer_sessions
@@ -461,4 +462,89 @@ def calculate_milestonegroup_statistics_by_age(
             for age in range(0, len(avg_scores))
         ],
         created_at=datetime.datetime.now(),
+    )
+
+
+async def get_user_ids(
+    user_session: UserAsyncSessionDep, research_group_id: int
+) -> list[int]:
+    users = await user_session.execute(
+        select(User).where(col(User.research_group_id) == research_group_id)
+    )
+    return [user.id for user in users.scalars().all()]
+
+
+def make_datatable(
+    milestone_answer_sessions: Sequence[MilestoneAnswerSession],
+    user_answers: dict[int, dict[str, str | int | float]],
+    child_answers: dict[int, dict[str, str | int | float]],
+    child_ages: dict[int, int],
+) -> list[dict[str, str | int | float]]:
+    datatable: list[dict[str, str | int | float]] = []
+    for milestone_answer_session in milestone_answer_sessions:
+        if milestone_answer_session.id in child_ages:
+            for milestone_id, answer in milestone_answer_session.answers.items():
+                row: dict[str, str | int | float] = (
+                    {
+                        "milestone_group_id": answer.milestone_group_id,
+                        "milestone_id": milestone_id,
+                        "answer": answer.answer + 1,
+                        "child_age": child_ages[milestone_answer_session.id],  # type: ignore
+                        "answer_session_id": milestone_answer_session.id,
+                    }
+                    | user_answers[milestone_answer_session.user_id]
+                    | child_answers[milestone_answer_session.child_id]
+                )
+                datatable.append(row)
+    return datatable
+
+
+def get_user_answers(session: SessionDep) -> dict[int, dict[str, str | int | float]]:
+    questions = {
+        q.user_question_id: q.question
+        for q in session.exec(
+            select(UserQuestionText).where(col(UserQuestionText.lang_id) == "de")
+        ).all()
+    }
+    user_answers: dict[int, dict[str, str | int | float]] = defaultdict(dict)
+    for answer in session.exec(select(UserAnswer)).all():
+        user_answers[answer.user_id][questions[answer.question_id]] = answer.answer
+    return user_answers
+
+
+def get_child_answers(session: SessionDep) -> dict[int, dict[str, str | int | float]]:
+    questions = {
+        q.child_question_id: q.question
+        for q in session.exec(
+            select(ChildQuestionText).where(col(ChildQuestionText.lang_id) == "de")
+        ).all()
+    }
+    child_answers: dict[int, dict[str, str | int | float]] = defaultdict(dict)
+    for answer in session.exec(select(ChildAnswer)).all():
+        child_answers[answer.child_id][questions[answer.question_id]] = answer.answer
+    return child_answers
+
+
+async def extract_research_data(
+    session: SessionDep,
+    user_session: UserAsyncSessionDep,
+    research_group_id: int | None = None,
+) -> list[dict[str, str | int | float]]:
+    user_ids_to_exclude = await get_test_account_user_ids(user_session)
+    answer_session_filter = select(MilestoneAnswerSession).where(
+        col(MilestoneAnswerSession.user_id).not_in(user_ids_to_exclude)
+    )
+    if research_group_id is not None:
+        user_ids = await get_user_ids(user_session, research_group_id)
+        answer_session_filter = answer_session_filter.where(
+            col(MilestoneAnswerSession.user_id).in_(user_ids)
+        )
+    milestone_answer_sessions = session.exec(answer_session_filter).all()
+    child_ages = _get_answer_session_child_ages_in_months(
+        session, milestone_answer_sessions
+    )
+    user_answers = get_user_answers(session)
+    child_answers = get_child_answers(session)
+    return make_datatable(
+        milestone_answer_sessions, user_answers, child_answers, child_ages
     )

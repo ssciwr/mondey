@@ -14,6 +14,7 @@ import type {
 	MilestoneGroupText,
 } from "$lib/client/types.gen";
 import CancelButton from "$lib/components/Admin/CancelButton.svelte";
+import InputAutoTranslate from "$lib/components/Admin/InputAutoTranslate.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";
 import { i18n } from "$lib/i18n.svelte";
@@ -81,10 +82,7 @@ export async function saveChanges() {
 				<Label class="mb-2">{title}</Label>
 				{#each i18n.locales as lang_id}
 					<div class="mb-1">
-						<ButtonGroup class="w-full">
-							<InputAddon>{lang_id}</InputAddon>
-							<Textarea bind:value={milestoneGroup.text[lang_id][textKey]} placeholder={title} />
-						</ButtonGroup>
+						<InputAutoTranslate bind:value={milestoneGroup.text[lang_id][textKey]} locale={lang_id} de_text={milestoneGroup.text["de"][textKey]} placeholder={title} multiline={true} />
 					</div>
 				{/each}
 			</div>

@@ -19,6 +19,7 @@ import {
 	Button,
 	ButtonGroup,
 	Card,
+	Checkbox,
 	Input,
 	InputAddon,
 	Label,
@@ -56,10 +57,10 @@ if (kind === "user") {
 }
 
 const inputTypes: Array<SelectOptionType<string>> = [
-	{ value: "textarea", name: "text" },
-	{ value: "select", name: "select" },
-	{ value: "fileupload", name: "fileupload" },
-	{ value: "date", name: "date" },
+	{ value: "textarea", name: "Text" },
+	{ value: "select", name: "Multiple Choice" },
+	{ value: "fileupload", name: "Upload file" },
+	{ value: "date", name: "Date" },
 ];
 
 function updateOptionsJson() {
@@ -126,7 +127,7 @@ async function saveChanges() {
 						<Label class="mb-2">Options</Label>
 						<div class="mb-1">
 							<ButtonGroup class="w-full">
-								<InputAddon>Option values</InputAddon>
+								<InputAddon>Option values (separate with ";" - like "Option A;Option B")</InputAddon>
 								<Textarea
 									bind:value={question.options}
 									on:input={updateOptionsJson}
@@ -152,6 +153,14 @@ async function saveChanges() {
 								<Textarea
 									bind:value={question.additional_option}
 									placeholder="Displayed additional option"
+								/>
+							</ButtonGroup>
+						</div>
+						<Label class="mb-2">Required?</Label>
+						<div class="mb-1">
+							<ButtonGroup class="w-full">
+								<Checkbox
+										bind:checked={question.required}
 								/>
 							</ButtonGroup>
 						</div>

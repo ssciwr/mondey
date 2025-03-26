@@ -10,6 +10,7 @@ import {
 import type { MilestoneAdmin, MilestoneText } from "$lib/client/types.gen";
 import CancelButton from "$lib/components/Admin/CancelButton.svelte";
 import EditImage from "$lib/components/Admin/EditImage.svelte";
+import InputAutoTranslate from "$lib/components/Admin/InputAutoTranslate.svelte";
 import MilestoneExpectedAgeModal from "$lib/components/Admin/MilestoneExpectedAgeModal.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";
@@ -85,10 +86,7 @@ async function deleteMilestoneImageAndUpdate() {
                 <Label class="mb-2">{title}</Label>
                 {#each i18n.locales as lang_id}
                     <div class="mb-1">
-                        <ButtonGroup class="w-full">
-                            <InputAddon>{lang_id}</InputAddon>
-                            <Textarea bind:value={milestone.text[lang_id][textKey]} placeholder={title}/>
-                        </ButtonGroup>
+                        <InputAutoTranslate bind:value={milestone.text[lang_id][textKey]} locale={lang_id} de_text={milestone.text["de"][textKey]} placeholder={title} />
                     </div>
                 {/each}
             </div>

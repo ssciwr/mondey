@@ -62,7 +62,11 @@ $effect(() => {
 
 {#if label}
 	<Label for={id} class="font-semibold text-gray-700 dark:text-gray-400"
-		>{label}</Label
+		>{label}
+		{#if required && false === disabled}
+			&nbsp;*
+		{/if}
+	</Label
 	>
 {/if}
 

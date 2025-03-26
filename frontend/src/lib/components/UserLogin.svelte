@@ -44,7 +44,7 @@ async function submitData(): Promise<void> {
 	if (authReturn.error) {
 		alertStore.showAlert(
 			i18n.tr.login.alertMessageTitle,
-			i18n.tr.login.badCredentials + authReturn.error.detail,
+			i18n.tr.login.badCredentials,
 			true,
 			false,
 		);
@@ -62,7 +62,8 @@ async function submitData(): Promise<void> {
 		} else {
 			console.log("login and user retrieval successful");
 			const intendedPath = $page.url.searchParams.get("intendedpath");
-			if (intendedPath !== null) {
+			if (intendedPath !== null && intendedPath.length > 2) {
+				console.log("Redirecting user to intended path: ", intendedPath);
 				goto(intendedPath);
 			} else {
 				goto("/userLand/children/gallery");

@@ -70,6 +70,7 @@ export type ChildQuestionAdmin = {
     type?: string;
     options?: string;
     additional_option?: string;
+    required?: boolean;
     id: number;
     text?: {
         [key: string]: ChildQuestionText;
@@ -84,6 +85,7 @@ export type ChildQuestionPublic = {
         [key: string]: QuestionTextPublic;
     };
     additional_option?: string;
+    required?: boolean;
 };
 
 export type ChildQuestionText = {
@@ -255,6 +257,7 @@ export type UserQuestionAdmin = {
     type?: string;
     options?: string;
     additional_option?: string;
+    required?: boolean;
     id: number;
     text?: {
         [key: string]: UserQuestionText;
@@ -269,6 +272,7 @@ export type UserQuestionPublic = {
         [key: string]: QuestionTextPublic;
     };
     additional_option?: string;
+    required?: boolean;
 };
 
 export type UserQuestionText = {
@@ -386,6 +390,18 @@ export type UpdateI18NData = {
 export type UpdateI18NResponse = (unknown);
 
 export type UpdateI18NError = (HTTPValidationError);
+
+export type TranslateData = {
+    query: {
+        locale: string;
+        source_lang?: string;
+        text: string;
+    };
+};
+
+export type TranslateResponse = (string);
+
+export type TranslateError = (HTTPValidationError);
 
 export type GetMilestoneGroupsAdminResponse = (Array<MilestoneGroupAdmin>);
 
@@ -893,6 +909,8 @@ export type VerifyVerifyResponse = (UserRead);
 
 export type VerifyVerifyError = (ErrorModel | HTTPValidationError);
 
-export type AuthResponse = (unknown);
+export type GetResearchDataResponse = (Array<{
+    [key: string]: (string | number);
+}>);
 
-export type AuthError = unknown;
+export type GetResearchDataError = unknown;

@@ -194,12 +194,14 @@ def get_db_child(
 def _get_answer_session_child_ages_in_months(
     session: SessionDep, answer_sessions: Sequence[MilestoneAnswerSession]
 ) -> dict[int, int]:
-    return {
-        answer_session.id: get_child_age_in_months(  # type: ignore
-            get(session, Child, answer_session.child_id), answer_session.created_at
-        )
-        for answer_session in answer_sessions
-    }
+    child_ages: dict[int, int] = {}
+    for answer_session in answer_sessions:
+        child = session.get(Child, answer_session.child_id)
+        if child is not None:
+            child_ages[answer_session.id] = get_child_age_in_months(  # type: ignore
+                child, answer_session.created_at
+            )
+    return child_ages
 
 
 def _get_expected_age_from_scores(scores: np.ndarray) -> int:
