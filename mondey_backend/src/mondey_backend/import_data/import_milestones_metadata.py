@@ -211,6 +211,14 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         clear_existing_milestones = sys.argv[2] == "true"
 
+    if clear_existing_milestones and (
+        input(
+            "This will wipe your DB data! Are you certain you want to *delete all data*? (y/n)"
+        )
+        != "y"
+    ):
+        exit()
+
     import_session, import_engine = get_import_test_session()
     create_mondey_db_and_tables(optional_engine=import_engine)
     # asyncio.run(create_user_db_and_tables()) We don't need this for milestones/children, I believe.
