@@ -62,3 +62,39 @@ def test_update_i18n_invalid_json(admin_client: TestClient, static_dir: pathlib.
     }
     response = admin_client.put("/admin/i18n/en", json=i18_json)
     assert response.status_code == 422
+
+
+def test_translate_non_admin_user(user_client: TestClient):
+    response = user_client.post(
+        "/admin/translate/",
+        params={"text": "Meilenstein", "locale": "en", "source_lang": "DE"},
+    )
+    assert response.status_code == 401
+
+
+class MockDeepLClient:
+    def __init__(self, api_key):
+        pass
+
+    def translate_text(self, text, target_lang, source_lang, **kwargs):
+        return type(
+            "DeepLResponse",
+            (),
+            {"text": f"Mock translation of {text} from {source_lang} to {target_lang}"},
+        )
+
+
+@pytest.mark.parametrize("locale, deepl_locale", [("en", "EN-US"), ("fr", "FR")])
+def test_translate(
+    admin_client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+    locale: str,
+    deepl_locale: str,
+):
+    text = "Meilenstein"
+    monkeypatch.setattr("deepl.DeepLClient", MockDeepLClient)
+    response = admin_client.post(
+        "/admin/translate/", params={"text": text, "locale": locale}
+    )
+    assert response.status_code == 200
+    assert response.json() == f"Mock translation of {text} from DE to {deepl_locale}"

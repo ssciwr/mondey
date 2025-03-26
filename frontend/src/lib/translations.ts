@@ -100,6 +100,7 @@ export const translationIds = {
 		milestones: "Meilensteine",
 		milestoneGroups: "Meilensteingruppen",
 		translations: "Übersetzungen",
+		missingTranslations: "Fehlende Übersetzungen!",
 		users: "Benutzer",
 		userQuestions: "Fragen über Beobachter",
 		childQuestions: "Fragen über Kind",

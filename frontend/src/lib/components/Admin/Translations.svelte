@@ -2,66 +2,69 @@
 
 <script lang="ts">
 import { updateI18N } from "$lib/client/services.gen";
+import EditTranslationModal from "$lib/components/Admin/EditTranslationModal.svelte";
+import InputAutoTranslate from "$lib/components/Admin/InputAutoTranslate.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import type { Translation } from "$lib/tr.svelte";
+import type { Translation } from "$lib/i18n.svelte";
 import { translationIds } from "$lib/translations";
-import {
-	Accordion,
-	AccordionItem,
-	ButtonGroup,
-	Card,
-	Input,
-	InputAddon,
-	Label,
-} from "flowbite-svelte";
+import { Accordion, AccordionItem, Card, Label } from "flowbite-svelte";
 import { onMount } from "svelte";
 
 let translations: Record<string, Translation> = $state(
 	{} as Record<string, Translation>,
 );
 
+let missing_translations: Array<string> = $state([] as Array<string>);
+let open_edit_translation_modal = $state(false);
+
 async function getTranslations() {
 	await i18n.load();
+	let missing_translations_set: Set<string> = new Set();
 	for (const locale of i18n.locales) {
 		try {
 			const res = await fetch(
 				`${import.meta.env.VITE_MONDEY_API_URL}/static/i18n/${locale}.json`,
 			);
+			let data = {} as Translation;
 			if (!res.ok) {
 				console.log(
 					`Failed to fetch locale ${locale} with status ${res.status}`,
 				);
-				translations[locale] = translationIds;
 			} else {
-				let data = await res.json();
-				// ensure all section keys are present, if not create them
-				for (const section_key in translationIds) {
-					if (!(section_key in data)) {
-						data[section_key] = {};
-					}
+				data = await res.json();
+			}
+			// ensure all section keys are present, if not create them
+			for (const section_key in translationIds) {
+				if (!(section_key in data)) {
+					data[section_key] = {};
 				}
-				// use built-in frontend text for any missing / empty entries in de locale json from server
-				if (locale === "de") {
-					for (const [section_key, section] of Object.entries(translationIds)) {
-						for (const [item_key, item] of Object.entries(section)) {
-							if (
-								!(item_key in data[section_key]) ||
-								data[section_key][item_key] === ""
-							) {
-								console.log(section_key, item_key);
-								data[section_key][item_key] = item;
-							}
+			}
+			for (const [section_key, section] of Object.entries(translationIds)) {
+				for (const [item_key, item] of Object.entries(section)) {
+					if (
+						!(item_key in data[section_key]) ||
+						data[section_key][item_key] === ""
+					) {
+						if (locale === "de") {
+							// use built-in frontend text for any missing / empty entries in de locale json from server
+							data[section_key][item_key] = item;
+						} else {
+							// otherwise add to list of missing translations
+							data[section_key][item_key] = "";
+							missing_translations_set.add(`${section_key}.${item_key}`);
 						}
 					}
 				}
-				translations[locale] = data;
 			}
+			translations[locale] = data;
 		} catch {
 			console.log(`Failed to fetch locale ${locale}`);
 			translations[locale] = translationIds;
 		}
 	}
+	missing_translations = Array.from(missing_translations_set);
+	open_edit_translation_modal = missing_translations.length > 0;
 }
 
 async function saveChanges() {
@@ -97,10 +100,7 @@ onMount(() => getTranslations());
 						<Label class="mb-2">{item_key}</Label>
 						{#each i18n.locales as lang}
 							<div class="mb-1">
-								<ButtonGroup class="w-full">
-									<InputAddon>{lang}</InputAddon>
-									<Input bind:value={translations[lang][section_key][item_key]} />
-								</ButtonGroup>
+								<InputAutoTranslate bind:value={translations[lang][section_key][item_key]} locale={lang} de_text={translations["de"][section_key][item_key]}/>
 							</div>
 						{/each}
 					</div>
@@ -112,3 +112,5 @@ onMount(() => getTranslations());
 		{/each}
 	</Accordion>
 </Card>
+
+<EditTranslationModal bind:open={open_edit_translation_modal} bind:translations={translations} missing_translations={missing_translations} onsave={saveChanges}/>

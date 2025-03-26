@@ -20,6 +20,7 @@ class AppSettings(BaseSettings):
     LOG_LEVEL: str = "debug"
     COOKIE_SECURE: bool = False
     STATS_CRONTAB: str = "0 3 * * mon"
+    DEEPL_API_KEY: str = ""
 
 
 app_settings = AppSettings()
