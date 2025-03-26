@@ -909,6 +909,8 @@ export type VerifyVerifyResponse = (UserRead);
 
 export type VerifyVerifyError = (ErrorModel | HTTPValidationError);
 
-export type AuthResponse = (unknown);
+export type GetResearchDataResponse = (Array<{
+    [key: string]: (string | number);
+}>);
 
-export type AuthError = unknown;
+export type GetResearchDataError = unknown;

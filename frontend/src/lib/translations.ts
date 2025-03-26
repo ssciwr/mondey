@@ -137,6 +137,12 @@ export const translationIds = {
 	researcher: {
 		label: "Wissenschaft",
 		images: "Bilder",
+		downloadAsCsv: "als CSV herunterladen",
+		filter: "filtern",
+		selectColumns: "Spalten auswählen",
+		milestone: "Meilenstein",
+		milestoneId: "Meilenstein-ID",
+		groupbyOptional: "Gruppieren nach (optional)",
 	},
 	registration: {
 		heading: "Als neuer Benutzer registrieren",
