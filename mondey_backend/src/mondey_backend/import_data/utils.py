@@ -15,6 +15,11 @@ db_url = "sqlite:////" + str(database_file_path)  # not the same as the normal D
 # Make sure to refresh and connect to it, it will otherwise appear to be blank!
 engine = create_engine(db_url)
 
+# All 3 come from SoSci...
+labels_path = "labels_encoded.csv"  # originally codeback...xlsx
+data_path = "data.csv"  # originally
+milestones_metadata_path = "milestones_metadata_(variables).csv"  # originally variables
+
 
 def clear_all_data(session):
     """Clear all data but do not delete the databases."""

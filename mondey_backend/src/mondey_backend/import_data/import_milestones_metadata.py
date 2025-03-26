@@ -221,7 +221,6 @@ if __name__ == "__main__":
 
     import_session, import_engine = get_import_test_session()
     create_mondey_db_and_tables(optional_engine=import_engine)
-    # asyncio.run(create_user_db_and_tables()) We don't need this for milestones/children, I believe.
 
     import_milestones_metadata(
         import_session, csv_path, clear_existing_milestones=clear_existing_milestones

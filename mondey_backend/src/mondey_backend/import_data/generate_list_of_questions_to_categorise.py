@@ -1,5 +1,23 @@
 import pandas as pd
 
+"""
+This file is NOT involved in the import process. It just helps us to generate a .csv so we can collaborate and understand
+what properties/where questions should be stored.
+
+Only the child/parent questions should be generated here, not mielstones.
+"""
+
+"""
+Them motivation for the columns is things like that FE01 and FK01 are both "Birth year".
+Is FK01 from the parent? Which parent?
+It is just labelled birth year.
+
+FE01 has more recent years (up to 2025), while FK01 only has at latest 2010. So it's more clear, but not always.
+
+Then, some questions are required to have answers. We track that this way too.
+
+"""
+
 # Read the CSV file
 df = pd.read_csv("labels_encoded.csv", encoding="UTF-16")
 
