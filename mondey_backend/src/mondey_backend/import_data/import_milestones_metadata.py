@@ -44,6 +44,30 @@ def is_milestone(row):
     return len(label) > 10
 
 
+def derive_milestone_group_from_milestone_string_id(string_id: str) -> str | None:
+    """
+    GM = Grobmotorik
+    HM = Handmotorik
+    SE = Soziale Entwicklung
+    SP = Sprache
+    SV = Schulische Vorläuferfertigkeiten
+    UZ = Umgang mit inneren Zuständen
+    DE = Denken
+    """
+    valid_milestone_groups = {
+        "GM": "Grobmotorik",
+        "HM": "Handmotorik",
+        "SE": "Soziale Entwicklung",
+        "SP": "Sprache",
+        "SV": "Schulische Vorläuferfertigkeiten",
+        "UZ": "Umgang mit inneren Zuständen",
+        "DE": "Denken",
+    }
+    if len(string_id) > 2 and string_id[0:2] in valid_milestone_groups:
+        return valid_milestone_groups[string_id[0:2]]
+    return None
+
+
 def import_milestones_metadata(session, csv_path, clear_existing_milestones=False):
     """Process the milestones CSV file and insert data into the database."""
     df = pd.read_csv(csv_path, sep="\t", encoding="utf-16")
@@ -103,6 +127,8 @@ def import_milestones_metadata(session, csv_path, clear_existing_milestones=Fals
         if not is_milestone(row):
             continue
 
+        derived_milestone_group = derive_milestone_group_from_milestone_string_id(var)
+
         # Get the prefix from the label
         prefix = extract_milestone_prefix(label)
 
@@ -113,7 +139,11 @@ def import_milestones_metadata(session, csv_path, clear_existing_milestones=Fals
                 # e.g. "__Denken__ Sehene und Hoeren
                 break
 
-        if prefix:
+        if derived_milestone_group:
+            if derived_milestone_group not in milestone_groups:
+                milestone_groups[derived_milestone_group] = []
+            milestone_groups[derived_milestone_group].append((var, label))
+        elif prefix:
             if prefix not in milestone_groups:
                 milestone_groups[prefix] = []
             milestone_groups[prefix].append((var, label))
