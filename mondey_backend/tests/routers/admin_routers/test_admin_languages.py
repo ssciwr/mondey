@@ -6,9 +6,38 @@ from fastapi.testclient import TestClient
 
 
 def test_post_language(admin_client: TestClient):
+    # initially no spanish language texts
+    for milestone_group in admin_client.get("/admin/milestone-groups/").json():
+        assert "es" not in milestone_group["text"]
+        for milestone in milestone_group["milestones"]:
+            assert "es" not in milestone["text"]
+    for user_question in admin_client.get("/admin/user-questions/").json():
+        assert "es" not in user_question["text"]
+    for child_question in admin_client.get("/admin/child-questions/").json():
+        assert "es" not in child_question["text"]
+    # add spanish language
     response = admin_client.post("/admin/languages/", json={"id": "es"})
     assert response.status_code == 200
     assert response.json() == {"id": "es"}
+    assert admin_client.get("/languages/").json() == ["de", "en", "fr", "es"]
+    # all texts now include spanish
+    for milestone_group in admin_client.get("/admin/milestone-groups/").json():
+        assert "es" in milestone_group["text"]
+        for milestone in milestone_group["milestones"]:
+            assert "es" in milestone["text"]
+    for user_question in admin_client.get("/admin/user-questions/").json():
+        assert "es" in user_question["text"]
+    for child_question in admin_client.get("/admin/child-questions/").json():
+        assert "es" in child_question["text"]
+
+
+def test_post_delete_repost_language(admin_client: TestClient):
+    assert admin_client.post("/admin/languages/", json={"id": "es"}).status_code == 200
+    assert admin_client.get("/languages/").json() == ["de", "en", "fr", "es"]
+    assert admin_client.delete("/admin/languages/es").status_code == 200
+    assert admin_client.get("/languages/").json() == ["de", "en", "fr"]
+    assert admin_client.post("/admin/languages/", json={"id": "es"}).status_code == 200
+    assert admin_client.get("/languages/").json() == ["de", "en", "fr", "es"]
 
 
 def test_post_language_invalid_already_exists(admin_client: TestClient):
@@ -16,10 +45,31 @@ def test_post_language_invalid_already_exists(admin_client: TestClient):
     assert response.status_code == 400
 
 
-def test_delete_language(admin_client: TestClient):
+def test_delete_language(admin_client: TestClient, static_dir: pathlib.Path):
+    i18_json_path = static_dir / "i18n" / "fr.json"
+    assert i18_json_path.is_file()
+    # initially we have french versions of all texts
+    for milestone_group in admin_client.get("/admin/milestone-groups/").json():
+        assert "fr" in milestone_group["text"]
+        for milestone in milestone_group["milestones"]:
+            assert "fr" in milestone["text"]
+    for user_question in admin_client.get("/admin/user-questions/").json():
+        assert "fr" in user_question["text"]
+    for child_question in admin_client.get("/admin/child-questions/").json():
+        assert "fr" in child_question["text"]
     response = admin_client.delete("/admin/languages/fr")
     assert response.status_code == 200
     assert admin_client.get("/languages").json() == ["de", "en"]
+    assert not i18_json_path.is_file()
+    # no french texts
+    for milestone_group in admin_client.get("/admin/milestone-groups/").json():
+        assert "fr" not in milestone_group["text"]
+        for milestone in milestone_group["milestones"]:
+            assert "fr" not in milestone["text"]
+    for user_question in admin_client.get("/admin/user-questions/").json():
+        assert "fr" not in user_question["text"]
+    for child_question in admin_client.get("/admin/child-questions/").json():
+        assert "fr" not in child_question["text"]
 
 
 @pytest.mark.parametrize("lang_id", ["de", "en"])

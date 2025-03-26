@@ -85,7 +85,7 @@ test("Research page: valid data", async ({ page }) => {
 
 test("Research page: no data", async ({ page }) => {
 	await mock_user_route(page);
-	await page.goto("/research");
+	await page.goto("/userLand/research");
 
 	// no plot or table are displayed if there is no data
 	const plot = page.getByTestId("researchPlotLines");
