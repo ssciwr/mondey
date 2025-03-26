@@ -107,6 +107,7 @@ def import_childrens_question_answers_data(
                         question=variable_label,
                         options_json=json.dumps(options_dict),
                         options=", ".join(options_dict.values()),
+                        lang_id=1,  # hardocded: This is the first language, which is German by default, amtching the questions
                     )
                 },
             )
@@ -133,11 +134,12 @@ def import_childrens_question_answers_data(
                 component="text",
                 type="text",
                 required=False,
-                text={"de": ChildQuestionText(question=variable_label)},
+                text={"de": ChildQuestionText(question=variable_label, lang_id=1)},
             )
             session.add(child_question)
 
         # For other less common types, skip or handle as needed
+    session.commit()
 
     # Process actual data into child answers
     for _, child_row in data_df.iterrows():
@@ -148,13 +150,10 @@ def import_childrens_question_answers_data(
             variable_type = label_row["Variable Type"]
 
             # Find the corresponding ChildQuestion
-            child_question = (
-                session.exec(select(ChildQuestion))
-                .filter(
-                    ChildQuestion.text["de"]["question"] == label_row["Variable Label"]
-                )
-                .first()
+            query = select(ChildQuestion).where(
+                ChildQuestion.text["de"]["question"] == label_row["Variable Label"]
             )
+            child_question = session.exec(query).first()  # why doesn't this work?
 
             if not child_question:
                 continue
