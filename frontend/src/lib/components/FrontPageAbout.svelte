@@ -26,8 +26,9 @@ let registerRequestTestAccountData: RegisterRegisterData = {
 };
 
 const registerTestUser = async () => {
+	console.log("Calling register...");
 	const result = await registerRegister(registerRequestTestAccountData);
-
+	console.log("Registered..");
 	if (result.error) {
 		alertMessage = `${i18n.tr.registration.alertMessageError}: ${result.error.detail}`;
 		showAlert = true;
@@ -43,7 +44,7 @@ const registerTestUser = async () => {
 
 		if (authReturn.error) {
 			showAlert = true;
-			alertMessage = i18n.tr.login.badCredentials + authReturn.error.detail;
+			alertMessage = i18n.tr.login.badCredentials;
 			console.log("error during login ", authReturn.error.detail);
 		} else {
 			const status: string = await refresh();
@@ -74,7 +75,7 @@ const registerTestUser = async () => {
       <p class="mb-3 font-normal max-w-prose text-gray-700 dark:text-gray-400">{i18n.tr.frontpageAbout.summary1}</p>
       <p class="mb-3 font-normal max-w-prose text-gray-700 dark:text-gray-400">{i18n.tr.frontpageAbout.summary2}</p>
 
-        <button class="btn-primary" on:click={() => registerTestUser()}>{i18n.tr.frontpageAbout.tryDemo}</button>
+        <button class="btn-primary" data-testid="anonymousLogin" onclick={registerTestUser}>{i18n.tr.frontpageAbout.tryDemo}</button>
       </div>
     </Card>
   </div>
