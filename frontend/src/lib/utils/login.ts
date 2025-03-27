@@ -8,7 +8,6 @@ export async function refresh(): Promise<string> {
 		console.log("Error getting current user: ", returned.error.detail);
 		return returned.error.detail;
 	}
-	console.log("Successfully retrieved active user");
 	if (returned.data === null || returned.data === undefined) {
 		user.data = null;
 		return "no user data";

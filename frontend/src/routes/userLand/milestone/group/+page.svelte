@@ -1,7 +1,6 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import { goto } from "$app/navigation";
-import { page } from "$app/state";
 import {
 	type MilestoneAnswerSessionPublic,
 	type MilestonePublic,
@@ -21,7 +20,6 @@ import {
 	RectangleListOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
-import { get } from "svelte/store"; // is this needed in svelte 5? Because now page is in $app/state we might not need to <store>get it?
 
 function computeProgress(
 	milestones: MilestonePublic[] | undefined,

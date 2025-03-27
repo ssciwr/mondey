@@ -15,9 +15,7 @@ function createUser() {
 		login: async (
 			loginData: Body_auth_cookie_login_auth_login_post,
 		): Promise<any> => {
-			const response = await authCookieLogin({ body: loginData });
-			console.log("login response: ", response);
-			return response;
+			return await authCookieLogin({ body: loginData });
 		},
 		logout: async (): Promise<any> => {
 			const response = await authCookieLogout();
@@ -28,18 +26,14 @@ function createUser() {
 					response.error.detail,
 				);
 			} else {
-				console.log("Successful logout of user ");
 				currentUser = null;
 			}
 			return response;
 		},
 		load: async (): Promise<void> => {
 			const { data, error } = await usersCurrentUser();
-
 			if (error || data === undefined) {
 				currentUser = null;
-
-				console.log("Failed to get current User");
 			} else {
 				currentUser = data as UserRead;
 			}

@@ -50,10 +50,10 @@ const color = isError ? "red" : "blue";
 		</p>
 	</div>
 	<div class="flex gap-2">
-		{#if infopage != ''}
+		{#if infopage !== ''}
 			<a class={(isError) ? "btn-danger" : "btn-primary"} href={infopage}><EyeSolid class="me-2 h-4 w-4" />{infotitle}</a>
 		{/if}
-		<a class={(isError) ? "btn-danger" : "btn-primary"} href={lastpage} on:click={onclick}>
+		<a class={(isError) ? "btn-danger" : "btn-primary"} href={lastpage} {onclick}>
 			{i18n.tr.misc.understood}
 		</a>
 	</div>

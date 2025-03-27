@@ -146,6 +146,7 @@ async function submitNewPassword() {
                 bind:value={newPassword}
                 type="password"
                 id="newPassword"
+                autocomplete="new-password"
                 required
                 placeholder={i18n.tr.settings.placeholder}
         />
@@ -160,6 +161,7 @@ async function submitNewPassword() {
                 bind:value={newPasswordRepeat}
                 type="password"
                 id="newPasswordConfirm"
+                autocomplete="new-password"
                 required
                 placeholder={i18n.tr.settings.placeholder}
         />

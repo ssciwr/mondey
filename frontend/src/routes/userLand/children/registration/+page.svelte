@@ -158,7 +158,6 @@ async function setup(): Promise<{
 			};
 		}
 	}
-	console.log("setup done");
 	return { questionnaire: questionnaire, answers: answers };
 }
 
