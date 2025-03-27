@@ -12,15 +12,15 @@ class AppSettings(BaseSettings):
     DATABASE_PATH: str = "db"
     STATIC_FILES_PATH: str = "static"
     PRIVATE_FILES_PATH: str = "private"
-    ENABLE_CORS: bool = True
     HOST: str = "localhost"
-    SMTP_HOST: str = "email:587"
     PORT: int = 8000
+    SMTP_HOST: str = ""
     RELOAD: bool = True
     LOG_LEVEL: str = "debug"
     COOKIE_SECURE: bool = False
     STATS_CRONTAB: str = "0 3 * * mon"
     DEEPL_API_KEY: str = ""
+    MONDEY_HOST: str = "mondey.de"
 
 
 app_settings = AppSettings()

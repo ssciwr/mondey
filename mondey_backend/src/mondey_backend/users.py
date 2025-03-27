@@ -27,34 +27,40 @@ from .models.research import ResearchGroup
 from .settings import app_settings
 
 
+def send_email(msg: EmailMessage) -> None:
+    if app_settings.SMTP_HOST != "":
+        with smtplib.SMTP(app_settings.SMTP_HOST) as s:
+            s.send_message(msg)
+    else:
+        logging.warning(f"Email {msg} not sent as SMTP_HOST is not set")
+
+
 def send_email_validation_link(email: str, token: str) -> None:
     msg = EmailMessage()
-    msg["From"] = "no-reply@mondey.lkeegan.dev"
+    msg["From"] = f"no-reply@{app_settings.MONDEY_HOST}"
     msg["To"] = email
     msg["Subject"] = "MONDEY-Konto aktivieren"
     msg.set_content(
-        f"Bitte klicken Sie hier, um Ihr MONDEY-Konto zu aktivieren:\n\nhttps://mondey.lkeegan.dev/verify/{token}\n\n-----\n\nPlease click here to activate your MONDEY account:\n\nhttps://mondey.lkeegan.dev/verify/{token}"
+        f"Bitte klicken Sie hier, um Ihr MONDEY-Konto zu aktivieren:\n\nhttps://{app_settings.MONDEY_HOST}/verify/{token}\n\n-----\n\nPlease click here to activate your MONDEY account:\n\nhttps://{app_settings.MONDEY_HOST}/verify/{token}"
     )
-    with smtplib.SMTP(app_settings.SMTP_HOST) as s:
-        s.send_message(msg)
+    send_email(msg)
 
 
 def send_reset_password_link(email: str, token: str) -> None:
     msg = EmailMessage()
-    msg["From"] = "no-reply@mondey.lkeegan.dev"
+    msg["From"] = f"no-reply@{app_settings.MONDEY_HOST}"
     msg["To"] = email
     msg["Subject"] = "MONDEY Passwort zurücksetzen"
     msg.set_content(
-        f"Bitte klicken Sie hier, um Ihr MONDEY Passwort zurückzusetzen:\n\nhttps://mondey.lkeegan.dev/resetPassword/{token}\n\n-----\n\nPlease click here to reset your MONDEY password:\n\nhttps://mondey.lkeegan.dev/resetPassword/{token}"
+        f"Bitte klicken Sie hier, um Ihr MONDEY Passwort zurückzusetzen:\n\nhttps://{app_settings.MONDEY_HOST}/resetPassword/{token}\n\n-----\n\nPlease click here to reset your MONDEY password:\n\nhttps://{app_settings.MONDEY_HOST}/resetPassword/{token}"
     )
-    with smtplib.SMTP(app_settings.SMTP_HOST) as s:
-        s.send_message(msg)
+    send_email(msg)
 
 
 def is_test_account_user(user: User) -> bool:
     # A bit over-explicit but I wanted to implement the use of pytest.raises and it could help prevent an annoying bug.
     if type(user) is str:
-        raise TypeError("Passed in the User object, not their email directly")
+        raise TypeError("Pass in the User object, not their email directly")
     if not hasattr(user, "email"):
         return False
     return "tester@testaccount.com" in user.email

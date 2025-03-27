@@ -15,10 +15,7 @@ let hideDrawer: boolean = $state(true);
 
 // get user state
 onMount(async () => {
-	console.log("Loading user on landing page..");
 	await user.load();
-
-	console.log("User should have loaded... user data was: ", user.data);
 	if (!user.data) {
 		goto(`/login?intendedpath=${$page.url.pathname}`);
 	}

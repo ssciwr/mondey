@@ -125,7 +125,7 @@ let password = $state("");
 			</div>
 
 			<Button
-				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+				class="dark:bg-primary-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
 				type="submit">{i18n.tr.login.submitButtonLabel}</Button
 			>
 		</form>

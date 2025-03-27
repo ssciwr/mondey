@@ -1,4 +1,5 @@
-import { type Page, expect, test } from "@playwright/test";
+import { type Page, expect } from "@playwright/test";
+import { test } from "./test";
 
 // Return a random integer from the inclusive range [min, max]
 function sample(min: number, max: number): number {
@@ -27,33 +28,15 @@ function make_research_data(n_answer_sessions = 20, n_milestones = 5) {
 }
 
 // Mock the /research/data route
-async function mock_research_data_route(page: Page) {
+async function mock_research_data_route(page: Page, n_answer_sessions: number) {
 	await page.route("**/research/data/", async (route) => {
-		const json = make_research_data();
-		await route.fulfill({ json });
-	});
-}
-
-// Mock the /users/me route with a valid User
-async function mock_user_route(page: Page) {
-	await page.route("**/users/me", async (route) => {
-		const json = {
-			id: 1,
-			email: "researcher@mondey.de",
-			is_active: true,
-			is_superuser: false,
-			is_verified: true,
-			is_researcher: true,
-			full_data_access: true,
-			research_group_id: 703207,
-		};
+		const json = make_research_data(n_answer_sessions);
 		await route.fulfill({ json });
 	});
 }
 
 test("Research page: valid data", async ({ page }) => {
-	await mock_user_route(page);
-	await mock_research_data_route(page);
+	await mock_research_data_route(page, 20);
 	await page.goto("/userLand/research");
 
 	// plot and table of data should be displayed
@@ -84,7 +67,7 @@ test("Research page: valid data", async ({ page }) => {
 });
 
 test("Research page: no data", async ({ page }) => {
-	await mock_user_route(page);
+	await mock_research_data_route(page, 0);
 	await page.goto("/userLand/research");
 
 	// no plot or table are displayed if there is no data

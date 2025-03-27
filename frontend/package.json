@@ -9,8 +9,10 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test:unit": "vitest --coverage",
-		"test:ui": "pnpm exec playwright test",
-		"test:ui:dev": "pnpm exec playwright test --ui",
+		"test:ui": "pnpm exec playwright test tests/ui",
+		"test:ui:dev": "pnpm exec playwright test tests/ui --ui",
+		"test:e2e": "pnpm exec playwright test tests/e2e",
+		"test:e2e:dev": "pnpm exec playwright test tests/e2e --ui",
 		"openapi-ts": "openapi-ts"
 	},
 	"devDependencies": {
