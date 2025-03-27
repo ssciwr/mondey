@@ -50,13 +50,15 @@ from mondey_backend.import_data.utils import clear_all_data
 from mondey_backend.import_data.utils import data_path
 from mondey_backend.import_data.utils import get_import_test_session
 from mondey_backend.import_data.utils import labels_path
+from mondey_backend.import_data.utils import questions_configured_path
+from mondey_backend.import_data.utils import save_select_question
+from mondey_backend.import_data.utils import save_text_question
 from mondey_backend.models.milestones import Language
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import ChildQuestionText
-from mondey_backend.src.mondey_backend.import_data.utils import (
-    questions_configured_path,
-)
+from mondey_backend.models.questions import UserQuestion
+from mondey_backend.models.questions import UserQuestionText
 
 # todo: Eventually this needs to parse Igor filled-out questions.csv file in order to also set the "required"
 # - also do the requried migration when doing that...
@@ -117,7 +119,7 @@ def import_childrens_question_answers_data(
     data_path: str,
     questions_configured_path: str,
     clear_existing_questions_and_answers: bool = False,
-) -> list[tuple[str, str]]:
+):
     if debug:
         print("Opening labels path: ", labels_path)
         print("Opening data path: ", data_path)
@@ -126,7 +128,10 @@ def import_childrens_question_answers_data(
 
     labels_df = pd.read_csv(labels_path, sep=",", encoding="utf-16")
     data_df = pd.read_csv(data_path, sep="\t", encoding="utf-16")
-    # questions_configured_df = pd.read_csv(questions_configured_path, sep="\t", encoding="utf-16")
+    questions_configured_df = pd.read_csv(
+        questions_configured_path, sep=",", encoding="utf-8", dtype=str
+    )
+    questions_configured_df.columns = questions_configured_df.columns.str.strip()
 
     if clear_existing_questions_and_answers:
         clear_all_data(session)
@@ -134,8 +139,7 @@ def import_childrens_question_answers_data(
     free_text_questions = []
 
     # Dictionary to track the previous variable for handling 'Andere' cases
-    previous_variable = None
-    # previous_variable_label = None
+    previous_variable_label = None
 
     # Process each unique variable in labels_df
     processed_variables = set()
@@ -194,65 +198,51 @@ def import_childrens_question_answers_data(
                 for _, row in valid_options.iterrows()
             }
 
-            # We need to store options like this:
-            """
-                        options="[12,22,32]",
-                        question="What else?",
-                        options_json="",
-            """
-            # optiosn json has "name", "value", "disabled".
-            # disabled should always be false. value should be the Response Code as string.
-            # response label should be the name.
-
             if debug:
                 print("Sample options: ", options_dict)
 
             options_json, options_str = prepare_options_json(options)
 
-            # Create ChildQuestion
-            child_question = ChildQuestion(
-                component="select",
-                type="text",
-                required=False,
-                text={
-                    "de": ChildQuestionText(
-                        question=variable + ": " + variable_label,
-                        options_json=options_json,
-                        options=options_str,
-                        lang_id=1,  # hardocded: This is the first language, which is German by default, amtching the questions
-                    )
-                },
+            save_select_question(
+                variable,
+                variable_label,
+                options_json,
+                options_str,
+                questions_configured_df,
+                session,
             )
-            session.add(child_question)
 
             # Track this as the previous variable for potential 'Andere' handling
-            previous_variable = variable
+            previous_variable_label = variable_label
             # previous_variable_label = variable_label
 
         elif variable_type == "TEXT" and input_type == "TXT":
             # These are free text questions
             if (
-                type(variable) is str
-                and "[01]" in variable
-                and (previous_variable and f"{previous_variable}_01" in variable)
+                type(variable_label) is str
+                and ": [01]" in variable_label
+                and (
+                    previous_variable_label
+                    and f"{previous_variable_label}: [01]" in variable_label
+                )
             ):  # only if they match
                 # = it's an other free text input, we handle in geenral data processing rules for TEXT variable type later.
+                if debug:
+                    print(
+                        "Not creating question for this Other option - its free text response will be merged"
+                    )
                 continue
 
             # Independent free text question
             free_text_questions.append((variable, variable_label))
 
-            child_question = ChildQuestion(
-                component="text",
-                type="text",
-                required=False,
-                text={
-                    "de": ChildQuestionText(
-                        question=variable + ": " + variable_label, lang_id=1
-                    )
-                },
+            save_text_question(
+                variable,
+                variable_label,
+                previous_variable_label,
+                questions_configured_df,
+                session,
             )
-            session.add(child_question)
             if debug:
                 print("Added text feetex tquestion type..")
         else:
@@ -265,7 +255,11 @@ def import_childrens_question_answers_data(
                 )
 
     session.commit()
-    # todo: Maybe refactor the above into it's own function, and the below into a second function.
+    print("All questions have been generated. Now assigning answers to them")
+    assign_answers_to_the_imported_questions(session, data_df, labels_df)
+
+
+def assign_answers_to_the_imported_questions(session, data_df, labels_df):
     questions_to_discard = []
     total_answers = 0
     missing = 0
@@ -280,6 +274,7 @@ def import_childrens_question_answers_data(
             variable_type = label_row["Variable Type"]
             variable = label_row["Variable"]
             variable_label = label_row["Variable Label"]
+            is_parent_question = False  # default assumption that it is a child question
 
             if variable_label in questions_to_discard:
                 continue
@@ -294,20 +289,32 @@ def import_childrens_question_answers_data(
                 )
             )
 
-            child_question = session.exec(query).first()  # why doesn't this work?
+            question = session.exec(query).first()
 
-            if not child_question:
+            if not question:
+                query = (
+                    select(UserQuestion)
+                    .join(UserQuestionText)
+                    .where(
+                        UserQuestionText.lang_id == 1,
+                        UserQuestionText.question == variable + ": " + variable_label,
+                    )
+                )
+
+                question = session.exec(query).first()
+                if not question:
+                    print(
+                        "Discarding question answer without found saved question (which was deliberately not saved, maybe because it was a milestone etc): ",
+                        variable,
+                        label_row["Variable Label"],
+                    )
+                    questions_to_discard.append(variable)
+                else:
+                    is_parent_question = True
                 if debug:
                     print("No child question...")
                     print(label_row["Variable Label"])
                 continue
-            else:
-                print(
-                    "Discarding question (which was deliberately not saved, maybe because it was a milestone etc): ",
-                    variable,
-                    label_row["Variable Label"],
-                )
-                questions_to_discard.append(variable)
 
             # Get the child's response for this variable
             response = child_row.get(variable)
@@ -316,7 +323,8 @@ def import_childrens_question_answers_data(
             if pd.isna(response) or response == -9:
                 continue
 
-            # Todo: FIlter this to not answer milestone questions. Did we at any point filter them?
+            if debug and is_parent_question:
+                print("Is parent question.")
 
             # Handle Multiple Choice
             if variable_type == "NOMINAL" or variable_type == "ORDINAL":
@@ -342,29 +350,30 @@ def import_childrens_question_answers_data(
                             answer_text,
                         )
 
-                    # Special handling for 'Andere' cases which are usually but not always free text
-                    if answer_text == "Andere" or answer_text == "Other":
-                        if debug:
-                            print("Free text Andere triggered!")
-                        # Look for free text input
-                        free_text_var = f"{variable}_01"
-                        free_text_answer = child_row.get(free_text_var)
-
-                        if not pd.isna(free_text_answer):
-                            answer_text = str(free_text_answer)
-
+                    # if is_parent_question: # then we need to go ahead and save it to the user_id for this child
+                    # now we need to bulk create the parents for each child in the 1st script.
                     child_answer = ChildAnswer(
                         child_id=child_row["CASE"],
-                        question_id=child_question.id,
+                        question_id=question.id,
                         answer=answer_text,
                     )
                     total_answers += 1
                     session.add(child_answer)
 
             elif variable_type == "TEXT":
+                if ": [01]" in variable:
+                    if debug:
+                        print("Free text Andere triggered!")
+                    # Look for free text input
+                    free_text_var = f"{variable}_01"
+                    free_text_answer = child_row.get(free_text_var)
+
+                    if not pd.isna(free_text_answer):
+                        answer_text = str(free_text_answer)
+
                 child_answer = ChildAnswer(
                     child_id=child_row["CASE"],
-                    question_id=child_question.id,
+                    question_id=question.id,
                     answer=str(response),
                 )
                 # not sure this will work for free text other cases.
@@ -381,13 +390,12 @@ def import_childrens_question_answers_data(
                 missing += 1
 
     session.commit()
-    print("Total answers saved: ", total_answers)
-    print(
-        "Missing (unable to deal with answers, to which we saved the questions, so wanted the answers): ",
-        missing,
-    )
-
-    return free_text_questions
+    if debug:
+        print("Total answers saved: ", total_answers)
+        print(
+            "Missing (unable to deal with answers, to which we saved the questions, so wanted the answers): ",
+            missing,
+        )
 
 
 if __name__ == "__main__":
