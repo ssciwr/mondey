@@ -8,6 +8,7 @@ from sqlmodel import SQLModel
 from sqlmodel import select
 from tqdm import tqdm
 
+from mondey_backend.import_data.utils import get_childs_parent_id
 from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneAnswer
@@ -52,24 +53,56 @@ def map_children_milestones_data():
             # Process each row (child)
             for row in tqdm(reader):
                 child_id = int(row["CASE"])
-
+                if str(row["FK01"]) == "-9" or str(row["FK02"]) == "-9":
+                    print(
+                        "Skipping child has who is missing essential birth month/year data."
+                    )
+                    continue
                 # Check if child already exists
                 existing_child = session.execute(
                     select(Child).where(Child.id == child_id)
                 ).scalar_one_or_none()
 
-                # todo: Adapt this so we actually use their real birth month/year... fields:
-                # Note: Latest birth year is 2010.
-                # FK01, FK02 (year, month)
+                print(row["FK01"])
+                print("And month:")
+                print(row["FK02"])
+
+                # Hardcoded
+                birth_year_mapping = {
+                    9: 2025,
+                    1: 2024,
+                    2: 2023,
+                    3: 2022,
+                    4: 2021,
+                    5: 2020,
+                    6: 2019,
+                    7: 2018,
+                    8: 2017,  # Converting "Vor 2018" to 2017
+                }
+
+                birth_month_mapping = {
+                    1: 1,  # Januar
+                    2: 2,  # Februar
+                    3: 3,  # März
+                    4: 4,  # April
+                    5: 5,  # Mai
+                    6: 6,  # Juni
+                    7: 7,  # Juli
+                    8: 8,  # August
+                    9: 9,  # September
+                    10: 10,  # Oktober
+                    11: 11,  # November
+                    12: 12,  # Dezember
+                }
 
                 if not existing_child:
                     # Create a new child
                     child = Child(
                         id=child_id,
                         name=f"Imported Child {child_id}",
-                        birth_year=2020,  # FK01, mapped...
-                        birth_month=1,
-                        user_id=1,  # Default user ID
+                        birth_year=birth_year_mapping[row["FK01"]],  # FK01, mapped...
+                        birth_month=birth_month_mapping[row["FK02"]],
+                        user_id=get_childs_parent_id(child_id),  # Default user ID
                         has_image=False,
                     )
                     session.add(child)

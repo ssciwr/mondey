@@ -24,10 +24,15 @@ engine = create_engine(db_url)
 labels_path = "labels_encoded.csv"  # originally codeback...xlsx
 data_path = "data.csv"  # originally
 milestones_metadata_path = "milestones_metadata_(variables).csv"  # originally variables
+# this was from the further information... classifying questions as required / isToParent.
 questions_configured_path = (
     "questions_specified.csv"  # so this is questions.csv once filled out
 )
 # (with isToParent)
+
+
+def get_childs_parent_id(child_id: int) -> int:
+    return child_id + 1000000000
 
 
 def clear_all_data(session):
@@ -174,13 +179,26 @@ def save_text_question(
         return child_question
 
 
-def get_question_filled_in_to_parent(questions_done_df, variable):
+def get_question_filled_in_to_parent(questions_done_df, variable, debug_print=False):
+    if debug_print:
+        print("Checking", variable)
     csv_match = questions_done_df[questions_done_df["variable"] == variable]
-    return not csv_match.empty and str(csv_match.iloc[0]["isToParent"]) in [
+    if debug_print:
+        print(csv_match)
+    if not csv_match.empty:
+        if debug_print:
+            print("Value was: ", str(csv_match.iloc[0]["isToParent"]))
+    else:
+        if debug_print:
+            print("No CSV match")
+    match_found = not csv_match.empty and str(csv_match.iloc[0]["isToParent"]) in [
         "true",
         "ja",
         "yes",
     ]
+    if debug_print:
+        print("So match found was: ", "True" if match_found else "False")
+    return match_found
 
 
 def get_question_filled_in_required(questions_done_df, variable):
