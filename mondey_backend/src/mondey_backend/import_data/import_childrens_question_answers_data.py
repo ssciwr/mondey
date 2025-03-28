@@ -117,6 +117,26 @@ def import_childrens_question_answers_data(
     questions_configured_path: str,
     clear_existing_questions_and_answers: bool = False,
 ):
+    """
+    This loads the "labels_df" which is in social science terms a "coding codebook". It lists several variables, which
+    represent Milestones and Questions in our system, with IDs like "DE01_02". It also lists answer options for each
+    "variable" with a mapping pairing, which "codes" the survey data value to the actual (text) answer. For example,
+    1 = 2024, 2 = 2023, 3 = 2020. The labels_df tells us this mapping for the question "FK_01", with the title,
+    "Geburtsjahr" - Year of birth.
+
+    Questions can include "codes" like -9, which means "no answer given".
+
+    This coding mapping is then used by the second main function in this file, assign_answers_to_the_imported_questions,
+    which uses the "data_path" dataframe. The data dataframe contains the codes for each child, so it provides a way to
+    map the actual answers, "using" the codebook. The second function maps those codes to save the real, true freetext
+    answers, which are compatible and match the questions saved by this function.
+
+    :param session: Important: This should be the import_session, so that we can keep it in it's own DB/folder location
+    (/import_data/db by default)
+    :param clear_existing_questions_and_answers: A dataframe which includes whether a question is directed to parents (so, a
+    UserQuestion/UserAnswer), such as income/Social Economic Status, or about/to the child (ChildQuestion/ChildAnswer)
+    :return:
+    """
     if debug:
         print("Opening labels path: ", labels_path)
         print("Opening data path: ", data_path)
@@ -285,10 +305,29 @@ def import_childrens_question_answers_data(
 def assign_answers_to_the_imported_questions(
     session, data_df, labels_df, questions_configured_df
 ):
+    """
+    Once the questions have been inserted into UserQuestion and ChildQuestion, we need to add answers.
+    This script works out the coding mappings for answers* and then connects the relevant answer and child/user ID
+    to save answers for each question.
+
+    Once complete the answers will all be imported. The logic deals with "free text other" answers by saving them
+    as their own answer (as simple "answer property") if they are an independent question, or by saving it as
+    "additioanl_answer" if it is connected to a select question, e.g.
+
+    "Name": Independent free text, saves "answer" to the question.
+    "Other Nationality": Exists with the "Nationality" Select question, which has an option for Other (Andere).
+    When uses select Other, this one will be filled out. In that case, we set the additional answer to the "Nationality"
+    question with the answer from this text field, rather than saving it as its own independent question. This leaves
+    it looking like so:
+    answer: "Andere", additional_answer: "Users Free text answer".
+
+    :param questions_configured_df: A dataframe which includes whether a question is directed to parents (so, a
+    UserQuestion/UserAnswer), such as income/Social Economic Status, or about/to the child (ChildQuestion/ChildAnswer)
+
+    """
     questions_to_discard = []
     total_answers = 0
     missing = 0
-    # missing_csv_questions = 0
 
     # Process actual data into child answers
     for _, child_row in data_df.iterrows():
