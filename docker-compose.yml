@@ -8,16 +8,18 @@ services:
       - ${PRIVATE_FILES_PATH:-./private}:/app/private
     environment:
       - SECRET=${SECRET:-}
+      - DATABASE_PATH=/app/db
       - STATIC_FILES_PATH=/app/static
       - PRIVATE_FILES_PATH=/app/private
-      - DATABASE_PATH=/app/db
-      - ENABLE_CORS=${ENABLE_CORS:-false}
       - HOST=${HOST:-backend}
       - PORT=${PORT:-80}
-      - RELOAD=${RELOAD:-false}
+      - SMTP_HOST=${SMTP_HOST:-email:587}
+      - RELOAD=false
       - LOG_LEVEL=${LOG_LEVEL:-info}
+      - COOKIE_SECURE=${COOKIE_SECURE:-true}
       - STATS_CRONTAB=${STATS_CRONTAB:-0 3 * * mon}
       - DEEPL_API_KEY=${DEEPL_API_KEY:-}
+      - MONDEY_HOST=${MONDEY_HOST:-mondey.lkeegan.dev}
     logging:
       driver: "local"
       options:
