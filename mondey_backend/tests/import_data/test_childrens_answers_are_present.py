@@ -1,3 +1,4 @@
+import pytest
 from sqlmodel import select
 
 from mondey_backend.import_data.utils import get_import_test_session
@@ -8,6 +9,8 @@ from mondey_backend.models.questions import UserAnswer
 from mondey_backend.models.questions import UserQuestionText
 
 
+# This passes after running `import_all.py true`
+@pytest.mark.skip(reason="Requires actual data CSVs which are not present")
 def test_andere_freetext_answer_is_saved_for_main_question():
     import_session, import_engine = get_import_test_session()
     # This focuses on the fact that the "Andere" question should not be their own question/answer but should be
@@ -98,7 +101,8 @@ def test_andere_freetext_answer_is_saved_for_main_question():
     print("Saved answer was: ", saved_answer)
     print("Looked up user ID: ", user_id, " and question ID: ", question_id)
     assert saved_answer is not None
-    assert saved_answer.answer == expected_answer
+    assert saved_answer.answer == "Andere"
+    assert saved_answer.additional_answer == expected_answer
 
     # Negative Test Case: Verify no answer for a non-existent scenario
     non_existent_answer = import_session.execute(
@@ -110,3 +114,8 @@ def test_andere_freetext_answer_is_saved_for_main_question():
     ).scalar_one_or_none()
     print("Non existent answer: ", non_existent_answer)
     assert non_existent_answer is None
+
+
+# todo: Ideally, add a test which asserts that independent free texts also have their answers (questions without a
+# select type, so actually pure free text question-answers)
+# *FK04_01: Frühgeboren: [01] + Andere Diagnosen are good examples of that.

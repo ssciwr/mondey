@@ -202,7 +202,8 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 2 or len(sys.argv) > 3:
         print(
-            "Usage: python import_milestones_metadata.py <path_to_csv> <?clear_existing_milestones bool>"
+            "Usage: python import_milestones_metadata.py <path_to_milestones_csv> <?clear_existing_milestones bool>, e.g."
+            "python import_milestones_metadata.py milestones_metadata_(variables).csv"
         )
         sys.exit(1)
 

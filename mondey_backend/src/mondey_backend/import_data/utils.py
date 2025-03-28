@@ -13,14 +13,14 @@ from sqlmodel import Session
 from sqlmodel import select
 
 from mondey_backend.models.children import Child
+from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import ChildQuestionText
+from mondey_backend.models.questions import UserAnswer
 from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.questions import UserQuestionText
 from mondey_backend.models.users import User
 from mondey_backend.models.users import UserCreate
-
-from mondey_backend.models.questions import UserAnswer
 
 script_dir = Path(__file__).parent.parent.parent.parent.absolute()
 database_file_path = script_dir / "src/mondey_backend/import_data/db/mondey.db"
@@ -53,15 +53,17 @@ questions_configured_path = "questions_specified.csv"  # so this is questions.cs
 def get_childs_parent_id(session: Session, child_id: int) -> int:
     """
     Get the user_id (parent ID) of a Child object
-    
+
     Args:
         session: Database session
         child_id: ID of the child
-        
+
     Returns:
         The user_id of the child's parent
     """
-    child = session.execute(select(Child).where(Child.id == child_id)).scalar_one_or_none()
+    child = session.execute(
+        select(Child).where(Child.id == child_id)
+    ).scalar_one_or_none()
     if not child:
         raise ValueError(f"Child with ID {child_id} not found")
     return child.user_id
@@ -275,58 +277,98 @@ async def generate_parents_for_children(child_ids: list[int]) -> dict[int, int]:
 
 
 def update_or_create_user_answer(
-        session: Session,
-        user_id: int,
-        question_id: int,
-        answer_text: str,
-        set_only_additional_answer: bool = False,
-        AnswerModel = UserAnswer,
+    session: Session,
+    user_or_child_id: int,
+    question_id: int,
+    answer_text: str,
+    set_only_additional_answer: bool = False,
+    is_child_question=True,
 ):
     """
-    Update existing UserAnswer or create a new one. Designed for use with the additional free text questions.
-
-    Args:
-        session: Database session
-        user_id: ID of the user
-        question_id: ID of the question
-        answer_text: Text of the answer
-        set_only_additional_answer: Flag to update only additional answer
+    Upsert strategy for user answers with robust handling of unique constraints
     """
-    # Try to find existing answer
-    existing_answer = session.execute(
-        select(AnswerModel)
-        .where(AnswerModel.user_id == user_id)
-        .where(AnswerModel.question_id == question_id)
-    ).scalar_one_or_none()
-
-    # If answer exists, update it
-    if existing_answer:
-        if set_only_additional_answer:
-            # Only update additional_answer if flag is set
-            existing_answer.additional_answer = answer_text
-        else:
-            # Update both main answer and additional answer
-            existing_answer.answer = answer_text
-            existing_answer.additional_answer = answer_text
-
-        # Commit the changes
-        session.commit()
-
-        return True, existing_answer
-
-    # If no existing answer, create a new one
-    new_answer = AnswerModel(
-        user_id=user_id,
-        question_id=question_id,
-        answer=answer_text,
-        additional_answer=answer_text
+    # Use with_for_update to lock the row during the transaction
+    query = (
+        (
+            select(ChildAnswer)
+            .where(ChildAnswer.child_id == user_or_child_id)
+            .where(ChildAnswer.question_id == question_id)
+            .with_for_update(skip_locked=True)
+        )
+        if is_child_question
+        else (
+            select(UserAnswer)
+            .where(UserAnswer.user_id == user_or_child_id)
+            .where(UserAnswer.question_id == question_id)
+            .with_for_update(skip_locked=True)
+        )
     )
 
-    # Add and commit the new answer
-    session.add(new_answer)
-    session.commit()
+    print(
+        "Adding or updating question!",
+        "QID: ",
+        str(question_id),
+        "UID",
+        str(user_or_child_id),
+    )
 
-    return False, new_answer
+    existing_answer = session.execute(query).scalar_one_or_none()
+
+    # If answer exists, update it
+    if existing_answer and answer_text is not None and answer_text != "":
+        print("Existing answer...")
+        try:
+            if set_only_additional_answer:
+                print("Setting additional answer")
+                # Only update additional_answer if flag is set
+                existing_answer.additional_answer = answer_text
+            else:
+                # Update both main answer and additional answer
+                existing_answer.answer = answer_text
+
+            print("Adding to SQL sesion...")
+            session.add(existing_answer)
+            return True, existing_answer
+
+        except Exception as e:
+            # Log the error, rollback the session
+            print(f"Error updating existing answer: {e}")
+            session.rollback()
+    else:
+        if set_only_additional_answer:
+            print(
+                "Additional answer with no found base question. This could be a question which is independent, "
+                "but happens to have [01] and 'Andere' in the name, like 'Andere Diagnosen', which is okay, "
+                "but it could indicate data processing has gone wrong."
+            )
+        # If no existing answer
+        try:
+            print(
+                "Not existing answer, so making a new one..",
+                "Answer:",
+                str(answer_text),
+            )
+            new_answer = (
+                ChildAnswer(
+                    child_id=user_or_child_id,
+                    question_id=question_id,
+                    answer=answer_text,
+                )
+                if is_child_question
+                else UserAnswer(
+                    user_id=user_or_child_id,
+                    question_id=question_id,
+                    answer=answer_text,
+                )
+            )
+            session.add(new_answer)
+            return False, new_answer
+
+        except Exception as e:
+            # Handle potential integrity errors
+            print(f"Error creating new answer: {e}")
+            session.rollback()
+            raise
 
 
 def get_question_filled_in_to_parent(questions_done_df, variable, debug_print=False):

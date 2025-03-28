@@ -55,11 +55,10 @@ from mondey_backend.import_data.utils import labels_path
 from mondey_backend.import_data.utils import questions_configured_path
 from mondey_backend.import_data.utils import save_select_question
 from mondey_backend.import_data.utils import save_text_question
+from mondey_backend.import_data.utils import update_or_create_user_answer
 from mondey_backend.models.milestones import Language
-from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import ChildQuestionText
-from mondey_backend.models.questions import UserAnswer
 from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.questions import UserQuestionText
 
@@ -181,7 +180,7 @@ def import_childrens_question_answers_data(
             "Now filtering out the milestones, so we only consider manual questions. This is unfortunately hardcoded."
         )
 
-    labels_df = labels_df.loc[(labels_df.index > 170) & (labels_df.index < 396)]
+    labels_df = labels_df.loc[(labels_df.index > 170) & (labels_df.index < 395)]
 
     if debug:
         print("Sample data:")
@@ -207,8 +206,9 @@ def import_childrens_question_answers_data(
 
         # Handling different variable types
         if (
-            variable_type == "NOMINAL" or variable_type == "ORDINAL"
-        ) and input_type == "MC":
+            (variable_type == "NOMINAL" or variable_type == "ORDINAL")
+            and input_type == "MC"
+        ) or (variable_type == "DICHOTOMOUS" and input_type == "CK"):
             if debug:
                 print(
                     "Handling Multiple Choice with optinos.. should be saved as separated text strings"
@@ -253,10 +253,12 @@ def import_childrens_question_answers_data(
                 and ": [01]" in variable_label
                 and (
                     previous_variable_label
-                    and f"{previous_variable_label}: [01]" in variable_label
+                    and f"{previous_variable_label}: [01]"
+                    in variable_label  # this line checks if previous was a select
+                    # situation or whether it's an actual indepedent free text question (then will be False)
                 )
             ):  # only if they match
-                # = it's an other free text input, we handle in geenral data processing rules for TEXT variable type later.
+                # = it's an other free text input, we handle in general data processing rules for TEXT variable type later.
                 if debug:
                     print(
                         "Not creating question for this Other option - its free text response will be merged"
@@ -332,6 +334,8 @@ def assign_answers_to_the_imported_questions(
     # Process actual data into child answers
     for _, child_row in data_df.iterrows():
         # Iterate through all variables in labels_df
+        previous_variable_label = "Default Label"
+        previous_variable = "Default Variable"
         for _j, label_row in (
             labels_df.groupby("Variable").first().reset_index().iterrows()
         ):
@@ -354,8 +358,20 @@ def assign_answers_to_the_imported_questions(
             """
             for variable_label_option in [
                 variable_label,
-                variable_label.replace(" [01]", "").replace("Andere ", ""),
             ]:
+                preserved_freetext_lookup_key = variable
+                set_only_additional_answer = False
+                if (
+                    " [01]" in variable_label
+                    and "Andere" in variable_label
+                    and previous_variable_label in variable_label
+                ):  # indicates it's linked to previous label (select)
+                    set_only_additional_answer = True
+                    variable_label_option = previous_variable_label
+                    variable = previous_variable
+                    print("Was linked to previous select, so setting additional answer")
+                    print(variable + ": " + variable_label_option)
+
                 # Find the corresponding ChildQuestion
                 query = (
                     select(ChildQuestion)
@@ -382,6 +398,10 @@ def assign_answers_to_the_imported_questions(
                     )
 
                     question = session.exec(query).first()
+                    print(
+                        "Intiiated latest search for ...:",
+                        variable + ": " + variable_label_option,
+                    )
 
             # If after all looping no match is found, discard.
             if not question:
@@ -391,10 +411,12 @@ def assign_answers_to_the_imported_questions(
                     label_row["Variable Label"],
                 )
                 questions_to_discard.append(variable)
+                # raise("This should not happen")
                 continue
 
             # Get the child's response for this variable
             response = child_row.get(variable)
+            answer_text = str(response)  # safe default for free text answers.
 
             # Skip if no response
             if pd.isna(response) or response == -9:
@@ -406,9 +428,13 @@ def assign_answers_to_the_imported_questions(
                     print("FE variable! ", variable)
 
             # Handle Multiple Choice
-            if variable_type == "NOMINAL" or variable_type == "ORDINAL":
+            if (
+                variable_type == "NOMINAL"
+                or variable_type == "ORDINAL"
+                or variable_type == "DICHOTOMOUS"
+            ):
                 if debug:
-                    print("Came across nominal...")
+                    print("Came across select question type...")
                 response_label = labels_df[
                     (labels_df["Variable"] == variable)
                     & (labels_df["Response Code"] == response)
@@ -421,71 +447,100 @@ def assign_answers_to_the_imported_questions(
 
                 if not response_label.empty:
                     answer_text = response_label.iloc[0]["Response Label"]
-                    if debug:
-                        print(
-                            "Answer leg assigned for response code: ",
-                            response,
-                            " was: ",
-                            answer_text,
-                        )
+                    print("Saving answer:", answer_text)
 
-                    # if is_parent_question: # then we need to go ahead and save it to the user_id for this child
-                    # now we need to bulk create the parents for each child in the 1st script.
                     if get_question_filled_in_to_parent(
                         questions_configured_df, variable, debug_print=True
                     ):
-                        print("Saving user answer!")
-                        answer = UserAnswer(
-                            user_id=get_childs_parent_id(child_row["CASE"]),
+                        found_base_question, answer = update_or_create_user_answer(
+                            session,  # Assuming you have a database session
+                            user_or_child_id=get_childs_parent_id(
+                                session, child_row["CASE"]
+                            ),
                             question_id=question.id,
-                            answer=answer_text,
+                            answer_text=answer_text,
+                            set_only_additional_answer=False,
+                            is_child_question=False,
                         )
                         print(
-                            "Saved with ID of...:",
-                            get_childs_parent_id(child_row["CASE"]),
+                            "Saved(user question) with parent ID of...:",
+                            get_childs_parent_id(session, child_row["CASE"]),
                         )
                     else:
                         print(
                             "Would have looked up isToParent Y status for: ", variable
                         )
-                        answer = ChildAnswer(
-                            child_id=child_row["CASE"],
+                        found_base_question, answer = update_or_create_user_answer(
+                            session,  # Assuming you have a database session
+                            user_or_child_id=child_row["CASE"],
                             question_id=question.id,
-                            answer=answer_text,
+                            answer_text=answer_text,
+                            set_only_additional_answer=set_only_additional_answer,
+                            is_child_question=True,
                         )
                     total_answers += 1
                     session.add(answer)
 
             elif variable_type == "TEXT":
-                if ": [01]" in variable:
+                print("Encountered text variable type.", variable, variable_label)
+                if " [01]" in variable_label and "Andere" in variable_label:
                     if debug:
-                        print("Free text Andere triggered!")
-                    # Look for free text input
-                    free_text_var = f"{variable}_01"
-                    free_text_answer = child_row.get(free_text_var)
+                        print("Free text Andere triggered!", variable, variable_label)
 
-                    if not pd.isna(free_text_answer):
-                        answer_text = str(free_text_answer)
+                    set_only_additional_answer = True
+
+                response = child_row.get(
+                    preserved_freetext_lookup_key
+                )  # For free text, always use the actual look up
+                # coding keys response - this will be e.g. the freetext plaintext for "Other" or whatever the user has
+                # written in.
+                answer_text = str(response)
+
+                # This if condition should not trigger for truly independent free text questions
+                if set_only_additional_answer and (
+                    answer_text == "nan" or answer_text is None
+                ):
+                    print("Skipping save due to 'nan' additional answer")
+                    continue
+
+                print(child_row)
+
+                print(
+                    "Saving user free text(either independent or connected)! to:",
+                    answer_text,
+                )
                 if get_question_filled_in_to_parent(questions_configured_df, variable):
-                    print("Saving user answer2!")
-                    answer = UserAnswer(
-                        user_id=get_childs_parent_id(child_row["CASE"]),
+                    print("Saving parent answer..", answer_text)
+                    found_base_question, answer = update_or_create_user_answer(
+                        session,  # Assuming you have a database session
+                        user_or_child_id=get_childs_parent_id(
+                            session, child_row["CASE"]
+                        ),
                         question_id=question.id,
-                        answer=str(response),
+                        answer_text=answer_text,
+                        set_only_additional_answer=set_only_additional_answer,
+                        is_child_question=False,
                     )
                     print(
-                        "Saved with ID of...:", get_childs_parent_id(child_row["CASE"])
+                        "Question ID: ",
+                        question.id,
+                        "Saved it for user(parent) ID of...:",
+                        get_childs_parent_id(session, child_row["CASE"]),
                     )
                 else:
-                    print("Saving child answer..")
-                    answer = ChildAnswer(
-                        child_id=child_row["CASE"],
+                    print("Saving child answer..", answer_text)
+                    found_base_question, answer = update_or_create_user_answer(
+                        session,  # Assuming you have a database session
+                        user_or_child_id=child_row["CASE"],
                         question_id=question.id,
-                        answer=str(response),
+                        answer_text=answer_text,
+                        set_only_additional_answer=set_only_additional_answer,
+                        is_child_question=True,
                     )
                 # not sure this will work for free text other cases.
                 total_answers += 1
                 session.add(answer)
+                # problem is that this shouldbe created or update too..
             else:
                 print("Variable type has no clear processing method! Warning.")
                 print(
@@ -495,6 +550,8 @@ def assign_answers_to_the_imported_questions(
                     variable_label,
                 )
                 missing += 1
+            previous_variable_label = variable_label
+            previous_variable = variable
 
     session.commit()
     if debug:

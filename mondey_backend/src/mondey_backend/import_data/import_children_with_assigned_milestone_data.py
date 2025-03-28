@@ -38,25 +38,25 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
     milestone_mapping = {}
     milestone_group_mapping = {}
 
+    print(
+        "Processing setting actual milestones data for children now.", len(milestones)
+    )
+
     for milestone in milestones:
         if milestone.data_import_key:
             milestone_mapping[milestone.data_import_key] = milestone.id
             milestone_group_mapping[milestone.id] = milestone.group_id
 
-    # Print the mapping for verification
-    print("Milestone mapping (column name -> milestone ID):")
-    for key, value in milestone_mapping.items():
-        print(f"  {key} -> {value}")
-
     # Now process the CSV file
     with (
         overwritten_csv if overwritten_csv else open(csv_path, encoding="utf-16")
     ) as csvfile:
-        reader = csv.DictReader(csvfile, delimiter="\t")
+        reader = list(csv.DictReader(csvfile, delimiter="\t"))
 
         # Make parents in a batch query.
         child_ids = [row["CASE"] for row in reader]
         parent_id_map = asyncio.run(generate_parents_for_children(child_ids))
+        print("Parent ID map", parent_id_map)
 
         # Process each row (child)
         for row in tqdm(reader):
@@ -65,6 +65,7 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
                 print(
                     "Skipping child has who is missing essential birth month/year data."
                 )
+                print("Skipping·..")
                 continue
             # Check if child already exists
             existing_child = session.execute(
@@ -106,7 +107,7 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
             if not existing_child:
                 # Make the parent first, for parent questions and milestone answering sessions.
                 parents_id = parent_id_map[
-                    child_id
+                    str(child_id)
                 ]  # still works: get_childs_parent_id(child_id)
 
                 # Create a new child
