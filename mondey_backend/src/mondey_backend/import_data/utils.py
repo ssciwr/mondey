@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel import Session
+from sqlmodel import select
 
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import ChildQuestionText
@@ -17,6 +18,8 @@ from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.questions import UserQuestionText
 from mondey_backend.models.users import User
 from mondey_backend.models.users import UserCreate
+
+from mondey_backend.models.questions import UserAnswer
 
 script_dir = Path(__file__).parent.parent.parent.parent.absolute()
 database_file_path = script_dir / "src/mondey_backend/import_data/db/mondey.db"
@@ -93,8 +96,6 @@ def save_select_question(
     :param variable_label: Question label
     :param options_json: Prepared options JSON
     :param options_str: Prepared options string
-    :param labels_df: Optional labels DataFrame for additional context
-    :param debug: Debug flag
     """
     debug = False
     is_to_parent = get_question_filled_in_to_parent(questions_configured_csv, variable)
@@ -257,6 +258,61 @@ async def generate_parents_for_children(child_ids: list[int]) -> dict[int, int]:
         except Exception as e:
             print(f"Error generating parents: {e}")
             raise
+
+
+def update_or_create_user_answer(
+        session: Session,
+        user_id: int,
+        question_id: int,
+        answer_text: str,
+        set_only_additional_answer: bool = False,
+        AnswerModel = UserAnswer,
+):
+    """
+    Update existing UserAnswer or create a new one. Designed for use with the additional free text questions.
+
+    Args:
+        session: Database session
+        user_id: ID of the user
+        question_id: ID of the question
+        answer_text: Text of the answer
+        set_only_additional_answer: Flag to update only additional answer
+    """
+    # Try to find existing answer
+    existing_answer = session.execute(
+        select(AnswerModel)
+        .where(AnswerModel.user_id == user_id)
+        .where(AnswerModel.question_id == question_id)
+    ).scalar_one_or_none()
+
+    # If answer exists, update it
+    if existing_answer:
+        if set_only_additional_answer:
+            # Only update additional_answer if flag is set
+            existing_answer.additional_answer = answer_text
+        else:
+            # Update both main answer and additional answer
+            existing_answer.answer = answer_text
+            existing_answer.additional_answer = answer_text
+
+        # Commit the changes
+        session.commit()
+
+        return True, existing_answer
+
+    # If no existing answer, create a new one
+    new_answer = AnswerModel(
+        user_id=user_id,
+        question_id=question_id,
+        answer=answer_text,
+        additional_answer=answer_text
+    )
+
+    # Add and commit the new answer
+    session.add(new_answer)
+    session.commit()
+
+    return False, new_answer
 
 
 def get_question_filled_in_to_parent(questions_done_df, variable, debug_print=False):
