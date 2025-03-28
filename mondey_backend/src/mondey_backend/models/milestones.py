@@ -100,6 +100,7 @@ class Milestone(SQLModel, table=True):
     group: MilestoneGroup = back_populates("milestones")
     text: Mapped[dict[str, MilestoneText]] = dict_relationship(key="lang_id")
     images: Mapped[list[MilestoneImage]] = back_populates("milestone")
+    data_import_key: str | None = Field(default=None)
 
 
 class MilestonePublic(SQLModel):
@@ -157,7 +158,8 @@ class MilestoneAnswer(SQLModel, table=True):
         default=None, foreign_key="milestone.id", primary_key=True
     )
     milestone_group_id: int = Field(default=None, foreign_key="milestonegroup.id")
-    answer: int
+    answer: int  # IMPORTANT: ranges from 0-3, where 0 is noch gar nichts and 4 is zuverlaessig.
+    # This differs from the imported DB data where it ranges from 1-4 (for those values - beware the off-by-one error)
 
 
 class MilestoneAnswerSession(SQLModel, table=True):
