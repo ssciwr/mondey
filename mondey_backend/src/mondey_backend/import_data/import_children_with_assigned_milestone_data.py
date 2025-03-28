@@ -1,10 +1,11 @@
+import asyncio
 import csv
 import pathlib
 
 from sqlmodel import select
 from tqdm import tqdm
 
-from mondey_backend.import_data.utils import get_childs_parent_id
+from mondey_backend.import_data.utils import generate_parents_for_children
 from mondey_backend.import_data.utils import get_import_test_session
 from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Milestone
@@ -53,6 +54,10 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
     ) as csvfile:
         reader = csv.DictReader(csvfile, delimiter="\t")
 
+        # Make parents in a batch query.
+        child_ids = [row["CASE"] for row in reader]
+        parent_id_map = asyncio.run(generate_parents_for_children(child_ids))
+
         # Process each row (child)
         for row in tqdm(reader):
             child_id = int(row["CASE"])
@@ -100,7 +105,9 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
 
             if not existing_child:
                 # Make the parent first, for parent questions and milestone answering sessions.
-                parents_id = get_childs_parent_id(child_id)
+                parents_id = parent_id_map[
+                    child_id
+                ]  # still works: get_childs_parent_id(child_id)
 
                 # Create a new child
                 child = Child(

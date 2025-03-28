@@ -2,15 +2,21 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from fastapi_users.db import SQLAlchemyUserDatabase
 from sqlalchemy import MetaData
 from sqlalchemy import create_engine
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel import Session
 
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import ChildQuestionText
 from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.questions import UserQuestionText
+from mondey_backend.models.users import User
+from mondey_backend.models.users import UserCreate
 
 script_dir = Path(__file__).parent.parent.parent.parent.absolute()
 database_file_path = script_dir / "src/mondey_backend/import_data/db/mondey.db"
@@ -19,6 +25,16 @@ database_file_path = script_dir / "src/mondey_backend/import_data/db/mondey.db"
 db_url = "sqlite:////" + str(database_file_path)  # not the same as the normal DB
 # Make sure to refresh and connect to it, it will otherwise appear to be blank!
 engine = create_engine(db_url)
+
+users_database_file_path = script_dir / "src/mondey_backend/import_data/db/users.db"
+
+async_users_engine = create_async_engine(
+    f"sqlite+aiosqlite:///{users_database_file_path}"
+)
+
+async_import_session_maker = async_sessionmaker(
+    async_users_engine, expire_on_commit=False
+)
 
 # All 3 files come from SoSci Spreadsheet export...
 labels_path = "labels_encoded.csv"  # originally codebook_MONDEY_0-6_2025-03-20_16-16.xlsx (export it to CSV first)
@@ -178,18 +194,74 @@ def save_text_question(
         return child_question
 
 
+async def create_parent_for_child(
+    session: AsyncSession, user_db: SQLAlchemyUserDatabase, child_id: int
+) -> User:
+    """
+    Create a parent user for a given child
+    """
+    # Generate a unique username and email based on child's details
+    username = f"parent_of_{child_id}"
+    email = f"{username}@example.com"
+
+    # Create user object
+    user_create = UserCreate(
+        email=email,
+        password="$$$$testUser$$$$432hjdfioj3409lk",
+        is_researcher=False,
+        full_data_access=False,
+        research_group_id=0,
+    )
+
+    # Manually create User instance with specific attributes
+    user = User(
+        email=user_create.email,
+        hashed_password="$$$$testUser$$$$432hjdfioj3409lk$$$$hashed$$$$",
+        is_active=True,
+        is_superuser=False,
+        is_verified=False,
+        is_researcher=user_create.is_researcher or False,
+        full_data_access=user_create.full_data_access or False,
+        research_group_id=user_create.research_group_id or 0,
+    )
+
+    # Add the user to the session
+    session.add(user)
+    await session.flush()
+
+    return user
+
+
+async def generate_parents_for_children(child_ids: list[int]) -> dict[int, int]:
+    """
+    Generate parents in bulk for given child IDs
+
+    Returns:
+        A dictionary mapping child IDs to parent IDs
+    """
+    child_parent_map = {}
+
+    async with async_import_session_maker() as user_import_session:
+        user_db: SQLAlchemyUserDatabase = SQLAlchemyUserDatabase(
+            user_import_session, User
+        )
+        try:
+            for child_id in child_ids:
+                parent = await create_parent_for_child(
+                    user_import_session, user_db, child_id
+                )
+                child_parent_map[child_id] = parent.id
+
+            return child_parent_map
+
+        except Exception as e:
+            print(f"Error generating parents: {e}")
+            raise
+
+
 def get_question_filled_in_to_parent(questions_done_df, variable, debug_print=False):
-    if debug_print:
-        print("Checking", variable)
     csv_match = questions_done_df[questions_done_df["variable"] == variable]
-    if debug_print:
-        print(csv_match)
-    if not csv_match.empty:
-        if debug_print:
-            print("Value was: ", str(csv_match.iloc[0]["isToParent"]))
-    else:
-        if debug_print:
-            print("No CSV match")
+
     match_found = not csv_match.empty and str(csv_match.iloc[0]["isToParent"]) in [
         "true",
         "ja",
