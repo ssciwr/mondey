@@ -10,25 +10,10 @@ import { type AuthCookieLoginData } from "$lib/client/types.gen";
 import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { preventDefault } from "$lib/util";
+import { refresh } from "$lib/utils/login";
 import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
 
-import { page } from "$app/stores";
-
-async function refresh(): Promise<string> {
-	const returned = await usersCurrentUser();
-	if (returned.error) {
-		user.data = null;
-		console.log("Error getting current user: ", returned.error.detail);
-		return returned.error.detail;
-	}
-	console.log("Successfully retrieved active user");
-	if (returned.data === null || returned.data === undefined) {
-		user.data = null;
-		return "no user data";
-	}
-	user.data = returned.data;
-	return "success";
-}
+import { page } from "$app/state";
 
 // functionality
 async function submitData(): Promise<void> {
@@ -60,8 +45,7 @@ async function submitData(): Promise<void> {
 				false,
 			);
 		} else {
-			console.log("login and user retrieval successful");
-			const intendedPath = $page.url.searchParams.get("intendedpath");
+			const intendedPath = page.url.searchParams.get("intendedpath");
 			if (intendedPath !== null && intendedPath.length > 2) {
 				console.log("Redirecting user to intended path: ", intendedPath);
 				goto(intendedPath);

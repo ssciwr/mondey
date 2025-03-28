@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 <script lang="ts">
-import { page } from "$app/stores";
+import { page } from "$app/state";
 import { resetResetPassword } from "$lib/client/services.gen";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import { i18n } from "$lib/i18n.svelte";
@@ -16,9 +16,9 @@ let success: boolean = $state(false);
 
 onMount(() => {
 	if (
-		$page.params.code === undefined ||
-		$page.params.code === null ||
-		$page.params.code === ""
+		page.params.code === undefined ||
+		page.params.code === null ||
+		page.params.code === ""
 	) {
 		alertStore.showAlert(
 			i18n.tr.forgotPw.error,
@@ -40,7 +40,7 @@ async function submitData(): Promise<void> {
 
 	try {
 		const { data, error } = await resetResetPassword({
-			body: { token: $page.params.code, password: pw },
+			body: { token: page.params.code, password: pw },
 		});
 
 		if ((!error && data) || error?.detail === "VERIFY_USER_ALREADY_VERIFIED") {

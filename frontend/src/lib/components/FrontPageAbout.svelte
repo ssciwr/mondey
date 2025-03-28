@@ -9,7 +9,7 @@ import type {
 import { authCookieLogin, registerRegister } from "$lib/client/services.gen";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import { refresh } from "$lib/utils/Login";
+import { refresh } from "$lib/utils/login";
 import { Button, Card } from "flowbite-svelte";
 
 let showAlert = $state(false);
@@ -51,7 +51,7 @@ const registerTestUser = async () => {
 			if (status !== "success") {
 				alertMessage = `${i18n.tr.login.badCredentials}`;
 			}
-			await goto("/userLand/children/gallery");
+			goto("/userLand/children/gallery");
 		}
 	}
 };

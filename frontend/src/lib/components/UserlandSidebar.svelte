@@ -32,7 +32,7 @@ let alertMessage = $state(i18n.tr.login.alertMessageError);
 <Sidebar>
     <SidebarWrapper>
         <SidebarGroup>
-            <SidebarItem label = {user.data.email} class = "font-bold"/>
+            <SidebarItem label = {user.data?.email} class = "font-bold"/>
             <SidebarItem label = {i18n.tr.userData.label} href="/userLand/dataInput">
                 <svelte:fragment slot="icon">
                     <ProfileCardSolid size="lg" />
@@ -45,7 +45,7 @@ let alertMessage = $state(i18n.tr.login.alertMessageError);
                 </svelte:fragment>
             </SidebarItem>
 
-            {#if user.data.is_superuser}
+            {#if user.data?.is_superuser}
                 <SidebarItem label = {i18n.tr.admin.label} href="/userLand/admin">
                     <svelte:fragment slot="icon">
                         <CogSolid size="lg" />
@@ -53,7 +53,7 @@ let alertMessage = $state(i18n.tr.login.alertMessageError);
                 </SidebarItem>
             {/if}
 
-            {#if user.data.is_researcher}
+            {#if user.data?.is_researcher}
                 <SidebarItem label = {i18n.tr.researcher.label} href="/userLand/research">
                     <svelte:fragment slot="icon">
                         <AtomOutline size="lg" />
@@ -81,10 +81,9 @@ let alertMessage = $state(i18n.tr.login.alertMessageError);
             <SidebarItem label = {i18n.tr.login.profileButtonLabelLogout} onclick = {async () => {
                     const response = await user.logout();
                     if (response.error) {
-                        alertMessage = i18n.tr.login.alertMessageError;
+                        alertMessage = i18n.tr.login.alertMessageTitle;
                         showAlert = true;
                     } else {
-                        console.log("Logout successful");
                         user.data = null;
                         currentChild.id = null;
                         currentChild.data = null;
