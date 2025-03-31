@@ -258,13 +258,10 @@ def import_childrens_question_answers_data(
                     # situation or whether it's an actual indepedent free text question (then will be False)
                 )
             ):  # only if they match
-                # = it's an other free text input, we handle in general data processing rules for TEXT variable type later.
-                if debug:
-                    print(
-                        "Not creating question for this Other option - its free text response will be merged"
-                    )
-                continue
                 """
+                In this IF case, it's an other free text input, we handle in general data processing rules for TEXT
+                variable type later on, so we "continue".
+
                 Note that some samples should not trigger this... for example:
                  FK04_01: Frühgeboren
                 The previous question is on FK03,Termingebunden? so this one gets kept.
@@ -275,6 +272,11 @@ def import_childrens_question_answers_data(
                 FE05_01,Andere Muttersprache: [01],,,TEXT,TXT
                 ... where "Muttersprache" is in common.
                 """
+                if debug:
+                    print(
+                        "Not creating question for this Other option - its free text response will be merged"
+                    )
+                continue
 
             # Independent free text question
             free_text_questions.append((variable, variable_label))
