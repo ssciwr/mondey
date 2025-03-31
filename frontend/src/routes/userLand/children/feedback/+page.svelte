@@ -512,7 +512,7 @@ async function printReport(): Promise<void> {
     <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center justify-center m-2 p-2">
         <svelte:component this={symbol} size="xl" class={`${color}`} />
         {#if color !== "gray"}
-			<span class = {`font-bold ${isMilestone? "text-gray-700 dark:text-gray-700": ""}`} >
+			<span class = {`font-bold ${isMilestone? "text-white dark:text-white": ""}`} >
 				{milestone_or_group?.text[i18n.locale].title}
 			</span>
         {/if}
@@ -522,7 +522,7 @@ async function printReport(): Promise<void> {
 
 <!--Snippet defining how the evaluation for each milestonegroup is shown. 'grade' is the evaluation we get from the backend-->
 {#snippet evaluation( milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, grade: number, isMilestone: boolean,)}
-    <div class={`rounded-lg space-x-2 space-y-2 justify-center p-2 m-2 flex flex-col text-sm md:text-base ${(grade === 0 || grade === -1) && isMilestone=== true ? "bg-feedback-background-0" : ""}`}>
+    <div class={`rounded-lg space-x-2 space-y-2 justify-center p-2 m-2 flex flex-col text-sm md:text-white ${(grade === 0 || grade === -1) && isMilestone=== true ? "bg-feedback-background-0" : ""}`}>
         {#if grade === 1}
             {@render evaluationElement(CheckCircleSolid, milestone_or_group, "text-feedback-0", isMilestone)}
         {:else if grade === 0}
@@ -536,7 +536,7 @@ async function printReport(): Promise<void> {
                 {@render milestoneHelpButton(milestone_or_group as MilestonePublic)}
             {/if}
         {:else }
-            {@render evaluationElement(CloseCircleSolid, milestone_or_group, "gray", isMilestone)}
+            {@render evaluationElement(CloseCircleSolid, milestone_or_group, "text-white", isMilestone)}
         {/if}
     </div>
 {/snippet}
@@ -547,8 +547,8 @@ async function printReport(): Promise<void> {
         {#each Object.entries(summary[aid]) as [mid, score]}
             <div class="flex flex-col">
                 <AccordionItem
-                        activeClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-primary-700 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-600 items-center justify-between w-full font-medium text-left p-1"
-                        inactiveClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-primary-800 dark:bg-primary-800 hover:bg-primary-700 dark:hover:bg-primary-700 items-center justify-between w-full font-medium text-left p-1"
+                        activeClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-milestone-700 dark:bg-milestone-700 hover:bg-milestone-600 dark:hover:bg-milestone-600 items-center justify-between w-full font-medium text-left p-1"
+                        inactiveClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-milestone-800 dark:bg-milestone-800 hover:bg-milestone-700 dark:hover:bg-milestone-700 items-center justify-between w-full font-medium text-left p-1"
                 >
 					<span slot="header" class="items-center flex justify-center py-1">
 						{@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
