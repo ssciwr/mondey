@@ -114,8 +114,3 @@ def test_andere_freetext_answer_is_saved_for_main_question():
     ).scalar_one_or_none()
     print("Non existent answer: ", non_existent_answer)
     assert non_existent_answer is None
-
-
-# todo: Ideally, add a test which asserts that independent free texts also have their answers (questions without a
-# select type, so actually pure free text question-answers)
-# *FK04_01: Frühgeboren: [01] + Andere Diagnosen are good examples of that.

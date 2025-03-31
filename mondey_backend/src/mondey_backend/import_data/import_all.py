@@ -67,14 +67,3 @@ if __name__ == "__main__":
         questions_configured_path,
         clear_existing_questions_and_answers=False,
     )
-
-"""
-
-Remaining major todos on data import:
-Check whether these should be discarded or not?
-Discarding question answer without found saved question (which was deliberately not saved, maybe because it was a milestone etc):  FK05 Gesundheit: Ausweichoption (negativ) oder Anzahl ausgewählter Optionen
-Discarding question answer without found saved question (which was deliberately not saved, maybe because it was a milestone etc):  FK05_01 Gesundheit: Motorik
-Discarding question answer without found saved question (which was deliberately not saved, maybe because it was a milestone etc):  FK05_02 Gesundheit: Denken
-Discarding question answer without found saved question (which was deliberately not saved, maybe because it was a milestone etc):  FK05_03 Gesundheit: Sprache
-
-"""
