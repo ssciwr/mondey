@@ -37,13 +37,11 @@ def test_import_works():
     import_milestones_metadata(
         import_session, milestone_data_csv_path, clear_existing_milestones=True
     )
-    # Assert that a milestone with data_import_key of DE01_02 exists
+    # Assert that a milestone with name of DE01_02 exists
     milestone_de01_02 = import_session.exec(
-        select(Milestone).where(Milestone.data_import_key == "DE01_02")
+        select(Milestone).where(Milestone.name == "DE01_02")
     ).first()
-    assert milestone_de01_02 is not None, (
-        "Milestone with data_import_key DE01_02 should exist"
-    )
+    assert milestone_de01_02 is not None, "Milestone with name DE01_02 should exist"
 
     # Assert that the milestone's group text contains "Sehen und"
     milestone_group = import_session.exec(
@@ -62,29 +60,23 @@ def test_import_works():
         f"Group title should contain 'Denken', but was '{group_text_de.title}'"
     )
 
-    # Assert that there is no milestone with data_import_key of DA03
+    # Assert that there is no milestone with name of DA03
     milestone_da03 = import_session.exec(
-        select(Milestone).where(Milestone.data_import_key == "DA03")
+        select(Milestone).where(Milestone.name == "DA03")
     ).first()
-    assert milestone_da03 is None, (
-        "Milestone with data_import_key DA03 should not exist"
-    )
+    assert milestone_da03 is None, "Milestone with name DA03 should not exist"
 
-    # Assert that there is no milestone with data_import_key of "CASE"
+    # Assert that there is no milestone with name of "CASE"
     milestone_case = import_session.exec(
-        select(Milestone).where(Milestone.data_import_key == "CASE")
+        select(Milestone).where(Milestone.name == "CASE")
     ).first()
-    assert milestone_case is None, (
-        "Milestone with data_import_key CASE should not exist"
-    )
+    assert milestone_case is None, "Milestone with name CASE should not exist"
 
-    # Assert that there is no milestone with data_import_key of "TIME057"
+    # Assert that there is no milestone with name of "TIME057"
     milestone_time057 = import_session.exec(
-        select(Milestone).where(Milestone.data_import_key == "TIME057")
+        select(Milestone).where(Milestone.name == "TIME057")
     ).first()
-    assert milestone_time057 is None, (
-        "Milestone with data_import_key TIME057 should not exist"
-    )
+    assert milestone_time057 is None, "Milestone with name TIME057 should not exist"
 
     # Assert that there are 208 milestones total in the database
     milestone_count = import_session.exec(select(Milestone)).all()

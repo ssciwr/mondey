@@ -42,8 +42,8 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
     )
 
     for milestone in milestones:
-        if milestone.data_import_key:
-            milestone_mapping[milestone.data_import_key] = milestone.id
+        if milestone.name:
+            milestone_mapping[milestone.name] = milestone.id
             milestone_group_mapping[milestone.id] = milestone.group_id
 
     # Now process the CSV file

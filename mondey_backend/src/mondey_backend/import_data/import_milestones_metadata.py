@@ -174,7 +174,7 @@ def import_milestones_metadata(session, csv_path, clear_existing_milestones=Fals
             milestone = Milestone(
                 group_id=milestone_group.id,
                 order=milestone_order,
-                data_import_key=var,
+                name=var,
                 expected_age_months=12,  # Default value, since they don't have expected ages in the csv?
             )
             session.add(milestone)

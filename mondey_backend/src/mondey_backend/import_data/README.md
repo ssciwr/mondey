@@ -11,7 +11,7 @@ Data.csv: the data on what values to save for milestone achievement, and questio
 Coding.csv: (exported from xlsx): this is used to generate the questions meta data themselves and answer options.
 
 ## Practical Use
-- Run the migration `migration.sql` to all the "data_import_key" to milestones. To do this, you'll need to first have the
+- Run the migration `migration.sql` to all the "name" to milestones. To do this, you'll need to first have the
 database, so I suggest running python3 -m import_milestones_metadata.py, which will fail because of the migration being
 missing, then running the migration manually, then running import_milestones_meta again to check it now works (so that
 you apply the migration to the right database)
