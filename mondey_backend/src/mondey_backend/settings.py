@@ -15,6 +15,8 @@ class AppSettings(BaseSettings):
     HOST: str = "localhost"
     PORT: int = 8000
     SMTP_HOST: str = ""
+    SMTP_USERNAME: str = ""
+    SMTP_PASSWORD: str = ""
     RELOAD: bool = True
     LOG_LEVEL: str = "debug"
     COOKIE_SECURE: bool = False

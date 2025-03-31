@@ -72,7 +72,7 @@ def main():
     logger = logging.getLogger(__name__)
     for key, value in app_settings:
         logger.info(
-            f"{key}: {'****************' if key in {'SECRET', 'DEEPL_API_KEY'} else value}"
+            f"{key}: {'****************' if key in {'SECRET', 'DEEPL_API_KEY', 'SMTP_PASSWORD'} else value}"
         )
     uvicorn.run(
         "mondey_backend.main:create_app",

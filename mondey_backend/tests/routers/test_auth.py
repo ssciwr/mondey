@@ -11,6 +11,8 @@ from mondey_backend.models.users import User
 
 class SMTPMock:
     last_message: EmailMessage | None = None
+    username: str | None = None
+    password: str | None = None
 
     def __init__(self, *args, **kwargs):
         pass
@@ -23,6 +25,10 @@ class SMTPMock:
 
     def send_message(self, msg: EmailMessage, **kwargs):
         SMTPMock.last_message = msg
+
+    def login(self, username: str, password: str):
+        SMTPMock.username = username
+        SMTPMock.password = password
 
 
 @pytest.fixture
@@ -41,6 +47,8 @@ def test_register_new_user(public_client: TestClient, smtp_mock: SMTPMock):
     assert response.status_code == 201
     msg = smtp_mock.last_message
     assert msg is not None
+    assert smtp_mock.username == "test-smtp-username"
+    assert smtp_mock.password == "test-smtp-password"
     assert "aktivieren" in msg.get("Subject").lower()
     assert msg.get("To") == email
     assert "/verify/" in msg.get_content()

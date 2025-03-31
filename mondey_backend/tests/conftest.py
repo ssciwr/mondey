@@ -935,7 +935,9 @@ def app(
 ):
     settings.app_settings.STATIC_FILES_PATH = str(static_dir)
     settings.app_settings.PRIVATE_FILES_PATH = str(private_dir)
-    settings.app_settings.SMTP_HOST = "smtp"
+    settings.app_settings.SMTP_HOST = "smtp-host"
+    settings.app_settings.SMTP_USERNAME = "test-smtp-username"
+    settings.app_settings.SMTP_PASSWORD = "test-smtp-password"
     app = create_app()
     app.dependency_overrides[get_session] = lambda: session
     app.dependency_overrides[get_async_session] = lambda: user_session
