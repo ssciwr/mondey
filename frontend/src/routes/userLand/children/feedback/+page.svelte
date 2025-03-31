@@ -592,9 +592,9 @@ async function printReport(): Promise<void> {
 <!-- Middle part of the page with a buttton that enables the explanation modal for the feedback, and a heading that tells people what they can do next -->
 {#snippet explanationModal()}
     <div class=" flex flex-col md:flex-row items-center text-gray-700 dark:text-gray-200 justify-between m-2 mb-4 pb-4 space-y-2">
-        <h5 class="flex flex-auto font-bold text-md md:text-xl text-gray-700 dark:text-gray-200 m-2 p-2">{i18n.tr.milestone.selectFeedback}</h5>
+        <h5 class="flex flex-auto font-bold text-md md:text-xl m-2 p-2">{i18n.tr.milestone.selectFeedback}</h5>
 
-        <Button class="bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 focus-within:ring-additional-color-40 text-sm md:text-base" size="md" type="button" on:click={() => {
+        <Button type="button" on:click={() => {
 			showMoreInfo = true;
 		}}
         >{i18n.tr.milestone.moreInfoOnEval}</Button>
@@ -659,7 +659,7 @@ async function printReport(): Promise<void> {
 
     <!--Button to print the report out into pdf or physical copy-->
     <div class="flex items-center justify-center w-full m-2 p-2 mb-4 pb-4">
-        <Button class="text-sm md:text-base md:w-64 md:h-8  m-2 p-2 bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 focus-within:ring-additional-color-40" onclick={async () => {await printReport();}}>{i18n.tr.milestone.printReport}</Button>
+        <Button class="btn-secondary" onclick={async () => {await printReport();}}>{i18n.tr.milestone.printReport}</Button>
     </div>
 {:catch error}
     {alertStore.showAlert(
