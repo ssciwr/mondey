@@ -151,11 +151,6 @@ export default {
 					},
 					"@apply dark:text-white": {},
 				},
-				".btn-icon": {
-					"min-width": "unset",
-					"background-color": "white!important",
-					"@apply py-2 px-2": {},
-				},
 				".bg-special": {
 					"background-color": "rgba(124, 158, 157, 0.15)",
 					color: "rgba(255, 255, 255, 0.925)",

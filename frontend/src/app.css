@@ -23,6 +23,10 @@
 		color: #2757ac;
 	}
 
+	.text-muted {
+		color: #838383;
+	}
+
 	.text-base {
 		@apply text-gray-900 dark:text-gray-100;
 	}
@@ -36,11 +40,12 @@
 		min-width: unset;
 		@apply py-2 px-2 rounded-md relative;
 		position: relative;
+		background-color: white !important;
 	}
 
 	/* Button icon group styling */
 	.btn-icon + .btn-icon {
-		margin-left: -8px; /* Negative margin to make borders overlap */
+		margin-left: -10px; /* Negative margin to make borders overlap */
 	}
 
 	/* Remove border radius between adjacent buttons */

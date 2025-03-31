@@ -341,31 +341,31 @@ const deleteCurrentChild = async () => {
                             class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
                     >{childLabel}
                         {#if disableEdit}
-                            <span class="justify-end w-full">
-                                <button aria-label={i18n.tr.admin.edit}
+                            <div class="justify-end">
+                                <Button aria-label={i18n.tr.admin.edit}
                                         type="button"
-                                        class="btn-secondary btn-icon"
+                                        class="btn-secondary btn-icon "
                                         onclick={() => {
                             disableEdit = false;
                         }}
                                 >
-                                    <PenOutline size="md" />
-                                </button>
+                                    <PenOutline class="h-5 w-5" />
+                                </Button>
 
                                 {#if currentChild.id !== null && disableEdit === true}
-                                    <button
+                                    <Button
                                             class="btn-danger btn-icon"
                                             aria-label={i18n.tr.admin.delete}
                                             onclick={() => showDeleteModal = true}
-                                    ><TrashBinOutline size="md"/></button
+                                    ><TrashBinOutline class="h-5 w-5" /></Button
                                     >
                                 {/if}
                                 <DeleteModal bind:open={showDeleteModal} onclick={deleteCurrentChild}></DeleteModal>
-                            </span>
-                            <div>
+                            </div>
+                            <small class="block text-muted">
                                 <span>{i18n.tr.childData.monthYearSubtext} </span>
                                 <span class="text-muted">{birthmonth} / {birthyear}</span>
-                            </div>
+                            </small>
                         {/if}
                     </Heading
                     >
