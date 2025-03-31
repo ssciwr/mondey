@@ -3,7 +3,6 @@ import csv
 import pathlib
 
 from sqlmodel import select
-from tqdm import tqdm
 
 from mondey_backend.import_data.utils import generate_parents_for_children
 from mondey_backend.import_data.utils import get_import_test_session
@@ -59,7 +58,7 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
         print("Parent ID map", parent_id_map)
 
         # Process each row (child)
-        for row in tqdm(reader):
+        for row in reader:
             child_id = int(row["CASE"])
             if str(row["FK01"]) == "-9" or str(row["FK02"]) == "-9":
                 print(
