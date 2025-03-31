@@ -9,7 +9,6 @@ export default {
 		"./node_modules/flowbite-svelte/**/*.{html,js,svelte,ts}",
 	],
 	darkMode: "selector",
-	// ensure svelte compiler doesn't optimize these away if it doesn't realise we are using them
 	safelist: [
 		"bg-milestone-answer-0",
 		"bg-milestone-answer-1",
@@ -19,18 +18,18 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				// flowbite-svelte
+				// From your original additional-color in CSS
 				primary: {
-					50: "#DDE1ED",
-					100: "#D5D9E9",
-					200: "#BAC1DA",
-					300: "#9AA5C9",
-					400: "#8592BE",
-					500: "#6C7BB0",
-					600: "#5D6EA8",
-					700: "#556499",
-					800: "#4D5B8B",
-					900: "#46537E",
+					50: "#E2F1F0",
+					100: "#D5EAE9",
+					200: "#C7E3E2",
+					300: "#B6DBDA",
+					400: "#A5D2D1",
+					500: "#96BFBE",
+					600: "#89b3b2",
+					700: "#7C9E9D", // This is rgb(124, 158, 157)
+					800: "#556C6B",
+					900: "#4D6261",
 				},
 
 				"additional-color": {
@@ -40,11 +39,16 @@ export default {
 					300: "#B6DBDA",
 					400: "#A5D2D1",
 					500: "#96BFBE",
-					600: "#7C9E9D",
+					600: "#7C9E9D", // This is rgb(124, 158, 157)
 					700: "#698584",
 					800: "#556C6B",
 					900: "#4D6261",
 				},
+
+				// Custom colors for special backgrounds
+				"special-bg": "rgba(124, 158, 157, 0.15)",
+				"delete-bg": "rgba(200, 30, 30, 0.1)",
+				"delete-hover": "rgba(200, 30, 30, 0.6)",
 
 				"milestone-answer": {
 					0: "#f2e8cf",
@@ -77,5 +81,86 @@ export default {
 		},
 	},
 
-	plugins: [flowbitePlugin, typographyPlugin],
+	plugins: [
+		flowbitePlugin,
+		typographyPlugin,
+		({ addComponents, theme }) => {
+			addComponents({
+				".btn": {
+					cursor: "pointer",
+					"transition-property": "all",
+					"transition-timing-function": "cubic-bezier(0.4, 0, 0.2, 1)",
+					"transition-duration": "100ms",
+				},
+				".text-btn": {
+					"padding-top": "0.5rem",
+					"padding-bottom": "0.5rem",
+					"padding-left": "1.25rem",
+					"padding-right": "1.25rem",
+					"border-radius": "0.375rem",
+					"min-width": "12rem",
+					margin: "0.25rem",
+				},
+				".btn-primary": {
+					"@apply inline-flex items-center justify-center gap-2 text-white font-semibold bg-additional-color-600 rounded-lg shadow-md focus:outline-none focus:ring focus:ring-additional-color-300 focus:ring-opacity-75 text-btn":
+						{},
+					border: "2px solid rgb(124, 158, 157)",
+					"background-color": "rgb(124, 158, 157)",
+					"&:hover": {
+						"bg-additional-color-700": {},
+						border: "2px solid #556C6B!important;",
+					},
+				},
+				".btn-secondary": {
+					"@apply text-additional-color-700 inline-flex items-center justify-center gap-2 font-semibold rounded-lg shadow-md focus:outline-none focus:ring focus:ring-additional-color-300 focus:ring-opacity-75 text-btn text-additional-color-700":
+						{},
+					border: "2px solid rgb(124, 158, 157)",
+					"background-color": "#e5f4f4!important",
+					color: "#698584!important",
+					"&:hover": {
+						"background-color": "#96BFBE!important",
+						border: "2px solid #96BFBE!important",
+						color: "white!important",
+					},
+					"@apply dark:bg-special-bg dark:text-white": {},
+				},
+				".btn-danger": {
+					"@apply inline-flex items-center justify-center gap-2 font-semibold rounded-lg shadow-md focus:outline-none focus:ring focus:ring-red-400 focus:ring-opacity-75 text-btn text-red-700":
+						{},
+					border: "2px solid rgba(200, 30, 30, 0.6)!important",
+					"background-color": "rgba(200, 30, 30, 0.1)!important",
+					color: "rgba(200, 30, 30, 0.8)!important",
+					"&:hover": {
+						border: "2px solid rgb(240, 82, 82)",
+						"background-color": "rgba(200, 30, 30, 0.3)!important",
+						color: "rgba(200, 30, 30, 1)!important",
+						"@apply text-white bg-red-500": {},
+					},
+					"@apply dark:text-white": {},
+				},
+				".btn-icon": {
+					"min-width": "unset",
+					"@apply py-2 px-2": {},
+				},
+				".bg-special": {
+					"background-color": "rgba(124, 158, 157, 0.15)",
+					color: "rgba(255, 255, 255, 0.925)",
+				},
+				// Make sure icons have consistent vertical alignment
+				".btn-primary svg, .btn-secondary svg, .btn-danger svg": {
+					"@apply inline-block align-middle": {},
+				},
+				// Media query for mobile responsiveness
+				"@media only screen and (min-device-width: 320px) and (max-device-width: 480px)":
+					{
+						".btn": {
+							"min-width": "100%",
+						},
+						".btn-icon": {
+							"min-width": "unset",
+						},
+					},
+			});
+		},
+	],
 } as Config;
