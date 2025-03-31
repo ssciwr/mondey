@@ -33,6 +33,8 @@ engine = create_engine(db_url)
 
 users_database_file_path = script_dir / "src/mondey_backend/import_data/db/users.db"
 
+print("Users database file path", users_database_file_path)
+
 async_users_engine = create_async_engine(
     f"sqlite+aiosqlite:///{users_database_file_path}"
 )
@@ -215,14 +217,14 @@ def save_text_question(
 
 
 async def create_parent_for_child(
-    session: AsyncSession, user_db: SQLAlchemyUserDatabase, child_id: int
+    user_session: AsyncSession, user_db: SQLAlchemyUserDatabase, child_id: int
 ) -> User:
     """
     Create a parent user for a given child
     """
     # Generate a unique username and email based on child's details
     username = f"parent_of_{child_id}"
-    email = f"{username}@example.com"
+    email = f"{username}@artificialImportedData.csv"
 
     # Create user object
     user_create = UserCreate(
@@ -246,8 +248,10 @@ async def create_parent_for_child(
     )
 
     # Add the user to the session
-    session.add(user)
-    await session.flush()
+    user_session.add(user)
+    await user_session.flush()
+
+    print("Created the user parent!!")
 
     return user
 
@@ -270,7 +274,10 @@ async def generate_parents_for_children(child_ids: list[int]) -> dict[int, int]:
                 parent = await create_parent_for_child(
                     user_import_session, user_db, child_id
                 )
+                print("created parent", parent)
                 child_parent_map[child_id] = parent.id
+
+            await user_import_session.commit()
 
             return child_parent_map
 
