@@ -288,7 +288,7 @@ def update_or_create_user_answer(
     is_child_question=True,
 ):
     """
-    Upsert strategy for user answers with robust handling of unique constraints
+    Upsert the answers to questions, by ID, handling different kinds of answers.
     """
     # Use with_for_update to lock the row during the transaction
     query = (
@@ -323,10 +323,10 @@ def update_or_create_user_answer(
         try:
             if set_only_additional_answer:
                 print("Setting additional answer")
-                # Only update additional_answer if flag is set
+                # Only update additional_answer if flag is set. Leave any set "answer", e.g. "Other", previously set...
                 existing_answer.additional_answer = answer_text
             else:
-                # Update both main answer and additional answer
+                # Update solely answer property, the default (especially for "select" options).
                 existing_answer.answer = answer_text
 
             print("Adding to SQL sesion...")
