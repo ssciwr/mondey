@@ -8,4 +8,4 @@ import Button from "flowbite-svelte/Button.svelte";
 let { onclick }: { onclick: (event: Event) => void } = $props();
 </script>
 
-<Button color="red" {onclick}><TrashBinOutline class="me-2 h-5 w-5" /> {i18n.tr.admin.delete}</Button>
+<Button class="btn-danger btn-icon" aria-roledescription={i18n.tr.admin.delete} {onclick}><TrashBinOutline class="h-5 w-5" /></Button>

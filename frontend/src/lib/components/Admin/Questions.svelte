@@ -116,6 +116,12 @@ onMount(async () => {
 <Card size="xl" class="m-5 w-full">
 	<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">
 		{i18n.tr.admin[`${kind}Questions`]}
+		<ReorderButton
+				onclick={() => {
+							currentOrderItems = $questions.map((question) => {return {id: question.id, text: question.text[i18n.locale]?.question};});
+							showOrderItemsModal = true;
+						}}
+		/>
 	</h3>
 	<Table>
 		<TableHead>
@@ -158,12 +164,6 @@ onMount(async () => {
 				<TableBodyCell></TableBodyCell>
 				<TableBodyCell>
 					<AddButton onclick={addQuestion} />
-					<ReorderButton
-						onclick={() => {
-							currentOrderItems = $questions.map((question) => {return {id: question.id, text: question.text[i18n.locale]?.question};});
-							showOrderItemsModal = true;
-						}}
-					/>
 				</TableBodyCell>
 			</TableBodyRow>
 		</TableBody>

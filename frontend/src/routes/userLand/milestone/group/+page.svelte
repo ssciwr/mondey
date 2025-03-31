@@ -188,7 +188,7 @@ export function createStyle(data: any[]) {
 		return {
 			card: {
 				class:
-					"m-2 max-w-prose dark:text-white text-white hover:cursor-pointer bg-primary-700 dark:bg-primary-900 hover:bg-primary-800 dark:hover:bg-primary-700",
+					"m-2 max-w-prose dark:text-white text-white hover:cursor-pointer bg-milestone-700 dark:bg-milestone-900 hover:bg-milestone-800 dark:hover:bg-milestone-700",
 			},
 			progress: {
 				labelInside: true,

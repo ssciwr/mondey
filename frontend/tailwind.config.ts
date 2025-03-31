@@ -21,7 +21,7 @@ export default {
 				// From your original additional-color in CSS
 				primary: {
 					50: "#E2F1F0",
-					100: "#D5EAE9",
+					100: "rgb(50,50,50)",
 					200: "#C7E3E2",
 					300: "#B6DBDA",
 					400: "#A5D2D1",
@@ -43,6 +43,19 @@ export default {
 					700: "#698584",
 					800: "#556C6B",
 					900: "#4D6261",
+				},
+
+				milestone: {
+					50: "#DDE1ED",
+					100: "#D5D9E9",
+					200: "#BAC1DA",
+					300: "#9AA5C9",
+					400: "#8592BE",
+					500: "#6C7BB0",
+					600: "#5D6EA8",
+					700: "#556499",
+					800: "#4D5B8B",
+					900: "#46537E",
 				},
 
 				// Custom colors for special backgrounds
@@ -127,8 +140,8 @@ export default {
 				".btn-danger": {
 					"@apply inline-flex items-center justify-center gap-2 font-semibold rounded-lg shadow-md focus:outline-none focus:ring focus:ring-red-400 focus:ring-opacity-75 text-btn text-red-700":
 						{},
-					border: "2px solid rgba(200, 30, 30, 0.6)!important",
-					"background-color": "rgba(200, 30, 30, 0.1)!important",
+					"background-color": "#e5f4f4!important",
+					border: "2px solid rgb(124, 158, 157)",
 					color: "rgba(200, 30, 30, 0.8)!important",
 					"&:hover": {
 						border: "2px solid rgb(240, 82, 82)",
@@ -140,6 +153,7 @@ export default {
 				},
 				".btn-icon": {
 					"min-width": "unset",
+					"background-color": "white!important",
 					"@apply py-2 px-2": {},
 				},
 				".bg-special": {

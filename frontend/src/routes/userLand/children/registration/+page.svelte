@@ -341,7 +341,7 @@ const deleteCurrentChild = async () => {
                             class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
                     >{childLabel}
                         {#if disableEdit}
-                            <small class="justify-end">
+                            <span class="justify-end w-full">
                                 <button aria-label={i18n.tr.admin.edit}
                                         type="button"
                                         class="btn-secondary btn-icon"
@@ -361,11 +361,11 @@ const deleteCurrentChild = async () => {
                                     >
                                 {/if}
                                 <DeleteModal bind:open={showDeleteModal} onclick={deleteCurrentChild}></DeleteModal>
-                                <br />
-
+                            </span>
+                            <div>
                                 <span>{i18n.tr.childData.monthYearSubtext} </span>
                                 <span class="text-muted">{birthmonth} / {birthyear}</span>
-                            </small>
+                            </div>
                         {/if}
                     </Heading
                     >
@@ -434,19 +434,15 @@ const deleteCurrentChild = async () => {
 
                             {#if image !== null && disableEdit === false}
                                 <Button
-                                        type="button"
-                                        class="w-full text-center text-sm text-white"
-                                        color={"red"}
+                                        class="btn-icon btn-delete"
                                         disabled={disableImageDelete}
                                         on:click={() => {
-                image = null;
-                disableImageDelete = true;
-                imageDeleted = true;
-            }}
+                                        image = null;
+                                        disableImageDelete = true;
+                                        imageDeleted = true;
+                                    }}
                                 >
-                                    <div class="flex items-center justify-center">
-                                        <TrashBinOutline size="sm"/> {i18n.tr.childData.deleteImageButton}
-                                    </div>
+                                    <TrashBinOutline size="sm"/> {i18n.tr.childData.deleteImageButton}
                                 </Button>
                             {:else if disableImageDelete === true}
                                 <p class="text-center text-sm text-gray-700 dark:text-gray-400 flex items-center justify-center">
@@ -485,15 +481,15 @@ const deleteCurrentChild = async () => {
 
 
                         {#if currentChild.id !== null && disableEdit === true}
-                            <a
+                            <Button
                                     class="btn-secondary"
                                     onclick={() => {
                                         goto(`/userLand/children/feedback`)
                                     }}>
                                 <ChartLineUpOutline size="md" />
                                 {i18n.tr.childData.feedbackButtonLabel}
-                            </a>
-                            <a
+                            </Button>
+                            <Button
                                     class="btn-primary"
                                     onclick={() => {
                                         goto(`/userLand/milestone/group`)
@@ -501,7 +497,7 @@ const deleteCurrentChild = async () => {
                             >
                                 <FlagOutline size="md" />
                                 {i18n.tr.childData.nextButtonLabel}
-                            </a>
+                            </Button>
 
                         {/if}
                     </form>
