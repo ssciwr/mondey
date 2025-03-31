@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel import Session
 from sqlmodel import select
 
+from mondey_backend.databases.mondey import create_mondey_db_and_tables_themselves
 from mondey_backend.models.children import Child
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
@@ -81,8 +82,10 @@ def clear_all_data(session):
     session.commit()
 
 
-def get_import_test_session():
+def get_import_test_session(create_tables=False):
     with Session(engine) as session:
+        if create_tables:  # Largely for use in the tests.
+            create_mondey_db_and_tables_themselves(engine)
         return session, engine
 
 

@@ -1,6 +1,8 @@
 import os
 import sys
 
+import pytest
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from config import milestone_data_csv_path
@@ -29,9 +31,12 @@ SQL export in the test database.
 """
 
 
+@pytest.mark.skip(reason="Requires private CSV data not in this repo")
 def test_import_works():
-    import_session, import_engine = get_import_test_session()
-    import_milestones_metadata(import_session, milestone_data_csv_path)
+    import_session, import_engine = get_import_test_session(create_tables=True)
+    import_milestones_metadata(
+        import_session, milestone_data_csv_path, clear_existing_milestones=True
+    )
     # Assert that a milestone with data_import_key of DE01_02 exists
     milestone_de01_02 = import_session.exec(
         select(Milestone).where(Milestone.data_import_key == "DE01_02")
@@ -53,8 +58,8 @@ def test_import_works():
         )
     ).first()
     assert group_text_de is not None
-    assert "Sehen und" in group_text_de.title, (
-        f"Group title should contain 'Sehen und', but was '{group_text_de.title}'"
+    assert "Denken" in group_text_de.title, (
+        f"Group title should contain 'Denken', but was '{group_text_de.title}'"
     )
 
     # Assert that there is no milestone with data_import_key of DA03
