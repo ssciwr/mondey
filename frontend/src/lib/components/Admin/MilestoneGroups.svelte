@@ -201,7 +201,11 @@ async function doDeleteMilestone() {
 														/>
 													{/if}
 												</TableBodyCell>
-												<TableBodyCell>{milestoneTitle}</TableBodyCell>
+												<TableBodyCell>{milestoneTitle}
+													{#if milestone.name}
+														<small>{milestone.name}</small>
+													{/if}
+												</TableBodyCell>
 												<TableBodyCell>
 													<EditButton
 														onclick={(event: Event) => {

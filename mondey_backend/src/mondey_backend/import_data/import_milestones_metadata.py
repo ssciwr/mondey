@@ -11,7 +11,7 @@ from mondey_backend.models.milestones import MilestoneText
 
 """ Imported so that all tables get created correctly, so that we don't get FK non-exists errors... """
 
-#
+# todo: Make this match to the existing ones, and then update them, rather than insert.
 
 
 def extract_milestone_prefix(text):

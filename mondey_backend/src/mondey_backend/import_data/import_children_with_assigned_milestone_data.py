@@ -1,6 +1,7 @@
 import asyncio
 import csv
 import pathlib
+from datetime import datetime
 
 from sqlmodel import select
 
@@ -137,8 +138,9 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
             answer_session = MilestoneAnswerSession(
                 child_id=child_id,
                 user_id=parents_id,
-                expired=False,
-                included_in_statistics=True,
+                expired=True,
+                included_in_statistics=False,
+                created_at=datetime(2025, 1, 1, 1, 0, 1),
             )
             session.add(answer_session)
             session.commit()
