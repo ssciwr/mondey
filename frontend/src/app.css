@@ -1,85 +1,84 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import "tailwindcss";
 
-@layer components {
-	/* Sub classes, not for use in HTML */
-	body {
-		@apply dark:text-white;
-	}
-
-	.btn:hover {
+@utility btn {
+	&:hover {
 		cursor: pointer;
 		@apply transition-all duration-100;
 	}
 
-	.text-btn {
-		@apply py-2 px-5 rounded-md;
-		min-width: 12rem;
-		margin: 0.25rem;
+	@media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
+		min-width: 100%;
 	}
+}
 
-	.text-primary {
-		color: #2757ac;
-	}
+@utility text-btn {
+	@apply py-2 px-5 rounded-md;
+	min-width: 12rem;
+	margin: 0.25rem;
+}
 
-	.text-muted {
-		color: #838383;
-	}
+@utility text-primary {
+	color: #2757ac;
+}
 
-	.text-base {
-		@apply text-gray-900 dark:text-gray-100;
-	}
+@utility text-muted {
+	color: #838383;
+}
 
-	.bg-primary {
-		background-color: rgb(124, 158, 157);
-	}
+@utility text-base {
+	@apply text-gray-900 dark:text-gray-100;
+}
 
+@utility bg-primary {
+	background-color: rgb(124, 158, 157);
+}
+
+@utility btn-icon {
 	/* Basic button icon styles */
-	.btn-icon {
-		min-width: unset;
-		@apply py-2 px-2 rounded-md relative;
-		position: relative;
-		background-color: white !important;
-	}
+	min-width: unset;
+	@apply py-2 px-2 rounded-md relative;
+	position: relative;
+	background-color: white !important;
 
 	/* Button icon group styling */
-	.btn-icon + .btn-icon {
+	& + & {
 		margin-left: -10px; /* Negative margin to make borders overlap */
 	}
 
 	/* Remove border radius between adjacent buttons */
-	.btn-icon:not(:first-child):not(:last-child) {
+	&:not(:first-child):not(:last-child) {
 		border-radius: 0;
 	}
 
 	/* Keep left border radius for first button */
-	.btn-icon:first-child:not(:only-child) {
+	&:first-child:not(:only-child) {
 		border-top-right-radius: 0;
 		border-bottom-right-radius: 0;
 	}
 
 	/* Keep right border radius for last button */
-	.btn-icon:last-child:not(:only-child) {
+	&:last-child:not(:only-child) {
 		border-top-left-radius: 0;
 		border-bottom-left-radius: 0;
 	}
 
-	.btn-icon-rounded {
-		border-radius: 0.5rem !important;
-	}
-
 	/* Make sure the button that's being hovered appears on top */
-	.btn-icon:hover {
+	&:hover {
 		z-index: 1;
 	}
 
 	@media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
-		.btn {
-			min-width: 100%;
-		}
-		.btn-icon {
-			min-width: unset;
-		}
+		min-width: unset;
+	}
+}
+
+@utility btn-icon-rounded {
+	border-radius: 0.5rem !important;
+}
+
+@layer components {
+	/* Sub classes, not for use in HTML */
+	body {
+		@apply dark:text-white;
 	}
 }
