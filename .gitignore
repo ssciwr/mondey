@@ -185,3 +185,4 @@ static
 /frontend/blob-report/
 /frontend/playwright/.cache/
 .aider*
+/frontend/src/locales/de.json
