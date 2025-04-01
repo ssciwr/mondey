@@ -28,11 +28,17 @@ from .settings import app_settings
 
 
 def send_email(msg: EmailMessage) -> None:
-    if app_settings.SMTP_HOST != "":
-        with smtplib.SMTP(app_settings.SMTP_HOST) as s:
-            s.send_message(msg)
-    else:
-        logging.warning(f"Email {msg} not sent as SMTP_HOST is not set")
+    try:
+        if app_settings.SMTP_HOST != "":
+            with smtplib.SMTP(app_settings.SMTP_HOST) as s:
+                if app_settings.SMTP_USERNAME != "":
+                    s.login(app_settings.SMTP_USERNAME, app_settings.SMTP_PASSWORD)
+                s.send_message(msg)
+        else:
+            logging.warning(f"Email {msg} not sent as SMTP_HOST is not set")
+    except smtplib.SMTPException as e:
+        logging.error(f"Email {msg} not sent due to SMTP error: {e}")
+        logging.exception(e)
 
 
 def send_email_validation_link(email: str, token: str) -> None:

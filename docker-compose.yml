@@ -14,6 +14,8 @@ services:
       - HOST=${HOST:-backend}
       - PORT=${PORT:-80}
       - SMTP_HOST=${SMTP_HOST:-email:587}
+      - SMTP_USERNAME=${SMTP_USERNAME:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
       - RELOAD=false
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - COOKIE_SECURE=${COOKIE_SECURE:-true}
@@ -46,8 +48,16 @@ services:
         max-file: 25
   email:
     image: "boky/postfix"
+    hostname: mail.mondey.lkeegan.dev
+    restart: always
     environment:
-      - ALLOW_EMPTY_SENDER_DOMAINS="true"
+      - RELAYHOST=${RELAYHOST:-}
+      - POSTFIX_myhostname=mail.mondey.lkeegan.dev
+      - POSTFIX_mydomain=mondey.lkeegan.dev
+      - ALLOWED_SENDER_DOMAINS=mondey.lkeegan.dev
+      - DKIM_AUTOGENERATE=true
+    volumes:
+      - ./opendkim-keys:/etc/opendkim/keys
     logging:
       driver: "local"
       options:
