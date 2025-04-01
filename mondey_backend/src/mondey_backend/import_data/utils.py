@@ -253,7 +253,7 @@ def save_select_question(
                     question=variable + ": " + variable_label,
                     options_json=options_json,
                     options=options_str,
-                    lang_id=1,  # German
+                    lang_id="de",  # German
                 )
             },
         )
@@ -270,7 +270,7 @@ def save_select_question(
                     question=variable + ": " + variable_label,
                     options_json=options_json,
                     options=options_str,
-                    lang_id=1,  # German
+                    lang_id="de",  # German
                 )
             },
         )
@@ -307,7 +307,7 @@ def save_text_question(
             text={
                 "de": UserQuestionText(
                     question=variable + ": " + variable_label,
-                    lang_id=1,  # German
+                    lang_id="de",  # German
                 )
             },
         )
@@ -322,7 +322,7 @@ def save_text_question(
             text={
                 "de": ChildQuestionText(
                     question=variable + ": " + variable_label,
-                    lang_id=1,  # German
+                    lang_id="de",  # German
                 )
             },
         )

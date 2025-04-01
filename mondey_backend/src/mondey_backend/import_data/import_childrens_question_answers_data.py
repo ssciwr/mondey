@@ -375,7 +375,7 @@ def assign_answers_to_the_imported_questions(
                     select(ChildQuestion)
                     .join(ChildQuestionText)
                     .where(
-                        ChildQuestionText.lang_id == 1,
+                        ChildQuestionText.lang_id == "de",
                         ChildQuestionText.question
                         == variable + ": " + variable_label_option,
                     )
@@ -389,7 +389,7 @@ def assign_answers_to_the_imported_questions(
                         select(UserQuestion)
                         .join(UserQuestionText)
                         .where(
-                            UserQuestionText.lang_id == 1,
+                            UserQuestionText.lang_id == "de",
                             UserQuestionText.question
                             == variable + ": " + variable_label_option,
                         )

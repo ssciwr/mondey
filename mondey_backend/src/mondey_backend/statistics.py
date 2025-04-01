@@ -508,6 +508,14 @@ def get_user_answers(session: SessionDep) -> dict[int, dict[str, str | int | flo
     }
     user_answers: dict[int, dict[str, str | int | float]] = defaultdict(dict)
     for answer in session.exec(select(UserAnswer)).all():
+        logging.warn(
+            "Attempting to consider answer:"
+            + answer.answer
+            + " for q ID: "
+            + str(answer.question_id)
+            + " for user ID:"
+            + str(answer.user_id)
+        )
         user_answers[answer.user_id][questions[answer.question_id]] = answer.answer
     return user_answers
 

@@ -1,9 +1,16 @@
+from mondey_backend.import_data.import_children_with_assigned_milestone_data import (
+    map_children_milestones_data,
+)
 from mondey_backend.import_data.import_childrens_question_answers_data import (
     import_childrens_question_answers_data,
+)
+from mondey_backend.import_data.import_milestones_metadata import (
+    import_milestones_metadata,
 )
 from mondey_backend.import_data.utils import data_path
 from mondey_backend.import_data.utils import get_import_current_session
 from mondey_backend.import_data.utils import labels_path
+from mondey_backend.import_data.utils import milestones_metadata_path
 from mondey_backend.import_data.utils import questions_configured_path
 
 """
@@ -16,10 +23,10 @@ You will usually want to clear the (import-specific) database each time you run 
 if __name__ == "__main__":
     import_current_session, import_current_engine = get_import_current_session()
 
-    # import_milestones_metadata(import_current_session, milestones_metadata_path)
+    import_milestones_metadata(import_current_session, milestones_metadata_path)
 
     print("Now assigning children their milestones")
-    # map_children_milestones_data(data_path, import_current_session)
+    map_children_milestones_data(data_path, import_current_session)
     print("Done assigning children their milestones.")
 
     print("Now setting the custom question/answers pairs")
