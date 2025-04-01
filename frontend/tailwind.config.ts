@@ -9,6 +9,7 @@ export default {
 		"./node_modules/flowbite-svelte/**/*.{html,js,svelte,ts}",
 	],
 	darkMode: "selector",
+	// ensure svelte compiler doesn't optimize these away if it doesn't realise we are using them
 	safelist: [
 		"bg-milestone-answer-0",
 		"bg-milestone-answer-1",
