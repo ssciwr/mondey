@@ -781,10 +781,21 @@ export const MilestonePublicSchema = {
             },
             type: 'array',
             title: 'Images'
+        },
+        name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
         }
     },
     type: 'object',
-    required: ['id', 'expected_age_months', 'text', 'images'],
+    required: ['id', 'expected_age_months', 'text', 'images', 'name'],
     title: 'MilestonePublic'
 } as const;
 

@@ -200,6 +200,7 @@ export type MilestonePublic = {
         [key: string]: MilestoneTextPublic;
     };
     images: Array<MilestoneImagePublic>;
+    name: (string | null);
 };
 
 export type MilestoneText = {
