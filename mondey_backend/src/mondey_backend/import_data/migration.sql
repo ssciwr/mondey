@@ -1,2 +1,4 @@
 ALTER TABLE milestone ADD COLUMN name VARCHAR DEFAULT NULL;
 CREATE INDEX idx_milestones_name ON milestone(name);
+ALTER TABLE userquestion ADD COLUMN required BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE childquestion ADD COLUMN required BOOLEAN NOT NULL DEFAULT FALSE;
