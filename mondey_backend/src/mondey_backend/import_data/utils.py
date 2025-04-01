@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 
 from fastapi_users.db import SQLAlchemyUserDatabase
@@ -72,8 +73,70 @@ def get_childs_parent_id(session: Session, child_id: int) -> int:
     return child.user_id
 
 
+async def clear_users_database():
+    """Clear all data from the users database (async_users_session)."""
+    print("Clearing users database...")
+
+    async with async_users_engine.begin() as conn:
+        # Get all table names from the users database
+        result = await conn.execute(
+            text("SELECT name FROM sqlite_master WHERE type='table'")
+        )
+        tables = [row[0] for row in result.fetchall()]
+
+        # Safety check
+        if "user" not in tables:
+            raise Exception(
+                "Safety check failed! 'user' table not found in the database. Operation aborted."
+            )
+
+        user_count = await conn.execute(text('SELECT COUNT(*) FROM "user"'))
+        user_count = user_count.scalar()
+
+        has_test_user = await conn.execute(
+            text("SELECT COUNT(*) FROM \"user\" WHERE email LIKE '%parent_of_'")
+        )
+        has_test_user = has_test_user.scalar() > 320  # should be 321
+
+        if not has_test_user or user_count < 250:  # probably real users
+            raise Exception(
+                f"Safety check failed! Found {user_count} users and no test users with example.com emails. "
+                "This could be real data - operation aborted."
+            )
+
+        print(f"Found {len(tables)} tables in users database")
+
+        await conn.execute(text("PRAGMA foreign_keys = OFF"))
+        # Delete data from all tables
+        for table in tables:
+            if table != "sqlite_sequence":  # Skip SQLite internal tables
+                print(f"Clearing table: {table}")
+                await conn.execute(text(f'DELETE FROM "{table}"'))
+        await conn.execute(text("DELETE FROM sqlite_sequence"))
+        await conn.execute(text("PRAGMA foreign_keys = ON"))
+
+        print("Successfully cleared all data from users database")
+
+
 def clear_all_data(session):
     """Clear all data but do not delete the databases."""
+
+    # Safety check: Verify this is test data
+    child_count = session.execute(text("SELECT COUNT(*) FROM child")).scalar()
+    has_test_child = (
+        session.execute(
+            text("SELECT COUNT(*) FROM child WHERE name = 'Imported Child 159'")
+        ).scalar()
+        > 0
+    )
+
+    # Abort if safety checks fail
+    if (child_count != 321 and not has_test_child) and child_count != 0:
+        raise Exception(
+            "Safety check failed! Expected 321 rows in child table and at least one "
+            "child with name 'Imported Child 159'. This could be real data - operation aborted."
+        )
+
     metadata = MetaData()
     metadata.reflect(bind=engine)
 
@@ -82,6 +145,11 @@ def clear_all_data(session):
         session.execute(text(f"DELETE FROM {table.name}"))
     session.execute(text("PRAGMA foreign_keys = ON"))
     session.commit()
+
+    asyncio.run(clear_users_database())
+
+    # todo: Also wipe and reset the users table. But this is dangerous too.
+    # maybe only select the test users? LIKE % testUser ?? not too heavy to run on 500 users
 
 
 def get_import_test_session(create_tables=False):
