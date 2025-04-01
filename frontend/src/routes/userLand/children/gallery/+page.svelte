@@ -37,12 +37,12 @@ function createStyle(data: CardElement[]): CardStyle[] {
 				item.header === i18n.tr.childData.newChildHeading
 					? {
 							class:
-								"bg-primary dark:bg-primary child-card hover:cursor-pointer m-2 max-w-prose hover:bg-additional-color-800 dark:hover:bg-additional-color-700 ",
+								"hover:scale-105 bg-primary dark:bg-primary child-card hover:cursor-pointer m-2 max-w-prose hover:bg-additional-color-800 dark:hover:bg-additional-color-700 ",
 							horizontal: false,
 						}
 					: {
 							class:
-								"child-card hover:cursor-pointer m-2 max-w-prose text-gray-700 hover:text-white dark:text-white hover:dark:text-gray-400 hover:bg-primary-800 dark:hover:bg-primary-700",
+								"hover:scale-105 child-card hover:cursor-pointer m-2 max-w-prose text-gray-700 hover:text-white dark:text-white hover:dark:text-gray-400 hover:bg-primary-800 dark:hover:bg-primary-700",
 							style: item.color
 								? `background-color: ${item.color};`
 								: "background-color: white", // default to white for image ones, even on hover.
