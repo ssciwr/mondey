@@ -11,6 +11,34 @@ from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
+from mondey_backend.models.milestones import MilestoneText
+
+
+def find_milestone_based_on_label(session, label):
+    # Extract the part after the colon
+    if ":" in label:
+        label = label.split(":", 1)[1].lstrip()
+
+    # Use select statement to find the milestone_id with matching title
+    stmt = select(MilestoneText).where(MilestoneText.title == label)
+    milestone_text = session.scalars(stmt).first()
+
+    if milestone_text:
+        return milestone_text.milestone_id
+    return None
+
+
+def update_milestone_with_name_property(session, milestone_id, var):
+    # Get the milestone object using select
+    stmt = select(Milestone).where(Milestone.id == milestone_id)
+    milestone = session.scalars(stmt).first()
+
+    if milestone:
+        # Update the name property
+        milestone.name = var
+        session.commit()
+        return True
+    return False
 
 
 def map_children_milestones_data(path, session, overwritten_csv=False):
@@ -43,7 +71,8 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
     )
 
     for milestone in milestones:
-        if milestone.name:
+        if milestone.name:  # we keep .name as just for imported milestones, for now.
+            # Though it won't cause an error if there isn't data for a milestone name-mapped here.
             milestone_mapping[milestone.name] = milestone.id
             milestone_group_mapping[milestone.id] = milestone.group_id
 

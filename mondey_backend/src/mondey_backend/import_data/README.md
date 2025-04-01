@@ -11,12 +11,17 @@ Data.csv: the data on what values to save for milestone achievement, and questio
 Coding.csv: (exported from xlsx): this is used to generate the questions meta data themselves and answer options.
 
 ## Practical Use
-- Run the migration `migration.sql` to all the "name" to milestones. To do this, you'll need to first have the
+- Run the migration `migration.sql` to add the "name" field to milestones. It signifies presently, that a milestone was
+matched to imported data from a CSV. To do this, you'll need to first have the
 database, so I suggest running python3 -m import_milestones_metadata.py, which will fail because of the migration being
 missing, then running the migration manually, then running import_milestones_meta again to check it now works (so that
 you apply the migration to the right database)
-- Run `import_all.py` once you have the three CSV data files in this directory, and your test database (so within *this* directory)
- will contain the imported milestones/children/answers and data for those.
+- Run `import_all.py` once you have the four CSV data files in this directory(three from the researchers in one batch,
+then the other with later, further details), and your "current" database (so within *this* directory)
+ will contain the imported milestones/children/answers and data for those once it finishes, by updating existing milestones.
+- Then change your DB settings to explore the "current_db" in the UI or by a local database connector tool.
+- If satisfied, take a back up of the live "/db" files (both mondey.db and user.db), and paste the current_mondey.db and
+current_users.db files into that directory, renaming them to remove the "current_" prefix, to update the live data!
 
 ### How to get the CSV files
 Export them from SoSCi. The columns must be the same and the script can dynamically deal with additional fields, but

@@ -46,7 +46,6 @@ import json
 import pandas as pd
 from sqlmodel import select
 
-from mondey_backend.import_data.utils import clear_all_data
 from mondey_backend.import_data.utils import data_path
 from mondey_backend.import_data.utils import get_childs_parent_id
 from mondey_backend.import_data.utils import get_import_test_session
@@ -160,9 +159,6 @@ def import_childrens_question_answers_data(
         encoding_errors="replace",
     )
     questions_configured_df.columns = questions_configured_df.columns.str.strip()
-
-    if clear_existing_questions_and_answers:
-        clear_all_data(session)
 
     free_text_questions = []
 

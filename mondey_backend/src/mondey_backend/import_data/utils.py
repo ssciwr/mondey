@@ -32,7 +32,17 @@ db_url = "sqlite:////" + str(database_file_path)  # not the same as the normal D
 # Make sure to refresh and connect to it, it will otherwise appear to be blank!
 engine = create_engine(db_url)
 
-users_database_file_path = script_dir / "src/mondey_backend/import_data/db/users.db"
+current_database_file_path = (
+    script_dir / "src/mondey_backend/import_data/current_db/current_mondey.db"
+)
+
+current_db_url = "sqlite:////" + str(current_database_file_path)
+current_engine = create_engine(current_db_url)
+
+# users_database_file_path = script_dir / "src/mondey_backend/import_data/db/users.db"
+users_database_file_path = (
+    script_dir / "src/mondey_backend/import_data/current_db/current_users.db"
+)
 
 print("Users database file path", users_database_file_path)
 
@@ -77,47 +87,80 @@ async def clear_users_database():
     """Clear all data from the users database (async_users_session)."""
     print("Clearing users database...")
 
-    async with async_users_engine.begin() as conn:
-        # Get all table names from the users database
-        result = await conn.execute(
-            text("SELECT name FROM sqlite_master WHERE type='table'")
-        )
-        tables = [row[0] for row in result.fetchall()]
-
-        # Safety check
-        if "user" not in tables:
-            raise Exception(
-                "Safety check failed! 'user' table not found in the database. Operation aborted."
-            )
-
-        user_count = await conn.execute(text('SELECT COUNT(*) FROM "user"'))
+    async with async_users_engine.begin() as session:
+        user_count = await session.execute(text('SELECT COUNT(*) FROM "user"'))
         user_count = user_count.scalar()
 
-        has_test_user = await conn.execute(
-            text("SELECT COUNT(*) FROM \"user\" WHERE email LIKE '%parent_of_'")
+        count_users = await session.execute(
+            text("SELECT COUNT(*) FROM \"user\" WHERE email LIKE '%parent_of_%'")
         )
-        has_test_user = has_test_user.scalar() > 320  # should be 321
+        total_users = count_users.scalar()
+        has_test_user = total_users in [
+            321,
+            642,
+        ]  # was going to do % 321 == 0, but that includes when 0 are found!
 
+        print("Total users:", total_users)
+        if total_users == 0:
+            print(f"Nothing to do - {count_users} no test users exist, so none deleted")
+            return False
         if not has_test_user or user_count < 250:  # probably real users
             raise Exception(
                 f"Safety check failed! Found {user_count} users and no test users with example.com emails. "
                 "This could be real data - operation aborted."
             )
 
-        print(f"Found {len(tables)} tables in users database")
+        # Get sample of emails for debugging
+        result = await session.execute(
+            text(
+                "SELECT id, email FROM \"user\" WHERE email LIKE '%artificialimporteddata.csv%' LIMIT 3"
+            )
+        )
+        sample_users = result.fetchall()
+        print("Sample users that should be deleted:")
+        for user_id, email in sample_users:
+            print(f"  ID: {user_id}, Email: {email}")
 
-        await conn.execute(text("PRAGMA foreign_keys = OFF"))
-        # Delete data from all tables
-        for table in tables:
-            if table != "sqlite_sequence":  # Skip SQLite internal tables
-                print(f"Clearing table: {table}")
-                await conn.execute(text(f'DELETE FROM "{table}"'))
-        await conn.execute(text("DELETE FROM sqlite_sequence"))
-        await conn.execute(text("PRAGMA foreign_keys = ON"))
+        # Try more direct approach with explicit transaction
+        try:
+            # Delete the users
+            result = await session.execute(
+                text("DELETE FROM \"user\" WHERE email LIKE '%parent_of_%'")
+            )
+            rows_deleted = result.rowcount
+            print(f"DELETE statement affected {rows_deleted} rows")
 
-        print("Successfully cleared all data from users database")
+            # Explicitly commit the transaction
+
+            # Verify deletion
+            result = await session.execute(
+                text(
+                    "SELECT COUNT(*) FROM \"user\" WHERE email LIKE '%artificialimporteddata.csv%'"
+                )
+            )
+            remaining = result.scalar()
+            print(f"Remaining matching users after deletion: {remaining}")
+            print("Successfully cleared all data from users database")
+            if (
+                input(
+                    f"Users deleted, leaving {remaining} users. Type 'undo' to cancel and undo this, or anything else to proceed"
+                )
+                == "undo"
+            ):
+                await session.rollback()
+                print("Rolled back changes.")
+                raise Exception("Finished script due to undo")
+            else:
+                await session.commit()
+                print("Transaction committed successfully")
+        except Exception as err:
+            print("Error encountered. Rolling back")
+            print(err)
+            await session.rollback()
 
 
+# Deprecated, as script now expects directory with existing data (in terms of Milestones/Milestonegroups,
+# but not children/users/question-answers).
 def clear_all_data(session):
     """Clear all data but do not delete the databases."""
 
@@ -148,15 +191,18 @@ def clear_all_data(session):
 
     asyncio.run(clear_users_database())
 
-    # todo: Also wipe and reset the users table. But this is dangerous too.
-    # maybe only select the test users? LIKE % testUser ?? not too heavy to run on 500 users
-
 
 def get_import_test_session(create_tables=False):
     with Session(engine) as session:
         if create_tables:  # Largely for use in the tests.
             create_mondey_db_and_tables_themselves(engine)
         return session, engine
+
+
+# This will ALREADY have the current milestones.
+def get_import_current_session():
+    with Session(current_engine) as current_session:
+        return current_session, current_engine
 
 
 """ (For PR review) - Instead of this, I could add a ImportManager with a @contextamanger get_session, but basically,
