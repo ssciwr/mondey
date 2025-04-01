@@ -45,9 +45,11 @@ let df_out = $derived.by(() => {
 	if (df_in === null || df_in.size === 0) {
 		return new DataFrame();
 	}
-	let grp = df_in.groupby(
-		["milestone_id", "child_age"].concat(selected_columns),
-	);
+	let grp = df_in
+		.loc({
+			rows: df_in.milestone_id.eq(selected_milestone_id),
+		})
+		.groupby(["milestone_id", "child_age"].concat(selected_columns));
 	let df = grp.col(["answer"]).mean();
 	df.addColumn("answer_std", grp.col(["answer"]).std().answer_std, {
 		inplace: true,
@@ -63,9 +65,7 @@ let json_data = $derived.by(() => {
 	if (!df_out || !df_out.milestone_id) {
 		return [];
 	}
-	return toJSON(
-		df_out.loc({ rows: df_out.milestone_id.eq(selected_milestone_id) }),
-	) as [];
+	return toJSON(df_out) as [];
 });
 
 let plot_data: PlotDatum[] = $derived.by(() => {
@@ -88,7 +88,11 @@ let plot_data: PlotDatum[] = $derived.by(() => {
 	}
 	for (const key in colDict) {
 		for (const [index, age] of colDict[key].child_age.entries()) {
-			plot_data[age - 1][key] = colDict[key].answer_mean[index];
+			if (age < 1 || age > 72) {
+				console.log(age);
+			} else {
+				plot_data[age - 1][key] = colDict[key].answer_mean[index];
+			}
 		}
 	}
 	return plot_data;

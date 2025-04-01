@@ -100,6 +100,7 @@ class Milestone(SQLModel, table=True):
     group: MilestoneGroup = back_populates("milestones")
     text: Mapped[dict[str, MilestoneText]] = dict_relationship(key="lang_id")
     images: Mapped[list[MilestoneImage]] = back_populates("milestone")
+    name: str
 
 
 class MilestonePublic(SQLModel):
@@ -107,6 +108,7 @@ class MilestonePublic(SQLModel):
     expected_age_months: int
     text: dict[str, MilestoneTextPublic]
     images: list[MilestoneImagePublic]
+    name: str
 
 
 class MilestoneAdmin(SQLModel):
@@ -116,6 +118,7 @@ class MilestoneAdmin(SQLModel):
     expected_age_months: int
     text: dict[str, MilestoneText]
     images: list[MilestoneImage]
+    name: str
 
 
 ## MilestoneImage
@@ -157,7 +160,7 @@ class MilestoneAnswer(SQLModel, table=True):
         default=None, foreign_key="milestone.id", primary_key=True
     )
     milestone_group_id: int = Field(default=None, foreign_key="milestonegroup.id")
-    answer: int
+    answer: int  # ranges from 0-3, where 0 is noch gar nichts and 3 is zuverlaessig, or -1 if not answered.
 
 
 class MilestoneAnswerSession(SQLModel, table=True):
