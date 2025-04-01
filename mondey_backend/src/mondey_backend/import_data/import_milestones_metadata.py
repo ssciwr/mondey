@@ -1,5 +1,6 @@
 import pandas as pd
 from sqlalchemy import select
+from fuzzywuzzy import fuzz
 
 from mondey_backend.databases.mondey import create_mondey_db_and_tables
 from mondey_backend.import_data.utils import get_import_current_session
@@ -17,6 +18,7 @@ def find_milestone_based_on_label(session, label):
 
     print("Milestone search - using preprocessed label for desc search as: ", label)
 
+    # Try exact match first
     stmt = select(MilestoneText).where(MilestoneText.desc == label)
     milestone_text = session.scalars(stmt).first()
 
@@ -38,6 +40,30 @@ def find_milestone_based_on_label(session, label):
         print("Trying with Dasified label: ", dasified_label)
         stmt = select(MilestoneText).where(MilestoneText.desc == dasified_label)
         milestone_text = session.scalars(stmt).first()
+
+    # If all direct matches fail, try fuzzy matching
+    if not milestone_text:
+        print("Direct matches failed. Trying fuzzy matching...")
+        # Get all milestone texts
+        stmt = select(MilestoneText)
+        all_milestone_texts = session.scalars(stmt).all()
+        
+        best_match = None
+        best_score = 0
+        threshold = 85  # Minimum score to consider a match
+        
+        for mt in all_milestone_texts:
+            if mt.desc:
+                score = fuzz.partial_ratio(label, mt.desc)
+                if score > best_score and score >= threshold:
+                    best_score = score
+                    best_match = mt
+        
+        if best_match:
+            print(f"Found fuzzy match with score {best_score}:")
+            print(f"Original: {label}")
+            print(f"Matched:  {best_match.desc}")
+            milestone_text = best_match
 
     if milestone_text:
         return milestone_text.milestone_id
