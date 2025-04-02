@@ -47,6 +47,7 @@ async function updateUser(user: UserRead) {
 			is_verified: user.is_verified,
 			is_researcher: user.is_researcher,
 			is_superuser: user.is_superuser,
+			full_data_access: user.full_data_access,
 		},
 		path: {
 			id: `${user.id}`,
