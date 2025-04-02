@@ -124,6 +124,7 @@ export type MilestoneAdmin = {
         [key: string]: MilestoneText;
     };
     images: Array<MilestoneImage>;
+    name: string;
 };
 
 export type MilestoneAgeScore = {
@@ -200,6 +201,7 @@ export type MilestonePublic = {
         [key: string]: MilestoneTextPublic;
     };
     images: Array<MilestoneImagePublic>;
+    name: string;
 };
 
 export type MilestoneText = {
@@ -538,6 +540,16 @@ export type GetMilestoneAgeScoresData = {
 export type GetMilestoneAgeScoresResponse = (MilestoneAgeScoreCollectionPublic);
 
 export type GetMilestoneAgeScoresError = (HTTPValidationError);
+
+export type AdminUpdateStatsData = {
+    path: {
+        incremental_update: boolean;
+    };
+};
+
+export type AdminUpdateStatsResponse = (string);
+
+export type AdminUpdateStatsError = (HTTPValidationError);
 
 export type GetUserQuestionsAdminResponse = (Array<UserQuestionAdmin>);
 
