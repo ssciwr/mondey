@@ -196,6 +196,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         for milestone_id in [1, 2, 3]:
             session.add(
                 Milestone(
+                    name=f"m{milestone_id}",
                     order=14 - milestone_id,
                     group_id=1,
                     expected_age_months=milestone_id * 6,
@@ -227,6 +228,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         for milestone_id in [4, 5]:
             session.add(
                 Milestone(
+                    name=f"m{milestone_id}",
                     order=milestone_id,
                     group_id=2,
                     expected_age_months=milestone_id * 6,
@@ -1062,6 +1064,7 @@ def milestone_group1():
         "milestones": [
             {
                 "id": 3,
+                "name": "m3",
                 "expected_age_months": 18,
                 "text": {
                     "de": {
@@ -1087,6 +1090,7 @@ def milestone_group1():
             },
             {
                 "id": 2,
+                "name": "m2",
                 "expected_age_months": 12,
                 "text": {
                     "de": {
@@ -1112,6 +1116,7 @@ def milestone_group1():
             },
             {
                 "id": 1,
+                "name": "m1",
                 "expected_age_months": 6,
                 "text": {
                     "de": {
@@ -1169,6 +1174,7 @@ def milestone_group_admin1():
                 "group_id": 1,
                 "order": 11,
                 "id": 3,
+                "name": "m3",
                 "expected_age_months": 18,
                 "images": [],
                 "text": {
@@ -1202,6 +1208,7 @@ def milestone_group_admin1():
                 "group_id": 1,
                 "order": 12,
                 "id": 2,
+                "name": "m2",
                 "expected_age_months": 12,
                 "images": [
                     {
@@ -1240,6 +1247,7 @@ def milestone_group_admin1():
                 "group_id": 1,
                 "order": 13,
                 "id": 1,
+                "name": "m1",
                 "expected_age_months": 6,
                 "images": [
                     {
@@ -1294,6 +1302,7 @@ def milestone_group2():
         "milestones": [
             {
                 "id": 4,
+                "name": "m4",
                 "expected_age_months": 24,
                 "images": [],
                 "text": {
@@ -1319,6 +1328,7 @@ def milestone_group2():
             },
             {
                 "id": 5,
+                "name": "m5",
                 "expected_age_months": 30,
                 "images": [],
                 "text": {
@@ -1376,6 +1386,7 @@ def milestone_group_admin2():
                 "group_id": 2,
                 "order": 4,
                 "id": 4,
+                "name": "m4",
                 "expected_age_months": 24,
                 "images": [],
                 "text": {
@@ -1409,6 +1420,7 @@ def milestone_group_admin2():
                 "group_id": 2,
                 "order": 5,
                 "id": 5,
+                "name": "m5",
                 "expected_age_months": 30,
                 "images": [],
                 "text": {

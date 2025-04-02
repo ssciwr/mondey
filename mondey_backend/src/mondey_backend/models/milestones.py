@@ -100,7 +100,7 @@ class Milestone(SQLModel, table=True):
     group: MilestoneGroup = back_populates("milestones")
     text: Mapped[dict[str, MilestoneText]] = dict_relationship(key="lang_id")
     images: Mapped[list[MilestoneImage]] = back_populates("milestone")
-    name: str
+    name: str = ""
 
 
 class MilestonePublic(SQLModel):
