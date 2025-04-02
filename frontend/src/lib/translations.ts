@@ -95,6 +95,7 @@ export const translationIds = {
 	admin: {
 		label: "Administration",
 		title: "Titel",
+		name: "Name",
 		languages: "Sprachen",
 		milestone: "Meilenstein",
 		milestones: "Meilensteine",

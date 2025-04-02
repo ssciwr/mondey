@@ -7,6 +7,7 @@ from sqlmodel import col
 from sqlmodel import select
 
 from ...dependencies import SessionDep
+from ...dependencies import UserAsyncSessionDep
 from ...models.milestones import Language
 from ...models.milestones import Milestone
 from ...models.milestones import MilestoneAdmin
@@ -20,6 +21,7 @@ from ...models.milestones import MilestoneText
 from ...models.milestones import SubmittedMilestoneImage
 from ...models.milestones import SubmittedMilestoneImagePublic
 from ...models.utils import ItemOrder
+from ...statistics import async_update_stats
 from ..utils import add
 from ..utils import get
 from ..utils import milestone_group_image_path
@@ -192,7 +194,17 @@ def create_router() -> APIRouter:
                 404,
                 detail='"No milestone age score collection with id: ", milestone_id',
             )
-
         return collection
+
+    @router.post(
+        "/update-stats/{incremental_update}",
+        response_model=str,
+    )
+    async def admin_update_stats(
+        session: SessionDep, user_session: UserAsyncSessionDep, incremental_update: bool
+    ):
+        return await async_update_stats(
+            session, user_session, incremental_update=incremental_update
+        )
 
     return router

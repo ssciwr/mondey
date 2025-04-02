@@ -164,7 +164,7 @@ def _get_statistics_by_age(
         Updated count, avg and stddev arrays.
     """
     if count is None or avg is None or stddev is None:
-        max_age_months = 72
+        max_age_months = 100
         count = np.zeros(max_age_months + 1, dtype=np.int32)
         avg = np.zeros(max_age_months + 1, dtype=np.float64)
         stddev = np.zeros(max_age_months + 1, dtype=np.float64)

@@ -117,6 +117,7 @@ def test_post_milestone(admin_client: TestClient):
     assert response.status_code == 200
     assert response.json() == {
         "id": 6,
+        "name": "",
         "group_id": 2,
         "order": 0,
         "expected_age_months": 12,
@@ -152,6 +153,7 @@ def test_post_milestone(admin_client: TestClient):
 
 def test_put_milestone(admin_client: TestClient, milestone_group_admin1: dict):
     milestone = milestone_group_admin1["milestones"][0]
+    milestone["name"] = "bob"
     milestone["order"] = 6
     milestone["expected_age_months"] = 11
     milestone["text"]["de"]["title"] = "asdsd"
