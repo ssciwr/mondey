@@ -26,7 +26,7 @@ import { onMount } from "svelte";
 
 // Web Worker for data processing
 let worker: Worker;
-let isLoading = $state(false);
+let isLoading: string | boolean = $state(false);
 
 // Data states
 let df_out = $state(new DataFrame());
@@ -52,39 +52,16 @@ onMount(() => {
 		const response = event.data;
 
 		if (response.type === "dataProcessed") {
-			console.log("Data returned!", response);
 			// Update the UI with processed data
 			df_out = new DataFrame(response.dfOut);
-			console.log("Set df_out");
 			json_data = response.jsonData;
-			console.log("SEt JSON");
 			plot_data = response.plotData;
-			console.log("Set Plot.");
 			if (columns.length === 0) {
-				console.log(
-					"SEtting columns to: ",
-					response.columns,
-					" they were: ",
-					columns,
-				);
 				columns = response.columns;
 			}
 			if (milestone_ids.length === 0) {
-				console.log(
-					"SEtting milestone IDs to: ",
-					response.milestoneIds,
-					"they were: ",
-					milestone_ids,
-				);
 				milestone_ids = response.milestoneIds;
 			}
-
-			// Set initial milestone if needed
-			// THis was causing infinite re-renders(!)
-			/*if (selected_milestone_id <= 0 && response.firstMilestoneId > 0) {
-				selected_milestone_id = response.firstMilestoneId;
-			}*/
-
 			isLoading = false;
 		}
 	};
@@ -98,13 +75,6 @@ onMount(() => {
 	};
 });
 
-$inspect(
-	"Inspect: ",
-	selected_columns,
-	"milestone ID: ",
-	selected_milestone_id,
-);
-
 // Track previous values to prevent infinite loops
 let prev_milestone_id = $state(0);
 let prev_columns = $state([] as string[]);
@@ -114,13 +84,14 @@ $effect(() => {
 	// Only process if values have actually changed from user interaction
 	// and not from data loading
 	const milestone_id_changed = selected_milestone_id !== prev_milestone_id;
-	const columns_changed = JSON.stringify(selected_columns) !== JSON.stringify(prev_columns);
-	
+	const columns_changed =
+		JSON.stringify(selected_columns) !== JSON.stringify(prev_columns);
+
 	if (milestone_id_changed || columns_changed) {
 		// Update previous values
 		prev_milestone_id = selected_milestone_id;
 		prev_columns = [...selected_columns];
-		
+
 		// Process data with new selections
 		processDataInWorker(selected_milestone_id, [...selected_columns]);
 	}
@@ -188,7 +159,6 @@ function sample(min: number, max: number): number {
 }
 
 function generateFakeData() {
-	console.log("Generating fake data");
 	isLoading = "Generating Fake Data";
 	const data: Array<Record<string, string | number>> = [];
 	let answer_session_id = 1;
@@ -224,7 +194,6 @@ function generateFakeData() {
 			++answer_session_id;
 		}
 	}
-	console.log("Data prepped...", data);
 
 	// Send fake data to worker for processing using only primitive values
 	worker.postMessage({
@@ -283,7 +252,7 @@ let headers = $derived.by(() => {
     <!-- Loading indicator -->
     {#if isLoading}
         <div class="flex justify-center items-center h-32">
-            <Spinner size="8" />&nbsp;{isLoading}
+            <Spinner size="8" />
         </div>
     {:else if json_data && json_data.length > 0}
         <!-- Plot -->
