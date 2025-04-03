@@ -1,4 +1,4 @@
-import { type GetResearchDataResponse, getResearchData } from "$lib/client";
+import type { GetResearchDataResponse } from "$lib/client";
 import type { PlotDatum } from "$lib/util";
 import { DataFrame, toJSON } from "danfojs/dist/danfojs-browser/src";
 import * as dfd from "danfojs/dist/danfojs-browser/src";
@@ -6,6 +6,7 @@ import * as dfd from "danfojs/dist/danfojs-browser/src";
 // Message types for worker communication
 type WorkerMessage = {
 	type: "processDataFully";
+	data: GetResearchDataResponse;
 	selectedMilestoneId: number;
 	selectedColumns: string[];
 };
@@ -135,20 +136,20 @@ function processData(
 	};
 }
 
-const data: GetResearchDataResponse | null = null;
+let data: GetResearchDataResponse | null = null;
 
 // Handle messages from main thread
-self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
-	const msg = event.data; // this is not the "data data", it's the worker call
+self.onmessage = (event: MessageEvent<WorkerMessage>) => {
+	const msg = event.data;
 
 	if (msg.type === "processDataFully") {
-		if (data === null) {
-			const res = await getResearchData();
-			if (res.error || !res.data) {
-				console.error(res.error);
-				console.error("W: Webworker rsearch data could not be requested...");
-				return;
-			}
+		console.log("W: Processing data...", msg.data);
+		if (msg.data !== null) {
+			data = msg.data;
+		}
+		if (msg.data === null && data === null) {
+			console.log("Early return from service worker.");
+			return false; // Invalid call, no data and no cached data.
 		}
 		// First preprocess the data
 		const { columns, milestoneIds, firstMilestoneId, df_in } =

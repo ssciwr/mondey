@@ -39,8 +39,6 @@ let milestone_ids = $state([] as SelectOptionType<number>[]);
 let selected_columns = $state([] as string[]);
 let columns = $state([] as SelectOptionType<string>[]);
 
-let tries = $state(0 as number);
-
 // Create web worker on mount
 onMount(() => {
 	worker = new Worker(new URL("./dataWorker.ts", import.meta.url), {
@@ -134,8 +132,7 @@ async function getData() {
 			return;
 		}
 
-		isLoading = "Computing";
-
+		isLoading = "Loading";
 		// Send fetched data to worker for processing
 		console.log("Requested worker to compute the data");
 		worker.postMessage({
@@ -150,61 +147,6 @@ async function getData() {
 	}
 }
 
-// Fake data generation (remains in main thread as requested)
-let n_answer_sessions = $state(2000);
-let n_milestones = $state(10);
-
-function sample(min: number, max: number): number {
-	return min + Math.floor(Math.random() * (max - min + 1));
-}
-
-function generateFakeData() {
-	isLoading = "Generating Fake Data";
-	const data: Array<Record<string, string | number>> = [];
-	let answer_session_id = 1;
-
-	// Get primitive values from potentially proxied state
-	const sessionsCount = Number(n_answer_sessions);
-	const milestonesCount = Number(n_milestones);
-	const milestoneId = Number(selected_milestone_id);
-	const columnsArray = [...selected_columns]; // Create a new array from the proxy
-
-	for (let i = 0; i < sessionsCount; ++i) {
-		for (
-			let milestone_id = 1;
-			milestone_id <= milestonesCount;
-			++milestone_id
-		) {
-			data.push({
-				milestone_group_id: 1,
-				milestone_id: milestone_id,
-				answer: sample(1, 4),
-				child_age: sample(1, 72),
-				answer_session_id: answer_session_id,
-				"number of older siblings": ["0", "1", "2", "3+"][sample(0, 3)],
-				"number of younger siblings": ["0", "1", "2", "3+"][sample(0, 3)],
-				"early birth": ["yes", "no"][sample(0, 1)],
-				"parental education": [
-					"school",
-					"university degree",
-					"postgraduate degree",
-					"other",
-				][sample(0, 3)],
-			});
-			++answer_session_id;
-		}
-	}
-
-	// Send fake data to worker for processing using only primitive values
-	worker.postMessage({
-		type: "processDataFully",
-		data: data, // This is already a plain object array
-		selectedMilestoneId: milestoneId,
-		selectedColumns: columnsArray,
-	});
-	console.log("Sent worker request to process data fully.");
-}
-
 let headers = $derived.by(() => {
 	if (!json_data || json_data.length === 0) {
 		return [];
@@ -214,23 +156,6 @@ let headers = $derived.by(() => {
 </script>
 
 <div class="w-full grow">
-    <!-- Fake data generation UI -->
-    <div class="flex flex-col m-2 bg-red-300">
-        Temporary FAKE data generation:
-        <div class="flex flex-row items-stretch m-2">
-            <div class="m-2 grow">
-                <Label> {n_milestones} milestones
-                    <Range min="0" max="200" bind:value={n_milestones} />
-                </Label>
-            </div>
-            <div class="m-2 grow">
-                <Label> {n_answer_sessions} answer sessions
-                    <Range min="0" max="100000" bind:value={n_answer_sessions} />
-                </Label>
-            </div>
-            <Button onclick={generateFakeData}>Generate FAKE data</Button>
-        </div>
-    </div>
 
     <!-- Controls -->
     <div class="flex flex-row items-stretch m-2">
