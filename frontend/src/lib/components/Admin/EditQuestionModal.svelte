@@ -2,10 +2,7 @@
 
 <script lang="ts">
 import { refreshChildQuestions, refreshUserQuestions } from "$lib/admin.svelte";
-import {
-	updateChildQuestion,
-	updateUserQuestion,
-} from "$lib/client/services.gen";
+import { updateChildQuestion, updateUserQuestion } from "$lib/client/sdk.gen";
 import type {
 	ChildQuestionAdmin,
 	UserQuestionAdmin,

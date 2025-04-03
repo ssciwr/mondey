@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter
+from fastapi import Response
 
 from ..dependencies import CurrentActiveResearchDep
 from ..dependencies import ResearchDep
@@ -14,7 +15,7 @@ def create_router() -> APIRouter:
         prefix="/research", tags=["research"], dependencies=[ResearchDep]
     )
 
-    @router.get("/data/", response_model=list[dict[str, str | int | float]])
+    @router.get("/data/")
     async def get_research_data(
         session: SessionDep,
         user_session: UserAsyncSessionDep,
@@ -24,8 +25,9 @@ def create_router() -> APIRouter:
             research_group_id_filter = None
         else:
             research_group_id_filter = current_active_researcher.research_group_id
-        return await extract_research_data(
+        df = await extract_research_data(
             session, user_session, research_group_id_filter
         )
+        return Response(df.to_json(orient="records"), media_type="application/json")
 
     return router

@@ -1,10 +1,9 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { type GetResearchDataResponse, getResearchData } from "$lib/client";
 import PlotLines from "$lib/components/DataDisplay/PlotLines.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import { type PlotDatum } from "$lib/util";
+import { type PlotData } from "$lib/util";
 import { download, generateCsv, mkConfig } from "export-to-csv";
 import {
 	Button,
@@ -21,126 +20,104 @@ import {
 	TableHeadCell,
 } from "flowbite-svelte";
 import { onMount } from "svelte";
+import type { WorkerRequest, WorkerResponse } from "./dataWorker";
 
 // Web Worker for data processing
 let worker: Worker;
-let isLoading: string | boolean = $state(false);
 
-// Data states
-let json_data = $state([] as any[]);
-let plot_data = $state([] as PlotDatum[]);
+// State for spinner component
+let is_loading = true;
+let show_spinner: boolean = $state(true);
+let show_spinner_timeout_id: number;
+
+// Data states (use raw state for performance as these are never mutated, only reassigned)
+let json_data = $state.raw([] as any[]);
+let plot_data = $state.raw({} as PlotData);
+let milestone_ids = $state.raw([] as SelectOptionType<string>[]);
+let columns = $state.raw([] as SelectOptionType<string>[]);
 
 // Selection states
-let selected_milestone_id = $state(1);
-let milestone_ids = $state([] as SelectOptionType<number>[]);
+let selected_milestone_column = $state("");
 let selected_columns = $state([] as string[]);
-let columns = $state([] as SelectOptionType<string>[]);
 
-// Create web worker on mount
-onMount(() => {
-	worker = new Worker(new URL("./dataWorker.ts", import.meta.url), {
+function createWorker(): Worker {
+	let worker = new Worker(new URL("./dataWorker.ts", import.meta.url), {
 		type: "module",
 	});
 
 	// Handle messages from worker
-	worker.onmessage = (event) => {
+	worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
 		const response = event.data;
-
-		if (response.type === "dataProcessed") {
-			// Update the UI with processed data
-			json_data = response.jsonData;
-			plot_data = response.plotData;
-			if (columns.length === 0) {
-				columns = response.columns;
-			}
-			if (milestone_ids.length === 0) {
-				milestone_ids = response.milestoneIds;
-			}
-			isLoading = false;
+		stop_spinner();
+		// update the plot & table data
+		json_data = response.json_data;
+		plot_data = response.plot_data;
+		// only update these if they are empty (i.e. the first time)
+		if (columns.length === 0) {
+			columns = response.columns;
+		}
+		if (milestone_ids.length === 0) {
+			milestone_ids = response.milestone_ids;
+		}
+		if (selected_milestone_column === "") {
+			selected_milestone_column = milestone_ids[0].value;
 		}
 	};
 
-	// Initial data fetch
-	getData();
+	return worker;
+}
+
+function destroyWorker(worker: Worker) {
+	worker.terminate();
+}
+
+onMount(() => {
+	worker = createWorker();
 
 	return () => {
-		// Clean up worker when component is destroyed
-		worker.terminate();
+		destroyWorker(worker);
 	};
 });
 
-// Track previous values to prevent infinite loops
-let prev_milestone_id = $state(0);
-let prev_columns = $state([] as string[]);
+function start_spinner() {
+	is_loading = true;
+	const delay_ms = 100;
+	// only display the spinner if we have to wait more than delay_ms
+	show_spinner_timeout_id = window.setTimeout(() => {
+		if (is_loading) {
+			show_spinner = true;
+		}
+	}, delay_ms);
+}
 
-// Watch for changes in selection and reprocess data only when user selections change
+function stop_spinner() {
+	window.clearTimeout(show_spinner_timeout_id);
+	is_loading = false;
+	show_spinner = false;
+}
+
+// Ask worker to update the data when selected milestone or group-by columns change
 $effect(() => {
-	// Only process if values have actually changed from user interaction
-	// and not from data loading
-	const milestone_id_changed = selected_milestone_id !== prev_milestone_id;
-	const columns_changed =
-		JSON.stringify(selected_columns) !== JSON.stringify(prev_columns);
-
-	if (milestone_id_changed || columns_changed) {
-		// Update previous values
-		prev_milestone_id = selected_milestone_id;
-		prev_columns = [...selected_columns];
-
-		// Process data with new selections
-		processDataInWorker(selected_milestone_id, [...selected_columns]);
-	}
+	const message: WorkerRequest = {
+		selected_milestone_column: selected_milestone_column,
+		selected_columns: $state.snapshot(selected_columns),
+	};
+	worker.postMessage(message);
+	start_spinner();
 });
 
 function downloadCSV() {
+	if (!json_data || json_data.length === 0) {
+		console.log("downloadCSV clicked but no data to download");
+		return;
+	}
 	const csvConfig = mkConfig({
 		useKeysAsHeaders: true,
 		filename: `${["mondey", new Date().toISOString().replace(/T.*/, "")].concat(selected_columns).join("-")}`,
 		quoteStrings: true,
 	});
-	const csv = generateCsv(csvConfig)(json_data as []);
+	const csv = generateCsv(csvConfig)(json_data);
 	download(csvConfig)(csv);
-}
-
-// Function to send data to worker for processing
-function processDataInWorker(milestoneId: number, columns: string[]) {
-	if (!worker || json_data.length === 0) {
-		console.log("Not processing data, as original load has not happened.");
-		return false;
-	}
-
-	isLoading = `Reprocessing·data${milestoneId.toString()}...cols:·${columns.toString()}`;
-	worker.postMessage({
-		type: "processDataFully",
-		data: null, // will be cached from original download on the worker.
-		selectedMilestoneId: milestoneId,
-		selectedColumns: columns,
-	});
-}
-
-async function getData() {
-	console.log("Loading data from API");
-	try {
-		isLoading = "Loading Data";
-		const res = await getResearchData();
-		if (res.error || !res.data) {
-			console.error(res.error);
-			isLoading = false;
-			return;
-		}
-
-		isLoading = "Loading";
-		// Send fetched data to worker for processing
-		console.log("Requested worker to compute the data");
-		worker.postMessage({
-			type: "processDataFully",
-			data: structuredClone(res.data),
-			selectedMilestoneId: Number(selected_milestone_id),
-			selectedColumns: [...selected_columns],
-		});
-	} catch (error) {
-		console.error("Error fetching data:", error);
-		isLoading = false;
-	}
 }
 
 let headers = $derived.by(() => {
@@ -152,40 +129,34 @@ let headers = $derived.by(() => {
 </script>
 
 <div class="w-full grow">
-
-    <!-- Controls -->
-    <div class="flex flex-row items-stretch m-2">
-        <div class="m-2">
-            <Label> {i18n.tr.researcher.milestoneId}
-                <Select bind:value={selected_milestone_id} class="mt-2" items={milestone_ids}
-                        placeholder={i18n.tr.researcher.milestoneId}
-                        data-testid="selectMilestone"/>
-            </Label>
-        </div>
-        <div class="m-2 grow">
-            <Label> {i18n.tr.researcher.groupbyOptional}
-                <MultiSelect bind:value={selected_columns} class="mt-2" items={columns} placeholder={i18n.tr.researcher.groupbyOptional} data-testid="selectGroupby"/>
-            </Label>
-        </div>
-        <Button class="mt-9 mb-3" onclick={downloadCSV} data-testid="researchDownloadCSV">{i18n.tr.researcher.downloadAsCsv}</Button>
+<div class="flex flex-row items-stretch m-2">
+    <div class="m-2">
+        <Label> {i18n.tr.researcher.milestoneId}
+            <Select bind:value={selected_milestone_column} class="mt-2" items={milestone_ids}
+                    placeholder={i18n.tr.researcher.milestoneId}
+                    data-testid="selectMilestone"/>
+        </Label>
     </div>
-
+    <div class="m-2 grow">
+        <Label> {i18n.tr.researcher.groupbyOptional}
+            <MultiSelect bind:value={selected_columns} class="mt-2" items={columns} placeholder={i18n.tr.researcher.groupbyOptional} data-testid="selectGroupby"/>
+        </Label>
+    </div>
+    <Button class="mt-9 mb-3" onclick={downloadCSV} data-testid="researchDownloadCSV">{i18n.tr.researcher.downloadAsCsv}</Button>
+</div>
     <!-- Loading indicator -->
-    {#if isLoading}
+    {#if show_spinner}
         <div class="flex justify-center items-center h-32">
             <Spinner size="8" />
         </div>
     {:else if json_data && json_data.length > 0}
         <!-- Plot -->
         {#key plot_data}
-            <div class="text-center text-2xl font-bold tracking-tight text-gray-700 dark:text-white" data-testid="researchPlotTitle">
-                {i18n.tr.researcher.milestone} {selected_milestone_id} {selected_columns.join("-")}
-            </div>
+            <div class="text-center text-2xl font-bold tracking-tight text-gray-700 dark:text-white" data-testid="researchPlotTitle">{i18n.tr.researcher.milestone} {selected_milestone_column.split("_").pop()} {selected_columns.join("-")}</div>
             <div class="m-2 p-2" data-testid="researchPlotLines">
-                <PlotLines scores={plot_data} />
+                <PlotLines {plot_data} />
             </div>
         {/key}
-
         <!-- Data table -->
         <Table data-testid="researchTable">
             <TableHead>

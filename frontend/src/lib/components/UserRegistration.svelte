@@ -1,5 +1,5 @@
 <script lang="ts">
-import { registerRegister } from "$lib/client/services.gen";
+import { registerRegister } from "$lib/client/sdk.gen";
 import { type RegisterRegisterData } from "$lib/client/types.gen";
 import ResearchCodeInput from "$lib/components/DataInput/ResearchCodeInput.svelte";
 import UserVerify from "$lib/components/UserVerify.svelte";

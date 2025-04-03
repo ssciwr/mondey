@@ -5,7 +5,7 @@ import { base } from "$app/paths";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 
 import { goto } from "$app/navigation";
-import { authCookieLogin, usersCurrentUser } from "$lib/client/services.gen";
+import { authCookieLogin, usersCurrentUser } from "$lib/client/sdk.gen";
 import { type AuthCookieLoginData } from "$lib/client/types.gen";
 import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";

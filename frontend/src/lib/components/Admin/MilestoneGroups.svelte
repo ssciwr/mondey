@@ -12,7 +12,7 @@ import {
 	deleteMilestoneGroupAdmin,
 	orderMilestoneGroupsAdmin,
 	orderMilestonesAdmin,
-} from "$lib/client/services.gen";
+} from "$lib/client/sdk.gen";
 import type {
 	MilestoneAdmin,
 	MilestoneGroupAdmin,

@@ -1,7 +1,7 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { getMilestoneAgeScores } from "$lib/client/services.gen";
+import { getMilestoneAgeScores } from "$lib/client/sdk.gen";
 import type { MilestoneAgeScore } from "$lib/client/types.gen";
 import PlotScoreAge from "$lib/components/DataDisplay/PlotScoreAge.svelte";
 import { i18n } from "$lib/i18n.svelte";
