@@ -105,9 +105,25 @@ $inspect(
 	selected_milestone_id,
 );
 
-// Watch for changes in selection and reprocess data
+// Track previous values to prevent infinite loops
+let prev_milestone_id = $state(0);
+let prev_columns = $state([] as string[]);
+
+// Watch for changes in selection and reprocess data only when user selections change
 $effect(() => {
-	processDataInWorker(selected_milestone_id, [...selected_columns]);
+	// Only process if values have actually changed from user interaction
+	// and not from data loading
+	const milestone_id_changed = selected_milestone_id !== prev_milestone_id;
+	const columns_changed = JSON.stringify(selected_columns) !== JSON.stringify(prev_columns);
+	
+	if (milestone_id_changed || columns_changed) {
+		// Update previous values
+		prev_milestone_id = selected_milestone_id;
+		prev_columns = [...selected_columns];
+		
+		// Process data with new selections
+		processDataInWorker(selected_milestone_id, [...selected_columns]);
+	}
 });
 
 function downloadCSV() {
