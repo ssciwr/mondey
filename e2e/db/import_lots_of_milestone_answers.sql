@@ -88,47 +88,47 @@ VALUES (1007, 5, 'Sophia Taylor',
 
 -- Child 1 (Emma) - Session 1 (recent)
 INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1002, 1001, 3, datetime('now', '-3 days'), false, true);
+VALUES (1002, 1001, 3, 1741102579000, false, true);
 
 -- Child 2 (Liam) - Session 1 (recent)
 INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1003, 1002, 3, datetime('now', '-5 days'), false, true);
+VALUES (1003, 1002, 3, 1741102579000, false, true);
 
 -- Child 2 (Liam) - Session 2 (older)
 INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1004, 1002, 3, datetime('now', '-2 months'), true, true);
+VALUES (1004, 1002, 3, 1741102579000, true, true);
 
 -- Child 3 (Olivia) - Session 1 (recent)
 INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1005, 1003, 3, datetime('now', '-1 week'), false, true);
+VALUES (1005, 1003, 3, 1741102579000, false, true);
 
 -- Child 3 (Olivia) - Session 2 (older)
 INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1006, 1003, 3, datetime('now', '-3 months'), true, true);
+VALUES (1006, 1003, 3, 1741102579000, true, true);
 
 -- Child 4 (Noah) - Session 1 (recent)
 INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1007, 1004, 4, datetime('now', '-2 weeks'), false, true);
+VALUES (1007, 1004, 4, 1741102579000, false, true);
 
 -- Child 5 (Ava) - Session 1 (recent)
 INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1008, 1005, 4, datetime('now', '-10 days'), false, true);
+VALUES (1008, 1005, 4, 1741102579000, false, true);
 
 -- Child 5 (Ava) - Session 2 (older)
 INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1009, 1005, 4, datetime('now', '-4 months'), true, true);
+VALUES (1009, 1005, 4, 1741102579000, true, true);
 
 -- Child 6 (Ethan) - Session 1 (recent)
 INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1010, 1006, 5, datetime('now', '-2 days'), false, true);
+VALUES (1010, 1006, 5, 1741102579000, false, true);
 
 -- Child 7 (Sophia) - Session 1 (recent)
 INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1011, 1007, 5, datetime('now', '-1 day'), false, true);
+VALUES (1011, 1007, 5, 1741102579000, false, true);
 
 -- Child 7 (Sophia) - Session 2 (older)
 INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1012, 1007, 5, datetime('now', '-5 months'), true, true);
+VALUES (1012, 1007, 5, 1741102579000, true, true);
 
 -- Now add milestone answers for each session
 -- Using milestone IDs 1000-1009 from clearsqlimport.sql
