@@ -11,9 +11,9 @@ test("/userLand/children/gallery - Can add Child", async ({
 	await page.locator('h5:has-text("Neu")').click();
 	await modalLoad(page);
 
-	await page.getByLabel("Name des Kindes?").fill("Test Child");
-	await page.getByLabel("Geburtsjahr des Kindes?").fill("2020");
-	await page.getByLabel("Geburtsmonat des Kindse?").fill("6");
+	await page.locator('input[for="Name des Kindes?"]').fill("Test Child");
+	await page.locator('input[for="Geburtsjahr des Kindes?"]').fill("2020");
+	await page.locator('input[for="Geburtsmonat des Kindes?"]').fill("6");
 	await page.getByRole("button", { name: "Speichern" }).click();
 
 	await page.waitForTimeout(1000);
