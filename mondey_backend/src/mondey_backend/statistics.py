@@ -20,9 +20,9 @@ from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroupAgeScore
 from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
 from mondey_backend.models.questions import ChildAnswer
-from mondey_backend.models.questions import ChildQuestionText
+from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import UserAnswer
-from mondey_backend.models.questions import UserQuestionText
+from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.users import User
 from mondey_backend.routers.utils import _get_answer_session_child_ages_in_months
 from mondey_backend.routers.utils import _get_expected_age_from_scores
@@ -495,11 +495,15 @@ def make_datatable(
             }
             datatable.append(row)  # type: ignore
     df = pd.DataFrame(datatable)
-    df.set_index("answer_session_id", inplace=True)
+    if "answer_session_id" in df.columns:
+        df.set_index("answer_session_id", inplace=True)
     df = df.merge(milestone_answers, how="left", left_index=True, right_index=True)
-    df = df.merge(user_answers, how="left", left_on="user_id", right_index=True)
-    df = df.merge(child_answers, how="left", left_on="child_id", right_index=True)
-    df.drop(columns=["user_id", "child_id"], inplace=True)
+    if "user_id" in df.columns:
+        df = df.merge(user_answers, how="left", left_on="user_id", right_index=True)
+        df.drop(columns=["user_id"], inplace=True)
+    if "child_id" in df.columns:
+        df = df.merge(child_answers, how="left", left_on="child_id", right_index=True)
+        df.drop(columns=["child_id"], inplace=True)
     return df
 
 
@@ -519,33 +523,35 @@ def get_milestone_answers(session: SessionDep) -> pd.DataFrame:
 
 
 def get_user_answers(session: SessionDep) -> pd.DataFrame:
-    questions = {
-        q.user_question_id: q.question
-        for q in session.exec(
-            select(UserQuestionText).where(col(UserQuestionText.lang_id) == "de")
-        ).all()
-    }
+    user_question_ids = session.exec(
+        select(UserQuestion.id).order_by(col(UserQuestion.id))
+    ).all()
     user_answers: dict[int, dict[str, str | int | float]] = defaultdict(dict)
     for answer in session.exec(select(UserAnswer)).all():
-        user_answers[answer.user_id][questions[answer.question_id]] = answer.answer
+        user_answers[answer.user_id][f"user_question_{answer.question_id}"] = (
+            answer.answer
+        )
     df = pd.DataFrame.from_dict(
-        user_answers, orient="index", columns=questions.values()
+        user_answers,
+        orient="index",
+        columns=[f"user_question_{question_id}" for question_id in user_question_ids],
     )
     return df
 
 
 def get_child_answers(session: SessionDep) -> pd.DataFrame:
-    questions = {
-        q.child_question_id: q.question
-        for q in session.exec(
-            select(ChildQuestionText).where(col(ChildQuestionText.lang_id) == "de")
-        ).all()
-    }
+    child_question_ids = session.exec(
+        select(ChildQuestion.id).order_by(col(ChildQuestion.id))
+    ).all()
     child_answers: dict[int, dict[str, str | int | float]] = defaultdict(dict)
     for answer in session.exec(select(ChildAnswer)).all():
-        child_answers[answer.child_id][questions[answer.question_id]] = answer.answer
+        child_answers[answer.child_id][f"child_question_{answer.question_id}"] = (
+            answer.answer
+        )
     df = pd.DataFrame.from_dict(
-        child_answers, orient="index", columns=questions.values()
+        child_answers,
+        orient="index",
+        columns=[f"child_question_{question_id}" for question_id in child_question_ids],
     )
     return df
 

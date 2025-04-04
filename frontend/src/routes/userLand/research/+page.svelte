@@ -34,11 +34,20 @@ let show_spinner_timeout_id: number;
 let json_data = $state.raw([] as any[]);
 let plot_data = $state.raw({} as PlotData);
 let milestone_ids = $state.raw([] as SelectOptionType<string>[]);
+let milestone_ids_inv = $state.raw({} as Record<string, string | number>);
 let columns = $state.raw([] as SelectOptionType<string>[]);
+let columns_inv = $state.raw({} as Record<string, string | number>);
 
 // Selection states
 let selected_milestone_column = $state("");
 let selected_columns = $state([] as string[]);
+
+function invert_select_option_array(arr: SelectOptionType<string>[]) {
+	return arr.reduce(
+		(obj, item) => Object.assign(obj, { [item.value]: item.name }),
+		{} as Record<string, string | number>,
+	);
+}
 
 function createWorker(): Worker {
 	let worker = new Worker(new URL("./dataWorker.ts", import.meta.url), {
@@ -55,9 +64,11 @@ function createWorker(): Worker {
 		// only update these if they are empty (i.e. the first time)
 		if (columns.length === 0) {
 			columns = response.columns;
+			columns_inv = invert_select_option_array(columns);
 		}
 		if (milestone_ids.length === 0) {
 			milestone_ids = response.milestone_ids;
+			milestone_ids_inv = invert_select_option_array(milestone_ids);
 		}
 		if (selected_milestone_column === "") {
 			selected_milestone_column = milestone_ids[0].value;
@@ -113,7 +124,7 @@ function downloadCSV() {
 	}
 	const csvConfig = mkConfig({
 		useKeysAsHeaders: true,
-		filename: `${["mondey", new Date().toISOString().replace(/T.*/, "")].concat(selected_columns).join("-")}`,
+		filename: `${["mondey", new Date().toISOString().replace(/T.*/, ""), selected_milestone_column].concat(selected_columns).join("-")}`,
 		quoteStrings: true,
 	});
 	const csv = generateCsv(csvConfig)(json_data);
@@ -152,7 +163,7 @@ let headers = $derived.by(() => {
     {:else if json_data && json_data.length > 0}
         <!-- Plot -->
         {#key plot_data}
-            <div class="text-center text-2xl font-bold tracking-tight text-gray-700 dark:text-white" data-testid="researchPlotTitle">{i18n.tr.researcher.milestone} {selected_milestone_column.split("_").pop()} {selected_columns.join("-")}</div>
+            <div class="text-center text-2xl font-bold tracking-tight text-gray-700 dark:text-white" data-testid="researchPlotTitle">{i18n.tr.researcher.milestone} {milestone_ids_inv?.[selected_milestone_column] ?? selected_milestone_column} {selected_columns.map((k) => {return columns_inv?.[k] ?? k}).join("-")}</div>
             <div class="m-2 p-2" data-testid="researchPlotLines">
                 <PlotLines {plot_data} />
             </div>
@@ -161,7 +172,7 @@ let headers = $derived.by(() => {
         <Table data-testid="researchTable">
             <TableHead>
                 {#each headers as header}
-                    <TableHeadCell>{header}</TableHeadCell>
+                    <TableHeadCell>{columns_inv?.[header] ?? header}</TableHeadCell>
                 {/each}
             </TableHead>
             <TableBody>

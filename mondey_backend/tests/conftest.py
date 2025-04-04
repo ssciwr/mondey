@@ -429,6 +429,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             UserQuestion(
                 id=1,
                 order=1,
+                name="User Question 1",
                 options="[a,b,c,other]",
                 additional_option="other",
                 component="select",
@@ -459,6 +460,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             UserQuestion(
                 id=2,
                 order=2,
+                name="User Question 2",
                 component="textarea",
                 options="[a2,b2,c2,other]",
                 additional_option="other",
@@ -497,6 +499,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             ChildQuestion(
                 id=1,
                 order=0,
+                name="Child Question 1",
                 options="[a,b,c,other]",
                 additional_option="other",
                 text={
@@ -523,6 +526,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             ChildQuestion(
                 id=2,
                 order=1,
+                name="Child Question 2",
                 options="[a2,b2,c2,other]",
                 additional_option="other",
                 text={
@@ -651,6 +655,7 @@ def user_questions():
     return [
         {
             "id": 1,
+            "name": "User Question 1",
             "order": 1,
             "component": "select",
             "options": "[a,b,c,other]",
@@ -683,6 +688,7 @@ def user_questions():
         },
         {
             "id": 2,
+            "name": "User Question 2",
             "order": 2,
             "component": "textarea",
             "options": "[a2,b2,c2,other]",
@@ -721,6 +727,7 @@ def child_questions():
     return [
         {
             "id": 1,
+            "name": "Child Question 1",
             "order": 0,
             "component": "select",
             "options": "[a,b,c,other]",
@@ -753,6 +760,7 @@ def child_questions():
         },
         {
             "id": 2,
+            "name": "Child Question 2",
             "order": 1,
             "component": "select",
             "options": "[a2,b2,c2,other]",
@@ -812,6 +820,7 @@ def child_answers():
 def default_user_question_admin():
     return {
         "id": 1,
+        "name": "User Question 1",
         "component": "textarea",
         "type": "other_thing",
         "order": 0,
