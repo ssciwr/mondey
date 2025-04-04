@@ -13,7 +13,7 @@ test("/userLand/admin - Questions on Children : New question can be added, and a
 
 	await page.getByRole("link", { name: "Administration" }).click();
 	await page.locator('button:has-text("Fragen über Kind")').click();
-	await expect(page.getByText("Childs Favorite Animal")).not.toBeVisible();
+	await expect(page.getByText(childQuestionText)).not.toBeVisible();
 
 	await page.locator('button:has-text("Hinzufügen")').click();
 	await modalLoad(page);
@@ -26,12 +26,12 @@ test("/userLand/admin - Questions on Children : New question can be added, and a
 
 	await page.locator('button:has-text("Änderungen speichern")').click();
 	await page.waitForTimeout(1000);
-	const element = page.getByText("Lieblings Tier Farbe");
+	const element = page.getByText(childQuestionText);
 	await expect(element).toBeTruthy();
 
 	await page.getByText("Kinder").click();
 	await page.locator('h5:has-text("Neu")').click();
 	await modalLoad(page);
-	const element_when_adding = page.getByText("Lieblings Tier Farbe");
+	const element_when_adding = page.getByText(childQuestionText);
 	await expect(element_when_adding).toBeTruthy();
 });
