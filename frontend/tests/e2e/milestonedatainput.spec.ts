@@ -5,16 +5,17 @@ test("/userLand/children/gallery - Can add Child", async ({
 	page,
 	isMobile,
 }) => {
-	await login(page, "admin@mondey.de", "admin"); // todo: Login as parent.
-	await page.getByText("Kinder").click();
+	await login(page, "admin@mondey.de", "admin");
 	
 	// Create a new child so existing milestone data isn't affected
 	await page.locator('h5:has-text("Neu")').click();
 	await modalLoad(page);
-	await page.getByLabel("Name").fill("Test Child");
-	await page.getByLabel("Geburtsjahr").fill("2020");
-	await page.getByLabel("Geburtsmonat").fill("6");
+
+	await page.getByLabel("Name des Kindes?").fill("Test Child");
+	await page.getByLabel("Geburtsjahr des Kindes?").fill("2020");
+	await page.getByLabel("Geburtsmonat des Kindse?").fill("6");
 	await page.getByRole("button", { name: "Speichern" }).click();
+
 	await page.waitForTimeout(1000);
 	
 	// Click on the child's name
