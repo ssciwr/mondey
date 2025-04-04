@@ -83,10 +83,12 @@ $effect(() => {
 		{required}
 		{disabled}
 		{...kwargs}
+		for={label}
 	/>
 
 	{#if showTextField === true}
 		<Textarea
+
 			bind:value={additionalValue}
 			required={additionalRequired}
 			{disabled}

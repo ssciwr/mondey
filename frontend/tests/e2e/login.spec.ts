@@ -1,4 +1,5 @@
 import { type Page, expect, test } from "@playwright/test";
+import { login } from "./utils";
 
 test("/login : A non-existing user account cannot login", async ({ page }) => {
 	await login(page, "fakeUsername@test.com", "8n408sdnk2349");
