@@ -2,10 +2,7 @@
 
 <script lang="ts">
 import { refreshChildQuestions, refreshUserQuestions } from "$lib/admin.svelte";
-import {
-	updateChildQuestion,
-	updateUserQuestion,
-} from "$lib/client/services.gen";
+import { updateChildQuestion, updateUserQuestion } from "$lib/client/sdk.gen";
 import type {
 	ChildQuestionAdmin,
 	UserQuestionAdmin,
@@ -99,6 +96,10 @@ async function saveChanges() {
 	{#if question}
 		<div class="flex flex-row items-center">
 			<div class="mr-5 grow">
+				<div class="mb-5">
+					<Label class="mb-2">{i18n.tr.admin.name}</Label>
+					<Input bind:value={question.name} placeholder={i18n.tr.admin.name}/>
+				</div>
 				<div class="mb-5">
 					<Label class="mb-2">{i18n.tr.admin.question}</Label>
 					{#each Object.values(question.text) as text}

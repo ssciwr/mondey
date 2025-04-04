@@ -1,7 +1,7 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { updateI18N } from "$lib/client/services.gen";
+import { updateI18N } from "$lib/client/sdk.gen";
 import EditTranslationModal from "$lib/components/Admin/EditTranslationModal.svelte";
 import InputAutoTranslate from "$lib/components/Admin/InputAutoTranslate.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";

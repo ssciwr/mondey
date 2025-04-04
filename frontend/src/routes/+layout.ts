@@ -1,4 +1,4 @@
-import { client } from "$lib/client/services.gen";
+import { client } from "$lib/client/client.gen";
 export const prerender = true;
 
 client.setConfig({

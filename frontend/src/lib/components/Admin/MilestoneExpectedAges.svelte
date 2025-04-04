@@ -2,10 +2,7 @@
 
 <script lang="ts">
 import { refreshMilestoneGroups } from "$lib/admin.svelte";
-import {
-	getMilestoneAgeScores,
-	updateMilestone,
-} from "$lib/client/services.gen";
+import { getMilestoneAgeScores, updateMilestone } from "$lib/client/sdk.gen";
 import type { MilestoneAgeScoreCollectionPublic } from "$lib/client/types.gen";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import PlotScoreAge from "$lib/components/DataDisplay/PlotScoreAge.svelte";

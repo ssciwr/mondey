@@ -19,7 +19,7 @@ import {
 	createResearchGroup,
 	getUsers,
 	usersPatchUser,
-} from "$lib/client/services.gen";
+} from "$lib/client/sdk.gen";
 import type { UserRead } from "$lib/client/types.gen";
 import { i18n } from "$lib/i18n.svelte";
 import { onMount } from "svelte";

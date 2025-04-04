@@ -5,7 +5,7 @@ This file could possibly be better one directory up as +page.svelte, since it is
 <svelte:options runes={true} />
 <script lang="ts">
 import { goto } from "$app/navigation";
-import { getChildImage, getChildren } from "$lib/client/services.gen";
+import { getChildImage, getChildren } from "$lib/client/sdk.gen";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";

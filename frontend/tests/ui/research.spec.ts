@@ -11,18 +11,17 @@ function make_research_data(n_answer_sessions = 20, n_milestones = 5) {
 	const data: Array<Record<string, string | number>> = [];
 	let answer_session_id = 1;
 	for (let i = 0; i < n_answer_sessions; ++i) {
+		const row: Record<string, string | number> = {
+			child_age: sample(1, 72),
+			answer_session_id: answer_session_id,
+			number_of_siblings: sample(0, 5),
+			"early birth": ["yes", "no"][sample(0, 1)],
+		};
 		for (let milestone_id = 1; milestone_id <= n_milestones; ++milestone_id) {
-			data.push({
-				milestone_group_id: 1,
-				milestone_id: milestone_id,
-				answer: sample(1, 4),
-				child_age: sample(1, 72),
-				answer_session_id: answer_session_id,
-				number_of_siblings: sample(0, 5),
-				"early birth": ["yes", "no"][sample(0, 1)],
-			});
-			++answer_session_id;
+			row[`milestone_id_${milestone_id}`] = sample(1, 4);
 		}
+		data.push(row);
+		++answer_session_id;
 	}
 	return data;
 }
@@ -46,7 +45,6 @@ test("Research page: valid data", async ({ page }) => {
 	await expect(plot_title).toContainText("Meilenstein 1");
 	const table = page.getByTestId("researchTable");
 	await expect(table).toContainText("1");
-	await expect(table).toContainText("milestone_id");
 	await expect(table).toContainText("child_age");
 	await expect(table).toContainText("answer_mean");
 	await expect(table).toContainText("answer_std");

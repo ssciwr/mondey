@@ -6,7 +6,7 @@ import {
 	authCookieLogin,
 	authCookieLogout,
 	usersCurrentUser,
-} from "$lib/client/services.gen";
+} from "$lib/client/sdk.gen";
 
 function createUser() {
 	let currentUser = $state(null as null | UserRead);

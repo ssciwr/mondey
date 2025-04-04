@@ -6,7 +6,7 @@ import type {
 	RegisterRegisterData,
 	UserCreate,
 } from "$lib/client/index.js";
-import { authCookieLogin, registerRegister } from "$lib/client/services.gen";
+import { authCookieLogin, registerRegister } from "$lib/client/sdk.gen";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { refresh } from "$lib/utils/login";

@@ -19,7 +19,7 @@ import {
 	deleteUserQuestion,
 	orderChildQuestionsAdmin,
 	orderUserQuestionsAdmin,
-} from "$lib/client/services.gen";
+} from "$lib/client/sdk.gen";
 import type {
 	ChildQuestionAdmin,
 	UserQuestionAdmin,

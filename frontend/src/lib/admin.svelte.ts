@@ -2,7 +2,7 @@ import {
 	getChildQuestionsAdmin,
 	getMilestoneGroupsAdmin,
 	getUserQuestionsAdmin,
-} from "$lib/client/services.gen";
+} from "$lib/client/sdk.gen";
 import {
 	childQuestions,
 	milestoneGroups,

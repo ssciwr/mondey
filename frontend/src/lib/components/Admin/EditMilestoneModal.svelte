@@ -6,7 +6,7 @@ import {
 	deleteMilestoneImage,
 	updateMilestone,
 	uploadMilestoneImage,
-} from "$lib/client/services.gen";
+} from "$lib/client/sdk.gen";
 import type { MilestoneAdmin, MilestoneText } from "$lib/client/types.gen";
 import CancelButton from "$lib/components/Admin/CancelButton.svelte";
 import EditImage from "$lib/components/Admin/EditImage.svelte";

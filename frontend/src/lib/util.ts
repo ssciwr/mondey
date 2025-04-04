@@ -40,3 +40,8 @@ export type PlotDatum = {
 	age: number;
 	[key: string]: string | number;
 };
+
+export type PlotData = {
+	keys: Array<string>;
+	data: Array<PlotDatum>;
+};
