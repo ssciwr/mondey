@@ -13,7 +13,6 @@ type WorkerMessage = {
 
 type WorkerResponse = {
 	type: "dataProcessed";
-	dfOut: any;
 	jsonData: any[];
 	plotData: PlotDatum[];
 	columns: Array<{ value: string; name: string }>;
@@ -72,7 +71,6 @@ function processData(
 ) {
 	if (df_in === null || df_in.size === 0) {
 		return {
-			df_out: new DataFrame(),
 			json_data: [],
 			plot_data: [],
 		};
@@ -130,7 +128,6 @@ function processData(
 	}
 
 	return {
-		df_out,
 		json_data,
 		plot_data,
 	};
@@ -147,7 +144,7 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 		if (msg.data !== null) {
 			data = msg.data;
 		}
-		if (msg.data === null && data === null) {
+		if (data === null) {
 			console.log("Early return from service worker.");
 			return false; // Invalid call, no data and no cached data.
 		}
@@ -158,7 +155,7 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 		// Then process with the selected milestone and columns
 		const milestoneId = msg.selectedMilestoneId || firstMilestoneId;
 		console.log("W: Milestone ID for processing data: ", milestoneId);
-		const { df_out, json_data, plot_data } = processData(
+		const { json_data, plot_data } = processData(
 			df_in,
 			milestoneId,
 			msg.selectedColumns,

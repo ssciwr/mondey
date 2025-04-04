@@ -5,13 +5,11 @@ import { type GetResearchDataResponse, getResearchData } from "$lib/client";
 import PlotLines from "$lib/components/DataDisplay/PlotLines.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { type PlotDatum } from "$lib/util";
-import { DataFrame } from "danfojs/dist/danfojs-browser/src";
 import { download, generateCsv, mkConfig } from "export-to-csv";
 import {
 	Button,
 	Label,
 	MultiSelect,
-	Range,
 	Select,
 	type SelectOptionType,
 	Spinner,
@@ -29,7 +27,6 @@ let worker: Worker;
 let isLoading: string | boolean = $state(false);
 
 // Data states
-let df_out = $state(new DataFrame());
 let json_data = $state([] as any[]);
 let plot_data = $state([] as PlotDatum[]);
 
@@ -51,7 +48,6 @@ onMount(() => {
 
 		if (response.type === "dataProcessed") {
 			// Update the UI with processed data
-			df_out = new DataFrame(response.dfOut);
 			json_data = response.jsonData;
 			plot_data = response.plotData;
 			if (columns.length === 0) {
@@ -107,7 +103,7 @@ function downloadCSV() {
 
 // Function to send data to worker for processing
 function processDataInWorker(milestoneId: number, columns: string[]) {
-	if (!worker || df_out.size === 0) {
+	if (!worker || json_data.length === 0) {
 		console.log("Not processing data, as original load has not happened.");
 		return false;
 	}
