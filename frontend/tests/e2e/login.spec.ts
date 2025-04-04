@@ -1,12 +1,5 @@
 import { type Page, expect, test } from "@playwright/test";
 
-async function login(page: Page, username: string, password: string) {
-	await page.goto("/login", { waitUntil: "networkidle" });
-	await page.fill("#username", username);
-	await page.fill("#password", password);
-	await page.getByRole("button", { name: "Absenden" }).click();
-}
-
 test("/login : A non-existing user account cannot login", async ({ page }) => {
 	await login(page, "fakeUsername@test.com", "8n408sdnk2349");
 	await expect(page.getByText(/Fehler/i)).toBeVisible();

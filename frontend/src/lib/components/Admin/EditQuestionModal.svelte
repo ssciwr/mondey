@@ -106,6 +106,7 @@ async function saveChanges() {
 							<ButtonGroup class="w-full">
 								<InputAddon>{text.lang_id}</InputAddon>
 								<Input
+									data-testid={`text-question-input-${text.lang_id}`}
 									bind:value={text.question}
 									placeholder=""
 								/>
@@ -116,6 +117,7 @@ async function saveChanges() {
 				<div class="mb-5">
 					<Label class="mb-2">Input type</Label>
 					<Select
+						data-testid="questionTypeSelect"
 						class="mt-2"
 						items={inputTypes}
 						bind:value={question.component}
