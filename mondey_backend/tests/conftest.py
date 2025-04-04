@@ -429,6 +429,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             UserQuestion(
                 id=1,
                 order=1,
+                name="User Question 1",
                 options="[a,b,c,other]",
                 additional_option="other",
                 component="select",
@@ -459,6 +460,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             UserQuestion(
                 id=2,
                 order=2,
+                name="User Question 2",
                 component="textarea",
                 options="[a2,b2,c2,other]",
                 additional_option="other",
@@ -497,6 +499,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             ChildQuestion(
                 id=1,
                 order=0,
+                name="Child Question 1",
                 options="[a,b,c,other]",
                 additional_option="other",
                 text={
@@ -523,6 +526,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             ChildQuestion(
                 id=2,
                 order=1,
+                name="Child Question 2",
                 options="[a2,b2,c2,other]",
                 additional_option="other",
                 text={

@@ -1,5 +1,9 @@
+import type {
+	GetResearchNamesResponse,
+	GetResearchNamesResponses,
+} from "$lib/client";
 import { client } from "$lib/client/client.gen";
-import { getResearchData } from "$lib/client/sdk.gen";
+import { getResearchData, getResearchNames } from "$lib/client/sdk.gen";
 import type { PlotData } from "$lib/util";
 import { DataFrame, toJSON } from "danfojs/dist/danfojs-browser/src";
 import type { SelectOptionType } from "flowbite-svelte";
@@ -21,6 +25,7 @@ export type WorkerResponse = {
 let df_in = null as DataFrame | null;
 let milestone_ids = [] as SelectOptionType<string>[];
 let columns = [] as SelectOptionType<string>[];
+let names = {} as GetResearchNamesResponse;
 
 // get research data and construct initial state
 async function init() {
@@ -33,13 +38,23 @@ async function init() {
 		return;
 	}
 	df_in = new DataFrame(res.data);
-	const non_question_columns = ["child_age", "answer_session_id"];
+	const res_names = await getResearchNames();
+	if (res_names.error || !res_names.data) {
+		console.error(res_names.error);
+		return;
+	}
+	names = res_names.data;
 	columns = df_in.columns
 		.filter((c) => {
-			return !c.includes("milestone_id_") && !non_question_columns.includes(c);
+			return c.includes("_question_");
 		})
 		.map((k: string) => {
-			return { value: k, name: k };
+			const question_type = k.split("_")[0];
+			const question_id = k.split("_").pop();
+			const name = question_id
+				? names?.[`${question_type}_question`]?.[question_id]
+				: k;
+			return { value: k, name: name };
 		});
 	milestone_ids = df_in.columns
 		.filter((c) => {
@@ -47,7 +62,8 @@ async function init() {
 		})
 		.map((column: string) => {
 			const milestone_id = column.split("_").pop();
-			return { value: column, name: `${milestone_id}` };
+			const name = milestone_id ? names?.milestone?.[milestone_id] : column;
+			return { value: column, name: name };
 		});
 	update_data(milestone_ids[0].value, []);
 }

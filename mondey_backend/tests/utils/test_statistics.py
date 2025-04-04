@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import pytest
 from sqlmodel import select
 
@@ -9,6 +10,7 @@ from mondey_backend.statistics import _add_sample
 from mondey_backend.statistics import _finalize_statistics
 from mondey_backend.statistics import _get_statistics_by_age
 from mondey_backend.statistics import async_update_stats
+from mondey_backend.statistics import make_datatable
 
 
 def test_online_statistics_computation():
@@ -273,3 +275,8 @@ async def test_calculate_milestonegroup_statistics(statistics_session, user_sess
     assert mg.scores[8].count == 6
     assert np.isclose(mg.scores[8].avg_score, (1 + 2 + 3 + 4 + 3 + 4) / 6.0)
     assert mg.scores[8].stddev_score == pytest.approx(1.15, abs=0.1)
+
+
+def test_make_datatable_no_data():
+    df = make_datatable([], pd.DataFrame([]), pd.DataFrame([]), pd.DataFrame([]), {})
+    assert df.shape == (0, 0)
