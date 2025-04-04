@@ -28,3 +28,11 @@ backend - make sure to do this from the /e2e/ directory, not the normal backend 
 (then in another tab you can run the Playwright/UI tests)
 
 Don't commit changes to e2e/db/mondey.db, only the import script.
+
+## Data import SQL files
+
+For now the data import is split into 2 SQL files: One for base SQL data (users, children, milestones and milestone groups)
+`sqlite3 db/mondey.db < db/clearsqlimport.sql && mondey-backend`
+
+The second one contains some fake milestone answering sessions and milestone answers (no question/answers):
+`sqlite3 db/mondey.db < db/import_lots_of_milestone_answers.sql`
