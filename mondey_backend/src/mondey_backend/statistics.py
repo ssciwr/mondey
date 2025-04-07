@@ -522,36 +522,45 @@ def get_milestone_answers(session: SessionDep) -> pd.DataFrame:
     return df
 
 
-def get_user_answers(session: SessionDep) -> pd.DataFrame:
-    user_question_ids = session.exec(
-        select(UserQuestion.id).order_by(col(UserQuestion.id))
-    ).all()
-    user_answers: dict[int, dict[str, str | int | float]] = defaultdict(dict)
-    for answer in session.exec(select(UserAnswer)).all():
-        user_answers[answer.user_id][f"user_question_{answer.question_id}"] = (
-            answer.answer
+def get_answers(
+    session: SessionDep,
+    answer_type_name: str,
+) -> pd.DataFrame:
+    if answer_type_name == "user":
+        question_type = UserQuestion
+        answer_type = UserAnswer
+    elif answer_type_name == "child":
+        question_type = ChildQuestion  # type: ignore
+        answer_type = ChildAnswer  # type: ignore
+    else:
+        raise ValueError(
+            f"Invalid answer_type_name '{answer_type_name}': must be 'user' or 'child'"
         )
+    question_additional_options = {
+        q.id: q.additional_option
+        for q in session.exec(
+            select(question_type).order_by(col(question_type.id))
+        ).all()
+    }
+    answers: dict[int, dict[str, str | int | float]] = defaultdict(dict)
+    for answer in session.exec(select(answer_type)).all():
+        answer_value = answer.answer
+        # if the selected answer is the additional option, use the additional answer instead
+        if (
+            answer_value == question_additional_options.get(answer.question_id)
+            and answer.additional_answer
+        ):
+            answer_value = answer.additional_answer
+        answers[getattr(answer, f"{answer_type_name}_id")][
+            f"{answer_type_name}_question_{answer.question_id}"
+        ] = answer_value
     df = pd.DataFrame.from_dict(
-        user_answers,
+        answers,
         orient="index",
-        columns=[f"user_question_{question_id}" for question_id in user_question_ids],
-    )
-    return df
-
-
-def get_child_answers(session: SessionDep) -> pd.DataFrame:
-    child_question_ids = session.exec(
-        select(ChildQuestion.id).order_by(col(ChildQuestion.id))
-    ).all()
-    child_answers: dict[int, dict[str, str | int | float]] = defaultdict(dict)
-    for answer in session.exec(select(ChildAnswer)).all():
-        child_answers[answer.child_id][f"child_question_{answer.question_id}"] = (
-            answer.answer
-        )
-    df = pd.DataFrame.from_dict(
-        child_answers,
-        orient="index",
-        columns=[f"child_question_{question_id}" for question_id in child_question_ids],
+        columns=[
+            f"{answer_type_name}_question_{question_id}"
+            for question_id in question_additional_options
+        ],
     )
     return df
 
@@ -583,9 +592,9 @@ async def extract_research_data(
         session, milestone_answer_sessions
     )
     logger.info(f"  - collected {len(child_ages)} child ages")
-    user_answers = get_user_answers(session)
+    user_answers = get_answers(session, "user")
     logger.info(f"  - collected {len(user_answers)} user answers")
-    child_answers = get_child_answers(session)
+    child_answers = get_answers(session, "child")
     logger.info(f"  - collected {len(child_answers)} child answers")
     datatable = make_datatable(
         milestone_answer_sessions,
