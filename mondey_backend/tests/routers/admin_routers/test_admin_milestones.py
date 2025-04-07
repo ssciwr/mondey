@@ -298,7 +298,7 @@ def test_delete_milestone_dry_run(admin_client, session):
     assert response.status_code == 200
     assert response_json["dry_run"]
     assert "would_delete" in response_json
-    assert response_json["would_delete"]["affected_answers_count"] == 3
+    assert response_json["would_delete"]["affectedAnswers"] == 3
     assert (
         count_milestone_answers_for_milestone(session, milestone_id)
         == expected_answers_from_fixtures
@@ -311,7 +311,7 @@ def test_delete_milestone_dry_run(admin_client, session):
     response_json = response.json()
     assert response_json["dry_run"]
     assert "would_delete" in response_json
-    assert response_json["would_delete"]["affected_answers_count"] == 3
+    assert response_json["would_delete"]["affectedAnswers"] == 3
     assert (
         count_milestone_answers_for_milestone(session, milestone_id)
         == expected_answers_from_fixtures
@@ -356,10 +356,10 @@ def test_delete_milestone_groups_dry_run(admin_client, session):
     assert response_json["dry_run"]
     assert "would_delete" in response_json
     assert (
-        response_json["would_delete"]["affected_answers_count"]
+        response_json["would_delete"]["affectedAnswers"]
         == expected_answers_from_fixtures
     )
-    assert response_json["would_delete"]["milestone_ids"] == [3, 2, 1]
+    assert response_json["would_delete"]["affectedMilestones"] == 3
 
     response = admin_client.delete(f"/admin/milestone-groups/{milestone_group_id}")
     assert response.status_code == 200  # still exists because was dry run.

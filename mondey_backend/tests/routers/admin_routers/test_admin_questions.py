@@ -8,9 +8,12 @@ from mondey_backend.models.questions import UserQuestion
 
 
 def test_get_user_question_admin_works(admin_client: TestClient, user_questions):
-    response = admin_client.get("/admin/user-questions/")
+    response = admin_client.get("/user-questions/")
+    print("Testing user questions... as admin...")
 
-    assert response.status_code == 200
+    print("User questiosn public...:")
+    print(response.json())
+    assert response.status_code == 300
 
     assert [element["order"] for element in response.json()] == [1, 2]
     assert response.json() == user_questions
@@ -130,7 +133,7 @@ def test_delete_user_question_works(session, admin_client: TestClient):
     assert response.status_code == 200
     assert response_json["ok"]
     assert response_json["would_delete"]
-    assert response_json["would_delete"]["total_answers"] == 1
+    assert response_json["would_delete"]["affectedQuestionAnswers"] == 1
 
     user_questions = session.exec(select(UserQuestion)).all()
     assert len(user_questions) == 2
@@ -292,7 +295,7 @@ def test_delete_child_question_works(session, admin_client: TestClient):
     assert response.status_code == 200
     assert response_json["ok"]
     assert response_json["would_delete"]
-    assert response_json["would_delete"]["total_answers"] == 1
+    assert response_json["would_delete"]["affectedQuestionAnswers"] == 1
 
     child_questions = session.exec(select(ChildQuestion)).all()
     assert len(child_questions) == 2

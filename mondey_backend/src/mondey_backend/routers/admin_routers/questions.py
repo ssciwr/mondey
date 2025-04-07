@@ -66,10 +66,10 @@ def create_router() -> APIRouter:
     ):
         question = get(session, UserQuestion, user_question_id)
         if dry_run:
-            affected_answers_count = len(question.answers)
+            affectedAnswers = len(question.answers)
             return {
                 "ok": "True",
-                "would_delete": {"total_answers": affected_answers_count},
+                "would_delete": {"affectedQuestionAnswers": affectedAnswers},
             }
         session.delete(question)
         session.commit()
@@ -126,10 +126,10 @@ def create_router() -> APIRouter:
     ):
         question = get(session, ChildQuestion, child_question_id)
         if dry_run:
-            affected_answers_count = len(question.answers)
+            affectedAnswers = len(question.answers)
             return {
                 "ok": "True",
-                "would_delete": {"total_answers": affected_answers_count},
+                "would_delete": {"affectedQuestionAnswers": affectedAnswers},
             }
         session.delete(question)
         session.commit()

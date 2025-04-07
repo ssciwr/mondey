@@ -112,21 +112,19 @@ def create_router() -> APIRouter:
                 "deleted_answer_count": affected_milestone_answers,
             }
 
-        affected_answers = 0
+        affectedAnswers = 0
         for milestone in milestone_group.milestones:
             if milestone.id is None:
                 continue
-            affected_answers += count_milestone_answers_for_milestone(
+            affectedAnswers += count_milestone_answers_for_milestone(
                 session, milestone.id
             )
         return {
             "ok": True,
             "dry_run": True,
             "would_delete": {
-                "milestone_ids": [
-                    milestone.id for milestone in milestone_group.milestones
-                ],
-                "affected_answers_count": affected_answers,
+                "affectedMilestones": len(milestone_group.milestones),
+                "affectedAnswers": affectedAnswers,
             },
         }
 
@@ -185,13 +183,13 @@ def create_router() -> APIRouter:
                 "deleted_answer_count": affected_milestone_answers,
             }
         else:
-            affected_answers = count_milestone_answers_for_milestone(
+            affectedAnswers = count_milestone_answers_for_milestone(
                 session, milestone_id
             )
             return {
                 "ok": True,
                 "dry_run": True,
-                "would_delete": {"affected_answers_count": affected_answers},
+                "would_delete": {"affectedAnswers": affectedAnswers},
             }
 
     @router.post("/milestones/order/")

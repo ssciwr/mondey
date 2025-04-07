@@ -107,7 +107,7 @@ async function addMilestone(milestoneGroupId: number) {
 	showEditMilestoneModal = true;
 }
 
-async function doDeleteMilestone() {
+async function doDeleteMilestone(dry_run = true) {
 	if (!currentMilestone) {
 		console.log("No currentMilestone");
 		return;
@@ -115,6 +115,7 @@ async function doDeleteMilestone() {
 	const { data, error } = await deleteMilestone({
 		path: {
 			milestone_id: currentMilestone.id,
+			dry_run: dry_run,
 		},
 	});
 	if (error) {
@@ -273,7 +274,7 @@ async function doDeleteMilestone() {
 	<EditMilestoneModal bind:open={showEditMilestoneModal} bind:milestone={currentMilestone}
 	></EditMilestoneModal>
 {/key}
-<DeleteModal bind:open={showDeleteMilestoneModal} onclick={doDeleteMilestone}></DeleteModal>
+<DeleteModal bind:open={showDeleteMilestoneModal} onclick={(dryRun=true) => doDeleteMilestone(dryRun)}></DeleteModal>
 
 <OrderItemsModal bind:open={showOrderItemsModal} items={currentOrderItems} endpoint={currentOrderEndpoint} callback={refreshMilestoneGroups}  />
 {:else}
