@@ -13,43 +13,43 @@ INSERT INTO milestonegroup (id, "order") VALUES (1001, 2);
 
 -- Add milestone group texts
 -- Reading Text group
-INSERT INTO milestonegrouptext (group_id, lang_id, title, desc) 
+INSERT INTO milestonegrouptext (group_id, lang_id, title, desc)
 VALUES (1000, 'en', 'Reading Text', 'Skills related to reading and text recognition');
-INSERT INTO milestonegrouptext (group_id, lang_id, title, desc) 
+INSERT INTO milestonegrouptext (group_id, lang_id, title, desc)
 VALUES (1000, 'de', 'Textlesen', 'Fähigkeiten im Zusammenhang mit Lesen und Texterkennung');
-INSERT INTO milestonegrouptext (group_id, lang_id, title, desc) 
+INSERT INTO milestonegrouptext (group_id, lang_id, title, desc)
 VALUES (1000, 'fr', 'Lecture de texte', 'Compétences liées à la lecture et à la reconnaissance de texte');
 
 -- Dancing Skills group
-INSERT INTO milestonegrouptext (group_id, lang_id, title, desc) 
+INSERT INTO milestonegrouptext (group_id, lang_id, title, desc)
 VALUES (1001, 'en', 'Dancing Skills', 'Skills related to movement and dancing');
-INSERT INTO milestonegrouptext (group_id, lang_id, title, desc) 
+INSERT INTO milestonegrouptext (group_id, lang_id, title, desc)
 VALUES (1001, 'de', 'Tanzfähigkeiten', 'Fähigkeiten im Zusammenhang mit Bewegung und Tanzen');
-INSERT INTO milestonegrouptext (group_id, lang_id, title, desc) 
+INSERT INTO milestonegrouptext (group_id, lang_id, title, desc)
 VALUES (1001, 'fr', 'Compétences en danse', 'Compétences liées au mouvement et à la danse');
 
 -- Add milestones for Reading Text group
-INSERT INTO milestone (id, group_id, "order", expected_age_months, name) 
+INSERT INTO milestone (id, group_id, "order", expected_age_months, name)
 VALUES (1000, 1000, 1, 3, 'Recognizing Shapes');
-INSERT INTO milestone (id, group_id, "order", expected_age_months, name) 
+INSERT INTO milestone (id, group_id, "order", expected_age_months, name)
 VALUES (1001, 1000, 2, 6, 'Recognizing Colors');
-INSERT INTO milestone (id, group_id, "order", expected_age_months, name) 
+INSERT INTO milestone (id, group_id, "order", expected_age_months, name)
 VALUES (1002, 1000, 3, 9, 'Recognizing Letters');
-INSERT INTO milestone (id, group_id, "order", expected_age_months, name) 
+INSERT INTO milestone (id, group_id, "order", expected_age_months, name)
 VALUES (1003, 1000, 4, 12, 'Recognizing Digits');
-INSERT INTO milestone (id, group_id, "order", expected_age_months, name) 
+INSERT INTO milestone (id, group_id, "order", expected_age_months, name)
 VALUES (1004, 1000, 5, 18, 'Recognizing Words');
 
 -- Add milestones for Dancing Skills group
-INSERT INTO milestone (id, group_id, "order", expected_age_months, name) 
+INSERT INTO milestone (id, group_id, "order", expected_age_months, name)
 VALUES (1005, 1001, 1, 3, 'Moving to Music');
-INSERT INTO milestone (id, group_id, "order", expected_age_months, name) 
+INSERT INTO milestone (id, group_id, "order", expected_age_months, name)
 VALUES (1006, 1001, 2, 6, 'Clapping Hands');
-INSERT INTO milestone (id, group_id, "order", expected_age_months, name) 
+INSERT INTO milestone (id, group_id, "order", expected_age_months, name)
 VALUES (1007, 1001, 3, 9, 'Simple Dance Moves');
-INSERT INTO milestone (id, group_id, "order", expected_age_months, name) 
+INSERT INTO milestone (id, group_id, "order", expected_age_months, name)
 VALUES (1008, 1001, 4, 12, 'Following Dance Instructions');
-INSERT INTO milestone (id, group_id, "order", expected_age_months, name) 
+INSERT INTO milestone (id, group_id, "order", expected_age_months, name)
 VALUES (1009, 1001, 5, 18, 'Creating Dance Patterns');
 
 -- Add milestone texts for Reading Text group
@@ -136,15 +136,15 @@ VALUES (1009, 'fr', 'Création de motifs de danse', 'L''enfant peut créer des m
 
 -- Create a child born 6 months ago for user ID 3
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)
-VALUES (1000, 3, 'Test Child', 
-        CASE 
-            WHEN strftime('%m', 'now') <= '06' THEN strftime('%Y', 'now') - 1 
-            ELSE strftime('%Y', 'now') 
-        END, 
-        CASE 
-            WHEN strftime('%m', 'now') <= '06' THEN strftime('%m', 'now') + 6 
-            ELSE strftime('%m', 'now') - 6 
-        END, 
+VALUES (1000, 3, 'Test Child',
+        CASE
+            WHEN strftime('%m', 'now') <= '06' THEN strftime('%Y', 'now') - 1
+            ELSE strftime('%Y', 'now')
+        END,
+        CASE
+            WHEN strftime('%m', 'now') <= '06' THEN strftime('%m', 'now') + 6
+            ELSE strftime('%m', 'now') - 6
+        END,
         false, '#f0f0ff');
 
 -- Create milestone answer session for the child

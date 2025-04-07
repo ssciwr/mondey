@@ -1,5 +1,5 @@
 -- This script creates 7 additional children with milestone answer sessions
--- It should be run after clearsqlimport.sql
+-- It should be run after importBaseMetadata.sql
 
 -- Clear any existing data with IDs in our range if needed
 DELETE FROM milestoneanswer WHERE answer_session_id >= 1002 AND answer_session_id < 1020;
@@ -119,7 +119,7 @@ INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, 
 VALUES (1012, 1007, 5, '2025-01-04 11:42:49', true, false);
 
 -- Now add milestone answers for each session
--- Using milestone IDs 1000-1009 from clearsqlimport.sql
+-- Using milestone IDs 1000-1009 from importBaseMetadata.sql
 
 -- Child 1 (Emma) - 3 months old - Session 1 (1002)
 -- Reading Text milestones

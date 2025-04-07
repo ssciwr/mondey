@@ -24,7 +24,7 @@ This database contains
 Use this command to run the test database, then fill it with SQL (we do this because .db is obscure), then run the
 backend - make sure to do this from the /e2e/ directory, not the normal backend directory!
 
-`sqlite3 db/mondey.db < db/clearsqlimport.sql && mondey-backend`
+`sqlite3 db/mondey.db < db/importBaseMetadata.sql && mondey-backend`
 (then in another tab you can run the Playwright/UI tests)
 
 Don't commit changes to e2e/db/mondey.db, only the import script.
@@ -32,7 +32,13 @@ Don't commit changes to e2e/db/mondey.db, only the import script.
 ## Data import SQL files
 
 For now the data import is split into 2 SQL files: One for base SQL data (users, children, milestones and milestone groups)
-`sqlite3 db/mondey.db < db/clearsqlimport.sql && mondey-backend`
+`sqlite3 db/mondey.db < db/importBaseMetadata.sql && mondey-backend`
 
 The second one contains some fake milestone answering sessions and milestone answers (no question/answers):
-`sqlite3 db/mondey.db < db/import_lots_of_milestone_answers.sql`
+`sqlite3 db/mondey.db < db/importMilestoneAnswers.sql`
+
+The CI script takes care of running these sequentially before each test.
+
+If you want to test E2E tests that are not idempotent(e.g. they delete some data from the .sql import files), then
+you should rollback the changes those files make to `mondey.db` in the e2e directory each time before you run the test,
+rerun the SQL import, then run your test.
