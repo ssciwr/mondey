@@ -630,7 +630,12 @@ export type DeleteMilestoneGroupAdminData = {
     path: {
         milestone_group_id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * When true, shows what would be deleted without actually deleting
+         */
+        dry_run?: boolean;
+    };
     url: '/admin/milestone-groups/{milestone_group_id}';
 };
 
@@ -755,7 +760,12 @@ export type DeleteMilestoneData = {
     path: {
         milestone_id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * When true, shows what would be deleted without actually deleting
+         */
+        dry_run?: boolean;
+    };
     url: '/admin/milestones/{milestone_id}';
 };
 
@@ -1032,7 +1042,12 @@ export type DeleteUserQuestionData = {
     path: {
         user_question_id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * When true, shows what would be deleted without actually deleting
+         */
+        dry_run?: boolean;
+    };
     url: '/admin/user-questions/{user_question_id}';
 };
 
@@ -1137,7 +1152,12 @@ export type DeleteChildQuestionData = {
     path: {
         child_question_id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * When true, shows what would be deleted without actually deleting
+         */
+        dry_run?: boolean;
+    };
     url: '/admin/child-questions/{child_question_id}';
 };
 
