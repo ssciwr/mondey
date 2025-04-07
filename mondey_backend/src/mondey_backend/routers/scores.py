@@ -54,11 +54,13 @@ def compute_feedback_simple(
     def leq(val: float, lim: float) -> bool:
         return val < lim or bool(np.isclose(val, lim))
 
+    logging.warning(f"Score was {score}")
     if stat.avg_score < 1e-2 and stat.stddev_score < 1e-2:
         # statistics has no data
         return TrafficLight.invalid.value
 
     if stat.stddev_score < 1e-2:
+        logging.warning("Score was degenerate statistically")
         # statistics data is degenerate and has no variance <- few datapoints
         # in this case, any score below the average is considered underperforming:
         # one step below -> yellow, two steps below -> red
@@ -72,7 +74,16 @@ def compute_feedback_simple(
         return TrafficLight.red.value
     elif score > lim_lower and leq(score, lim_upper):
         return TrafficLight.yellow.value
+        # If the score is less than the average score - 1, we get yellow.
+        # So a score of average-0.8 gets green by falling into the else below.
+    elif (
+        score == 1
+    ):  # Specifically marked as not having acheived the milestone ("Gar nichts").
+        # Even if the stats are degenerate (so lim_lower and upper will be below 0), return yellow.
+        logging.warning("Default yellow case")
+        return TrafficLight.yellow.value
     else:
+        logging.warning(f"Default green case, score was {score}")
         return TrafficLight.green.value
 
 
@@ -195,12 +206,18 @@ def compute_milestonegroup_feedback_detailed(
     # for each milestonegroup, get the statistics, compute the current mean, and compute the feedback
     feedback: dict[int, dict[int, int]] = {}
     for milestone_id, answer in answersession.answers.items():
-        logger.debug(f"  milestone id: {milestone_id}, answer: {answer.answer + 1}")
+        logging.warning("")
+        logging.warning("")
+        logger.warning(
+            f"  milestone id: {milestone_id}, this specific childs answer: {answer.answer + 1}"
+        )
         stats = session.get(MilestoneAgeScoreCollection, milestone_id)
-        logger.debug(f"  stats: {stats}")
+        logger.warning(f"  stats: {stats}")
         if answer.milestone_group_id not in feedback:
+            logger.warning("Group ID not in 'feedback' variable.")
             feedback[answer.milestone_group_id] = {}
         if stats is None:
+            logger.warning("Feedback was None because stats was none!")
             feedback[answer.milestone_group_id][cast(int, answer.milestone_id)] = (
                 TrafficLight.invalid.value
             )
@@ -210,10 +227,19 @@ def compute_milestonegroup_feedback_detailed(
                     logger.debug(
                         f"   score: {i}, {score.count}, {score.avg_score}, {score.stddev_score}"
                     )
-            feedback[answer.milestone_group_id][cast(int, answer.milestone_id)] = (
-                compute_feedback_simple(stats.scores[age], answer.answer + 1)
+            traffic_light_answer_value = compute_feedback_simple(
+                stats.scores[age], answer.answer + 1
             )
+            feedback[answer.milestone_group_id][cast(int, answer.milestone_id)] = (
+                traffic_light_answer_value
+            )
+            logger.warning(f"Score at age: {stats.scores[age]}")
+            logger.warning(f"Answer: {answer.answer + 1}")
+            logger.warning(
+                f"Converted to Traffic Light Output Answer: {traffic_light_answer_value}"
+            )
+            # logger.warning(str(compute_feedback_simple(stats.scores[age], answer.answer + 1)))
 
-    logger.debug(f" detailed feedback: {feedback}")
+    logger.warning(f" detailed feedback: {feedback}")
 
     return feedback
