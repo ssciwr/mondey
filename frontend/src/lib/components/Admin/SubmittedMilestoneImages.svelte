@@ -6,7 +6,7 @@ import {
 	approveSubmittedMilestoneImage,
 	deleteSubmittedMilestoneImage,
 	getSubmittedMilestoneImages,
-} from "$lib/client/services.gen";
+} from "$lib/client/sdk.gen";
 import type { SubmittedMilestoneImagePublic } from "$lib/client/types.gen";
 import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";

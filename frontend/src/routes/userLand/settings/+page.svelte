@@ -5,7 +5,7 @@ import {
 	authCookieLogin,
 	usersCurrentUser,
 	usersPatchCurrentUser,
-} from "$lib/client/services.gen";
+} from "$lib/client/sdk.gen";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { preventDefault } from "$lib/util";

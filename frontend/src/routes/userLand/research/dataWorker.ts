@@ -1,180 +1,182 @@
-import type { GetResearchDataResponse } from "$lib/client";
-import type { PlotDatum } from "$lib/util";
+import type {
+	GetResearchNamesResponse,
+	GetResearchNamesResponses,
+} from "$lib/client";
+import { client } from "$lib/client/client.gen";
+import { getResearchData, getResearchNames } from "$lib/client/sdk.gen";
+import type { PlotData } from "$lib/util";
 import { DataFrame, toJSON } from "danfojs/dist/danfojs-browser/src";
-import * as dfd from "danfojs/dist/danfojs-browser/src";
+import type { SelectOptionType } from "flowbite-svelte";
 
 // Message types for worker communication
-type WorkerMessage = {
-	type: "processDataFully";
-	data: GetResearchDataResponse;
-	selectedMilestoneId: number;
-	selectedColumns: string[];
+export type WorkerRequest = {
+	selected_milestone_column: string;
+	selected_columns: string[];
 };
 
-type WorkerResponse = {
-	type: "dataProcessed";
-	jsonData: any[];
-	plotData: PlotDatum[];
-	columns: Array<{ value: string; name: string }>;
-	milestoneIds: Array<{ value: number; name: string }>;
-	firstMilestoneId: number;
+export type WorkerResponse = {
+	json_data: any[];
+	plot_data: PlotData;
+	milestone_ids: SelectOptionType<string>[];
+	columns: SelectOptionType<string>[];
 };
 
-// Process data function
-function preprocessData(data: GetResearchDataResponse) {
-	const df_in = new DataFrame(data);
-	if (df_in.size === 0) {
-		return {
-			columns: [],
-			milestoneIds: [],
-			firstMilestoneId: 0,
-			df_in,
-		};
+// initial state that is constructed when web worker starts
+let df_in = null as DataFrame | null;
+let milestone_ids = [] as SelectOptionType<string>[];
+let columns = [] as SelectOptionType<string>[];
+let names = {} as GetResearchNamesResponse;
+
+// get research data and construct initial state
+async function init() {
+	client.setConfig({
+		baseUrl: import.meta.env.VITE_MONDEY_API_URL,
+	});
+	const res = await getResearchData();
+	if (res.error || !res.data) {
+		console.error(res.error);
+		return;
 	}
-
-	const non_question_columns = [
-		"milestone_group_id",
-		"milestone_id",
-		"answer",
-		"child_age",
-		"answer_session_id",
-	];
-
-	console.log("W: Columns before: ", df_in.columns);
-
-	const columns = df_in.columns
+	df_in = new DataFrame(res.data);
+	const res_names = await getResearchNames();
+	if (res_names.error || !res_names.data) {
+		console.error(res_names.error);
+		return;
+	}
+	names = res_names.data;
+	columns = df_in.columns
 		.filter((c) => {
-			return !non_question_columns.includes(c);
+			return c.includes("_question_");
 		})
 		.map((k: string) => {
-			return { value: k, name: k };
+			const question_type = k.split("_")[0];
+			const question_id = k.split("_").pop();
+			const name = question_id
+				? names?.[`${question_type}_question`]?.[question_id]
+				: k;
+			return { value: k, name: name };
 		});
-
-	const milestoneIds = df_in.milestone_id.unique().values.map((k: number) => {
-		return { value: k, name: `${k}` };
-	});
-
-	const firstMilestoneId = milestoneIds.length > 0 ? milestoneIds[0].value : 0;
-
-	return {
-		columns,
-		milestoneIds,
-		firstMilestoneId,
-		df_in,
-	};
+	milestone_ids = df_in.columns
+		.filter((c) => {
+			return c.includes("milestone_id_");
+		})
+		.map((column: string) => {
+			const milestone_id = column.split("_").pop();
+			const name = milestone_id ? names?.milestone?.[milestone_id] : column;
+			return { value: column, name: name };
+		});
+	update_data(milestone_ids[0].value, []);
 }
 
-function processData(
-	df_in: DataFrame,
-	selectedMilestoneId: number,
-	selectedColumns: string[],
-) {
+// construct dataframe of answers for selected milestone grouped by selected columns
+function get_df(selected_milestone_column: string, selected_columns: string[]) {
 	if (df_in === null || df_in.size === 0) {
-		return {
-			json_data: [],
-			plot_data: [],
-		};
+		return new DataFrame();
 	}
-
-	// Process df_out
 	const grp = df_in
 		.loc({
-			rows: df_in.milestone_id.eq(selectedMilestoneId),
+			columns: ["child_age", selected_milestone_column].concat(
+				selected_columns,
+			),
 		})
-		.groupby(["milestone_id", "child_age"].concat(selectedColumns));
+		.dropNa()
+		.groupby(["child_age"].concat(selected_columns));
+	const df = grp.col([selected_milestone_column]).mean();
+	if (df.size === 0) {
+		return new DataFrame();
+	}
+	df.rename(
+		{ [`${selected_milestone_column}_mean`]: "answer_mean" },
+		{ inplace: true },
+	);
+	df.addColumn(
+		"answer_std",
+		grp
+			.col([selected_milestone_column])
+			.std()
+			.column(`${selected_milestone_column}_std`),
+		{
+			inplace: true,
+		},
+	);
+	df.addColumn(
+		"answer_count",
+		grp
+			.col([selected_milestone_column])
+			.count()
+			.column(`${selected_milestone_column}_count`),
+		{
+			inplace: true,
+		},
+	);
+	df.sortValues("child_age", { ascending: true, inplace: true });
+	return df;
+}
 
-	const df_out = grp.col(["answer"]).mean();
+// construct json data from supplied dataframe
+function get_json_data(df: DataFrame) {
+	if (!df || !df.child_age) {
+		return [];
+	}
+	return toJSON(df) as [];
+}
 
-	df_out.addColumn("answer_std", grp.col(["answer"]).std().answer_std, {
-		inplace: true,
-	});
-
-	df_out.addColumn("answer_count", grp.col(["answer"]).count().answer_count, {
-		inplace: true,
-	});
-
-	df_out.sortValues("child_age", { ascending: true, inplace: true });
-
-	// Process json_data
-	const json_data = dfd.toJSON(df_out) as [];
-
-	// Process plot_data
-	const plot_data: PlotDatum[] = [];
-
-	if (df_out?.milestone_id) {
-		const groupby = df_out
-			.loc({
-				rows: df_out.milestone_id.eq(selectedMilestoneId),
-				columns: ["child_age", "answer_mean"].concat(selectedColumns),
-			})
-			.groupby(selectedColumns);
-
-		const colDict = groupby.colDict as Record<
-			string,
-			Record<string, Array<number>>
-		>;
-
-		for (let a = 1; a < 73; ++a) {
-			plot_data.push({ age: a });
-		}
-
-		for (const key in colDict) {
-			for (const [index, age] of colDict[key].child_age.entries()) {
-				if (age >= 1 && age <= 72) {
-					plot_data[age - 1][key] = colDict[key].answer_mean[index];
-				}
+// construct plot data from supplied dataframe grouped by selected columns
+function get_plot_data(df: DataFrame, selected_columns: string[]) {
+	const plot_data = { keys: [], data: [] } as PlotData;
+	if (!df || !df.child_age) {
+		return plot_data;
+	}
+	const groupby = df
+		.loc({
+			columns: ["child_age", "answer_mean"].concat(selected_columns),
+		})
+		.groupby(selected_columns);
+	const colDict = groupby.colDict as Record<
+		string,
+		Record<string, Array<number>>
+	>;
+	plot_data.keys = Object.keys(colDict);
+	const min_child_age = 0;
+	const max_child_age = 72;
+	for (let a = min_child_age; a <= max_child_age; ++a) {
+		plot_data.data.push({ age: a });
+	}
+	for (const key in colDict) {
+		for (const [index, age] of colDict[key].child_age.entries()) {
+			if (age >= min_child_age && age <= max_child_age) {
+				// only create plot data points for ages in plotting range
+				plot_data.data[age][key] = colDict[key].answer_mean[index];
 			}
 		}
 	}
-
-	return {
-		json_data,
-		plot_data,
-	};
+	return plot_data;
 }
 
-let data: GetResearchDataResponse | null = null;
-
-// Handle messages from main thread
-self.onmessage = (event: MessageEvent<WorkerMessage>) => {
-	const msg = event.data;
-
-	if (msg.type === "processDataFully") {
-		console.log("W: Processing data...", msg.data);
-		if (msg.data !== null) {
-			data = msg.data;
-		}
-		if (data === null) {
-			console.log("Early return from service worker.");
-			return false; // Invalid call, no data and no cached data.
-		}
-		// First preprocess the data
-		const { columns, milestoneIds, firstMilestoneId, df_in } =
-			preprocessData(data);
-		console.log("W: Done preprocessing.");
-		// Then process with the selected milestone and columns
-		const milestoneId = msg.selectedMilestoneId || firstMilestoneId;
-		console.log("W: Milestone ID for processing data: ", milestoneId);
-		const { json_data, plot_data } = processData(
-			df_in,
-			milestoneId,
-			msg.selectedColumns,
-		);
-		console.log("W: Done processing.", columns);
-
-		// Send everything back to the main thread
-		const response: WorkerResponse = {
-			type: "dataProcessed",
-			jsonData: json_data,
-			plotData: plot_data,
-			columns: columns,
-			milestoneIds: milestoneIds,
-			firstMilestoneId: firstMilestoneId,
-		};
-
-		if (columns.length > 0) {
-			console.log("W: Completed data processing...");
-			self.postMessage(response);
-		}
+// send message with updated data for provided milestone and group-by columns
+function update_data(
+	selected_milestone_column: string,
+	selected_columns: string[],
+) {
+	const df = get_df(selected_milestone_column, selected_columns);
+	if (df_in === null || df_in.size === 0) {
+		return;
 	}
+	const json_data = get_json_data(df);
+	const plot_data = get_plot_data(df, selected_columns);
+	const message: WorkerResponse = {
+		json_data: json_data,
+		plot_data: plot_data,
+		milestone_ids: milestone_ids,
+		columns: columns,
+	};
+	self.postMessage(message);
+}
+
+self.onmessage = (event: MessageEvent<WorkerRequest>) => {
+	const { selected_milestone_column, selected_columns } = event.data;
+	update_data(selected_milestone_column, selected_columns);
 };
+
+// download research data and construct initial state on creation of web worker
+init();

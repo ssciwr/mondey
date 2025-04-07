@@ -5,7 +5,7 @@ import {
 	getCurrentUserAnswers,
 	getUserQuestions,
 	updateCurrentUserAnswers,
-} from "$lib/client/services.gen";
+} from "$lib/client/sdk.gen";
 import {
 	type GetUserQuestionsResponse,
 	type UserAnswerPublic,
