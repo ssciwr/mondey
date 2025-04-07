@@ -4,6 +4,9 @@ from sqlalchemy.orm import Mapped
 from sqlmodel import Field
 from sqlmodel import SQLModel
 
+from .utils import back_populates
+
+# Different format to dict-relationship
 from .utils import dict_relationship
 from .utils import fixed_length_string_field
 
@@ -55,6 +58,9 @@ class UserQuestionText(QuestionTextBase, table=True):
 class UserQuestion(Question, table=True):
     id: int | None = Field(default=None, primary_key=True)
     text: Mapped[dict[str, UserQuestionText]] = dict_relationship(key="lang_id")
+    answers: Mapped[list[UserAnswer]] = back_populates(
+        "question", cascade="all, delete-orphan"
+    )
 
 
 class UserQuestionPublic(QuestionPublic):
@@ -80,6 +86,9 @@ class ChildQuestionText(QuestionTextBase, table=True):
 class ChildQuestion(Question, table=True):
     id: int | None = Field(default=None, primary_key=True)
     text: Mapped[dict[str, ChildQuestionText]] = dict_relationship(key="lang_id")
+    answers: Mapped[list[ChildAnswer]] = back_populates(
+        "question", cascade="all, delete-orphan"
+    )
 
 
 class ChildQuestionPublic(QuestionPublic):
@@ -105,6 +114,7 @@ class UserAnswer(AnswerBase, table=True):
     question_id: int = Field(
         default=None, primary_key=True, foreign_key="userquestion.id"
     )
+    question: UserQuestion = back_populates("answers")
 
 
 class UserAnswerPublic(AnswerPublicBase):
@@ -116,6 +126,7 @@ class ChildAnswer(AnswerBase, table=True):
     question_id: int = Field(
         default=None, primary_key=True, foreign_key="childquestion.id"
     )
+    question: ChildQuestion = back_populates("answers")
 
 
 class ChildAnswerPublic(AnswerPublicBase):

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter
+from fastapi import Query
 from sqlmodel import col
 from sqlmodel import select
 
@@ -55,11 +56,24 @@ def create_router() -> APIRouter:
         return db_user_question
 
     @router.delete("/user-questions/{user_question_id}")
-    def delete_user_question(session: SessionDep, user_question_id: int):
+    def delete_user_question(
+        session: SessionDep,
+        user_question_id: int,
+        dry_run: bool = Query(
+            True,
+            description="When true, shows what would be deleted without actually deleting",
+        ),
+    ):
         question = get(session, UserQuestion, user_question_id)
+        if dry_run:
+            affected_answers_count = len(question.answers)
+            return {
+                "ok": "True",
+                "would_delete": {"total_answers": affected_answers_count},
+            }
         session.delete(question)
         session.commit()
-        return {"ok": True}
+        return {"ok": True, "deletion_executed": True}
 
     @router.post("/user-questions/order/")
     def order_user_questions_admin(session: SessionDep, item_orders: list[ItemOrder]):
@@ -102,11 +116,24 @@ def create_router() -> APIRouter:
         return db_child_question
 
     @router.delete("/child-questions/{child_question_id}")
-    def delete_child_question(session: SessionDep, child_question_id: int):
+    def delete_child_question(
+        session: SessionDep,
+        child_question_id: int,
+        dry_run: bool = Query(
+            True,
+            description="When true, shows what would be deleted without actually deleting",
+        ),
+    ):
         question = get(session, ChildQuestion, child_question_id)
+        if dry_run:
+            affected_answers_count = len(question.answers)
+            return {
+                "ok": "True",
+                "would_delete": {"total_answers": affected_answers_count},
+            }
         session.delete(question)
         session.commit()
-        return {"ok": True}
+        return {"ok": True, "deletion_executed": True}
 
     @router.post("/child-questions/order/")
     def order_child_questions_admin(session: SessionDep, item_orders: list[ItemOrder]):

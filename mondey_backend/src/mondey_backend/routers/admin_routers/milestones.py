@@ -85,13 +85,23 @@ def create_router() -> APIRouter:
 
         if not dry_run:
             affected_milestone_answers = 0
-            deleted_milestone_ids = delete_milestones_with_group_id(
-                session, milestone_group_id, dry_run=False
-            )
-            for milestone_id in deleted_milestone_ids:
+            groups_milestone_ids = session.exec(
+                select(Milestone.id).where(
+                    col(Milestone.group_id) == milestone_group_id
+                )
+            ).all()
+            for milestone_id in [
+                milestone_id
+                for milestone_id in groups_milestone_ids
+                if milestone_id is not None
+            ]:
                 affected_milestone_answers += count_milestone_answers_for_milestone(
                     session, milestone_id
                 )
+
+            deleted_milestone_ids = delete_milestones_with_group_id(
+                session, milestone_group_id, dry_run=False
+            )
 
             session.delete(milestone_group)
             session.commit()

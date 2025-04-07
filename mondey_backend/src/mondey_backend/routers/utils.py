@@ -334,10 +334,9 @@ def delete_milestone_by_id(session: SessionDep, milestone_id: int) -> int:
 def delete_milestones_with_group_id(
     session: SessionDep, milestone_group_id: int, dry_run: bool = True
 ) -> list[int]:
-    milestone_ids_query = select(Milestone.id).where(
-        Milestone.group_id == milestone_group_id
-    )
-    milestone_ids_result = session.exec(milestone_ids_query).all()
+    milestone_ids_result = session.exec(
+        select(Milestone.id).where(col(Milestone.group_id) == milestone_group_id)
+    ).all()
     milestone_ids: list[int] = [id for id in milestone_ids_result if id is not None]
 
     if not dry_run:

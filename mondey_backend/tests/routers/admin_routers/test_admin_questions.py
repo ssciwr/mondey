@@ -1,7 +1,9 @@
 from fastapi.testclient import TestClient
 from sqlmodel import select
 
+from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
+from mondey_backend.models.questions import UserAnswer
 from mondey_backend.models.questions import UserQuestion
 
 
@@ -103,15 +105,52 @@ def test_update_user_question_id_not_there(admin_client: TestClient):
     assert response.status_code == 404
 
 
-def test_delete_user_question_works(session, admin_client: TestClient):
-    response = admin_client.delete("/admin/user-questions/1")
+def test_delete_user_question_deletes(session, admin_client: TestClient):
+    response = admin_client.delete("/admin/user-questions/1?dry_run=false")
 
     assert response.status_code == 200
-    assert response.json() == {"ok": True}
+    response_json = response.json()
+    assert response_json["ok"]
+    assert response_json["deletion_executed"]
 
     user_questions = session.exec(select(UserQuestion)).all()
     assert len(user_questions) == 1
     assert user_questions[0].id == 2
+
+
+def test_delete_user_question_works(session, admin_client: TestClient):
+    user_questions = session.exec(select(UserQuestion)).all()
+    assert len(user_questions) == 2
+
+    user_answers = session.exec(select(UserAnswer)).all()
+    assert len(user_answers) == 2
+
+    response = admin_client.delete("/admin/user-questions/1")  # dry run
+    response_json = response.json()
+    assert response.status_code == 200
+    assert response_json["ok"]
+    assert response_json["would_delete"]
+    assert response_json["would_delete"]["total_answers"] == 1
+
+    user_questions = session.exec(select(UserQuestion)).all()
+    assert len(user_questions) == 2
+
+    response = admin_client.delete(
+        "/admin/user-questions/1?dry_run=false"
+    )  # really delete
+    response_json = response.json()
+    assert response.status_code == 200
+    assert response_json["ok"]
+    assert response_json["deletion_executed"]
+
+    user_questions = session.exec(select(UserQuestion)).all()
+    assert len(user_questions) == 1
+    assert user_questions[0].id == 2
+
+    user_answers = session.exec(select(UserAnswer)).all()
+    assert len(user_answers) == 1
+    for user_answer in user_answers:
+        assert user_answer.question_id != 1  # because they don't have answer IDs.
 
 
 def test_delete_user_question_id_not_there(admin_client: TestClient):
@@ -242,13 +281,38 @@ def test_update_child_question_id_not_there(admin_client: TestClient):
 
 
 def test_delete_child_question_works(session, admin_client: TestClient):
-    response = admin_client.delete("/admin/child-questions/1")
+    child_questions = session.exec(select(ChildQuestion)).all()
+    assert len(child_questions) == 2
+
+    child_answers = session.exec(select(ChildAnswer)).all()
+    assert len(child_answers) == 2
+
+    response = admin_client.delete("/admin/child-questions/1")  # dry run
+    response_json = response.json()
     assert response.status_code == 200
-    assert response.json() == {"ok": True}
+    assert response_json["ok"]
+    assert response_json["would_delete"]
+    assert response_json["would_delete"]["total_answers"] == 1
+
+    child_questions = session.exec(select(ChildQuestion)).all()
+    assert len(child_questions) == 2
+
+    response = admin_client.delete(
+        "/admin/child-questions/1?dry_run=false"
+    )  # really delete
+    response_json = response.json()
+    assert response.status_code == 200
+    assert response_json["ok"]
+    assert response_json["deletion_executed"]
 
     child_questions = session.exec(select(ChildQuestion)).all()
     assert len(child_questions) == 1
     assert child_questions[0].id == 2
+
+    child_answers = session.exec(select(ChildAnswer)).all()
+    assert len(child_answers) == 1
+    for child_answer in child_answers:
+        assert child_answer.question_id != 1  # because they don't have answer IDs.
 
 
 def test_delete_child_question_id_not_there(admin_client: TestClient):
