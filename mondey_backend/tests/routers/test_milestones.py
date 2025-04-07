@@ -3,6 +3,8 @@ import pathlib
 import pytest
 from fastapi.testclient import TestClient
 
+from mondey_backend.routers.utils import count_milestone_answers_for_milestone
+
 
 @pytest.mark.parametrize(
     "client_type", ["public_client", "user_client", "research_client", "admin_client"]
@@ -123,3 +125,62 @@ def test_submit_milestone_image_valid(
         )
     assert response.status_code == 200
     assert submitted_image_file.is_file()
+
+
+"""
+Test that deleting a milestone actually deletes nothing (count milestone answers remains the same) with dry_run = True
+or non-specified dry_run value, and that deleting a milestone with dry_run = False succeeds
+"""
+
+
+def test_delete_milestone_dry_run(admin_client, session):
+    milestone_id = 2
+    expected_answers_from_fixtures = 3  # Has these 3 existing answers in the fixtures.
+    print("Testing with dry run..")
+    assert (
+        count_milestone_answers_for_milestone(session, milestone_id)
+        == expected_answers_from_fixtures
+    )
+    print("Expected milestone answers were there.")
+
+    # Fake delete call without dry run param at all (should default to dry run to be safe)
+    response = admin_client.delete(f"/admin/milestones/{milestone_id}")
+    print("Returned something back...,")
+    response_json = response.json()
+    assert response.status_code == 200
+    print(response_json)
+    assert response_json["dry_run"]
+    assert "would_delete" in response_json
+    assert response_json["would_delete"]["affected_answers_count"] == 3
+    assert (
+        count_milestone_answers_for_milestone(session, milestone_id)
+        == expected_answers_from_fixtures
+    )
+
+    # Fake delete call with explicit dry_run param set to True
+    response = admin_client.delete(f"/admin/milestones/{milestone_id}?dry_run=true")
+    assert response.status_code == 200
+
+    response_json = response.json()
+    assert response_json["dry_run"]
+    assert "would_delete" in response_json
+    assert response_json["would_delete"]["affected_answers_count"] == 3
+    assert (
+        count_milestone_answers_for_milestone(session, milestone_id)
+        == expected_answers_from_fixtures
+    )
+
+
+def test_delete_milestone_confirmed(admin_client, session):
+    milestone_id = 2
+    expected_answers_from_fixtures = 3  # Has these 3 existing answers in the fixtures.
+    assert (
+        count_milestone_answers_for_milestone(session, milestone_id)
+        == expected_answers_from_fixtures
+    )
+
+    # Real delete call with dry_run param set to False
+    response = admin_client.delete(f"/admin/milestones/{milestone_id}?dry_run=false")
+    assert response.status_code == 200
+    assert response.json()["deletion_executed"]
+    assert count_milestone_answers_for_milestone(session, milestone_id) == 0

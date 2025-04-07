@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 from fastapi import HTTPException
+from fastapi import Query
 from fastapi import UploadFile
 from sqlmodel import col
 from sqlmodel import select
@@ -23,6 +24,9 @@ from ...models.milestones import SubmittedMilestoneImagePublic
 from ...models.utils import ItemOrder
 from ...statistics import async_update_stats
 from ..utils import add
+from ..utils import count_milestone_answers_for_milestone
+from ..utils import delete_milestone_by_id
+from ..utils import delete_milestones_with_group_id
 from ..utils import get
 from ..utils import milestone_group_image_path
 from ..utils import milestone_image_path
@@ -69,11 +73,52 @@ def create_router() -> APIRouter:
         return db_milestone_group
 
     @router.delete("/milestone-groups/{milestone_group_id}")
-    def delete_milestone_group_admin(session: SessionDep, milestone_group_id: int):
+    def delete_milestone_group_admin(
+        session: SessionDep,
+        milestone_group_id: int,
+        dry_run: bool = Query(
+            True,
+            description="When true, shows what would be deleted without actually deleting",
+        ),
+    ):
         milestone_group = get(session, MilestoneGroup, milestone_group_id)
-        session.delete(milestone_group)
-        session.commit()
-        return {"ok": True}
+
+        if not dry_run:
+            affected_milestone_answers = 0
+            deleted_milestone_ids = delete_milestones_with_group_id(
+                session, milestone_group_id, dry_run=False
+            )
+            for milestone_id in deleted_milestone_ids:
+                affected_milestone_answers += count_milestone_answers_for_milestone(
+                    session, milestone_id
+                )
+
+            session.delete(milestone_group)
+            session.commit()
+            return {
+                "ok": True,
+                "deletion_executed": True,
+                "deleted_milestone_count": len(deleted_milestone_ids),
+                "deleted_answer_count": affected_milestone_answers,
+            }
+
+        affected_answers = 0
+        for milestone in milestone_group.milestones:
+            if milestone.id is None:
+                continue
+            affected_answers += count_milestone_answers_for_milestone(
+                session, milestone.id
+            )
+        return {
+            "ok": True,
+            "dry_run": True,
+            "would_delete": {
+                "milestone_ids": [
+                    milestone.id for milestone in milestone_group.milestones
+                ],
+                "affected_answers_count": affected_answers,
+            },
+        }
 
     @router.post("/milestone-groups/order/")
     def order_milestone_groups_admin(session: SessionDep, item_orders: list[ItemOrder]):
@@ -112,11 +157,32 @@ def create_router() -> APIRouter:
         return db_milestone
 
     @router.delete("/milestones/{milestone_id}")
-    def delete_milestone(session: SessionDep, milestone_id: int):
-        milestone = get(session, Milestone, milestone_id)
-        session.delete(milestone)
-        session.commit()
-        return {"ok": True}
+    def delete_milestone(
+        session: SessionDep,
+        milestone_id: int,
+        dry_run: bool = Query(
+            True,
+            description="When true, shows what would be deleted without actually deleting",
+        ),
+    ):
+        if not dry_run:
+            affected_milestone_answers = delete_milestone_by_id(session, milestone_id)
+
+            return {
+                "ok": True,
+                "deletion_executed": True,
+                "deleted_milestone_id": milestone_id,
+                "deleted_answer_count": affected_milestone_answers,
+            }
+        else:
+            affected_answers = count_milestone_answers_for_milestone(
+                session, milestone_id
+            )
+            return {
+                "ok": True,
+                "dry_run": True,
+                "would_delete": {"affected_answers_count": affected_answers},
+            }
 
     @router.post("/milestones/order/")
     def order_milestones_admin(session: SessionDep, item_orders: list[ItemOrder]):
