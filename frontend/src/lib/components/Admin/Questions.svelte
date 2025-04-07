@@ -127,7 +127,6 @@ onMount(async () => {
 		<TableHead>
 			<TableHeadCell>Question</TableHeadCell>
 			<TableHeadCell>Input type</TableHeadCell>
-			<TableHeadCell>Options</TableHeadCell>
 			<TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
 		</TableHead>
 		<TableBody>
@@ -138,9 +137,6 @@ onMount(async () => {
 					</TableBodyCell>
 					<TableBodyCell>
 						{question?.component}
-					</TableBodyCell>
-					<TableBodyCell>
-						{question?.text[i18n.locale]?.options}
 					</TableBodyCell>
 					<TableBodyCell>
 						<EditButton
@@ -159,7 +155,6 @@ onMount(async () => {
 				</TableBodyRow>
 			{/each}
 			<TableBodyRow>
-				<TableBodyCell></TableBodyCell>
 				<TableBodyCell></TableBodyCell>
 				<TableBodyCell></TableBodyCell>
 				<TableBodyCell>
