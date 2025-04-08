@@ -30,7 +30,7 @@ test("/userLand/admin - Questions on Children : New question can be added, and a
 	await expect(element).toBeTruthy();
 
 	await page.getByText("Kinder").click();
-	await page.locator('h5:has-text("Neu")').click();
+	await page.locator('h5:has-text("+ Neu")').click();
 	await modalLoad(page);
 	const element_when_adding = page.getByText(childQuestionText);
 	await expect(element_when_adding).toBeTruthy();

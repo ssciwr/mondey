@@ -8,7 +8,7 @@ test("/userLand/children/gallery - Can add Child", async ({
 	await login(page, "admin@mondey.de", "admin");
 
 	// Create a new child so existing milestone data isn't affected
-	await page.locator('h5:has-text("Neu")').click();
+	await page.locator('h5:has-text("+ Neu")').click();
 	await modalLoad(page);
 
 	await page.locator('input[for="Name des Kindes?"]').fill("Test Child 2");

@@ -60,7 +60,6 @@ def compute_feedback_simple(
         return TrafficLight.invalid.value
 
     if stat.stddev_score < 1e-2:
-        logging.warning("Score was degenerate statistically")
         # statistics data is degenerate and has no variance <- few datapoints
         # in this case, any score below the average is considered underperforming:
         # one step below -> yellow, two steps below -> red
@@ -74,16 +73,7 @@ def compute_feedback_simple(
         return TrafficLight.red.value
     elif score > lim_lower and leq(score, lim_upper):
         return TrafficLight.yellow.value
-        # If the score is less than the average score - 1, we get yellow.
-        # So a score of average-0.8 gets green by falling into the else below.
-    elif (
-        score == 1
-    ):  # Specifically marked as not having acheived the milestone ("Gar nichts").
-        # Even if the stats are degenerate (so lim_lower and upper will be below 0), return yellow.
-        logging.warning("Default yellow case")
-        return TrafficLight.yellow.value
     else:
-        logging.warning(f"Default green case, score was {score}")
         return TrafficLight.green.value
 
 
