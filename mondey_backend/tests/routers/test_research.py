@@ -14,7 +14,11 @@ def test_research_data(research_client: TestClient):
     assert len(data) == 2
     for item in data:
         assert item["user_question_1"] == "lorem ipsum"
+        # for user question 2, the answer is "other" which is the additional_option for this question,
+        # so we get the additional_answer here instead of the answer:
+        assert item["user_question_2"] == "dolor sit"
         assert item["child_question_1"] == "a"
+        assert item["child_question_2"] == "apple"
         assert "milestone_id_1" in item
 
 
