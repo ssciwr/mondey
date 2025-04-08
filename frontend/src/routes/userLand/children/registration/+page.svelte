@@ -455,18 +455,19 @@ const deleteCurrentChild = async () => {
                             <DataInput
                                     component={element.component ? componentTable[element.component] : undefined}
                                     bind:value={answers[element.id].answer}
-                                    bind:additionalValue={answers[element.id]
-              .additional_answer}
+                                    bind:additionalValue={answers[element.id].additional_answer}
                                     label={element?.text?.[i18n.locale].question}
                                     textTrigger={element.additional_option}
                                     required={element.required}
                                     additionalRequired={true}
                                     id={"input_" + String(i)}
                                     items={element?.text?.[i18n.locale].options_json === ""
-              ? undefined
-              : JSON.parse(
-                  element?.text?.[i18n.locale].options_json ?? '',
-              )}
+                                      ? undefined
+                                      : JSON.parse(
+                                          element?.text?.[i18n.locale].options_json
+                                          .replace('"name":"nicht gewählt"', '"name": "Nein"')
+                                          .replace('"name":"ausgewählt"', '"name": "Ja"') ?? '',
+                                      )}
                                     disabled={disableEdit}
                                     placeholder=""
                             />
