@@ -464,9 +464,7 @@ const deleteCurrentChild = async () => {
                                     items={element?.text?.[i18n.locale].options_json === ""
                                       ? undefined
                                       : JSON.parse(
-                                          element?.text?.[i18n.locale].options_json
-                                          .replace('"name":"nicht gewählt"', '"name": "Nein"')
-                                          .replace('"name":"ausgewählt"', '"name": "Ja"') ?? '',
+                                          element?.text?.[i18n.locale].options_json ?? '',
                                       )}
                                     disabled={disableEdit}
                                     placeholder=""
