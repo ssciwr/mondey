@@ -111,6 +111,7 @@ async function setup(): Promise<{
 			true,
 		);
 	} else {
+		console.log("Set questionnaire");
 		questionnaire = questions.data;
 	}
 
@@ -175,8 +176,8 @@ async function setup(): Promise<{
 }
 
 let birthmonthtext = $derived.by(() => {
-	return birthmonth
-		? Intl.DateTimeFormat(i18n.locale, { month: "long" }).format(
+	return birthmonth !== null
+		? Intl.DateTimeFormat(i18n.locale || "en", { month: "long" }).format(
 				new Date(birthmonth.toString()),
 			)
 		: "";
@@ -409,17 +410,6 @@ const deleteCurrentChild = async () => {
                             />
 
                             <DataInput
-                                    component={componentTable["fileupload"]}
-                                    bind:value={image}
-                                    label={image !== null ? i18n.tr.childData.imageOfChildChange : i18n.tr.childData.imageOfChildNew}
-                                    required={false}
-                                    placeholder={i18n.tr.childData.noFileChosen}
-                                    disabled={disableEdit}
-                                    id="child_image"
-                                    kwargs = {{accept: ".jpg, .jpeg, .png", clearable: true}}
-                            />
-
-                            <DataInput
                                     component={Input}
                                     bind:value={color}
                                     label={i18n.tr.childData.childColor}
@@ -431,18 +421,32 @@ const deleteCurrentChild = async () => {
                                     componentClass="w-1/4 h-12 rounded"
                             />
 
+                            <DataInput
+                                    component={componentTable["fileupload"]}
+                                    bind:value={image}
+                                    label={image !== null ? i18n.tr.childData.imageOfChildChange : i18n.tr.childData.imageOfChildNew}
+                                    required={false}
+                                    placeholder={i18n.tr.childData.noFileChosen}
+                                    disabled={disableEdit}
+                                    id="child_image"
+                                    kwargs = {{accept: ".jpg, .jpeg, .png", clearable: true}}
+                            />
+
+
                             {#if image !== null && disableEdit === false}
-                                <Button
-                                        class="btn-icon btn-delete"
-                                        disabled={disableImageDelete}
-                                        on:click={() => {
-                                        image = null;
-                                        disableImageDelete = true;
-                                        imageDeleted = true;
-                                    }}
-                                >
-                                    <TrashBinOutline size="sm"/> {i18n.tr.childData.deleteImageButton}
-                                </Button>
+
+                                <div class="text-center" style="min-width:100%">
+                                    <div>
+                                        <img src={URL.createObjectURL(image)} alt="Child preview" style="width: 100%; max-height: 200px; object-fit: contain;" />
+                                    </div>
+                                    <div>
+                                    <DeleteButton onclick={() => {
+                                            image = null;
+                                            disableImageDelete = true;
+                                            imageDeleted = true;
+                                    }} />
+                                    </div>
+                                </div>
                             {:else if disableImageDelete === true}
                                 <p class="text-center text-sm text-gray-700 dark:text-gray-400 flex items-center justify-center">
                                     <CheckCircleOutline size="lg" color="green"/> {i18n.tr.childData.imageOfChildChangeDelete}
@@ -452,7 +456,10 @@ const deleteCurrentChild = async () => {
 
 
                         <span>
-                              <EditButton onclick={() => disableEdit = false} />
+                            {#if disableEdit}
+                                <EditButton onclick={() => disableEdit = false} />
+                            {/if}
+
                             {#if currentChild.id !== null && disableEdit === true}
                                     <DeleteButton onclick={() => showDeleteModal = true} />
                                 {/if}
@@ -493,7 +500,7 @@ const deleteCurrentChild = async () => {
 
                         {/if}
 
-                        {#if !disableEdit || (disableEdit && showChildQuestions)}
+                        {#if (!disableEdit || (disableEdit && showChildQuestions))}
                             {#each questionnaire as element, i}
                                 <DataInput
                                         component={element.component ? componentTable[element.component] : undefined}
