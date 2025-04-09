@@ -19,14 +19,31 @@ def replace_answer_terms():
         child_questions_texts = session.exec(select(ChildQuestionText)).all()
 
         for question in [*user_questions_texts, *child_questions_texts]:
+            debug = False
             # update options, options_json
             # Better than an UPDATE with LIKE etc matching for this many answers
-            question.options = question.options.replace(
-                term_not_chosen, "Nein"
-            ).replace(term_chosen, "Ja")
-            question.options_json = question.options_json.replace(
-                term_not_chosen, "Nein"
-            ).replace(term_chosen, "Ja")
+            if question.question == "Geschwister?: Ja, jüngere Geschwister":
+                debug = True
+
+            if debug:
+                print(question)
+            question.options = (
+                question.options.replace(term_not_chosen, "Nein")
+                .replace(term_chosen, "Ja")
+                .replace("ausgew\\u00e4hlt", "Ja")
+                .replace("nicht gew\\u00e4hlt", "Nein")
+            )
+
+            question.options_json = (
+                question.options_json.replace(term_not_chosen, "Nein")
+                .replace(term_chosen, "Ja")
+                .replace("ausgew\\u00e4hlt", "Ja")
+                .replace("nicht gew\\u00e4hlt", "Nein")
+            )
+
+            if debug:
+                print("After:")
+                print(question.options_json)
 
         user_questions = session.exec(select(UserQuestion)).all()
         child_questions = session.exec(select(ChildQuestion)).all()
