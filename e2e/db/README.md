@@ -31,11 +31,16 @@ Don't commit changes to e2e/db/mondey.db, only the import script.
 
 ## Data import SQL files
 
-For now the data import is split into 2 SQL files: One for base SQL data (users, children, milestones and milestone groups)
+For now the data import is split into 3 SQL files: One for base SQL data (users, children, milestones and milestone groups)
 `sqlite3 db/mondey.db < db/importBaseMetadata.sql && mondey-backend`
 
 The second one contains some fake milestone answering sessions and milestone answers (no question/answers):
 `sqlite3 db/mondey.db < db/importMilestoneAnswers.sql`
+__if you change this one, you should also regenerate the content for the third one by running the stats calculation
+used in `main.py` manually so that the two match__
+
+The third one contains the milestone scores and statistics processed for the fake milestone answers.
+`sqlite3 db/mondey.db < db/importDerivedMilestoneScores.sql`
 
 The CI script takes care of running these sequentially before each test.
 
