@@ -1,7 +1,7 @@
 import json
 
 from sqlalchemy import delete
-from sqlmodel import select as sqlmodel_select
+from sqlmodel import select as select
 
 from mondey_backend.dependencies import get_session
 from mondey_backend.models.questions import UserAnswer
@@ -18,7 +18,7 @@ def combine_question_options():
         # Get question IDs by matching the question text in UserQuestionText
         question_ids = []
         for question_text in target_questions:
-            stmt = sqlmodel_select(UserQuestionText).where(
+            stmt = select(UserQuestionText).where(
                 UserQuestionText.question == question_text
             )
             text_entries = session.exec(stmt).all()
@@ -30,7 +30,7 @@ def combine_question_options():
         print("Relevant IDs of questions to remove:", question_ids)
 
         # Also get FP03 ID for later deletion
-        stmt_eltern = sqlmodel_select(UserQuestionText).where(
+        stmt_eltern = select(UserQuestionText).where(
             UserQuestionText.question == eltern_question
         )
         eltern_text = session.exec(stmt_eltern).first()
@@ -38,7 +38,7 @@ def combine_question_options():
 
         # Step 2: Get language IDs to maintain language variants
         stmt_langs = (
-            sqlmodel_select(UserQuestionText.lang_id)
+            select(UserQuestionText.lang_id)
             .distinct()
             .where(UserQuestionText.user_question_id.in_(question_ids))
         )
@@ -52,7 +52,7 @@ def combine_question_options():
 
             # Get options for each question in this language
             for question_id in question_ids:
-                stmt = sqlmodel_select(UserQuestionText).where(
+                stmt = select(UserQuestionText).where(
                     (UserQuestionText.user_question_id == question_id)
                     & (UserQuestionText.lang_id == lang_id)
                 )
@@ -124,7 +124,7 @@ def combine_question_options():
 def update_user_answers(new_question_id: int, old_question_ids: list[int]):
     with next(get_session()) as session:
         # Find the FP03 question ID (Eltern)
-        stmt = sqlmodel_select(UserQuestionText).where(
+        stmt = select(UserQuestionText).where(
             UserQuestionText.question == "FP03: Eltern"
         )
         eltern_text = session.exec(stmt).first()
@@ -143,7 +143,7 @@ def update_user_answers(new_question_id: int, old_question_ids: list[int]):
         # Step 3: Handle answers one by one to avoid constraint violations
         # First get all users who answered these questions
         stmt_users = (
-            sqlmodel_select(UserAnswer.user_id)
+            select(UserAnswer.user_id)
             .distinct()
             .where(UserAnswer.question_id.in_(update_ids))
         )
@@ -154,7 +154,7 @@ def update_user_answers(new_question_id: int, old_question_ids: list[int]):
         for user_id in users:
             print("Processing user:", user_id)
             # Get all answers for this user for the questions we're combining
-            stmt_answers = sqlmodel_select(UserAnswer).where(
+            stmt_answers = select(UserAnswer).where(
                 (UserAnswer.user_id == user_id)
                 & (UserAnswer.question_id.in_(update_ids))
             )

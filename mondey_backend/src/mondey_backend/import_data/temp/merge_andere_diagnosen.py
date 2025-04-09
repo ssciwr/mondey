@@ -1,4 +1,4 @@
-from sqlmodel import select as sqlmodel_select
+from sqlmodel import select as select
 
 from mondey_backend.dependencies import get_session
 from mondey_backend.models.questions import ChildAnswer
@@ -12,12 +12,12 @@ def merge_andere_diagnosen():
     count_merged = 0
     with next(get_session()) as session:
         # Get all answers for question ID 12 (Other diagnoses)
-        q12_stmt = sqlmodel_select(ChildAnswer).where(ChildAnswer.question_id == 12)
+        q12_stmt = select(ChildAnswer).where(ChildAnswer.question_id == 12)
         q12_answers = session.exec(q12_stmt).all()
 
         for q12_answer in q12_answers:
             # Find the corresponding answer for question ID 10 for the same child
-            q10_stmt = sqlmodel_select(ChildAnswer).where(
+            q10_stmt = select(ChildAnswer).where(
                 ChildAnswer.child_id == q12_answer.child_id,
                 ChildAnswer.question_id == 10,
             )
