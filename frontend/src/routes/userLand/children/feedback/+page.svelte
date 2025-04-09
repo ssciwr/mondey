@@ -297,11 +297,7 @@ async function loadDetailedFeedbackFor(
 	for (const [mid, milestones] of Object.entries(response.data)) {
 		res[Number(mid)] = {} as Record<number, number>;
 		for (const [ms_id, ms_score] of Object.entries(milestones)) {
-			console.log("Considering milestone detailed info for: ", ms_id);
 			if (ms_score <= 0) {
-				console.log(
-					"milestone score was less than or equal to 0 (so yellow or red), so we need to show it",
-				);
 				res[Number(mid)][Number(ms_id)] = Number(ms_score);
 			}
 		}
@@ -411,12 +407,6 @@ async function generateReport(): Promise<string | null> {
 
 		// iterate over all answersessions with aid:key
 		for (let aid of allSessionkeys) {
-			console.log(
-				"THe summary values were: ",
-				summary[aid],
-				"for session key: ",
-				aid,
-			);
 			const min = Math.min(...(Object.values(summary[aid]) as number[]));
 			report += `<h2>${i18n.tr.milestone.timeperiod}: ${makeTitle(Number(aid))}</h2> \n`;
 			report += `<strong>${i18n.tr.milestone.summaryScore}:</strong> ${min === 1 ? i18n.tr.milestone.recommendOk : min === 0 ? i18n.tr.milestone.recommendWatch : min === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
@@ -534,17 +524,13 @@ async function printReport(): Promise<void> {
 {#snippet evaluation( milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, grade: number, isMilestone: boolean,)}
     <div class={`rounded-lg space-x-2 space-y-2 justify-center p-10 m-2 flex flex-col text-sm text-white ${(grade === 0 || grade === -1) && isMilestone=== true ? "bg-milestone-600" : "bg-green-700"}`}>
         {#if grade === 1}
-            GRADE 1<br />
             {@render evaluationElement(CheckCircleSolid, milestone_or_group, "text-feedback-0", isMilestone)}
         {:else if grade === 0}
-
-            GRADE 2 (middle)<br />
             {@render evaluationElement(QuestionCircleSolid, milestone_or_group, "text-feedback-1", isMilestone)}
             {#if isMilestone}
                 {@render milestoneHelpButton(milestone_or_group as MilestonePublic)}
             {/if}
         {:else if grade === -1}
-            GRADE 3 (bad)<br />
             {@render evaluationElement(ExclamationCircleSolid, milestone_or_group, "text-feedback-2", isMilestone)}
             {#if isMilestone}
                 {@render milestoneHelpButton(milestone_or_group as MilestonePublic)}
@@ -566,8 +552,6 @@ async function printReport(): Promise<void> {
                 >
 					<span slot="header" class="items-center flex justify-center py-1">
 						{@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
-                        <br />
-                        {Object.entries(detailed[aid][mid]).toString()}
 					</span>
                     {#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
                         {@render evaluation(

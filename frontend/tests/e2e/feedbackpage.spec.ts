@@ -27,11 +27,6 @@ test("/userLand/admin - Questions on Children : New question can be added, and a
 		page.locator('span:has-text("Tanzfähigkeiten")').last(),
 	).toBeAttached();
 
-	// This is our circular checkmark.
-	// todo: There could be checkmarks for other milestone groups. Solution:
-	// I think maybe alter the code to have a testdataID for milestone feedback (e.g. Grun, Fragenzeichern, Verzögerung)
-	// The code right now displays these as elements so it might mean rewriting though but this is important.
-
 	await expect(
 		page.locator("svg.shrink-0.w-8.h-8.text-feedback-0").first(),
 	).toBeAttached();

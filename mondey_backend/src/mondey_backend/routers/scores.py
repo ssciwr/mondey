@@ -54,7 +54,6 @@ def compute_feedback_simple(
     def leq(val: float, lim: float) -> bool:
         return val < lim or bool(np.isclose(val, lim))
 
-    logging.warning(f"Score was {score}")
     if stat.avg_score < 1e-2 and stat.stddev_score < 1e-2:
         # statistics has no data
         return TrafficLight.invalid.value
@@ -196,18 +195,10 @@ def compute_milestonegroup_feedback_detailed(
     # for each milestonegroup, get the statistics, compute the current mean, and compute the feedback
     feedback: dict[int, dict[int, int]] = {}
     for milestone_id, answer in answersession.answers.items():
-        logging.warning("")
-        logging.warning("")
-        logger.warning(
-            f"  milestone id: {milestone_id}, this specific childs answer: {answer.answer + 1}"
-        )
         stats = session.get(MilestoneAgeScoreCollection, milestone_id)
-        logger.warning(f"  stats: {stats}")
         if answer.milestone_group_id not in feedback:
-            logger.warning("Group ID not in 'feedback' variable.")
             feedback[answer.milestone_group_id] = {}
         if stats is None:
-            logger.warning("Feedback was None because stats was none!")
             feedback[answer.milestone_group_id][cast(int, answer.milestone_id)] = (
                 TrafficLight.invalid.value
             )
@@ -217,19 +208,10 @@ def compute_milestonegroup_feedback_detailed(
                     logger.debug(
                         f"   score: {i}, {score.count}, {score.avg_score}, {score.stddev_score}"
                     )
-            traffic_light_answer_value = compute_feedback_simple(
-                stats.scores[age], answer.answer + 1
-            )
             feedback[answer.milestone_group_id][cast(int, answer.milestone_id)] = (
-                traffic_light_answer_value
+                compute_feedback_simple(stats.scores[age], answer.answer + 1)
             )
-            logger.warning(f"Score at age: {stats.scores[age]}")
-            logger.warning(f"Answer: {answer.answer + 1}")
-            logger.warning(
-                f"Converted to Traffic Light Output Answer: {traffic_light_answer_value}"
-            )
-            # logger.warning(str(compute_feedback_simple(stats.scores[age], answer.answer + 1)))
 
-    logger.warning(f" detailed feedback: {feedback}")
+    logger.debug(f" detailed feedback: {feedback}")
 
     return feedback

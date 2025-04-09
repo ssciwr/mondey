@@ -25,7 +25,7 @@ test("/login : login as valid researcher", async ({ page, isMobile }) => {
 	if (!isMobile) {
 		await expect(page.getByText(/researcher@mondey.de/i)).toBeVisible();
 		await expect(page.getByText(/Research/i)).toBeVisible();
-		await expect(page.getByText(/Admin/i)).toHaveCount(0);
+		await expect(page.getByText(/Administration/i)).toHaveCount(0);
 	}
 });
 
@@ -34,6 +34,6 @@ test("/login : login as valid admin", async ({ page, isMobile }) => {
 	if (!isMobile) {
 		await expect(page.getByText(/admin@mondey.de/i)).toBeVisible();
 		await expect(page.getByText(/Research/i)).toHaveCount(0);
-		await expect(page.getByText(/Admin/i)).toBeVisible();
+		await expect(page.getByText(/Administration/i)).toBeVisible();
 	}
 });
