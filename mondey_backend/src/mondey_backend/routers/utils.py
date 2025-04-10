@@ -16,7 +16,6 @@ from PIL import ImageOps
 from sqlalchemy import func
 from sqlmodel import SQLModel
 from sqlmodel import col
-from sqlmodel import delete
 from sqlmodel import select
 from webp import WebPPreset
 
@@ -310,37 +309,3 @@ def count_milestone_answers_for_milestone(
         .where(MilestoneAnswer.milestone_id == milestone_id)
     )
     return session.exec(count_query).one()
-
-
-def delete_milestone_by_id(session: SessionDep, milestone_id: int) -> int:
-    milestone = get(session, Milestone, milestone_id)
-    if milestone is None:
-        return 0
-
-    affected_milestone_answer_count = count_milestone_answers_for_milestone(
-        session, milestone_id
-    )
-
-    delete_stmt = delete(MilestoneAnswer).where(
-        col(MilestoneAnswer.milestone_id) == milestone_id
-    )
-    session.execute(delete_stmt)
-
-    session.delete(milestone)
-    session.commit()
-    return affected_milestone_answer_count
-
-
-def delete_milestones_with_group_id(
-    session: SessionDep, milestone_group_id: int, dry_run: bool = True
-) -> list[int]:
-    milestone_ids_result = session.exec(
-        select(Milestone.id).where(col(Milestone.group_id) == milestone_group_id)
-    ).all()
-    milestone_ids: list[int] = [id for id in milestone_ids_result if id is not None]
-
-    if not dry_run:
-        for milestone_id in milestone_ids:
-            delete_milestone_by_id(session, milestone_id)
-
-    return milestone_ids

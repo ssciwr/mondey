@@ -25,8 +25,6 @@ from ...models.utils import ItemOrder
 from ...statistics import async_update_stats
 from ..utils import add
 from ..utils import count_milestone_answers_for_milestone
-from ..utils import delete_milestone_by_id
-from ..utils import delete_milestones_with_group_id
 from ..utils import get
 from ..utils import milestone_group_image_path
 from ..utils import milestone_image_path
@@ -85,30 +83,23 @@ def create_router() -> APIRouter:
 
         if not dry_run:
             affected_milestone_answers = 0
-            groups_milestone_ids = session.exec(
-                select(Milestone.id).where(
-                    col(Milestone.group_id) == milestone_group_id
-                )
-            ).all()
-            for milestone_id in [
-                milestone_id
-                for milestone_id in groups_milestone_ids
-                if milestone_id is not None
-            ]:
+            groups_milestone_ids = [
+                milestone.id
+                for milestone in milestone_group.milestones
+                if milestone.id is not None
+            ]
+
+            for milestone_id in groups_milestone_ids:
                 affected_milestone_answers += count_milestone_answers_for_milestone(
                     session, milestone_id
                 )
-
-            deleted_milestone_ids = delete_milestones_with_group_id(
-                session, milestone_group_id, dry_run=False
-            )
 
             session.delete(milestone_group)
             session.commit()
             return {
                 "ok": True,
                 "deletion_executed": True,
-                "deleted_milestone_count": len(deleted_milestone_ids),
+                "deleted_milestone_count": len(groups_milestone_ids),
                 "deleted_answer_count": affected_milestone_answers,
             }
 
@@ -173,23 +164,25 @@ def create_router() -> APIRouter:
             description="When true, shows what would be deleted without actually deleting",
         ),
     ):
+        affected_answers = count_milestone_answers_for_milestone(session, milestone_id)
         if not dry_run:
-            affected_milestone_answers = delete_milestone_by_id(session, milestone_id)
+            milestone = get(session, Milestone, milestone_id)
+            if milestone is None:
+                return 0
+            session.delete(milestone)
+            session.commit()
 
             return {
                 "ok": True,
                 "deletion_executed": True,
                 "deleted_milestone_id": milestone_id,
-                "deleted_answer_count": affected_milestone_answers,
+                "deleted_answer_count": affected_answers,
             }
         else:
-            affectedAnswers = count_milestone_answers_for_milestone(
-                session, milestone_id
-            )
             return {
                 "ok": True,
                 "dry_run": True,
-                "would_delete": {"affectedAnswers": affectedAnswers},
+                "would_delete": {"affectedAnswers": affected_answers},
             }
 
     @router.post("/milestones/order/")
