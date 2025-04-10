@@ -3,27 +3,39 @@
 <script lang="ts">
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
-import { Button, Input, Modal, Spinner } from "flowbite-svelte";
+import { Button, Input, Label, Modal, Spinner } from "flowbite-svelte";
 import { CheckCircleOutline } from "flowbite-svelte-icons";
 import ExclamationCircleOutline from "flowbite-svelte-icons/ExclamationCircleOutline.svelte";
 import { onMount } from "svelte";
 
 type DeletionWillAffectTotals = {
-    [key: string]: number;
+	[key: string]: number;
 };
 
-type DryRunnableDataResponse = 
-    | { deletion_executed: boolean; error?: never; would_delete?: never }
-    | { would_delete: DeletionWillAffectTotals; error?: never; deletion_executed?: never }
-    | { error: string; deletion_executed?: never; would_delete?: never };
+type DryRunnableDataResponse =
+	| {
+			data: { deletion_executed: boolean; error?: never; would_delete?: never };
+	  }
+	| {
+			data: {
+				would_delete: DeletionWillAffectTotals;
+				error?: never;
+				deletion_executed?: never;
+			};
+	  }
+	| { error: string };
 
 let {
 	open = $bindable(false),
 	deleteDryRunnableRequest,
+	afterDelete,
 	intendedConfirmCode,
 }: {
 	open: boolean;
-	deleteDryRunnableRequest: (dryRun: boolean) => Promise<DryRunnableDataResponse>;
+	deleteDryRunnableRequest: (
+		dryRun: boolean,
+	) => Promise<DryRunnableDataResponse>;
+	afterDelete: () => void;
 	intendedConfirmCode: string;
 } = $props();
 
@@ -32,26 +44,39 @@ let deleteConfirmCode: string = $state("");
 let deleteDone: boolean = $state(false);
 
 let sendDeleteRequest = async () => {
-	// if confirm text is what we expect..
-	// then call deleteDryRunnableRequest(false) // dry run false.
-	// otherwise display an alert.
 	if (deleteConfirmCode === intendedConfirmCode) {
-		const result = await deleteDryRunnableRequest(false);
-		if (result.deletion_executed) {
+		const { data, error } = await deleteDryRunnableRequest(false);
+		console.error("Error on real call:", error);
+
+		if (data.deletion_executed) {
 			deleteDone = true;
+			afterDelete(); // refresh the list items this is in etc.
 		} else {
-			alertStore.showAlert(i18n.tr.admin.deleteError, "", true, false);
-			console.error(result.error);
+			alertStore.showAlert(i18n.tr.admin.deleteError, error, true, false);
+			console.error(error);
 		}
 	}
 };
 
-onMount(async () => {
-	const dryRunResult = await deleteDryRunnableRequest(true);
-	if ('would_delete' in dryRunResult) {
-		deletionWillAffectTotals = dryRunResult.would_delete;
-		intendedConfirmCode = Object.keys(deletionWillAffectTotals)[0];
+$effect(async () => {
+	if (open) {
+		console.log("Delete dry runnable request was: ", deleteDryRunnableRequest);
+		const { data, error } = await deleteDryRunnableRequest(true);
+		if (error) {
+			alertStore.showAlert(i18n.tr.admin.deleteError, "", true, false);
+			console.error(error);
+		}
+		if (data.hasOwn("would_delete")) {
+			console.log("Deletion would affect: ", data.would_delete);
+			deletionWillAffectTotals = data.would_delete;
+		} else {
+			console.log("Dry run result:", data);
+		}
+	} else {
+		deletionWillAffectTotals = {};
+		deleteDone = false;
 	}
+	console.log("Deletion keys were", i18n.tr.admin.deletion);
 });
 </script>
 
@@ -67,20 +92,31 @@ onMount(async () => {
         </h3>
 
         {#if Object.keys(deletionWillAffectTotals).length == 0}
-            <Spinner />
+            <div>
+                <Spinner />
+            </div>
         {:else}
             {i18n.tr.admin.deletionWillAffect}
-            <ul>
-                {#each Object(deletionWillAffectTotals).keys() as { translationKey}}
-                    {i18n.tr.admin.deletion[translationKey]} x {deletionWillAffectTotals[translationKey]}
-                {/each}
-            </ul>
+            <div class="text-black" style="background-color:rgb(255,220,220);border: 2px solid darkred;border-radius:10px;padding:10px">
+                <ul>
+                    {#each Object.entries(deletionWillAffectTotals) as [translationKey, total]}
+                        <li>{total} {translationKey}</li>
+                    {/each}
+                </ul>
+            </div>
 
-            {i18n.tr.admin.deletionWillAffect}: <code>{intendedConfirmCode}</code>
+            <div class="mt-10 mb-5">
+            {i18n.tr.admin.deletionConfirm}: <code>{intendedConfirmCode}</code>
 
-            <Input bind:value={deleteConfirmCode}></Input>
+            <Label
+                    for={"password"}
+                    class="font-semibold text-gray-700 dark:text-gray-400"
+            >{i18n.tr.admin.enterDeletionConfirmation}</Label>
 
-            <Button color="red" class="me-2" on:click={sendDeleteRequest}>
+            <Input id="confirm-delete"  bind:value={deleteConfirmCode}></Input>
+            </div>
+
+            <Button color="red" class="me-2" disabled={intendedConfirmCode !== deleteConfirmCode} on:click={sendDeleteRequest}>
             {i18n.tr.admin.yesSure}
             </Button>
         {/if}

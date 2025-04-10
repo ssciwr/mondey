@@ -142,6 +142,10 @@ export const translationIds = {
 		},
 		deleteError: "Ein Fehler ist durch Löschen aufgetreten",
 		deletionComplete: "Löschen Erfolgreich",
+		deletionConfirm:
+			"Geben Sie das folgende Löschungswort ein, um zu bestätigen, dass dies und alles oben genannte gelöscht wurde",
+		confirmDeleteCode: "Geben Sie das Löschungswort ein",
+		enterDeletionConfirmation: "Löschungswort",
 	},
 	researcher: {
 		label: "Wissenschaft",
