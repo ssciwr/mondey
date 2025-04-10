@@ -60,23 +60,18 @@ let sendDeleteRequest = async () => {
 
 $effect(async () => {
 	if (open) {
-		console.log("Delete dry runnable request was: ", deleteDryRunnableRequest);
 		const { data, error } = await deleteDryRunnableRequest(true);
 		if (error) {
 			alertStore.showAlert(i18n.tr.admin.deleteError, "", true, false);
 			console.error(error);
 		}
 		if (data.would_delete) {
-			console.log("Deletion would affect: ", data.would_delete);
 			deletionWillAffectTotals = data.would_delete;
-		} else {
-			console.log("Dry run result:", data);
 		}
 	} else {
 		deletionWillAffectTotals = {};
 		deleteDone = false;
 	}
-	console.log("Deletion keys were", i18n.tr.admin.deletion);
 });
 </script>
 
