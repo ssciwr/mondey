@@ -14,6 +14,7 @@ import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { type CardElement, type CardStyle } from "$lib/util";
 import { Heading, Spinner } from "flowbite-svelte";
+import { displayChildImages } from "../../../../features";
 
 /* From stackoverflow: https://stackoverflow.com/a/41491220 | SudoPlz | CC BY-SA 4.0
  * Ensures that we use a high contrast color given we are allowing unlimited colors to be selected by the user
@@ -103,11 +104,13 @@ async function setup(): Promise<CardElement[]> {
 		const childrenData = await Promise.all(
 			(children.data || []).map(async (child): Promise<CardElement> => {
 				let image = undefined as string | undefined;
-				const childImageResponse = await getChildImage({
-					path: { child_id: child.id },
-				});
-				if (!childImageResponse.error) {
-					image = URL.createObjectURL(childImageResponse.data as Blob);
+				if (displayChildImages) {
+					const childImageResponse = await getChildImage({
+						path: { child_id: child.id },
+					});
+					if (!childImageResponse.error) {
+						image = URL.createObjectURL(childImageResponse.data as Blob);
+					}
 				}
 				return {
 					header: child.name,

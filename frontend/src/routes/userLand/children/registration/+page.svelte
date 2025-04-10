@@ -48,6 +48,7 @@ import {
 	TrashBinOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
+import { displayChildImages } from "../../../../features";
 // questions and answers about child that are not part of the child object
 let questionnaire: GetChildQuestionsResponse = $state(
 	[] as GetChildQuestionsResponse,
@@ -254,6 +255,10 @@ async function submitChildData(): Promise<void> {
 }
 
 async function submitImageData(): Promise<void> {
+	if (false === displayChildImages) {
+		console.warn("Image upload is manually disabled");
+		return;
+	}
 	if (currentChild.id === null) {
 		console.log("no child id, no image to upload");
 		alertStore.showAlert(
@@ -373,9 +378,7 @@ const deleteCurrentChild = async () => {
                             class="m-1 mx-auto w-full flex-col space-y-6"
                             onsubmit={preventDefault(submitData)}
                     >
-                        {#if disableEdit}
-
-                        {:else}
+                        {#if false === disableEdit}
                             <DataInput
                                     component={componentTable["input"]}
                                     bind:value={name}
@@ -421,36 +424,38 @@ const deleteCurrentChild = async () => {
                                     componentClass="w-1/4 h-12 rounded"
                             />
 
-                            <DataInput
-                                    component={componentTable["fileupload"]}
-                                    bind:value={image}
-                                    label={image !== null ? i18n.tr.childData.imageOfChildChange : i18n.tr.childData.imageOfChildNew}
-                                    required={false}
-                                    placeholder={i18n.tr.childData.noFileChosen}
-                                    disabled={disableEdit}
-                                    id="child_image"
-                                    kwargs = {{accept: ".jpg, .jpeg, .png", clearable: true}}
-                            />
+                            {#if displayChildImages}
+                                <DataInput
+                                        component={componentTable["fileupload"]}
+                                        bind:value={image}
+                                        label={image !== null ? i18n.tr.childData.imageOfChildChange : i18n.tr.childData.imageOfChildNew}
+                                        required={false}
+                                        placeholder={i18n.tr.childData.noFileChosen}
+                                        disabled={disableEdit}
+                                        id="child_image"
+                                        kwargs = {{accept: ".jpg, .jpeg, .png", clearable: true}}
+                                />
 
 
-                            {#if image !== null && disableEdit === false}
+                                {#if image !== null && disableEdit === false}
 
-                                <div class="text-center" style="min-width:100%">
-                                    <div>
-                                        <img src={URL.createObjectURL(image)} alt="Child preview" style="width: 100%; max-height: 200px; object-fit: contain;" />
+                                    <div class="text-center" style="min-width:100%">
+                                        <div>
+                                            <img src={URL.createObjectURL(image)} alt="Child preview" style="width: 100%; max-height: 200px; object-fit: contain;" />
+                                        </div>
+                                        <div>
+                                        <DeleteButton onclick={() => {
+                                                image = null;
+                                                disableImageDelete = true;
+                                                imageDeleted = true;
+                                        }} />
+                                        </div>
                                     </div>
-                                    <div>
-                                    <DeleteButton onclick={() => {
-                                            image = null;
-                                            disableImageDelete = true;
-                                            imageDeleted = true;
-                                    }} />
-                                    </div>
-                                </div>
-                            {:else if disableImageDelete === true}
-                                <p class="text-center text-sm text-gray-700 dark:text-gray-400 flex items-center justify-center">
-                                    <CheckCircleOutline size="lg" color="green"/> {i18n.tr.childData.imageOfChildChangeDelete}
-                                </p>
+                                {:else if disableImageDelete === true}
+                                    <p class="text-center text-sm text-gray-700 dark:text-gray-400 flex items-center justify-center">
+                                        <CheckCircleOutline size="lg" color="green"/> {i18n.tr.childData.imageOfChildChangeDelete}
+                                    </p>
+                                {/if}
                             {/if}
                         {/if}
 
