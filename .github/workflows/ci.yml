@@ -99,6 +99,21 @@ jobs:
         working-directory: ./e2e
         run: sqlite3 db/mondey.db < db/importBaseMetadata.sql && sqlite3 db/mondey.db < db/importMilestoneAnswers.sql && sqlite3 db/mondey.db < db/importDerivedMilestoneScores.sql && SMTP_HOST="" RELOAD=false mondey-backend &
 
+      - name: Wait for backend to be ready as the SQL takes time to load.
+        run: |
+          timeout=30
+          while ! curl -s http://localhost:8000 2>&1 > /dev/null
+          do
+            if [ $timeout -le 0 ]; then
+              echo "Backend failed to start"
+              exit 1
+            fi
+            echo "Waiting for backend to be ready... ($timeout seconds left)"
+            timeout=$((timeout-1))
+            sleep 1
+          done
+          echo "Backend is ready!"
+
       # Setup Node.js and pnpm for frontend
       - uses: pnpm/action-setup@v4
         with:
