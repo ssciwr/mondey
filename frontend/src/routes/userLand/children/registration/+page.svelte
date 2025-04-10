@@ -336,13 +336,15 @@ async function submitData(): Promise<void> {
                                     intendedConfirmCode={i18n.tr.admin.delete}
                                     deleteDryRunnableRequest={(dryRun) =>
                                     deleteChild({
-                                    path: {
-                                        child_id: currentChild.id,
-                                    },
-                                    query: {
-                                        dry_run: dryRun
-                                    }
-                                })}></DangerousDeleteModal>
+                                        path: {
+                                            child_id: currentChild.id,
+                                        },
+                                        query: {
+                                            dry_run: dryRun
+                                        }
+                                    })}>
+
+                                </DangerousDeleteModal>
                             </div>
                             <small class="block text-muted">
                                 <span>{i18n.tr.childData.monthYearSubtext} </span>
