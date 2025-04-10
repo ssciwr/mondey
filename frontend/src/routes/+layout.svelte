@@ -71,7 +71,7 @@ const asAlert = false;
 
 <div style="position:fixed;padding-top:1.1rem;padding-bottom:1rem;left:0px;right:0px;border-bottom:1px solid lightgray"
 	 class="bg-white dark:bg-gray-800 md:hidden w-full text-center flex justify-center items-center shadow-lg">
-	<a href="/">
+	<a href="/#">
 		<img src={logo_light} class="block h-10 dark:hidden" alt="MONDEY Logo" />
 		<img src={logo_dark} class="hidden h-10 dark:block" alt="MONDEY Logo" />
 	</a>
@@ -80,7 +80,7 @@ const asAlert = false;
 <div class="hidden md:block">
 	<Navbar>
 		<div>
-			<NavBrand href={base}>
+			<NavBrand href="/#">
 				<img src={logo_light} class="mt-6 block h-12 dark:hidden" alt="MONDEY Logo" />
 				<img src={logo_dark} class="mt-6 hidden h-12 dark:block" alt="MONDEY Logo" />
 			</NavBrand>

@@ -9,6 +9,7 @@ import { getChildImage, getChildren } from "$lib/client/sdk.gen";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
+import { displayChildImages } from "$lib/features";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
@@ -103,11 +104,13 @@ async function setup(): Promise<CardElement[]> {
 		const childrenData = await Promise.all(
 			(children.data || []).map(async (child): Promise<CardElement> => {
 				let image = undefined as string | undefined;
-				const childImageResponse = await getChildImage({
-					path: { child_id: child.id },
-				});
-				if (!childImageResponse.error) {
-					image = URL.createObjectURL(childImageResponse.data as Blob);
+				if (displayChildImages) {
+					const childImageResponse = await getChildImage({
+						path: { child_id: child.id },
+					});
+					if (!childImageResponse.error) {
+						image = URL.createObjectURL(childImageResponse.data as Blob);
+					}
 				}
 				return {
 					header: child.name,

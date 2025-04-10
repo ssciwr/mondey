@@ -106,6 +106,7 @@ export const translationIds = {
 		userQuestions: "Fragen über Beobachter",
 		childQuestions: "Fragen über Kind",
 		question: "Frage",
+		questions: "Fragen",
 		selectOptions: "Optionen",
 		actions: "Aktionen",
 		selectPlaceholder: "Erstens,Zweitens,Drittens;",
