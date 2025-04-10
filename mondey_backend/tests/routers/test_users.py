@@ -468,7 +468,7 @@ def test_get_current_child_answers_works(user_client: TestClient):
         "2": {
             "answer": "other",
             "question_id": 2,
-            "additional_answer": "dolor sit",
+            "additional_answer": "apple",
         },
     }
 

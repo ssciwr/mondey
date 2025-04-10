@@ -157,16 +157,16 @@ async function saveChanges() {
 								/>
 							</ButtonGroup>
 						</div>
-						<Label class="mb-2">Required?</Label>
-						<div class="mb-1">
-							<ButtonGroup class="w-full">
-								<Checkbox
-										bind:checked={question.required}
-								/>
-							</ButtonGroup>
-						</div>
 					</div>
 				{/if}
+				<Label class="mb-2">Required?</Label>
+				<div class="mb-1">
+					<ButtonGroup class="w-full">
+						<Checkbox
+								bind:checked={question.required}
+						/>
+					</ButtonGroup>
+				</div>
 			</div>
 			<div>
 				<Card>

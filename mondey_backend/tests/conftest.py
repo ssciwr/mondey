@@ -595,7 +595,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 user_id=3,
                 child_id=1,
                 answer="other",
-                additional_answer="dolor sit",
+                additional_answer="apple",
             )
         )
         session.commit()
