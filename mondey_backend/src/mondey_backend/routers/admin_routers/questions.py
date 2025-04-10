@@ -68,7 +68,7 @@ def create_router() -> APIRouter:
         if dry_run:
             affectedAnswers = len(question.answers)
             return {
-                "ok": "True",
+                "ok": True,
                 "would_delete": {"affectedQuestionAnswers": affectedAnswers},
             }
         session.delete(question)
@@ -128,7 +128,7 @@ def create_router() -> APIRouter:
         if dry_run:
             affectedAnswers = len(question.answers)
             return {
-                "ok": "True",
+                "ok": True,
                 "would_delete": {"affectedQuestionAnswers": affectedAnswers},
             }
         session.delete(question)

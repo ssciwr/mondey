@@ -6,6 +6,7 @@ from fastapi import Query
 from fastapi import UploadFile
 from fastapi.responses import FileResponse
 from sqlmodel import col
+from sqlmodel import delete
 from sqlmodel import select
 
 from ..dependencies import CurrentActiveUserDep
@@ -89,14 +90,20 @@ def create_router() -> APIRouter:
         ),
     ):
         child = get_db_child(session, current_active_user, child_id)
+        # the above guards it to only owners of the child.
         if dry_run:
             affectedAnswers = 0
             for answering_session in get_childs_answering_sessions(session, child_id):
                 affectedAnswers += len(answering_session.answers)
             return {
-                "ok": "True",
+                "ok": True,
                 "would_delete": {"affectedAnswers": affectedAnswers},
             }
+
+        delete_statement = delete(MilestoneAnswerSession).where(
+            col(MilestoneAnswerSession.child_id) == child_id
+        )
+        session.exec(delete_statement)
         session.delete(child)
         session.commit()
         return {"ok": True, "deletion_executed": True}
