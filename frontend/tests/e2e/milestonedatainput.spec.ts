@@ -16,8 +16,14 @@ test("/userLand/children/gallery - Can add Child", async ({
 		.locator('input[for="Geburtsjahr des Kindes?"]')
 		.fill((new Date().getFullYear() - 1).toString());
 	await page.locator('input[for="Geburtsmonat des Kindes?"]').fill("9");
-	await page.getByRole("button", { name: "Abschließen" }).click();
+	
+	// Make sure the button is visible before clicking
+	const finishButton = page.getByRole("button", { name: "Abschließen" });
+	await finishButton.scrollIntoViewIfNeeded();
+	await finishButton.waitFor({ state: 'visible' });
+	await finishButton.click();
 
+	// Wait for navigation to complete
 	await page.waitForTimeout(1000);
 
 	// Click on the child's name
