@@ -66,7 +66,7 @@ $effect(async () => {
 			alertStore.showAlert(i18n.tr.admin.deleteError, "", true, false);
 			console.error(error);
 		}
-		if (data.hasOwn("would_delete")) {
+		if (data.would_delete) {
 			console.log("Deletion would affect: ", data.would_delete);
 			deletionWillAffectTotals = data.would_delete;
 		} else {

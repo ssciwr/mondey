@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 from fastapi import HTTPException
+from fastapi import Query
 from fastapi import UploadFile
 from fastapi.responses import FileResponse
 from sqlmodel import col
@@ -28,6 +29,7 @@ from .scores import compute_milestonegroup_feedback_summary
 from .utils import add
 from .utils import child_image_path
 from .utils import get
+from .utils import get_childs_answering_sessions
 from .utils import get_db_child
 from .utils import get_milestonegroups_for_answersession
 from .utils import get_or_create_current_milestone_answer_session
@@ -78,12 +80,26 @@ def create_router() -> APIRouter:
 
     @router.delete("/children/{child_id}")
     def delete_child(
-        session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
+        session: SessionDep,
+        current_active_user: CurrentActiveUserDep,
+        child_id: int,
+        dry_run: bool = Query(
+            True,
+            description="When true, shows what would be deleted without actually deleting",
+        ),
     ):
         child = get_db_child(session, current_active_user, child_id)
+        if dry_run:
+            affectedAnswers = 0
+            for answering_session in get_childs_answering_sessions(session, child_id):
+                affectedAnswers += len(answering_session.answers)
+            return {
+                "ok": "True",
+                "would_delete": {"affectedAnswers": affectedAnswers},
+            }
         session.delete(child)
         session.commit()
-        return {"ok": True}
+        return {"ok": True, "deletion_executed": True}
 
     @router.get("/children-images/{child_id}", response_class=FileResponse)
     async def get_child_image(

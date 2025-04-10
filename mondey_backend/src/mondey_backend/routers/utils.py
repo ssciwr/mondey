@@ -309,3 +309,12 @@ def count_milestone_answers_for_milestone(
         .where(MilestoneAnswer.milestone_id == milestone_id)
     )
     return session.exec(count_query).one()
+
+
+def get_childs_answering_sessions(
+    session: SessionDep, child_id: int
+) -> list[MilestoneAnswerSession]:
+    select_answering_sessions = select(MilestoneAnswerSession).where(
+        col(MilestoneAnswerSession.child_id) == child_id
+    )
+    return list(session.exec(select_answering_sessions).all())

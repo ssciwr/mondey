@@ -18,6 +18,7 @@ import {
 	updateCurrentChildAnswers,
 	uploadChildImage,
 } from "$lib/client";
+import DangerousDeleteModal from "$lib/components/DangerousDeleteModal.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import DeleteModal from "$lib/components/DeleteModal.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
@@ -295,36 +296,6 @@ async function submitData(): Promise<void> {
 	console.log("submission of child data successful.");
 	goto("/userLand/children/gallery");
 }
-
-const deleteCurrentChild = async () => {
-	if (currentChild.id === null) {
-		console.log("no child id, no child to delete");
-		alertStore.showAlert(
-			i18n.tr.childData.alertMessageTitle,
-			i18n.tr.childData.alertMessageError,
-			true,
-		);
-		return;
-	}
-
-	const response = await deleteChild({
-		path: {
-			child_id: currentChild.id,
-		},
-	});
-
-	if (response.error) {
-		console.log("Error when deleting child");
-		alertStore.showAlert(
-			`${i18n.tr.childData.alertMessageTitle} ${i18n.tr.childData.alertMessageError}`,
-			response.error.detail,
-			true,
-		);
-	} else {
-		goto("/userLand/children/gallery");
-		currentChild.id = null;
-	}
-};
 </script>
 
 {#if i18n.locale}
@@ -360,7 +331,18 @@ const deleteCurrentChild = async () => {
                                     ><TrashBinOutline class="h-5 w-5" /></Button
                                     >
                                 {/if}
-                                <DeleteModal bind:open={showDeleteModal} onclick={deleteCurrentChild}></DeleteModal>
+                                <DangerousDeleteModal bind:open={showDeleteModal}
+                                    afterDelete={() => goto("/userLand/children/gallery")}
+                                    intendedConfirmCode={i18n.tr.admin.delete}
+                                    deleteDryRunnableRequest={(dryRun) =>
+                                    deleteChild({
+                                    path: {
+                                        child_id: currentChild.id,
+                                    },
+                                    query: {
+                                        dry_run: dryRun
+                                    }
+                                })}></DangerousDeleteModal>
                             </div>
                             <small class="block text-muted">
                                 <span>{i18n.tr.childData.monthYearSubtext} </span>
