@@ -35,7 +35,7 @@ def test_research_data_deleted_child(admin_client: TestClient):
     assert len(admin_client.get("/users/children/").json()) == 1
     assert len(admin_client.get("/research/data/").json()) == 3
     # if a child is deleted, their answers are no longer included
-    assert admin_client.delete("/users/children/3").status_code == 200
+    assert admin_client.delete("/users/children/3?dry_run=false").status_code == 200
     assert len(admin_client.get("/users/children/").json()) == 0
     assert len(admin_client.get("/research/data/").json()) == 2
 
