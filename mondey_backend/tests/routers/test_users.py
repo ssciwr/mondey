@@ -235,7 +235,6 @@ def test_delete_child_removes_answering_sessions(
         MilestoneAnswerSession.child_id == new_child_id
     )
     deleted_child_sessions = session.exec(deleted_child_sessions_stmt).all()
-    print("Deleted child sessions were:", deleted_child_sessions)
     assert len(deleted_child_sessions) == 0
 
     # Verify total milestone sessions decreased by 1
