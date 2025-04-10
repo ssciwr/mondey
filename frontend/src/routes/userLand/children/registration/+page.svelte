@@ -18,21 +18,34 @@ import {
 	updateCurrentChildAnswers,
 	uploadChildImage,
 } from "$lib/client";
+import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
+import EditButton from "$lib/components/Admin/EditButton.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import DeleteModal from "$lib/components/DeleteModal.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
+import { displayChildImages } from "$lib/features";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { activePage, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
-import { Button, Card, Heading, Hr, Input, Spinner } from "flowbite-svelte";
+import {
+	Button,
+	Card,
+	Heading,
+	Hr,
+	Input,
+	Spinner,
+	Tooltip,
+} from "flowbite-svelte";
 import {
 	ChartLineUpOutline,
 	CheckCircleOutline,
+	ClipboardCheckOutline,
 	FlagOutline,
 	GridPlusSolid,
 	PenOutline,
+	QuestionCircleSolid,
 	TrashBinOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
@@ -60,6 +73,7 @@ let {
 // functionality
 let disableEdit: boolean = $state(false);
 let disableImageDelete: boolean = $state(false);
+let showChildQuestions: boolean = $state(false);
 let showDeleteModal: boolean = $state(false);
 let imageDeleted: boolean = $state(false);
 let childLabel = $derived(name ? name : i18n.tr.childData.newChildHeadingLong);
@@ -98,6 +112,7 @@ async function setup(): Promise<{
 			true,
 		);
 	} else {
+		console.log("Set questionnaire");
 		questionnaire = questions.data;
 	}
 
@@ -160,6 +175,14 @@ async function setup(): Promise<{
 	}
 	return { questionnaire: questionnaire, answers: answers };
 }
+
+let birthmonthtext = $derived.by(() => {
+	return birthmonth !== null
+		? Intl.DateTimeFormat(i18n.locale || "en", { month: "long" }).format(
+				new Date(birthmonth.toString()),
+			)
+		: "";
+});
 
 async function submitChildData(): Promise<void> {
 	console.log("SubmitChild Data was called.");
@@ -232,6 +255,10 @@ async function submitChildData(): Promise<void> {
 }
 
 async function submitImageData(): Promise<void> {
+	if (false === displayChildImages) {
+		console.warn("Image upload is manually disabled");
+		return;
+	}
 	if (currentChild.id === null) {
 		console.log("no child id, no image to upload");
 		alertStore.showAlert(
@@ -338,33 +365,11 @@ const deleteCurrentChild = async () => {
                 <Card class="container m-1 mx-auto w-full max-w-xl">
                     <Heading
                             tag="h3"
-                            class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
+                            class="m-1 mb-1 p-1 text-left font-bold tracking-tight text-gray-700 dark:text-gray-400"
                     >{childLabel}
                         {#if disableEdit}
-                            <div class="justify-end">
-                                <Button aria-label={i18n.tr.admin.edit}
-                                        type="button"
-                                        class="btn-secondary btn-icon "
-                                        onclick={() => {
-                            disableEdit = false;
-                        }}
-                                >
-                                    <PenOutline class="h-5 w-5" />
-                                </Button>
-
-                                {#if currentChild.id !== null && disableEdit === true}
-                                    <Button
-                                            class="btn-danger btn-icon"
-                                            aria-label={i18n.tr.admin.delete}
-                                            onclick={() => showDeleteModal = true}
-                                    ><TrashBinOutline class="h-5 w-5" /></Button
-                                    >
-                                {/if}
-                                <DeleteModal bind:open={showDeleteModal} onclick={deleteCurrentChild}></DeleteModal>
-                            </div>
                             <small class="block text-muted">
-                                <span>{i18n.tr.childData.monthYearSubtext} </span>
-                                <span class="text-muted">{birthmonth} / {birthyear}</span>
+                                <span class="text-muted">{birthmonthtext} {birthyear}</span>
                             </small>
                         {/if}
                     </Heading
@@ -373,9 +378,7 @@ const deleteCurrentChild = async () => {
                             class="m-1 mx-auto w-full flex-col space-y-6"
                             onsubmit={preventDefault(submitData)}
                     >
-                        {#if disableEdit}
-
-                        {:else}
+                        {#if false === disableEdit}
                             <DataInput
                                     component={componentTable["input"]}
                                     bind:value={name}
@@ -410,17 +413,6 @@ const deleteCurrentChild = async () => {
                             />
 
                             <DataInput
-                                    component={componentTable["fileupload"]}
-                                    bind:value={image}
-                                    label={image !== null ? i18n.tr.childData.imageOfChildChange : i18n.tr.childData.imageOfChildNew}
-                                    required={false}
-                                    placeholder={i18n.tr.childData.noFileChosen}
-                                    disabled={disableEdit}
-                                    id="child_image"
-                                    kwargs = {{accept: ".jpg, .jpeg, .png", clearable: true}}
-                            />
-
-                            <DataInput
                                     component={Input}
                                     bind:value={color}
                                     label={i18n.tr.childData.childColor}
@@ -432,57 +424,69 @@ const deleteCurrentChild = async () => {
                                     componentClass="w-1/4 h-12 rounded"
                             />
 
-                            {#if image !== null && disableEdit === false}
-                                <Button
-                                        class="btn-icon btn-delete"
-                                        disabled={disableImageDelete}
-                                        on:click={() => {
-                                        image = null;
-                                        disableImageDelete = true;
-                                        imageDeleted = true;
-                                    }}
-                                >
-                                    <TrashBinOutline size="sm"/> {i18n.tr.childData.deleteImageButton}
-                                </Button>
-                            {:else if disableImageDelete === true}
-                                <p class="text-center text-sm text-gray-700 dark:text-gray-400 flex items-center justify-center">
-                                    <CheckCircleOutline size="lg" color="green"/> {i18n.tr.childData.imageOfChildChangeDelete}
-                                </p>
+                            {#if displayChildImages}
+                                <DataInput
+                                        component={componentTable["fileupload"]}
+                                        bind:value={image}
+                                        label={image !== null ? i18n.tr.childData.imageOfChildChange : i18n.tr.childData.imageOfChildNew}
+                                        required={false}
+                                        placeholder={i18n.tr.childData.noFileChosen}
+                                        disabled={disableEdit}
+                                        id="child_image"
+                                        kwargs = {{accept: ".jpg, .jpeg, .png", clearable: true}}
+                                />
+
+
+                                {#if image !== null && disableEdit === false}
+
+                                    <div class="text-center" style="min-width:100%">
+                                        <div>
+                                            <img src={URL.createObjectURL(image)} alt="Child preview" style="width: 100%; max-height: 200px; object-fit: contain;" />
+                                        </div>
+                                        <div>
+                                        <DeleteButton onclick={() => {
+                                                image = null;
+                                                disableImageDelete = true;
+                                                imageDeleted = true;
+                                        }} />
+                                        </div>
+                                    </div>
+                                {:else if disableImageDelete === true}
+                                    <p class="text-center text-sm text-gray-700 dark:text-gray-400 flex items-center justify-center">
+                                        <CheckCircleOutline size="lg" color="green"/> {i18n.tr.childData.imageOfChildChangeDelete}
+                                    </p>
+                                {/if}
                             {/if}
                         {/if}
 
-                        {#each questionnaire as element, i}
-                            <DataInput
-                                    component={element.component ? componentTable[element.component] : undefined}
-                                    bind:value={answers[element.id].answer}
-                                    bind:additionalValue={answers[element.id]
-              .additional_answer}
-                                    label={element?.text?.[i18n.locale].question}
-                                    textTrigger={element.additional_option}
-                                    required={element.required}
-                                    additionalRequired={true}
-                                    id={"input_" + String(i)}
-                                    items={element?.text?.[i18n.locale].options_json === ""
-              ? undefined
-              : JSON.parse(
-                  element?.text?.[i18n.locale].options_json ?? '',
-              )}
-                                    disabled={disableEdit}
-                                    placeholder=""
-                            />
-                        {/each}
-                        {#if disableEdit === false}
-                            <button
-                                    class="btn-primary"
-                                    type="submit"
-                            >{i18n.tr.childData.submitButtonLabel}</button
-                            >
-                        {/if}
 
+                        <span>
+                            {#if disableEdit}
+                                <EditButton onclick={() => disableEdit = false} />
+                            {/if}
+
+                            {#if currentChild.id !== null && disableEdit === true}
+                                    <DeleteButton onclick={() => showDeleteModal = true} />
+                                {/if}
+                            {#if !showChildQuestions && disableEdit}
+                                <Button class="btn-secondary btn-icon" style="padding: 9.5px 20px" on:click={() => {
+                                    showChildQuestions = true;
+                                    disableEdit = false;
+                                }}>
+                                      <ClipboardCheckOutline /> {questionnaire.length} {i18n.tr.admin.questions}
+
+                                </Button>
+                                <Tooltip>{questionnaire.length} {i18n.tr.admin.childQuestions}</Tooltip>
+                            {/if}
+                            <DeleteModal bind:open={showDeleteModal} onclick={deleteCurrentChild}></DeleteModal>
+
+                        </span>
+
+                        <hr style="margin-bottom:10px" />
 
                         {#if currentChild.id !== null && disableEdit === true}
                             <Button
-                                    class="btn-secondary"
+                                    class="btn-primary"
                                     onclick={() => {
                                         goto(`/userLand/children/feedback`)
                                     }}>
@@ -499,6 +503,35 @@ const deleteCurrentChild = async () => {
                                 {i18n.tr.childData.nextButtonLabel}
                             </Button>
 
+                        {/if}
+
+                        {#if (!disableEdit || (disableEdit && showChildQuestions))}
+                            {#each questionnaire as element, i}
+                                <DataInput
+                                        component={element.component ? componentTable[element.component] : undefined}
+                                        bind:value={answers[element.id].answer}
+                                        bind:additionalValue={answers[element.id].additional_answer}
+                                        label={element?.text?.[i18n.locale].question}
+                                        textTrigger={element.additional_option}
+                                        required={element.required}
+                                        additionalRequired={true}
+                                        id={"input_" + String(i)}
+                                        items={element?.text?.[i18n.locale].options_json === ""
+                                          ? undefined
+                                          : JSON.parse(
+                                              element?.text?.[i18n.locale].options_json ?? '',
+                                          )}
+                                        disabled={disableEdit}
+                                        placeholder=""
+                                />
+                            {/each}
+                        {/if}
+                        {#if disableEdit === false}
+                            <button
+                                    class="btn-primary"
+                                    type="submit"
+                            >{i18n.tr.childData.submitButtonLabel}</button
+                            >
                         {/if}
                     </form>
                 </Card>
