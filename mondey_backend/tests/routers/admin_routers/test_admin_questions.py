@@ -8,12 +8,8 @@ from mondey_backend.models.questions import UserQuestion
 
 
 def test_get_user_question_admin_works(admin_client: TestClient, user_questions):
-    response = admin_client.get("/user-questions/")
-    print("Testing user questions... as admin...")
-
-    print("User questiosn public...:")
-    print(response.json())
-    assert response.status_code == 300
+    response = admin_client.get("/admin/user-questions/")
+    assert response.status_code == 200
 
     assert [element["order"] for element in response.json()] == [1, 2]
     assert response.json() == user_questions
