@@ -38,7 +38,7 @@ let {
 		on:click={data?.events?.['onclick'] ?? (()=>{})}
 >
 	<!-- Fixed height container for header -->
-	<div class="h-24">
+	<div>
 		{#if data.header}
 			<h5 class="text-xl font-bold break-words hyphens-auto " {...styleProps.header}>
 				{data.header}
