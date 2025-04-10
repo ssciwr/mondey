@@ -49,7 +49,7 @@ async function mock_research_names_route(page: Page, n_milestones: number) {
 			child_question: { "1": "Number of Siblings", "2": "Early birth" },
 		};
 		for (let milestone_id = 1; milestone_id <= n_milestones; ++milestone_id) {
-			json.milestone[`${milestone_id}`] = `Milestone ${milestone_id}`;
+			json.milestone[`${milestone_id}`] = `MS${milestone_id}`;
 		}
 		await route.fulfill({ json });
 	});
@@ -66,30 +66,55 @@ async function clickDownloadCSVButtonAndGetFilename(
 
 // selectOption doesn't work with the flowbite-svelte multiselect component,
 // so this class abstracts the workarounds found for interacting with it.
-class GroupbyMultiselect {
-	private locator: Locator;
-	constructor(page: Page) {
-		this.locator = page.getByRole("listbox");
+class Multiselect {
+	private page: Page;
+	private readonly placeholder: string;
+	private currentText: string;
+	constructor(page: Page, placeholder: string) {
+		this.page = page;
+		this.placeholder = placeholder;
+		this.currentText = placeholder;
+	}
+	private locater() {
+		// select which listbox we want based on the text currently displayed in it
+		return this.page.getByRole("listbox").filter({ hasText: this.currentText });
+	}
+	private async toggleDropdown() {
+		// click on up/down svg arrow to open/close drop-down
+		// locate it as the last svg element of the listbox
+		await this.locater().locator("svg").locator("nth=-1").click();
 	}
 	async clear() {
-		await this.locator.getByRole("button", { name: "Close" }).click();
+		await this.locater().getByRole("button", { name: "Close" }).click();
+		this.currentText = this.placeholder;
 	}
 	async select(text: string) {
-		await this.locator.click();
-		await this.locator.getByText(text).click();
+		// open drop-down menu
+		await this.toggleDropdown();
+		// click on element with text in drop-down
+		await this.locater().getByText(text).click();
+		this.currentText = text;
+		// open drop-down menu
+		await this.toggleDropdown();
 	}
 }
 
 test("Research page: valid data", async ({ page }) => {
 	await mock_research_data_route(page, 20, 5);
 	await mock_research_names_route(page, 5);
-	await page.goto("/userLand/research");
+	await page.goto("/userLand/research", { waitUntil: "networkidle" });
 
+	// select first milestone
+	const selectMilestone = new Multiselect(
+		page,
+		translationIds.researcher.milestones,
+	);
+	await selectMilestone.select("MS1");
 	// plot and table of data for first milestone should be displayed
 	const plot = page.getByTestId("researchPlotLines");
 	await expect(plot).toContainText("punktzahl");
 	const plot_title = page.getByTestId("researchPlotTitle");
-	await expect(plot_title).toContainText("Milestone 1");
+	await expect(plot_title).toContainText("MS1");
 	const table = page.getByTestId("researchTable");
 	await expect(table).toContainText("1");
 	await expect(table).toContainText("child_age");
@@ -97,57 +122,72 @@ test("Research page: valid data", async ({ page }) => {
 	await expect(table).toContainText("answer_std");
 	await expect(table).toContainText("answer_count");
 	await expect(table).not.toContainText("Parent income");
-
 	// download CSV
 	let downloadFilename = await clickDownloadCSVButtonAndGetFilename(page);
 	expect(downloadFilename).toContain("mondey");
-	expect(downloadFilename).toContain("milestone_id_1");
+	expect(downloadFilename).toContain("MS1");
 
-	// select another milestone
-	const selectMilestone = page.getByTestId("selectMilestone");
-	await selectMilestone.selectOption("Milestone 3");
-	await expect(plot_title).toContainText("Milestone 3");
-
+	// select two more milestones
+	await selectMilestone.select("MS2");
+	await selectMilestone.select("MS3");
+	await expect(plot_title).toContainText("MS1");
+	await expect(plot_title).toContainText("MS2");
+	await expect(plot_title).toContainText("MS3");
 	// download CSV
 	downloadFilename = await clickDownloadCSVButtonAndGetFilename(page);
 	expect(downloadFilename).toContain("mondey");
-	expect(downloadFilename).toContain("milestone_id_3");
+	expect(downloadFilename).toContain("MS1");
+	expect(downloadFilename).toContain("MS2");
+	expect(downloadFilename).toContain("MS3");
 
 	// group by parent income
 	await expect(table).not.toContainText("Parent income");
-	const selectGroupby = new GroupbyMultiselect(page);
+	const selectGroupby = new Multiselect(
+		page,
+		translationIds.researcher.groupbyOptional,
+	);
 	await selectGroupby.select("Parent income");
 	await expect(table).toContainText("Parent income");
-
 	// download CSV
 	downloadFilename = await clickDownloadCSVButtonAndGetFilename(page);
 	expect(downloadFilename).toContain("mondey");
-	expect(downloadFilename).toContain("milestone_id_3");
-	expect(downloadFilename).toContain("user_question_1");
+	expect(downloadFilename).toContain("MS1");
+	expect(downloadFilename).toContain("MS2");
+	expect(downloadFilename).toContain("MS3");
+	expect(downloadFilename).toContain("Parent income");
 
 	// also group by number of siblings
 	await expect(table).not.toContainText("Number of Siblings");
 	await selectGroupby.select("Number of Siblings");
 	await expect(table).toContainText("Parent income");
 	await expect(table).toContainText("Number of Siblings");
-
 	// download CSV
 	downloadFilename = await clickDownloadCSVButtonAndGetFilename(page);
 	expect(downloadFilename).toContain("mondey");
-	expect(downloadFilename).toContain("milestone_id_3");
-	expect(downloadFilename).toContain("user_question_1");
-	expect(downloadFilename).toContain("child_question_1");
+	expect(downloadFilename).toContain("MS1");
+	expect(downloadFilename).toContain("MS2");
+	expect(downloadFilename).toContain("MS3");
+	expect(downloadFilename).toContain("Parent income");
+	expect(downloadFilename).toContain("Number of Siblings");
 
 	// clear groupby selection
 	await selectGroupby.clear();
 	await expect(table).not.toContainText("Parent income");
 	await expect(table).not.toContainText("Number of Siblings");
-
 	// download CSV
 	downloadFilename = await clickDownloadCSVButtonAndGetFilename(page);
 	expect(downloadFilename).toContain("mondey");
-	expect(downloadFilename).toContain("milestone_id_3");
-	expect(downloadFilename).not.toContain("question");
+	expect(downloadFilename).toContain("MS1");
+	expect(downloadFilename).toContain("MS2");
+	expect(downloadFilename).toContain("MS3");
+	expect(downloadFilename).not.toContain("Parent income");
+	expect(downloadFilename).not.toContain("Number of Siblings");
+
+	// clear milestone selection
+	await selectMilestone.clear();
+	// no plot or table are displayed if there is no data
+	await expect(plot).toHaveCount(0);
+	await expect(table).toHaveCount(0);
 });
 
 test("Research page: no data", async ({ page }) => {

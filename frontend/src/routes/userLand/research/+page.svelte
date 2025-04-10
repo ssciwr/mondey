@@ -9,7 +9,6 @@ import {
 	Button,
 	Label,
 	MultiSelect,
-	Select,
 	type SelectOptionType,
 	Spinner,
 	Table,
@@ -20,7 +19,7 @@ import {
 	TableHeadCell,
 } from "flowbite-svelte";
 import { onMount } from "svelte";
-import type { WorkerRequest, WorkerResponse } from "./dataWorker";
+import type { WorkerInit, WorkerRequest, WorkerUpdate } from "./dataWorker";
 
 // Web Worker for data processing
 let worker: Worker;
@@ -34,18 +33,29 @@ let show_spinner_timeout_id: number;
 let json_data = $state.raw([] as any[]);
 let plot_data = $state.raw({} as PlotData);
 let milestone_ids = $state.raw([] as SelectOptionType<string>[]);
-let milestone_ids_inv = $state.raw({} as Record<string, string | number>);
+let milestone_ids_inv = $state.raw({} as Record<string, string>);
 let columns = $state.raw([] as SelectOptionType<string>[]);
-let columns_inv = $state.raw({} as Record<string, string | number>);
+let columns_inv = $state.raw({} as Record<string, string>);
 
 // Selection states
-let selected_milestone_column = $state("");
+let selected_milestones = $state([] as string[]);
 let selected_columns = $state([] as string[]);
+
+let selected_milestone_names = $derived(
+	selected_milestones.map((k) => {
+		return milestone_ids_inv?.[k] ?? k;
+	}),
+);
+let selected_column_names = $derived(
+	selected_columns.map((k) => {
+		return columns_inv?.[k] ?? k;
+	}),
+);
 
 function invert_select_option_array(arr: SelectOptionType<string>[]) {
 	return arr.reduce(
 		(obj, item) => Object.assign(obj, { [item.value]: item.name }),
-		{} as Record<string, string | number>,
+		{} as Record<string, string>,
 	);
 }
 
@@ -55,23 +65,17 @@ function createWorker(): Worker {
 	});
 
 	// Handle messages from worker
-	worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
+	worker.onmessage = (event: MessageEvent<WorkerUpdate | WorkerInit>) => {
 		const response = event.data;
 		stop_spinner();
-		// update the plot & table data
-		json_data = response.json_data;
-		plot_data = response.plot_data;
-		// only update these if they are empty (i.e. the first time)
-		if (columns.length === 0) {
+		if (response.type === "init") {
 			columns = response.columns;
 			columns_inv = invert_select_option_array(columns);
-		}
-		if (milestone_ids.length === 0) {
 			milestone_ids = response.milestone_ids;
 			milestone_ids_inv = invert_select_option_array(milestone_ids);
-		}
-		if (selected_milestone_column === "") {
-			selected_milestone_column = milestone_ids[0].value;
+		} else if (response.type === "update") {
+			json_data = response.json_data;
+			plot_data = response.plot_data;
 		}
 	};
 
@@ -110,7 +114,7 @@ function stop_spinner() {
 // Ask worker to update the data when selected milestone or group-by columns change
 $effect(() => {
 	const message: WorkerRequest = {
-		selected_milestone_column: selected_milestone_column,
+		selected_milestones: $state.snapshot(selected_milestones),
 		selected_columns: $state.snapshot(selected_columns),
 	};
 	worker.postMessage(message);
@@ -124,7 +128,7 @@ function downloadCSV() {
 	}
 	const csvConfig = mkConfig({
 		useKeysAsHeaders: true,
-		filename: `${["mondey", new Date().toISOString().replace(/T.*/, ""), selected_milestone_column].concat(selected_columns).join("-")}`,
+		filename: `${["mondey", new Date().toISOString().replace(/T.*/, "")].concat(selected_milestone_names).concat(selected_column_names).join("-")}`,
 		quoteStrings: true,
 	});
 	const csv = generateCsv(csvConfig)(json_data);
@@ -140,12 +144,12 @@ let headers = $derived.by(() => {
 </script>
 
 <div class="w-full grow">
-<div class="flex flex-row items-stretch m-2">
-    <div class="m-2">
-        <Label> {i18n.tr.researcher.milestoneId}
-            <Select bind:value={selected_milestone_column} class="mt-2" items={milestone_ids}
-                    placeholder={i18n.tr.researcher.milestoneId}
-                    data-testid="selectMilestone"/>
+<div class="flex flex-col items-stretch m-2">
+    <div class="m-2 grow">
+        <Label> {i18n.tr.researcher.milestones}
+            <MultiSelect bind:value={selected_milestones} class="mt-2" items={milestone_ids}
+                         placeholder={i18n.tr.researcher.milestones}
+                         data-testid="selectMilestone"/>
         </Label>
     </div>
     <div class="m-2 grow">
@@ -163,7 +167,7 @@ let headers = $derived.by(() => {
     {:else if json_data && json_data.length > 0}
         <!-- Plot -->
         {#key plot_data}
-            <div class="text-center text-2xl font-bold tracking-tight text-gray-700 dark:text-white" data-testid="researchPlotTitle">{i18n.tr.researcher.milestone} {milestone_ids_inv?.[selected_milestone_column] ?? selected_milestone_column} {selected_columns.map((k) => {return columns_inv?.[k] ?? k}).join("-")}</div>
+            <div class="text-center text-2xl font-bold tracking-tight text-gray-700 dark:text-white" data-testid="researchPlotTitle">{selected_milestone_names.join(", ")} {selected_column_names.join("-")}</div>
             <div class="m-2 p-2" data-testid="researchPlotLines">
                 <PlotLines {plot_data} />
             </div>

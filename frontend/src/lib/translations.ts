@@ -144,7 +144,7 @@ export const translationIds = {
 		selectColumns: "Spalten auswählen",
 		milestone: "Meilenstein",
 		error: "Ein Fehler ist aufgetreten. Bitte versuchen sie es später erneut.",
-		milestoneId: "Meilenstein-ID",
+		milestones: "Meilensteine",
 		groupbyOptional: "Gruppieren nach (optional)",
 	},
 	registration: {

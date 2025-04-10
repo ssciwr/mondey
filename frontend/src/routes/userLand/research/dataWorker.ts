@@ -1,22 +1,24 @@
-import type {
-	GetResearchNamesResponse,
-	GetResearchNamesResponses,
-} from "$lib/client";
+import type { GetResearchNamesResponse } from "$lib/client";
 import { client } from "$lib/client/client.gen";
 import { getResearchData, getResearchNames } from "$lib/client/sdk.gen";
 import type { PlotData } from "$lib/util";
-import { DataFrame, toJSON } from "danfojs/dist/danfojs-browser/src";
+import { DataFrame, concat, toJSON } from "danfojs/dist/danfojs-browser/src";
 import type { SelectOptionType } from "flowbite-svelte";
 
 // Message types for worker communication
 export type WorkerRequest = {
-	selected_milestone_column: string;
+	selected_milestones: string[];
 	selected_columns: string[];
 };
 
-export type WorkerResponse = {
+export type WorkerUpdate = {
+	type: "update";
 	json_data: any[];
 	plot_data: PlotData;
+};
+
+export type WorkerInit = {
+	type: "init";
 	milestone_ids: SelectOptionType<string>[];
 	columns: SelectOptionType<string>[];
 };
@@ -65,46 +67,43 @@ async function init() {
 			const name = milestone_id ? names?.milestone?.[milestone_id] : column;
 			return { value: column, name: name };
 		});
-	update_data(milestone_ids[0].value, []);
+	const message: WorkerInit = {
+		type: "init",
+		milestone_ids: milestone_ids,
+		columns: columns,
+	};
+	self.postMessage(message);
 }
 
-// construct dataframe of answers for selected milestone grouped by selected columns
-function get_df(selected_milestone_column: string, selected_columns: string[]) {
-	if (df_in === null || df_in.size === 0) {
+// construct dataframe of answers for selected milestones grouped by selected columns
+function get_df(selected_milestones: string[], selected_columns: string[]) {
+	if (df_in === null || df_in.size === 0 || selected_milestones.length === 0) {
 		return new DataFrame();
 	}
-	const grp = df_in
-		.loc({
-			columns: ["child_age", selected_milestone_column].concat(
-				selected_columns,
-			),
-		})
-		.dropNa()
-		.groupby(["child_age"].concat(selected_columns));
-	const df = grp.col([selected_milestone_column]).mean();
+	const df_list: DataFrame[] = [];
+	for (const selected_milestone of selected_milestones) {
+		df_list.push(
+			df_in
+				.loc({
+					columns: ["child_age", selected_milestone].concat(selected_columns),
+				})
+				.dropNa()
+				.rename({ [selected_milestone]: "answer" }),
+		);
+	}
+	const grp = (concat({ dfList: df_list, axis: 0 }) as DataFrame).groupby(
+		["child_age"].concat(selected_columns),
+	);
+	const df = grp.col(["answer"]).mean();
 	if (df.size === 0) {
 		return new DataFrame();
 	}
-	df.rename(
-		{ [`${selected_milestone_column}_mean`]: "answer_mean" },
-		{ inplace: true },
-	);
-	df.addColumn(
-		"answer_std",
-		grp
-			.col([selected_milestone_column])
-			.std()
-			.column(`${selected_milestone_column}_std`),
-		{
-			inplace: true,
-		},
-	);
+	df.addColumn("answer_std", grp.col(["answer"]).std().column("answer_std"), {
+		inplace: true,
+	});
 	df.addColumn(
 		"answer_count",
-		grp
-			.col([selected_milestone_column])
-			.count()
-			.column(`${selected_milestone_column}_count`),
+		grp.col(["answer"]).count().column("answer_count"),
 		{
 			inplace: true,
 		},
@@ -155,27 +154,24 @@ function get_plot_data(df: DataFrame, selected_columns: string[]) {
 
 // send message with updated data for provided milestone and group-by columns
 function update_data(
-	selected_milestone_column: string,
+	selected_milestones: string[],
 	selected_columns: string[],
 ) {
-	const df = get_df(selected_milestone_column, selected_columns);
-	if (df_in === null || df_in.size === 0) {
+	if (!df_in || df_in.size === 0) {
 		return;
 	}
-	const json_data = get_json_data(df);
-	const plot_data = get_plot_data(df, selected_columns);
-	const message: WorkerResponse = {
-		json_data: json_data,
-		plot_data: plot_data,
-		milestone_ids: milestone_ids,
-		columns: columns,
+	const df = get_df(selected_milestones, selected_columns);
+	const message: WorkerUpdate = {
+		type: "update",
+		json_data: get_json_data(df),
+		plot_data: get_plot_data(df, selected_columns),
 	};
 	self.postMessage(message);
 }
 
 self.onmessage = (event: MessageEvent<WorkerRequest>) => {
-	const { selected_milestone_column, selected_columns } = event.data;
-	update_data(selected_milestone_column, selected_columns);
+	const { selected_milestones, selected_columns } = event.data;
+	update_data(selected_milestones, selected_columns);
 };
 
 // download research data and construct initial state on creation of web worker
