@@ -1532,7 +1532,12 @@ export type DeleteChildData = {
     path: {
         child_id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * When true, shows what would be deleted without actually deleting
+         */
+        dry_run?: boolean;
+    };
     url: '/users/children/{child_id}';
 };
 
