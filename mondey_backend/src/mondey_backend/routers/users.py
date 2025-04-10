@@ -103,7 +103,7 @@ def create_router() -> APIRouter:
         delete_statement = delete(MilestoneAnswerSession).where(
             col(MilestoneAnswerSession.child_id) == child_id
         )
-        session.exec(delete_statement)
+        session.execute(delete_statement)
         session.delete(child)
         session.commit()
         return {"ok": True, "deletion_executed": True}
