@@ -140,6 +140,8 @@ export const translationIds = {
 			affectedMilestones: "Meilsteinen",
 			affectedAnswers: "Meilsteinen Antworten",
 		},
+		deleteError: "Ein Fehler ist durch Löschen aufgetreten",
+		deletionComplete: "Löschen Erfolgreich",
 	},
 	researcher: {
 		label: "Wissenschaft",

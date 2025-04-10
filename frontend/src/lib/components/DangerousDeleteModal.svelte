@@ -2,24 +2,25 @@
 
 <script lang="ts">
 import { i18n } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { Button, Input, Modal, Spinner } from "flowbite-svelte";
+import { CheckCircleOutline } from "flowbite-svelte-icons";
 import ExclamationCircleOutline from "flowbite-svelte-icons/ExclamationCircleOutline.svelte";
 import { onMount } from "svelte";
 
 let {
 	open = $bindable(false),
 	deleteDryRunnableRequest,
+	intendedConfirmCode,
 }: {
 	open: boolean;
-	deleteDryRunnableRequest: (b: boolean) => {
-		would_delete: { translation_key: number } | { deletion_executed: boolean };
-	};
+	deleteDryRunnableRequest: any;
+	intendedConfirmCode: string;
 } = $props();
 
 // todo: Type these better
 let deletionWillAffectTotals = $state({});
 let deleteConfirmCode: string = $state("");
-let intendedConfirmCode: string = $state("");
 let deleteDone: boolean = $state(false);
 
 let sendDeleteRequest = () => {
@@ -27,22 +28,28 @@ let sendDeleteRequest = () => {
 	// then call deleteDryRunnableRequest(false) // dry run false.
 	// otherwise display an alert.
 	if (deleteConfirmCode === intendedConfirmCode) {
-		const result: { deletion_executed: boolean } =
-			deleteDryRunnableRequest(false);
+		const result = deleteDryRunnableRequest(false);
 		if (result.deletion_executed) {
 			deleteDone = true;
+		} else {
+			alertStore.showAlert(i18n.tr.admin.deleteError, "", true, false);
+			console.error(result.error);
 		}
 	}
 };
 
-onMount(() => {
-	deletionWillAffectTotals = deleteDryRunnableRequest(true).would_delete; // dry run delete will return
+onMount(async () => {
+	deletionWillAffectTotals = await deleteDryRunnableRequest(true).would_delete; // dry run delete will return
 	intendedConfirmCode = Object.keys(deletionWillAffectTotals)[0];
 });
 </script>
 
 <Modal bind:open size="xs" autoclose>
     <div class="text-center">
+        {#if deleteDone}
+            <h3><CheckCircleOutline class="h-12 w-12" />{i18n.tr.admin.deletionComplete}</h3>
+        {/if}
+
         <ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-gray-400 dark:text-gray-200" />
         <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
             {i18n.tr.admin.deleteAreYouSure}

@@ -7,7 +7,6 @@ from sqlmodel import Field
 from sqlmodel import SQLModel
 from sqlmodel import text
 
-from .children import Child
 from .utils import back_populates
 from .utils import dict_relationship
 from .utils import fixed_length_string_field
@@ -170,7 +169,7 @@ class MilestoneAnswer(SQLModel, table=True):
 
 class MilestoneAnswerSession(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    child_id: int = Field(foreign_key="child.id")
+    child_id: int = Field(foreign_key="child.id", ondelete="CASCADE")
     user_id: int
     created_at: datetime.datetime = Field(
         sa_column_kwargs={
@@ -180,7 +179,6 @@ class MilestoneAnswerSession(SQLModel, table=True):
     expired: bool
     included_in_statistics: bool
     answers: Mapped[dict[int, MilestoneAnswer]] = dict_relationship(key="milestone_id")
-    child: Child = back_populates("answering_sessions")
 
 
 class MilestoneAnswerSessionPublic(SQLModel):

@@ -24,6 +24,7 @@ import EditMilestoneGroupModal from "$lib/components/Admin/EditMilestoneGroupMod
 import EditMilestoneModal from "$lib/components/Admin/EditMilestoneModal.svelte";
 import OrderItemsModal from "$lib/components/Admin/OrderItemsModal.svelte";
 import ReorderButton from "$lib/components/Admin/ReorderButton.svelte";
+import DangerousDeleteModal from "$lib/components/DangerousDeleteModal.svelte";
 import DeleteModal from "$lib/components/DeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { milestoneGroups } from "$lib/stores/adminStore";
@@ -267,14 +268,14 @@ async function doDeleteMilestone(dry_run = true) {
 		milestoneGroup={currentMilestoneGroup}
 	></EditMilestoneGroupModal>
 {/key}
-<DeleteModal bind:open={showDeleteMilestoneGroupModal} onclick={doDeleteMilestoneGroup}
-></DeleteModal>
+<DangerousDeleteModal bind:open={showDeleteMilestoneGroupModal} deleteDryRunnableRequest={doDeleteMilestoneGroup}
+></DangerousDeleteModal>
 
 {#key showEditMilestoneModal}
 	<EditMilestoneModal bind:open={showEditMilestoneModal} bind:milestone={currentMilestone}
 	></EditMilestoneModal>
 {/key}
-<DeleteModal bind:open={showDeleteMilestoneModal} onclick={(dryRun=true) => doDeleteMilestone(dryRun)}></DeleteModal>
+<DangerousDeleteModal bind:open={showDeleteMilestoneModal} deleteDryRunnableRequest={deleteMilestone}></DangerousDeleteModal>
 
 <OrderItemsModal bind:open={showOrderItemsModal} items={currentOrderItems} endpoint={currentOrderEndpoint} callback={refreshMilestoneGroups}  />
 {:else}
