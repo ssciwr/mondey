@@ -4,7 +4,6 @@ import pathlib
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
-from mondey_backend.dependencies import SessionDep
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
 
@@ -146,9 +145,7 @@ def test_delete_dry_run_does_not_delete_child(user_client: TestClient):
     assert len(user_client.get("/users/children/").json()) == 3
 
 
-def test_delete_child_removes_answering_sessions(
-    session: SessionDep, user_client: TestClient
-):
+def test_delete_child_removes_answering_sessions(session, user_client: TestClient):
     assert len(user_client.get("/users/children/").json()) == 2
 
     # Count initial MilestoneAnswerSessions
