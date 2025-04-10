@@ -18,9 +18,9 @@ import {
 	updateCurrentChildAnswers,
 	uploadChildImage,
 } from "$lib/client";
-import DangerousDeleteModal from "$lib/components/DangerousDeleteModal.svelte";
 import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
 import EditButton from "$lib/components/Admin/EditButton.svelte";
+import DangerousDeleteModal from "$lib/components/DangerousDeleteModal.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import DeleteModal from "$lib/components/DeleteModal.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
