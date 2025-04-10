@@ -8,7 +8,7 @@ ratehr than use the UI to manually add the data etc.
 import { expect, test } from "@playwright/test";
 import { login, modalLoad } from "./utils";
 
-test("/userLand/admin - Questions on Children : New question can be added, and appears on the create child form", async ({
+test("/userLand/children/gallery - The gallery of children includes feedback with the relevant milestone groups", async ({
 	page,
 }) => {
 	await login(page, "admin@mondey.de", "admin");

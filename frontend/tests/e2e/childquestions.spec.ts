@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { login, modalLoad } from "./utils";
 
-test("/userLand/admin - Questions on Children : New question can be added, and appears on the create child form", async ({
+test("/userLand/admin - Questions on Children : New child question can be added, and appears on the create child form", async ({
 	page,
 	isMobile,
 }) => {
