@@ -8,27 +8,35 @@ import { CheckCircleOutline } from "flowbite-svelte-icons";
 import ExclamationCircleOutline from "flowbite-svelte-icons/ExclamationCircleOutline.svelte";
 import { onMount } from "svelte";
 
+type DeletionWillAffectTotals = {
+    [key: string]: number;
+};
+
+type DryRunnableDataResponse = 
+    | { deletion_executed: boolean; error?: never; would_delete?: never }
+    | { would_delete: DeletionWillAffectTotals; error?: never; deletion_executed?: never }
+    | { error: string; deletion_executed?: never; would_delete?: never };
+
 let {
 	open = $bindable(false),
 	deleteDryRunnableRequest,
 	intendedConfirmCode,
 }: {
 	open: boolean;
-	deleteDryRunnableRequest: any;
+	deleteDryRunnableRequest: (dryRun: boolean) => Promise<DryRunnableDataResponse>;
 	intendedConfirmCode: string;
 } = $props();
 
-// todo: Type these better
-let deletionWillAffectTotals = $state({});
+let deletionWillAffectTotals = $state<DeletionWillAffectTotals>({});
 let deleteConfirmCode: string = $state("");
 let deleteDone: boolean = $state(false);
 
-let sendDeleteRequest = () => {
+let sendDeleteRequest = async () => {
 	// if confirm text is what we expect..
 	// then call deleteDryRunnableRequest(false) // dry run false.
 	// otherwise display an alert.
 	if (deleteConfirmCode === intendedConfirmCode) {
-		const result = deleteDryRunnableRequest(false);
+		const result = await deleteDryRunnableRequest(false);
 		if (result.deletion_executed) {
 			deleteDone = true;
 		} else {
@@ -39,8 +47,11 @@ let sendDeleteRequest = () => {
 };
 
 onMount(async () => {
-	deletionWillAffectTotals = await deleteDryRunnableRequest(true).would_delete; // dry run delete will return
-	intendedConfirmCode = Object.keys(deletionWillAffectTotals)[0];
+	const dryRunResult = await deleteDryRunnableRequest(true);
+	if ('would_delete' in dryRunResult) {
+		deletionWillAffectTotals = dryRunResult.would_delete;
+		intendedConfirmCode = Object.keys(deletionWillAffectTotals)[0];
+	}
 });
 </script>
 
@@ -69,7 +80,7 @@ onMount(async () => {
 
             <Input bind:value={deleteConfirmCode}></Input>
 
-            <Button color="red" class="me-2" onclick={sendDeleteRequest}>
+            <Button color="red" class="me-2" on:click={sendDeleteRequest}>
             {i18n.tr.admin.yesSure}
             </Button>
         {/if}
