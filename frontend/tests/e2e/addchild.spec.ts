@@ -6,7 +6,6 @@ test("/userLand/children/gallery - Can add Child", async ({
 	isMobile,
 }) => {
 	await login(page, "admin@mondey.de", "admin");
-	await page.getByText("Kinder").first().click();
 	await page.locator('h5:has-text("+ Neu")').click();
 	await modalLoad(page);
 	const element_when_adding = page.getByText("Name des Kindes?");

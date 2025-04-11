@@ -89,7 +89,7 @@ async function setup(): Promise<{
 	const questions = await getChildQuestions();
 	if (questions.error || questions.data === undefined) {
 		console.log(
-			"Error when getting userquestions: ",
+			"Error when getting childquestions: ",
 			(questions.error as ErrorModel).detail,
 		);
 		alertStore.showAlert(
