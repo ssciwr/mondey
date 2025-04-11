@@ -135,6 +135,16 @@ export const translationIds = {
 		editUserQuestionTitle: "Frage an Benutzer editieren",
 		expectedAgeData: "Voraussichtliches Alter Daten",
 		maxFileSizeIs: "Die maximale Dateigröße für ein Bild beträgt",
+		deletionWillAffect: "Durch die Löschung werden diese Elemente gelöscht:",
+		deleteError: "Ein Fehler ist durch Löschen aufgetreten",
+		deletionComplete: "Löschen Erfolgreich",
+		deletionConfirm:
+			"Geben Sie das folgende Löschungswort ein, um zu bestätigen, dass dies und alles oben genannte gelöscht wurde",
+		confirmDeleteCode: "Geben Sie das Löschungswort ein",
+		enterDeletionConfirmation: "Löschungswort",
+		affectedQuestionAnswers: "Fragen Antworten",
+		affectedMilestones: "Meilsteinen",
+		affectedAnswers: "Meilsteinen Antworten",
 	},
 	researcher: {
 		label: "Wissenschaft",

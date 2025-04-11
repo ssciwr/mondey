@@ -24,6 +24,7 @@ import EditMilestoneGroupModal from "$lib/components/Admin/EditMilestoneGroupMod
 import EditMilestoneModal from "$lib/components/Admin/EditMilestoneModal.svelte";
 import OrderItemsModal from "$lib/components/Admin/OrderItemsModal.svelte";
 import ReorderButton from "$lib/components/Admin/ReorderButton.svelte";
+import DangerousDeleteModal from "$lib/components/DangerousDeleteModal.svelte";
 import DeleteModal from "$lib/components/DeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { milestoneGroups } from "$lib/stores/adminStore";
@@ -107,7 +108,7 @@ async function addMilestone(milestoneGroupId: number) {
 	showEditMilestoneModal = true;
 }
 
-async function doDeleteMilestone() {
+async function doDeleteMilestone(dry_run = true) {
 	if (!currentMilestone) {
 		console.log("No currentMilestone");
 		return;
@@ -115,6 +116,7 @@ async function doDeleteMilestone() {
 	const { data, error } = await deleteMilestone({
 		path: {
 			milestone_id: currentMilestone.id,
+			dry_run: dry_run,
 		},
 	});
 	if (error) {
@@ -266,14 +268,30 @@ async function doDeleteMilestone() {
 		milestoneGroup={currentMilestoneGroup}
 	></EditMilestoneGroupModal>
 {/key}
-<DeleteModal bind:open={showDeleteMilestoneGroupModal} onclick={doDeleteMilestoneGroup}
-></DeleteModal>
+<DangerousDeleteModal bind:open={showDeleteMilestoneGroupModal} intendedConfirmCode={i18n.tr.admin.milestones}
+  deleteDryRunnableRequest={(dry_run) => deleteMilestoneGroupAdmin({
+		path: {
+			milestone_group_id: currentMilestoneGroup.id
+		},
+		query: {
+			dry_run: dry_run
+		}
+	})} afterDelete={() => refreshMilestoneGroups()}
+></DangerousDeleteModal>
 
 {#key showEditMilestoneModal}
 	<EditMilestoneModal bind:open={showEditMilestoneModal} bind:milestone={currentMilestone}
 	></EditMilestoneModal>
 {/key}
-<DeleteModal bind:open={showDeleteMilestoneModal} onclick={doDeleteMilestone}></DeleteModal>
+<DangerousDeleteModal bind:open={showDeleteMilestoneModal} intendedConfirmCode={i18n.tr.admin.milestone} deleteDryRunnableRequest={(dry_run) =>
+ deleteMilestone({
+		path: {
+			milestone_id: currentMilestone.id,
+		},
+		query: {
+			dry_run: dry_run
+		}})} afterDelete={() => refreshMilestoneGroups()}>
+</DangerousDeleteModal>
 
 <OrderItemsModal bind:open={showOrderItemsModal} items={currentOrderItems} endpoint={currentOrderEndpoint} callback={refreshMilestoneGroups}  />
 {:else}

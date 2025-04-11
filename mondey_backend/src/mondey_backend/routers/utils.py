@@ -13,6 +13,7 @@ from fastapi import HTTPException
 from fastapi import UploadFile
 from PIL import Image
 from PIL import ImageOps
+from sqlalchemy import func
 from sqlmodel import SQLModel
 from sqlmodel import col
 from sqlmodel import select
@@ -297,3 +298,23 @@ def get_milestonegroups_for_answersession(
             select(MilestoneGroup).where(col(MilestoneGroup.id).in_(check_for_overlap))
         ).all()
     }
+
+
+def count_milestone_answers_for_milestone(
+    session: SessionDep, milestone_id: int
+) -> int:
+    count_query = (
+        select(func.count())
+        .select_from(MilestoneAnswer)
+        .where(MilestoneAnswer.milestone_id == milestone_id)
+    )
+    return session.exec(count_query).one()
+
+
+def get_childs_answering_sessions(
+    session: SessionDep, child_id: int
+) -> list[MilestoneAnswerSession]:
+    select_answering_sessions = select(MilestoneAnswerSession).where(
+        col(MilestoneAnswerSession.child_id) == child_id
+    )
+    return list(session.exec(select_answering_sessions).all())
