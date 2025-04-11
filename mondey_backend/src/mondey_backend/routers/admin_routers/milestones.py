@@ -159,8 +159,6 @@ def create_router() -> APIRouter:
         affected_answers = count_milestone_answers_for_milestone(session, milestone_id)
         if not dry_run:
             milestone = get(session, Milestone, milestone_id)
-            if milestone is None:
-                return 0
             session.delete(milestone)
             session.commit()
 
