@@ -21,6 +21,7 @@ from ...models.milestones import MilestoneImage
 from ...models.milestones import MilestoneText
 from ...models.milestones import SubmittedMilestoneImage
 from ...models.milestones import SubmittedMilestoneImagePublic
+from ...models.utils import DeleteResponse
 from ...models.utils import ItemOrder
 from ...statistics import async_update_stats
 from ..utils import add
@@ -70,7 +71,9 @@ def create_router() -> APIRouter:
         add(session, db_milestone_group)
         return db_milestone_group
 
-    @router.delete("/milestone-groups/{milestone_group_id}")
+    @router.delete(
+        "/milestone-groups/{milestone_group_id}", response_model=DeleteResponse
+    )
     def delete_milestone_group_admin(
         session: SessionDep,
         milestone_group_id: int,
@@ -95,17 +98,11 @@ def create_router() -> APIRouter:
         if not dry_run:
             session.delete(milestone_group)
             session.commit()
-            return {
-                "ok": True,
-                "deletion_executed": True,
-                "deleted_milestone_count": len(groups_milestone_ids),
-                "deleted_answer_count": affected_milestone_answers,
-            }
 
         return {
             "ok": True,
-            "dry_run": True,
-            "would_delete": {
+            "dry_run": dry_run,
+            "children": {
                 "affectedMilestones": len(milestone_group.milestones),
                 "affectedAnswers": affected_milestone_answers,
             },
@@ -147,7 +144,7 @@ def create_router() -> APIRouter:
         add(session, db_milestone)
         return db_milestone
 
-    @router.delete("/milestones/{milestone_id}")
+    @router.delete("/milestones/{milestone_id}", response_model=DeleteResponse)
     def delete_milestone(
         session: SessionDep,
         milestone_id: int,
@@ -161,18 +158,11 @@ def create_router() -> APIRouter:
             milestone = get(session, Milestone, milestone_id)
             session.delete(milestone)
             session.commit()
-
-            return {
-                "ok": True,
-                "deletion_executed": True,
-                "deleted_milestone_id": milestone_id,
-                "deleted_answer_count": affected_answers,
-            }
         else:
             return {
                 "ok": True,
-                "dry_run": True,
-                "would_delete": {"affectedAnswers": affected_answers},
+                "dry_run": dry_run,
+                "children": {"affectedAnswers": affected_answers},
             }
 
     @router.post("/milestones/order/")

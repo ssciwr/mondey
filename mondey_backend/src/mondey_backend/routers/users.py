@@ -24,6 +24,7 @@ from ..models.questions import UserAnswer
 from ..models.questions import UserAnswerPublic
 from ..models.users import UserRead
 from ..models.users import UserUpdate
+from ..models.utils import DeleteResponse
 from ..users import fastapi_users
 from .scores import compute_milestonegroup_feedback_detailed
 from .scores import compute_milestonegroup_feedback_summary
@@ -79,7 +80,7 @@ def create_router() -> APIRouter:
         session.commit()
         return db_child
 
-    @router.delete("/children/{child_id}")
+    @router.delete("/children/{child_id}", response_model=DeleteResponse)
     def delete_child(
         session: SessionDep,
         current_active_user: CurrentActiveUserDep,
@@ -91,13 +92,14 @@ def create_router() -> APIRouter:
     ):
         child = get_db_child(session, current_active_user, child_id)
         # the above guards it to only owners of the child.
+        affected_child_answers = 0
+        for answering_session in get_childs_answering_sessions(session, child_id):
+            affected_child_answers += len(answering_session.answers)
         if dry_run:
-            affectedAnswers = 0
-            for answering_session in get_childs_answering_sessions(session, child_id):
-                affectedAnswers += len(answering_session.answers)
             return {
                 "ok": True,
-                "would_delete": {"affectedAnswers": affectedAnswers},
+                "dry_run": dry_run,
+                "children": {"affectedAnswers": affected_child_answers},
             }
 
         child_image_path(child_id).unlink(missing_ok=True)
@@ -115,7 +117,11 @@ def create_router() -> APIRouter:
         session.delete(child)
         session.commit()
 
-        return {"ok": True, "deletion_executed": True}
+        return {
+            "ok": True,
+            "dry_run": dry_run,
+            "children": {"affectedAnswers": affected_child_answers},
+        }
 
     @router.get("/children-images/{child_id}", response_class=FileResponse)
     async def get_child_image(
