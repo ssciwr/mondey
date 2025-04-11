@@ -43,10 +43,13 @@ let options = $derived.by(() => {
 		return opts;
 	}
 	return opts.concat(
-		question.options.replace(/;$/, '').split(";").map((value) => ({
-			value: value,
-			name: value,
-		})),
+		question.options
+			.replace(/;$/, "")
+			.split(";")
+			.map((value) => ({
+				value: value,
+				name: value,
+			})),
 	);
 });
 let update: any;
