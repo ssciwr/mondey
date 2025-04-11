@@ -71,6 +71,7 @@ $effect(async () => {
 	} else {
 		deletionWillAffectTotals = {};
 		deleteDone = false;
+		deleteConfirmCode = "";
 	}
 });
 </script>

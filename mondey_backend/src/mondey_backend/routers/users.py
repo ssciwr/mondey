@@ -100,12 +100,21 @@ def create_router() -> APIRouter:
                 "would_delete": {"affectedAnswers": affectedAnswers},
             }
 
-        delete_statement = delete(MilestoneAnswerSession).where(
+        child_image_path(child_id).unlink(missing_ok=True)
+
+        delete_milestone_statement = delete(MilestoneAnswerSession).where(
             col(MilestoneAnswerSession.child_id) == child_id
         )
-        session.execute(delete_statement)
+        session.execute(delete_milestone_statement)
+
+        delete_answers_statement = delete(ChildAnswer).where(
+            col(ChildAnswer.child_id) == child_id
+        )
+
+        session.execute(delete_answers_statement)
         session.delete(child)
         session.commit()
+
         return {"ok": True, "deletion_executed": True}
 
     @router.get("/children-images/{child_id}", response_class=FileResponse)

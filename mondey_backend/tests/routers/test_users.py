@@ -7,6 +7,7 @@ from sqlmodel import col
 
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
+from mondey_backend.models.questions import ChildAnswer
 
 
 def _is_approx_now(iso_date_string: str, delta=datetime.timedelta(hours=1)) -> bool:
@@ -176,7 +177,7 @@ def test_delete_child_removes_answering_sessions(session, user_client: TestClien
         child_id=new_child_id, user_id=1, expired=False, included_in_statistics=True
     )
     session.add(milestone_answer_session)
-    session.commit()
+    session.flush()
 
     # Add a MilestoneAnswer to the session
     milestone_answer = MilestoneAnswer(
@@ -186,6 +187,13 @@ def test_delete_child_removes_answering_sessions(session, user_client: TestClien
         answer=2,
     )
     session.add(milestone_answer)
+    session.flush()
+
+    child_question_answer = ChildAnswer(
+        child_id=new_child_id, question_id=1, answer="FakeAnswer"
+    )
+
+    session.add(child_question_answer)
     session.commit()
 
     # Verify milestone answer session was created
@@ -199,6 +207,10 @@ def test_delete_child_removes_answering_sessions(session, user_client: TestClien
     after_create_sessions_stmt = select(MilestoneAnswerSession)
     after_create_sessions_count = len(session.exec(after_create_sessions_stmt).all())
     assert after_create_sessions_count == initial_sessions_count + 1
+
+    child_answer = select(ChildAnswer).where(col(ChildAnswer.child_id) == new_child_id)
+    child_answers = session.exec(child_answer).all()
+    assert len(child_answers) == 1
 
     # dry run case:
     response_delete = user_client.delete(f"/users/children/{new_child_id}")
@@ -218,6 +230,10 @@ def test_delete_child_removes_answering_sessions(session, user_client: TestClien
     # Check that milestone answer sessions for this child have been deleted now
     deleted_child_sessions = session.exec(child_sessions_stmt).all()
     assert len(deleted_child_sessions) == 0
+
+    # Check that child answers were also deleted:
+    child_answers = session.exec(child_answer).all()
+    assert len(child_answers) == 0
 
     # Verify total milestone sessions decreased by 1
     after_delete_sessions_stmt = select(MilestoneAnswerSession)

@@ -80,20 +80,19 @@ def create_router() -> APIRouter:
         ),
     ):
         milestone_group = get(session, MilestoneGroup, milestone_group_id)
+        affected_milestone_answers = 0
+        groups_milestone_ids = [
+            milestone.id
+            for milestone in milestone_group.milestones
+            if milestone.id is not None
+        ]
+
+        for milestone_id in groups_milestone_ids:
+            affected_milestone_answers += count_milestone_answers_for_milestone(
+                session, milestone_id
+            )
 
         if not dry_run:
-            affected_milestone_answers = 0
-            groups_milestone_ids = [
-                milestone.id
-                for milestone in milestone_group.milestones
-                if milestone.id is not None
-            ]
-
-            for milestone_id in groups_milestone_ids:
-                affected_milestone_answers += count_milestone_answers_for_milestone(
-                    session, milestone_id
-                )
-
             session.delete(milestone_group)
             session.commit()
             return {
@@ -103,19 +102,12 @@ def create_router() -> APIRouter:
                 "deleted_answer_count": affected_milestone_answers,
             }
 
-        affectedAnswers = 0
-        for milestone in milestone_group.milestones:
-            if milestone.id is None:
-                continue
-            affectedAnswers += count_milestone_answers_for_milestone(
-                session, milestone.id
-            )
         return {
             "ok": True,
             "dry_run": True,
             "would_delete": {
                 "affectedMilestones": len(milestone_group.milestones),
-                "affectedAnswers": affectedAnswers,
+                "affectedAnswers": affected_milestone_answers,
             },
         }
 
