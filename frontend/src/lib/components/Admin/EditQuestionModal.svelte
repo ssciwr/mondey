@@ -43,7 +43,7 @@ let options = $derived.by(() => {
 		return opts;
 	}
 	return opts.concat(
-		question.options.split(";").map((value) => ({
+		question.options.replace(/;$/, '').split(";").map((value) => ({
 			value: value,
 			name: value,
 		})),
