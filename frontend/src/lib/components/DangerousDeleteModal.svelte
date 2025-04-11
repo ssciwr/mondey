@@ -88,7 +88,7 @@ $effect(async () => {
         </h3>
 
         {#if Object.keys(deletionWillAffectTotals).length == 0}
-            <div>
+            <div class="mb-6">
                 <Spinner />
             </div>
         {:else}
@@ -96,7 +96,8 @@ $effect(async () => {
             <div class="text-black" style="background-color:rgb(255,220,220);border: 2px solid darkred;border-radius:10px;padding:10px">
                 <ul>
                     {#each Object.entries(deletionWillAffectTotals) as [translationKey, total]}
-                        <li>{total} {translationKey}</li>
+                        <li>{total} {i18n.tr.admin && translationKey in i18n.tr.admin
+                            ? i18n.tr.admin[translationKey] : i18n.tr.admin.affectedAnswers}</li>
                     {/each}
                 </ul>
             </div>
@@ -117,6 +118,6 @@ $effect(async () => {
             </Button>
         {/if}
 
-        <Button color="alternative">{i18n.tr.admin.noCancel}</Button>
+        <Button class="btn-secondary">{i18n.tr.admin.noCancel}</Button>
     </div>
 </Modal>
