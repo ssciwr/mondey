@@ -463,7 +463,6 @@ async function submitData(): Promise<void> {
                                 </Button>
                                 <Tooltip>{questionnaire.length} {i18n.tr.admin.childQuestions}</Tooltip>
                             {/if}
-                            <DeleteModal bind:open={showDeleteModal} onclick={deleteCurrentChild}></DeleteModal>
 
                         </span>
 
