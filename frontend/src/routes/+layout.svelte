@@ -129,8 +129,8 @@ const asAlert = false;
 		</div>
 		<!-- Mobile Navigation -->
 		<div class="z-10 fixed" style="top:0.8rem;right:1rem;">
-			<div class="btn-primary btn-icon">
-				<BarsOutline  class="cursor-pointer" onclick={toggleDrawer} />
+			<div class="btn-primary btn-icon" onclick={toggleDrawer} >
+				<BarsOutline data-testid="mobile-userland-navbar" class="cursor-pointer" />
 			</div>
 		</div>
 

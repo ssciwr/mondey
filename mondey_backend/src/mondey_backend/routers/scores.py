@@ -195,9 +195,7 @@ def compute_milestonegroup_feedback_detailed(
     # for each milestonegroup, get the statistics, compute the current mean, and compute the feedback
     feedback: dict[int, dict[int, int]] = {}
     for milestone_id, answer in answersession.answers.items():
-        logger.debug(f"  milestone id: {milestone_id}, answer: {answer.answer + 1}")
         stats = session.get(MilestoneAgeScoreCollection, milestone_id)
-        logger.debug(f"  stats: {stats}")
         if answer.milestone_group_id not in feedback:
             feedback[answer.milestone_group_id] = {}
         if stats is None:
