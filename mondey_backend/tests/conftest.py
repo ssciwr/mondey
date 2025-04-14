@@ -456,6 +456,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                         options_json="",
                     ),
                 },
+                visibility=True,
             ),
             UserQuestion(
                 id=2,
@@ -487,6 +488,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                         options_json="",
                     ),
                 },
+                visibility=True,
             ),
         ]
         for user_question in user_questions:
@@ -522,6 +524,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                         options="[1,2,3,autre]",
                     ),
                 },
+                visibility=True,
             ),
             ChildQuestion(
                 id=2,
@@ -549,6 +552,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                         options="[12,22,32,autre]",
                     ),
                 },
+                visibility=True,
             ),
         ]
 
