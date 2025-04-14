@@ -13,6 +13,7 @@
 		"test:ui:dev": "pnpm exec playwright test tests/ui --ui",
 		"test:e2e": "pnpm exec playwright test tests/e2e",
 		"test:e2e:dev": "pnpm exec playwright test tests/e2e --ui",
+		"test:e2e:dev:seq": "pnpm exec playwright test tests/e2e --ui --workers 1",
 		"openapi-ts": "openapi-ts"
 	},
 	"devDependencies": {

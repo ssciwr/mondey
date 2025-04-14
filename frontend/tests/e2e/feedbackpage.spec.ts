@@ -12,6 +12,7 @@ test("/userLand/children/gallery - The gallery of children includes feedback wit
 	page,
 }) => {
 	await login(page, "admin@mondey.de", "admin");
+	await page.waitForLoadState("networkidle");
 
 	await page.locator('h5:has-text("Emma Johnson")').click();
 	await page.locator('button:has-text("Feedback zur Entwicklung")').click();

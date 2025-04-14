@@ -1,11 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { login, modalLoad } from "./utils";
 
-test("/userLand/children/gallery - Can add Child", async ({
+test("/userLand/children/gallery - Childs Milestone % gets updated when you select it to have been acheived", async ({
 	page,
 	isMobile,
 }) => {
 	await login(page, "admin@mondey.de", "admin");
+	await page.waitForLoadState("networkidle");
+	// should already have waited for network idle...
 
 	// Create a new child so existing milestone data isn't affected
 	await page.locator('h5:has-text("+ Neu")').click();
