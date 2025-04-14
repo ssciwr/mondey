@@ -224,7 +224,7 @@ def test_delete_child_removes_answering_sessions(session, user_client: TestClien
     response_delete = user_client.delete(
         f"/users/children/{new_child_id}?dry_run=false"
     )
-    assert response_delete.json()["deletion_executed"]
+    assert response_delete.json()["ok"]
     assert len(user_client.get("/users/children/").json()) == 2
 
     # Check that milestone answer sessions for this child have been deleted now

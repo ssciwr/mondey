@@ -158,12 +158,11 @@ def create_router() -> APIRouter:
             milestone = get(session, Milestone, milestone_id)
             session.delete(milestone)
             session.commit()
-        else:
-            return {
-                "ok": True,
-                "dry_run": dry_run,
-                "children": {"affectedAnswers": affected_answers},
-            }
+        return {
+            "ok": True,
+            "dry_run": dry_run,
+            "children": {"affectedAnswers": affected_answers},
+        }
 
     @router.post("/milestones/order/")
     def order_milestones_admin(session: SessionDep, item_orders: list[ItemOrder]):

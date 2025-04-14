@@ -329,7 +329,7 @@ def test_delete_milestone_confirmed(admin_client, session):
     # Real delete call with dry_run param set to False
     response = admin_client.delete(f"/admin/milestones/{milestone_id}?dry_run=false")
     assert response.status_code == 200
-    assert response.json()["deletion_executed"]
+    assert response.json()["ok"]
     assert count_milestone_answers_for_milestone(session, milestone_id) == 0
 
 
@@ -387,9 +387,11 @@ def test_delete_milestone_groups_real(admin_client, session):
     )
     response_json = response.json()
     assert response.status_code == 200
-    assert response_json["deletion_executed"]
-    assert response_json["deleted_milestone_count"] == 3
-    assert response_json["deleted_answer_count"] == expected_answers_from_fixtures
+    assert response_json["ok"]
+    assert response_json["children"]["affectedMilestones"] == 3
+    assert (
+        response_json["children"]["affectedAnswers"] == expected_answers_from_fixtures
+    )
 
     assert count_milestone_answers_for_milestone(session, known_first_milestone_id) == 0
     response = admin_client.delete(

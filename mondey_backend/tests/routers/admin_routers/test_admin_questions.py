@@ -110,7 +110,6 @@ def test_delete_user_question_deletes(session, admin_client: TestClient):
     assert response.status_code == 200
     response_json = response.json()
     assert response_json["ok"]
-    assert response_json["deletion_executed"]
 
     user_questions = session.exec(select(UserQuestion)).all()
     assert len(user_questions) == 1
@@ -128,8 +127,8 @@ def test_delete_user_question_works(session, admin_client: TestClient):
     response_json = response.json()
     assert response.status_code == 200
     assert response_json["ok"]
-    assert response_json["would_delete"]
-    assert response_json["would_delete"]["affectedQuestionAnswers"] == 1
+    assert response_json["children"]
+    assert response_json["children"]["affectedQuestionAnswers"] == 1
 
     user_questions = session.exec(select(UserQuestion)).all()
     assert len(user_questions) == 2
@@ -140,7 +139,6 @@ def test_delete_user_question_works(session, admin_client: TestClient):
     response_json = response.json()
     assert response.status_code == 200
     assert response_json["ok"]
-    assert response_json["deletion_executed"]
 
     user_questions = session.exec(select(UserQuestion)).all()
     assert len(user_questions) == 1
@@ -290,8 +288,8 @@ def test_delete_child_question_works(session, admin_client: TestClient):
     response_json = response.json()
     assert response.status_code == 200
     assert response_json["ok"]
-    assert response_json["would_delete"]
-    assert response_json["would_delete"]["affectedQuestionAnswers"] == 1
+    assert response_json["children"]
+    assert response_json["children"]["affectedQuestionAnswers"] == 1
 
     child_questions = session.exec(select(ChildQuestion)).all()
     assert len(child_questions) == 2
@@ -302,7 +300,6 @@ def test_delete_child_question_works(session, admin_client: TestClient):
     response_json = response.json()
     assert response.status_code == 200
     assert response_json["ok"]
-    assert response_json["deletion_executed"]
 
     child_questions = session.exec(select(ChildQuestion)).all()
     assert len(child_questions) == 1
