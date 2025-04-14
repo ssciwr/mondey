@@ -120,6 +120,10 @@ jobs:
         working-directory: ./frontend
         run: pnpm exec playwright install --with-deps
 
+      # Print current time before running e2e tests
+      - name: Print current time before e2e tests
+        run: echo "Current time before running e2e tests is $(date)"
+
       # Run the e2e tests
       - name: Run e2e tests
         working-directory: ./frontend

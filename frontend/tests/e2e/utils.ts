@@ -8,4 +8,4 @@ export async function login(page: Page, username: string, password: string) {
 }
 
 // Would be good to improve this.
-export const modalLoad = async (page: Page) => page.waitForTimeout(1000);
+export const modalLoad = async (page: Page) => page.waitForTimeout(5000);
