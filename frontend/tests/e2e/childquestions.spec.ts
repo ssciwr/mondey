@@ -11,7 +11,9 @@ test("/userLand/admin - Questions on Children : New child question can be added,
 
 	await page.waitForTimeout(1000);
 
-	await page.getByText("mobile-userland-navbar").click(); // open the sidebar.
+	if (isMobile) {
+		await page.getByText("mobile-userland-navbar").click(); // open the sidebar.
+	}
 	await page.getByRole("link", { name: "Administration" }).click();
 	await page.locator('button:has-text("Fragen über Kind")').click();
 
