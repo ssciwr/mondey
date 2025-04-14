@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from fastapi import APIRouter
-from sqlmodel import col
 from sqlmodel import select
 
 from ..dependencies import SessionDep
@@ -19,7 +18,9 @@ def create_router() -> APIRouter:
         session: SessionDep,
     ):
         user_questions = session.exec(
-            select(UserQuestion).order_by(col(UserQuestion.order))
+            select(UserQuestion)
+            .where(UserQuestion.visibility)
+            .order_by(UserQuestion.order)
         ).all()
 
         return user_questions
@@ -27,7 +28,9 @@ def create_router() -> APIRouter:
     @router.get("/child-questions/", response_model=list[ChildQuestionPublic])
     def get_child_questions(session: SessionDep):
         child_questions = session.exec(
-            select(ChildQuestion).order_by(col(ChildQuestion.order))
+            select(ChildQuestion)
+            .where(ChildQuestion.visibility)
+            .order_by(ChildQuestion.order)
         ).all()
         return child_questions
 

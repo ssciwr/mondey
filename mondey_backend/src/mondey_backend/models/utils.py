@@ -17,6 +17,7 @@ class DeleteResponse(BaseModel):
     ok: bool
     dry_run: bool
     children: dict[str, int]
+    error: str | None = Field(default=None, description="Error message when present")
 
 
 def back_populates(name: str, **kwargs):

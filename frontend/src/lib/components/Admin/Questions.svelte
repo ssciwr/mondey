@@ -3,6 +3,7 @@
 <script lang="ts">
 import {
 	Card,
+	Checkbox,
 	Table,
 	TableBody,
 	TableBodyCell,
@@ -106,6 +107,8 @@ async function doDeleteQuestion() {
 		await refresh();
 	}
 }
+
+// Todo: CHange to Dangerously delete modal for questions in the admin panel.
 
 onMount(async () => {
 	await refresh();

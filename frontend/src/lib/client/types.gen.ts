@@ -72,6 +72,7 @@ export type ChildQuestionAdmin = {
     additional_option?: string;
     required?: boolean;
     name?: string;
+    visibility?: boolean;
     id: number;
     text?: {
         [key: string]: ChildQuestionText;
@@ -96,6 +97,18 @@ export type ChildQuestionText = {
     options?: string;
     child_question_id?: number | null;
     lang_id?: string | null;
+};
+
+export type DeleteResponse = {
+    ok: boolean;
+    dry_run: boolean;
+    children: {
+        [key: string]: number;
+    };
+    /**
+     * Error message when present
+     */
+    error?: string | null;
 };
 
 export type ErrorModel = {
@@ -263,6 +276,7 @@ export type UserQuestionAdmin = {
     additional_option?: string;
     required?: boolean;
     name?: string;
+    visibility?: boolean;
     id: number;
     text?: {
         [key: string]: UserQuestionText;
@@ -652,8 +666,10 @@ export type DeleteMilestoneGroupAdminResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: DeleteResponse;
 };
+
+export type DeleteMilestoneGroupAdminResponse = DeleteMilestoneGroupAdminResponses[keyof DeleteMilestoneGroupAdminResponses];
 
 export type OrderMilestoneGroupsAdminData = {
     body: Array<ItemOrder>;
@@ -782,8 +798,10 @@ export type DeleteMilestoneResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: DeleteResponse;
 };
+
+export type DeleteMilestoneResponse = DeleteMilestoneResponses[keyof DeleteMilestoneResponses];
 
 export type OrderMilestonesAdminData = {
     body: Array<ItemOrder>;
@@ -1064,8 +1082,10 @@ export type DeleteUserQuestionResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: DeleteResponse;
 };
+
+export type DeleteUserQuestionResponse = DeleteUserQuestionResponses[keyof DeleteUserQuestionResponses];
 
 export type OrderUserQuestionsAdminData = {
     body: Array<ItemOrder>;
@@ -1174,8 +1194,10 @@ export type DeleteChildQuestionResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: DeleteResponse;
 };
+
+export type DeleteChildQuestionResponse = DeleteChildQuestionResponses[keyof DeleteChildQuestionResponses];
 
 export type OrderChildQuestionsAdminData = {
     body: Array<ItemOrder>;
@@ -1554,8 +1576,10 @@ export type DeleteChildResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: DeleteResponse;
 };
+
+export type DeleteChildResponse = DeleteChildResponses[keyof DeleteChildResponses];
 
 export type GetChildData = {
     body?: never;

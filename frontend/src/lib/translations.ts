@@ -96,6 +96,8 @@ export const translationIds = {
 		label: "Administration",
 		title: "Titel",
 		name: "Name",
+		visibility: "Angezeigt/Sichtbar",
+		required: "Pflichtig",
 		languages: "Sprachen",
 		milestone: "Meilenstein",
 		milestones: "Meilensteine",

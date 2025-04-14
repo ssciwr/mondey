@@ -82,7 +82,7 @@ def create_router() -> APIRouter:
         update_item_orders(session, UserQuestion, item_orders)
         return {"ok": True}
 
-    # Child question CRUD endpoints
+    # Child question CRUD endpoints, we include visible or invisible ones in this one...
     @router.get("/child-questions/", response_model=list[ChildQuestionAdmin])
     def get_child_questions_admin(session: SessionDep):
         user_questions = session.exec(
@@ -117,7 +117,9 @@ def create_router() -> APIRouter:
         add(session, db_child_question)
         return db_child_question
 
-    @router.delete("/child-questions/{child_question_id}")
+    @router.delete(
+        "/child-questions/{child_question_id}", response_model=DeleteResponse
+    )
     def delete_child_question(
         session: SessionDep,
         child_question_id: int,
