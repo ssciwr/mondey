@@ -97,7 +97,9 @@ jobs:
       # Start backend server
       - name: Start backend server in directory with e2e test databases. First fill the database with our SQL.
         working-directory: ./e2e
-        run: sqlite3 db/mondey.db < db/importBaseMetadata.sql && sqlite3 db/mondey.db < db/importMilestoneAnswers.sql && sqlite3 db/mondey.db < db/importDerivedMilestoneScores.sql && SMTP_HOST="" RELOAD=true mondey-backend &
+        run: |
+          mkdir -p logs
+          sqlite3 db/mondey.db < db/importBaseMetadata.sql && sqlite3 db/mondey.db < db/importMilestoneAnswers.sql && sqlite3 db/mondey.db < db/importDerivedMilestoneScores.sql && SMTP_HOST="" RELOAD=false mondey-backend > logs/backend.log 2>&1 &
 
       # Setup Node.js and pnpm for frontend
       - uses: pnpm/action-setup@v4
@@ -134,4 +136,11 @@ jobs:
         with:
           name: e2e-tests-playwright-report
           path: frontend/playwright-report/
+          retention-days: 7
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: backend-e2e-logs
+          path: ./e2e/logs/
           retention-days: 7
