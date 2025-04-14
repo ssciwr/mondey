@@ -665,6 +665,7 @@ def user_questions():
             "options": "[a,b,c,other]",
             "additional_option": "other",
             "required": False,
+            "visibility": True,
             "type": "text",
             "text": {
                 "de": {
@@ -698,6 +699,7 @@ def user_questions():
             "options": "[a2,b2,c2,other]",
             "additional_option": "other",
             "required": False,
+            "visibility": True,
             "type": "text",
             "text": {
                 "de": {
@@ -737,6 +739,7 @@ def child_questions():
             "options": "[a,b,c,other]",
             "additional_option": "other",
             "required": False,
+            "visibility": True,
             "type": "text",
             "text": {
                 "de": {
@@ -770,6 +773,7 @@ def child_questions():
             "options": "[a2,b2,c2,other]",
             "additional_option": "other",
             "required": False,
+            "visibility": True,
             "type": "text",
             "text": {
                 "de": {
@@ -854,6 +858,7 @@ def default_user_question_admin():
         },
         "additional_option": "nothing",
         "required": False,
+        "visibility": False,
     }
 
 

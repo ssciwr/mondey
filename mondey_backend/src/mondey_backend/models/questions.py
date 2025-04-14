@@ -45,6 +45,7 @@ class QuestionPublic(SQLModel):
     additional_option: str = ""
     required: bool = False
     name: str = ""
+    visibility: bool = False
 
 
 class UserQuestionText(QuestionTextBase, table=True):

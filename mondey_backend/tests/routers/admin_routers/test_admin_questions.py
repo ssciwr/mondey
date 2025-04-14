@@ -1,3 +1,5 @@
+import pytest
+from deepdiff import DeepDiff
 from fastapi.testclient import TestClient
 from sqlmodel import select
 
@@ -12,7 +14,9 @@ def test_get_user_question_admin_works(admin_client: TestClient, user_questions)
     assert response.status_code == 200
 
     assert [element["order"] for element in response.json()] == [1, 2]
-    assert response.json() == user_questions
+    diff = DeepDiff(response.json(), user_questions, verbose_level=2)
+    if diff:
+        pytest.fail(f"Response differs from expected:\n{diff}")
 
 
 def test_create_user_question_works(admin_client: TestClient):
@@ -50,6 +54,7 @@ def test_create_user_question_works(admin_client: TestClient):
         },
         "additional_option": "",
         "required": False,
+        "visibility": False,
     }
 
 
@@ -200,6 +205,7 @@ def test_create_child_question_works(admin_client: TestClient):
         },
         "additional_option": "",
         "required": False,
+        "visibility": False,
     }
 
 
