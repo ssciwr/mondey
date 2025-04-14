@@ -37,6 +37,21 @@ let {
 } = $props();
 let preview_lang = $state("de");
 let preview_answer = $state("");
+let options = $derived.by(() => {
+	let opts = [{ value: "", name: "No free text option" }];
+	if (!question || !question.options) {
+		return opts;
+	}
+	return opts.concat(
+		question.options
+			.replace(/;$/, "")
+			.split(";")
+			.map((value) => ({
+				value: value,
+				name: value,
+			})),
+	);
+});
 let update: any;
 let refresh: any;
 
@@ -56,12 +71,10 @@ if (kind === "user") {
 const inputTypes: Array<SelectOptionType<string>> = [
 	{ value: "textarea", name: "Text" },
 	{ value: "select", name: "Multiple Choice" },
-	{ value: "fileupload", name: "Upload file" },
-	{ value: "date", name: "Date" },
 ];
 
 function updateOptionsJson() {
-	if (!question) {
+	if (!question || !question.options) {
 		return;
 	}
 	const values = question.options.split(";");
@@ -148,14 +161,14 @@ async function saveChanges() {
 								</ButtonGroup>
 							</div>
 						{/each}
-						<Label class="mb-2">Additional Option</Label>
 						<div class="mb-1">
-							<ButtonGroup class="w-full">
-								<Textarea
-									bind:value={question.additional_option}
-									placeholder="Displayed additional option"
-								/>
-							</ButtonGroup>
+						<Label class="mb-2">Free text Option</Label>
+						<Select
+								class="mt-2"
+								items={options}
+								bind:value={question.additional_option}
+								placeholder=""
+						/>
 						</div>
 					</div>
 				{/if}
@@ -192,7 +205,7 @@ async function saveChanges() {
 							</ButtonGroup>
 						</div>
 						<Card class="mb-4 bg-blue-300">
-							<InputPreview data={question} lang={preview_lang} bind:answer={preview_answer} />
+							<InputPreview data={question} lang={preview_lang} bind:answer={preview_answer}/>
 						</Card>
 						<Label class="mb-2">Generated answer:</Label>
 						<Badge large border color="dark">{preview_answer}</Badge

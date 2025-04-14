@@ -9,6 +9,14 @@ let {
 	answer = $bindable(),
 }: { data: UserQuestionAdmin; lang: string; answer: string } = $props();
 let items: Array<SelectOptionType<string>> = $derived(parse_options_json());
+let selected_answer = $state("");
+let additional_answer = $state("");
+let free_text = $derived(
+	data.additional_option && data.additional_option === selected_answer,
+);
+$effect(() => {
+	answer = free_text ? additional_answer : selected_answer;
+});
 
 function parse_options_json() {
 	try {
@@ -27,8 +35,11 @@ function parse_options_json() {
 </div>
 <div class="mb-5">
 	{#if data.component === 'select'}
-		<Select {items} bind:value={answer} placeholder="" />
+		<Select {items} bind:value={selected_answer} placeholder="" />
+		{#if free_text}
+			<Input type="text" bind:value={additional_answer} />
+		{/if}
 	{:else}
-		<Input type="text" bind:value={answer} />
+		<Input type="text" bind:value={selected_answer} />
 	{/if}
 </div>
