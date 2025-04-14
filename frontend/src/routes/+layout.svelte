@@ -204,7 +204,7 @@ const asAlert = false;
 	{@render children?.()}
 </div>
 
-<Modal bind:open={alertStore.isAlertShown} color={alertStore.isError ? 'red' : alertStore.isAwaitError ? 'yellow' : 'default'} title={alertStore.title} autoclose>
+<Modal data-testid="alert-modal" bind:open={alertStore.isAlertShown} color={alertStore.isError ? 'red' : alertStore.isAwaitError ? 'yellow' : 'default'} title={alertStore.title} autoclose>
 	<p class="text-base">{alertStore.message}</p>
 	<svelte:fragment slot="footer">
 		<button class="btn-primary" onclick={() => {
