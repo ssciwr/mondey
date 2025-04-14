@@ -1,29 +1,13 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
+import type { DeleteResponse } from "$lib/client";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { Button, Input, Label, Modal, Spinner } from "flowbite-svelte";
 import { CheckCircleOutline } from "flowbite-svelte-icons";
 import ExclamationCircleOutline from "flowbite-svelte-icons/ExclamationCircleOutline.svelte";
 import { onMount } from "svelte";
-
-type DeletionWillAffectTotals = {
-	[key: string]: number;
-};
-
-type DryRunnableDataResponse =
-	| {
-			data: { deletion_executed: boolean; error?: never; would_delete?: never };
-	  }
-	| {
-			data: {
-				would_delete: DeletionWillAffectTotals;
-				error?: never;
-				deletion_executed?: never;
-			};
-	  }
-	| { error: string };
 
 let {
 	open = $bindable(false),
@@ -32,23 +16,21 @@ let {
 	intendedConfirmCode,
 }: {
 	open: boolean;
-	deleteDryRunnableRequest: (
-		dryRun: boolean,
-	) => Promise<DryRunnableDataResponse>;
+	deleteDryRunnableRequest: (dryRun: boolean) => Promise<DeleteResponse>;
 	afterDelete: () => void;
 	intendedConfirmCode: string;
 } = $props();
 
-let deletionWillAffectTotals = $state<DeletionWillAffectTotals>({});
+let deletionWillAffectTotals = $state<DeleteResponse["children"]>({});
 let deleteConfirmCode: string = $state("");
 let deleteDone: boolean = $state(false);
 
 let sendDeleteRequest = async () => {
 	if (deleteConfirmCode === intendedConfirmCode) {
-		const { data, error } = await deleteDryRunnableRequest(false);
-		console.error("Error on real call:", error);
+		const resp = await deleteDryRunnableRequest(false);
+		const { ok, dry_run, children, error } = resp.data;
 
-		if (data.deletion_executed) {
+		if (ok && dry_run === false) {
 			deleteDone = true;
 			afterDelete(); // refresh the list items this is in etc.
 		} else {
@@ -60,13 +42,13 @@ let sendDeleteRequest = async () => {
 
 $effect(async () => {
 	if (open) {
-		const { data, error } = await deleteDryRunnableRequest(true);
+		const resp = await deleteDryRunnableRequest(true);
+		const { children, error } = resp.data;
 		if (error) {
 			alertStore.showAlert(i18n.tr.admin.deleteError, "", true, false);
-			console.error(error);
 		}
-		if (data.would_delete) {
-			deletionWillAffectTotals = data.would_delete;
+		if (children) {
+			deletionWillAffectTotals = children;
 		}
 	} else {
 		deletionWillAffectTotals = {};
@@ -87,7 +69,7 @@ $effect(async () => {
             {i18n.tr.admin.deleteAreYouSure}
         </h3>
 
-        {#if Object.keys(deletionWillAffectTotals).length == 0}
+        {#if Object.keys(deletionWillAffectTotals).length === 0}
             <div class="mb-6">
                 <Spinner />
             </div>
