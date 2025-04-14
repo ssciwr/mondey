@@ -362,7 +362,7 @@ async function submitData(): Promise<void> {
                             class="m-1 mx-auto w-full flex-col space-y-6"
                             onsubmit={preventDefault(submitData)}
                     >
-                        {#if false === disableEdit}
+                        {#if false === disableEdit && showChildQuestions === false}
                             <DataInput
                                     component={componentTable["input"]}
                                     bind:value={name}
