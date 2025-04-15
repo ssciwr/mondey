@@ -103,7 +103,7 @@ def prepare_options_json(options):
     options_json = json.dumps(prepared_options)
 
     # Create comma-separated string of options (with escaped labels)
-    options_str = ", ".join(options_display)
+    options_str = ";".join(options_display)
 
     return options_json, options_str
 
