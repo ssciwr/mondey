@@ -1,6 +1,6 @@
 <script lang="ts">
-import { page } from "$app/stores";
-import { verifyVerify } from "$lib/client/services.gen";
+import { page } from "$app/state";
+import { verifyVerify } from "$lib/client/sdk.gen";
 import UserLogin from "$lib/components/UserLogin.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import {
@@ -11,7 +11,7 @@ import { onMount } from "svelte";
 
 onMount(async () => {
 	const { data, error } = await verifyVerify({
-		body: { token: $page.params.code },
+		body: { token: page.params.code },
 	});
 	if ((!error && data) || error?.detail === "VERIFY_USER_ALREADY_VERIFIED") {
 		success = true;

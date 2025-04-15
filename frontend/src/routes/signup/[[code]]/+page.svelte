@@ -1,6 +1,6 @@
 <script lang="ts">
-import { page } from "$app/stores";
+import { page } from "$app/state";
 import UserRegistration from "$lib/components/UserRegistration.svelte";
 </script>
 
-<UserRegistration researchCode={$page.params.code}/>
+<UserRegistration researchCode={page.params.code}/>

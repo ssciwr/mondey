@@ -2,10 +2,7 @@
 
 <script lang="ts">
 import { refreshMilestoneGroups } from "$lib/admin.svelte";
-import {
-	getMilestoneAgeScores,
-	updateMilestone,
-} from "$lib/client/services.gen";
+import { getMilestoneAgeScores, updateMilestone } from "$lib/client/sdk.gen";
 import type { MilestoneAgeScoreCollectionPublic } from "$lib/client/types.gen";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import PlotScoreAge from "$lib/components/DataDisplay/PlotScoreAge.svelte";
@@ -89,7 +86,7 @@ async function saveNewExpectedAges() {
     {#if milestoneGroups && i18n.locale}
         <div class="grid grid-cols-2 justify-items-stretch">
             <div class="grid grid-rows-2">
-                <Button class="mx-2" onclick={getNewExpectedAges}>
+                <Button class="btn-primary" onclick={getNewExpectedAges}>
                     <RefreshOutline class="me-2 h-5 w-5"/> {i18n.tr.admin.recalculateExpectedAge}</Button>
                 <div class="m-2">
                     <Progressbar labelInside progress={calculateProgress} size="h-4"/>

@@ -1,7 +1,7 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { createLanguage, deleteLanguage } from "$lib/client/services.gen";
+import { createLanguage, deleteLanguage } from "$lib/client/sdk.gen";
 import AddButton from "$lib/components/Admin/AddButton.svelte";
 import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
 import DeleteModal from "$lib/components/DeleteModal.svelte";

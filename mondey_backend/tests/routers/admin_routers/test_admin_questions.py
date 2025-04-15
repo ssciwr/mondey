@@ -19,6 +19,7 @@ def test_create_user_question_works(admin_client: TestClient):
     assert response.status_code == 200
     assert response.json() == {
         "id": 3,
+        "name": "",
         "order": 0,
         "component": "select",
         "type": "text",
@@ -66,6 +67,7 @@ def test_update_user_question_works(
 def test_update_user_question_id_not_there(admin_client: TestClient):
     user_question_admin = {
         "id": 5,
+        "name": "User Question 5",
         "component": "textarea",
         "type": "other_thing",
         "order": 0,
@@ -132,6 +134,7 @@ def test_create_child_question_works(admin_client: TestClient):
     assert response.status_code == 200
     assert response.json() == {
         "id": 3,
+        "name": "",
         "order": 0,
         "component": "select",
         "type": "text",
@@ -167,6 +170,7 @@ def test_create_child_question_works(admin_client: TestClient):
 def test_update_child_question_works(admin_client: TestClient):
     child_question_admin = {
         "id": 2,
+        "name": "Child Question 2",
         "component": "textarea",
         "type": "other_thing",
         "order": 0,
@@ -203,6 +207,7 @@ def test_update_child_question_works(admin_client: TestClient):
 def test_update_child_question_id_not_there(admin_client: TestClient):
     child_question_admin = {
         "id": 5,
+        "name": "Child Question 5",
         "component": "textarea",
         "type": "other_thing",
         "order": 0,

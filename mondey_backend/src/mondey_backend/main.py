@@ -9,7 +9,7 @@ import uvicorn
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi_injectable.decorator import injectable
 
@@ -58,29 +58,24 @@ def create_app() -> FastAPI:
     app.include_router(users.create_router())
     app.include_router(auth.create_router())
     app.include_router(research.create_router())
+    app.add_middleware(GZipMiddleware, minimum_size=5000, compresslevel=5)
     app.mount(
         "/static", StaticFiles(directory=app_settings.STATIC_FILES_PATH), name="static"
     )
-    if app_settings.ENABLE_CORS:
-        app.add_middleware(
-            CORSMiddleware,
-            allow_origins=["http://localhost:5173"],
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
     return app
 
 
 def main():
     logging.basicConfig(
         level=app_settings.LOG_LEVEL.upper(),
-        format="%(asctime)s :: %(levelname)s :: %(name)s :: %(funcName)s :: %(message)s",
+        format="%(asctime)s.%(msecs)03d :: %(levelname)s :: %(name)s :: %(funcName)s :: %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
     logger = logging.getLogger(__name__)
     for key, value in app_settings:
-        logger.info(f"{key}: {value if key != 'SECRET' else '****************'}")
+        logger.info(
+            f"{key}: {'****************' if key in {'SECRET', 'DEEPL_API_KEY', 'SMTP_PASSWORD'} else value}"
+        )
     uvicorn.run(
         "mondey_backend.main:create_app",
         host=app_settings.HOST,

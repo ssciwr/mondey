@@ -1,6 +1,6 @@
 <script lang="ts">
 import { afterNavigate, goto } from "$app/navigation";
-import { page } from "$app/stores";
+import { page } from "$app/state";
 import UserVerify from "$lib/components/UserVerify.svelte";
 import UserlandSidebar from "$lib/components/UserlandSidebar.svelte";
 import { i18n } from "$lib/i18n.svelte";
@@ -15,12 +15,9 @@ let hideDrawer: boolean = $state(true);
 
 // get user state
 onMount(async () => {
-	console.log("Loading user on landing page..");
 	await user.load();
-
-	console.log("User should have loaded... user data was: ", user.data);
 	if (!user.data) {
-		goto(`/login?intendedpath=${$page.url.pathname}`);
+		goto(`/login?intendedpath=${page.url.pathname}`);
 	}
 });
 

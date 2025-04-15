@@ -11,6 +11,6 @@ let {
 }: { onclick: (event: Event) => void; disabled?: boolean } = $props();
 </script>
 
-<Button color="blue" {onclick} {disabled}
+<Button class="btn-primary" {onclick} {disabled}
 	><PlusOutline class="me-2 h-5 w-5" /> {i18n.tr.admin.add}</Button
 >

@@ -5,7 +5,7 @@ import {
 	getCurrentUserAnswers,
 	getUserQuestions,
 	updateCurrentUserAnswers,
-} from "$lib/client/services.gen";
+} from "$lib/client/sdk.gen";
 import {
 	type GetUserQuestionsResponse,
 	type UserAnswerPublic,
@@ -102,6 +102,18 @@ let questionnaire: GetUserQuestionsResponse = $state(
 let answers: { [k: string]: UserAnswerPublic } = $state({});
 let disableEdit: boolean = $state(false);
 let promise = $state(setup());
+
+function safeParseJsonList(str: string | null | undefined): any[] {
+	if (!str || str === "") {
+		return [];
+	}
+	try {
+		return JSON.parse(str);
+	} catch (error) {
+		console.log(error);
+		return [];
+	}
+}
 </script>
 
 
@@ -129,10 +141,10 @@ let promise = $state(setup());
 								.additional_answer}
                                 label={element?.text[i18n.locale].question}
                                 textTrigger={element.additional_option}
-                                required={true}
+                                required={element.required}
                                 additionalRequired={true}
-                                id={"input_" + String(i)}
-                                items={element.text[i18n.locale].options_json === "" ? null : JSON.parse(element.text[i18n.locale].options_json)}
+                                id={`input_${i}`}
+                                items={safeParseJsonList(element?.text[i18n.locale]?.options_json)}
                                 disabled={disableEdit}
                         />
                     {/if}
@@ -140,7 +152,7 @@ let promise = $state(setup());
                 {#if disableEdit === true}
                     <Button
                             type="button"
-                            class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+                            class="dark:bg-primary-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
                             on:click={() => {
 								disableEdit = false;
 							}}
@@ -151,7 +163,7 @@ let promise = $state(setup());
                     </Button>
                 {:else}
                     <Button
-                            class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+                            class="dark:bg-primary-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
                             type="submit">{i18n.tr.userData.submitButtonLabel}</Button
                     >
                 {/if}

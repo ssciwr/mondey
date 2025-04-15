@@ -19,7 +19,7 @@ import {
 	deleteUserQuestion,
 	orderChildQuestionsAdmin,
 	orderUserQuestionsAdmin,
-} from "$lib/client/services.gen";
+} from "$lib/client/sdk.gen";
 import type {
 	ChildQuestionAdmin,
 	UserQuestionAdmin,
@@ -116,12 +116,17 @@ onMount(async () => {
 <Card size="xl" class="m-5 w-full">
 	<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">
 		{i18n.tr.admin[`${kind}Questions`]}
+		<ReorderButton
+				onclick={() => {
+							currentOrderItems = $questions.map((question) => {return {id: question.id, text: question.text[i18n.locale]?.question};});
+							showOrderItemsModal = true;
+						}}
+		/>
 	</h3>
 	<Table>
 		<TableHead>
 			<TableHeadCell>Question</TableHeadCell>
 			<TableHeadCell>Input type</TableHeadCell>
-			<TableHeadCell>Options</TableHeadCell>
 			<TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
 		</TableHead>
 		<TableBody>
@@ -132,9 +137,6 @@ onMount(async () => {
 					</TableBodyCell>
 					<TableBodyCell>
 						{question?.component}
-					</TableBodyCell>
-					<TableBodyCell>
-						{question?.text[i18n.locale]?.options}
 					</TableBodyCell>
 					<TableBodyCell>
 						<EditButton
@@ -155,15 +157,8 @@ onMount(async () => {
 			<TableBodyRow>
 				<TableBodyCell></TableBodyCell>
 				<TableBodyCell></TableBodyCell>
-				<TableBodyCell></TableBodyCell>
 				<TableBodyCell>
 					<AddButton onclick={addQuestion} />
-					<ReorderButton
-						onclick={() => {
-							currentOrderItems = $questions.map((question) => {return {id: question.id, text: question.text[i18n.locale]?.question};});
-							showOrderItemsModal = true;
-						}}
-					/>
 				</TableBodyCell>
 			</TableBodyRow>
 		</TableBody>

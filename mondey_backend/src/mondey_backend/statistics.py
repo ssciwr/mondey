@@ -6,11 +6,13 @@ from collections import defaultdict
 from collections.abc import Sequence
 
 import numpy as np
+import pandas as pd
 from sqlmodel import col
 from sqlmodel import select
 
 from mondey_backend.dependencies import SessionDep
 from mondey_backend.dependencies import UserAsyncSessionDep
+from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneAgeScore
 from mondey_backend.models.milestones import MilestoneAgeScoreCollection
 from mondey_backend.models.milestones import MilestoneAnswer
@@ -18,9 +20,9 @@ from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroupAgeScore
 from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
 from mondey_backend.models.questions import ChildAnswer
-from mondey_backend.models.questions import ChildQuestionText
+from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import UserAnswer
-from mondey_backend.models.questions import UserQuestionText
+from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.users import User
 from mondey_backend.routers.utils import _get_answer_session_child_ages_in_months
 from mondey_backend.routers.utils import _get_expected_age_from_scores
@@ -164,7 +166,7 @@ def _get_statistics_by_age(
         Updated count, avg and stddev arrays.
     """
     if count is None or avg is None or stddev is None:
-        max_age_months = 72
+        max_age_months = 100
         count = np.zeros(max_age_months + 1, dtype=np.int32)
         avg = np.zeros(max_age_months + 1, dtype=np.float64)
         stddev = np.zeros(max_age_months + 1, dtype=np.float64)
@@ -476,69 +478,102 @@ async def get_user_ids(
 
 def make_datatable(
     milestone_answer_sessions: Sequence[MilestoneAnswerSession],
-    user_answers: dict[int, dict[str, str | int | float]],
-    child_answers: dict[int, dict[str, str | int | float]],
+    milestone_answers: pd.DataFrame,
+    user_answers: pd.DataFrame,
+    child_answers: pd.DataFrame,
     child_ages: dict[int, int],
-) -> list[dict[str, str | int | float]]:
+) -> pd.DataFrame:
     datatable: list[dict[str, str | int | float]] = []
     for milestone_answer_session in milestone_answer_sessions:
-        if milestone_answer_session.id in child_ages:
-            for milestone_id, answer in milestone_answer_session.answers.items():
-                row: dict[str, str | int | float] = (
-                    {
-                        "milestone_group_id": answer.milestone_group_id,
-                        "milestone_id": milestone_id,
-                        "answer": answer.answer + 1,
-                        "child_age": child_ages[milestone_answer_session.id],  # type: ignore
-                        "answer_session_id": milestone_answer_session.id,
-                    }
-                    | user_answers[milestone_answer_session.user_id]
-                    | child_answers[milestone_answer_session.child_id]
-                )
-                datatable.append(row)
-    return datatable
+        child_age = child_ages.get(milestone_answer_session.id)  # type: ignore
+        if child_age is not None:
+            row = {
+                "child_age": child_age,
+                "answer_session_id": milestone_answer_session.id,
+                "user_id": milestone_answer_session.user_id,
+                "child_id": milestone_answer_session.child_id,
+            }
+            datatable.append(row)  # type: ignore
+    df = pd.DataFrame(datatable)
+    if "answer_session_id" in df.columns:
+        df.set_index("answer_session_id", inplace=True)
+    df = df.merge(milestone_answers, how="left", left_index=True, right_index=True)
+    if "user_id" in df.columns:
+        df = df.merge(user_answers, how="left", left_on="user_id", right_index=True)
+        df.drop(columns=["user_id"], inplace=True)
+    if "child_id" in df.columns:
+        df = df.merge(child_answers, how="left", left_on="child_id", right_index=True)
+        df.drop(columns=["child_id"], inplace=True)
+    return df
 
 
-def get_user_answers(session: SessionDep) -> dict[int, dict[str, str | int | float]]:
-    questions = {
-        q.user_question_id: q.question
-        for q in session.exec(
-            select(UserQuestionText).where(col(UserQuestionText.lang_id) == "de")
-        ).all()
-    }
-    user_answers: dict[int, dict[str, str | int | float]] = defaultdict(dict)
-    for answer in session.exec(select(UserAnswer)).all():
-        logging.warn(
-            "Attempting to consider answer:"
-            + answer.answer
-            + " for q ID: "
-            + str(answer.question_id)
-            + " for user ID:"
-            + str(answer.user_id)
+def get_milestone_answers(session: SessionDep) -> pd.DataFrame:
+    milestone_ids = session.exec(select(Milestone.id).order_by(col(Milestone.id))).all()
+    milestone_answers: dict[int, dict[str, int]] = defaultdict(dict)
+    for answer in session.exec(select(MilestoneAnswer)).all():
+        milestone_answers[answer.answer_session_id][  # type: ignore
+            f"milestone_id_{answer.milestone_id}"
+        ] = answer.answer + 1
+    df = pd.DataFrame.from_dict(
+        milestone_answers,
+        orient="index",
+        columns=[f"milestone_id_{milestone_id}" for milestone_id in milestone_ids],
+    )
+    return df
+
+
+def get_answers(
+    session: SessionDep,
+    answer_type_name: str,
+) -> pd.DataFrame:
+    if answer_type_name == "user":
+        question_type = UserQuestion
+        answer_type = UserAnswer
+    elif answer_type_name == "child":
+        question_type = ChildQuestion  # type: ignore
+        answer_type = ChildAnswer  # type: ignore
+    else:
+        raise ValueError(
+            f"Invalid answer_type_name '{answer_type_name}': must be 'user' or 'child'"
         )
-        user_answers[answer.user_id][questions[answer.question_id]] = answer.answer
-    return user_answers
-
-
-def get_child_answers(session: SessionDep) -> dict[int, dict[str, str | int | float]]:
-    questions = {
-        q.child_question_id: q.question
+    question_additional_options = {
+        q.id: q.additional_option
         for q in session.exec(
-            select(ChildQuestionText).where(col(ChildQuestionText.lang_id) == "de")
+            select(question_type).order_by(col(question_type.id))
         ).all()
     }
-    child_answers: dict[int, dict[str, str | int | float]] = defaultdict(dict)
-    for answer in session.exec(select(ChildAnswer)).all():
-        child_answers[answer.child_id][questions[answer.question_id]] = answer.answer
-    return child_answers
+    answers: dict[int, dict[str, str | int | float]] = defaultdict(dict)
+    for answer in session.exec(select(answer_type)).all():
+        answer_value = answer.answer
+        # if the selected answer is the additional option, use the additional answer instead
+        if (
+            answer_value == question_additional_options.get(answer.question_id)
+            and answer.additional_answer
+        ):
+            answer_value = answer.additional_answer
+        answers[getattr(answer, f"{answer_type_name}_id")][
+            f"{answer_type_name}_question_{answer.question_id}"
+        ] = answer_value
+    df = pd.DataFrame.from_dict(
+        answers,
+        orient="index",
+        columns=[
+            f"{answer_type_name}_question_{question_id}"
+            for question_id in question_additional_options
+        ],
+    )
+    return df
 
 
 async def extract_research_data(
     session: SessionDep,
     user_session: UserAsyncSessionDep,
     research_group_id: int | None = None,
-) -> list[dict[str, str | int | float]]:
+) -> pd.DataFrame:
+    logger = logging.getLogger(__name__)
+    logger.info("Extracting research data...")
     user_ids_to_exclude = await get_test_account_user_ids(user_session)
+    logger.info(f"  - collected {len(user_ids_to_exclude)} user ids to exclude")
     answer_session_filter = select(MilestoneAnswerSession).where(
         col(MilestoneAnswerSession.user_id).not_in(user_ids_to_exclude)
     )
@@ -548,11 +583,25 @@ async def extract_research_data(
             col(MilestoneAnswerSession.user_id).in_(user_ids)
         )
     milestone_answer_sessions = session.exec(answer_session_filter).all()
+    logger.info(
+        f"  - collected {len(milestone_answer_sessions)} milestone answer sessions"
+    )
+    milestone_answers = get_milestone_answers(session)
+    logger.info(f"  - collected {len(milestone_answers)} milestone answers")
     child_ages = _get_answer_session_child_ages_in_months(
         session, milestone_answer_sessions
     )
-    user_answers = get_user_answers(session)
-    child_answers = get_child_answers(session)
-    return make_datatable(
-        milestone_answer_sessions, user_answers, child_answers, child_ages
+    logger.info(f"  - collected {len(child_ages)} child ages")
+    user_answers = get_answers(session, "user")
+    logger.info(f"  - collected {len(user_answers)} user answers")
+    child_answers = get_answers(session, "child")
+    logger.info(f"  - collected {len(child_answers)} child answers")
+    datatable = make_datatable(
+        milestone_answer_sessions,
+        milestone_answers,
+        user_answers,
+        child_answers,
+        child_ages,
     )
+    logger.info("...done")
+    return datatable

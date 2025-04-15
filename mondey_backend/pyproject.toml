@@ -27,7 +27,7 @@ dependencies = [
     "apscheduler",
     "fastapi-injectable",
     "deepl",
-    "pandas"
+    "pandas",
 ]
 dynamic = ["version"]
 

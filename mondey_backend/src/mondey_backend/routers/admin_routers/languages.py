@@ -10,6 +10,8 @@ from ...dependencies import SessionDep
 from ...models.milestones import Language
 from ...settings import app_settings
 from ..utils import add
+from ..utils import delete_texts_for_language
+from ..utils import ensure_texts_exist_for_language
 from ..utils import get
 from ..utils import i18n_language_path
 
@@ -23,6 +25,8 @@ def create_router() -> APIRouter:
         if session.get(Language, db_language.id) is not None:
             raise HTTPException(400, "Language already exists")
         add(session, db_language)
+        ensure_texts_exist_for_language(session, db_language.id)
+        session.refresh(db_language)
         return db_language
 
     @router.delete("/languages/{language_id}")
@@ -32,6 +36,7 @@ def create_router() -> APIRouter:
                 status_code=400, detail=f"{language_id} language cannot be deleted"
             )
         language = get(session, Language, language_id)
+        delete_texts_for_language(session, language.id)
         session.delete(language)
         session.commit()
         return {"ok": True}

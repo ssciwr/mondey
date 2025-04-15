@@ -6,29 +6,29 @@ import type {
 	RegisterRegisterData,
 	UserCreate,
 } from "$lib/client/index.js";
-import { authCookieLogin, registerRegister } from "$lib/client/services.gen";
+import { authCookieLogin, registerRegister } from "$lib/client/sdk.gen";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import { refresh } from "$lib/utils/Login";
+import { refresh } from "$lib/utils/login";
 import { Button, Card } from "flowbite-svelte";
 
 let showAlert = $state(false);
 let alertMessage = $state(i18n.tr.registration.alertMessageError);
-
-let testAccountData: UserCreate = {
-	email: `${((Math.random() + 0.1) * 100000000).toString()}tester@testaccount.com`,
-	password: ((Math.random() + 0.1) * 100000000).toString(), // random 8 digit or more password
-	is_active: true,
-	research_group_id: 0,
-};
-let registerRequestTestAccountData: RegisterRegisterData = {
-	body: testAccountData,
-};
+let registerTestUserButtonDisabled = $state(false);
 
 const registerTestUser = async () => {
-	console.log("Calling register...");
+	let testAccountData: UserCreate = {
+		email: `${((Math.random() + 0.1) * 100000000).toString()}tester@testaccount.com`,
+		password: ((Math.random() + 0.1) * 100000000).toString(), // random 8 digit or more password
+		is_active: true,
+		research_group_id: 0,
+	};
+	let registerRequestTestAccountData: RegisterRegisterData = {
+		body: testAccountData,
+	};
+	registerTestUserButtonDisabled = true;
 	const result = await registerRegister(registerRequestTestAccountData);
-	console.log("Registered..");
+
 	if (result.error) {
 		alertMessage = `${i18n.tr.registration.alertMessageError}: ${result.error.detail}`;
 		showAlert = true;
@@ -51,7 +51,7 @@ const registerTestUser = async () => {
 			if (status !== "success") {
 				alertMessage = `${i18n.tr.login.badCredentials}`;
 			}
-			await goto("/userLand/children/gallery");
+			goto("/userLand/children/gallery");
 		}
 	}
 };
@@ -75,7 +75,9 @@ const registerTestUser = async () => {
       <p class="mb-3 font-normal max-w-prose text-gray-700 dark:text-gray-400">{i18n.tr.frontpageAbout.summary1}</p>
       <p class="mb-3 font-normal max-w-prose text-gray-700 dark:text-gray-400">{i18n.tr.frontpageAbout.summary2}</p>
 
-        <button class="btn-primary" data-testid="anonymousLogin" onclick={registerTestUser}>{i18n.tr.frontpageAbout.tryDemo}</button>
+        <button disabled={registerTestUserButtonDisabled} class="btn-primary" data-testid="anonymousLogin" onclick={registerTestUser}>
+          {i18n.tr.frontpageAbout.tryDemo}
+        </button>
       </div>
     </Card>
   </div>

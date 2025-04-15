@@ -61,7 +61,7 @@ let filteredComponentProps = $derived(
 	{#if header !== null}
 		<Heading
 			tag="h1"
-			class="m-2 mt-4 flex w-full gap-2 p-2 tracking-tight "
+			class="m-2 mt-4 flex w-full gap-2 p-2 tracking-tight whitespace-nowrap"
 			customSize="text-2xl"
 			color="text-gray-800 dark:text-white"
 		>

@@ -2,23 +2,27 @@
 
 <script lang="ts">
 import { i18n } from "$lib/i18n.svelte";
-import { type PlotDatum } from "$lib/util";
-import { Axis, BulletLegend, Line, Scale, XYContainer } from "@unovis/ts";
+import { type PlotData } from "$lib/util";
+import {
+	Axis,
+	BulletLegend,
+	CurveType,
+	Line,
+	Scale,
+	XYContainer,
+} from "@unovis/ts";
 import { onMount } from "svelte";
 
-let { scores = [] }: { scores: Array<PlotDatum> } = $props();
+let { plot_data = { keys: [], data: [] } }: { plot_data: PlotData } = $props();
 let legend_container: HTMLDivElement;
 let xy_container: HTMLDivElement;
 
 onMount(() => {
-	if (!scores || Object.keys(scores).length === 0) {
+	if (!plot_data.keys || plot_data.keys.length === 0) {
 		return;
 	}
-	const lines = Object.keys(scores[0]).filter((e) => {
-		return e !== "age";
-	});
 	const legend = new BulletLegend(legend_container, {
-		items: lines.map((line) => ({ name: line })),
+		items: plot_data.keys.map((key: string) => ({ name: key })),
 	});
 	const chart = new XYContainer(
 		xy_container,
@@ -26,10 +30,12 @@ onMount(() => {
 			components: [
 				new Line({
 					x: (d) => d.age,
-					y: lines.map((k) => {
+					y: plot_data.keys.map((k) => {
 						return (d) => d[k];
 					}),
 					lineWidth: 3,
+					curveType: CurveType.Linear,
+					interpolateMissingData: true,
 				}),
 			],
 			xAxis: new Axis({
@@ -41,7 +47,7 @@ onMount(() => {
 			xDomain: [1, 72],
 			yDomain: [1, 4],
 		},
-		scores,
+		plot_data.data,
 	);
 });
 </script>

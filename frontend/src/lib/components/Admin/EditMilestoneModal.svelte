@@ -6,7 +6,7 @@ import {
 	deleteMilestoneImage,
 	updateMilestone,
 	uploadMilestoneImage,
-} from "$lib/client/services.gen";
+} from "$lib/client/sdk.gen";
 import type { MilestoneAdmin, MilestoneText } from "$lib/client/types.gen";
 import CancelButton from "$lib/components/Admin/CancelButton.svelte";
 import EditImage from "$lib/components/Admin/EditImage.svelte";
@@ -19,6 +19,7 @@ import { i18n } from "$lib/i18n.svelte";
 import {
 	Button,
 	ButtonGroup,
+	Input,
 	InputAddon,
 	Label,
 	Modal,
@@ -80,6 +81,10 @@ async function deleteMilestoneImageAndUpdate() {
 
 <Modal title={i18n.tr.admin.edit} bind:open size="xl" outsideclose>
     {#if milestone}
+        <div class="mb-5">
+            <Label class="mb-2">{i18n.tr.admin.name}</Label>
+            <Input bind:value={milestone.name} placeholder={i18n.tr.admin.name}/>
+        </div>
         {#each textKeys as textKey}
             {@const title = i18n.tr.admin[textKey]}
             <div class="mb-5">

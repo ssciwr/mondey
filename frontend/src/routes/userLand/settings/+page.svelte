@@ -5,7 +5,7 @@ import {
 	authCookieLogin,
 	usersCurrentUser,
 	usersPatchCurrentUser,
-} from "$lib/client/services.gen";
+} from "$lib/client/sdk.gen";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { preventDefault } from "$lib/util";
@@ -146,6 +146,7 @@ async function submitNewPassword() {
                 bind:value={newPassword}
                 type="password"
                 id="newPassword"
+                autocomplete="new-password"
                 required
                 placeholder={i18n.tr.settings.placeholder}
         />
@@ -160,6 +161,7 @@ async function submitNewPassword() {
                 bind:value={newPasswordRepeat}
                 type="password"
                 id="newPasswordConfirm"
+                autocomplete="new-password"
                 required
                 placeholder={i18n.tr.settings.placeholder}
         />

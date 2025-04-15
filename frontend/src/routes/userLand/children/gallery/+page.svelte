@@ -5,10 +5,11 @@ This file could possibly be better one directory up as +page.svelte, since it is
 <svelte:options runes={true} />
 <script lang="ts">
 import { goto } from "$app/navigation";
-import { getChildImage, getChildren } from "$lib/client/services.gen";
+import { getChildImage, getChildren } from "$lib/client/sdk.gen";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
+import { displayChildImages } from "$lib/features";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
@@ -37,12 +38,12 @@ function createStyle(data: CardElement[]): CardStyle[] {
 				item.header === i18n.tr.childData.newChildHeading
 					? {
 							class:
-								"bg-primary dark:bg-primary child-card hover:cursor-pointer m-2 max-w-prose hover:bg-additional-color-800 dark:hover:bg-additional-color-700 ",
+								"hover:scale-105 bg-primary dark:bg-primary child-card hover:cursor-pointer m-2 max-w-prose hover:bg-additional-color-800 dark:hover:bg-additional-color-700 ",
 							horizontal: false,
 						}
 					: {
 							class:
-								"child-card hover:cursor-pointer m-2 max-w-prose text-gray-700 hover:text-white dark:text-white hover:dark:text-gray-400 hover:bg-primary-800 dark:hover:bg-primary-700",
+								"hover:scale-105 child-card hover:cursor-pointer m-2 max-w-prose text-gray-700 hover:text-white dark:text-white hover:dark:text-gray-400 hover:bg-primary-800 dark:hover:bg-primary-700",
 							style: item.color
 								? `background-color: ${item.color};`
 								: "background-color: white", // default to white for image ones, even on hover.
@@ -103,11 +104,13 @@ async function setup(): Promise<CardElement[]> {
 		const childrenData = await Promise.all(
 			(children.data || []).map(async (child): Promise<CardElement> => {
 				let image = undefined as string | undefined;
-				const childImageResponse = await getChildImage({
-					path: { child_id: child.id },
-				});
-				if (!childImageResponse.error) {
-					image = URL.createObjectURL(childImageResponse.data as Blob);
+				if (displayChildImages) {
+					const childImageResponse = await getChildImage({
+						path: { child_id: child.id },
+					});
+					if (!childImageResponse.error) {
+						image = URL.createObjectURL(childImageResponse.data as Blob);
+					}
 				}
 				return {
 					header: child.name,

@@ -95,6 +95,7 @@ export const translationIds = {
 	admin: {
 		label: "Administration",
 		title: "Titel",
+		name: "Name",
 		languages: "Sprachen",
 		milestone: "Meilenstein",
 		milestones: "Meilensteine",
@@ -105,6 +106,7 @@ export const translationIds = {
 		userQuestions: "Fragen über Beobachter",
 		childQuestions: "Fragen über Kind",
 		question: "Frage",
+		questions: "Fragen",
 		selectOptions: "Optionen",
 		actions: "Aktionen",
 		selectPlaceholder: "Erstens,Zweitens,Drittens;",
@@ -141,7 +143,8 @@ export const translationIds = {
 		filter: "filtern",
 		selectColumns: "Spalten auswählen",
 		milestone: "Meilenstein",
-		milestoneId: "Meilenstein-ID",
+		error: "Ein Fehler ist aufgetreten. Bitte versuchen sie es später erneut.",
+		milestones: "Meilensteine",
 		groupbyOptional: "Gruppieren nach (optional)",
 	},
 	registration: {

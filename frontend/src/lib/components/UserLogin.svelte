@@ -5,30 +5,15 @@ import { base } from "$app/paths";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 
 import { goto } from "$app/navigation";
-import { authCookieLogin, usersCurrentUser } from "$lib/client/services.gen";
+import { authCookieLogin, usersCurrentUser } from "$lib/client/sdk.gen";
 import { type AuthCookieLoginData } from "$lib/client/types.gen";
 import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { preventDefault } from "$lib/util";
+import { refresh } from "$lib/utils/login";
 import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
 
-import { page } from "$app/stores";
-
-async function refresh(): Promise<string> {
-	const returned = await usersCurrentUser();
-	if (returned.error) {
-		user.data = null;
-		console.log("Error getting current user: ", returned.error.detail);
-		return returned.error.detail;
-	}
-	console.log("Successfully retrieved active user");
-	if (returned.data === null || returned.data === undefined) {
-		user.data = null;
-		return "no user data";
-	}
-	user.data = returned.data;
-	return "success";
-}
+import { page } from "$app/state";
 
 // functionality
 async function submitData(): Promise<void> {
@@ -60,8 +45,7 @@ async function submitData(): Promise<void> {
 				false,
 			);
 		} else {
-			console.log("login and user retrieval successful");
-			const intendedPath = $page.url.searchParams.get("intendedpath");
+			const intendedPath = page.url.searchParams.get("intendedpath");
 			if (intendedPath !== null && intendedPath.length > 2) {
 				console.log("Redirecting user to intended path: ", intendedPath);
 				goto(intendedPath);
@@ -125,7 +109,7 @@ let password = $state("");
 			</div>
 
 			<Button
-				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
+				class="dark:bg-primary-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
 				type="submit">{i18n.tr.login.submitButtonLabel}</Button
 			>
 		</form>

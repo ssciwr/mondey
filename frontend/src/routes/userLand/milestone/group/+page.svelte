@@ -1,7 +1,6 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import { goto } from "$app/navigation";
-import { page } from "$app/state";
 import {
 	type MilestoneAnswerSessionPublic,
 	type MilestonePublic,
@@ -21,7 +20,6 @@ import {
 	RectangleListOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
-import { get } from "svelte/store"; // is this needed in svelte 5? Because now page is in $app/state we might not need to <store>get it?
 
 function computeProgress(
 	milestones: MilestonePublic[] | undefined,
@@ -190,7 +188,7 @@ export function createStyle(data: any[]) {
 		return {
 			card: {
 				class:
-					"m-2 max-w-prose dark:text-white text-white hover:cursor-pointer bg-primary-700 dark:bg-primary-900 hover:bg-primary-800 dark:hover:bg-primary-700",
+					"m-2 max-w-prose dark:text-white text-white hover:cursor-pointer bg-milestone-700 dark:bg-milestone-900 hover:bg-milestone-800 dark:hover:bg-milestone-700",
 			},
 			progress: {
 				labelInside: true,

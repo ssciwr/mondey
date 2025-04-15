@@ -12,7 +12,7 @@ import {
 	deleteMilestoneGroupAdmin,
 	orderMilestoneGroupsAdmin,
 	orderMilestonesAdmin,
-} from "$lib/client/services.gen";
+} from "$lib/client/sdk.gen";
 import type {
 	MilestoneAdmin,
 	MilestoneGroupAdmin,
@@ -228,7 +228,6 @@ async function doDeleteMilestone() {
 											<TableBodyCell></TableBodyCell>
 											<TableBodyCell></TableBodyCell>
 											<TableBodyCell>
-												<AddButton onclick={() => addMilestone(milestoneGroup.id)} />
 												<ReorderButton
 														onclick={(event: Event) => {
 															event.stopPropagation();
@@ -236,6 +235,7 @@ async function doDeleteMilestone() {
 															currentOrderItems = milestoneGroup.milestones.map((milestone) => {return {id: milestone.id, text: milestone.text[i18n.locale]?.title};});
 															showOrderItemsModal = true;
 														}} />
+												<AddButton onclick={() => addMilestone(milestoneGroup.id)} />
 											</TableBodyCell>
 										</TableBodyRow>
 									</TableBody>
@@ -249,7 +249,6 @@ async function doDeleteMilestone() {
 					<TableBodyCell></TableBodyCell>
 					<TableBodyCell></TableBodyCell>
 					<TableBodyCell>
-						<AddButton onclick={addMilestoneGroup} />
 						<ReorderButton
 								onclick={(event: Event) => {
 									event.stopPropagation();
@@ -257,6 +256,7 @@ async function doDeleteMilestone() {
 									currentOrderItems = $milestoneGroups.map((milestoneGroup) => {return {id: milestoneGroup.id, text: milestoneGroup.text[i18n.locale]?.title};});
 									showOrderItemsModal = true;
 								}} />
+						<AddButton onclick={addMilestoneGroup} />
 					</TableBodyCell>
 				</TableBodyRow>
 			</TableBody>

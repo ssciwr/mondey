@@ -67,6 +67,11 @@ def static_dir(tmp_path_factory: pytest.TempPathFactory):
         img.save(
             submitted_milestone_images_dir / f"{submitted_milestone_image_id}.webp"
         )
+    # add some i18n json files
+    i18n_dir = static_dir / "i18n"
+    i18n_dir.mkdir()
+    for lang in ["de", "en", "fr"]:
+        (i18n_dir / f"{lang}.json").write_text("{}")
     return static_dir
 
 
@@ -191,6 +196,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         for milestone_id in [1, 2, 3]:
             session.add(
                 Milestone(
+                    name=f"m{milestone_id}",
                     order=14 - milestone_id,
                     group_id=1,
                     expected_age_months=milestone_id * 6,
@@ -222,6 +228,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         for milestone_id in [4, 5]:
             session.add(
                 Milestone(
+                    name=f"m{milestone_id}",
                     order=milestone_id,
                     group_id=2,
                     expected_age_months=milestone_id * 6,
@@ -422,6 +429,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             UserQuestion(
                 id=1,
                 order=1,
+                name="User Question 1",
                 options="[a,b,c,other]",
                 additional_option="other",
                 component="select",
@@ -452,6 +460,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             UserQuestion(
                 id=2,
                 order=2,
+                name="User Question 2",
                 component="textarea",
                 options="[a2,b2,c2,other]",
                 additional_option="other",
@@ -490,6 +499,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             ChildQuestion(
                 id=1,
                 order=0,
+                name="Child Question 1",
                 options="[a,b,c,other]",
                 additional_option="other",
                 text={
@@ -516,6 +526,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             ChildQuestion(
                 id=2,
                 order=1,
+                name="Child Question 2",
                 options="[a2,b2,c2,other]",
                 additional_option="other",
                 text={
@@ -584,7 +595,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 user_id=3,
                 child_id=1,
                 answer="other",
-                additional_answer="dolor sit",
+                additional_answer="apple",
             )
         )
         session.commit()
@@ -644,6 +655,7 @@ def user_questions():
     return [
         {
             "id": 1,
+            "name": "User Question 1",
             "order": 1,
             "component": "select",
             "options": "[a,b,c,other]",
@@ -676,6 +688,7 @@ def user_questions():
         },
         {
             "id": 2,
+            "name": "User Question 2",
             "order": 2,
             "component": "textarea",
             "options": "[a2,b2,c2,other]",
@@ -714,6 +727,7 @@ def child_questions():
     return [
         {
             "id": 1,
+            "name": "Child Question 1",
             "order": 0,
             "component": "select",
             "options": "[a,b,c,other]",
@@ -746,6 +760,7 @@ def child_questions():
         },
         {
             "id": 2,
+            "name": "Child Question 2",
             "order": 1,
             "component": "select",
             "options": "[a2,b2,c2,other]",
@@ -805,6 +820,7 @@ def child_answers():
 def default_user_question_admin():
     return {
         "id": 1,
+        "name": "User Question 1",
         "component": "textarea",
         "type": "other_thing",
         "order": 0,
@@ -930,6 +946,9 @@ def app(
 ):
     settings.app_settings.STATIC_FILES_PATH = str(static_dir)
     settings.app_settings.PRIVATE_FILES_PATH = str(private_dir)
+    settings.app_settings.SMTP_HOST = "smtp-host"
+    settings.app_settings.SMTP_USERNAME = "test-smtp-username"
+    settings.app_settings.SMTP_PASSWORD = "test-smtp-password"
     app = create_app()
     app.dependency_overrides[get_session] = lambda: session
     app.dependency_overrides[get_async_session] = lambda: user_session
@@ -1054,6 +1073,7 @@ def milestone_group1():
         "milestones": [
             {
                 "id": 3,
+                "name": "m3",
                 "expected_age_months": 18,
                 "text": {
                     "de": {
@@ -1079,6 +1099,7 @@ def milestone_group1():
             },
             {
                 "id": 2,
+                "name": "m2",
                 "expected_age_months": 12,
                 "text": {
                     "de": {
@@ -1104,6 +1125,7 @@ def milestone_group1():
             },
             {
                 "id": 1,
+                "name": "m1",
                 "expected_age_months": 6,
                 "text": {
                     "de": {
@@ -1161,6 +1183,7 @@ def milestone_group_admin1():
                 "group_id": 1,
                 "order": 11,
                 "id": 3,
+                "name": "m3",
                 "expected_age_months": 18,
                 "images": [],
                 "text": {
@@ -1194,6 +1217,7 @@ def milestone_group_admin1():
                 "group_id": 1,
                 "order": 12,
                 "id": 2,
+                "name": "m2",
                 "expected_age_months": 12,
                 "images": [
                     {
@@ -1232,6 +1256,7 @@ def milestone_group_admin1():
                 "group_id": 1,
                 "order": 13,
                 "id": 1,
+                "name": "m1",
                 "expected_age_months": 6,
                 "images": [
                     {
@@ -1286,6 +1311,7 @@ def milestone_group2():
         "milestones": [
             {
                 "id": 4,
+                "name": "m4",
                 "expected_age_months": 24,
                 "images": [],
                 "text": {
@@ -1311,6 +1337,7 @@ def milestone_group2():
             },
             {
                 "id": 5,
+                "name": "m5",
                 "expected_age_months": 30,
                 "images": [],
                 "text": {
@@ -1368,6 +1395,7 @@ def milestone_group_admin2():
                 "group_id": 2,
                 "order": 4,
                 "id": 4,
+                "name": "m4",
                 "expected_age_months": 24,
                 "images": [],
                 "text": {
@@ -1401,6 +1429,7 @@ def milestone_group_admin2():
                 "group_id": 2,
                 "order": 5,
                 "id": 5,
+                "name": "m5",
                 "expected_age_months": 30,
                 "images": [],
                 "text": {
