@@ -298,10 +298,5 @@ def create_router() -> APIRouter:
         return DetailedMilestoneFeedbackResponse(
             detailed_=feedback, isLackingPeerAgeData=is_lacking_peer_age_data
         )
-        """
-        return {
-            'detailed_': feedback,
-            'isLackingPeerAgeData': is_lacking_peer_age_data
-        }"""
 
     return router
