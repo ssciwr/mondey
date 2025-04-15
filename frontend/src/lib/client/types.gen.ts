@@ -71,6 +71,7 @@ export type ChildQuestionAdmin = {
     options?: string;
     additional_option?: string;
     required?: boolean;
+    name?: string;
     id: number;
     text?: {
         [key: string]: ChildQuestionText;
@@ -86,6 +87,7 @@ export type ChildQuestionPublic = {
     };
     additional_option?: string;
     required?: boolean;
+    name?: string;
 };
 
 export type ChildQuestionText = {
@@ -260,6 +262,7 @@ export type UserQuestionAdmin = {
     options?: string;
     additional_option?: string;
     required?: boolean;
+    name?: string;
     id: number;
     text?: {
         [key: string]: UserQuestionText;
@@ -275,6 +278,7 @@ export type UserQuestionPublic = {
     };
     additional_option?: string;
     required?: boolean;
+    name?: string;
 };
 
 export type UserQuestionText = {
