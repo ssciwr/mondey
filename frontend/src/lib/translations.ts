@@ -140,6 +140,8 @@ export const translationIds = {
 		label: "Wissenschaft",
 		images: "Bilder",
 		downloadAsCsv: "als CSV herunterladen",
+		downloadAll: "Alles als CSV herunterladen",
+		researchData: "Wissenshaftlichen Daten",
 		filter: "filtern",
 		selectColumns: "Spalten auswählen",
 		milestone: "Meilenstein",
