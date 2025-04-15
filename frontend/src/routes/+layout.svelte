@@ -130,7 +130,7 @@ const asAlert = false;
 		<!-- Mobile Navigation -->
 		<div class="z-10 fixed" style="top:0.8rem;right:1rem;">
 			<div class="btn-primary btn-icon" onclick={toggleDrawer} >
-				<BarsOutline data-testid="mobile-userland-navbar" class="cursor-pointer" />
+				<BarsOutline class="cursor-pointer" />
 			</div>
 		</div>
 

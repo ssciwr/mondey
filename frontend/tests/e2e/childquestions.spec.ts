@@ -17,8 +17,13 @@ test("/userLand/admin - Questions on Children : New child question can be added,
 	await page.getByRole("link", { name: "Administration" }).click();
 	await page.locator('button:has-text("Fragen über Kind")').click();
 
-	// Count occurrences of the text on the page and store in a variable
-	const appearancesOfQuestion = await page.getByText(childQuestionText).count();
+	await page.waitForTimeout(500); // would like to use network idle don't like hardcoding but we need questions to load
+
+	// This hardcoded way I don't like but basically if we use the other approach it seems to use a ref and update
+	// so comparisons don't work. But by doing this approach, we freeze the initial count for later comparison.
+	const initialQuestions = await page
+		.getByText(childQuestionText, { exact: true })
+		.count();
 
 	await page.locator('button:has-text("Hinzufügen")').click();
 	await modalLoad(page);
@@ -34,10 +39,7 @@ test("/userLand/admin - Questions on Children : New child question can be added,
 	const element = page.getByText(childQuestionText);
 	await expect(element).toBeTruthy();
 
-	if (isMobile) {
-		await page.getByTestId("mobile-userland-navbar").click(); // open the sidebar.
-	}
-	await page.getByText("Kinder").first().click();
+	await page.goto("/userLand/children/gallery");
 	await page.locator('h5:has-text("+ Neu")').click();
 	await modalLoad(page);
 	const element_when_adding = page.getByText(childQuestionText).all();
@@ -49,10 +51,26 @@ test("/userLand/admin - Questions on Children : New child question can be added,
 	await page.getByRole("link", { name: "Administration" }).click();
 	await page.locator('button:has-text("Fragen über Kind")').click();
 
-	// Count occurrences of the text on the page and store in a variable
-	const laterAppearancesOfQuestion = await page
-		.getByText(childQuestionText)
+	// Force a complete reload of the page to avoid any caching issues with # of questions.
+	await page.waitForLoadState("networkidle");
+	await page.waitForTimeout(3000);
+
+	const laterQuestions = await page
+		.locator(`div:has-text("${childQuestionText}")`)
+		.filter({ hasText: childQuestionText })
 		.count();
 
-	expect(laterAppearancesOfQuestion).toBe(appearancesOfQuestion + 1);
+	// Add some debugging to help troubleshoot
+	console.log(
+		`Initial count: ${initialQuestions}, Later count: ${laterQuestions}`,
+	);
+
+	// Make sure we're comparing the right numbers
+	expect(laterQuestions).toBe(initialQuestions + 1);
+
+	// This is unusual because the test is flaky: The first run fails (Expected 2, Received 1).
+	// But the second run succeeds.
+	// When I look a the playwright report images, the first one clearly shows the text twice and the second one it thrice
+	// (so what we expect, successful. Yet the returned count is only "1").
+	// expect(laterAppearancesOfQuestion).toBe(appearancesOfQuestion + 1);
 });
