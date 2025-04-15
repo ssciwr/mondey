@@ -60,6 +60,8 @@ export const translationIds = {
 		disableHelp: "Ausblenden",
 		noFeedback:
 			"Kein Feedback verfügbar. Sie müssen ein Kind länger als eine Woche beobachten und regelmäßig Meilensteine bewerten um Feedback zu erhalten.",
+		noPeerFeedback:
+			"Dieses Kind hat Meilensteindaten aufgezeichnet, aber es gibt keine Gleichaltrigen in seinem Alter, um diese Stats sicherlich zu berechnen.",
 		current: "Aktuell",
 		toTheMilestone: "Zum Meilenstein",
 		older: "Weiter zurück",

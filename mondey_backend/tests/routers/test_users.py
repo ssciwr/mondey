@@ -391,7 +391,10 @@ def test_get_summary_feedback_for_session_invalid(user_client: TestClient):
 def test_get_detailed_feedback_for_session(user_client: TestClient, session):
     response = user_client.get("/users/feedback/answersession=1/detailed")
     assert response.status_code == 200
-    assert response.json() == {"1": {"1": 1, "2": 1}}
+    assert response.json() == {
+        "detailed_": {"1": {"1": 1, "2": 1}},
+        "isLackingPeerAgeData": True,
+    }
 
 
 def test_get_detailed_feedback_for_session_invalid(user_client: TestClient):

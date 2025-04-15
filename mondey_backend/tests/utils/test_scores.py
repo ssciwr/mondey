@@ -35,13 +35,13 @@ def test_compute_feedback_simple():
         expected_score=1.0,
     )
     score = 0
-    assert compute_feedback_simple(dummy_scores, score) == -1
+    assert compute_feedback_simple(dummy_scores, score) == (-1, False)
 
     score = 1
-    assert compute_feedback_simple(dummy_scores, score) == 0
+    assert compute_feedback_simple(dummy_scores, score) == (0, False)
 
     score = 3
-    assert compute_feedback_simple(dummy_scores, score) == 1
+    assert compute_feedback_simple(dummy_scores, score) == (1, False)
 
 
 @pytest.mark.asyncio
@@ -119,7 +119,7 @@ async def test_compute_detailed_milestonegroup_feedback_for_answersession_with_r
     statistics_session, user_session
 ):
     # initial stats only include answer session 1: all feedback green
-    feedback = compute_milestonegroup_feedback_detailed(
+    feedback, stats_degenerate = compute_milestonegroup_feedback_detailed(
         statistics_session, child_id=1, answersession_id=1
     )
     assert len(feedback) == 1
@@ -129,7 +129,7 @@ async def test_compute_detailed_milestonegroup_feedback_for_answersession_with_r
 
     # updated stats include more answer sessions
     await async_update_stats(statistics_session, user_session, incremental_update=True)
-    feedback = compute_milestonegroup_feedback_detailed(
+    feedback, stats_degenerate = compute_milestonegroup_feedback_detailed(
         statistics_session, child_id=1, answersession_id=1
     )
     assert len(feedback) == 1
@@ -143,7 +143,7 @@ async def test_compute_detailed_milestonegroup_feedback_for_answersession_with_r
 def test_compute_detailed_milestonegroup_feedback_for_answersession_no_existing_stat(
     statistics_session,
 ):
-    feedback = compute_milestonegroup_feedback_detailed(
+    feedback, score_degenerate = compute_milestonegroup_feedback_detailed(
         statistics_session, child_id=3, answersession_id=3
     )
     assert len(feedback) == 1
