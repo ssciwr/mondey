@@ -39,7 +39,10 @@ Each file, including import_all.py, has tests to make sure they correctly import
 The tests mainly assert data has been mapped correctly and small fine parts worked correctly (e.g. group full names from
 acronym look up keys)
 
-## Questions remaining:
-1) For birth year: An option is "Before 2018". Can we convert these all to 2017? Because we need a specific number.
-2) Merging milestones with different titles/the subgroups in milestones CSV data
-3) Future format/data?
+## The delinetion between importing and correction.
+The import scripts always load in actual data from CSVs.
+
+The correction scripts change the (valid) psychology format data into a more sensible data format for our system
+(where compatibility is needed), and often a more consolidated, numerical "flattened" form. For example, if a question
+had free text answers with two values like "Pregnancy Duration + Incubator period": "34+2", "38", "40", "32,3", then the correction changes
+this into two separate questions.

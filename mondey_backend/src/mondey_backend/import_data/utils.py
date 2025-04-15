@@ -301,7 +301,7 @@ def save_text_question(
         print(variable)
         # Create UserQuestion for the parent
         user_question = UserQuestion(
-            component="text",
+            component="textarea",
             type="text",
             required=is_required,
             text={
@@ -316,7 +316,7 @@ def save_text_question(
     else:
         # Create ChildQuestion if not a parent question
         child_question = ChildQuestion(
-            component="text",
+            component="textarea",
             type="text",
             required=is_required,
             text={

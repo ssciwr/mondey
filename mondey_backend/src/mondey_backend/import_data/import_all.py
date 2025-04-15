@@ -37,3 +37,31 @@ if __name__ == "__main__":
         questions_configured_path,
         clear_existing_questions_and_answers=False,
     )
+
+"""
+Todos to make this work for the second masters batch of data (obviously it'll be hard to be sure it can work with the
+amount of different columns, ways they work, and the possibility of changed data collection):
+
+- Add code to merge the sibling answers (by setting # younger/older siblings to 0 if none)
+for child_id in child_ids:\n",
+    "    with con:\n",
+    "        cur = con.cursor()\n",
+    "        for question_id in [17, 18]:\n",
+    "            if not cur.execute(\n",
+    "                f\"select * from childanswer where child_id={child_id} and question_id={question_id}\"\n",
+    "            ).fetchone():\n",
+    "                sql = f\"insert into childanswer values (0, NULL, {child_id}, {question_id});\"\n",
+    "                print(sql)\n",
+    "                cur.execute(sql)"
+- Add code after that to delete the "Do you have siblings?" kind of question.
+
+- Replace parsed text in questions/answers (correct_answers.py)
+
+- Merge the Eltern question
+
+- Change exceptio nfor ANdere Diagnosen.
+
+- x textarea/text in make_text_question.
+
+
+"""
