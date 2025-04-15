@@ -195,7 +195,7 @@ let headers = $derived.by(() => {
             <MultiSelect bind:value={selected_columns} class="mt-2" items={columns} placeholder={i18n.tr.researcher.groupbyOptional} data-testid="selectGroupby"/>
         </Label>
     </div>
-    <Button class="mt-9 mb-3" onclick={downloadCurrentDataAsCSV} data-testid="researchdownloadCurrentDataAsCSV">{i18n.tr.researcher.downloadAsCsv}</Button>
+    <Button class="mt-9 mb-3" onclick={downloadCurrentDataAsCSV} data-testid="researchDownloadCSV">{i18n.tr.researcher.downloadAsCsv}</Button>
 </div>
     <!-- Loading indicator -->
     {#if show_spinner}

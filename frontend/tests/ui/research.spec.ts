@@ -1,3 +1,4 @@
+import * as fs from "node:fs";
 import { translationIds } from "$lib/translations";
 import { type Locator, type Page, expect } from "@playwright/test";
 import { test } from "./test";
@@ -57,9 +58,12 @@ async function mock_research_names_route(page: Page, n_milestones: number) {
 
 async function clickDownloadCSVButtonAndGetFilename(
 	page: Page,
+	allData = false,
 ): Promise<string> {
 	const downloadPromise = page.waitForEvent("download");
-	await page.getByTestId("researchDownloadCSV").click();
+	await page
+		.getByTestId(allData ? "downloadAllResearchData" : "researchDownloadCSV")
+		.click();
 	const download = await downloadPromise;
 	return download.suggestedFilename();
 }
@@ -199,4 +203,17 @@ test("Research page: no data", async ({ page }) => {
 	await expect(plot).toHaveCount(0);
 	const table = page.getByTestId("researchTable");
 	await expect(table).toHaveCount(0);
+});
+
+test("Research page: Download all CSV contains expected data", async ({
+	page,
+}) => {
+	await mock_research_data_route(page, 20, 5);
+	await mock_research_names_route(page, 5);
+	await page.goto("/userLand/research", { waitUntil: "networkidle" });
+	const downloadFilename = await clickDownloadCSVButtonAndGetFilename(
+		page,
+		true,
+	);
+	expect(downloadFilename).toContain("mondey-research-all");
 });
