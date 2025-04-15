@@ -56,8 +56,7 @@ test("/userLand/admin - Questions on Children : New child question can be added,
 	await page.waitForTimeout(3000);
 
 	const laterQuestions = await page
-		.locator(`div:has-text("${childQuestionText}")`)
-		.filter({ hasText: childQuestionText })
+		.getByText(childQuestionText, { exact: true })
 		.count();
 
 	// Add some debugging to help troubleshoot
@@ -67,10 +66,4 @@ test("/userLand/admin - Questions on Children : New child question can be added,
 
 	// Make sure we're comparing the right numbers
 	expect(laterQuestions).toBe(initialQuestions + 1);
-
-	// This is unusual because the test is flaky: The first run fails (Expected 2, Received 1).
-	// But the second run succeeds.
-	// When I look a the playwright report images, the first one clearly shows the text twice and the second one it thrice
-	// (so what we expect, successful. Yet the returned count is only "1").
-	// expect(laterAppearancesOfQuestion).toBe(appearancesOfQuestion + 1);
 });
