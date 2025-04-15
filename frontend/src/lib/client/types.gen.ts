@@ -98,6 +98,15 @@ export type ChildQuestionText = {
     lang_id?: string | null;
 };
 
+export type DetailedMilestoneFeedbackResponse = {
+    detailed_: {
+        [key: string]: {
+            [key: string]: number;
+        };
+    };
+    isLackingPeerAgeData?: boolean;
+};
+
 export type ErrorModel = {
     detail: string | {
         [key: string]: string;
@@ -1894,11 +1903,7 @@ export type GetDetailedFeedbackForAnswersessionResponses = {
     /**
      * Successful Response
      */
-    200: {
-        [key: string]: {
-            [key: string]: number;
-        };
-    };
+    200: DetailedMilestoneFeedbackResponse;
 };
 
 export type GetDetailedFeedbackForAnswersessionResponse = GetDetailedFeedbackForAnswersessionResponses[keyof GetDetailedFeedbackForAnswersessionResponses];

@@ -25,6 +25,7 @@ from ..models.users import UserUpdate
 from ..users import fastapi_users
 from .scores import compute_milestonegroup_feedback_detailed
 from .scores import compute_milestonegroup_feedback_summary
+from .utils import DetailedMilestoneFeedbackResponse
 from .utils import add
 from .utils import child_image_path
 from .utils import get
@@ -281,19 +282,26 @@ def create_router() -> APIRouter:
 
     @router.get(
         "/feedback/answersession={answersession_id}/detailed",
-        response_model=dict[int, dict[int, int]],
+        response_model=DetailedMilestoneFeedbackResponse,
     )
     def get_detailed_feedback_for_answersession(
         session: SessionDep,
         answersession_id: int,
-    ) -> dict[int, dict[int, int]]:
+    ) -> DetailedMilestoneFeedbackResponse | None:
         answersession = session.get(MilestoneAnswerSession, answersession_id)
         if answersession is None:
             raise HTTPException(404, detail="Answer session not found")
         child_id = answersession.child_id
-        feedback = compute_milestonegroup_feedback_detailed(
+        feedback, is_lacking_peer_age_data = compute_milestonegroup_feedback_detailed(
             session, child_id, answersession_id
         )
-        return feedback
+        return DetailedMilestoneFeedbackResponse(
+            detailed_=feedback, isLackingPeerAgeData=is_lacking_peer_age_data
+        )
+        """
+        return {
+            'detailed_': feedback,
+            'isLackingPeerAgeData': is_lacking_peer_age_data
+        }"""
 
     return router

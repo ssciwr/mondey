@@ -33,7 +33,7 @@ class TrafficLight(Enum):
 def compute_feedback_simple(
     stat: MilestoneAgeScore | MilestoneGroupAgeScore,
     score: float,
-) -> int:
+) -> tuple[int, bool]:
     """
     Compute trafficlight feedback. Replace this function with your own if you
     want to change the feedback logic.
@@ -50,13 +50,14 @@ def compute_feedback_simple(
         0 if avg - 2 * stddev < score <= avg - stddev (trafficlight: yellow)
         1if score > avg - stddev (trafficlight: green)
     """
+    degenerate_stats = False
 
     def leq(val: float, lim: float) -> bool:
         return val < lim or bool(np.isclose(val, lim))
 
     if stat.avg_score < 1e-2 and stat.stddev_score < 1e-2:
         # statistics has no data
-        return TrafficLight.invalid.value
+        return TrafficLight.invalid.value, degenerate_stats
 
     if stat.stddev_score < 1e-2:
         # statistics data is degenerate and has no variance <- few datapoints
@@ -64,16 +65,17 @@ def compute_feedback_simple(
         # one step below -> yellow, two steps below -> red
         lim_lower = stat.avg_score - 2
         lim_upper = stat.avg_score - 1
+        degenerate_stats = True
     else:
         lim_lower = stat.avg_score - 2 * stat.stddev_score
         lim_upper = stat.avg_score - stat.stddev_score
 
     if leq(score, lim_lower):
-        return TrafficLight.red.value
+        return TrafficLight.red.value, degenerate_stats
     elif score > lim_lower and leq(score, lim_upper):
-        return TrafficLight.yellow.value
+        return TrafficLight.yellow.value, degenerate_stats
     else:
-        return TrafficLight.green.value
+        return TrafficLight.green.value, degenerate_stats
 
 
 def compute_milestonegroup_feedback_summary(
@@ -144,7 +146,7 @@ def compute_milestonegroup_feedback_summary(
                 f'  group answers: , {group_answers}, "mean: ", {np.mean(group_answers)}'
             )
             # use the statistics recorded for a certain age as the basis for the feedback computation
-            feedback[group] = compute_feedback_simple(
+            feedback[group], stats_are_degenerate = compute_feedback_simple(
                 stats.scores[age], float(np.mean(group_answers))
             )
     logger.debug(f"summary feedback: {feedback}")
@@ -153,7 +155,7 @@ def compute_milestonegroup_feedback_summary(
 
 def compute_milestonegroup_feedback_detailed(
     session: SessionDep, child_id: int, answersession_id: int
-) -> dict[int, dict[int, int]]:
+) -> tuple[dict[int, dict[int, int]], bool]:
     """
     Compute the per-milestone (detailed) feedback for all answers in a given answersession.
     This is done by comparing the given answer per milestone against the mean and standard deviation of the known population of children for the child's age.
@@ -174,6 +176,7 @@ def compute_milestonegroup_feedback_detailed(
         Dictionary of milestonegroup_id -> [milestone_id -> feedback]
     """
     logger = logging.getLogger(__name__)
+    is_lacking_peer_age_data = True
 
     logger.debug("compute_milestonegroup_feedback_detailed")
     answersession = session.get(MilestoneAnswerSession, answersession_id)
@@ -210,10 +213,17 @@ def compute_milestonegroup_feedback_detailed(
                     logger.debug(
                         f"   score: {i}, {score.count}, {score.avg_score}, {score.stddev_score}"
                     )
+            score_value, degenerate_stats = compute_feedback_simple(
+                stats.scores[age], answer.answer + 1
+            )
+
+            if not degenerate_stats:
+                is_lacking_peer_age_data = False
+
             feedback[answer.milestone_group_id][cast(int, answer.milestone_id)] = (
-                compute_feedback_simple(stats.scores[age], answer.answer + 1)
+                score_value
             )
 
     logger.debug(f" detailed feedback: {feedback}")
 
-    return feedback
+    return feedback, is_lacking_peer_age_data

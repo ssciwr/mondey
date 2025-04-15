@@ -50,6 +50,7 @@ let milestoneGroups = $state(
 let detailed = $state({}) as Record<number, any>; // detailed feedback for each milestone
 let summary = $state({}) as Record<number, any>; // summary feedback for each milestonegroup
 let answerSessions = $state({}) as Record<number, MilestoneAnswerSessionPublic>;
+let isLackingPeerAgeData = $state(false);
 
 // helpers
 const breakpoints = {
@@ -291,10 +292,16 @@ async function loadDetailedFeedbackFor(
 		return null;
 	}
 
+	if (false === isLackingPeerAgeData) {
+		isLackingPeerAgeData = response.data.isLackingPeerAgeData;
+		// this is the case when they have some milestone answers, but no peers to compare to.
+		// so the milestones should appear green/checked, but have a note about this.
+	}
+
 	let res = {} as Record<number, Record<number, number>>;
 
 	// filter out the milestones that are not ideal and only show those
-	for (const [mid, milestones] of Object.entries(response.data)) {
+	for (const [mid, milestones] of Object.entries(response.data.detailed_)) {
 		res[Number(mid)] = {} as Record<number, number>;
 		for (const [ms_id, ms_score] of Object.entries(milestones)) {
 			if (ms_score <= 0) {
@@ -631,10 +638,14 @@ async function printReport(): Promise<void> {
     <!--Main tabs component that displays the feedback for the milestones and milestonegroups -->
     <Tabs tabStyle="full" defaultClass="justify-center flex rounded-lg divide-x rtl:divide-x-reverse divide-gray-200 shadow-sm dark:divide-gray-700">
         <div class="flex flex-col md:flex-row justify-between text-sm md:text-base ">
+
             {#if relevant_sessionkeys.length=== 0}
                 <p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-200">{i18n.tr.milestone.noFeedback}</p>
             {:else}
-                {#each relevant_sessionkeys.slice(0, Math.min(numShownAnswersessions, relevant_sessionkeys.length)) as aid}
+                {#if relevant_sessionkeys.length=== 0}
+                    <p class="m-2 p-2 pb-4 text-gray-700 dark:text-gray-200">{i18n.tr.milestone.noPeerFeedback}</p>
+                {/if}
+                    {#each relevant_sessionkeys.slice(0, Math.min(numShownAnswersessions, relevant_sessionkeys.length)) as aid}
                     <TabItem defaultClass="font-bold m-1 p-0"
                              activeClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600 border-1"
                              inactiveClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 border-additional-color-600 dark:border-additional-color-600 border-1"

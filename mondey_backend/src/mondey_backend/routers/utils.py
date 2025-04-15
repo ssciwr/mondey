@@ -13,6 +13,7 @@ from fastapi import HTTPException
 from fastapi import UploadFile
 from PIL import Image
 from PIL import ImageOps
+from pydantic import BaseModel
 from sqlmodel import SQLModel
 from sqlmodel import col
 from sqlmodel import select
@@ -297,3 +298,8 @@ def get_milestonegroups_for_answersession(
             select(MilestoneGroup).where(col(MilestoneGroup.id).in_(check_for_overlap))
         ).all()
     }
+
+
+class DetailedMilestoneFeedbackResponse(BaseModel):
+    detailed_: dict[int, dict[int, int]]
+    isLackingPeerAgeData: bool = False
