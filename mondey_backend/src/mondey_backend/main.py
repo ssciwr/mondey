@@ -9,6 +9,7 @@ import uvicorn
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi_injectable.decorator import injectable
 
@@ -57,6 +58,7 @@ def create_app() -> FastAPI:
     app.include_router(users.create_router())
     app.include_router(auth.create_router())
     app.include_router(research.create_router())
+    app.add_middleware(GZipMiddleware, minimum_size=5000, compresslevel=5)
     app.mount(
         "/static", StaticFiles(directory=app_settings.STATIC_FILES_PATH), name="static"
     )
@@ -66,7 +68,7 @@ def create_app() -> FastAPI:
 def main():
     logging.basicConfig(
         level=app_settings.LOG_LEVEL.upper(),
-        format="%(asctime)s :: %(levelname)s :: %(name)s :: %(funcName)s :: %(message)s",
+        format="%(asctime)s.%(msecs)03d :: %(levelname)s :: %(name)s :: %(funcName)s :: %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
     logger = logging.getLogger(__name__)

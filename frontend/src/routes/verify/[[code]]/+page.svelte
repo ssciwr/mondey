@@ -1,6 +1,6 @@
 <script lang="ts">
 import { page } from "$app/state";
-import { verifyVerify } from "$lib/client/services.gen";
+import { verifyVerify } from "$lib/client/sdk.gen";
 import UserLogin from "$lib/components/UserLogin.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import {

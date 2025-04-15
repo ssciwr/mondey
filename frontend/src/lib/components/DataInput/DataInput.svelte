@@ -34,30 +34,27 @@ let {
 	kwargs?: any;
 } = $props();
 
-// functionality for showing the textfield when the trigger is selected
-function checkShowTextfield(v: any): boolean {
-	let basic =
-		value !== undefined &&
-		value !== null &&
-		value !== "" &&
-		textTrigger !== undefined &&
-		textTrigger !== null &&
-		textTrigger !== "";
-	if (Array.isArray(v)) {
-		return v.includes(textTrigger) && basic;
-	}
-	return v === textTrigger && basic;
-}
-
 let valid: boolean = $state(false);
-let showTextField: boolean = $state(false);
-let highlight = $state(false);
-$effect(() => {
-	highlight = !valid && required === true;
-});
-$effect(() => {
-	showTextField = checkShowTextfield(value);
-});
+let showTextField: boolean = $derived.by(
+	// functionality for showing the textfield when the trigger is selected
+	() => {
+		let basic =
+			value !== undefined &&
+			value !== null &&
+			value !== "" &&
+			textTrigger !== undefined &&
+			textTrigger !== null &&
+			textTrigger !== "";
+		if (!basic) {
+			return false;
+		}
+		if (Array.isArray(value)) {
+			return value.includes(textTrigger);
+		}
+		return value === textTrigger;
+	},
+);
+let highlight = $derived(!valid && required === true);
 </script>
 
 {#if label}

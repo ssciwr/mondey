@@ -1,7 +1,7 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { submitMilestoneImage } from "$lib/client/services.gen";
+import { submitMilestoneImage } from "$lib/client/sdk.gen";
 import CancelButton from "$lib/components/Admin/CancelButton.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";

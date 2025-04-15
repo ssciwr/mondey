@@ -8,7 +8,7 @@ import {
 import {
 	updateMilestoneGroupAdmin,
 	uploadMilestoneGroupImage,
-} from "$lib/client/services.gen";
+} from "$lib/client/sdk.gen";
 import type {
 	MilestoneGroupAdmin,
 	MilestoneGroupText,

@@ -106,6 +106,7 @@ export const translationIds = {
 		userQuestions: "Fragen über Beobachter",
 		childQuestions: "Fragen über Kind",
 		question: "Frage",
+		questions: "Fragen",
 		selectOptions: "Optionen",
 		actions: "Aktionen",
 		selectPlaceholder: "Erstens,Zweitens,Drittens;",
@@ -143,7 +144,7 @@ export const translationIds = {
 		selectColumns: "Spalten auswählen",
 		milestone: "Meilenstein",
 		error: "Ein Fehler ist aufgetreten. Bitte versuchen sie es später erneut.",
-		milestoneId: "Meilenstein-ID",
+		milestones: "Meilensteine",
 		groupbyOptional: "Gruppieren nach (optional)",
 	},
 	registration: {
