@@ -2108,20 +2108,6 @@ export type GetResearchDataResponses = {
     200: unknown;
 };
 
-export type GetResearchDataCsvData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/research/data/csv';
-};
-
-export type GetResearchDataCsvResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
-
 export type GetResearchNamesData = {
     body?: never;
     path?: never;

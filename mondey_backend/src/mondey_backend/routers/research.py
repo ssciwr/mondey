@@ -34,31 +34,6 @@ def create_router() -> APIRouter:
         )
         return Response(df.to_json(orient="records"), media_type="application/json")
 
-    @router.get("/data/csv")
-    async def get_research_data_csv(
-        session: SessionDep,
-        user_session: UserAsyncSessionDep,
-        current_active_researcher: CurrentActiveResearchDep,
-    ):
-        if current_active_researcher.full_data_access:
-            research_group_id_filter = None
-        else:
-            research_group_id_filter = current_active_researcher.research_group_id
-
-        df = await extract_research_data(
-            session, user_session, research_group_id_filter
-        )
-
-        # Create a response with the CSV data
-        csv_data = df.to_csv(index=False)
-
-        response = Response(content=csv_data, media_type="text/csv")
-        response.headers["Content-Disposition"] = (
-            "attachment; filename=research_data.csv"
-        )
-
-        return response
-
     @router.get("/names/", response_model=dict[str, dict[int, str]])
     async def get_research_names(session: SessionDep):
         return {

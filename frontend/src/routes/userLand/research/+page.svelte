@@ -1,14 +1,12 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { getResearchDataCsv } from "$lib/client";
 import PlotLines from "$lib/components/DataDisplay/PlotLines.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { type PlotData } from "$lib/util";
 import { download, generateCsv, mkConfig } from "export-to-csv";
 import {
 	Button,
-	Card,
 	Label,
 	MultiSelect,
 	type SelectOptionType,
@@ -30,7 +28,6 @@ let worker: Worker;
 let is_loading = true;
 let show_spinner: boolean = $state(true);
 let show_spinner_timeout_id: number;
-let downloading_all: boolean = $state(false);
 
 // Data states (use raw state for performance as these are never mutated, only reassigned)
 let json_data = $state.raw([] as any[]);
@@ -124,9 +121,9 @@ $effect(() => {
 	start_spinner();
 });
 
-function downloadCurrentDataAsCSV() {
+function downloadCSV() {
 	if (!json_data || json_data.length === 0) {
-		console.log("downloadCurrentDataAsCSV clicked but no data to download");
+		console.log("downloadCSV clicked but no data to download");
 		return;
 	}
 	const csvConfig = mkConfig({
@@ -138,34 +135,6 @@ function downloadCurrentDataAsCSV() {
 	download(csvConfig)(csv);
 }
 
-async function downloadAllResearchData() {
-	try {
-		is_loading = true;
-		downloading_all = true;
-
-		const response = await getResearchDataCsv();
-
-		const blob = new Blob([response.data], { type: "text/csv" });
-
-		const url = window.URL.createObjectURL(blob);
-		const a = document.createElement("a");
-		a.href = url;
-		a.download = `mondey-research-all-${new Date().toISOString().slice(0, 10)}.csv`;
-		document.body.appendChild(a);
-		a.click();
-
-		// Clean up
-		window.URL.revokeObjectURL(url);
-		document.body.removeChild(a);
-	} catch (error) {
-		console.error("Error downloading research data:", error);
-		alert(i18n.tr.researcher.error || "Error downloading data");
-	} finally {
-		downloading_all = false;
-		is_loading = false;
-	}
-}
-
 let headers = $derived.by(() => {
 	if (!json_data || json_data.length === 0) {
 		return [];
@@ -175,28 +144,21 @@ let headers = $derived.by(() => {
 </script>
 
 <div class="w-full grow">
-    <Card style="display: block">
-        <h1>{i18n.tr.researcher.researchData}</h1>
-        <Button class="btn-secondary" disabled={downloading_all}
-                 on:click={downloadAllResearchData}
-                 data-testid="downloadAllResearchData">{i18n.tr.researcher.downloadAll}</Button>
-        <span class="tertiary">{milestone_ids.length} {i18n.tr.researcher.milestones} </span>
-    </Card>
-<div class="flex flex-col items-stretch m-2">
-    <div class="m-2 grow">
-        <Label> {i18n.tr.researcher.milestones}
-            <MultiSelect bind:value={selected_milestones} class="mt-2" items={milestone_ids}
-                         placeholder={i18n.tr.researcher.milestones}
-                         data-testid="selectMilestone"/>
-        </Label>
+    <div class="flex flex-col items-stretch m-2">
+        <div class="m-2 grow">
+            <Label> {i18n.tr.researcher.milestones}
+                <MultiSelect bind:value={selected_milestones} class="mt-2" items={milestone_ids}
+                             placeholder={i18n.tr.researcher.milestones}
+                             data-testid="selectMilestone"/>
+            </Label>
+        </div>
+        <div class="m-2 grow">
+            <Label> {i18n.tr.researcher.groupbyOptional}
+                <MultiSelect bind:value={selected_columns} class="mt-2" items={columns} placeholder={i18n.tr.researcher.groupbyOptional} data-testid="selectGroupby"/>
+            </Label>
+        </div>
+        <Button class="mt-9 mb-3" onclick={downloadCSV} data-testid="researchDownloadCSV">{i18n.tr.researcher.downloadAsCsv}</Button>
     </div>
-    <div class="m-2 grow">
-        <Label> {i18n.tr.researcher.groupbyOptional}
-            <MultiSelect bind:value={selected_columns} class="mt-2" items={columns} placeholder={i18n.tr.researcher.groupbyOptional} data-testid="selectGroupby"/>
-        </Label>
-    </div>
-    <Button class="mt-9 mb-3" onclick={downloadCurrentDataAsCSV} data-testid="researchDownloadCSV">{i18n.tr.researcher.downloadAsCsv}</Button>
-</div>
     <!-- Loading indicator -->
     {#if show_spinner}
         <div class="flex justify-center items-center h-32">
