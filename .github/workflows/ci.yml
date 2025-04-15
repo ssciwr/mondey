@@ -99,7 +99,7 @@ jobs:
         working-directory: ./e2e
         run: |
           mkdir -p logs
-          RELOAD=false SMTP_HOST="" E2E_TEST_SQL_FILES="db/importBaseMetadata.sql;db/importMilestoneAnswers.sql" mondey-backend
+          RELOAD=false SMTP_HOST="" E2E_TEST_SQL_FILES="db/importBaseMetadata.sql;db/importMilestoneAnswers.sql" mondey-backend &
 
       # Setup Node.js and pnpm for frontend
       - uses: pnpm/action-setup@v4
