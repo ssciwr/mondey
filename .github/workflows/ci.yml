@@ -95,11 +95,11 @@ jobs:
         run: pip install -e .
 
       # Start backend server
-      - name: Start backend server in directory with e2e test databases. First fill the database with our SQL.
+      - name: Start backend server in directory with e2e test database and SQL.
         working-directory: ./e2e
         run: |
           mkdir -p logs
-          sqlite3 db/mondey.db < db/importBaseMetadata.sql && sqlite3 db/mondey.db < db/importMilestoneAnswers.sql && sqlite3 db/mondey.db < db/importDerivedMilestoneScores.sql && SMTP_HOST="" RELOAD=false mondey-backend > logs/backend.log 2>&1 &
+          RELOAD=false SMTP_HOST="" E2E_TEST_SQL_FILES="db/importBaseMetadata.sql;db/importMilestoneAnswers.sql" mondey-backend
 
       # Setup Node.js and pnpm for frontend
       - uses: pnpm/action-setup@v4

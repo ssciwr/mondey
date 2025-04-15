@@ -5,6 +5,7 @@ import logging
 import pathlib
 from contextlib import asynccontextmanager
 
+import sqlparse
 import uvicorn
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -12,8 +13,10 @@ from fastapi import FastAPI
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi_injectable.decorator import injectable
+from sqlalchemy import text
 
 from .databases.mondey import create_mondey_db_and_tables
+from .databases.mondey import engine
 from .databases.users import create_user_db_and_tables
 from .routers import admin
 from .routers import auth
@@ -28,14 +31,29 @@ from .statistics import async_update_stats
 async def scheduled_update_stats():
     update_stats_func = injectable(async_update_stats)
     await update_stats_func()
-    # Based on async dependency injection here: https://github.com/JasperSui/fastapi-injectable/blob/main/test/test_injectable.py
+
+
+async def import_e2e_test_sql_files():
+    with engine.connect() as con:
+        for sql_file in app_settings.E2E_TEST_SQL_FILES.split(";"):
+            logging.warning(f"Importing e2e test data from {sql_file}")
+            with open(f"{sql_file}") as file:
+                queries = sqlparse.split(
+                    sqlparse.format(file.read(), strip_comments=True)
+                )
+                for query in queries:
+                    con.execute(text(query))
+                con.commit()
+    logging.warning("Updating statistics after importing e2e test data")
+    await scheduled_update_stats()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_mondey_db_and_tables()
     await create_user_db_and_tables()
-    # For manual invocation: await scheduled_update_stats()
+    if app_settings.E2E_TEST_SQL_FILES:
+        await import_e2e_test_sql_files()
     scheduler = AsyncIOScheduler()
     scheduler.add_job(
         lambda: asyncio.run(
