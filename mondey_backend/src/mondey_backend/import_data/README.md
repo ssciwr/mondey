@@ -46,3 +46,17 @@ The correction scripts change the (valid) psychology format data into a more sen
 (where compatibility is needed), and often a more consolidated, numerical "flattened" form. For example, if a question
 had free text answers with two values like "Pregnancy Duration + Incubator period": "34+2", "38", "40", "32,3", then the correction changes
 this into two separate questions.
+
+## Add additional data
+The add additional data version only appends data to the existing database, which is assumed to be form a previous import.
+It does not add new milestones or new child questions; it only adds:
+(a) The milestone answers
+(b) The question answers
+
+And then it runs the same corrections process as we have with the original data.
+
+Problem: The imported data for question answers will include the non-flattened multi-layer question answers, like
+relation to parent or younger siblings - young siblings ages, etc.
+
+So they won't line up neatly with the question IDs etc. Probably we could go ahead and add them as answers still,
+but then overwrite their question IDs with a align_additional_data_to_current_answers.py.
