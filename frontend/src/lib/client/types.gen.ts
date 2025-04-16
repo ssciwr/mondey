@@ -89,7 +89,6 @@ export type ChildQuestionPublic = {
     additional_option?: string;
     required?: boolean;
     name?: string;
-    visibility?: boolean;
 };
 
 export type ChildQuestionText = {
@@ -294,7 +293,6 @@ export type UserQuestionPublic = {
     additional_option?: string;
     required?: boolean;
     name?: string;
-    visibility?: boolean;
 };
 
 export type UserQuestionText = {
