@@ -4,13 +4,18 @@ from sqlmodel import Session
 from sqlmodel import SQLModel
 from sqlmodel import create_engine
 from sqlmodel import select
+from sqlmodel.pool import StaticPool
 
 from ..models.milestones import Language
 from ..settings import app_settings
 
+engine_path = (
+    f"/{app_settings.DATABASE_PATH}/mondey.db" if app_settings.DATABASE_PATH else ""
+)
 engine = create_engine(
-    f"sqlite:///{app_settings.DATABASE_PATH}/mondey.db",
+    f"sqlite://{engine_path}",
     connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
 )
 
 

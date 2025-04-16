@@ -9,14 +9,20 @@ from fastapi_users_db_sqlalchemy.access_token import SQLAlchemyAccessTokenDataba
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine
+from sqlmodel.pool import StaticPool
 
 from ..models.users import AccessToken
 from ..models.users import Base
 from ..models.users import User
 from ..settings import app_settings
 
+engine_path = (
+    f"/{app_settings.DATABASE_PATH}/users.db" if app_settings.DATABASE_PATH else ""
+)
 engine = create_async_engine(
-    f"sqlite+aiosqlite:///{app_settings.DATABASE_PATH}/users.db"
+    f"sqlite+aiosqlite://{engine_path}",
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
 )
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
