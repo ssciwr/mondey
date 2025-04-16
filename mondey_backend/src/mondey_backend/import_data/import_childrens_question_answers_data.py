@@ -207,7 +207,7 @@ def import_childrens_question_answers_data(
         ) or (variable_type == "DICHOTOMOUS" and input_type == "CK"):
             if debug:
                 print(
-                    "Handling Multiple Choice with optinos.. should be saved as separated text strings"
+                    "Handling Multiple Choice with options.. should be saved as separated text strings"
                 )
             # Multiple Choice Question
             print("Should just be saved.")

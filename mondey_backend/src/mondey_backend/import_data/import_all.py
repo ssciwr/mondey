@@ -7,6 +7,9 @@ from mondey_backend.import_data.import_childrens_question_answers_data import (
 from mondey_backend.import_data.import_milestones_metadata import (
     import_milestones_metadata,
 )
+from mondey_backend.import_data.postprocessing_corrections.run_postprocess_corrections import (
+    run_postprocessing_corrections,
+)
 from mondey_backend.import_data.utils import data_path
 from mondey_backend.import_data.utils import get_import_current_session
 from mondey_backend.import_data.utils import labels_path
@@ -37,6 +40,10 @@ if __name__ == "__main__":
         questions_configured_path,
         clear_existing_questions_and_answers=False,
     )
+
+    print("Running postprocessing corrections...")
+    run_postprocessing_corrections(dry_run=False)
+    print("Postprocessing complete.")
 
 """
 Todos to make this work for the second masters batch of data (obviously it'll be hard to be sure it can work with the
