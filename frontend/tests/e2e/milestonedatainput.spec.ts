@@ -12,7 +12,7 @@ test("/userLand/children/gallery - Childs Milestone % gets updated when you sele
 	const childName = `child-${crypto.randomUUID()}`;
 
 	await page.locator('h5:has-text("+ Neu")').click();
-	await expect(page.getByText("Neues Kind registrieren")).toBeVisible();
+	await expect(page.getByText("Neues Kind registrieren")).toHaveCount(2);
 	await expect(page.getByText("Name des Kindes?")).toBeVisible();
 
 	await page.locator('input[for="Name des Kindes?"]').fill(childName);
