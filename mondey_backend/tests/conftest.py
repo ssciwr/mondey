@@ -490,6 +490,38 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 },
                 visibility=True,
             ),
+            UserQuestion(
+                id=3,
+                order=3,
+                name="User Question 3 - Should not be visible",
+                options="[a,b,c,other]",
+                additional_option="other",
+                component="select",
+                text={
+                    "de": UserQuestionText(
+                        user_question_id=3,
+                        lang_id="de",
+                        options="[x,y,z]",
+                        question="Wo sonst 3?",
+                        options_json="",
+                    ),
+                    "en": UserQuestionText(
+                        user_question_id=3,
+                        lang_id="en",
+                        options="[1,2,3]",
+                        question="Where else 3?",
+                        options_json="",
+                    ),
+                    "fr": UserQuestionText(
+                        user_question_id=3,
+                        lang_id="fr",
+                        options="[1,2,3]",
+                        question="french words 3",
+                        options_json="",
+                    ),
+                },
+                visibility=False,
+            ),
         ]
         for user_question in user_questions:
             session.add(user_question)
@@ -654,73 +686,117 @@ def statistics_session(session):
     yield session
 
 
+visible_questions = [
+    {
+        "id": 1,
+        "name": "User Question 1",
+        "order": 1,
+        "component": "select",
+        "options": "[a,b,c,other]",
+        "additional_option": "other",
+        "required": False,
+        "visibility": True,
+        "type": "text",
+        "text": {
+            "de": {
+                "user_question_id": 1,
+                "lang_id": "de",
+                "options": "[x,y,z]",
+                "options_json": "",
+                "question": "Wo sonst?",
+            },
+            "en": {
+                "user_question_id": 1,
+                "lang_id": "en",
+                "options": "[1,2,3]",
+                "question": "Where else?",
+                "options_json": "",
+            },
+            "fr": {
+                "user_question_id": 1,
+                "lang_id": "fr",
+                "options": "[1,2,3]",
+                "question": "french words",
+                "options_json": "",
+            },
+        },
+    },
+    {
+        "id": 2,
+        "name": "User Question 2",
+        "order": 2,
+        "component": "textarea",
+        "options": "[a2,b2,c2,other]",
+        "additional_option": "other",
+        "required": False,
+        "visibility": True,
+        "type": "text",
+        "text": {
+            "de": {
+                "user_question_id": 2,
+                "lang_id": "de",
+                "options": "[x2,y2,z2]",
+                "options_json": "",
+                "question": "Was noch?",
+            },
+            "en": {
+                "user_question_id": 2,
+                "lang_id": "en",
+                "options": "[12,22,32]",
+                "question": "What else?",
+                "options_json": "",
+            },
+            "fr": {
+                "user_question_id": 2,
+                "lang_id": "fr",
+                "options": "[12,22,32]",
+                "question": "french words",
+                "options_json": "",
+            },
+        },
+    },
+]
+
+
 @pytest.fixture
 def user_questions():
+    return visible_questions
+
+
+@pytest.fixture
+def user_questions_with_invisible_question():
     return [
+        *visible_questions,
         {
-            "id": 1,
-            "name": "User Question 1",
-            "order": 1,
+            "id": 3,
+            "name": "User Question 3 - Should not be visible",
+            "order": 3,
             "component": "select",
             "options": "[a,b,c,other]",
             "additional_option": "other",
             "required": False,
-            "visibility": True,
+            "visibility": False,
             "type": "text",
             "text": {
                 "de": {
-                    "user_question_id": 1,
+                    "user_question_id": 3,
                     "lang_id": "de",
                     "options": "[x,y,z]",
                     "options_json": "",
-                    "question": "Wo sonst?",
+                    "question": "Wo sonst 3?",
                 },
                 "en": {
-                    "user_question_id": 1,
+                    "user_question_id": 3,
                     "lang_id": "en",
                     "options": "[1,2,3]",
-                    "question": "Where else?",
+                    "question": "Where else 3?",
                     "options_json": "",
                 },
                 "fr": {
-                    "user_question_id": 1,
+                    "user_question_id": 3,
                     "lang_id": "fr",
                     "options": "[1,2,3]",
-                    "question": "french words",
-                    "options_json": "",
-                },
-            },
-        },
-        {
-            "id": 2,
-            "name": "User Question 2",
-            "order": 2,
-            "component": "textarea",
-            "options": "[a2,b2,c2,other]",
-            "additional_option": "other",
-            "required": False,
-            "visibility": True,
-            "type": "text",
-            "text": {
-                "de": {
-                    "user_question_id": 2,
-                    "lang_id": "de",
-                    "options": "[x2,y2,z2]",
-                    "options_json": "",
-                    "question": "Was noch?",
-                },
-                "en": {
-                    "user_question_id": 2,
-                    "lang_id": "en",
-                    "options": "[12,22,32]",
-                    "question": "What else?",
-                    "options_json": "",
-                },
-                "fr": {
-                    "user_question_id": 2,
-                    "lang_id": "fr",
-                    "options": "[12,22,32]",
-                    "question": "french words",
+                    "question": "french words 3",
                     "options_json": "",
                 },
             },

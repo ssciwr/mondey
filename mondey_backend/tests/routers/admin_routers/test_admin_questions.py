@@ -7,19 +7,42 @@ from mondey_backend.models.questions import UserAnswer
 from mondey_backend.models.questions import UserQuestion
 
 
-def test_get_user_question_admin_works(admin_client: TestClient, user_questions):
+def test_get_user_question_admin_works(
+    admin_client: TestClient, user_questions_with_invisible_question
+):
     response = admin_client.get("/admin/user-questions/")
     assert response.status_code == 200
 
-    assert [element["order"] for element in response.json()] == [1, 2]
-    assert response.json() == user_questions
+    assert [element["order"] for element in response.json()] == [1, 2, 3]
+    assert response.json() == user_questions_with_invisible_question
+
+
+def test_visbility_hidden_questions_only_included_in_admin_endpoint(
+    admin_client: TestClient, user_questions, user_questions_with_invisible_question
+):
+    response = admin_client.get("/admin/user-questions/")
+    assert response.status_code == 200
+
+    assert [element["order"] for element in response.json()] == [1, 2, 3]
+    assert len(user_questions_with_invisible_question) == 3
+    assert response.json() == user_questions_with_invisible_question
+
+    print("Resp JSON was: ")
+    print(response.json())
+
+    response = admin_client.get("/user-questions/")
+    assert response.status_code == 200
+
+    assert len(response.json()) == 2
+    assert response.json() == user_questions  # visible ones only
+    # Question 3 is not visible.
 
 
 def test_create_user_question_works(admin_client: TestClient):
     response = admin_client.post("/admin/user-questions/")
     assert response.status_code == 200
     assert response.json() == {
-        "id": 3,
+        "id": 4,
         "name": "",
         "order": 0,
         "component": "select",
@@ -28,21 +51,21 @@ def test_create_user_question_works(admin_client: TestClient):
         "text": {
             "de": {
                 "options_json": "",
-                "user_question_id": 3,
+                "user_question_id": 4,
                 "options": "",
                 "lang_id": "de",
                 "question": "",
             },
             "en": {
                 "options_json": "",
-                "user_question_id": 3,
+                "user_question_id": 4,
                 "options": "",
                 "lang_id": "en",
                 "question": "",
             },
             "fr": {
                 "options_json": "",
-                "user_question_id": 3,
+                "user_question_id": 4,
                 "options": "",
                 "lang_id": "fr",
                 "question": "",
@@ -113,13 +136,13 @@ def test_delete_user_question_deletes(session, admin_client: TestClient):
     assert response_json["ok"]
 
     user_questions = session.exec(select(UserQuestion)).all()
-    assert len(user_questions) == 1
+    assert len(user_questions) == 2
     assert user_questions[0].id == 2
 
 
 def test_delete_user_question_works(session, admin_client: TestClient):
     user_questions = session.exec(select(UserQuestion)).all()
-    assert len(user_questions) == 2
+    assert len(user_questions) == 3
 
     user_answers = session.exec(select(UserAnswer)).all()
     assert len(user_answers) == 2
@@ -132,7 +155,7 @@ def test_delete_user_question_works(session, admin_client: TestClient):
     assert response_json["children"]["affectedQuestionAnswers"] == 1
 
     user_questions = session.exec(select(UserQuestion)).all()
-    assert len(user_questions) == 2
+    assert len(user_questions) == 3
 
     response = admin_client.delete(
         "/admin/user-questions/1?dry_run=false"
@@ -142,7 +165,7 @@ def test_delete_user_question_works(session, admin_client: TestClient):
     assert response_json["ok"]
 
     user_questions = session.exec(select(UserQuestion)).all()
-    assert len(user_questions) == 1
+    assert len(user_questions) == 2
     assert user_questions[0].id == 2
 
     user_answers = session.exec(select(UserAnswer)).all()
