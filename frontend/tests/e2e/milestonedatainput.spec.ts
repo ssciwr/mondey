@@ -1,19 +1,21 @@
 import { expect, test } from "@playwright/test";
-import { login, modalLoad } from "./utils";
+import { login } from "./utils";
 
-test("/userLand/children/gallery - Childs Milestone % gets updated when you select it to have been acheived", async ({
+test("/userLand/children/gallery - Childs Milestone % gets updated when you select it to have been achieved", async ({
 	page,
 	isMobile,
 }) => {
 	await login(page, "admin@mondey.de", "admin");
-	await page.waitForLoadState("networkidle");
-	// should already have waited for network idle...
 
 	// Create a new child so existing milestone data isn't affected
-	await page.locator('h5:has-text("+ Neu")').click();
-	await modalLoad(page);
+	// and use a unique name for each child to allow tests to run in parallel without affecting each other
+	const childName = `child-${crypto.randomUUID()}`;
 
-	await page.locator('input[for="Name des Kindes?"]').fill("Test Child 2");
+	await page.locator('h5:has-text("+ Neu")').click();
+	await expect(page.getByText("Neues Kind registrieren")).toBeVisible();
+	await expect(page.getByText("Name des Kindes?")).toBeVisible();
+
+	await page.locator('input[for="Name des Kindes?"]').fill(childName);
 	await page
 		.locator('input[for="Geburtsjahr des Kindes?"]')
 		.fill((new Date().getFullYear() - 1).toString());
@@ -25,19 +27,19 @@ test("/userLand/children/gallery - Childs Milestone % gets updated when you sele
 	await finishButton.waitFor({ state: "visible" });
 	await finishButton.click();
 
-	// Wait for navigation to complete
-	await page.waitForTimeout(1000);
+	// Wait until child page has loaded
+	await expect(
+		page.getByText("Wählen sie ein Kind zur Beobachtung aus"),
+	).toBeVisible();
 
 	// Click on the child's name
-	await page.getByText("Test Child 2").last().click(); // really vital that we don't put "first" here
-	// or we could just get an outdated child..
+	await page.getByText(childName).click();
 
 	// Navigate to milestones
 	await page.getByRole("button", { name: "Weiter zu Meilensteinen" }).click();
 
 	// Select milestone group "Reading skills"
 	await page.locator('h5:has-text("Textlesen")').click();
-	await page.waitForTimeout(500);
 
 	// Select specific milestone "Recognizes Digits"
 	await page.locator('h5:has-text("Formen erkennen")').click();
@@ -55,11 +57,9 @@ test("/userLand/children/gallery - Childs Milestone % gets updated when you sele
 	await page.getByRole("button", { name: "Weitgehend" }).click();
 
 	// Part 2: We now check that the actual score was updated from 0 to 25% for the milestone group:
-	await page.goto("/userLand/children/gallery");
-	await page.waitForTimeout(1000);
+	await page.goto("/userLand/children/gallery", { waitUntil: "networkidle" });
 
-	// this line must be the same as the above or we will get a different child...
-	await page.getByText("Test Child 2").last().click();
+	await page.getByText(childName).click();
 
 	await page.getByRole("button", { name: "Weiter zu Meilensteinen" }).click();
 

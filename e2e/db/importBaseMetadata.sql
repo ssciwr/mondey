@@ -135,7 +135,8 @@ INSERT INTO milestonetext (milestone_id, lang_id, title, desc, obs, help)
 VALUES (1009, 'fr', 'Création de motifs de danse', 'L''enfant peut créer des motifs de danse simples', 'Observez si l''enfant crée ses propres séquences de danse', 'Encouragez la danse libre et observez si des motifs émergent');
 
 -- Create a child for user ID 1
-INSERT INTO child VALUES('userChild1',2024,12,'#402bde',1,1,0);
+INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)
+VALUES(1,1,'userChild1',2024,12,0,'#402bde');
 
 -- Create a child born 6 months ago for user ID 3
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)

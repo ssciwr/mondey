@@ -6,15 +6,19 @@ ratehr than use the UI to manually add the data etc.
  */
 
 import { expect, test } from "@playwright/test";
-import { login, modalLoad } from "./utils";
+import { login } from "./utils";
 
 test("/userLand/children/gallery - The gallery of children includes feedback with the relevant milestone groups", async ({
 	page,
 }) => {
 	await login(page, "admin@mondey.de", "admin");
-	await page.waitForLoadState("networkidle");
+	await expect(
+		page.getByText("Wählen sie ein Kind zur Beobachtung aus"),
+	).toBeVisible();
 
 	await page.locator('h5:has-text("Emma Johnson")').click();
+	await expect(page.getByText("Januar 2025")).toBeVisible();
+
 	await page.locator('button:has-text("Feedback zur Entwicklung")').click();
 
 	await expect(
