@@ -76,7 +76,10 @@ export default {
 					2: "#E9715F",
 				},
 				"feedback-background": {
-					0: "#f3ddb0",
+					0: "#b17a06",
+				},
+				"feedback-border": {
+					0: "#f8c554",
 				},
 			},
 			fontSize: {

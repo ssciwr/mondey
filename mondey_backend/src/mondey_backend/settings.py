@@ -23,6 +23,7 @@ class AppSettings(BaseSettings):
     STATS_CRONTAB: str = "0 3 * * mon"
     DEEPL_API_KEY: str = ""
     MONDEY_HOST: str = "mondey.de"
+    E2E_TEST_SQL_FILES: str = ""
 
 
 app_settings = AppSettings()

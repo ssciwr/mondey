@@ -185,3 +185,6 @@ static
 /frontend/blob-report/
 /frontend/playwright/.cache/
 .aider*
+
+# generated e2e test database
+/e2e/db/mondey.db

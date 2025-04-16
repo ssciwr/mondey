@@ -1,4 +1,4 @@
-This folder contains the pre-filled backend databases to be used when running the end-to-end tests.
+This folder contains a pre-filled users database, and SQL files to fill the mondey database - to be used when running the end-to-end tests.
 
 ## users.db
 
@@ -16,6 +16,9 @@ This database contains three users:
 
 ## mondey.db
 
-This database contains
+This database is generated when running the e2e tests (and should not be committed to the git repo)
 
-- child of user with name "userChild1" born 2024/12
+## Data import SQL files
+
+- importBaseMetadata.sql: base SQL data (users, children, milestones and milestone groups)
+- importMilestoneAnswers.sql: milestone answering sessions and milestone answers (no question/answers)

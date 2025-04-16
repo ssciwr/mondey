@@ -129,8 +129,8 @@ const asAlert = false;
 		</div>
 		<!-- Mobile Navigation -->
 		<div class="z-10 fixed" style="top:0.8rem;right:1rem;">
-			<div class="btn-primary btn-icon">
-				<BarsOutline  class="cursor-pointer" onclick={toggleDrawer} />
+			<div class="btn-primary btn-icon" onclick={toggleDrawer} >
+				<BarsOutline class="cursor-pointer" />
 			</div>
 		</div>
 
@@ -204,7 +204,7 @@ const asAlert = false;
 	{@render children?.()}
 </div>
 
-<Modal bind:open={alertStore.isAlertShown} color={alertStore.isError ? 'red' : alertStore.isAwaitError ? 'yellow' : 'default'} title={alertStore.title} autoclose>
+<Modal data-testid="alert-modal" bind:open={alertStore.isAlertShown} color={alertStore.isError ? 'red' : alertStore.isAwaitError ? 'yellow' : 'default'} title={alertStore.title} autoclose>
 	<p class="text-base">{alertStore.message}</p>
 	<svelte:fragment slot="footer">
 		<button class="btn-primary" onclick={() => {

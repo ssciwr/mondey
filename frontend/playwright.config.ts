@@ -5,7 +5,7 @@ export default defineConfig({
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
-	workers: process.env.CI ? 1 : undefined,
+	workers: process.env.CI ? 4 : undefined,
 	reporter: "html",
 	use: {
 		baseURL: "http://localhost:5173",
@@ -36,8 +36,10 @@ export default defineConfig({
 		// },
 	],
 	webServer: {
-		command: "pnpm exec vite dev --port 5173",
+		command: process.env.CI
+			? "pnpm exec ws --port 5173 --directory build --spa index.html --rewrite '/api/(.*) -> http://localhost:8000/$1'"
+			: "pnpm exec vite dev --port 5173",
 		port: 5173,
-		reuseExistingServer: true,
+		reuseExistingServer: !process.env.CI,
 	},
 });
