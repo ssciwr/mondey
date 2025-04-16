@@ -45,7 +45,6 @@ class QuestionPublic(SQLModel):
     additional_option: str = ""
     required: bool = False
     name: str = ""
-    visibility: bool = False
 
 
 class UserQuestionText(QuestionTextBase, table=True):
@@ -63,7 +62,7 @@ class UserQuestion(Question, table=True):
     answers: Mapped[list[UserAnswer]] = back_populates(
         "question", cascade="all, delete-orphan"
     )
-    visibility: bool = False
+    name: str = ""
 
 
 class UserQuestionPublic(QuestionPublic):
@@ -72,7 +71,6 @@ class UserQuestionPublic(QuestionPublic):
 
 class UserQuestionAdmin(QuestionAdmin):
     text: dict[str, UserQuestionText] = {}
-    visibility: bool = False
 
 
 # child questions
@@ -93,7 +91,7 @@ class ChildQuestion(Question, table=True):
     answers: Mapped[list[ChildAnswer]] = back_populates(
         "question", cascade="all, delete-orphan"
     )
-    visibility: bool = False
+    name: str = ""
 
 
 class ChildQuestionPublic(QuestionPublic):
@@ -102,7 +100,6 @@ class ChildQuestionPublic(QuestionPublic):
 
 class ChildQuestionAdmin(QuestionAdmin):
     text: dict[str, ChildQuestionText] = {}
-    visibility: bool = False
 
 
 # Answers to user questions. Internal model and 'public' model exposed to the forntend app

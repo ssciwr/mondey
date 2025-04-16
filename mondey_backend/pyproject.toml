@@ -28,6 +28,7 @@ dependencies = [
     "fastapi-injectable",
     "deepl",
     "pandas",
+    "sqlparse",
 ]
 dynamic = ["version"]
 

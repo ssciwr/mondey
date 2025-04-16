@@ -24,9 +24,6 @@ import {
 } from "flowbite-svelte";
 
 let { setHideDrawer } = $props();
-
-let showAlert = $state(false);
-let alertMessage = $state(i18n.tr.login.alertMessageError);
 </script>
 
 <Sidebar>

@@ -17,5 +17,13 @@ export default defineConfig(({ mode }) => {
 			},
 			port: 5173,
 		},
+		preview: {
+			host: "localhost",
+			strictPort: true,
+			proxy: {
+				"/api": "http://localhost:8000",
+			},
+			port: 5173,
+		},
 	};
 });
