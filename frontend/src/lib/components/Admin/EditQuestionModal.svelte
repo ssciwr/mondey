@@ -185,7 +185,7 @@ async function saveChanges() {
 				<Label class="mb-2">{i18n.tr.admin.visibility}</Label>
 				<div class="mb-1">
 					<ButtonGroup class="w-full">
-						<Checkbox bind:checked={question.visibility}></Checkbox>
+						<Checkbox data-testid="visibility-checkbox" bind:checked={question.visibility}></Checkbox>
 					</ButtonGroup>
 				</div>
 			</div>
