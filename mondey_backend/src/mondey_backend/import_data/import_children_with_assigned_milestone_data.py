@@ -66,6 +66,8 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
     milestone_mapping = {}
     milestone_group_mapping = {}
 
+    require_confirmation_of_duplicates = True
+
     print(
         "Processing setting actual milestones data for children now.", len(milestones)
     )
@@ -154,10 +156,20 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
                 # So for now it will raise a ValueError to prevent messing up the data on import, to be safe.
                 child = existing_child
                 print(f"Using existing child with ID: {child_id}")
-                raise ValueError(
-                    "There appears to be duplicate data for a child - they already have data. "
-                    "Are you sure you want to add further milestone data, possibly duplicating answers?"
-                )
+                if require_confirmation_of_duplicates:
+                    user_input = input(
+                        "There appears to be duplicate data for a child - they already have data. Are you sure you "
+                        "want to add further milestone/child answer data, possibly duplicating answers? Respond 'yes' "
+                        "to proceed for this one child, or 'always' to allow duplicate data for all children"
+                    )
+                    if user_input in ["yes", "always"]:
+                        print("Okay, silently continuing for this child.")
+                        if user_input == "always":
+                            require_confirmation_of_duplicates = False
+                    else:
+                        raise ValueError(
+                            "Duplicate Child Information found during import"
+                        )
 
             # Create a milestone answer session for this child
             answer_session = MilestoneAnswerSession(

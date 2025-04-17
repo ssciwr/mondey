@@ -72,7 +72,3 @@ def align_additional_data_to_current_answers():
         "research data from these additional sessions in the UI - the scores will only calculate when the stats update"
         "gets ran (e.g. by running async_update_stats or using the endpoint for update-stats/{incremental_update})"
     )
-
-
-# Important todo: Double check - are we just ignoring Eltern parents ages? Labels
-# We consider FK01 & FK02 - these are childrens month and year of birth. What about the Eltern equivalents?
