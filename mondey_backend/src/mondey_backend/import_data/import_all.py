@@ -42,7 +42,7 @@ if __name__ == "__main__":
     )
 
     print("Running postprocessing corrections...")
-    run_postprocessing_corrections(dry_run=False)
+    run_postprocessing_corrections(data_path, dry_run=False)
     print("Postprocessing complete.")
 
 """

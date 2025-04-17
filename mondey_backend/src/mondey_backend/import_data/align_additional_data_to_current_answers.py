@@ -65,10 +65,14 @@ def align_additional_data_to_current_answers():
         import_current_session, additional_data_df, labels_df, questions_configured_df
     )
 
-    run_postprocessing_corrections(dry_run=False)
+    run_postprocessing_corrections(additional_data_path, dry_run=False)
 
     print(
         "Finished! All additional data added. Remember to re-run and update the stats if you want to see the updated"
         "research data from these additional sessions in the UI - the scores will only calculate when the stats update"
         "gets ran (e.g. by running async_update_stats or using the endpoint for update-stats/{incremental_update})"
     )
+
+
+# Important todo: Double check - are we just ignoring Eltern parents ages? Labels
+# We consider FK01 & FK02 - these are childrens month and year of birth. What about the Eltern equivalents?

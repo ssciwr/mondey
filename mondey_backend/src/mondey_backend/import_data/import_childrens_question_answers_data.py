@@ -325,7 +325,10 @@ def assign_answers_to_the_imported_questions(
     UserQuestion/UserAnswer), such as income/Social Economic Status, or about/to the child (ChildQuestion/ChildAnswer)
 
     """
-    questions_to_discard = []
+    questions_to_discard = [
+        "FK01",
+        "FK02",
+    ]  # Child date of month/year: Already assigned to each child.
     total_answers = 0
     missing = 0
 

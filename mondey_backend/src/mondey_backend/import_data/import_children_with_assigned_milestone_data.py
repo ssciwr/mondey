@@ -101,10 +101,6 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
                 select(Child).where(Child.id == child_id)
             ).scalar_one_or_none()
 
-            print(row["FK01"])
-            print("And month:")
-            print(row["FK02"])
-
             # Hardcoded
             birth_year_mapping = {
                 9: 2025,
