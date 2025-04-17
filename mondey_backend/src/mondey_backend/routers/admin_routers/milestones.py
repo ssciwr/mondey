@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 from fastapi import HTTPException
+from fastapi import Query
 from fastapi import UploadFile
 from sqlmodel import col
 from sqlmodel import select
@@ -20,9 +21,11 @@ from ...models.milestones import MilestoneImage
 from ...models.milestones import MilestoneText
 from ...models.milestones import SubmittedMilestoneImage
 from ...models.milestones import SubmittedMilestoneImagePublic
+from ...models.utils import DeleteResponse
 from ...models.utils import ItemOrder
 from ...statistics import async_update_stats
 from ..utils import add
+from ..utils import count_milestone_answers_for_milestone
 from ..utils import get
 from ..utils import milestone_group_image_path
 from ..utils import milestone_image_path
@@ -68,12 +71,42 @@ def create_router() -> APIRouter:
         add(session, db_milestone_group)
         return db_milestone_group
 
-    @router.delete("/milestone-groups/{milestone_group_id}")
-    def delete_milestone_group_admin(session: SessionDep, milestone_group_id: int):
+    @router.delete(
+        "/milestone-groups/{milestone_group_id}", response_model=DeleteResponse
+    )
+    def delete_milestone_group_admin(
+        session: SessionDep,
+        milestone_group_id: int,
+        dry_run: bool = Query(
+            True,
+            description="When true, shows what would be deleted without actually deleting",
+        ),
+    ):
         milestone_group = get(session, MilestoneGroup, milestone_group_id)
-        session.delete(milestone_group)
-        session.commit()
-        return {"ok": True}
+        affected_milestone_answers = 0
+        groups_milestone_ids = [
+            milestone.id
+            for milestone in milestone_group.milestones
+            if milestone.id is not None
+        ]
+
+        for milestone_id in groups_milestone_ids:
+            affected_milestone_answers += count_milestone_answers_for_milestone(
+                session, milestone_id
+            )
+
+        if not dry_run:
+            session.delete(milestone_group)
+            session.commit()
+
+        return {
+            "ok": True,
+            "dry_run": dry_run,
+            "children": {
+                "affectedMilestones": len(milestone_group.milestones),
+                "affectedAnswers": affected_milestone_answers,
+            },
+        }
 
     @router.post("/milestone-groups/order/")
     def order_milestone_groups_admin(session: SessionDep, item_orders: list[ItemOrder]):
@@ -111,12 +144,25 @@ def create_router() -> APIRouter:
         add(session, db_milestone)
         return db_milestone
 
-    @router.delete("/milestones/{milestone_id}")
-    def delete_milestone(session: SessionDep, milestone_id: int):
-        milestone = get(session, Milestone, milestone_id)
-        session.delete(milestone)
-        session.commit()
-        return {"ok": True}
+    @router.delete("/milestones/{milestone_id}", response_model=DeleteResponse)
+    def delete_milestone(
+        session: SessionDep,
+        milestone_id: int,
+        dry_run: bool = Query(
+            True,
+            description="When true, shows what would be deleted without actually deleting",
+        ),
+    ):
+        affected_answers = count_milestone_answers_for_milestone(session, milestone_id)
+        if not dry_run:
+            milestone = get(session, Milestone, milestone_id)
+            session.delete(milestone)
+            session.commit()
+        return {
+            "ok": True,
+            "dry_run": dry_run,
+            "children": {"affectedAnswers": affected_answers},
+        }
 
     @router.post("/milestones/order/")
     def order_milestones_admin(session: SessionDep, item_orders: list[ItemOrder]):

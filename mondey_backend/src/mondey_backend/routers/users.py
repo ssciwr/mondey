@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 from fastapi import HTTPException
+from fastapi import Query
 from fastapi import UploadFile
 from fastapi.responses import FileResponse
 from sqlmodel import col
+from sqlmodel import delete
 from sqlmodel import select
 
 from ..dependencies import CurrentActiveUserDep
@@ -22,12 +24,14 @@ from ..models.questions import UserAnswer
 from ..models.questions import UserAnswerPublic
 from ..models.users import UserRead
 from ..models.users import UserUpdate
+from ..models.utils import DeleteResponse
 from ..users import fastapi_users
 from .scores import compute_milestonegroup_feedback_detailed
 from .scores import compute_milestonegroup_feedback_summary
 from .utils import add
 from .utils import child_image_path
 from .utils import get
+from .utils import get_childs_answering_sessions
 from .utils import get_db_child
 from .utils import get_milestonegroups_for_answersession
 from .utils import get_or_create_current_milestone_answer_session
@@ -76,14 +80,48 @@ def create_router() -> APIRouter:
         session.commit()
         return db_child
 
-    @router.delete("/children/{child_id}")
+    @router.delete("/children/{child_id}", response_model=DeleteResponse)
     def delete_child(
-        session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
+        session: SessionDep,
+        current_active_user: CurrentActiveUserDep,
+        child_id: int,
+        dry_run: bool = Query(
+            True,
+            description="When true, shows what would be deleted without actually deleting",
+        ),
     ):
         child = get_db_child(session, current_active_user, child_id)
+        # the above guards it to only owners of the child.
+        affected_child_answers = 0
+        for answering_session in get_childs_answering_sessions(session, child_id):
+            affected_child_answers += len(answering_session.answers)
+        if dry_run:
+            return {
+                "ok": True,
+                "dry_run": dry_run,
+                "children": {"affectedAnswers": affected_child_answers},
+            }
+
+        child_image_path(child_id).unlink(missing_ok=True)
+
+        delete_milestone_statement = delete(MilestoneAnswerSession).where(
+            col(MilestoneAnswerSession.child_id) == child_id
+        )
+        session.execute(delete_milestone_statement)
+
+        delete_answers_statement = delete(ChildAnswer).where(
+            col(ChildAnswer.child_id) == child_id
+        )
+
+        session.execute(delete_answers_statement)
         session.delete(child)
         session.commit()
-        return {"ok": True}
+
+        return {
+            "ok": True,
+            "dry_run": dry_run,
+            "children": {"affectedAnswers": affected_child_answers},
+        }
 
     @router.get("/children-images/{child_id}", response_class=FileResponse)
     async def get_child_image(

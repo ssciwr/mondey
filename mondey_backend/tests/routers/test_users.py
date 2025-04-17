@@ -2,6 +2,12 @@ import datetime
 import pathlib
 
 from fastapi.testclient import TestClient
+from sqlalchemy import select
+from sqlmodel import col
+
+from mondey_backend.models.milestones import MilestoneAnswer
+from mondey_backend.models.milestones import MilestoneAnswerSession
+from mondey_backend.models.questions import ChildAnswer
 
 
 def _is_approx_now(iso_date_string: str, delta=datetime.timedelta(hours=1)) -> bool:
@@ -63,6 +69,16 @@ def test_get_child_image_no_image(user_client: TestClient):
     assert response.status_code == 404
 
 
+expected_created_child = {
+    "id": 5,
+    "name": "new child",
+    "birth_year": 2021,
+    "birth_month": 3,
+    "has_image": False,
+    "color": "#000000",
+}
+
+
 def test_create_update_and_delete_child(user_client: TestClient):
     assert len(user_client.get("/users/children/").json()) == 2
     response_create = user_client.post(
@@ -75,14 +91,7 @@ def test_create_update_and_delete_child(user_client: TestClient):
         },
     )
     assert response_create.status_code == 200
-    assert response_create.json() == {
-        "id": 5,
-        "name": "new child",
-        "birth_year": 2021,
-        "birth_month": 3,
-        "has_image": False,
-        "color": "#000000",
-    }
+    assert response_create.json() == expected_created_child
     assert len(user_client.get("/users/children/").json()) == 3
     response_update = user_client.put(
         "/users/children/",
@@ -105,9 +114,131 @@ def test_create_update_and_delete_child(user_client: TestClient):
         "color": "af4413",
     }
     assert len(user_client.get("/users/children/").json()) == 3
-    response_delete = user_client.delete("/users/children/5")
+    response_delete = user_client.delete("/users/children/5?dry_run=false")
     assert response_delete.status_code == 200
     assert len(user_client.get("/users/children/").json()) == 2
+
+
+def test_delete_dry_run_does_not_delete_child(user_client: TestClient):
+    assert len(user_client.get("/users/children/").json()) == 2
+    response_create = user_client.post(
+        "/users/children/",
+        json={
+            "name": "new child",
+            "birth_year": 2021,
+            "birth_month": 3,
+            "color": "#000000",
+        },
+    )
+    assert response_create.status_code == 200
+    assert response_create.json() == expected_created_child
+
+    assert len(user_client.get("/users/children/").json()) == 3  # will be a dry run
+    response_delete = user_client.delete("/users/children/5")
+    assert response_delete.status_code == 200
+    assert len(user_client.get("/users/children/").json()) == 3
+
+
+def test_delete_child_removes_answering_sessions(session, user_client: TestClient):
+    assert len(user_client.get("/users/children/").json()) == 2
+
+    # Count initial MilestoneAnswerSessions
+    initial_sessions_stmt = select(MilestoneAnswerSession)
+    initial_sessions_count = len(session.exec(initial_sessions_stmt).all())
+
+    response_create = user_client.post(
+        "/users/children/",
+        json={
+            "name": "new child",
+            "birth_year": 2021,
+            "birth_month": 3,
+            "color": "#000000",
+        },
+    )
+    assert response_create.status_code == 200
+    new_child_id = 5
+    assert response_create.json() == {
+        "id": new_child_id,
+        "name": "new child",
+        "birth_year": 2021,
+        "birth_month": 3,
+        "has_image": False,
+        "color": "#000000",
+    }
+
+    child_sessions_stmt = select(MilestoneAnswerSession).where(
+        col(MilestoneAnswerSession.child_id) == new_child_id
+    )
+    child_sessions = session.exec(child_sessions_stmt).all()
+    assert len(child_sessions) == 0
+
+    # Create a MilestoneAnswerSession for the new child
+    milestone_answer_session = MilestoneAnswerSession(
+        child_id=new_child_id, user_id=1, expired=False, included_in_statistics=True
+    )
+    session.add(milestone_answer_session)
+    session.flush()
+
+    # Add a MilestoneAnswer to the session
+    milestone_answer = MilestoneAnswer(
+        answer_session_id=milestone_answer_session.id,
+        milestone_id=1,
+        milestone_group_id=1,
+        answer=2,
+    )
+    session.add(milestone_answer)
+    session.flush()
+
+    child_question_answer = ChildAnswer(
+        child_id=new_child_id, question_id=1, answer="FakeAnswer"
+    )
+
+    session.add(child_question_answer)
+    session.commit()
+
+    # Verify milestone answer session was created
+    child_sessions_stmt = select(MilestoneAnswerSession).where(
+        col(MilestoneAnswerSession.child_id) == new_child_id
+    )
+    child_sessions = session.exec(child_sessions_stmt).all()
+    assert len(child_sessions) == 1
+
+    # Verify total milestone sessions increased by 1
+    after_create_sessions_stmt = select(MilestoneAnswerSession)
+    after_create_sessions_count = len(session.exec(after_create_sessions_stmt).all())
+    assert after_create_sessions_count == initial_sessions_count + 1
+
+    child_answer = select(ChildAnswer).where(col(ChildAnswer.child_id) == new_child_id)
+    child_answers = session.exec(child_answer).all()
+    assert len(child_answers) == 1
+
+    # dry run case:
+    response_delete = user_client.delete(f"/users/children/{new_child_id}")
+    assert response_delete.status_code == 200
+    assert len(user_client.get("/users/children/").json()) == 3
+
+    deleted_child_sessions = session.exec(child_sessions_stmt).all()
+    assert len(deleted_child_sessions) == 1
+
+    # Attempt to delete the child
+    response_delete = user_client.delete(
+        f"/users/children/{new_child_id}?dry_run=false"
+    )
+    assert response_delete.json()["ok"]
+    assert len(user_client.get("/users/children/").json()) == 2
+
+    # Check that milestone answer sessions for this child have been deleted now
+    deleted_child_sessions = session.exec(child_sessions_stmt).all()
+    assert len(deleted_child_sessions) == 0
+
+    # Check that child answers were also deleted:
+    child_answers = session.exec(child_answer).all()
+    assert len(child_answers) == 0
+
+    # Verify total milestone sessions decreased by 1
+    after_delete_sessions_stmt = select(MilestoneAnswerSession)
+    after_delete_sessions_count = len(session.exec(after_delete_sessions_stmt).all())
+    assert after_delete_sessions_count == initial_sessions_count
 
 
 def test_upload_child_image(

@@ -72,6 +72,7 @@ export type ChildQuestionAdmin = {
     additional_option?: string;
     required?: boolean;
     name?: string;
+    visibility?: boolean;
     id: number;
     text?: {
         [key: string]: ChildQuestionText;
@@ -96,6 +97,18 @@ export type ChildQuestionText = {
     options?: string;
     child_question_id?: number | null;
     lang_id?: string | null;
+};
+
+export type DeleteResponse = {
+    ok: boolean;
+    dry_run: boolean;
+    children: {
+        [key: string]: number;
+    };
+    /**
+     * Error message when present
+     */
+    error?: string | null;
 };
 
 export type ErrorModel = {
@@ -263,6 +276,7 @@ export type UserQuestionAdmin = {
     additional_option?: string;
     required?: boolean;
     name?: string;
+    visibility?: boolean;
     id: number;
     text?: {
         [key: string]: UserQuestionText;
@@ -630,7 +644,12 @@ export type DeleteMilestoneGroupAdminData = {
     path: {
         milestone_group_id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * When true, shows what would be deleted without actually deleting
+         */
+        dry_run?: boolean;
+    };
     url: '/admin/milestone-groups/{milestone_group_id}';
 };
 
@@ -647,8 +666,10 @@ export type DeleteMilestoneGroupAdminResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: DeleteResponse;
 };
+
+export type DeleteMilestoneGroupAdminResponse = DeleteMilestoneGroupAdminResponses[keyof DeleteMilestoneGroupAdminResponses];
 
 export type OrderMilestoneGroupsAdminData = {
     body: Array<ItemOrder>;
@@ -755,7 +776,12 @@ export type DeleteMilestoneData = {
     path: {
         milestone_id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * When true, shows what would be deleted without actually deleting
+         */
+        dry_run?: boolean;
+    };
     url: '/admin/milestones/{milestone_id}';
 };
 
@@ -772,8 +798,10 @@ export type DeleteMilestoneResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: DeleteResponse;
 };
+
+export type DeleteMilestoneResponse = DeleteMilestoneResponses[keyof DeleteMilestoneResponses];
 
 export type OrderMilestonesAdminData = {
     body: Array<ItemOrder>;
@@ -1032,7 +1060,12 @@ export type DeleteUserQuestionData = {
     path: {
         user_question_id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * When true, shows what would be deleted without actually deleting
+         */
+        dry_run?: boolean;
+    };
     url: '/admin/user-questions/{user_question_id}';
 };
 
@@ -1049,8 +1082,10 @@ export type DeleteUserQuestionResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: DeleteResponse;
 };
+
+export type DeleteUserQuestionResponse = DeleteUserQuestionResponses[keyof DeleteUserQuestionResponses];
 
 export type OrderUserQuestionsAdminData = {
     body: Array<ItemOrder>;
@@ -1137,7 +1172,12 @@ export type DeleteChildQuestionData = {
     path: {
         child_question_id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * When true, shows what would be deleted without actually deleting
+         */
+        dry_run?: boolean;
+    };
     url: '/admin/child-questions/{child_question_id}';
 };
 
@@ -1154,8 +1194,10 @@ export type DeleteChildQuestionResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: DeleteResponse;
 };
+
+export type DeleteChildQuestionResponse = DeleteChildQuestionResponses[keyof DeleteChildQuestionResponses];
 
 export type OrderChildQuestionsAdminData = {
     body: Array<ItemOrder>;
@@ -1512,7 +1554,12 @@ export type DeleteChildData = {
     path: {
         child_id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * When true, shows what would be deleted without actually deleting
+         */
+        dry_run?: boolean;
+    };
     url: '/users/children/{child_id}';
 };
 
@@ -1529,8 +1576,10 @@ export type DeleteChildResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: DeleteResponse;
 };
+
+export type DeleteChildResponse = DeleteChildResponses[keyof DeleteChildResponses];
 
 export type GetChildData = {
     body?: never;

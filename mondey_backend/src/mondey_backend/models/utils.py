@@ -13,6 +13,13 @@ class ItemOrder(BaseModel):
     order: int
 
 
+class DeleteResponse(BaseModel):
+    ok: bool
+    dry_run: bool
+    children: dict[str, int]
+    error: str | None = Field(default=None, description="Error message when present")
+
+
 def back_populates(name: str, **kwargs):
     # Workaround for "please state the generic argument using an annotation" sqlalchemy error
     # https://github.com/fastapi/sqlmodel/discussions/771#discussioncomment-10326074

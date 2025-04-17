@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter
+from fastapi import Query
 from sqlmodel import col
 from sqlmodel import select
 
@@ -12,6 +13,7 @@ from ...models.questions import ChildQuestionText
 from ...models.questions import UserQuestion
 from ...models.questions import UserQuestionAdmin
 from ...models.questions import UserQuestionText
+from ...models.utils import DeleteResponse
 from ...models.utils import ItemOrder
 from ..utils import add
 from ..utils import get
@@ -54,19 +56,33 @@ def create_router() -> APIRouter:
         add(session, db_user_question)
         return db_user_question
 
-    @router.delete("/user-questions/{user_question_id}")
-    def delete_user_question(session: SessionDep, user_question_id: int):
+    @router.delete("/user-questions/{user_question_id}", response_model=DeleteResponse)
+    def delete_user_question(
+        session: SessionDep,
+        user_question_id: int,
+        dry_run: bool = Query(
+            True,
+            description="When true, shows what would be deleted without actually deleting",
+        ),
+    ):
         question = get(session, UserQuestion, user_question_id)
-        session.delete(question)
-        session.commit()
-        return {"ok": True}
+        affected_answers = len(question.answers)
+        if not dry_run:
+            session.delete(question)
+            session.commit()
+
+        return {
+            "ok": True,
+            "dry_run": dry_run,
+            "children": {"affectedQuestionAnswers": affected_answers},
+        }
 
     @router.post("/user-questions/order/")
     def order_user_questions_admin(session: SessionDep, item_orders: list[ItemOrder]):
         update_item_orders(session, UserQuestion, item_orders)
         return {"ok": True}
 
-    # Child question CRUD endpoints
+    # Child question CRUD endpoints, we include visible or invisible ones in this one...
     @router.get("/child-questions/", response_model=list[ChildQuestionAdmin])
     def get_child_questions_admin(session: SessionDep):
         user_questions = session.exec(
@@ -101,12 +117,27 @@ def create_router() -> APIRouter:
         add(session, db_child_question)
         return db_child_question
 
-    @router.delete("/child-questions/{child_question_id}")
-    def delete_child_question(session: SessionDep, child_question_id: int):
+    @router.delete(
+        "/child-questions/{child_question_id}", response_model=DeleteResponse
+    )
+    def delete_child_question(
+        session: SessionDep,
+        child_question_id: int,
+        dry_run: bool = Query(
+            True,
+            description="When true, shows what would be deleted without actually deleting",
+        ),
+    ):
         question = get(session, ChildQuestion, child_question_id)
-        session.delete(question)
-        session.commit()
-        return {"ok": True}
+        affected_answers = len(question.answers)
+        if not dry_run:
+            session.delete(question)
+            session.commit()
+        return {
+            "ok": True,
+            "dry_run": dry_run,
+            "children": {"affectedQuestionAnswers": affected_answers},
+        }
 
     @router.post("/child-questions/order/")
     def order_child_questions_admin(session: SessionDep, item_orders: list[ItemOrder]):

@@ -51,7 +51,7 @@ class MilestoneGroup(SQLModel, table=True):
     order: int = 0
     text: Mapped[dict[str, MilestoneGroupText]] = dict_relationship(key="lang_id")
     milestones: Mapped[list[Milestone]] = back_populates(
-        "group", order_by="asc(Milestone.order)"
+        "group", order_by="asc(Milestone.order)", cascade="all, delete-orphan"
     )
 
 
@@ -101,6 +101,9 @@ class Milestone(SQLModel, table=True):
     text: Mapped[dict[str, MilestoneText]] = dict_relationship(key="lang_id")
     images: Mapped[list[MilestoneImage]] = back_populates("milestone")
     name: str = ""
+    answers: Mapped[list[MilestoneAnswer]] = back_populates(
+        "milestone", cascade="all, delete-orphan"
+    )
 
 
 class MilestonePublic(SQLModel):
@@ -161,11 +164,12 @@ class MilestoneAnswer(SQLModel, table=True):
     )
     milestone_group_id: int = Field(default=None, foreign_key="milestonegroup.id")
     answer: int  # ranges from 0-3, where 0 is noch gar nichts and 3 is zuverlaessig, or -1 if not answered.
+    milestone: Milestone = back_populates("answers")
 
 
 class MilestoneAnswerSession(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    child_id: int = Field(foreign_key="child.id")
+    child_id: int = Field(foreign_key="child.id", ondelete="CASCADE")
     user_id: int
     created_at: datetime.datetime = Field(
         sa_column_kwargs={
