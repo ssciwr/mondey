@@ -51,9 +51,9 @@ def test_research_names(research_client: TestClient):
     assert len(data["milestone"]) == 5
     assert data["milestone"]["1"] == "m1"
     assert data["milestone"]["5"] == "m5"
-    assert len(data["user_question"]) == 2
+    assert len(data["user_question"]) == 3
     assert data["user_question"]["1"] == "User Question 1"
     assert data["user_question"]["2"] == "User Question 2"
-    assert len(data["child_question"]) == 2
+    assert len(data["child_question"]) == 3
     assert data["child_question"]["1"] == "Child Question 1"
     assert data["child_question"]["2"] == "Child Question 2"
