@@ -82,36 +82,40 @@ VALUES (1007, 5, 'Sophia Taylor',
 -- Each child will have 1-2 sessions
 
 -- Child 1 (Emma) - Session 1 (recent)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1002, 1001, 3, '2025-02-04 11:42:49', true, false);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious)
+VALUES (1002, 1001, 3, '2025-02-04 11:42:49', true, false, false);
 
 -- Child 2 (Liam) - Session 1 (recent)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1003, 1002, 3, '2025-02-04 11:42:49', true, false);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious)
+VALUES (1003, 1002, 3, '2025-02-04 11:42:49', true, false, false);
+
+-- Child 2 (Liam) - Session 2 (older & contains suspicious answers)
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious)
+VALUES (1004, 1002, 3, '2025-01-04 11:42:49', true, false, true);
 
 -- Child 3 (Olivia) - Session 1 (recent)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1005, 1003, 3, '2025-02-04 11:42:49', false, false);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious)
+VALUES (1005, 1003, 3, '2025-02-04 11:42:49', false, false, false);
 
 -- Child 3 (Olivia) - Session 2 (older)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1006, 1003, 3, '2025-01-04 11:42:49', true, false);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious)
+VALUES (1006, 1003, 3, '2025-01-04 11:42:49', true, false, false);
 
 -- Child 4 (Noah) - Session 1 (recent)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1007, 1004, 4, '2025-02-04 11:42:49', true, false);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious)
+VALUES (1007, 1004, 4, '2025-02-04 11:42:49', true, false, false);
 
 -- Child 6 (Ethan) - Session 1 (recent)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1010, 1006, 5, '2025-02-04 11:42:49', false, false);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious)
+VALUES (1010, 1006, 5, '2025-02-04 11:42:49', false, false, false);
 
 -- Child 7 (Sophia) - Session 1 (recent)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1011, 1007, 5, '2025-02-04 11:42:49', false, false);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious)
+VALUES (1011, 1007, 5, '2025-02-04 11:42:49', false, false, false);
 
 -- Child 7 (Sophia) - Session 2 (older)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics)
-VALUES (1012, 1007, 5, '2025-01-04 11:42:49', true, false);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious)
+VALUES (1012, 1007, 5, '2025-01-04 11:42:49', true, false, false);
 
 -- Now add milestone answers for each session
 -- Using milestone IDs 1000-1009 from importBaseMetadata.sql
@@ -161,27 +165,26 @@ VALUES (1003, 1008, 1001, 0); -- Following Dance Instructions (not yet)
 INSERT INTO milestoneanswer (answer_session_id, milestone_id, milestone_group_id, answer)
 VALUES (1003, 1009, 1001, 0); -- Creating Dance Patterns (not yet)
 
--- Child 2 (Liam) - 8 months old - Session 2 (1004) - older session
+-- Child 2 (Liam) - 8 months old - Session 2 (1004) - older session with suspicious answers
 -- Reading Text milestones
 INSERT INTO milestoneanswer (answer_session_id, milestone_id, milestone_group_id, answer)
-VALUES (1004, 1000, 1000, 2); -- Recognizing Shapes (sometimes)
+VALUES (1004, 1000, 1000, 3); -- Recognizing Shapes (sometimes)
 
 INSERT INTO milestoneanswer (answer_session_id, milestone_id, milestone_group_id, answer)
-VALUES (1004, 1001, 1000, 1); -- Recognizing Colors (beginning)
+VALUES (1004, 1001, 1000, 3); -- Recognizing Colors (beginning)
 
 INSERT INTO milestoneanswer (answer_session_id, milestone_id, milestone_group_id, answer)
-VALUES (1004, 1002, 1000, 0); -- Recognizing Letters (not yet)
+VALUES (1004, 1002, 1000, 3); -- Recognizing Letters (not yet)
 
 -- Dancing Skills milestones
 INSERT INTO milestoneanswer (answer_session_id, milestone_id, milestone_group_id, answer)
-VALUES (1004, 1005, 1001, 2); -- Moving to Music (sometimes)
+VALUES (1004, 1005, 1001, 3); -- Moving to Music (sometimes)
 
 INSERT INTO milestoneanswer (answer_session_id, milestone_id, milestone_group_id, answer)
-VALUES (1004, 1006, 1001, 1); -- Clapping Hands (beginning)
-
+VALUES (1004, 1006, 1001, 3); -- Clapping Hands (beginning)
 
 INSERT INTO milestoneanswer (answer_session_id, milestone_id, milestone_group_id, answer)
-VALUES (1004, 1009, 1001, 0); -- Creating Dance Patterns (not yet)
+VALUES (1004, 1009, 1001, 3); -- Creating Dance Patterns (not yet)
 
 -- Child 3 (Olivia) - 12 months old - Session 1 (1005)
 -- Reading Text milestones

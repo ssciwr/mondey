@@ -174,7 +174,11 @@ def test_delete_child_removes_answering_sessions(session, user_client: TestClien
 
     # Create a MilestoneAnswerSession for the new child
     milestone_answer_session = MilestoneAnswerSession(
-        child_id=new_child_id, user_id=1, expired=False, included_in_statistics=True
+        child_id=new_child_id,
+        user_id=1,
+        expired=False,
+        included_in_statistics=True,
+        suspicious=False,
     )
     session.add(milestone_answer_session)
     session.flush()

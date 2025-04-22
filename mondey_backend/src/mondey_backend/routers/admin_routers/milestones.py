@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from fastapi import APIRouter
-from fastapi import HTTPException
 from fastapi import Query
 from fastapi import UploadFile
 from sqlmodel import col
@@ -14,6 +15,8 @@ from ...models.milestones import Milestone
 from ...models.milestones import MilestoneAdmin
 from ...models.milestones import MilestoneAgeScoreCollection
 from ...models.milestones import MilestoneAgeScoreCollectionPublic
+from ...models.milestones import MilestoneAnswerSession
+from ...models.milestones import MilestoneAnswerSessionAnalysis
 from ...models.milestones import MilestoneGroup
 from ...models.milestones import MilestoneGroupAdmin
 from ...models.milestones import MilestoneGroupText
@@ -23,6 +26,7 @@ from ...models.milestones import SubmittedMilestoneImage
 from ...models.milestones import SubmittedMilestoneImagePublic
 from ...models.utils import DeleteResponse
 from ...models.utils import ItemOrder
+from ...statistics import analyse_answer_session
 from ...statistics import async_update_stats
 from ..utils import add
 from ..utils import count_milestone_answers_for_milestone
@@ -234,12 +238,6 @@ def create_router() -> APIRouter:
         session: SessionDep, milestone_id: int
     ) -> MilestoneAgeScoreCollection:
         collection = get(session, MilestoneAgeScoreCollection, milestone_id)
-
-        if collection is None:
-            raise HTTPException(
-                404,
-                detail='"No milestone age score collection with id: ", milestone_id',
-            )
         return collection
 
     @router.post(
@@ -252,5 +250,38 @@ def create_router() -> APIRouter:
         return await async_update_stats(
             session, user_session, incremental_update=incremental_update
         )
+
+    @router.get(
+        "/milestone-answer-sessions/",
+        response_model=Sequence[MilestoneAnswerSession],
+    )
+    def get_milestone_answer_sessions(
+        session: SessionDep,
+    ) -> Sequence[MilestoneAnswerSession]:
+        return session.exec(
+            select(MilestoneAnswerSession).where(col(MilestoneAnswerSession.expired))
+        ).all()
+
+    @router.post("/milestone-answer-sessions/{answer_session_id}")
+    def modify_milestone_answer_session(
+        session: SessionDep, answer_session_id: int, suspicious: bool
+    ):
+        answer_session = get(session, MilestoneAnswerSession, answer_session_id)
+        answer_session.suspicious = suspicious
+        session.add(answer_session)
+        session.commit()
+        return {"ok": True}
+
+    @router.get(
+        "/milestone-answer-session-analysis/{answer_session_id}",
+        response_model=MilestoneAnswerSessionAnalysis,
+    )
+    def get_milestone_answer_session_analysis(
+        session: SessionDep, answer_session_id: int
+    ) -> MilestoneAnswerSessionAnalysis:
+        milestone_answer_session = get(
+            session, MilestoneAnswerSession, answer_session_id
+        )
+        return analyse_answer_session(session, milestone_answer_session)
 
     return router

@@ -196,6 +196,7 @@ def get_or_create_current_milestone_answer_session(
             created_at=datetime.datetime.now(),
             expired=False,
             included_in_statistics=False,
+            suspicious=False,
         )
         add(session, milestone_answer_session)
         delta_months = 6
