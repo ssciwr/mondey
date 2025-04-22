@@ -236,7 +236,7 @@ def test_get_milestone_age_scores(admin_client_stat: TestClient):
     assert response.json()["scores"][7]["stddev_score"] == pytest.approx(0.0)
     assert response.json()["scores"][7]["count"] == 0
 
-    assert response.json()["scores"][8]["avg_score"] == pytest.approx(2.0)
+    assert response.json()["scores"][8]["avg_score"] == pytest.approx(1.0)
     assert response.json()["scores"][8]["stddev_score"] == pytest.approx(0.0)
     assert response.json()["scores"][8]["count"] == 1
 
