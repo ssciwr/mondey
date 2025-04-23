@@ -151,6 +151,7 @@ function downloadCSV() {
 }
 
 const downloadAllAsCSV = () => {
+	if (!worker) return;
 	const message: WorkerFullDataRequest = {
 		requestType: WorkerRequestTypes.FULL_DATA,
 	};

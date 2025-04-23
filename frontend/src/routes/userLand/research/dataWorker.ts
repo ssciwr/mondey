@@ -61,15 +61,12 @@ async function init() {
 		return;
 	}
 	df_in = new DataFrame(res.data);
-	console.log("OG: ", res.data);
-	console.log("df in: ", df_in);
 	const res_names = await getResearchNames();
 	if (res_names.error || !res_names.data) {
 		console.error(res_names.error);
 		return;
 	}
 	names = res_names.data;
-	console.log("Research names", names);
 	columns = df_in.columns
 		.filter((c) => {
 			return c.includes("_question_");
@@ -104,34 +101,26 @@ const get_raw_data = () => {
 	if (df_in === null) {
 		return new DataFrame();
 	}
-	const columnMapping = {};
+	const columnMapping: Record<string, string> = {};
 
 	columns.forEach((item) => {
-		columnMapping[item.value] = item.name;
+		columnMapping[item.value] = item.name.toString();
 	});
 
 	milestone_ids.forEach((item) => {
-		columnMapping[item.value] = item.name;
+		columnMapping[item.value] = item.name.toString();
 	});
 
-	console.log("Column mapping:", columnMapping);
 	return df_in.rename(columnMapping);
 };
 
 // construct dataframe of answers for selected milestones grouped by selected columns
-function get_df(
-	selected_milestones: string[],
-	selected_columns: string[],
-	returnAll: boolean,
-) {
-	console.log("Selected milestones:", selected_milestones);
-	console.log("Selected columns:", selected_columns);
+function get_df(selected_milestones: string[], selected_columns: string[]) {
 	if (df_in === null || df_in.size === 0 || selected_milestones.length === 0) {
 		return new DataFrame();
 	}
 	const df_list: DataFrame[] = [];
 	for (const selected_milestone of selected_milestones) {
-		console.log("Indiivdual milesetone: ", selected_milestone);
 		df_list.push(
 			df_in
 				.loc({
@@ -141,19 +130,14 @@ function get_df(
 				.rename({ [selected_milestone]: "answer" }),
 		);
 	}
-	console.log("Done milestones.");
 
 	// Remove the empty columns/milestones
 	const valid_df_list = df_list.filter((df) => df.size > 0);
 
-	if (returnAll) {
-		return concat({ dfList: valid_df_list, axis: 1 });
-	}
 	const concatenated = concat({ dfList: valid_df_list, axis: 0 }) as DataFrame;
 
-	console.log("Concatenated.");
 	const grp = concatenated.groupby(["child_age"].concat(selected_columns));
-	console.log("Done group by columns...");
+
 	const df = grp.col(["answer"]).mean();
 	if (df.size === 0) {
 		return new DataFrame();
@@ -220,7 +204,7 @@ function update_data(
 	if (!df_in || df_in.size === 0) {
 		return;
 	}
-	const df = get_df(selected_milestones, selected_columns, false);
+	const df = get_df(selected_milestones, selected_columns);
 	const message: WorkerUpdate = {
 		type: WorkerTypes.UPDATE,
 		json_data: get_json_data(df),
@@ -234,7 +218,6 @@ function retrieve_all_data() {
 		return;
 	}
 	const df = get_raw_data();
-	console.log("Renamed DF: ", df);
 
 	const message: WorkerFullData = {
 		type: WorkerTypes.FULL_DATA,
