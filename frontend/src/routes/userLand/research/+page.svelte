@@ -60,6 +60,8 @@ let selected_column_names = $derived(
 	}),
 );
 
+let downloadAllHandler: (() => void) | null = null;
+
 function invert_select_option_array(arr: SelectOptionType<string>[]) {
 	return arr.reduce(
 		(obj, item) => Object.assign(obj, { [item.value]: item.name }),
@@ -103,6 +105,15 @@ function destroyWorker(worker: Worker) {
 
 onMount(() => {
 	worker = createWorker();
+
+	downloadAllHandler = () => {
+		if (!worker) return;
+
+		const message: WorkerFullDataRequest = {
+			requestType: WorkerRequestTypes.FULL_DATA,
+		};
+		worker.postMessage(message);
+	};
 
 	return () => {
 		destroyWorker(worker);
@@ -151,13 +162,10 @@ function downloadCSV() {
 	download(csvConfig)(csv);
 }
 
-function downloadAllAsCSV() {
-	if (!browser || !worker) return; // seems to be that SSR checks this function which causes a reference error eventually
-	// within dataWorker.ts trying to refer to self outside of a browser context. We could deal with this onMount instead.
-	const message: WorkerFullDataRequest = {
-		requestType: WorkerRequestTypes.FULL_DATA,
-	};
-	worker.postMessage(message);
+function handleDownloadAll() {
+	if (downloadAllHandler) {
+		downloadAllHandler();
+	}
 }
 
 let headers = $derived.by(() => {
@@ -171,7 +179,7 @@ let headers = $derived.by(() => {
 <div class="w-full grow">
 
     <div class="flex flex-col items-stretch m-2">
-        <Button class="mt-9 mb-3" onclick={downloadAllAsCSV} data-testid="researchDownloadAllAsCSV">{i18n.tr.researcher.downloadAll}</Button>
+        <Button class="mt-9 mb-3" onclick={handleDownloadAll} data-testid="researchDownloadAllAsCSV">{i18n.tr.researcher.downloadAll}</Button>
     </div>
 
     <div class="flex flex-col items-stretch m-2">
