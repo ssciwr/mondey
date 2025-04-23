@@ -151,14 +151,14 @@ function downloadCSV() {
 	download(csvConfig)(csv);
 }
 
-const downloadAllAsCSV = () => {
-	if (!browser) return; // seems to be that SSR checks this function which causes a reference error eventually
+function downloadAllAsCSV() {
+	if (!browser || !worker) return; // seems to be that SSR checks this function which causes a reference error eventually
 	// within dataWorker.ts trying to refer to self outside of a browser context. We could deal with this onMount instead.
 	const message: WorkerFullDataRequest = {
 		requestType: WorkerRequestTypes.FULL_DATA,
 	};
 	worker.postMessage(message);
-};
+}
 
 let headers = $derived.by(() => {
 	if (!json_data || json_data.length === 0) {
