@@ -72,12 +72,13 @@ def _finalize_statistics(
     count: int | np.ndarray,
     mean: float | np.ndarray,
     m2: float | np.ndarray,
+    min_num_samples: int = 2,
 ) -> tuple[int | np.ndarray, float | np.ndarray, float | np.ndarray]:
     """
     Compute the mean and standard deviation from the intermediate values.
     This function is used to finalize the statistics after a batch of new samples have been added.
     If arrays are supplied, they all need to have the same shape.
-    Values for the standard deviation for which the count is less than 2 are set to zero.
+    Values for the standard deviation for which the count is less than min_num_samples are set to -1.
 
     Parameters
     ----------
@@ -87,6 +88,8 @@ def _finalize_statistics(
         Current mean value of the samples. If ndarray, it contains the mean for each entry.
     m2 : float | np.ndarray
         Current intermediate value for variance computation. If ndarray, it contains the intermediate value for each entry.
+    min_num_samples: int
+        Minumum number of samples required to compute a valid standard deviation.
 
     Returns
     -------
@@ -102,8 +105,8 @@ def _finalize_statistics(
         If arrays have different shapes.
     """
     if all(isinstance(x, float | int) for x in [count, mean, m2]):
-        if count < 2:
-            return count, mean, 0.0
+        if count < min_num_samples:
+            return count, mean, -1.0
         else:
             var = m2 / (count - 1)
             return count, mean, np.sqrt(var)
@@ -181,7 +184,7 @@ def _get_statistics_by_age(
     for answer in answers:
         age = child_ages[answer.answer_session_id]  # type: ignore
         new_count, new_avg, new_m2 = _add_sample(
-            count[age], avg[age], m2[age], answer.answer + 1
+            count[age], avg[age], m2[age], answer.answer
         )
         count[age] = new_count
         avg[age] = new_avg
@@ -407,7 +410,7 @@ def calculate_milestone_statistics_by_age(
                 ),  # need a conversion to avoid numpy.int32 being stored as byte object
                 avg_score=avg_scores[age],
                 stddev_score=stddev_scores[age],
-                expected_score=4 if age >= expected_age else 1,
+                expected_score=3 if age >= expected_age else 0,
             )
             for age in range(0, len(avg_scores))
         ],
@@ -513,7 +516,7 @@ def get_milestone_answers(session: SessionDep) -> pd.DataFrame:
     for answer in session.exec(select(MilestoneAnswer)).all():
         milestone_answers[answer.answer_session_id][  # type: ignore
             f"milestone_id_{answer.milestone_id}"
-        ] = answer.answer + 1
+        ] = answer.answer
     df = pd.DataFrame.from_dict(
         milestone_answers,
         orient="index",

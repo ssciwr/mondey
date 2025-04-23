@@ -371,9 +371,9 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                     age=age,
                     milestone_id=1,
                     count=1 if age == 8 else 0,
-                    avg_score=2.0 if age == 8 else 0,
+                    avg_score=1.0 if age == 8 else 0,
                     stddev_score=0.0,
-                    expected_score=3 if age >= 8 else 1,
+                    expected_score=2 if age >= 8 else 0,
                 )
             )
 
@@ -395,9 +395,9 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                     age=age,
                     milestone_id=2,
                     count=1 if age == 8 else 0,
-                    avg_score=1.0 if age == 8 else 0,
+                    avg_score=0.0 if age == 8 else 0,
                     stddev_score=0.0,
-                    expected_score=3 if age >= 8 else 1,
+                    expected_score=2 if age >= 8 else 0,
                 )
             )
 
@@ -418,7 +418,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                     age=age,
                     milestone_group_id=1,
                     count=2 if age == 8 else 0,
-                    avg_score=1.5 if age == 8 else 0.0,
+                    avg_score=0.5 if age == 8 else 0.0,
                     stddev_score=0.5 if age == 8 else 0.0,
                 )
             )
