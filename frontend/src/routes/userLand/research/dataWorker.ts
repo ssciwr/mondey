@@ -4,45 +4,15 @@ import { getResearchData, getResearchNames } from "$lib/client/sdk.gen";
 import type { PlotData } from "$lib/util";
 import { DataFrame, concat, toJSON } from "danfojs/dist/danfojs-browser/src";
 import type { SelectOptionType } from "flowbite-svelte";
-
-// Message types for worker communication
-export type WorkerProcessDataRequest = {
-	requestType: WorkerRequestTypes.PROCESS_DATA;
-	selected_milestones: string[];
-	selected_columns: string[];
-};
-
-export type WorkerFullDataRequest = {
-	requestType: WorkerRequestTypes.FULL_DATA;
-};
-
-export enum WorkerRequestTypes {
-	PROCESS_DATA = "requestProcessData",
-	FULL_DATA = "requestFullData",
-}
-
-export enum WorkerTypes {
-	INIT = "init",
-	FULL_DATA = "fullData",
-	UPDATE = "update",
-}
-
-export type WorkerUpdate = {
-	type: WorkerTypes.UPDATE;
-	json_data: any[];
-	plot_data: PlotData;
-};
-
-export type WorkerInit = {
-	type: WorkerTypes.INIT;
-	milestone_ids: SelectOptionType<string>[];
-	columns: SelectOptionType<string>[];
-};
-
-export type WorkerFullData = {
-	type: WorkerTypes.FULL_DATA;
-	json_data: any[];
-};
+import {
+	type WorkerFullData,
+	type WorkerFullDataRequest,
+	type WorkerInit,
+	type WorkerProcessDataRequest,
+	WorkerRequestTypes,
+	WorkerTypes,
+	type WorkerUpdate,
+} from "./utilTypes";
 
 // initial state that is constructed when web worker starts
 let df_in = null as DataFrame | null;
