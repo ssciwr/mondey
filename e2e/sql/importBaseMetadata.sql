@@ -1,12 +1,3 @@
--- Clear existing data if needed
-DELETE FROM milestoneanswer WHERE answer_session_id >= 1000;
-DELETE FROM milestoneanswersession WHERE id >= 1000;
-DELETE FROM child WHERE id >= 1000;
-DELETE FROM milestonetext WHERE milestone_id >= 1000;
-DELETE FROM milestone WHERE id >= 1000;
-DELETE FROM milestonegrouptext WHERE group_id >= 1000;
-DELETE FROM milestonegroup WHERE id >= 1000;
-
 -- Add milestone groups
 INSERT INTO milestonegroup (id, "order") VALUES (1000, 1);
 INSERT INTO milestonegroup (id, "order") VALUES (1001, 2);

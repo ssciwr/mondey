@@ -16,8 +16,9 @@ from fastapi_injectable.decorator import injectable
 from sqlalchemy import text
 
 from .databases.mondey import create_mondey_db_and_tables
-from .databases.mondey import engine
+from .databases.mondey import engine as mondey_engine
 from .databases.users import create_user_db_and_tables
+from .databases.users import engine as users_engine
 from .routers import admin
 from .routers import auth
 from .routers import milestones
@@ -34,9 +35,19 @@ async def scheduled_update_stats():
 
 
 async def import_e2e_test_sql_files():
-    with engine.connect() as con:
-        for sql_file in app_settings.E2E_TEST_SQL_FILES.split(";"):
-            logging.warning(f"Importing e2e test data from {sql_file}")
+    async with users_engine.begin() as con:
+        for sql_file in app_settings.E2E_TEST_USER_SQL_FILES.split(";"):
+            logging.warning(f"Importing e2e test user data from {sql_file}")
+            with open(f"{sql_file}") as file:
+                queries = sqlparse.split(
+                    sqlparse.format(file.read(), strip_comments=True)
+                )
+                for query in queries:
+                    await con.execute(text(query))
+                await con.commit()
+    with mondey_engine.connect() as con:
+        for sql_file in app_settings.E2E_TEST_MONDEY_SQL_FILES.split(";"):
+            logging.warning(f"Importing e2e test mondey data from {sql_file}")
             with open(f"{sql_file}") as file:
                 queries = sqlparse.split(
                     sqlparse.format(file.read(), strip_comments=True)
@@ -52,7 +63,7 @@ async def import_e2e_test_sql_files():
 async def lifespan(app: FastAPI):
     create_mondey_db_and_tables()
     await create_user_db_and_tables()
-    if app_settings.E2E_TEST_SQL_FILES:
+    if app_settings.E2E_TEST_USER_SQL_FILES and app_settings.E2E_TEST_MONDEY_SQL_FILES:
         await import_e2e_test_sql_files()
     scheduler = AsyncIOScheduler()
     scheduler.add_job(
@@ -64,6 +75,13 @@ async def lifespan(app: FastAPI):
     scheduler.start()
     yield
     scheduler.shutdown()
+    if not app_settings.DATABASE_PATH:
+        for engine in (mondey_engine, users_engine):
+            if engine.url.database:
+                db_path = pathlib.Path(engine.url.database)
+                logging.warning(f"Removing temporary database {db_path}")
+                db_path.unlink()
+                db_path.parent.rmdir()
 
 
 def create_app() -> FastAPI:
@@ -90,6 +108,10 @@ def main():
         datefmt="%Y-%m-%d %H:%M:%S",
     )
     logger = logging.getLogger(__name__)
+    if not app_settings.DATABASE_PATH:
+        logger.warning(
+            "No database path set. Using temporary directory, all data will be lost when server is stopped."
+        )
     for key, value in app_settings:
         logger.info(
             f"{key}: {'****************' if key in {'SECRET', 'DEEPL_API_KEY', 'SMTP_PASSWORD'} else value}"

@@ -1,11 +1,6 @@
 -- This script creates 7 additional children with milestone answer sessions
 -- It should be run after importBaseMetadata.sql
 
--- Clear any existing data with IDs in our range if needed
-DELETE FROM milestoneanswer WHERE answer_session_id >= 1002 AND answer_session_id < 1020;
-DELETE FROM milestoneanswersession WHERE id >= 1002 AND id < 1020;
-DELETE FROM child WHERE id >= 1001 AND id < 1010;
-
 -- Create 7 children with different ages
 -- Child 1: 3 months old
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)

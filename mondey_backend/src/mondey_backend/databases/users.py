@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import tempfile
 from collections.abc import AsyncGenerator
 from typing import Annotated
 
@@ -16,7 +17,7 @@ from ..models.users import User
 from ..settings import app_settings
 
 engine = create_async_engine(
-    f"sqlite+aiosqlite:///{app_settings.DATABASE_PATH}/users.db"
+    f"sqlite+aiosqlite:///{app_settings.DATABASE_PATH if app_settings.DATABASE_PATH else tempfile.mkdtemp()}/users.db"
 )
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
