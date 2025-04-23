@@ -15,16 +15,27 @@ export type WorkerFullDataRequest = {
 	fullDataRequest: true;
 };
 
+export enum WorkerTypes {
+	INIT = "init",
+	FULL_DATA = "fullData",
+	UPDATE = "update",
+}
+
 export type WorkerUpdate = {
-	type: "update";
+	type: WorkerTypes.UPDATE;
 	json_data: any[];
 	plot_data: PlotData;
 };
 
 export type WorkerInit = {
-	type: "init";
+	type: WorkerTypes.INIT;
 	milestone_ids: SelectOptionType<string>[];
 	columns: SelectOptionType<string>[];
+};
+
+export type WorkerFullData = {
+	type: WorkerTypes.FULL_DATA;
+	json_data: any[];
 };
 
 // initial state that is constructed when web worker starts
@@ -79,6 +90,56 @@ async function init() {
 	self.postMessage(message);
 }
 
+function processDataframe(df_list: DataFrame[]) {
+	const grp = (concat({ dfList: df_list, axis: 0 }) as DataFrame).groupby(
+		["child_age"].concat(columns.map((col) => col.value)),
+	);
+
+	const df = grp.col(["answer"]).mean();
+	if (df.size === 0) {
+		return new DataFrame();
+	}
+
+	df.addColumn("answer_std", grp.col(["answer"]).std().column("answer_std"), {
+		inplace: true,
+	});
+	df.addColumn(
+		"answer_count",
+		grp.col(["answer"]).count().column("answer_count"),
+		{
+			inplace: true,
+		},
+	);
+	df.sortValues("child_age", { ascending: true, inplace: true });
+	return df;
+}
+
+function get_full_df() {
+	if (df_in === null || df_in.size === 0) {
+		return new DataFrame();
+	}
+
+	const df_list: DataFrame[] = [];
+	const milestone_columns = df_in.columns.filter((c) =>
+		c.includes("milestone_id_"),
+	);
+
+	for (const milestone_column of milestone_columns) {
+		df_list.push(
+			df_in
+				.loc({
+					columns: ["child_age", milestone_column].concat(
+						columns.map((col) => col.value),
+					),
+				})
+				.dropNa()
+				.rename({ [milestone_column]: "answer" }),
+		);
+	}
+
+	return processDataframe(df_list);
+}
+
 // construct dataframe of answers for selected milestones grouped by selected columns
 function get_df(selected_milestones: string[], selected_columns: string[]) {
 	if (df_in === null || df_in.size === 0 || selected_milestones.length === 0) {
@@ -95,25 +156,7 @@ function get_df(selected_milestones: string[], selected_columns: string[]) {
 				.rename({ [selected_milestone]: "answer" }),
 		);
 	}
-	const grp = (concat({ dfList: df_list, axis: 0 }) as DataFrame).groupby(
-		["child_age"].concat(selected_columns),
-	);
-	const df = grp.col(["answer"]).mean();
-	if (df.size === 0) {
-		return new DataFrame();
-	}
-	df.addColumn("answer_std", grp.col(["answer"]).std().column("answer_std"), {
-		inplace: true,
-	});
-	df.addColumn(
-		"answer_count",
-		grp.col(["answer"]).count().column("answer_count"),
-		{
-			inplace: true,
-		},
-	);
-	df.sortValues("child_age", { ascending: true, inplace: true });
-	return df;
+	return processDataframe(df_list);
 }
 
 // construct json data from supplied dataframe

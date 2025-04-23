@@ -19,11 +19,13 @@ import {
 	TableHeadCell,
 } from "flowbite-svelte";
 import { onMount } from "svelte";
-import type {
-	WorkerFullDataRequest,
-	WorkerInit,
-	WorkerProcessDataRequest,
-	WorkerUpdate,
+import {
+	type WorkerFullData,
+	type WorkerFullDataRequest,
+	type WorkerInit,
+	type WorkerProcessDataRequest,
+	WorkerTypes,
+	type WorkerUpdate,
 } from "./dataWorker";
 
 // Web Worker for data processing
@@ -70,17 +72,21 @@ function createWorker(): Worker {
 	});
 
 	// Handle messages from worker
-	worker.onmessage = (event: MessageEvent<WorkerUpdate | WorkerInit>) => {
+	worker.onmessage = (
+		event: MessageEvent<WorkerUpdate | WorkerInit | WorkerFullData>,
+	) => {
 		const response = event.data;
 		stop_spinner();
-		if (response.type === "init") {
+		if (response.type === WorkerTypes.WorkerInit) {
 			columns = response.columns;
 			columns_inv = invert_select_option_array(columns);
 			milestone_ids = response.milestone_ids;
 			milestone_ids_inv = invert_select_option_array(milestone_ids);
-		} else if (response.type === "update") {
+		} else if (response.type === WorkerTypes.UPDATE) {
 			json_data = response.json_data;
 			plot_data = response.plot_data;
+		} else if (response.type === WorkerTypes.FULL_DATA) {
+			json_data = response.json_data;
 		}
 	};
 
