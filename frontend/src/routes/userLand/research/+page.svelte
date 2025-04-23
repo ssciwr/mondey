@@ -1,6 +1,7 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
+import { browser } from "$app/environment";
 import PlotLines from "$lib/components/DataDisplay/PlotLines.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { type PlotData } from "$lib/util";
@@ -151,7 +152,8 @@ function downloadCSV() {
 }
 
 const downloadAllAsCSV = () => {
-	if (!worker) return;
+	if (!browser) return; // seems to be that SSR checks this function which causes a reference error eventually
+	// within dataWorker.ts trying to refer to self outside of a browser context. We could deal with this onMount instead.
 	const message: WorkerFullDataRequest = {
 		requestType: WorkerRequestTypes.FULL_DATA,
 	};
