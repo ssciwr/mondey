@@ -27,7 +27,7 @@ import {
 	type WorkerProcessDataRequest,
 	WorkerRequestTypes,
 	type WorkerUpdate,
-} from "./dataWorker";
+} from "./utilTypes";
 
 // Web Worker for data processing
 let worker: Worker;
