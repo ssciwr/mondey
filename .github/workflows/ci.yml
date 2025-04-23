@@ -96,12 +96,6 @@ jobs:
 
       - name: Start backend server in directory with e2e test database and SQL.
         working-directory: ./e2e
-        env:
-          RELOAD: false
-          DATABASE_PATH: ''
-          SMTP_HOST: ''
-          E2E_TEST_USER_SQL_FILES: sql/importUsers.sql
-          E2E_TEST_MONDEY_SQL_FILES: sql/importBaseMetadata.sql;sql/importMilestoneAnswers.sql
         run: |
           mkdir -p logs
           mondey-backend > logs/backend.log 2>&1 &

@@ -6,8 +6,8 @@ This directory contains SQL data and static files for the backend to use when ru
 
 - (if not already done) install the backend from the **mondey-backend** directory:
   - `pip install -e .[tests]`
-- start the backend in the **e2e** directory with an empty database path and the e2e test sql files:
-  - `RELOAD=false SMTP_HOST="" DATABASE_PATH="" E2E_TEST_USER_SQL_FILES="sql/importUsers.sql" E2E_TEST_MONDEY_SQL_FILES="sql/importBaseMetadata.sql;sql/importMilestoneAnswers.sql" mondey-backend`
+- start the backend in the **e2e** directory (it will use temporary databases populated with the e2e test sql data - see the .env file):
+  - `mondey-backend`
 - run the e2e tests in the **frontend** directory
   - `pnpm test:e2e:dev`
 
