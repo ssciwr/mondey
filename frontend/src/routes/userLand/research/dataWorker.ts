@@ -6,9 +6,13 @@ import { DataFrame, concat, toJSON } from "danfojs/dist/danfojs-browser/src";
 import type { SelectOptionType } from "flowbite-svelte";
 
 // Message types for worker communication
-export type WorkerRequest = {
+export type WorkerProcessDataRequest = {
 	selected_milestones: string[];
 	selected_columns: string[];
+};
+
+export type WorkerFullDataRequest = {
+	fullDataRequest: true;
 };
 
 export type WorkerUpdate = {
@@ -169,7 +173,7 @@ function update_data(
 	self.postMessage(message);
 }
 
-self.onmessage = (event: MessageEvent<WorkerRequest>) => {
+self.onmessage = (event: MessageEvent<WorkerProcessDataRequest>) => {
 	const { selected_milestones, selected_columns } = event.data;
 	update_data(selected_milestones, selected_columns);
 };

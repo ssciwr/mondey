@@ -19,7 +19,12 @@ import {
 	TableHeadCell,
 } from "flowbite-svelte";
 import { onMount } from "svelte";
-import type { WorkerInit, WorkerRequest, WorkerUpdate } from "./dataWorker";
+import type {
+	WorkerFullDataRequest,
+	WorkerInit,
+	WorkerProcessDataRequest,
+	WorkerUpdate,
+} from "./dataWorker";
 
 // Web Worker for data processing
 let worker: Worker;
@@ -113,7 +118,7 @@ function stop_spinner() {
 
 // Ask worker to update the data when selected milestone or group-by columns change
 $effect(() => {
-	const message: WorkerRequest = {
+	const message: WorkerProcessDataRequest = {
 		selected_milestones: $state.snapshot(selected_milestones),
 		selected_columns: $state.snapshot(selected_columns),
 	};
@@ -135,6 +140,13 @@ function downloadCSV() {
 	download(csvConfig)(csv);
 }
 
+const downloadAllAsCSV = () => {
+	const message: WorkerFullDataRequest = {
+		fullDataRequest: true,
+	};
+	worker.postMessage(message);
+};
+
 let headers = $derived.by(() => {
 	if (!json_data || json_data.length === 0) {
 		return [];
@@ -144,6 +156,11 @@ let headers = $derived.by(() => {
 </script>
 
 <div class="w-full grow">
+
+    <div class="flex flex-col items-stretch m-2">
+        <Button class="mt-9 mb-3" onclick={downloadAllAsCSV} data-testid="researchDownloadAllAsCSV">{i18n.tr.researcher.downloadAll}</Button>
+    </div>
+
     <div class="flex flex-col items-stretch m-2">
         <div class="m-2 grow">
             <Label> {i18n.tr.researcher.milestones}
