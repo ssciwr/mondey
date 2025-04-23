@@ -7,13 +7,19 @@ import type { SelectOptionType } from "flowbite-svelte";
 
 // Message types for worker communication
 export type WorkerProcessDataRequest = {
+	requestType: WorkerRequestTypes.PROCESS_DATA;
 	selected_milestones: string[];
 	selected_columns: string[];
 };
 
 export type WorkerFullDataRequest = {
-	fullDataRequest: true;
+	requestType: WorkerRequestTypes.FULL_DATA;
 };
+
+export enum WorkerRequestTypes {
+	PROCESS_DATA = "requestProcessData",
+	FULL_DATA = "requestFullData",
+}
 
 export enum WorkerTypes {
 	INIT = "init",
@@ -83,23 +89,67 @@ async function init() {
 			return { value: column, name: name };
 		});
 	const message: WorkerInit = {
-		type: "init",
+		type: WorkerTypes.INIT,
 		milestone_ids: milestone_ids,
 		columns: columns,
 	};
 	self.postMessage(message);
 }
 
-function processDataframe(df_list: DataFrame[]) {
-	const grp = (concat({ dfList: df_list, axis: 0 }) as DataFrame).groupby(
-		["child_age"].concat(columns.map((col) => col.value)),
+function get_all_data() {
+	if (df_in === null || df_in.size === 0) {
+		return new DataFrame();
+	}
+	console.log("DF columns:", df_in.columns);
+	const selected_milestones = df_in.columns.filter(
+		(column) => column.indexOf("milestone_id") !== -1,
 	);
+	const selected_columns = df_in.columns.filter(
+		(column) => column.indexOf("milestone_id") === -1 && column !== "child_age",
+	);
+	return get_df(selected_milestones, selected_columns, true);
+}
 
+// construct dataframe of answers for selected milestones grouped by selected columns
+function get_df(
+	selected_milestones: string[],
+	selected_columns: string[],
+	returnAll: boolean,
+) {
+	console.log("Selected milestones:", selected_milestones);
+	console.log("Selected columns:", selected_columns);
+	if (df_in === null || df_in.size === 0 || selected_milestones.length === 0) {
+		return new DataFrame();
+	}
+	const df_list: DataFrame[] = [];
+	for (const selected_milestone of selected_milestones) {
+		console.log("Indiivdual milesetone: ", selected_milestone);
+		df_list.push(
+			df_in
+				.loc({
+					columns: ["child_age", selected_milestone].concat(selected_columns),
+				})
+				.dropNa()
+				.rename({ [selected_milestone]: "answer" }),
+		);
+	}
+	console.log("Done milestones.");
+
+	// Remove the empty columns/milestones
+	const valid_df_list = df_list.filter((df) => df.size > 0);
+
+	if (returnAll) {
+		return concat({ dfList: valid_df_list, axis: 1 });
+	}
+	const concatenated = concat({ dfList: valid_df_list, axis: 0 }) as DataFrame;
+
+	console.log("Concatenated.");
+	const grp = concatenated.groupby(["child_age"].concat(selected_columns));
+	console.log("Done group by columns...");
 	const df = grp.col(["answer"]).mean();
 	if (df.size === 0) {
 		return new DataFrame();
 	}
-
 	df.addColumn("answer_std", grp.col(["answer"]).std().column("answer_std"), {
 		inplace: true,
 	});
@@ -112,51 +162,6 @@ function processDataframe(df_list: DataFrame[]) {
 	);
 	df.sortValues("child_age", { ascending: true, inplace: true });
 	return df;
-}
-
-function get_full_df() {
-	if (df_in === null || df_in.size === 0) {
-		return new DataFrame();
-	}
-
-	const df_list: DataFrame[] = [];
-	const milestone_columns = df_in.columns.filter((c) =>
-		c.includes("milestone_id_"),
-	);
-
-	for (const milestone_column of milestone_columns) {
-		df_list.push(
-			df_in
-				.loc({
-					columns: ["child_age", milestone_column].concat(
-						columns.map((col) => col.value),
-					),
-				})
-				.dropNa()
-				.rename({ [milestone_column]: "answer" }),
-		);
-	}
-
-	return processDataframe(df_list);
-}
-
-// construct dataframe of answers for selected milestones grouped by selected columns
-function get_df(selected_milestones: string[], selected_columns: string[]) {
-	if (df_in === null || df_in.size === 0 || selected_milestones.length === 0) {
-		return new DataFrame();
-	}
-	const df_list: DataFrame[] = [];
-	for (const selected_milestone of selected_milestones) {
-		df_list.push(
-			df_in
-				.loc({
-					columns: ["child_age", selected_milestone].concat(selected_columns),
-				})
-				.dropNa()
-				.rename({ [selected_milestone]: "answer" }),
-		);
-	}
-	return processDataframe(df_list);
 }
 
 // construct json data from supplied dataframe
@@ -207,18 +212,39 @@ function update_data(
 	if (!df_in || df_in.size === 0) {
 		return;
 	}
-	const df = get_df(selected_milestones, selected_columns);
+	const df = get_df(selected_milestones, selected_columns, false);
 	const message: WorkerUpdate = {
-		type: "update",
+		type: WorkerTypes.UPDATE,
 		json_data: get_json_data(df),
 		plot_data: get_plot_data(df, selected_columns),
 	};
 	self.postMessage(message);
 }
 
-self.onmessage = (event: MessageEvent<WorkerProcessDataRequest>) => {
-	const { selected_milestones, selected_columns } = event.data;
-	update_data(selected_milestones, selected_columns);
+function retrieve_all_data() {
+	if (!df_in || df_in.size === 0) {
+		return;
+	}
+	const df = get_all_data();
+
+	const message: WorkerFullData = {
+		type: WorkerTypes.FULL_DATA,
+		json_data: get_json_data(df),
+	};
+	self.postMessage(message);
+}
+
+self.onmessage = (
+	event: MessageEvent<WorkerProcessDataRequest | WorkerFullDataRequest>,
+) => {
+	if (event.data.requestType === WorkerRequestTypes.PROCESS_DATA) {
+		const { selected_milestones, selected_columns } = event.data;
+		update_data(selected_milestones, selected_columns);
+	} else if (event.data.requestType === WorkerRequestTypes.FULL_DATA) {
+		retrieve_all_data();
+	} else {
+		console.warn("Request Type not matched for dataWorker message.");
+	}
 };
 
 // download research data and construct initial state on creation of web worker

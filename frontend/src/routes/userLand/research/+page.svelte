@@ -24,7 +24,7 @@ import {
 	type WorkerFullDataRequest,
 	type WorkerInit,
 	type WorkerProcessDataRequest,
-	WorkerTypes,
+	WorkerRequestTypes,
 	type WorkerUpdate,
 } from "./dataWorker";
 
@@ -73,20 +73,23 @@ function createWorker(): Worker {
 
 	// Handle messages from worker
 	worker.onmessage = (
-		event: MessageEvent<WorkerUpdate | WorkerInit | WorkerFullData>,
+		event: MessageEvent<WorkerUpdate | WorkerInit | WorkerFullData>, // these are the response types.
 	) => {
 		const response = event.data;
 		stop_spinner();
-		if (response.type === WorkerTypes.WorkerInit) {
+		if (response.type === "init") {
 			columns = response.columns;
 			columns_inv = invert_select_option_array(columns);
 			milestone_ids = response.milestone_ids;
 			milestone_ids_inv = invert_select_option_array(milestone_ids);
-		} else if (response.type === WorkerTypes.UPDATE) {
+		} else if (response.type === "update") {
 			json_data = response.json_data;
 			plot_data = response.plot_data;
-		} else if (response.type === WorkerTypes.FULL_DATA) {
+		} else if (response.type === "fullData") {
 			json_data = response.json_data;
+			downloadCSV();
+			// todo: on receiving it, call downloadCSV()
+			// todo: Reset plot_Data (or keep it in sync with json_data) or reset json_data after downloading.
 		}
 	};
 
@@ -125,6 +128,7 @@ function stop_spinner() {
 // Ask worker to update the data when selected milestone or group-by columns change
 $effect(() => {
 	const message: WorkerProcessDataRequest = {
+		requestType: WorkerRequestTypes.PROCESS_DATA,
 		selected_milestones: $state.snapshot(selected_milestones),
 		selected_columns: $state.snapshot(selected_columns),
 	};
@@ -148,7 +152,7 @@ function downloadCSV() {
 
 const downloadAllAsCSV = () => {
 	const message: WorkerFullDataRequest = {
-		fullDataRequest: true,
+		requestType: WorkerRequestTypes.FULL_DATA,
 	};
 	worker.postMessage(message);
 };
