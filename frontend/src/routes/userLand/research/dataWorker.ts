@@ -61,12 +61,15 @@ async function init() {
 		return;
 	}
 	df_in = new DataFrame(res.data);
+	console.log("OG: ", res.data);
+	console.log("df in: ", df_in);
 	const res_names = await getResearchNames();
 	if (res_names.error || !res_names.data) {
 		console.error(res_names.error);
 		return;
 	}
 	names = res_names.data;
+	console.log("Research names", names);
 	columns = df_in.columns
 		.filter((c) => {
 			return c.includes("_question_");
@@ -96,19 +99,24 @@ async function init() {
 	self.postMessage(message);
 }
 
-function get_all_data() {
-	if (df_in === null || df_in.size === 0) {
+const get_raw_data = () => {
+	// Create a mapping object for easier lookups
+	if (df_in === null) {
 		return new DataFrame();
 	}
-	console.log("DF columns:", df_in.columns);
-	const selected_milestones = df_in.columns.filter(
-		(column) => column.indexOf("milestone_id") !== -1,
-	);
-	const selected_columns = df_in.columns.filter(
-		(column) => column.indexOf("milestone_id") === -1 && column !== "child_age",
-	);
-	return get_df(selected_milestones, selected_columns, true);
-}
+	const columnMapping = {};
+
+	columns.forEach((item) => {
+		columnMapping[item.value] = item.name;
+	});
+
+	milestone_ids.forEach((item) => {
+		columnMapping[item.value] = item.name;
+	});
+
+	console.log("Column mapping:", columnMapping);
+	return df_in.rename(columnMapping);
+};
 
 // construct dataframe of answers for selected milestones grouped by selected columns
 function get_df(
@@ -225,7 +233,8 @@ function retrieve_all_data() {
 	if (!df_in || df_in.size === 0) {
 		return;
 	}
-	const df = get_all_data();
+	const df = get_raw_data();
+	console.log("Renamed DF: ", df);
 
 	const message: WorkerFullData = {
 		type: WorkerTypes.FULL_DATA,
