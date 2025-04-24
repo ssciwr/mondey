@@ -190,7 +190,7 @@ let headers = $derived.by(() => {
         <Button class="mt-9 mb-3" disabled={is_downloading} onclick={handleDownloadAll} data-testid="downloadAllResearchData">{i18n.tr.researcher.downloadAll}</Button>
         {#if is_downloading}
             <div class="text-center">
-                <Spinner class="mt-5" /> <span class="tertiary">{i18n.tr.researcher.downloadingAllResearchData}</span>
+                <Spinner class="mt-5" /> <small class="tertiary">{i18n.tr.researcher.downloadingAllResearchData}</small>
             </div>
         {/if}
     </div>
