@@ -105,109 +105,131 @@ async function saveChanges() {
 }
 </script>
 
-<Modal title="Edit user question" bind:open autoclose size="xl">
+<style>
+	:global(.modal-scrollable) {
+		display: flex !important;
+		align-items: flex-start !important;
+		padding-top: 2rem;
+		margin-bottom:10rem!important;
+	}
+
+	:global(.modal-scrollable > div) {
+		max-height: calc(100vh - 4rem);
+		overflow-y: auto;
+	}
+</style>
+
+<Modal title="Edit user question" class="modal-scrollable" bind:open autoclose >
 	{#if question}
-		<div class="flex flex-row items-center">
-			<div class="mr-5 grow">
-				<div class="mb-5">
-					<Label class="mb-2">{i18n.tr.admin.name}</Label>
-					<Input bind:value={question.name} placeholder={i18n.tr.admin.name}/>
-				</div>
-				<div class="mb-5">
-					<Label class="mb-2">{i18n.tr.admin.question}</Label>
-					{#each Object.values(question.text) as text}
-						<div class="mb-1">
-							<ButtonGroup class="w-full">
-								<InputAddon>{text.lang_id}</InputAddon>
-								<Input
-									data-testid={`text-question-input-${text.lang_id}`}
-									bind:value={text.question}
-									placeholder=""
-								/>
-							</ButtonGroup>
-						</div>
-					{/each}
-				</div>
-				<div class="mb-5">
-					<Label class="mb-2">Input type</Label>
-					<Select
-						data-testid="questionTypeSelect"
-						class="mt-2"
-						items={inputTypes}
-						bind:value={question.component}
-						placeholder=""
-					/>
-				</div>
-				{#if question.component === "select"}
+		<div>
+			<div class="flex flex-row items-center">
+				<div class="mr-5 grow">
 					<div class="mb-5">
-						<Label class="mb-2">Options</Label>
-						<div class="mb-1">
-							<ButtonGroup class="w-full">
-								<InputAddon>Option values (separate with ";" - like "Option A;Option B")</InputAddon>
-								<Textarea
-									bind:value={question.options}
-									on:input={updateOptionsJson}
-									placeholder="Option values"
-								/>
-							</ButtonGroup>
-						</div>
+						<Label class="mb-2">{i18n.tr.admin.name}</Label>
+						<Input bind:value={question.name} placeholder={i18n.tr.admin.name}/>
+					</div>
+					<div class="mb-5">
+						<Label class="mb-2">{i18n.tr.admin.question}</Label>
 						{#each Object.values(question.text) as text}
 							<div class="mb-1">
 								<ButtonGroup class="w-full">
 									<InputAddon>{text.lang_id}</InputAddon>
-									<Textarea
-										bind:value={text.options}
-										on:input={updateOptionsJson}
-										placeholder="Displayed options"
+									<Input
+										data-testid={`text-question-input-${text.lang_id}`}
+										bind:value={text.question}
+										placeholder=""
 									/>
 								</ButtonGroup>
 							</div>
 						{/each}
-						<div class="mb-1">
-						<Label class="mb-2">Free text Option</Label>
-						<Select
-								class="mt-2"
-								items={options}
-								bind:value={question.additional_option}
-								placeholder=""
-						/>
-						</div>
 					</div>
-				{/if}
-				<Label class="mb-2">Required?</Label>
-				<div class="mb-1">
-					<ButtonGroup class="w-full">
-						<Checkbox
-								bind:checked={question.required}
-						/>
-					</ButtonGroup>
-				</div>
-			</div>
-			<div>
-				<Card>
 					<div class="mb-5">
-						<Label class="mb-2">Preview</Label>
-						<div class="flex flex-row">
-							<ButtonGroup class="mb-2 mr-2">
-								{#each i18n.locales as lang_id}
-									<Button
-										checked={preview_lang === lang_id}
-										on:click={(e) => {
-											e.stopPropagation();
-											preview_lang = lang_id;
-										}}>{lang_id}</Button
-									>
-								{/each}
-							</ButtonGroup>
-						</div>
-						<Card class="mb-4 bg-blue-300">
-							<InputPreview data={question} lang={preview_lang} bind:answer={preview_answer}/>
-						</Card>
-						<Label class="mb-2">Generated answer:</Label>
-						<Badge large border color="dark">{preview_answer}</Badge
-						>
+						<Label class="mb-2">Input type</Label>
+						<Select
+							data-testid="questionTypeSelect"
+							class="mt-2"
+							items={inputTypes}
+							bind:value={question.component}
+							placeholder=""
+						/>
 					</div>
-				</Card>
+					{#if question.component === "select"}
+						<div class="mb-5">
+							<Label class="mb-2">Options</Label>
+							<div class="mb-1">
+								<ButtonGroup class="w-full">
+									<InputAddon>Option values (separate with ";" - like "Option A;Option B")</InputAddon>
+									<Textarea
+										bind:value={question.options}
+										on:input={updateOptionsJson}
+										placeholder="Option values"
+									/>
+								</ButtonGroup>
+							</div>
+							{#each Object.values(question.text) as text}
+								<div class="mb-1">
+									<ButtonGroup class="w-full">
+										<InputAddon>{text.lang_id}</InputAddon>
+										<Textarea
+											bind:value={text.options}
+											on:input={updateOptionsJson}
+											placeholder="Displayed options"
+										/>
+									</ButtonGroup>
+								</div>
+							{/each}
+							<div class="mb-1">
+							<Label class="mb-2">Free text Option</Label>
+							<Select
+									class="mt-2"
+									items={options}
+									bind:value={question.additional_option}
+									placeholder=""
+							/>
+							</div>
+						</div>
+					{/if}
+					<Label class="mb-2">{i18n.tr.admin.required}</Label>
+					<div class="mb-1">
+						<ButtonGroup class="w-full">
+							<Checkbox
+									bind:checked={question.required}
+							/>
+						</ButtonGroup>
+					</div>
+					<Label class="mb-2">{i18n.tr.admin.visibility}</Label>
+					<div class="mb-1">
+						<ButtonGroup class="w-full">
+							<Checkbox data-testid="visibility-checkbox" bind:checked={question.visibility}></Checkbox>
+						</ButtonGroup>
+					</div>
+				</div>
+				<div>
+					<Card>
+						<div class="mb-5">
+							<Label class="mb-2">Preview</Label>
+							<div class="flex flex-row">
+								<ButtonGroup class="mb-2 mr-2">
+									{#each i18n.locales as lang_id}
+										<Button
+											checked={preview_lang === lang_id}
+											on:click={(e) => {
+												e.stopPropagation();
+												preview_lang = lang_id;
+											}}>{lang_id}</Button
+										>
+									{/each}
+								</ButtonGroup>
+							</div>
+							<Card class="mb-4 bg-blue-300">
+								<InputPreview data={question} lang={preview_lang} bind:answer={preview_answer}/>
+							</Card>
+							<Label class="mb-2">Generated answer:</Label>
+							<Badge large border color="dark">{preview_answer}</Badge
+							>
+						</div>
+					</Card>
+				</div>
 			</div>
 		</div>
 	{/if}

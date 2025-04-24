@@ -21,6 +21,7 @@ test("/userLand/admin - Questions on Children : New child question can be added,
 
 	await page.locator('button:has-text("Hinzufügen")').click();
 	await page.getByTestId("text-question-input-de").fill(childQuestionText);
+	await page.getByTestId("visibility-checkbox").setChecked(true);
 
 	await page.getByTestId("questionTypeSelect").click();
 	await page.selectOption('[data-testid="questionTypeSelect"]', {

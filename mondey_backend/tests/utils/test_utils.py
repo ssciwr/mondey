@@ -3,6 +3,7 @@ from sqlmodel import select
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.routers.utils import _get_answer_session_child_ages_in_months
+from mondey_backend.routers.utils import count_milestone_answers_for_milestone
 from mondey_backend.routers.utils import get_milestonegroups_for_answersession
 
 
@@ -30,3 +31,15 @@ def test_get_answer_session_child_ages_in_months(session):
     assert child_ages[2] == 8
     assert child_ages[3] == 55
     assert child_ages[99] == 8
+
+
+def test_count_milestone_answers(session):
+    result = count_milestone_answers_for_milestone(session, milestone_id=2)
+    assert type(result) is int
+    assert result == 3
+
+
+def test_count_milestone_answers_non_existing(session):
+    result = count_milestone_answers_for_milestone(session, milestone_id=9999954)
+    assert type(result) is int
+    assert result == 0
