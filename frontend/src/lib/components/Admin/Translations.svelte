@@ -25,6 +25,7 @@ async function getTranslations() {
 		try {
 			const res = await fetch(
 				`${import.meta.env.VITE_MONDEY_API_URL}/static/i18n/${locale}.json`,
+				{ cache: "no-cache" },
 			);
 			let data = {} as Translation;
 			if (!res.ok) {
