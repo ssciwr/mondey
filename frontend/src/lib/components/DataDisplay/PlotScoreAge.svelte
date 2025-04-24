@@ -36,14 +36,16 @@ onMount(() => {
 					color: "#000000",
 				}),
 			],
-			xAxis: new Axis({
+			xAxis: new Axis<MilestoneAgeScore>({
 				label: `${i18n.tr.admin.age} (m)`,
 				tickValues: [0, 1, 2, 3, 4, 5, 6, 9, 12, 16, 24, 36, 48, 60, 72],
 			}),
-			yAxis: new Axis({ label: `${i18n.tr.admin.averageScore} (1-4)` }),
+			yAxis: new Axis<MilestoneAgeScore>({
+				label: `${i18n.tr.admin.averageScore} (0-3)`,
+			}),
 			xScale: Scale.scalePow().exponent(0.5),
 			xDomain: [0, 72],
-			yDomain: [1, 4],
+			yDomain: [0, 3],
 		},
 		scores,
 	);

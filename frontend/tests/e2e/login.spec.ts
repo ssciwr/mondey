@@ -1,11 +1,5 @@
 import { type Page, expect, test } from "@playwright/test";
-
-async function login(page: Page, username: string, password: string) {
-	await page.goto("/login", { waitUntil: "networkidle" });
-	await page.fill("#username", username);
-	await page.fill("#password", password);
-	await page.getByRole("button", { name: "Absenden" }).click();
-}
+import { login } from "./utils";
 
 test("/login : A non-existing user account cannot login", async ({ page }) => {
 	await login(page, "fakeUsername@test.com", "8n408sdnk2349");
@@ -31,7 +25,7 @@ test("/login : login as valid researcher", async ({ page, isMobile }) => {
 	if (!isMobile) {
 		await expect(page.getByText(/researcher@mondey.de/i)).toBeVisible();
 		await expect(page.getByText(/Research/i)).toBeVisible();
-		await expect(page.getByText(/Admin/i)).toHaveCount(0);
+		await expect(page.getByText(/Administration/i)).toHaveCount(0);
 	}
 });
 
@@ -40,6 +34,6 @@ test("/login : login as valid admin", async ({ page, isMobile }) => {
 	if (!isMobile) {
 		await expect(page.getByText(/admin@mondey.de/i)).toBeVisible();
 		await expect(page.getByText(/Research/i)).toHaveCount(0);
-		await expect(page.getByText(/Admin/i)).toBeVisible();
+		await expect(page.getByText(/Administration/i)).toBeVisible();
 	}
 });

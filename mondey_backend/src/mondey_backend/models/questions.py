@@ -55,6 +55,7 @@ class UserQuestionText(QuestionTextBase, table=True):
 class UserQuestion(Question, table=True):
     id: int | None = Field(default=None, primary_key=True)
     text: Mapped[dict[str, UserQuestionText]] = dict_relationship(key="lang_id")
+    name: str = ""
 
 
 class UserQuestionPublic(QuestionPublic):
@@ -80,6 +81,7 @@ class ChildQuestionText(QuestionTextBase, table=True):
 class ChildQuestion(Question, table=True):
     id: int | None = Field(default=None, primary_key=True)
     text: Mapped[dict[str, ChildQuestionText]] = dict_relationship(key="lang_id")
+    name: str = ""
 
 
 class ChildQuestionPublic(QuestionPublic):

@@ -40,7 +40,11 @@
 		min-width: unset;
 		@apply py-2 px-2 rounded-md relative;
 		position: relative;
-		background-color: white !important;
+		background-color: white;
+	}
+
+	.btn-primary.btn-icon {
+		@apply text-primary-700 dark:text-white bg-white dark:bg-primary;
 	}
 
 	/* Button icon group styling */

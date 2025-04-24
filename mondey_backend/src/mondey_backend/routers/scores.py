@@ -46,16 +46,17 @@ def compute_feedback_simple(
     Returns
     -------
     int
+        -2 if there is insufficient data to provide feedback (trafficlight: invalid)
         -1 if score <= avg - 2 * stddev (trafficlight: red)
         0 if avg - 2 * stddev < score <= avg - stddev (trafficlight: yellow)
-        1if score > avg - stddev (trafficlight: green)
+        1 if score > avg - stddev (trafficlight: green)
     """
 
     def leq(val: float, lim: float) -> bool:
         return val < lim or bool(np.isclose(val, lim))
 
-    if stat.avg_score < 1e-2 and stat.stddev_score < 1e-2:
-        # statistics has no data
+    if stat.stddev_score < 0:
+        # negative stddev indicates insufficient data so we cannot provide feedback
         return TrafficLight.invalid.value
 
     if stat.stddev_score < 1e-2:
@@ -136,7 +137,7 @@ def compute_milestonegroup_feedback_summary(
                     )
             # extract the answers for the current milestone group
             group_answers = [
-                answer.answer + 1
+                answer.answer
                 for answer in answersession.answers.values()
                 if answer.milestone_group_id == group
             ]
@@ -195,9 +196,7 @@ def compute_milestonegroup_feedback_detailed(
     # for each milestonegroup, get the statistics, compute the current mean, and compute the feedback
     feedback: dict[int, dict[int, int]] = {}
     for milestone_id, answer in answersession.answers.items():
-        logger.debug(f"  milestone id: {milestone_id}, answer: {answer.answer + 1}")
         stats = session.get(MilestoneAgeScoreCollection, milestone_id)
-        logger.debug(f"  stats: {stats}")
         if answer.milestone_group_id not in feedback:
             feedback[answer.milestone_group_id] = {}
         if stats is None:
@@ -211,7 +210,7 @@ def compute_milestonegroup_feedback_detailed(
                         f"   score: {i}, {score.count}, {score.avg_score}, {score.stddev_score}"
                     )
             feedback[answer.milestone_group_id][cast(int, answer.milestone_id)] = (
-                compute_feedback_simple(stats.scores[age], answer.answer + 1)
+                compute_feedback_simple(stats.scores[age], answer.answer)
             )
 
     logger.debug(f" detailed feedback: {feedback}")
