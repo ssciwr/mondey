@@ -141,6 +141,8 @@ export const translationIds = {
 		images: "Bilder",
 		downloadAsCsv: "als CSV herunterladen",
 		downloadAll: "Alles als CSV herunterladen",
+		downloadingAllResearchData: "Herunterladen von Daten...",
+		dataPlotsHeading: "Datenvisualisierungen",
 		researchData: "Wissenshaftlichen Daten",
 		filter: "filtern",
 		selectColumns: "Spalten auswählen",

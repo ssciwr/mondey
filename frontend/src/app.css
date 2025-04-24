@@ -74,6 +74,10 @@
 		z-index: 1;
 	}
 
+	h4 {
+		@apply text-2xl
+	}
+
 	@media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
 		.btn {
 			min-width: 100%;

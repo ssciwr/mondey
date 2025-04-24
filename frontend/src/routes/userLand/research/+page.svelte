@@ -1,7 +1,6 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { browser } from "$app/environment";
 import PlotLines from "$lib/components/DataDisplay/PlotLines.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { type PlotData } from "$lib/util";
@@ -26,6 +25,7 @@ import {
 	type WorkerInit,
 	type WorkerProcessDataRequest,
 	WorkerRequestTypes,
+	WorkerTypes,
 	type WorkerUpdate,
 } from "./utilTypes";
 
@@ -36,6 +36,8 @@ let worker: Worker;
 let is_loading = true;
 let show_spinner: boolean = $state(true);
 let show_spinner_timeout_id: number;
+
+let is_downloading: boolean = $state(false);
 
 // Data states (use raw state for performance as these are never mutated, only reassigned)
 let json_data = $state.raw([] as any[]);
@@ -80,19 +82,17 @@ function createWorker(): Worker {
 	) => {
 		const response = event.data;
 		stop_spinner();
-		if (response.type === "init") {
+		if (response.type === WorkerTypes.INIT) {
 			columns = response.columns;
 			columns_inv = invert_select_option_array(columns);
 			milestone_ids = response.milestone_ids;
 			milestone_ids_inv = invert_select_option_array(milestone_ids);
-		} else if (response.type === "update") {
+		} else if (response.type === WorkerTypes.UPDATE) {
 			json_data = response.json_data;
 			plot_data = response.plot_data;
-		} else if (response.type === "fullData") {
+		} else if (response.type === WorkerTypes.FULL_DATA) {
 			json_data = response.json_data;
 			downloadCSV();
-			// todo: on receiving it, call downloadCSV()
-			// todo: Reset plot_Data (or keep it in sync with json_data) or reset json_data after downloading.
 		}
 	};
 
@@ -153,6 +153,7 @@ function downloadCSV() {
 		console.log("downloadCSV clicked but no data to download");
 		return;
 	}
+	is_downloading = true;
 	const csvConfig = mkConfig({
 		useKeysAsHeaders: true,
 		filename: `${["mondey", new Date().toISOString().replace(/T.*/, "")].concat(selected_milestone_names).concat(selected_column_names).join("-")}`,
@@ -160,11 +161,16 @@ function downloadCSV() {
 	});
 	const csv = generateCsv(csvConfig)(json_data);
 	download(csvConfig)(csv);
+	is_downloading = false;
 }
 
 function handleDownloadAll() {
 	if (downloadAllHandler) {
+		is_downloading = true;
 		downloadAllHandler();
+		// Reset state
+		json_data = [];
+		plot_data = {} as PlotData;
 	}
 }
 
@@ -178,11 +184,20 @@ let headers = $derived.by(() => {
 
 <div class="w-full grow">
 
-    <div class="flex flex-col items-stretch m-2">
-        <Button class="mt-9 mb-3" onclick={handleDownloadAll} data-testid="downloadAllResearchData">{i18n.tr.researcher.downloadAll}</Button>
-    </div>
 
     <div class="flex flex-col items-stretch m-2">
+        <h4>{i18n.tr.researcher.researchData}</h4>
+        <Button class="mt-9 mb-3" disabled={is_downloading} onclick={handleDownloadAll} data-testid="downloadAllResearchData">{i18n.tr.researcher.downloadAll}</Button>
+        {#if is_downloading}
+            <div class="text-center">
+                <Spinner class="mt-5" /> <span class="tertiary">{i18n.tr.researcher.downloadingAllResearchData}</span>
+            </div>
+        {/if}
+    </div>
+    <hr />
+
+    <div class="flex flex-col items-stretch m-2">
+        <h4>{i18n.tr.researcher.dataPlotsHeading}</h4>
         <div class="m-2 grow">
             <Label> {i18n.tr.researcher.milestones}
                 <MultiSelect bind:value={selected_milestones} class="mt-2" items={milestone_ids}
