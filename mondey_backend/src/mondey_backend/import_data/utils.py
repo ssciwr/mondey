@@ -44,8 +44,6 @@ users_database_file_path = (
     script_dir / "src/mondey_backend/import_data/current_db/current_users.db"
 )
 
-print("Users database file path", users_database_file_path)
-
 async_users_engine = create_async_engine(
     f"sqlite+aiosqlite:///{users_database_file_path}"
 )
@@ -449,16 +447,23 @@ def update_or_create_user_answer(
     if existing_answer and answer_text is not None and answer_text != "":
         print("Existing answer...")
         try:
+            different = False
             if set_only_additional_answer:
                 print("Setting additional answer")
                 # Only update additional_answer if flag is set. Leave any set "answer", e.g. "Other", previously set...
                 existing_answer.additional_answer = answer_text
             else:
                 # Update solely answer property, the default (especially for "select" options).
-                existing_answer.answer = answer_text
+                different = existing_answer.answer != answer_text
+                if different:
+                    existing_answer.answer = answer_text
+                # if this is an existing question answer from a previous import, the above will basically do nothing.
 
             print("Adding to SQL sesion...")
-            session.add(existing_answer)
+            if (
+                different
+            ):  # only update the actual rows we need to, not overwritten rows.
+                session.add(existing_answer)
             return True, existing_answer
 
         except Exception as e:

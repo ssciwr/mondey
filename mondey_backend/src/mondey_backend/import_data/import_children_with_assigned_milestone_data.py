@@ -66,7 +66,7 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
     milestone_mapping = {}
     milestone_group_mapping = {}
 
-    require_confirmation_of_duplicates = True
+    require_confirmation_of_duplicates = False  # Change because adding additional data basically always uses skipping duplicates.
 
     print(
         "Processing setting actual milestones data for children now.", len(milestones)

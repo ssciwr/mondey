@@ -1,5 +1,4 @@
 import pandas as pd
-from mmondey_backend.import_data.utils import labels_path
 
 from mondey_backend.import_data.import_children_with_assigned_milestone_data import (
     map_children_milestones_data,
@@ -12,6 +11,7 @@ from mondey_backend.import_data.postprocessing_corrections.run_postprocess_corre
 )
 from mondey_backend.import_data.utils import additional_data_path
 from mondey_backend.import_data.utils import get_import_current_session
+from mondey_backend.import_data.utils import labels_path
 from mondey_backend.import_data.utils import questions_configured_path
 
 
@@ -20,6 +20,9 @@ def align_additional_data_to_current_answers():
     This function assumes that you have placed the additional data in the additional data file paths,and that the mondey.db and user.db
     file in /import_data are the ones you want to build the data on top of. So it skips importing/aligning
     the milestone meta IDs.
+
+    Note that given the actual additional data is simply overlaid, we match by child ID and do not add duplicate data
+    where it already exists for the childrens milestone or question answers.
 
     The script does not support updating or changing answers for existing children.
     It only supports adding data with new children.
@@ -30,6 +33,9 @@ def align_additional_data_to_current_answers():
     Then it inserts the question answers for those children/answers.
 
     Then it runs the postprocessing_corrections/run_postprocess_corrections.py script.
+
+    The challenge with the additional data containing data that already exists and writing on an existing DB is
+    that our postprocessing of questions has to work correctly (e.g. mapping the multi part questions)
 
     :return:
     """

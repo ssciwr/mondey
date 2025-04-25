@@ -113,7 +113,6 @@ def import_childrens_question_answers_data(
     labels_path: str,
     data_path: str,
     questions_configured_path: str,
-    clear_existing_questions_and_answers: bool = False,
 ):
     """
     This loads the "labels_df" which is in social science terms a "coding codebook". It lists several variables, which
@@ -321,6 +320,9 @@ def assign_answers_to_the_imported_questions(
     it looking like so:
     answer: "Andere", additional_answer: "Users Free text answer".
 
+    When answers already exist for a given child/user ID, it will not insert a second answer. This is to support importing
+    additional data.
+
     :param questions_configured_df: A dataframe which includes whether a question is directed to parents (so, a
     UserQuestion/UserAnswer), such as income/Social Economic Status, or about/to the child (ChildQuestion/ChildAnswer)
 
@@ -454,7 +456,7 @@ def assign_answers_to_the_imported_questions(
                         questions_configured_df, variable, debug_print=True
                     ):
                         found_base_question, answer = update_or_create_user_answer(
-                            session,  # Assuming you have a database session
+                            session,
                             user_or_child_id=get_childs_parent_id(
                                 session, child_row["CASE"]
                             ),
@@ -472,7 +474,7 @@ def assign_answers_to_the_imported_questions(
                             "Would have looked up isToParent Y status for: ", variable
                         )
                         found_base_question, answer = update_or_create_user_answer(
-                            session,  # Assuming you have a database session
+                            session,
                             user_or_child_id=child_row["CASE"],
                             question_id=question.id,
                             answer_text=answer_text,
@@ -513,7 +515,7 @@ def assign_answers_to_the_imported_questions(
                 if get_question_filled_in_to_parent(questions_configured_df, variable):
                     print("Saving parent answer..", answer_text)
                     found_base_question, answer = update_or_create_user_answer(
-                        session,  # Assuming you have a database session
+                        session,
                         user_or_child_id=get_childs_parent_id(
                             session, child_row["CASE"]
                         ),
@@ -531,7 +533,7 @@ def assign_answers_to_the_imported_questions(
                 else:
                     print("Saving child answer..", answer_text)
                     found_base_question, answer = update_or_create_user_answer(
-                        session,  # Assuming you have a database session
+                        session,
                         user_or_child_id=child_row["CASE"],
                         question_id=question.id,
                         answer_text=answer_text,
@@ -587,9 +589,5 @@ if __name__ == "__main__":
     import_session, import_engine = get_import_test_session()
 
     import_childrens_question_answers_data(
-        import_session,
-        labels_path,
-        data_path,
-        questions_configured_path,
-        clear_existing_questions_and_answers=clear_existing_questions_and_answers,
+        import_session, labels_path, data_path, questions_configured_path
     )
