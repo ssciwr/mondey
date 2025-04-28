@@ -345,9 +345,15 @@ def assign_answers_to_the_imported_questions(
 
     # Process actual data into child answers
     for _, child_row in tqdm(data_df.iterrows()):
+        print("")
+        print("")
+        print("")
         # First: If the child has any answers, we assume their data is complete (previously imported). So skip such children
         if child_row.get("CASE") in children_ids_with_data:
+            print("Skipping done child:", child_row.get("CASE"))
             continue
+        else:
+            print("Adding answers for child: ", child_row.get("CASE"))
         # Iterate through all variables in labels_df
         print("")
         print("Going through for child ... ", child_row.get("CASE"))
@@ -395,8 +401,7 @@ def assign_answers_to_the_imported_questions(
                     .join(ChildQuestionText)
                     .where(
                         ChildQuestionText.lang_id == "de",
-                        ChildQuestionText.question
-                        == variable + ": " + variable_label_option,
+                        ChildQuestionText.question == variable_label_option,
                     )
                 )
 

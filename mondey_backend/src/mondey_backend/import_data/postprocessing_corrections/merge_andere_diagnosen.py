@@ -4,7 +4,7 @@
 
 from sqlmodel import select as select
 
-from mondey_backend.dependencies import get_session
+from mondey_backend.import_data.utils import get_import_current_session
 from mondey_backend.models.questions import ChildAnswer
 
 
@@ -14,7 +14,7 @@ def merge_andere_diagnosen():
     of question ID 10 for the same child.
     """
     count_merged = 0
-    with next(get_session()) as session:
+    with get_import_current_session()[0] as session:
         # Get all answers for question ID 12 (Other diagnoses)
         q12_stmt = select(ChildAnswer).where(ChildAnswer.question_id == 12)
         q12_answers = session.exec(q12_stmt).all()

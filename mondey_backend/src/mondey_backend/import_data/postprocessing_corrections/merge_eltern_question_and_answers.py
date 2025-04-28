@@ -4,14 +4,14 @@ from sqlalchemy import delete
 from sqlmodel import col
 from sqlmodel import select
 
-from mondey_backend.dependencies import get_session
+from mondey_backend.import_data.utils import get_import_current_session
 from mondey_backend.models.questions import UserAnswer
 from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.questions import UserQuestionText
 
 
 def combine_question_options():
-    with next(get_session()) as session:
+    with get_import_current_session()[0] as session:
         # Step 1: Find the question IDs for FP01, FP02, FP04, FP05 (exclude FP03)
         target_questions = ["Mütter", "Väter", "Andere Verwandte", "Fremdbetreuung"]
         eltern_question = "Eltern"
@@ -123,7 +123,7 @@ def combine_question_options():
 
 
 def update_user_answers(new_question_id: int, old_question_ids: list[int]):
-    with next(get_session()) as session:
+    with get_import_current_session()[0] as session:
         # Find the FP03 question ID (Eltern)
         stmt = select(UserQuestionText).where(
             UserQuestionText.question == "FP03: Eltern"

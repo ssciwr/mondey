@@ -1,13 +1,13 @@
 from sqlmodel import select as select
 
-from mondey_backend.dependencies import get_session
+from mondey_backend.import_data.utils import get_import_current_session
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import UserAnswer
 
 
 def remove_encoding_in_text_answers():
     count_changed = 0
-    with next(get_session()) as session:
+    with get_import_current_session()[0] as session:
         stmt = select(UserAnswer)
         child_stmt = select(ChildAnswer)
         user_answers = session.exec(stmt).all()

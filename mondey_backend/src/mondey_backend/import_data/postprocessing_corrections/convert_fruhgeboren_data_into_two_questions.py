@@ -22,7 +22,7 @@ import json
 
 from sqlmodel import select as select
 
-from mondey_backend.dependencies import get_session
+from mondey_backend.import_data.utils import get_import_current_session
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import ChildQuestionText
@@ -73,15 +73,15 @@ def transform_birth_terms(dry_run=False):
         "processing_errors": 0,
     }
 
-    with next(get_session()) as session:
+    with get_import_current_session()[0] as session:
         # 1. Find or create the new questions
         # Check if questions with appropriate names already exist
         birth_question = session.exec(
-            select(ChildQuestion).where(ChildQuestion.name == "birth_weeks")
+            select(ChildQuestion).where(ChildQuestion.name == "Schwangerschaftsdauer")
         ).first()
 
         incubator_question = session.exec(
-            select(ChildQuestion).where(ChildQuestion.name == "incubator_weeks")
+            select(ChildQuestion).where(ChildQuestion.name == "Inkubatorwochen")
         ).first()
 
         # If questions don't exist, create them
@@ -186,14 +186,16 @@ def transform_birth_terms(dry_run=False):
                 q3_answer = session.exec(
                     select(ChildAnswer)
                     .where(ChildAnswer.child_id == child_id)
-                    .where(ChildAnswer.question_id == 3)
+                    .where(
+                        ChildAnswer.question_id in [3, 25]
+                    )  # 3 in original import, 25 in re-import/additional batch
                 ).first()
 
                 # Get answer to question 4 (weeks if Fruhgeboren)
                 q4_answer = session.exec(
                     select(ChildAnswer)
                     .where(ChildAnswer.child_id == child_id)
-                    .where(ChildAnswer.question_id == 4)
+                    .where(ChildAnswer.question_id in [4, 26])  # 26 in new import
                 ).first()
 
                 # Process based on answers

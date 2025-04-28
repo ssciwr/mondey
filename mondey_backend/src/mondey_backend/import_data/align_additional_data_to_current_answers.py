@@ -1,6 +1,9 @@
 from mondey_backend.import_data.import_children_with_assigned_milestone_data import (
     map_children_milestones_data,
 )
+from mondey_backend.import_data.import_childrens_question_answers_data import (
+    import_childrens_question_answers_data,
+)
 from mondey_backend.import_data.postprocessing_corrections.run_postprocess_corrections import (
     run_postprocessing_corrections,
 )
@@ -8,9 +11,6 @@ from mondey_backend.import_data.utils import additional_data_path
 from mondey_backend.import_data.utils import get_import_current_session
 from mondey_backend.import_data.utils import labels_path
 from mondey_backend.import_data.utils import questions_configured_path
-from mondey_backend.src.mondey_backend.import_data.import_childrens_question_answers_data import (
-    import_childrens_question_answers_data,
-)
 
 
 def align_additional_data_to_current_answers():
@@ -51,7 +51,6 @@ def align_additional_data_to_current_answers():
         labels_path,
         additional_data_path,
         questions_configured_path,
-        clear_existing_questions_and_answers=False,
     )
 
     """

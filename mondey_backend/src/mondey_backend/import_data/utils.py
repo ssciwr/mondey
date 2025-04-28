@@ -210,17 +210,6 @@ def get_import_current_session():
         return current_session, current_engine
 
 
-""" (For PR review) - Instead of this, I could add a ImportManager with a @contextamanger get_session, but basically,
-I think it's useful for tests to just get_import_test_session (we know the strain on the DB won't be crazy with this
-amount of data)
-
-I can refactor it if useful, as I am not too happy just having functions exported from several files that are all
-doing the same thing (importing), but at the same time I think it is pretty clear how they function for a one-off
-import process. I think the individual tests for data existing, plus the full import to test each function can work
-sequentially, should together confirm whether import works well or not.
-"""
-
-
 def save_select_question(
     variable,
     variable_label,
@@ -246,14 +235,26 @@ def save_select_question(
         print(f"Is to parent: {is_to_parent}")
         print(f"Is required: {is_required}")
 
-    # Determine the appropriate question type
+    # Check if this question already exists
     if is_to_parent:
+        # Check for existing UserQuestion
+        existing_question = session.execute(
+            select(UserQuestion).where(UserQuestion.name == variable_label)
+        ).scalar_one_or_none()
+
+        if existing_question:
+            if debug:
+                print(
+                    f"UserQuestion with name {variable} already exists, skipping insertion"
+                )
+            return existing_question
+
         # Create UserQuestion for the parent
         user_question = UserQuestion(
             component="select",
             type="text",
             required=is_required,
-            name=variable,
+            name=variable_label,
             text={
                 "de": UserQuestionText(
                     question=variable_label,
@@ -266,12 +267,26 @@ def save_select_question(
         session.add(user_question)
         return user_question
     else:
+        # todo: Add special case for Questions 3/4 (Termingeboren) to keep that using the same ID?
+
+        # Check for existing ChildQuestion
+        existing_question = session.execute(
+            select(ChildQuestion).where(ChildQuestion.name == variable_label)
+        ).scalar_one_or_none()
+
+        if existing_question:
+            if debug:
+                print(
+                    f"ChildQuestion with name {variable} already exists, skipping insertion"
+                )
+            return existing_question
+
         # Create ChildQuestion if not a parent question
         child_question = ChildQuestion(
             component="select",
             type="text",
             required=is_required,
-            name=variable,
+            name=variable_label,
             text={
                 "de": ChildQuestionText(
                     question=variable_label,
@@ -288,13 +303,12 @@ def save_select_question(
 def save_text_question(
     variable, variable_label, previous_variable, questions_configured_csv, session
 ):
-    debug = False
     """
     Save a text question as either a ChildQuestion or UserQuestion
 
     By default as a child question, but as a user question if that has been configured.
     """
-
+    debug = False
     is_to_parent = get_question_filled_in_to_parent(questions_configured_csv, variable)
     is_required = get_question_filled_in_required(questions_configured_csv, variable)
 
@@ -305,13 +319,25 @@ def save_text_question(
 
     # Determine the appropriate question type
     if is_to_parent:
+        # Check for existing UserQuestion
+        existing_question = session.execute(
+            select(UserQuestion).where(UserQuestion.name == variable_label)
+        ).scalar_one_or_none()
+
+        if existing_question:
+            if debug:
+                print(
+                    f"UserQuestion with name {variable} already exists, skipping insertion"
+                )
+            return existing_question
+
         print(variable)
         # Create UserQuestion for the parent
         user_question = UserQuestion(
             component="textarea",
             type="text",
             required=is_required,
-            name=variable,
+            name=variable_label,
             text={
                 "de": UserQuestionText(
                     question=variable_label,
@@ -322,12 +348,24 @@ def save_text_question(
         session.add(user_question)
         return user_question
     else:
+        # Check for existing ChildQuestion
+        existing_question = session.execute(
+            select(ChildQuestion).where(ChildQuestion.name == variable_label)
+        ).scalar_one_or_none()
+
+        if existing_question:
+            if debug:
+                print(
+                    f"ChildQuestion with name {variable} already exists, skipping insertion"
+                )
+            return existing_question
+
         # Create ChildQuestion if not a parent question
         child_question = ChildQuestion(
             component="textarea",
             type="text",
             required=is_required,
-            name=variable,
+            name=variable_label,
             text={
                 "de": ChildQuestionText(
                     question=variable_label,
@@ -512,6 +550,7 @@ def update_or_create_user_answer(
                 "Answer:",
                 str(answer_text),
             )
+            print("Was child answer..." if is_child_question else "Was user answer..")
             new_answer = (
                 ChildAnswer(
                     child_id=user_or_child_id,
@@ -526,6 +565,8 @@ def update_or_create_user_answer(
                 )
             )
             session.add(new_answer)
+            print("ADded new answer")
+            print(new_answer)
             return False, new_answer
 
         except Exception as e:

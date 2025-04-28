@@ -4,6 +4,7 @@ Script to add STARTED dates from data.csv to MilestoneAnswerSessions in database
 """
 
 import pandas as pd
+from sqlmodel import text
 
 from mondey_backend.import_data.utils import data_path
 from mondey_backend.import_data.utils import get_import_current_session
@@ -27,7 +28,9 @@ def update_started_value_for_answersessions(relevant_data_csv_path: str):
     for child_id, row in df.iterrows():
         print(f"Updating child_id {child_id} with STARTED date {row.STARTED}")
         session.execute(
-            f"UPDATE milestoneanswersession SET created_at='{row.STARTED}' WHERE child_id={child_id}"
+            text(
+                f"UPDATE milestoneanswersession SET created_at='{row.STARTED}' WHERE child_id={child_id}"
+            )
         )
 
     # Commit the changes

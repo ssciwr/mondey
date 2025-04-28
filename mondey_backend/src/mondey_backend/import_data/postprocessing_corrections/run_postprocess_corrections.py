@@ -34,8 +34,11 @@ def run_postprocessing_corrections(
     # Improve raw data
     print("Improving raw data.")
     remove_encoding_in_text_answers()
+    print("Removed encoding.")
     correct_ja_nein_question_answer_options()
+    print("Correct yes/no answers.")
     update_started_value_for_answersessions(relevant_data_csv_path)
+    print("Cleaned up raw data.")
 
     # Transform answers to be more useful
     print("Transforming answers.")
@@ -47,8 +50,11 @@ def run_postprocessing_corrections(
         # todo: Partial version of transform_younger_older_siblings only for the new children
         # update_user_answers(new_id, old_ids) # from merge_eltern_question
     # because of the approach of deleting the processed questions
+    print("Deleting children age survey answers...")
     delete_children_age_survey_answers()
+    print("Transforming the birth terms question & answers...")
     transform_birth_terms(dry_run=dry_run)
+    # todo: Need to make transforming birth terms actually work.
     # not needed as already done after initial import:
     if cleanup_questions:
         delete_previous_birth_terms_questions(dry_run=dry_run)

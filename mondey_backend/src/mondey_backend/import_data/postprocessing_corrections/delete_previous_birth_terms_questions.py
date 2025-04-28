@@ -1,7 +1,7 @@
 from sqlmodel import select
 from sqlmodel import text
 
-from mondey_backend.dependencies import get_session
+from mondey_backend.import_data.utils import get_import_current_session
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import ChildQuestionText
@@ -16,7 +16,7 @@ def delete_previous_birth_terms_questions(dry_run=False):
     """
     question_ids_to_delete = [3, 4]  # Termingeboren/Fruhgeboren and Fruhgeboren [01]
 
-    with next(get_session()) as session:
+    with get_import_current_session()[0] as session:
         # Count records before deletion for reporting
         answer_count = 0
         for q_id in question_ids_to_delete:
