@@ -253,9 +253,10 @@ def save_select_question(
             component="select",
             type="text",
             required=is_required,
+            name=variable,
             text={
                 "de": UserQuestionText(
-                    question=variable + ": " + variable_label,
+                    question=variable_label,
                     options_json=options_json,
                     options=options_str,
                     lang_id="de",  # German
@@ -270,9 +271,10 @@ def save_select_question(
             component="select",
             type="text",
             required=is_required,
+            name=variable,
             text={
                 "de": ChildQuestionText(
-                    question=variable + ": " + variable_label,
+                    question=variable_label,
                     options_json=options_json,
                     options=options_str,
                     lang_id="de",  # German
@@ -309,9 +311,10 @@ def save_text_question(
             component="textarea",
             type="text",
             required=is_required,
+            name=variable,
             text={
                 "de": UserQuestionText(
-                    question=variable + ": " + variable_label,
+                    question=variable_label,
                     lang_id="de",  # German
                 )
             },
@@ -324,9 +327,10 @@ def save_text_question(
             component="textarea",
             type="text",
             required=is_required,
+            name=variable,
             text={
                 "de": ChildQuestionText(
-                    question=variable + ": " + variable_label,
+                    question=variable_label,
                     lang_id="de",  # German
                 )
             },
@@ -343,7 +347,7 @@ async def create_parent_for_child(
     """
     # Generate a unique username and email based on child's details
     username = f"parent_of_{child_id}"
-    email = f"{username}@artificialImportedData.csv"
+    email = f"{username}@artificialimporteddata.csv"
 
     # Create user object
     user_create = UserCreate(
@@ -375,9 +379,30 @@ async def create_parent_for_child(
     return user
 
 
+async def check_parent_exists(user_session: AsyncSession, child_id: int) -> User | None:
+    """
+    Check if a parent already exists for a given child by looking up the derived email
+
+    Returns:
+        The parent user if found, None otherwise
+    """
+    email = f"parent_of_{child_id}@artificialimporteddata.csv"
+    print("Checking", email)
+
+    # Query for existing parent with this email
+    stmt = select(User).where(User.email == email)
+    result = await user_session.execute(stmt)
+    existing_parent = result.scalars().first()
+
+    print("Existing parent:")
+    print(existing_parent)
+
+    return existing_parent
+
+
 async def generate_parents_for_children(child_ids: list[int]) -> dict[int, int]:
     """
-    Generate parents in bulk for given child IDs
+    Generate parents in bulk for given child IDs, but only for children who don't already have parents
 
     Returns:
         A dictionary mapping child IDs to parent IDs
@@ -388,21 +413,24 @@ async def generate_parents_for_children(child_ids: list[int]) -> dict[int, int]:
         user_db: SQLAlchemyUserDatabase = SQLAlchemyUserDatabase(
             user_import_session, User
         )
-        try:
-            for child_id in child_ids:
+
+        # First, check which children already have parents
+        for child_id in child_ids:
+            existing_parent = await check_parent_exists(user_import_session, child_id)
+
+            if existing_parent:
+                child_parent_map[child_id] = existing_parent.id
+            else:
                 parent = await create_parent_for_child(
                     user_import_session, user_db, child_id
                 )
-                print("created parent", parent)
+                print(f"Created parent {parent.id} for child {child_id}")
                 child_parent_map[child_id] = parent.id
 
-            await user_import_session.commit()
+        await user_import_session.commit()
 
-            return child_parent_map
-
-        except Exception as e:
-            print(f"Error generating parents: {e}")
-            raise
+        print("Final child_parent_map: ", child_parent_map)
+        return child_parent_map
 
 
 def update_or_create_user_answer(
@@ -516,7 +544,7 @@ def get_question_filled_in_to_parent(questions_done_df, variable, debug_print=Fa
         "yes",
     ]
     if debug_print:
-        print("So match found was: ", "True" if match_found else "False")
+        print("So is to parent variable was: ", "True" if match_found else "False")
     return match_found
 
 

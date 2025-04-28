@@ -21,7 +21,7 @@ def update_started_value_for_answersessions(relevant_data_csv_path: str):
     df = (df.loc[:, ["CASE", "STARTED"]]).set_index("CASE")
 
     # Get database session
-    session = get_import_current_session()
+    session, engine = get_import_current_session()
 
     # Update MilestoneAnswerSession records
     for child_id, row in df.iterrows():

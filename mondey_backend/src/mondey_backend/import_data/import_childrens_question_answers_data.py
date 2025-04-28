@@ -45,6 +45,7 @@ import json
 
 import pandas as pd
 from sqlmodel import select
+from tqdm import tqdm
 
 from mondey_backend.import_data.utils import data_path
 from mondey_backend.import_data.utils import get_childs_parent_id
@@ -56,6 +57,7 @@ from mondey_backend.import_data.utils import save_select_question
 from mondey_backend.import_data.utils import save_text_question
 from mondey_backend.import_data.utils import update_or_create_user_answer
 from mondey_backend.models.milestones import Language
+from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import ChildQuestionText
 from mondey_backend.models.questions import UserQuestion
@@ -334,9 +336,21 @@ def assign_answers_to_the_imported_questions(
     total_answers = 0
     missing = 0
 
+    # Get all unique child_ids that already have answers
+    results = session.query(ChildAnswer.child_id).distinct().all()
+    # Extract the ids into a list
+    children_ids_with_data = [result[0] for result in results]
+
+    print("Children IDs which were already covered by answers:", children_ids_with_data)
+
     # Process actual data into child answers
-    for _, child_row in data_df.iterrows():
+    for _, child_row in tqdm(data_df.iterrows()):
+        # First: If the child has any answers, we assume their data is complete (previously imported). So skip such children
+        if child_row.get("CASE") in children_ids_with_data:
+            continue
         # Iterate through all variables in labels_df
+        print("")
+        print("Going through for child ... ", child_row.get("CASE"))
         previous_variable_label = "Default Label"
         previous_variable = "Default Variable"
         for _j, label_row in (
@@ -395,8 +409,7 @@ def assign_answers_to_the_imported_questions(
                         .join(UserQuestionText)
                         .where(
                             UserQuestionText.lang_id == "de",
-                            UserQuestionText.question
-                            == variable + ": " + variable_label_option,
+                            UserQuestionText.question == variable_label_option,
                         )
                     )
 

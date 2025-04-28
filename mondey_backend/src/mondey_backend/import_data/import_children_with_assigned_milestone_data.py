@@ -98,6 +98,11 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
                 )
                 print("Skipping·..")
                 continue
+
+            # Make the parent first, for parent questions and milestone answering sessions. Error out if something went wrong...
+            parents_id = parent_id_map[
+                str(child_id)
+            ]  # still works: get_childs_parent_id(child_id)
             # Check if child already exists
             existing_child = session.execute(
                 select(Child).where(Child.id == child_id)
@@ -132,11 +137,6 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
             }
 
             if not existing_child:
-                # Make the parent first, for parent questions and milestone answering sessions.
-                parents_id = parent_id_map[
-                    str(child_id)
-                ]  # still works: get_childs_parent_id(child_id)
-
                 # Create a new child
                 child = Child(
                     id=child_id,
