@@ -39,5 +39,5 @@ export type WorkerInit = {
 
 export type WorkerFullData = {
 	type: WorkerTypes.FULL_DATA;
-	json_data: any[];
+	csv_data: string;
 };

@@ -91,8 +91,17 @@ function createWorker(): Worker {
 			json_data = response.json_data;
 			plot_data = response.plot_data;
 		} else if (response.type === WorkerTypes.FULL_DATA) {
-			json_data = response.json_data;
-			downloadCSV();
+			console.log("CSV data received:", response.csv_data);
+			is_downloading = true;
+			const csvConfig = mkConfig({
+				useKeysAsHeaders: true,
+				filename: `${["mondey_all_", new Date().toISOString().replace(/T.*/, "")].concat(selected_milestone_names).concat(selected_column_names).join("-")}`,
+				quoteStrings: true,
+			});
+			const csv = generateCsv(csvConfig)(response.csv_data);
+			download(csvConfig)(csv);
+			is_downloading = false;
+			console.log("Download complete.");
 		}
 	};
 

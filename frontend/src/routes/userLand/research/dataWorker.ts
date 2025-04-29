@@ -2,7 +2,12 @@ import type { GetResearchNamesResponse } from "$lib/client";
 import { client } from "$lib/client/client.gen";
 import { getResearchData, getResearchNames } from "$lib/client/sdk.gen";
 import type { PlotData } from "$lib/util";
-import { DataFrame, concat, toJSON } from "danfojs/dist/danfojs-browser/src";
+import {
+	DataFrame,
+	concat,
+	toCSV,
+	toJSON,
+} from "danfojs/dist/danfojs-browser/src";
 import type { SelectOptionType } from "flowbite-svelte";
 import {
 	type WorkerFullData,
@@ -191,7 +196,7 @@ function retrieve_all_data() {
 
 	const message: WorkerFullData = {
 		type: WorkerTypes.FULL_DATA,
-		json_data: get_json_data(df),
+		csv_data: toCSV(df_in),
 	};
 	self.postMessage(message);
 }
