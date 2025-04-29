@@ -215,5 +215,5 @@ test("Research page: Download all CSV contains expected data", async ({
 		page,
 		true,
 	);
-	expect(downloadFilename).toContain("mondey-");
+	expect(downloadFilename).toContain("mondey_all_");
 });
