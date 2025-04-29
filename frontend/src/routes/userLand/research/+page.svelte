@@ -174,9 +174,6 @@ function handleDownloadAll() {
 	if (downloadAllHandler) {
 		is_downloading = true;
 		downloadAllHandler();
-		// Reset state
-		json_data = [];
-		plot_data = {} as PlotData;
 	}
 }
 
