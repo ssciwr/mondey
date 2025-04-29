@@ -4,6 +4,8 @@
 import PlotLines from "$lib/components/DataDisplay/PlotLines.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { type PlotData } from "$lib/util";
+import pkg from "file-saver";
+const { saveAs } = pkg;
 import { download, generateCsv, mkConfig } from "export-to-csv";
 import {
 	Button,
@@ -91,17 +93,11 @@ function createWorker(): Worker {
 			json_data = response.json_data;
 			plot_data = response.plot_data;
 		} else if (response.type === WorkerTypes.FULL_DATA) {
-			console.log("CSV data received:", response.csv_data);
 			is_downloading = true;
-			const csvConfig = mkConfig({
-				useKeysAsHeaders: true,
-				filename: `${["mondey_all_", new Date().toISOString().replace(/T.*/, "")].concat(selected_milestone_names).concat(selected_column_names).join("-")}`,
-				quoteStrings: true,
+			const blob = new Blob([response.csv_data], {
+				type: "text/csv;charset=utf-8;",
 			});
-			const csv = generateCsv(csvConfig)(response.csv_data);
-			download(csvConfig)(csv);
-			is_downloading = false;
-			console.log("Download complete.");
+			saveAs(blob, `mondey_all_${new Date().toISOString().replace(/T.*/, "")}`);
 		}
 	};
 
