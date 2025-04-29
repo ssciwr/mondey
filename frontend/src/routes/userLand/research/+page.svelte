@@ -98,6 +98,7 @@ function createWorker(): Worker {
 				type: "text/csv;charset=utf-8;",
 			});
 			saveAs(blob, `mondey_all_${new Date().toISOString().replace(/T.*/, "")}`);
+			is_downloading = false;
 		}
 	};
 
