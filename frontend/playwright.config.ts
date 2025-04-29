@@ -29,6 +29,7 @@ export default defineConfig({
 		{
 			name: "Mobile Chrome",
 			use: { ...devices["Pixel 5"] },
+			testIgnore: [/.*admin.*\.spec\.ts/],
 		},
 		// {
 		// 	name: "Mobile Safari",

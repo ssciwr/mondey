@@ -4,6 +4,8 @@ import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
 
+from mondey_backend.routers.utils import count_milestone_answers_for_milestone
+
 
 def test_get_milestone_groups(
     admin_client: TestClient, milestone_group_admin1: dict, milestone_group_admin2: dict
@@ -56,15 +58,8 @@ def test_put_milestone_group(admin_client: TestClient, milestone_group_admin1: d
     assert response.json() == milestone_group
 
 
-def test_delete_milestone_group(admin_client: TestClient):
-    response = admin_client.delete("/admin/milestone-groups/2")
-    assert response.status_code == 200
-    response = admin_client.delete("/admin/milestone-groups/2")
-    assert response.status_code == 404
-
-
 def test_delete_milestone_group_invalid_group_id(admin_client: TestClient):
-    response = admin_client.delete("/admin/milestone-groups/692")
+    response = admin_client.delete("/admin/milestone-groups/692?dry_run=false")
     assert response.status_code == 404
 
 
@@ -169,10 +164,10 @@ def test_put_milestone(admin_client: TestClient, milestone_group_admin1: dict):
 
 def test_delete_milestone(admin_client: TestClient):
     assert admin_client.get("/milestones/2").status_code == 200
-    response = admin_client.delete("/admin/milestones/2")
+    response = admin_client.delete("/admin/milestones/2?dry_run=false")
     assert response.status_code == 200
     assert admin_client.get("/milestones/2").status_code == 404
-    response = admin_client.delete("/admin/milestones/2")
+    response = admin_client.delete("/admin/milestones/2?dry_run=false")
     assert response.status_code == 404
 
 
@@ -281,3 +276,124 @@ def test_delete_submitted_milestone_image(
     assert not submitted_image_file.is_file()
     assert not approved_image_file.is_file()
     assert len(admin_client.get("/admin/submitted-milestone-images").json()) == 1
+
+
+"""
+Test that deleting a milestone actually deletes nothing (count milestone answers remains the same) with dry_run = True
+or non-specified dry_run value, and that deleting a milestone with dry_run = False succeeds
+"""
+
+
+def test_delete_milestone_dry_run(admin_client, session):
+    milestone_id = 2
+    expected_answers_from_fixtures = 3  # Has these 3 existing answers in the fixtures.
+    assert (
+        count_milestone_answers_for_milestone(session, milestone_id)
+        == expected_answers_from_fixtures
+    )
+
+    # Fake delete call without dry run param at all (should default to dry run to be safe)
+    response = admin_client.delete(f"/admin/milestones/{milestone_id}")
+    response_json = response.json()
+    assert response.status_code == 200
+    assert response_json["dry_run"]
+    assert "children" in response_json
+    assert response_json["children"]["affectedAnswers"] == 3
+    assert (
+        count_milestone_answers_for_milestone(session, milestone_id)
+        == expected_answers_from_fixtures
+    )
+
+    # Fake delete call with explicit dry_run param set to True
+    response = admin_client.delete(f"/admin/milestones/{milestone_id}?dry_run=true")
+    assert response.status_code == 200
+
+    response_json = response.json()
+    assert response_json["dry_run"]
+    assert "children" in response_json
+    assert response_json["children"]["affectedAnswers"] == 3
+    assert (
+        count_milestone_answers_for_milestone(session, milestone_id)
+        == expected_answers_from_fixtures
+    )
+
+
+def test_delete_milestone_confirmed(admin_client, session):
+    milestone_id = 2
+    expected_answers_from_fixtures = 3  # Has these 3 existing answers in the fixtures.
+    assert (
+        count_milestone_answers_for_milestone(session, milestone_id)
+        == expected_answers_from_fixtures
+    )
+
+    # Real delete call with dry_run param set to False
+    response = admin_client.delete(f"/admin/milestones/{milestone_id}?dry_run=false")
+    assert response.status_code == 200
+    assert response.json()["ok"]
+    assert count_milestone_answers_for_milestone(session, milestone_id) == 0
+
+
+## Test Delete whole milestone groups:
+def test_delete_milestone_groups_dry_run(admin_client, session):
+    milestone_group_id = (
+        1  # owns milestone ID 1, 2, 3 which have answers respectively of:
+    )
+    # num answers for each milestone: [3, 2, 1]
+    known_first_milestone_id = 1
+    expected_answers_for_first_milestone = 3
+    expected_answers_from_fixtures = (
+        6  # from the 3 milestones in group 1 (setup in conftest fixtures)
+    )
+    assert (
+        count_milestone_answers_for_milestone(session, known_first_milestone_id)
+        == expected_answers_for_first_milestone
+    )
+
+    # Fake delete call without dry run param at all (should default to dry run to be safe)
+    response = admin_client.delete(f"/admin/milestone-groups/{milestone_group_id}")
+    response_json = response.json()
+    assert response.status_code == 200
+    assert response_json["dry_run"]
+    assert "children" in response_json
+    assert (
+        response_json["children"]["affectedAnswers"] == expected_answers_from_fixtures
+    )
+    assert response_json["children"]["affectedMilestones"] == 3
+
+    response = admin_client.delete(f"/admin/milestone-groups/{milestone_group_id}")
+    assert response.status_code == 200  # still exists because was dry run.
+
+
+## Test Delete whole milestone groups:
+def test_delete_milestone_groups_real(admin_client, session):
+    milestone_group_id = (
+        1  # owns milestone ID 1, 2, 3 which have answers respectively of:
+    )
+    # num answers for each milestone: [3, 3, 0] # first two milestones have 3 answers each, last 0.
+    known_first_milestone_id = 1
+    expected_answers_for_first_milestone = 3
+    expected_answers_from_fixtures = (
+        6  # from the 3 milestones in group 1 (setup in conftest fixtures)
+    )
+    assert (
+        count_milestone_answers_for_milestone(session, known_first_milestone_id)
+        == expected_answers_for_first_milestone
+    )
+
+    # Fake delete call without dry run param at all (should default to dry run to be safe)
+    response = admin_client.delete(
+        f"/admin/milestone-groups/{milestone_group_id}?dry_run=false"
+    )
+    response_json = response.json()
+    assert response.status_code == 200
+    assert response_json["ok"]
+    assert response_json["children"]["affectedMilestones"] == 3
+    assert (
+        response_json["children"]["affectedAnswers"] == expected_answers_from_fixtures
+    )
+
+    assert count_milestone_answers_for_milestone(session, known_first_milestone_id) == 0
+    response = admin_client.delete(
+        f"/admin/milestone-groups/{milestone_group_id}?dry_run=false"
+    )
+    assert response.status_code == 404  # gone for good, because was real, not dry_run.

@@ -3,6 +3,7 @@
 <script lang="ts">
 import {
 	Card,
+	Checkbox,
 	Table,
 	TableBody,
 	TableBodyCell,
@@ -30,6 +31,7 @@ import EditButton from "$lib/components/Admin/EditButton.svelte";
 import EditQuestionModal from "$lib/components/Admin/EditQuestionModal.svelte";
 import OrderItemsModal from "$lib/components/Admin/OrderItemsModal.svelte";
 import ReorderButton from "$lib/components/Admin/ReorderButton.svelte";
+import DangerousDeleteModal from "$lib/components/DangerousDeleteModal.svelte";
 import DeleteModal from "$lib/components/DeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { childQuestions, userQuestions } from "$lib/stores/adminStore";
@@ -60,9 +62,10 @@ if (kind === "user") {
 	create = createUserQuestion;
 	doDelete = deleteUserQuestion;
 	refresh = refreshUserQuestions;
-	build = () => {
+	build = (dry_run = true) => {
 		return {
 			path: { user_question_id: currentQuestionId },
+			query: { dry_run: dry_run },
 		};
 	};
 	order = orderUserQuestionsAdmin;
@@ -71,9 +74,10 @@ if (kind === "user") {
 	create = createChildQuestion;
 	doDelete = deleteChildQuestion;
 	refresh = refreshChildQuestions;
-	build = () => {
+	build = (dry_run = true) => {
 		return {
 			path: { child_question_id: currentQuestionId },
+			query: { dry_run: dry_run },
 		};
 	};
 	order = orderChildQuestionsAdmin;
@@ -94,17 +98,11 @@ async function addQuestion() {
 	}
 }
 
-async function doDeleteQuestion() {
+async function doDeleteQuestion(dry_run = true) {
 	if (!currentQuestionId) {
 		return;
 	}
-	const { data, error } = await doDelete(build());
-	if (error) {
-		console.log(error);
-	} else {
-		console.log(data);
-		await refresh();
-	}
+	return await doDelete(build(dry_run));
 }
 
 onMount(async () => {
@@ -172,7 +170,11 @@ onMount(async () => {
 		question={currentQuestion}
 	/>
 {/key}
-<DeleteModal bind:open={showDeleteModal} onclick={doDeleteQuestion} />
+<DangerousDeleteModal bind:open={showDeleteModal}
+					  deleteDryRunnableRequest={(dry_run) => doDeleteQuestion(dry_run)}
+					  afterDelete={async() => await refresh()}
+					  intendedConfirmCode={i18n.tr.admin.delete}
+/>
 
 <OrderItemsModal bind:open={showOrderItemsModal} items={currentOrderItems} endpoint={order} callback={refresh}/>
 {:else}

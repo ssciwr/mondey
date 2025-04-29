@@ -20,8 +20,8 @@ import {
 } from "$lib/client";
 import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
 import EditButton from "$lib/components/Admin/EditButton.svelte";
+import DangerousDeleteModal from "$lib/components/DangerousDeleteModal.svelte";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
-import DeleteModal from "$lib/components/DeleteModal.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { displayChildImages } from "$lib/features";
 import { i18n } from "$lib/i18n.svelte";
@@ -322,36 +322,6 @@ async function submitData(): Promise<void> {
 	console.log("submission of child data successful.");
 	goto("/userLand/children/gallery");
 }
-
-const deleteCurrentChild = async () => {
-	if (currentChild.id === null) {
-		console.log("no child id, no child to delete");
-		alertStore.showAlert(
-			i18n.tr.childData.alertMessageTitle,
-			i18n.tr.childData.alertMessageError,
-			true,
-		);
-		return;
-	}
-
-	const response = await deleteChild({
-		path: {
-			child_id: currentChild.id,
-		},
-	});
-
-	if (response.error) {
-		console.log("Error when deleting child");
-		alertStore.showAlert(
-			`${i18n.tr.childData.alertMessageTitle} ${i18n.tr.childData.alertMessageError}`,
-			response.error.detail,
-			true,
-		);
-	} else {
-		goto("/userLand/children/gallery");
-		currentChild.id = null;
-	}
-};
 </script>
 
 {#if i18n.locale}
@@ -368,6 +338,20 @@ const deleteCurrentChild = async () => {
                             class="m-1 mb-1 p-1 text-left font-bold tracking-tight text-gray-700 dark:text-gray-400"
                     >{childLabel}
                         {#if disableEdit}
+                             <DangerousDeleteModal bind:open={showDeleteModal}
+                                    afterDelete={() => goto("/userLand/children/gallery")}
+                                    intendedConfirmCode={i18n.tr.admin.delete}
+                                    deleteDryRunnableRequest={(dryRun) =>
+                                    deleteChild({
+                                        path: {
+                                            child_id: currentChild.id,
+                                        },
+                                        query: {
+                                            dry_run: dryRun
+                                        }
+                                    })}>
+
+                                </DangerousDeleteModal>
                             <small class="block text-muted">
                                 <span class="text-muted">{birthmonthtext} {birthyear}</span>
                             </small>
@@ -378,7 +362,7 @@ const deleteCurrentChild = async () => {
                             class="m-1 mx-auto w-full flex-col space-y-6"
                             onsubmit={preventDefault(submitData)}
                     >
-                        {#if false === disableEdit}
+                        {#if false === disableEdit && showChildQuestions === false}
                             <DataInput
                                     component={componentTable["input"]}
                                     bind:value={name}
@@ -478,7 +462,6 @@ const deleteCurrentChild = async () => {
                                 </Button>
                                 <Tooltip>{questionnaire.length} {i18n.tr.admin.childQuestions}</Tooltip>
                             {/if}
-                            <DeleteModal bind:open={showDeleteModal} onclick={deleteCurrentChild}></DeleteModal>
 
                         </span>
 
