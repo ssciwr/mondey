@@ -4,8 +4,7 @@
 import PlotLines from "$lib/components/DataDisplay/PlotLines.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { type PlotData } from "$lib/util";
-import pkg from "file-saver";
-const { saveAs } = pkg;
+import saveAs from "file-saver";
 import { download, generateCsv, mkConfig } from "export-to-csv";
 import {
 	Button,
