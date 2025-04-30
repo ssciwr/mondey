@@ -1,8 +1,10 @@
+import pandas as pd
+
 from mondey_backend.import_data.import_children_with_assigned_milestone_data import (
     map_children_milestones_data,
 )
 from mondey_backend.import_data.import_childrens_question_answers_data import (
-    import_childrens_question_answers_data,
+    assign_answers_to_the_imported_questions,
 )
 from mondey_backend.import_data.postprocessing_corrections.run_postprocess_corrections import (
     run_postprocessing_corrections,
@@ -38,6 +40,25 @@ def align_additional_data_to_current_answers():
     :return:
     """
 
+    # Check we have all additional data files:
+    labels_df = pd.read_csv(
+        labels_path,
+        sep=",",
+        encoding="utf-16",
+        encoding_errors="replace",
+        index_col=None,
+    )
+    additional_data_df = pd.read_csv(
+        additional_data_path, sep="\t", encoding="utf-16", encoding_errors="replace"
+    )
+    questions_configured_df = pd.read_csv(
+        questions_configured_path,
+        sep=",",
+        encoding="utf-8",
+        dtype=str,
+        encoding_errors="replace",
+    )
+
     import_current_session, import_current_engine = get_import_current_session()
 
     print("Now assigning the additional children their milestones")
@@ -45,21 +66,10 @@ def align_additional_data_to_current_answers():
         additional_data_path, import_current_session
     )  # already deals with existing children.
 
-    # Ignore duplicate questions... just re-add simple ones that postprocessing will merge later.
-    import_childrens_question_answers_data(
-        import_current_session,
-        labels_path,
-        additional_data_path,
-        questions_configured_path,
-    )
-
-    """
-    # Below: Not needed. The above script inserts questions, then answers too.
-    # Only answers
+    # Only answers - do not re-add the questions
     assign_answers_to_the_imported_questions(
         import_current_session, additional_data_df, labels_df, questions_configured_df
     )
-    """
 
     run_postprocessing_corrections(additional_data_path, dry_run=False)
 
@@ -68,7 +78,3 @@ def align_additional_data_to_current_answers():
         "research data from these additional sessions in the UI - the scores will only calculate when the stats update"
         "gets ran (e.g. by running async_update_stats or using the endpoint for update-stats/{incremental_update})"
     )
-
-
-print("Aligning additional data now..")
-align_additional_data_to_current_answers()

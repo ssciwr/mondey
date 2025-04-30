@@ -4,9 +4,6 @@ from mondey_backend.import_data.postprocessing_corrections.convert_fruhgeboren_d
 from mondey_backend.import_data.postprocessing_corrections.correct_ja_nein_question_answer_options import (
     correct_ja_nein_question_answer_options,
 )
-from mondey_backend.import_data.postprocessing_corrections.delete_children_age_survey_answers import (
-    delete_children_age_survey_answers,
-)
 from mondey_backend.import_data.postprocessing_corrections.delete_previous_birth_terms_questions import (
     delete_previous_birth_terms_questions,
 )
@@ -33,11 +30,13 @@ def run_postprocessing_corrections(
 ):
     # Improve raw data
     print("Improving raw data.")
-    remove_encoding_in_text_answers()
+    remove_encoding_in_text_answers()  # still need, works on additional, does not affect existing
     print("Removed encoding.")
-    correct_ja_nein_question_answer_options()
+    correct_ja_nein_question_answer_options()  # still need, works on additional, does not affect existing
     print("Correct yes/no answers.")
-    update_started_value_for_answersessions(relevant_data_csv_path)
+    update_started_value_for_answersessions(
+        relevant_data_csv_path
+    )  # still need, works on additional, does not affect existing
     print("Cleaned up raw data.")
 
     # Transform answers to be more useful
@@ -49,9 +48,6 @@ def run_postprocessing_corrections(
         pass
         # todo: Partial version of transform_younger_older_siblings only for the new children
         # update_user_answers(new_id, old_ids) # from merge_eltern_question
-    # because of the approach of deleting the processed questions
-    print("Deleting children age survey answers...")
-    delete_children_age_survey_answers()
     print("Transforming the birth terms question & answers...")
     transform_birth_terms(dry_run=dry_run)
     # todo: Need to make transforming birth terms actually work.
@@ -61,6 +57,12 @@ def run_postprocessing_corrections(
     # no translation of questions needed as we are re-using the english questions (which have german and english texts)
     print("All postprocessing complete.")
 
+
+"""
+- Children Birth age (FK01 FK02) - don't save, skip.
+- Fruhgeboren / Termingeboren: parse it automatically upon saving, save direct into question IDs.
+- Eltern questions (this includes: ) - just save to the Eltern question instead.
+"""
 
 # For testing..
 if __name__ == "__main__":
