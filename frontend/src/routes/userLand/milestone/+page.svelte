@@ -199,7 +199,18 @@ const breadcrumbdata = $derived([
                                 class={` min-w-20 absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
                                 src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${image.id}.webp`}
                                 alt=""
+                                on:click={() => modal-${image.id}.open}
+
                         />
+
+
+                        <dialog id={`modal-${image.id}`}>
+                            <img
+                                    class={` min-w-20 absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out`}
+                                    src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${image.id}.webp`}
+                                    alt=""
+                            />
+                        </dialog>
                     {/each}
                 </div>
                 <div class="m-2 md:m-4 grow">
