@@ -72,9 +72,14 @@ def align_additional_data_to_current_answers():
     )
 
     run_postprocessing_corrections(additional_data_path, dry_run=False)
+    # these largely convert the "chosen/not chosen" into "Yes/No" etc and other similar parsing of encoded characters
 
     print(
         "Finished! All additional data added. Remember to re-run and update the stats if you want to see the updated"
         "research data from these additional sessions in the UI - the scores will only calculate when the stats update"
         "gets ran (e.g. by running async_update_stats or using the endpoint for update-stats/{incremental_update})"
     )
+
+
+if __name__ == "__main__":
+    align_additional_data_to_current_answers()

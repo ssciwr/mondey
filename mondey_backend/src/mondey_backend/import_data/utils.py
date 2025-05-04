@@ -479,6 +479,7 @@ def update_or_create_user_answer(
     set_only_additional_answer: bool = False,
     is_child_question=True,
 ):
+    print("Updating Question ID: " + str(question_id) + " with answer: " + answer_text)
     """
     Upsert the answers to questions, by ID, handling different kinds of answers.
     """

@@ -38,6 +38,3 @@ def merge_andere_diagnosen():
         session.commit()
         print("Done!")
         print(f"Merged {count_merged} 'Other diagnoses' answers into question ID 10")
-
-        # todo; DOuble check fi answers for question ID 12 (or I remember in the back of my head 13)
-        # remain wrongly in the data.

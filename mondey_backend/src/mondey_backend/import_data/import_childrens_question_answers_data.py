@@ -47,6 +47,12 @@ import pandas as pd
 from sqlmodel import select
 from tqdm import tqdm
 
+from mondey_backend.import_data.hardcoded_additional_data_answer_saving import (
+    is_special_answer_case,
+)
+from mondey_backend.import_data.hardcoded_additional_data_answer_saving import (
+    process_special_answer,
+)
 from mondey_backend.import_data.utils import data_path
 from mondey_backend.import_data.utils import get_childs_parent_id
 from mondey_backend.import_data.utils import get_import_test_session
@@ -382,6 +388,19 @@ def assign_answers_to_the_imported_questions(
             for variable_label_option in [
                 variable_label,
             ]:
+                response = child_row.get(variable)
+                answer = str(
+                    labels_df[
+                        (labels_df["Variable"] == variable)
+                        & (labels_df["Response Code"] == response)
+                    ]
+                )
+                # at this point we check if it is a hardcoded special case:
+                if is_special_answer_case(variable_label, variable):
+                    process_special_answer(
+                        session, variable_label, answer, variable, child_row.get("CASE")
+                    )
+                    continue
                 preserved_freetext_lookup_key = variable
                 set_only_additional_answer = False
                 if (
@@ -408,6 +427,7 @@ def assign_answers_to_the_imported_questions(
                 question = session.exec(query).first()
 
                 # todo: Now we know FK = Children, FE/FP = Parents, we could use IF rather than fallback for this.
+                # note: The above doesn't always hold ...
                 if not question:
                     query = (
                         select(UserQuestion)
@@ -430,14 +450,18 @@ def assign_answers_to_the_imported_questions(
                     "Discarding question answer without found saved question (which was deliberately not saved, maybe because it was a milestone etc): ",
                     variable,
                     label_row["Variable Label"],
+                    "Answer:",
+                    str(child_row.get(variable)),
+                    str(
+                        labels_df[
+                            (labels_df["Variable"] == variable)
+                            & (labels_df["Response Code"] == response)
+                        ]
+                    ),
                 )
                 questions_to_discard.append(variable)
                 # raise("This should not happen")
                 continue
-
-            # Get the child's response for this variable
-            response = child_row.get(variable)
-            answer_text = str(response)  # safe default for free text answers.
 
             # Skip if no response
             if pd.isna(response) or response == -9:
