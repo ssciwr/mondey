@@ -523,7 +523,7 @@ async function printReport(): Promise<void> {
 
 <!--Snippet defining how the evaluation for each milestonegroup is shown. 'grade' is the evaluation we get from the backend-->
 {#snippet evaluation( milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, grade: number, isMilestone: boolean,)}
-    <div class={`rounded-lg space-x-2 space-y-2 justify-center p-2 pt-0 pb-0 m-2 flex flex-col text-sm text-white ${(grade === 0 || grade === -1) && isMilestone=== true ? "bg-milestone-600" : "bg-green-700"}`}>
+    <div class={`rounded-lg space-x-2 space-y-2 justify-center p-2 pt-0 pb-0 m-2 flex flex-col text-sm text-white bg-milestone-600`}>
         {#if grade === 1}
             {@render evaluationElement(CheckCircleSolid, milestone_or_group, "text-feedback-0", isMilestone)}
         {:else if grade === 0}
@@ -637,8 +637,8 @@ async function printReport(): Promise<void> {
             {:else}
                 {#each relevant_sessionkeys.slice(0, Math.min(numShownAnswersessions, relevant_sessionkeys.length)) as aid}
                     <TabItem defaultClass="font-bold m-1 p-0"
-                             activeClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600 border-1"
-                             inactiveClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 border-additional-color-600 dark:border-additional-color-600 border-1"
+                             activeClasses="font-bold m-1 p-2 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600 border-1"
+                             inactiveClasses="font-bold m-1 p-2 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 border-additional-color-600 dark:border-additional-color-600 border-1"
                              title={makeTitle(aid)}
                              open={aid === relevant_sessionkeys[0]}
                     >
