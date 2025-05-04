@@ -317,7 +317,7 @@ async function loadData(aid: number | null): Promise<void> {
 
 	const summary_ = await loadSummaryFeedbackFor(aid);
 	if (summary_ === null) {
-		alertMessage = `Something went wrong when loading the summary feedback for ${aid}`;
+		alertMessage = i18n.tr.milestone.feedbackLoadingSummaryError;
 		alertStore.showAlert(
 			i18n.tr.childData.alertMessageTitle,
 			alertMessage,
@@ -329,7 +329,7 @@ async function loadData(aid: number | null): Promise<void> {
 
 	const detailed_ = await loadDetailedFeedbackFor(aid);
 	if (detailed_ === null) {
-		alertMessage = `Something went wrong when loading the detailed feedback for ${aid}`;
+		alertMessage = i18n.tr.milestone.feedbackLoadingError;
 		alertStore.showAlert(
 			i18n.tr.childData.alertMessageTitle,
 			alertMessage,
@@ -509,20 +509,21 @@ async function printReport(): Promise<void> {
 
 <!--element of the detailed evaluation which shows how the child fared in each milestonegroup-->
 {#snippet evaluationElement(symbol: any, milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, color: string, isMilestone: boolean = false)}
-    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center justify-center m-2 p-6">
-        <svelte:component this={symbol} size="xl" class={`${color}`} />
+    <div class="flex flex-col items-center justify-center p-2 w-full">
+        <div class="flex justify-center w-full mb-2">
+            <svelte:component this={symbol} size="xl" class={`${color}`} />
+        </div>
         {#if color !== "gray"}
 			<div class = {`font-bold ${isMilestone? "text-white dark:text-white": ""}`} >
 				{milestone_or_group?.text[i18n.locale].title}
 			</div>
         {/if}
-        <Hr class="w-full my-1"/>
     </div>
 {/snippet}
 
 <!--Snippet defining how the evaluation for each milestonegroup is shown. 'grade' is the evaluation we get from the backend-->
 {#snippet evaluation( milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, grade: number, isMilestone: boolean,)}
-    <div class={`rounded-lg space-x-2 space-y-2 justify-center p-10 m-2 flex flex-col text-sm text-white ${(grade === 0 || grade === -1) && isMilestone=== true ? "bg-milestone-600" : "bg-green-700"}`}>
+    <div class={`rounded-lg space-x-2 space-y-2 justify-center p-2 pt-0 pb-0 m-2 flex flex-col text-sm text-white ${(grade === 0 || grade === -1) && isMilestone=== true ? "bg-milestone-600" : "bg-green-700"}`}>
         {#if grade === 1}
             {@render evaluationElement(CheckCircleSolid, milestone_or_group, "text-feedback-0", isMilestone)}
         {:else if grade === 0}

@@ -62,6 +62,9 @@ export const translationIds = {
 		disableHelp: "Ausblenden",
 		noFeedback:
 			"Kein Feedback verfügbar. Sie müssen ein Kind länger als eine Woche beobachten und regelmäßig Meilensteine bewerten um Feedback zu erhalten.",
+		feedbackLoadingSummaryError:
+			"Beim Laden der Zusammenfassung des Feedbacks ist ein Fehler aufgetreten.",
+		feedbackLoadingError: "Beim Laden das Feedback ist ein Fehler aufgetreten.",
 		current: "Aktuell",
 		toTheMilestone: "Zum Meilenstein",
 		older: "Weiter zurück",
