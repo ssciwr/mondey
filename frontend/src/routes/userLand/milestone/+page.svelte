@@ -84,7 +84,7 @@ async function nextMilestone() {
 		currentMilestoneIndex + 1 ===
 		contentStore.milestoneGroupData.milestones.length
 	) {
-		goto("/userLand/milestone/overview");
+		goto("/userLand/milestone/group");
 		return;
 	}
 	currentMilestoneIndex += 1;
@@ -240,13 +240,19 @@ const breadcrumbdata = $derived([
                     </Accordion>
                 </div>
                 <div class="m-1 mt-0 flex flex-col justify-items-stretch rounded-lg">
-                    {#each [0, 1, 2, 3] as answerIndex}
+                    {#each [0, 1, 2, 3, 4] as answerIndex}
                         <MilestoneButton
                                 index={answerIndex}
                                 selected={selectedAnswer === answerIndex}
                                 onClick={() => {
-							selectAnswer(answerIndex);
-						}}
+                                    if (answerIndex === 4) {
+                                        if (selectedAnswer === null || selectedAnswer === undefined || selectedAnswer < 0) {
+                                        nextMilestone(); // skip ahead.
+                                        return; // early exit
+                                        }
+                                    }
+							        selectAnswer(answerIndex);
+                                }}
                                 tooltip={i18n.tr.milestone[`answer${answerIndex}Desc`]}
                         >
                             {i18n.tr.milestone[`answer${answerIndex}Text`]}
@@ -261,15 +267,6 @@ const breadcrumbdata = $derived([
                         >
                             <ArrowLeftOutline class="me-2 h-5 w-5 text-gray-700 dark:text-gray-400" />
                             {i18n.tr.milestone.prev}
-                        </Button>
-                        <Button
-                                color="light"
-                                disabled={selectedAnswer === null || selectedAnswer === undefined || selectedAnswer < 0}
-                                on:click={nextMilestone}
-                                class="m-1 mt-4 text-gray-700 dark:text-gray-400"
-                        >
-                            {i18n.tr.milestone.next}
-                            <ArrowRightOutline class="ms-2 h-5 w-5 text-gray-700 dark:text-gray-400" />
                         </Button>
                     </div>
                 </div>
