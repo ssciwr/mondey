@@ -408,7 +408,7 @@ async function generateReport(): Promise<string | null> {
 		// iterate over all answersessions with aid:key
 		for (let aid of allSessionkeys) {
 			const min = Math.min(...(Object.values(summary[aid]) as number[]));
-			report += `<h2>${i18n.tr.milestone.timeperiod}: ${makeTitle(Number(aid))}</h2> \n`;
+			report += `<h2>${i18n.tr.milestone.timeperiod}: ${formatDate(answerSessions[aid].created_at)}</h2> \n`;
 			report += `<strong>${i18n.tr.milestone.summaryScore}:</strong> ${min === 1 ? i18n.tr.milestone.recommendOk : min === 0 ? i18n.tr.milestone.recommendWatch : min === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
 
 			for (let [mid, score] of Object.entries(summary[aid])) {
