@@ -15,7 +15,7 @@ import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { contentStore } from "$lib/stores/contentStore.svelte";
-import { Accordion, AccordionItem, Button } from "flowbite-svelte";
+import { Accordion, AccordionItem, Button, Modal } from "flowbite-svelte";
 import {
 	ArrowLeftOutline,
 	ArrowRightOutline,
@@ -140,6 +140,7 @@ let milestoneAnswerSession = $state(
 );
 let currentMilestoneIndex = $state(contentStore.milestoneIndex);
 let currentMilestone = $state(undefined as MilestonePublic | undefined);
+let modalImagePreviewOpen = $state(false);
 let selectedAnswer = $derived(
 	milestoneAnswerSession?.answers?.[`${currentMilestone?.id}`]?.answer,
 );
@@ -200,22 +201,21 @@ const breadcrumbdata = $derived([
                                 src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${image.id}.webp`}
                                 alt=""
                                 on:click={() => {
-                                    const dialog: HTMLDialogElement = document.querySelector("#modalpreview")
-                                    if (dialog) {
-                                        dialog.showModal()
-                                    }
+                                    modalImagePreviewOpen = true;
                                 }}
-
                         />
-
-                        <dialog id="modalpreview" class="bg-white p-6">
-                            <img
-                                    class="rounded-xl"
-                                    src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${currentMilestone.images[currentImageIndex].id}.webp`}
-                                    alt=""
-                            />
-                        </dialog>
                     {/each}
+                    <Modal bind:open={modalImagePreviewOpen} size="xl" autoclose outsideclose>
+                        <div class="p-2">
+                            {#if currentMilestone?.images && currentMilestone.images.length > 0}
+                                <img
+                                        class="w-full rounded-lg"
+                                        src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${currentMilestone.images[currentImageIndex].id}.webp`}
+                                        alt=""
+                                />
+                            {/if}
+                        </div>
+                    </Modal>
                 </div>
                 <div class="m-2 md:m-4 grow">
                     <h2 class="mb-2 text-2xl font-bold text-gray-700 dark:text-gray-400">
