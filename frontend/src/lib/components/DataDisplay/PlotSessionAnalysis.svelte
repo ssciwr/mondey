@@ -22,7 +22,7 @@ onMount(() => {
 			],
 			xAxis: new Axis<MilestoneAnswerAnalysis>({
 				type: "x",
-				label: `${i18n.tr.admin.milestone}`,
+				label: `${i18n.tr.admin.milestoneId}`,
 				tickFormat: (tick: number) => `${data[tick].milestone_id}`,
 			}),
 			yAxis: new Axis<MilestoneAnswerAnalysis>({
@@ -44,7 +44,7 @@ onMount(() => {
 			],
 			xAxis: new Axis<MilestoneAnswerAnalysis>({
 				type: "x",
-				label: `${i18n.tr.admin.milestone}`,
+				label: `${i18n.tr.admin.milestoneId}`,
 				tickFormat: (tick: number) => `${data[tick].milestone_id}`,
 			}),
 			yAxis: new Axis<MilestoneAnswerAnalysis>({
@@ -57,7 +57,14 @@ onMount(() => {
 });
 </script>
 
+<div class="text-center">
+<h4>{i18n.tr.admin.score}</h4>
 <div class="w-full" bind:this={container_scores}>
 </div>
+</div>
+<hr />
+<div class="text-center">
+<h4>{i18n.tr.admin.differenceFromAverageScore}</h4>
 <div class="w-full" bind:this={container_diff}>
+</div>
 </div>

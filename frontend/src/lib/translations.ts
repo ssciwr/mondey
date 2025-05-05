@@ -101,6 +101,7 @@ export const translationIds = {
 		required: "Pflichtig",
 		languages: "Sprachen",
 		milestone: "Meilenstein",
+		milestoneId: "Meilenstein-ID",
 		milestones: "Meilensteine",
 		milestoneGroups: "Meilensteingruppen",
 		translations: "Übersetzungen",
@@ -137,7 +138,8 @@ export const translationIds = {
 		score: "Punktzahl",
 		averageScore: "Durchschnittspunktzahl",
 		differenceFromAverageScore: "Differenz zum Durchschnittspunktzahl",
-		rmsDifferenceFromAverageScore: "RMS-Differenz zum Durchschnittspunktzahl",
+		rmsDifferenceFromAverageScore:
+			"Effektivwert-Differenz zum Durchschnittspunktzahl",
 		analyze: "analysieren",
 		milestoneAnswerSession: "Meilenstein-Antwortsitzung",
 		expectedAge: "Voraussichtliches Alter",
@@ -165,6 +167,10 @@ export const translationIds = {
 		updateStatistics: "Statistiken aktualisieren",
 		recalculateAllStatistics: "alle Statistiken neu berechnen",
 		statisticsAreBeingUpdated: "Statistiken werden aktualisiert...",
+		statisticsNeedUpdating:
+			"Statistiken müssen aktualisiert werden. Klicken Sie dazu auf „alle Statistiken neu berechnen“.",
+		suspiciousSessionNote:
+			"Hinweis: Als verdächtig markierte Antwortsitzungen werden bei der Berechnung des voraussichtlichen Alters für Meilensteine nicht berücksichtigt, sind aber dennoch in den Forschungsdaten enthalten.",
 	},
 	researcher: {
 		label: "Wissenschaft",

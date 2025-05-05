@@ -9,6 +9,7 @@ import type { MilestoneAnswerSession } from "$lib/client/types.gen";
 import AnswerSessionAnalysisModal from "$lib/components/Admin/AnswerSessionAnalysisModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import {
+	Alert,
 	Button,
 	Card,
 	Checkbox,
@@ -34,6 +35,7 @@ let show_analysis_modal = $state(false);
 let show_suspicious_only = $state(true);
 let show_update_stats_modal = $state(false);
 let update_stats_result = $state("");
+let stats_out_of_date = $state(false);
 
 async function doStatsUpdate(incremental: boolean) {
 	show_update_stats_modal = true;
@@ -48,6 +50,7 @@ async function doStatsUpdate(incremental: boolean) {
 		update_stats_result = i18n.tr.admin.error;
 	} else {
 		update_stats_result = data;
+		stats_out_of_date = false;
 		await refreshMilestoneAnswerSessions();
 	}
 }
@@ -61,6 +64,11 @@ async function refreshMilestoneAnswerSessions() {
 	}
 }
 
+async function answerSessionAnalysisModalCallback() {
+	stats_out_of_date = true;
+	await refreshMilestoneAnswerSessions();
+}
+
 onMount(async () => {
 	await refreshMilestoneAnswerSessions();
 });
@@ -70,6 +78,9 @@ onMount(async () => {
     <h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">
         {i18n.tr.admin.data}
     </h3>
+    {#if stats_out_of_date}
+        <Alert color="red">{i18n.tr.admin.statisticsNeedUpdating}</Alert>
+    {/if}
     <div class="grid grid-cols-2 justify-items-stretch my-2">
         <Button class="mr-2" onclick={() => {doStatsUpdate(true)}} data-testid="incrementalStatsUpdate">
             <RefreshOutline class="me-2 h-5 w-5"/>{i18n.tr.admin.updateStatistics}
@@ -78,6 +89,7 @@ onMount(async () => {
             <RefreshOutline class="me-2 h-5 w-5"/>{i18n.tr.admin.recalculateAllStatistics}
         </Button>
     </div>
+    {i18n.tr.admin.suspiciousSessionNote}
     <Checkbox bind:checked={show_suspicious_only} class="my-2">
         {i18n.tr.admin.showSuspiciousOnly}
     </Checkbox>
@@ -122,7 +134,7 @@ onMount(async () => {
 
 {#key current_answer_session_id}
     <AnswerSessionAnalysisModal answer_session_id={current_answer_session_id} bind:open={show_analysis_modal}
-                                callback={refreshMilestoneAnswerSessions}/>
+                                callback={answerSessionAnalysisModalCallback}/>
 {/key}
 
 <Modal bind:open={show_update_stats_modal} size="md" title={i18n.tr.admin.updateStatistics}>
