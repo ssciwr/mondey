@@ -16,8 +16,8 @@ export const translationIds = {
 		answer3Text: "Zuverlässig",
 		answer3Desc:
 			"Das Kind zeigt das Verhalten mehrmals sicher und genau wie beschrieben.",
-		answer4Text: "Später bewerte",
-		answer4Desc: "Falls Sie noch nicht wissen, ob das Kind das tun könnt.",
+		"answer-1Text": "Später bewerten",
+		"answer-1Desc": "Falls Sie noch nicht wissen, ob das Kind das tun könnt.",
 		milestones: "Meilensteine",
 		observation: "Beobachtungshinweise",
 		help: "Fördern",

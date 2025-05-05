@@ -255,19 +255,13 @@ const breadcrumbdata = $derived([
                     </Accordion>
                 </div>
                 <div class="m-1 mt-0 flex flex-col justify-items-stretch rounded-lg">
-                    {#each [0, 1, 2, 3, 4] as answerIndex}
+                    {#each [0, 1, 2, 3, -1] as answerIndex}
                         <MilestoneButton
                                 index={answerIndex}
                                 selected={selectedAnswer === answerIndex}
-                                onClick={() => {
-                                    if (answerIndex === 4) {
-                                        if (selectedAnswer === null || selectedAnswer === undefined || selectedAnswer < 0) {
-                                        nextMilestone(); // skip ahead.
-                                        return; // early exit
-                                        }
-                                    }
-							        selectAnswer(answerIndex);
-                                }}
+                                onClick={()=>{
+							        selectAnswer(answerIndex);}
+                                }
                                 tooltip={i18n.tr.milestone[`answer${answerIndex}Desc`]}
                         >
                             {i18n.tr.milestone[`answer${answerIndex}Text`]}

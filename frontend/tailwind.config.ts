@@ -15,7 +15,7 @@ export default {
 		"bg-milestone-answer-1",
 		"bg-milestone-answer-2",
 		"bg-milestone-answer-3",
-		"bg-milestone-answer-4",
+		"bg-milestone-answer--1",
 	],
 	theme: {
 		extend: {
@@ -70,7 +70,7 @@ export default {
 					1: "#cdd993",
 					2: "#a7c957",
 					3: "#6a994e",
-					4: "#274e88",
+					"-1": "#274e88",
 				},
 				feedback: {
 					0: "#98CB6A",
