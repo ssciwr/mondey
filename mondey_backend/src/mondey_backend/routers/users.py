@@ -67,7 +67,9 @@ def create_router() -> APIRouter:
     ):
         current_month = int(datetime.now().strftime("%m"))  # 01 for Jan
         current_year = int(datetime.now().strftime("%Y"))
-        if child.birth_month > current_month and child.birth_year >= current_year:
+        if (
+            child.birth_month > current_month and child.birth_year >= current_year
+        ) or child.birth_year >= current_year:
             raise HTTPException(400, "Birth date must be in the past")
 
         db_child = Child.model_validate(
