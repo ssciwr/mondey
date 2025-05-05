@@ -149,6 +149,25 @@ def process_special_answer(
 
 
 """
+Going to change questions and the hardcoded import matching system to use variable IDs, these will need to be saved
+(and manually added for existing questions).
+
+-> Add API route which allows the user to upload the CSV.
+--- Checks basic format (right columns?)
+--- Identifies duplicate row by combo of the survey submission "TIME" variable + Milestone answers matching
+------ To avoid the issue of half complete milestones child data with then added on further milestone data, if a subset
+of atleast say 10 milestones match (from the "half complete" previous child) with a future, we assume it's the same child
+with further data to append to it. We don't look for exactly identical milestone data.
+--- Duplicate data gets ignored. Since we detect duplicate data based on milestones + submission time, changes to
+question answers would (deliberately) not be updated if the milestone data is exactly the same.
+--- Child needs an optional new "timeOfDataAdded" or so field to store the survey submission field
+--- We agreed generally that the import process is strict and will error out if input data cannot be processed rather than
+save. Possibly, it can highlight the specific rows which can't be processed (The script does iterate per-row), but won't
+give a specific reason. The rows which could not be processed would be displayed on the frontend.
+"""
+
+
+"""
 Remaining todos:
 Get the titles for andere diagnosen in the new data import.
 
