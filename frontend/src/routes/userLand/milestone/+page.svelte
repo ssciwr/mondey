@@ -199,14 +199,19 @@ const breadcrumbdata = $derived([
                                 class={` min-w-20 absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
                                 src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${image.id}.webp`}
                                 alt=""
+                                on:click={() => {
+                                    const dialog: HTMLDialogElement = document.querySelector("#modalpreview")
+                                    if (dialog) {
+                                        dialog.showModal()
+                                    }
+                                }}
 
                         />
 
-
-                        <dialog id={`modal-${image.id}`}>
+                        <dialog id="modalpreview" class="bg-white p-6">
                             <img
-                                    class={` min-w-20 absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out`}
-                                    src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${image.id}.webp`}
+                                    class="rounded-xl"
+                                    src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${currentMilestone.images[currentImageIndex].id}.webp`}
                                     alt=""
                             />
                         </dialog>
