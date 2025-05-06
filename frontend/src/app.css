@@ -82,6 +82,10 @@
 		@apply text-2xl;
 	}
 
+	.z-1000 {
+		z-index: 1000;
+	}
+
 	@media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
 		.btn {
 			min-width: 100%;

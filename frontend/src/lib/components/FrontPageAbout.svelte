@@ -10,7 +10,7 @@ import { authCookieLogin, registerRegister } from "$lib/client/sdk.gen";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { refresh } from "$lib/utils/login";
-import { Button, Card } from "flowbite-svelte";
+import { Button, Card, Tooltip } from "flowbite-svelte";
 
 let showAlert = $state(false);
 let alertMessage = $state(i18n.tr.registration.alertMessageError);
@@ -78,6 +78,7 @@ const registerTestUser = async () => {
         <button disabled={registerTestUserButtonDisabled} class="btn-primary" data-testid="anonymousLogin" onclick={registerTestUser}>
           {i18n.tr.frontpageAbout.tryDemo}
         </button>
+        <Tooltip>{i18n.tr.frontpageAbout.tryDemoTooltip}</Tooltip>
       </div>
     </Card>
   </div>

@@ -157,9 +157,32 @@ export type MilestoneAgeScoreCollectionPublic = {
     scores: Array<MilestoneAgeScore>;
 };
 
+export type MilestoneAnswerAnalysis = {
+    milestone_id: number;
+    answer: number;
+    avg_answer: number;
+    stddev_answer: number;
+};
+
 export type MilestoneAnswerPublic = {
     milestone_id: number;
     answer: number;
+};
+
+export type MilestoneAnswerSession = {
+    id?: number | null;
+    child_id: number;
+    user_id: number;
+    created_at: string;
+    expired: boolean;
+    included_in_statistics: boolean;
+    suspicious: boolean;
+};
+
+export type MilestoneAnswerSessionAnalysis = {
+    child_age: number;
+    rms: number;
+    answers: Array<MilestoneAnswerAnalysis>;
 };
 
 export type MilestoneAnswerSessionPublic = {
@@ -997,6 +1020,76 @@ export type AdminUpdateStatsResponses = {
 };
 
 export type AdminUpdateStatsResponse = AdminUpdateStatsResponses[keyof AdminUpdateStatsResponses];
+
+export type GetMilestoneAnswerSessionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/milestone-answer-sessions/';
+};
+
+export type GetMilestoneAnswerSessionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Array<MilestoneAnswerSession>;
+};
+
+export type GetMilestoneAnswerSessionsResponse = GetMilestoneAnswerSessionsResponses[keyof GetMilestoneAnswerSessionsResponses];
+
+export type ModifyMilestoneAnswerSessionData = {
+    body?: never;
+    path: {
+        answer_session_id: number;
+    };
+    query: {
+        suspicious: boolean;
+    };
+    url: '/admin/milestone-answer-sessions/{answer_session_id}';
+};
+
+export type ModifyMilestoneAnswerSessionErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ModifyMilestoneAnswerSessionError = ModifyMilestoneAnswerSessionErrors[keyof ModifyMilestoneAnswerSessionErrors];
+
+export type ModifyMilestoneAnswerSessionResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type GetMilestoneAnswerSessionAnalysisData = {
+    body?: never;
+    path: {
+        answer_session_id: number;
+    };
+    query?: never;
+    url: '/admin/milestone-answer-session-analysis/{answer_session_id}';
+};
+
+export type GetMilestoneAnswerSessionAnalysisErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMilestoneAnswerSessionAnalysisError = GetMilestoneAnswerSessionAnalysisErrors[keyof GetMilestoneAnswerSessionAnalysisErrors];
+
+export type GetMilestoneAnswerSessionAnalysisResponses = {
+    /**
+     * Successful Response
+     */
+    200: MilestoneAnswerSessionAnalysis;
+};
+
+export type GetMilestoneAnswerSessionAnalysisResponse = GetMilestoneAnswerSessionAnalysisResponses[keyof GetMilestoneAnswerSessionAnalysisResponses];
 
 export type GetUserQuestionsAdminData = {
     body?: never;

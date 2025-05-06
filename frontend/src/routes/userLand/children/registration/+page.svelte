@@ -393,7 +393,7 @@ async function submitData(): Promise<void> {
                                     placeholder={i18n.tr.childData.pleaseEnterNumber}
                                     disabled={disableEdit}
                                     id="child_birthyear"
-                                    kwargs = {{type: "number", min: 2007, step: '1'}}
+                                    kwargs = {{type: "number", min: 2007, step: '1', max: new Date().getFullYear()}}
                             />
 
                             <DataInput

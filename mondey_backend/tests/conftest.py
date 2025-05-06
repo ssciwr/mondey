@@ -266,6 +266,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 created_at=datetime.datetime(last_month.year, last_month.month, 15),
                 expired=True,
                 included_in_statistics=True,
+                suspicious=False,
             )
         )
         session.add(
@@ -284,7 +285,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 answer=0,
             )
         )
-        # add another (unexpired and not included in stats) milestone answer session for child 1 / user (id 3) with 2 answers to the same questions
+        # add another (unexpired but old, not yet included in stats) milestone answer session for child 1 / user (id 3) with 2 answers to the same questions
         session.add(
             MilestoneAnswerSession(
                 id=2,
@@ -293,17 +294,18 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 created_at=datetime.datetime(last_month.year, last_month.month, 20),
                 expired=False,
                 included_in_statistics=False,
+                suspicious=False,
             )
         )
         # add two milestone answers
         session.add(
             MilestoneAnswer(
-                answer_session_id=2, milestone_id=1, milestone_group_id=1, answer=3
+                answer_session_id=2, milestone_id=1, milestone_group_id=1, answer=1
             )
         )
         session.add(
             MilestoneAnswer(
-                answer_session_id=2, milestone_id=2, milestone_group_id=1, answer=2
+                answer_session_id=2, milestone_id=2, milestone_group_id=1, answer=1
             )
         )
         # add an (un-expired) milestone answer session for child 3 / admin user (id 1) with 1 answer
@@ -315,6 +317,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 created_at=datetime.datetime.today(),
                 expired=False,
                 included_in_statistics=False,
+                suspicious=False,
             )
         )
         session.add(
@@ -326,7 +329,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             )
         )
         # add an (expired) milestone answer session for child 4 / test account user (id 5) with 2 answers
-
         session.add(
             MilestoneAnswerSession(
                 id=99,
@@ -335,6 +337,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 created_at=datetime.datetime(last_month.year, last_month.month, 15),
                 expired=True,
                 included_in_statistics=True,
+                suspicious=False,
             )
         )
         session.add(
@@ -681,16 +684,17 @@ def statistics_session(session):
             created_at=datetime.datetime(last_month.year, last_month.month, 20),
             expired=True,
             included_in_statistics=False,
+            suspicious=False,
         )
     )
     session.add(
         MilestoneAnswer(
-            answer_session_id=4, milestone_id=1, milestone_group_id=1, answer=3
+            answer_session_id=4, milestone_id=1, milestone_group_id=1, answer=2
         )
     )
     session.add(
         MilestoneAnswer(
-            answer_session_id=4, milestone_id=2, milestone_group_id=1, answer=2
+            answer_session_id=4, milestone_id=2, milestone_group_id=1, answer=0
         )
     )
 
@@ -703,6 +707,7 @@ def statistics_session(session):
             created_at=datetime.datetime(today.year - 1, 1, 10),
             expired=True,
             included_in_statistics=False,
+            suspicious=False,
         )
     )
     session.add(
@@ -710,6 +715,7 @@ def statistics_session(session):
             answer_session_id=5, milestone_id=5, milestone_group_id=2, answer=1
         )
     )
+
     session.commit()
     yield session
 

@@ -17,7 +17,9 @@ test("/userLand/children/gallery - The gallery of children includes feedback wit
 	).toBeVisible();
 
 	await page.locator('h5:has-text("Emma Johnson")').click();
-	await expect(page.getByText("Januar 2025")).toBeVisible();
+	await expect(page.getByText("2025", { exact: false }).first()).toBeVisible(); //  we don't test the month because it's variable in a
+	// complicated way in the SQL which inserts the children (importMIlestoneAnswer.sql) to keep them around 3 months
+	// old at time of test.
 
 	await page.locator('button:has-text("Feedback zur Entwicklung")').click();
 
