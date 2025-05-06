@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import tempfile
+
 from sqlalchemy.engine import Engine
 from sqlmodel import Session
 from sqlmodel import SQLModel
@@ -10,7 +12,7 @@ from ..models.milestones import Language
 from ..settings import app_settings
 
 engine = create_engine(
-    f"sqlite:///{app_settings.DATABASE_PATH}/mondey.db",
+    f"sqlite:///{app_settings.DATABASE_PATH if app_settings.DATABASE_PATH else tempfile.mkdtemp()}/mondey.db",
     connect_args={"check_same_thread": False},
 )
 

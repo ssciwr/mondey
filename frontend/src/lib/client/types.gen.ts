@@ -72,6 +72,7 @@ export type ChildQuestionAdmin = {
     additional_option?: string;
     required?: boolean;
     name?: string;
+    visibility?: boolean;
     id: number;
     text?: {
         [key: string]: ChildQuestionText;
@@ -96,6 +97,18 @@ export type ChildQuestionText = {
     options?: string;
     child_question_id?: number | null;
     lang_id?: string | null;
+};
+
+export type DeleteResponse = {
+    ok: boolean;
+    dry_run: boolean;
+    children: {
+        [key: string]: number;
+    };
+    /**
+     * Error message when present
+     */
+    error?: string | null;
 };
 
 export type ErrorModel = {
@@ -144,9 +157,32 @@ export type MilestoneAgeScoreCollectionPublic = {
     scores: Array<MilestoneAgeScore>;
 };
 
+export type MilestoneAnswerAnalysis = {
+    milestone_id: number;
+    answer: number;
+    avg_answer: number;
+    stddev_answer: number;
+};
+
 export type MilestoneAnswerPublic = {
     milestone_id: number;
     answer: number;
+};
+
+export type MilestoneAnswerSession = {
+    id?: number | null;
+    child_id: number;
+    user_id: number;
+    created_at: string;
+    expired: boolean;
+    included_in_statistics: boolean;
+    suspicious: boolean;
+};
+
+export type MilestoneAnswerSessionAnalysis = {
+    child_age: number;
+    rms: number;
+    answers: Array<MilestoneAnswerAnalysis>;
 };
 
 export type MilestoneAnswerSessionPublic = {
@@ -263,6 +299,7 @@ export type UserQuestionAdmin = {
     additional_option?: string;
     required?: boolean;
     name?: string;
+    visibility?: boolean;
     id: number;
     text?: {
         [key: string]: UserQuestionText;
@@ -630,7 +667,12 @@ export type DeleteMilestoneGroupAdminData = {
     path: {
         milestone_group_id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * When true, shows what would be deleted without actually deleting
+         */
+        dry_run?: boolean;
+    };
     url: '/admin/milestone-groups/{milestone_group_id}';
 };
 
@@ -647,8 +689,10 @@ export type DeleteMilestoneGroupAdminResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: DeleteResponse;
 };
+
+export type DeleteMilestoneGroupAdminResponse = DeleteMilestoneGroupAdminResponses[keyof DeleteMilestoneGroupAdminResponses];
 
 export type OrderMilestoneGroupsAdminData = {
     body: Array<ItemOrder>;
@@ -755,7 +799,12 @@ export type DeleteMilestoneData = {
     path: {
         milestone_id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * When true, shows what would be deleted without actually deleting
+         */
+        dry_run?: boolean;
+    };
     url: '/admin/milestones/{milestone_id}';
 };
 
@@ -772,8 +821,10 @@ export type DeleteMilestoneResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: DeleteResponse;
 };
+
+export type DeleteMilestoneResponse = DeleteMilestoneResponses[keyof DeleteMilestoneResponses];
 
 export type OrderMilestonesAdminData = {
     body: Array<ItemOrder>;
@@ -970,6 +1021,76 @@ export type AdminUpdateStatsResponses = {
 
 export type AdminUpdateStatsResponse = AdminUpdateStatsResponses[keyof AdminUpdateStatsResponses];
 
+export type GetMilestoneAnswerSessionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/milestone-answer-sessions/';
+};
+
+export type GetMilestoneAnswerSessionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Array<MilestoneAnswerSession>;
+};
+
+export type GetMilestoneAnswerSessionsResponse = GetMilestoneAnswerSessionsResponses[keyof GetMilestoneAnswerSessionsResponses];
+
+export type ModifyMilestoneAnswerSessionData = {
+    body?: never;
+    path: {
+        answer_session_id: number;
+    };
+    query: {
+        suspicious: boolean;
+    };
+    url: '/admin/milestone-answer-sessions/{answer_session_id}';
+};
+
+export type ModifyMilestoneAnswerSessionErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ModifyMilestoneAnswerSessionError = ModifyMilestoneAnswerSessionErrors[keyof ModifyMilestoneAnswerSessionErrors];
+
+export type ModifyMilestoneAnswerSessionResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type GetMilestoneAnswerSessionAnalysisData = {
+    body?: never;
+    path: {
+        answer_session_id: number;
+    };
+    query?: never;
+    url: '/admin/milestone-answer-session-analysis/{answer_session_id}';
+};
+
+export type GetMilestoneAnswerSessionAnalysisErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMilestoneAnswerSessionAnalysisError = GetMilestoneAnswerSessionAnalysisErrors[keyof GetMilestoneAnswerSessionAnalysisErrors];
+
+export type GetMilestoneAnswerSessionAnalysisResponses = {
+    /**
+     * Successful Response
+     */
+    200: MilestoneAnswerSessionAnalysis;
+};
+
+export type GetMilestoneAnswerSessionAnalysisResponse = GetMilestoneAnswerSessionAnalysisResponses[keyof GetMilestoneAnswerSessionAnalysisResponses];
+
 export type GetUserQuestionsAdminData = {
     body?: never;
     path?: never;
@@ -1032,7 +1153,12 @@ export type DeleteUserQuestionData = {
     path: {
         user_question_id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * When true, shows what would be deleted without actually deleting
+         */
+        dry_run?: boolean;
+    };
     url: '/admin/user-questions/{user_question_id}';
 };
 
@@ -1049,8 +1175,10 @@ export type DeleteUserQuestionResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: DeleteResponse;
 };
+
+export type DeleteUserQuestionResponse = DeleteUserQuestionResponses[keyof DeleteUserQuestionResponses];
 
 export type OrderUserQuestionsAdminData = {
     body: Array<ItemOrder>;
@@ -1137,7 +1265,12 @@ export type DeleteChildQuestionData = {
     path: {
         child_question_id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * When true, shows what would be deleted without actually deleting
+         */
+        dry_run?: boolean;
+    };
     url: '/admin/child-questions/{child_question_id}';
 };
 
@@ -1154,8 +1287,10 @@ export type DeleteChildQuestionResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: DeleteResponse;
 };
+
+export type DeleteChildQuestionResponse = DeleteChildQuestionResponses[keyof DeleteChildQuestionResponses];
 
 export type OrderChildQuestionsAdminData = {
     body: Array<ItemOrder>;
@@ -1512,7 +1647,12 @@ export type DeleteChildData = {
     path: {
         child_id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * When true, shows what would be deleted without actually deleting
+         */
+        dry_run?: boolean;
+    };
     url: '/users/children/{child_id}';
 };
 
@@ -1529,8 +1669,10 @@ export type DeleteChildResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: DeleteResponse;
 };
+
+export type DeleteChildResponse = DeleteChildResponses[keyof DeleteChildResponses];
 
 export type GetChildData = {
     body?: never;

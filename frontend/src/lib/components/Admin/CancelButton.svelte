@@ -12,6 +12,6 @@ let {
 }: { onclick?: () => void } = $props();
 </script>
 
-<Button color="alternative" {onclick}
-	><CloseOutline class="me-2 h-5 w-5" /> {i18n.tr.admin.cancel}</Button
->
+<Button color="alternative" {onclick} data-testid="cancelButton">
+	<CloseOutline class="me-2 h-5 w-5" /> {i18n.tr.admin.cancel}
+</Button>

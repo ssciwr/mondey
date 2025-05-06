@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from fastapi import APIRouter
-from fastapi import HTTPException
+from fastapi import Query
 from fastapi import UploadFile
 from sqlmodel import col
 from sqlmodel import select
@@ -13,6 +15,8 @@ from ...models.milestones import Milestone
 from ...models.milestones import MilestoneAdmin
 from ...models.milestones import MilestoneAgeScoreCollection
 from ...models.milestones import MilestoneAgeScoreCollectionPublic
+from ...models.milestones import MilestoneAnswerSession
+from ...models.milestones import MilestoneAnswerSessionAnalysis
 from ...models.milestones import MilestoneGroup
 from ...models.milestones import MilestoneGroupAdmin
 from ...models.milestones import MilestoneGroupText
@@ -20,9 +24,12 @@ from ...models.milestones import MilestoneImage
 from ...models.milestones import MilestoneText
 from ...models.milestones import SubmittedMilestoneImage
 from ...models.milestones import SubmittedMilestoneImagePublic
+from ...models.utils import DeleteResponse
 from ...models.utils import ItemOrder
+from ...statistics import analyse_answer_session
 from ...statistics import async_update_stats
 from ..utils import add
+from ..utils import count_milestone_answers_for_milestone
 from ..utils import get
 from ..utils import milestone_group_image_path
 from ..utils import milestone_image_path
@@ -68,12 +75,42 @@ def create_router() -> APIRouter:
         add(session, db_milestone_group)
         return db_milestone_group
 
-    @router.delete("/milestone-groups/{milestone_group_id}")
-    def delete_milestone_group_admin(session: SessionDep, milestone_group_id: int):
+    @router.delete(
+        "/milestone-groups/{milestone_group_id}", response_model=DeleteResponse
+    )
+    def delete_milestone_group_admin(
+        session: SessionDep,
+        milestone_group_id: int,
+        dry_run: bool = Query(
+            True,
+            description="When true, shows what would be deleted without actually deleting",
+        ),
+    ):
         milestone_group = get(session, MilestoneGroup, milestone_group_id)
-        session.delete(milestone_group)
-        session.commit()
-        return {"ok": True}
+        affected_milestone_answers = 0
+        groups_milestone_ids = [
+            milestone.id
+            for milestone in milestone_group.milestones
+            if milestone.id is not None
+        ]
+
+        for milestone_id in groups_milestone_ids:
+            affected_milestone_answers += count_milestone_answers_for_milestone(
+                session, milestone_id
+            )
+
+        if not dry_run:
+            session.delete(milestone_group)
+            session.commit()
+
+        return {
+            "ok": True,
+            "dry_run": dry_run,
+            "children": {
+                "affectedMilestones": len(milestone_group.milestones),
+                "affectedAnswers": affected_milestone_answers,
+            },
+        }
 
     @router.post("/milestone-groups/order/")
     def order_milestone_groups_admin(session: SessionDep, item_orders: list[ItemOrder]):
@@ -111,12 +148,25 @@ def create_router() -> APIRouter:
         add(session, db_milestone)
         return db_milestone
 
-    @router.delete("/milestones/{milestone_id}")
-    def delete_milestone(session: SessionDep, milestone_id: int):
-        milestone = get(session, Milestone, milestone_id)
-        session.delete(milestone)
-        session.commit()
-        return {"ok": True}
+    @router.delete("/milestones/{milestone_id}", response_model=DeleteResponse)
+    def delete_milestone(
+        session: SessionDep,
+        milestone_id: int,
+        dry_run: bool = Query(
+            True,
+            description="When true, shows what would be deleted without actually deleting",
+        ),
+    ):
+        affected_answers = count_milestone_answers_for_milestone(session, milestone_id)
+        if not dry_run:
+            milestone = get(session, Milestone, milestone_id)
+            session.delete(milestone)
+            session.commit()
+        return {
+            "ok": True,
+            "dry_run": dry_run,
+            "children": {"affectedAnswers": affected_answers},
+        }
 
     @router.post("/milestones/order/")
     def order_milestones_admin(session: SessionDep, item_orders: list[ItemOrder]):
@@ -188,12 +238,6 @@ def create_router() -> APIRouter:
         session: SessionDep, milestone_id: int
     ) -> MilestoneAgeScoreCollection:
         collection = get(session, MilestoneAgeScoreCollection, milestone_id)
-
-        if collection is None:
-            raise HTTPException(
-                404,
-                detail='"No milestone age score collection with id: ", milestone_id',
-            )
         return collection
 
     @router.post(
@@ -206,5 +250,38 @@ def create_router() -> APIRouter:
         return await async_update_stats(
             session, user_session, incremental_update=incremental_update
         )
+
+    @router.get(
+        "/milestone-answer-sessions/",
+        response_model=Sequence[MilestoneAnswerSession],
+    )
+    def get_milestone_answer_sessions(
+        session: SessionDep,
+    ) -> Sequence[MilestoneAnswerSession]:
+        return session.exec(
+            select(MilestoneAnswerSession).where(col(MilestoneAnswerSession.expired))
+        ).all()
+
+    @router.post("/milestone-answer-sessions/{answer_session_id}")
+    def modify_milestone_answer_session(
+        session: SessionDep, answer_session_id: int, suspicious: bool
+    ):
+        answer_session = get(session, MilestoneAnswerSession, answer_session_id)
+        answer_session.suspicious = suspicious
+        session.add(answer_session)
+        session.commit()
+        return {"ok": True}
+
+    @router.get(
+        "/milestone-answer-session-analysis/{answer_session_id}",
+        response_model=MilestoneAnswerSessionAnalysis,
+    )
+    def get_milestone_answer_session_analysis(
+        session: SessionDep, answer_session_id: int
+    ) -> MilestoneAnswerSessionAnalysis:
+        milestone_answer_session = get(
+            session, MilestoneAnswerSession, answer_session_id
+        )
+        return analyse_answer_session(session, milestone_answer_session)
 
     return router

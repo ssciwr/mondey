@@ -266,6 +266,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 created_at=datetime.datetime(last_month.year, last_month.month, 15),
                 expired=True,
                 included_in_statistics=True,
+                suspicious=False,
             )
         )
         session.add(
@@ -284,7 +285,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 answer=0,
             )
         )
-        # add another (unexpired and not included in stats) milestone answer session for child 1 / user (id 3) with 2 answers to the same questions
+        # add another (unexpired but old, not yet included in stats) milestone answer session for child 1 / user (id 3) with 2 answers to the same questions
         session.add(
             MilestoneAnswerSession(
                 id=2,
@@ -293,17 +294,18 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 created_at=datetime.datetime(last_month.year, last_month.month, 20),
                 expired=False,
                 included_in_statistics=False,
+                suspicious=False,
             )
         )
         # add two milestone answers
         session.add(
             MilestoneAnswer(
-                answer_session_id=2, milestone_id=1, milestone_group_id=1, answer=3
+                answer_session_id=2, milestone_id=1, milestone_group_id=1, answer=1
             )
         )
         session.add(
             MilestoneAnswer(
-                answer_session_id=2, milestone_id=2, milestone_group_id=1, answer=2
+                answer_session_id=2, milestone_id=2, milestone_group_id=1, answer=1
             )
         )
         # add an (un-expired) milestone answer session for child 3 / admin user (id 1) with 1 answer
@@ -315,6 +317,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 created_at=datetime.datetime.today(),
                 expired=False,
                 included_in_statistics=False,
+                suspicious=False,
             )
         )
         session.add(
@@ -326,7 +329,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             )
         )
         # add an (expired) milestone answer session for child 4 / test account user (id 5) with 2 answers
-
         session.add(
             MilestoneAnswerSession(
                 id=99,
@@ -335,6 +337,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 created_at=datetime.datetime(last_month.year, last_month.month, 15),
                 expired=True,
                 included_in_statistics=True,
+                suspicious=False,
             )
         )
         session.add(
@@ -371,9 +374,9 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                     age=age,
                     milestone_id=1,
                     count=1 if age == 8 else 0,
-                    avg_score=2.0 if age == 8 else 0,
+                    avg_score=1.0 if age == 8 else 0,
                     stddev_score=0.0,
-                    expected_score=3 if age >= 8 else 1,
+                    expected_score=2 if age >= 8 else 0,
                 )
             )
 
@@ -395,9 +398,9 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                     age=age,
                     milestone_id=2,
                     count=1 if age == 8 else 0,
-                    avg_score=1.0 if age == 8 else 0,
+                    avg_score=0.0 if age == 8 else 0,
                     stddev_score=0.0,
-                    expected_score=3 if age >= 8 else 1,
+                    expected_score=2 if age >= 8 else 0,
                 )
             )
 
@@ -418,7 +421,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                     age=age,
                     milestone_group_id=1,
                     count=2 if age == 8 else 0,
-                    avg_score=1.5 if age == 8 else 0.0,
+                    avg_score=0.5 if age == 8 else 0.0,
                     stddev_score=0.5 if age == 8 else 0.0,
                 )
             )
@@ -456,6 +459,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                         options_json="",
                     ),
                 },
+                visibility=True,
             ),
             UserQuestion(
                 id=2,
@@ -487,6 +491,39 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                         options_json="",
                     ),
                 },
+                visibility=True,
+            ),
+            UserQuestion(
+                id=3,
+                order=3,
+                name="User Question 3 - Should not be visible",
+                options="[a,b,c,other]",
+                additional_option="other",
+                component="select",
+                text={
+                    "de": UserQuestionText(
+                        user_question_id=3,
+                        lang_id="de",
+                        options="[x,y,z]",
+                        question="Wo sonst 3?",
+                        options_json="",
+                    ),
+                    "en": UserQuestionText(
+                        user_question_id=3,
+                        lang_id="en",
+                        options="[1,2,3]",
+                        question="Where else 3?",
+                        options_json="",
+                    ),
+                    "fr": UserQuestionText(
+                        user_question_id=3,
+                        lang_id="fr",
+                        options="[1,2,3]",
+                        question="french words 3",
+                        options_json="",
+                    ),
+                },
+                visibility=False,
             ),
         ]
         for user_question in user_questions:
@@ -522,6 +559,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                         options="[1,2,3,autre]",
                     ),
                 },
+                visibility=True,
             ),
             ChildQuestion(
                 id=2,
@@ -549,6 +587,35 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                         options="[12,22,32,autre]",
                     ),
                 },
+                visibility=True,
+            ),
+            ChildQuestion(
+                id=3,
+                order=2,
+                name="Child Question 3",
+                options="[a,b,c,other]",
+                additional_option="other",
+                text={
+                    "de": ChildQuestionText(
+                        child_question_id=1,
+                        lang_id="de",
+                        question="was?",
+                        options="[x,y,z,andere]",
+                    ),
+                    "en": ChildQuestionText(
+                        child_question_id=1,
+                        lang_id="en",
+                        question="what?",
+                        options="[1,2,3,other]",
+                    ),
+                    "fr": ChildQuestionText(
+                        child_question_id=1,
+                        lang_id="fr",
+                        question="french...",
+                        options="[1,2,3,autre]",
+                    ),
+                },
+                visibility=False,
             ),
         ]
 
@@ -617,16 +684,17 @@ def statistics_session(session):
             created_at=datetime.datetime(last_month.year, last_month.month, 20),
             expired=True,
             included_in_statistics=False,
+            suspicious=False,
         )
     )
     session.add(
         MilestoneAnswer(
-            answer_session_id=4, milestone_id=1, milestone_group_id=1, answer=3
+            answer_session_id=4, milestone_id=1, milestone_group_id=1, answer=2
         )
     )
     session.add(
         MilestoneAnswer(
-            answer_session_id=4, milestone_id=2, milestone_group_id=1, answer=2
+            answer_session_id=4, milestone_id=2, milestone_group_id=1, answer=0
         )
     )
 
@@ -639,6 +707,7 @@ def statistics_session(session):
             created_at=datetime.datetime(today.year - 1, 1, 10),
             expired=True,
             included_in_statistics=False,
+            suspicious=False,
         )
     )
     session.add(
@@ -646,75 +715,122 @@ def statistics_session(session):
             answer_session_id=5, milestone_id=5, milestone_group_id=2, answer=1
         )
     )
+
     session.commit()
     yield session
 
 
+visible_user_questions = [
+    {
+        "id": 1,
+        "name": "User Question 1",
+        "order": 1,
+        "component": "select",
+        "options": "[a,b,c,other]",
+        "additional_option": "other",
+        "required": False,
+        "visibility": True,
+        "type": "text",
+        "text": {
+            "de": {
+                "user_question_id": 1,
+                "lang_id": "de",
+                "options": "[x,y,z]",
+                "options_json": "",
+                "question": "Wo sonst?",
+            },
+            "en": {
+                "user_question_id": 1,
+                "lang_id": "en",
+                "options": "[1,2,3]",
+                "question": "Where else?",
+                "options_json": "",
+            },
+            "fr": {
+                "user_question_id": 1,
+                "lang_id": "fr",
+                "options": "[1,2,3]",
+                "question": "french words",
+                "options_json": "",
+            },
+        },
+    },
+    {
+        "id": 2,
+        "name": "User Question 2",
+        "order": 2,
+        "component": "textarea",
+        "options": "[a2,b2,c2,other]",
+        "additional_option": "other",
+        "required": False,
+        "visibility": True,
+        "type": "text",
+        "text": {
+            "de": {
+                "user_question_id": 2,
+                "lang_id": "de",
+                "options": "[x2,y2,z2]",
+                "options_json": "",
+                "question": "Was noch?",
+            },
+            "en": {
+                "user_question_id": 2,
+                "lang_id": "en",
+                "options": "[12,22,32]",
+                "question": "What else?",
+                "options_json": "",
+            },
+            "fr": {
+                "user_question_id": 2,
+                "lang_id": "fr",
+                "options": "[12,22,32]",
+                "question": "french words",
+                "options_json": "",
+            },
+        },
+    },
+]
+
+
 @pytest.fixture
 def user_questions():
+    return visible_user_questions
+
+
+@pytest.fixture
+def user_questions_with_invisible_question():
     return [
+        *visible_user_questions,
         {
-            "id": 1,
-            "name": "User Question 1",
-            "order": 1,
+            "id": 3,
+            "name": "User Question 3 - Should not be visible",
+            "order": 3,
             "component": "select",
             "options": "[a,b,c,other]",
             "additional_option": "other",
             "required": False,
+            "visibility": False,
             "type": "text",
             "text": {
                 "de": {
-                    "user_question_id": 1,
+                    "user_question_id": 3,
                     "lang_id": "de",
                     "options": "[x,y,z]",
                     "options_json": "",
-                    "question": "Wo sonst?",
+                    "question": "Wo sonst 3?",
                 },
                 "en": {
-                    "user_question_id": 1,
+                    "user_question_id": 3,
                     "lang_id": "en",
                     "options": "[1,2,3]",
-                    "question": "Where else?",
+                    "question": "Where else 3?",
                     "options_json": "",
                 },
                 "fr": {
-                    "user_question_id": 1,
+                    "user_question_id": 3,
                     "lang_id": "fr",
                     "options": "[1,2,3]",
-                    "question": "french words",
-                    "options_json": "",
-                },
-            },
-        },
-        {
-            "id": 2,
-            "name": "User Question 2",
-            "order": 2,
-            "component": "textarea",
-            "options": "[a2,b2,c2,other]",
-            "additional_option": "other",
-            "required": False,
-            "type": "text",
-            "text": {
-                "de": {
-                    "user_question_id": 2,
-                    "lang_id": "de",
-                    "options": "[x2,y2,z2]",
-                    "options_json": "",
-                    "question": "Was noch?",
-                },
-                "en": {
-                    "user_question_id": 2,
-                    "lang_id": "en",
-                    "options": "[12,22,32]",
-                    "question": "What else?",
-                    "options_json": "",
-                },
-                "fr": {
-                    "user_question_id": 2,
-                    "lang_id": "fr",
-                    "options": "[12,22,32]",
-                    "question": "french words",
+                    "question": "french words 3",
                     "options_json": "",
                 },
             },
@@ -722,71 +838,117 @@ def user_questions():
     ]
 
 
+visible_child_questions = [
+    {
+        "id": 1,
+        "name": "Child Question 1",
+        "order": 0,
+        "component": "select",
+        "options": "[a,b,c,other]",
+        "additional_option": "other",
+        "required": False,
+        "visibility": True,
+        "type": "text",
+        "text": {
+            "de": {
+                "child_question_id": 1,
+                "lang_id": "de",
+                "options": "[x,y,z,andere]",
+                "options_json": "",
+                "question": "was?",
+            },
+            "en": {
+                "child_question_id": 1,
+                "lang_id": "en",
+                "options": "[1,2,3,other]",
+                "question": "what?",
+                "options_json": "",
+            },
+            "fr": {
+                "child_question_id": 1,
+                "lang_id": "fr",
+                "question": "french...",
+                "options": "[1,2,3,autre]",
+                "options_json": "",
+            },
+        },
+    },
+    {
+        "id": 2,
+        "name": "Child Question 2",
+        "order": 1,
+        "component": "select",
+        "options": "[a2,b2,c2,other]",
+        "additional_option": "other",
+        "required": False,
+        "visibility": True,
+        "type": "text",
+        "text": {
+            "de": {
+                "child_question_id": 2,
+                "lang_id": "de",
+                "options": "[x2,y2,z2,andere]",
+                "options_json": "",
+                "question": "Wo?",
+            },
+            "en": {
+                "child_question_id": 2,
+                "lang_id": "en",
+                "options": "[12,22,32,other]",
+                "question": "Where?",
+                "options_json": "",
+            },
+            "fr": {
+                "child_question_id": 2,
+                "lang_id": "fr",
+                "question": "french...",
+                "options": "[12,22,32,autre]",
+                "options_json": "",
+            },
+        },
+    },
+]
+
+
 @pytest.fixture
 def child_questions():
+    return visible_user_questions
+
+
+@pytest.fixture
+def child_questions_with_invisible_question():
     return [
+        *visible_child_questions,
         {
-            "id": 1,
-            "name": "Child Question 1",
-            "order": 0,
+            "id": 3,
+            "name": "Child Question 3",
+            "order": 2,
             "component": "select",
             "options": "[a,b,c,other]",
             "additional_option": "other",
             "required": False,
+            "visibility": False,
             "type": "text",
             "text": {
                 "de": {
-                    "child_question_id": 1,
+                    "child_question_id": 3,
                     "lang_id": "de",
                     "options": "[x,y,z,andere]",
                     "options_json": "",
                     "question": "was?",
                 },
                 "en": {
-                    "child_question_id": 1,
+                    "child_question_id": 3,
                     "lang_id": "en",
                     "options": "[1,2,3,other]",
                     "question": "what?",
                     "options_json": "",
                 },
                 "fr": {
-                    "child_question_id": 1,
+                    "child_question_id": 3,
                     "lang_id": "fr",
                     "question": "french...",
                     "options": "[1,2,3,autre]",
-                    "options_json": "",
-                },
-            },
-        },
-        {
-            "id": 2,
-            "name": "Child Question 2",
-            "order": 1,
-            "component": "select",
-            "options": "[a2,b2,c2,other]",
-            "additional_option": "other",
-            "required": False,
-            "type": "text",
-            "text": {
-                "de": {
-                    "child_question_id": 2,
-                    "lang_id": "de",
-                    "options": "[x2,y2,z2,andere]",
-                    "options_json": "",
-                    "question": "Wo?",
-                },
-                "en": {
-                    "child_question_id": 2,
-                    "lang_id": "en",
-                    "options": "[12,22,32,other]",
-                    "question": "Where?",
-                    "options_json": "",
-                },
-                "fr": {
-                    "child_question_id": 2,
-                    "lang_id": "fr",
-                    "question": "french...",
-                    "options": "[12,22,32,autre]",
                     "options_json": "",
                 },
             },
@@ -850,6 +1012,7 @@ def default_user_question_admin():
         },
         "additional_option": "nothing",
         "required": False,
+        "visibility": False,
     }
 
 

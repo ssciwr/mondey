@@ -317,7 +317,7 @@ async function loadData(aid: number | null): Promise<void> {
 
 	const summary_ = await loadSummaryFeedbackFor(aid);
 	if (summary_ === null) {
-		alertMessage = `Something went wrong when loading the summary feedback for ${aid}`;
+		alertMessage = i18n.tr.milestone.feedbackLoadingSummaryError;
 		alertStore.showAlert(
 			i18n.tr.childData.alertMessageTitle,
 			alertMessage,
@@ -329,7 +329,7 @@ async function loadData(aid: number | null): Promise<void> {
 
 	const detailed_ = await loadDetailedFeedbackFor(aid);
 	if (detailed_ === null) {
-		alertMessage = `Something went wrong when loading the detailed feedback for ${aid}`;
+		alertMessage = i18n.tr.milestone.feedbackLoadingError;
 		alertStore.showAlert(
 			i18n.tr.childData.alertMessageTitle,
 			alertMessage,
@@ -408,7 +408,7 @@ async function generateReport(): Promise<string | null> {
 		// iterate over all answersessions with aid:key
 		for (let aid of allSessionkeys) {
 			const min = Math.min(...(Object.values(summary[aid]) as number[]));
-			report += `<h2>${i18n.tr.milestone.timeperiod}: ${makeTitle(Number(aid))}</h2> \n`;
+			report += `<h2>${i18n.tr.milestone.timeperiod}: ${formatDate(answerSessions[aid].created_at)}</h2> \n`;
 			report += `<strong>${i18n.tr.milestone.summaryScore}:</strong> ${min === 1 ? i18n.tr.milestone.recommendOk : min === 0 ? i18n.tr.milestone.recommendWatch : min === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
 
 			for (let [mid, score] of Object.entries(summary[aid])) {
@@ -498,7 +498,7 @@ async function printReport(): Promise<void> {
 <!--Snippet defining how to render detailed milestone feedback with help button-->
 {#snippet milestoneHelpButton(milestone_or_group: MilestonePublic | undefined)}
 	<span class =  "flex w-full m-2 p-2 justify-center" >
-		<Button class = "text-sm md:text-base bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 focus-within:ring-additional-color-40" id="b1" onclick={()=>{
+		<Button class = "btn-white btn-no-min-width" id="b1" onclick={()=>{
 			showHelp= true;
 		}}>{i18n.tr.milestone.help}</Button>
 		<Modal class = "m-2 p-2" title={i18n.tr.milestone.help} bind:open={showHelp} dismissable={true}>
@@ -509,20 +509,21 @@ async function printReport(): Promise<void> {
 
 <!--element of the detailed evaluation which shows how the child fared in each milestonegroup-->
 {#snippet evaluationElement(symbol: any, milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, color: string, isMilestone: boolean = false)}
-    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center justify-center m-2 p-2">
-        <svelte:component this={symbol} size="xl" class={`${color}`} />
+    <div class="flex flex-col items-center justify-center p-2 w-full">
+        <div class="flex justify-center w-full mb-2">
+            <svelte:component this={symbol} size="xl" class={`${color}`} />
+        </div>
         {#if color !== "gray"}
-			<span class = {`font-bold ${isMilestone? "text-white dark:text-white": ""}`} >
+			<div class = {`font-bold ${isMilestone? "text-white dark:text-white": ""}`} >
 				{milestone_or_group?.text[i18n.locale].title}
-			</span>
+			</div>
         {/if}
-        <Hr class="w-full my-1"/>
     </div>
 {/snippet}
 
 <!--Snippet defining how the evaluation for each milestonegroup is shown. 'grade' is the evaluation we get from the backend-->
 {#snippet evaluation( milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, grade: number, isMilestone: boolean,)}
-    <div class={`rounded-lg space-x-2 space-y-2 justify-center p-2 m-2 flex flex-col text-sm md:text-white ${(grade === 0 || grade === -1) && isMilestone=== true ? "bg-feedback-background-0" : ""}`}>
+    <div class={`rounded-lg space-x-2 space-y-2 justify-center p-2 pt-0 pb-0 m-2 flex flex-col text-sm text-white bg-milestone-600`}>
         {#if grade === 1}
             {@render evaluationElement(CheckCircleSolid, milestone_or_group, "text-feedback-0", isMilestone)}
         {:else if grade === 0}
@@ -543,7 +544,7 @@ async function printReport(): Promise<void> {
 
 <!-- Individual element in the main tabs component of the page: Accordion display of milestone group feedback with detailed feedback for suboptimal milestones available on click -->
 {#snippet milestoneGroupsEval(aid: number)}
-    <Accordion class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <Accordion class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-4">
         {#each Object.entries(summary[aid]) as [mid, score]}
             <div class="flex flex-col">
                 <AccordionItem
@@ -636,8 +637,8 @@ async function printReport(): Promise<void> {
             {:else}
                 {#each relevant_sessionkeys.slice(0, Math.min(numShownAnswersessions, relevant_sessionkeys.length)) as aid}
                     <TabItem defaultClass="font-bold m-1 p-0"
-                             activeClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600 border-1"
-                             inactiveClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 border-additional-color-600 dark:border-additional-color-600 border-1"
+                             activeClasses="font-bold m-1 p-2 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600 border-1"
+                             inactiveClasses="font-bold m-1 p-2 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 border-additional-color-600 dark:border-additional-color-600 border-1"
                              title={makeTitle(aid)}
                              open={aid === relevant_sessionkeys[0]}
                     >

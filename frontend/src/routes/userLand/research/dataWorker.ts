@@ -2,26 +2,22 @@ import type { GetResearchNamesResponse } from "$lib/client";
 import { client } from "$lib/client/client.gen";
 import { getResearchData, getResearchNames } from "$lib/client/sdk.gen";
 import type { PlotData } from "$lib/util";
-import { DataFrame, concat, toJSON } from "danfojs/dist/danfojs-browser/src";
+import {
+	DataFrame,
+	concat,
+	toCSV,
+	toJSON,
+} from "danfojs/dist/danfojs-browser/src";
 import type { SelectOptionType } from "flowbite-svelte";
-
-// Message types for worker communication
-export type WorkerRequest = {
-	selected_milestones: string[];
-	selected_columns: string[];
-};
-
-export type WorkerUpdate = {
-	type: "update";
-	json_data: any[];
-	plot_data: PlotData;
-};
-
-export type WorkerInit = {
-	type: "init";
-	milestone_ids: SelectOptionType<string>[];
-	columns: SelectOptionType<string>[];
-};
+import {
+	type WorkerFullData,
+	type WorkerFullDataRequest,
+	type WorkerInit,
+	type WorkerProcessDataRequest,
+	WorkerRequestTypes,
+	WorkerTypes,
+	type WorkerUpdate,
+} from "./utilTypes";
 
 // initial state that is constructed when web worker starts
 let df_in = null as DataFrame | null;
@@ -68,12 +64,30 @@ async function init() {
 			return { value: column, name: name };
 		});
 	const message: WorkerInit = {
-		type: "init",
+		type: WorkerTypes.INIT,
 		milestone_ids: milestone_ids,
 		columns: columns,
 	};
 	self.postMessage(message);
 }
+
+const get_raw_data = () => {
+	// Create a mapping object for easier lookups
+	if (df_in === null) {
+		return new DataFrame();
+	}
+	const columnMapping: Record<string, string> = {};
+
+	columns.forEach((item) => {
+		columnMapping[item.value] = item.name.toString();
+	});
+
+	milestone_ids.forEach((item) => {
+		columnMapping[item.value] = item.name.toString();
+	});
+
+	return df_in.rename(columnMapping);
+};
 
 // construct dataframe of answers for selected milestones grouped by selected columns
 function get_df(selected_milestones: string[], selected_columns: string[]) {
@@ -91,9 +105,14 @@ function get_df(selected_milestones: string[], selected_columns: string[]) {
 				.rename({ [selected_milestone]: "answer" }),
 		);
 	}
-	const grp = (concat({ dfList: df_list, axis: 0 }) as DataFrame).groupby(
-		["child_age"].concat(selected_columns),
-	);
+
+	// Remove the empty columns/milestones
+	const valid_df_list = df_list.filter((df) => df.size > 0);
+
+	const concatenated = concat({ dfList: valid_df_list, axis: 0 }) as DataFrame;
+
+	const grp = concatenated.groupby(["child_age"].concat(selected_columns));
+
 	const df = grp.col(["answer"]).mean();
 	if (df.size === 0) {
 		return new DataFrame();
@@ -162,16 +181,45 @@ function update_data(
 	}
 	const df = get_df(selected_milestones, selected_columns);
 	const message: WorkerUpdate = {
-		type: "update",
+		type: WorkerTypes.UPDATE,
 		json_data: get_json_data(df),
 		plot_data: get_plot_data(df, selected_columns),
 	};
 	self.postMessage(message);
 }
 
-self.onmessage = (event: MessageEvent<WorkerRequest>) => {
-	const { selected_milestones, selected_columns } = event.data;
-	update_data(selected_milestones, selected_columns);
+function retrieve_all_data() {
+	if (!df_in || df_in.size === 0) {
+		return;
+	}
+	const df = get_raw_data();
+	// using \t as seperator causes issues - some answers have columns. This protects against it
+	// since danfojs version supports sep but not quoting args. And sep = \t will be ignored by users device, even if
+	// we hint it with delimiter=tab in the file type, in my case at least it still used "," as a seperator too,
+	const csvVersionOfData = toCSV(
+		df.applyMap((val) =>
+			val !== null && val !== undefined ? `"${val}"` : val,
+		),
+	);
+
+	const message: WorkerFullData = {
+		type: WorkerTypes.FULL_DATA,
+		csv_data: csvVersionOfData,
+	};
+	self.postMessage(message);
+}
+
+self.onmessage = (
+	event: MessageEvent<WorkerProcessDataRequest | WorkerFullDataRequest>,
+) => {
+	if (event.data.requestType === WorkerRequestTypes.PROCESS_DATA) {
+		const { selected_milestones, selected_columns } = event.data;
+		update_data(selected_milestones, selected_columns);
+	} else if (event.data.requestType === WorkerRequestTypes.FULL_DATA) {
+		retrieve_all_data();
+	} else {
+		console.warn("Request Type not matched for dataWorker message.");
+	}
 };
 
 // download research data and construct initial state on creation of web worker

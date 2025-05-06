@@ -12,11 +12,14 @@ from sqlmodel import select
 
 from mondey_backend.dependencies import SessionDep
 from mondey_backend.dependencies import UserAsyncSessionDep
+from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneAgeScore
 from mondey_backend.models.milestones import MilestoneAgeScoreCollection
 from mondey_backend.models.milestones import MilestoneAnswer
+from mondey_backend.models.milestones import MilestoneAnswerAnalysis
 from mondey_backend.models.milestones import MilestoneAnswerSession
+from mondey_backend.models.milestones import MilestoneAnswerSessionAnalysis
 from mondey_backend.models.milestones import MilestoneGroupAgeScore
 from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
 from mondey_backend.models.questions import ChildAnswer
@@ -26,7 +29,7 @@ from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.users import User
 from mondey_backend.routers.utils import _get_answer_session_child_ages_in_months
 from mondey_backend.routers.utils import _get_expected_age_from_scores
-from mondey_backend.users import is_test_account_user
+from mondey_backend.routers.utils import get_child_age_in_months
 
 
 # see: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
@@ -72,12 +75,13 @@ def _finalize_statistics(
     count: int | np.ndarray,
     mean: float | np.ndarray,
     m2: float | np.ndarray,
+    min_num_samples: int = 2,
 ) -> tuple[int | np.ndarray, float | np.ndarray, float | np.ndarray]:
     """
     Compute the mean and standard deviation from the intermediate values.
     This function is used to finalize the statistics after a batch of new samples have been added.
     If arrays are supplied, they all need to have the same shape.
-    Values for the standard deviation for which the count is less than 2 are set to zero.
+    Values for the standard deviation for which the count is less than min_num_samples are set to -1.
 
     Parameters
     ----------
@@ -87,6 +91,8 @@ def _finalize_statistics(
         Current mean value of the samples. If ndarray, it contains the mean for each entry.
     m2 : float | np.ndarray
         Current intermediate value for variance computation. If ndarray, it contains the intermediate value for each entry.
+    min_num_samples: int
+        Minumum number of samples required to compute a valid standard deviation.
 
     Returns
     -------
@@ -102,8 +108,8 @@ def _finalize_statistics(
         If arrays have different shapes.
     """
     if all(isinstance(x, float | int) for x in [count, mean, m2]):
-        if count < 2:
-            return count, mean, 0.0
+        if count < min_num_samples:
+            return count, mean, -1.0
         else:
             var = m2 / (count - 1)
             return count, mean, np.sqrt(var)
@@ -181,7 +187,7 @@ def _get_statistics_by_age(
     for answer in answers:
         age = child_ages[answer.answer_session_id]  # type: ignore
         new_count, new_avg, new_m2 = _add_sample(
-            count[age], avg[age], m2[age], answer.answer + 1
+            count[age], avg[age], m2[age], answer.answer
         )
         count[age] = new_count
         avg[age] = new_avg
@@ -196,12 +202,10 @@ async def get_test_account_user_ids(user_session: UserAsyncSessionDep) -> list[i
     """
     Lists user IDs that are identified as test accounts
     """
-    users = await user_session.execute(select(User))
-    users_as_list = (
-        users.scalars().all()
-    )  # IIRC this converts to python list object from Cursor.
-    test_user_ids = [user.id for user in users_as_list if is_test_account_user(user)]
-    return test_user_ids
+    res = await user_session.execute(
+        select(User.id).where(col(User.email).like("%tester@testaccount.com"))
+    )
+    return list(res.scalars().all())
 
 
 def make_any_stale_answer_sessions_inactive(
@@ -234,6 +238,94 @@ def make_any_stale_answer_sessions_inactive(
     session.commit()
 
 
+def analyse_answer_session(
+    session: SessionDep, milestone_answer_session: MilestoneAnswerSession
+) -> MilestoneAnswerSessionAnalysis:
+    logger = logging.getLogger(__name__)
+    analysis = MilestoneAnswerSessionAnalysis(rms=0, child_age=0, answers=[])
+    child = session.get(Child, milestone_answer_session.child_id)
+    if child is None:
+        logger.error(f"Child {milestone_answer_session.child_id} does not exist")
+        return analysis
+    child_age = get_child_age_in_months(child, milestone_answer_session.created_at)
+    analysis.child_age = child_age
+    logger.debug(
+        f"  - checking answer session {milestone_answer_session.id}, child age {child_age}"
+    )
+    diff = 0
+    count = 0
+    for milestone_id, answer in milestone_answer_session.answers.items():
+        score = session.exec(
+            select(MilestoneAgeScore)
+            .where(col(MilestoneAgeScore.age) == child_age)
+            .where(col(MilestoneAgeScore.milestone_id) == milestone_id)
+        ).one_or_none()
+        if score is None:
+            logger.warning(
+                f"    - no statistics available for milestone {milestone_id} - skipping"
+            )
+            continue
+        if answer.answer < 0:
+            logger.debug(
+                f"    - no answer available for milestone {milestone_id} - skipping"
+            )
+            continue
+        logger.debug(
+            f"    - milestone {milestone_id}: answer {answer}, avg score {score.avg_score}"
+        )
+        analysis.answers.append(
+            MilestoneAnswerAnalysis(
+                milestone_id=milestone_id,
+                answer=answer.answer,
+                avg_answer=score.avg_score,
+                stddev_answer=score.stddev_score,
+            )
+        )
+        diff += np.power(score.avg_score - answer.answer, 2)
+        count += 1
+    if count == 0:
+        analysis.rms = 0
+    else:
+        analysis.rms = np.sqrt(diff / count)
+    logger.debug(f"    rms {analysis.rms}")
+    return analysis
+
+
+def flag_suspicious_answer_sessions(
+    session: SessionDep,
+    test_account_user_ids_to_exclude: list[int],
+    threshold: float = 1.0,
+):
+    """
+    Flag any new answer sessions with rms difference to average answers for that age greater than `threshold` as suspicious
+    """
+    logger = logging.getLogger(__name__)
+    milestone_answer_sessions = session.exec(
+        select(MilestoneAnswerSession)
+        .where(~col(MilestoneAnswerSession.suspicious))
+        .where(
+            col(MilestoneAnswerSession.user_id).not_in(test_account_user_ids_to_exclude)
+        )
+        .where(col(MilestoneAnswerSession.expired))
+        .where(~col(MilestoneAnswerSession.included_in_statistics))
+    ).all()
+    logger.debug(
+        f"  - found {len(milestone_answer_sessions)} answer sessions to check for suspiciousness"
+    )
+    for milestone_answer_session in milestone_answer_sessions:
+        try:
+            analysis = analyse_answer_session(session, milestone_answer_session)
+            if analysis.rms > threshold:
+                logger.debug(
+                    f"Marking answer session {milestone_answer_session.id} with rms difference {analysis.rms} as suspicious"
+                )
+                milestone_answer_session.suspicious = True
+                session.add(milestone_answer_session)
+        except AttributeError as e:
+            logger.exception(e)
+    session.commit()
+
+
 async def async_update_stats(
     session: SessionDep,
     user_session: UserAsyncSessionDep,
@@ -257,13 +349,23 @@ async def async_update_stats(
     test_account_user_ids_to_exclude = await get_test_account_user_ids(user_session)
     make_any_stale_answer_sessions_inactive(session, test_account_user_ids_to_exclude)
 
-    # get MilestoneAnswerSessions to be used for calculating statistics
+    flag_suspicious_answer_sessions(session, test_account_user_ids_to_exclude)
+
+    if not incremental_update:
+        # if doing a full update, initially set the included_in_statistics flag to false for all sessions
+        for answer_session in session.exec(select(MilestoneAnswerSession)).all():
+            answer_session.included_in_statistics = False
+            session.add(answer_session)
+        session.commit()
+
+    # get MilestoneAnswerSessions to be used for calculating statistics - exclude any flagged as suspicious
     answer_session_filter = (
         select(MilestoneAnswerSession)
         .where(col(MilestoneAnswerSession.expired))
         .where(
             col(MilestoneAnswerSession.user_id).not_in(test_account_user_ids_to_exclude)
         )
+        .where(~col(MilestoneAnswerSession.suspicious))
     )
     if incremental_update:
         answer_session_filter = answer_session_filter.where(
@@ -407,7 +509,7 @@ def calculate_milestone_statistics_by_age(
                 ),  # need a conversion to avoid numpy.int32 being stored as byte object
                 avg_score=avg_scores[age],
                 stddev_score=stddev_scores[age],
-                expected_score=4 if age >= expected_age else 1,
+                expected_score=3 if age >= expected_age else 0,
             )
             for age in range(0, len(avg_scores))
         ],
@@ -513,7 +615,7 @@ def get_milestone_answers(session: SessionDep) -> pd.DataFrame:
     for answer in session.exec(select(MilestoneAnswer)).all():
         milestone_answers[answer.answer_session_id][  # type: ignore
             f"milestone_id_{answer.milestone_id}"
-        ] = answer.answer + 1
+        ] = answer.answer
     df = pd.DataFrame.from_dict(
         milestone_answers,
         orient="index",

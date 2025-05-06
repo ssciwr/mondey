@@ -15,6 +15,7 @@ export default {
 		"bg-milestone-answer-1",
 		"bg-milestone-answer-2",
 		"bg-milestone-answer-3",
+		"bg-milestone-answer--1",
 	],
 	theme: {
 		extend: {
@@ -69,6 +70,7 @@ export default {
 					1: "#cdd993",
 					2: "#a7c957",
 					3: "#6a994e",
+					"-1": "#6C7BB0",
 				},
 				feedback: {
 					0: "#98CB6A",
@@ -76,7 +78,10 @@ export default {
 					2: "#E9715F",
 				},
 				"feedback-background": {
-					0: "#f3ddb0",
+					0: "#b17a06",
+				},
+				"feedback-border": {
+					0: "#f8c554",
 				},
 			},
 			fontSize: {

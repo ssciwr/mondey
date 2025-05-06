@@ -1,11 +1,16 @@
-<svelte:options runes={true} />
+<svelte:options runes={true}/>
 
 <script lang="ts">
 import { translate } from "$lib/client";
-import { i18n } from "$lib/i18n.svelte";
-import { ButtonGroup, Input, InputAddon, Textarea } from "flowbite-svelte";
-import WandMagicSparklesOutline from "flowbite-svelte-icons/WandMagicSparklesOutline.svelte";
-import Button from "flowbite-svelte/Button.svelte";
+import {
+	Button,
+	ButtonGroup,
+	Input,
+	InputAddon,
+	Spinner,
+	Textarea,
+} from "flowbite-svelte";
+import { WandMagicSparklesOutline } from "flowbite-svelte-icons";
 
 let {
 	value = $bindable(""),
@@ -21,28 +26,36 @@ let {
 	multiline?: boolean;
 } = $props();
 
-async function getTranslation(text: string, locale: string): Promise<string> {
+let translate_button_disabled = $state(false);
+
+async function getTranslation() {
+	translate_button_disabled = true;
 	const { data, error } = await translate({
-		query: { locale: locale, text: text },
+		query: { locale: locale, text: de_text },
 	});
-	if (error) {
+	if (error || !data) {
 		console.log(error);
-		return "";
+	} else {
+		value = data;
 	}
-	return data;
+	translate_button_disabled = false;
 }
 </script>
 
 <ButtonGroup class="w-full">
-<InputAddon>{locale}</InputAddon>
-	{#if multiline}
-		<Textarea bind:value={value} placeholder={placeholder}/>
-		{:else}
-<Input bind:value={value} placeholder={placeholder}/>
-		{/if}
-{#if locale !== "de"}
-	<Button onclick={async () => {value = await getTranslation(de_text, locale)}}>
-		<WandMagicSparklesOutline class="h-5 w-5" />
-	</Button>
-{/if}
+    <InputAddon>{locale}</InputAddon>
+    {#if multiline}
+        <Textarea bind:value={value} placeholder={placeholder}/>
+    {:else}
+        <Input bind:value={value} placeholder={placeholder}/>
+    {/if}
+    {#if locale !== "de"}
+        <Button disabled={translate_button_disabled} onclick={getTranslation}>
+            {#if translate_button_disabled}
+                <Spinner class="h-5 w-5"/>
+            {:else}
+                <WandMagicSparklesOutline class="h-5 w-5"/>
+            {/if}
+        </Button>
+    {/if}
 </ButtonGroup>

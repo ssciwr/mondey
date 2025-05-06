@@ -94,10 +94,11 @@ jobs:
         working-directory: ./mondey_backend
         run: pip install -e .
 
-      # Start backend server
-      - name: Start backend server in directory with e2e test databases
+      - name: Start backend server in directory with e2e test database and SQL.
         working-directory: ./e2e
-        run: SMTP_HOST="" RELOAD=false mondey-backend &
+        run: |
+          mkdir -p logs
+          mondey-backend > logs/backend.log 2>&1 &
 
       # Setup Node.js and pnpm for frontend
       - uses: pnpm/action-setup@v4
@@ -120,6 +121,10 @@ jobs:
         working-directory: ./frontend
         run: pnpm exec playwright install --with-deps
 
+      # Print current time before running e2e tests
+      - name: Print current time before e2e tests
+        run: echo "Current time before running e2e tests is $(date)"
+
       # Run the e2e tests
       - name: Run e2e tests
         working-directory: ./frontend
@@ -130,4 +135,11 @@ jobs:
         with:
           name: e2e-tests-playwright-report
           path: frontend/playwright-report/
+          retention-days: 7
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: e2e-tests-backend-logs
+          path: ./e2e/logs/
           retention-days: 7

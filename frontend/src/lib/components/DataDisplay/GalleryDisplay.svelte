@@ -70,7 +70,7 @@ let filteredComponentProps = $derived(
 	{/if}
 
 	{#if withSearch}
-		<form class="m-2 flex w-full rounded p-4">
+		<form class="m-2 w-full rounded p-4">
 			{#if searchData.length > 1}
 				<!-- after example: https://flowbite-svelte.com/docs/forms/search-input#Search_with_dropdown -->
 				<div class="relative">
@@ -105,8 +105,8 @@ let filteredComponentProps = $derived(
 				/>
 			{:else}
 				<Search
-					size="md"
-					class="rounded py-2.5"
+					size="lg"
+					class="rounded py-2.5 min-w-full"
 					placeholder={searchPlaceHolder}
 					bind:value={searchTerm}
 				/>

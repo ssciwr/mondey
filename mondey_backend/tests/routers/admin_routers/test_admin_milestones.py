@@ -1,8 +1,14 @@
+import datetime
 import pathlib
 
 import pytest
+from dateutil.relativedelta import relativedelta
 from fastapi.testclient import TestClient
 from PIL import Image
+
+from mondey_backend.models.milestones import MilestoneAnswer
+from mondey_backend.models.milestones import MilestoneAnswerSession
+from mondey_backend.routers.utils import count_milestone_answers_for_milestone
 
 
 def test_get_milestone_groups(
@@ -56,15 +62,8 @@ def test_put_milestone_group(admin_client: TestClient, milestone_group_admin1: d
     assert response.json() == milestone_group
 
 
-def test_delete_milestone_group(admin_client: TestClient):
-    response = admin_client.delete("/admin/milestone-groups/2")
-    assert response.status_code == 200
-    response = admin_client.delete("/admin/milestone-groups/2")
-    assert response.status_code == 404
-
-
 def test_delete_milestone_group_invalid_group_id(admin_client: TestClient):
-    response = admin_client.delete("/admin/milestone-groups/692")
+    response = admin_client.delete("/admin/milestone-groups/692?dry_run=false")
     assert response.status_code == 404
 
 
@@ -169,10 +168,10 @@ def test_put_milestone(admin_client: TestClient, milestone_group_admin1: dict):
 
 def test_delete_milestone(admin_client: TestClient):
     assert admin_client.get("/milestones/2").status_code == 200
-    response = admin_client.delete("/admin/milestones/2")
+    response = admin_client.delete("/admin/milestones/2?dry_run=false")
     assert response.status_code == 200
     assert admin_client.get("/milestones/2").status_code == 404
-    response = admin_client.delete("/admin/milestones/2")
+    response = admin_client.delete("/admin/milestones/2?dry_run=false")
     assert response.status_code == 404
 
 
@@ -236,7 +235,7 @@ def test_get_milestone_age_scores(admin_client_stat: TestClient):
     assert response.json()["scores"][7]["stddev_score"] == pytest.approx(0.0)
     assert response.json()["scores"][7]["count"] == 0
 
-    assert response.json()["scores"][8]["avg_score"] == pytest.approx(2.0)
+    assert response.json()["scores"][8]["avg_score"] == pytest.approx(1.0)
     assert response.json()["scores"][8]["stddev_score"] == pytest.approx(0.0)
     assert response.json()["scores"][8]["count"] == 1
 
@@ -281,3 +280,266 @@ def test_delete_submitted_milestone_image(
     assert not submitted_image_file.is_file()
     assert not approved_image_file.is_file()
     assert len(admin_client.get("/admin/submitted-milestone-images").json()) == 1
+
+
+"""
+Test that deleting a milestone actually deletes nothing (count milestone answers remains the same) with dry_run = True
+or non-specified dry_run value, and that deleting a milestone with dry_run = False succeeds
+"""
+
+
+def test_delete_milestone_dry_run(admin_client, session):
+    milestone_id = 2
+    expected_answers_from_fixtures = 3  # Has these 3 existing answers in the fixtures.
+    assert (
+        count_milestone_answers_for_milestone(session, milestone_id)
+        == expected_answers_from_fixtures
+    )
+
+    # Fake delete call without dry run param at all (should default to dry run to be safe)
+    response = admin_client.delete(f"/admin/milestones/{milestone_id}")
+    response_json = response.json()
+    assert response.status_code == 200
+    assert response_json["dry_run"]
+    assert "children" in response_json
+    assert response_json["children"]["affectedAnswers"] == 3
+    assert (
+        count_milestone_answers_for_milestone(session, milestone_id)
+        == expected_answers_from_fixtures
+    )
+
+    # Fake delete call with explicit dry_run param set to True
+    response = admin_client.delete(f"/admin/milestones/{milestone_id}?dry_run=true")
+    assert response.status_code == 200
+
+    response_json = response.json()
+    assert response_json["dry_run"]
+    assert "children" in response_json
+    assert response_json["children"]["affectedAnswers"] == 3
+    assert (
+        count_milestone_answers_for_milestone(session, milestone_id)
+        == expected_answers_from_fixtures
+    )
+
+
+def test_delete_milestone_confirmed(admin_client, session):
+    milestone_id = 2
+    expected_answers_from_fixtures = 3  # Has these 3 existing answers in the fixtures.
+    assert (
+        count_milestone_answers_for_milestone(session, milestone_id)
+        == expected_answers_from_fixtures
+    )
+
+    # Real delete call with dry_run param set to False
+    response = admin_client.delete(f"/admin/milestones/{milestone_id}?dry_run=false")
+    assert response.status_code == 200
+    assert response.json()["ok"]
+    assert count_milestone_answers_for_milestone(session, milestone_id) == 0
+
+
+## Test Delete whole milestone groups:
+def test_delete_milestone_groups_dry_run(admin_client, session):
+    milestone_group_id = (
+        1  # owns milestone ID 1, 2, 3 which have answers respectively of:
+    )
+    # num answers for each milestone: [3, 2, 1]
+    known_first_milestone_id = 1
+    expected_answers_for_first_milestone = 3
+    expected_answers_from_fixtures = (
+        6  # from the 3 milestones in group 1 (setup in conftest fixtures)
+    )
+    assert (
+        count_milestone_answers_for_milestone(session, known_first_milestone_id)
+        == expected_answers_for_first_milestone
+    )
+
+    # Fake delete call without dry run param at all (should default to dry run to be safe)
+    response = admin_client.delete(f"/admin/milestone-groups/{milestone_group_id}")
+    response_json = response.json()
+    assert response.status_code == 200
+    assert response_json["dry_run"]
+    assert "children" in response_json
+    assert (
+        response_json["children"]["affectedAnswers"] == expected_answers_from_fixtures
+    )
+    assert response_json["children"]["affectedMilestones"] == 3
+
+    response = admin_client.delete(f"/admin/milestone-groups/{milestone_group_id}")
+    assert response.status_code == 200  # still exists because was dry run.
+
+
+## Test Delete whole milestone groups:
+def test_delete_milestone_groups_real(admin_client, session):
+    milestone_group_id = (
+        1  # owns milestone ID 1, 2, 3 which have answers respectively of:
+    )
+    # num answers for each milestone: [3, 3, 0] # first two milestones have 3 answers each, last 0.
+    known_first_milestone_id = 1
+    expected_answers_for_first_milestone = 3
+    expected_answers_from_fixtures = (
+        6  # from the 3 milestones in group 1 (setup in conftest fixtures)
+    )
+    assert (
+        count_milestone_answers_for_milestone(session, known_first_milestone_id)
+        == expected_answers_for_first_milestone
+    )
+
+    # Fake delete call without dry run param at all (should default to dry run to be safe)
+    response = admin_client.delete(
+        f"/admin/milestone-groups/{milestone_group_id}?dry_run=false"
+    )
+    response_json = response.json()
+    assert response.status_code == 200
+    assert response_json["ok"]
+    assert response_json["children"]["affectedMilestones"] == 3
+    assert (
+        response_json["children"]["affectedAnswers"] == expected_answers_from_fixtures
+    )
+
+    assert count_milestone_answers_for_milestone(session, known_first_milestone_id) == 0
+    response = admin_client.delete(
+        f"/admin/milestone-groups/{milestone_group_id}?dry_run=false"
+    )
+    assert response.status_code == 404  # gone for good, because was real, not dry_run.
+
+
+def test_get_milestone_answer_sessions(admin_client_stat: TestClient, session):
+    # update the stats
+    assert admin_client_stat.post("/admin/update-stats/true").status_code == 200
+    response = admin_client_stat.get("/admin/milestone-answer-sessions/")
+    assert response.status_code == 200
+    answer_sessions = response.json()
+    # only the 5 expired answer sessions should be returned
+    assert len(answer_sessions) == 5
+    for answer_session in answer_sessions:
+        assert answer_session["expired"]
+        # none of them are marked as suspicious
+        assert not answer_session["suspicious"]
+    # add an answer session with answers that should be flagged as suspicious
+    today = datetime.datetime.today()
+    last_month = today - relativedelta(months=1)
+    session.add(
+        MilestoneAnswerSession(
+            id=666,
+            child_id=1,
+            user_id=3,
+            created_at=datetime.datetime(
+                last_month.year, last_month.month, last_month.day
+            ),
+            expired=True,
+            included_in_statistics=False,
+            suspicious=False,
+        )
+    )
+    session.add(
+        MilestoneAnswer(
+            answer_session_id=666, milestone_id=1, milestone_group_id=1, answer=3
+        )
+    )
+    session.add(
+        MilestoneAnswer(
+            answer_session_id=666, milestone_id=2, milestone_group_id=1, answer=3
+        )
+    )
+    # the new answer session is included and initially not marked as suspicious
+    new_answer_sessions = admin_client_stat.get(
+        "/admin/milestone-answer-sessions/"
+    ).json()
+    assert len(new_answer_sessions) == 6
+    assert new_answer_sessions[5]["id"] == 666
+    assert not new_answer_sessions[5]["suspicious"]
+    # after running an incremental stats update, the new answer session should be marked as suspicious
+    assert admin_client_stat.post("/admin/update-stats/true").status_code == 200
+    new_answer_sessions = admin_client_stat.get(
+        "/admin/milestone-answer-sessions/"
+    ).json()
+    assert len(new_answer_sessions) == 6
+    assert new_answer_sessions[5]["id"] == 666
+    assert new_answer_sessions[5]["suspicious"]
+
+
+def test_modify_milestone_answer_session(admin_client_stat: TestClient):
+    assert (
+        admin_client_stat.get("/admin/milestone-answer-sessions/").json()[0][
+            "suspicious"
+        ]
+        is False
+    )
+    response = admin_client_stat.post(
+        "/admin/milestone-answer-sessions/1?suspicious=true"
+    )
+    assert response.status_code == 200
+    assert (
+        admin_client_stat.get("/admin/milestone-answer-sessions/").json()[0][
+            "suspicious"
+        ]
+        is True
+    )
+    response = admin_client_stat.post(
+        "/admin/milestone-answer-sessions/1?suspicious=false"
+    )
+    assert response.status_code == 200
+    assert (
+        admin_client_stat.get("/admin/milestone-answer-sessions/").json()[0][
+            "suspicious"
+        ]
+        is False
+    )
+
+
+def test_modify_milestone_answer_session_does_not_exist(admin_client_stat: TestClient):
+    response = admin_client_stat.post(
+        "/admin/milestone-answer-sessions/7942?suspicious=true"
+    )
+    assert response.status_code == 404
+
+
+def test_get_milestone_answer_session_analysis(admin_client_stat: TestClient):
+    response = admin_client_stat.get("/admin/milestone-answer-session-analysis/1")
+    assert response.status_code == 200
+    analysis = response.json()
+    assert len(analysis["answers"]) == 2
+    assert analysis["answers"][0]["milestone_id"] == 1
+    assert analysis["answers"][0]["answer"] == 1
+    assert analysis["answers"][0]["avg_answer"] == pytest.approx(1.0)
+    assert analysis["answers"][1]["milestone_id"] == 2
+    assert analysis["answers"][1]["answer"] == 0
+    assert analysis["answers"][1]["avg_answer"] == pytest.approx(0.0)
+    # rms = sqrt(((1-1)^2 + (0-0)^2) / 2) = 0
+    assert analysis["rms"] == pytest.approx(0.0)
+    assert analysis["child_age"] == 8
+
+
+def test_get_milestone_answer_session_analysis_no_stats(admin_client_stat: TestClient):
+    # milestone 3 doesn't have any statistics yet
+    response = admin_client_stat.get("/admin/milestone-answer-session-analysis/3")
+    assert response.status_code == 200
+    analysis = response.json()
+    assert len(analysis["answers"]) == 0
+    assert analysis["rms"] == pytest.approx(0.0)
+    assert 50 < analysis["child_age"] < 60
+    # update stats
+    assert admin_client_stat.post("/admin/update-stats/false").status_code == 200
+    # now we get analysis for the milestones in this answer session
+    response = admin_client_stat.get("/admin/milestone-answer-session-analysis/3")
+    assert response.status_code == 200
+    analysis = response.json()
+    assert len(analysis["answers"]) == 1
+    assert analysis["answers"][0]["milestone_id"] == 5
+    assert analysis["answers"][0]["answer"] == 2
+    assert analysis["answers"][0]["avg_answer"] == pytest.approx(0.0)
+    # rms = sqrt(((2-0)^2) / 1) = 2
+    assert analysis["rms"] == pytest.approx(2.0)
+    assert 50 < analysis["child_age"] < 60
+
+
+def test_get_milestone_answer_session_analysis_no_answer_session(
+    admin_client_stat: TestClient,
+):
+    # this milestone answer session doesn't exist
+    assert (
+        admin_client_stat.get(
+            "/admin/milestone-answer-session-analysis/348"
+        ).status_code
+        == 404
+    )
