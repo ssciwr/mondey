@@ -1,6 +1,7 @@
 import datetime
 import pathlib
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlmodel import col
@@ -37,7 +38,20 @@ def test_get_children(
 ):
     response = user_client.get("/users/children/")
     assert response.status_code == 200
-    assert response.json() == [children[0], children[1]]
+    assert len(response.json()) == 2
+    for child, response_child in zip(children, response.json(), strict=False):
+        for key, value in child.items():
+            assert response_child[key] == value
+
+    # child 1 has an active session and has answered all milestones
+    assert response.json()[0]["active_answer_session"] is True
+    assert response.json()[0]["session_progress"] == pytest.approx(1.0)
+    assert response.json()[0]["session_remaining_seconds"] > 0
+
+    # child 2 has no active session
+    assert response.json()[1]["active_answer_session"] is False
+    assert response.json()[1]["session_progress"] == pytest.approx(0.0)
+    assert response.json()[1]["session_remaining_seconds"] == 0
 
 
 def test_get_children_no_children(research_client: TestClient):
@@ -51,7 +65,12 @@ def test_get_children_admin_user_1_child(
 ):
     response = admin_client.get("/users/children/")
     assert response.status_code == 200
-    assert response.json() == [children[2]]
+    assert len(response.json()) == 1
+    for key, value in children[2].items():
+        assert response.json()[0][key] == value
+    assert "session_progress" in response.json()[0]
+    assert "active_answer_session" in response.json()[0]
+    assert "session_remaining_seconds" in response.json()[0]
 
 
 def test_get_children_invalid_user(public_client: TestClient):
@@ -192,6 +211,7 @@ def test_delete_child_removes_answering_sessions(session, user_client: TestClien
         child_id=new_child_id,
         user_id=1,
         expired=False,
+        completed=False,
         included_in_statistics=True,
         suspicious=False,
     )
@@ -319,12 +339,12 @@ def test_get_milestone_answers_child3_current_answer_session(
 ):
     response = admin_client.get("/users/milestone-answers/3")
     assert response.status_code == 200
-    assert response.json()["id"] == 3
+    assert response.json()["id"] == 6
     assert response.json()["child_id"] == 3
     assert response.json()["answers"] == {
         "5": {
             "milestone_id": 5,
-            "answer": 2,
+            "answer": -1,
         },
     }
     assert _is_approx_now(response.json()["created_at"])
@@ -354,9 +374,14 @@ def test_update_milestone_answer_no_current_answer_session(
 ):
     current_answer_session = user_client.get("/users/milestone-answers/2").json()
     assert current_answer_session["child_id"] == 2
-
-    # child 2 is 20 months old, so milestones 4
+    # a new answer session is created with id 100 (id 99 is the last one in the db)
+    assert current_answer_session["id"] == 100
+    # child 2 is 20 months old, so relevant milestones are 3 and 4, initially unanswered
+    assert sorted(current_answer_session["answers"].keys()) == ["3", "4"]
+    assert current_answer_session["answers"]["3"]["answer"] == -1
     assert current_answer_session["answers"]["4"]["answer"] == -1
+
+    # answer milestone 4
     new_answer = {
         "milestone_id": 4,
         "answer": 2,
@@ -365,9 +390,29 @@ def test_update_milestone_answer_no_current_answer_session(
         f"/users/milestone-answers/{current_answer_session['id']}", json=new_answer
     )
     assert response.status_code == 200
-    assert response.json() == new_answer
+    assert response.json()["answer"] == new_answer
+    assert response.json()["session_completed"] is False
+    # check that the answer session is still the same
     new_answer_session = user_client.get("/users/milestone-answers/2").json()
+    assert new_answer_session["id"] == 100
     assert new_answer_session["answers"]["4"] == new_answer
+
+    # answer the final milestone in the session
+    new_answer = {
+        "milestone_id": 3,
+        "answer": 1,
+    }
+    response = user_client.put(
+        f"/users/milestone-answers/{current_answer_session['id']}", json=new_answer
+    )
+    assert response.status_code == 200
+    assert response.json()["answer"] == new_answer
+    assert response.json()["session_completed"] is True
+    # check that we get a new answer session
+    new_answer_session = user_client.get("/users/milestone-answers/2").json()
+    assert new_answer_session["id"] == 101
+    assert new_answer_session["answers"]["3"]["answer"] == -1
+    assert new_answer_session["answers"]["4"]["answer"] == -1
 
 
 def test_update_milestone_answer_update_existing_answer(user_client: TestClient):
@@ -384,7 +429,8 @@ def test_update_milestone_answer_update_existing_answer(user_client: TestClient)
         f"/users/milestone-answers/{current_answer_session['id']}", json=new_answer
     )
     assert response.status_code == 200
-    assert response.json() == new_answer
+    assert response.json()["answer"] == new_answer
+    assert response.json()["session_completed"] is False
     assert (
         user_client.get("/users/milestone-answers/1").json()["answers"]["1"]
         == new_answer
@@ -552,10 +598,10 @@ def test_get_detailed_feedback_for_session_invalid(user_client: TestClient):
 def test_get_milestone_answer_sessions_for_statistics(user_client: TestClient, session):
     response = user_client.get("/users/milestone-answers-sessions/2")
     assert response.status_code == 200
+    # child 2 has no answer sessions
     assert response.json() == {}
 
     response = user_client.get("/users/milestone-answers-sessions/1")
-
     assert response.status_code == 200
-    assert len(list(response.json().keys())) == 1
-    assert list(response.json().keys())[0] == "1"
+    # child 1 has 3 completed answer sessions with ids 1, 2 & 4
+    assert sorted(response.json().keys()) == ["1", "2", "4"]

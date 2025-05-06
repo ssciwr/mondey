@@ -2,7 +2,10 @@
 
 <script lang="ts">
 import { getMilestoneAgeScores } from "$lib/client/sdk.gen";
-import type { MilestoneAgeScore } from "$lib/client/types.gen";
+import type {
+	MilestoneAgeScore,
+	MilestoneAgeScoreCollectionPublic,
+} from "$lib/client/types.gen";
 import PlotScoreAge from "$lib/components/DataDisplay/PlotScoreAge.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { Modal } from "flowbite-svelte";
@@ -13,7 +16,7 @@ let {
 	milestoneId = null,
 }: { open: boolean; milestoneId: number | null } = $props();
 
-let scores = $state([] as Array<MilestoneAgeScore>);
+let scoreCollection = $state(null as MilestoneAgeScoreCollectionPublic | null);
 
 async function updateAnswerData() {
 	if (!milestoneId) {
@@ -25,7 +28,7 @@ async function updateAnswerData() {
 	if (error || data === undefined) {
 		console.log(error);
 	} else {
-		scores = data.scores;
+		scoreCollection = data;
 	}
 }
 
@@ -35,7 +38,7 @@ onMount(async () => {
 </script>
 
 <Modal title={i18n.tr.admin.expectedAgeData} bind:open size="lg" outsideclose>
-	{#if scores}
-		<PlotScoreAge {scores} />
+	{#if scoreCollection}
+		<PlotScoreAge {scoreCollection} />
 	{/if}
 </Modal>

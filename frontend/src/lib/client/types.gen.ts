@@ -99,6 +99,18 @@ export type ChildQuestionText = {
     lang_id?: string | null;
 };
 
+export type ChildSummaryPublic = {
+    name?: string;
+    birth_year: number;
+    birth_month: number;
+    color?: string | null;
+    id: number;
+    has_image: boolean;
+    active_answer_session: boolean;
+    session_progress: number;
+    session_remaining_seconds: number;
+};
+
 export type DeleteResponse = {
     ok: boolean;
     dry_run: boolean;
@@ -148,7 +160,6 @@ export type MilestoneAgeScore = {
     count: number;
     avg_score: number;
     stddev_score: number;
-    expected_score: number;
 };
 
 export type MilestoneAgeScoreCollectionPublic = {
@@ -169,12 +180,18 @@ export type MilestoneAnswerPublic = {
     answer: number;
 };
 
+export type MilestoneAnswerResponse = {
+    answer: MilestoneAnswerPublic;
+    session_completed: boolean;
+};
+
 export type MilestoneAnswerSession = {
     id?: number | null;
     child_id: number;
     user_id: number;
     created_at: string;
     expired: boolean;
+    completed: boolean;
     included_in_statistics: boolean;
     suspicious: boolean;
 };
@@ -1587,7 +1604,7 @@ export type GetChildrenResponses = {
     /**
      * Successful Response
      */
-    200: Array<ChildPublic>;
+    200: Array<ChildSummaryPublic>;
 };
 
 export type GetChildrenResponse = GetChildrenResponses[keyof GetChildrenResponses];
@@ -1825,7 +1842,7 @@ export type UpdateMilestoneAnswerResponses = {
     /**
      * Successful Response
      */
-    200: MilestoneAnswerPublic;
+    200: MilestoneAnswerResponse;
 };
 
 export type UpdateMilestoneAnswerResponse = UpdateMilestoneAnswerResponses[keyof UpdateMilestoneAnswerResponses];
@@ -1927,7 +1944,7 @@ export type UpdateCurrentChildAnswersResponses = {
     200: unknown;
 };
 
-export type GetExpiredMilestoneAnswerSessionsData = {
+export type GetCompletedMilestoneAnswerSessionsData = {
     body?: never;
     path: {
         child_id: number;
@@ -1936,16 +1953,16 @@ export type GetExpiredMilestoneAnswerSessionsData = {
     url: '/users/milestone-answers-sessions/{child_id}';
 };
 
-export type GetExpiredMilestoneAnswerSessionsErrors = {
+export type GetCompletedMilestoneAnswerSessionsErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GetExpiredMilestoneAnswerSessionsError = GetExpiredMilestoneAnswerSessionsErrors[keyof GetExpiredMilestoneAnswerSessionsErrors];
+export type GetCompletedMilestoneAnswerSessionsError = GetCompletedMilestoneAnswerSessionsErrors[keyof GetCompletedMilestoneAnswerSessionsErrors];
 
-export type GetExpiredMilestoneAnswerSessionsResponses = {
+export type GetCompletedMilestoneAnswerSessionsResponses = {
     /**
      * Successful Response
      */
@@ -1954,7 +1971,7 @@ export type GetExpiredMilestoneAnswerSessionsResponses = {
     };
 };
 
-export type GetExpiredMilestoneAnswerSessionsResponse = GetExpiredMilestoneAnswerSessionsResponses[keyof GetExpiredMilestoneAnswerSessionsResponses];
+export type GetCompletedMilestoneAnswerSessionsResponse = GetCompletedMilestoneAnswerSessionsResponses[keyof GetCompletedMilestoneAnswerSessionsResponses];
 
 export type GetMilestonegroupsForSessionData = {
     body?: never;
