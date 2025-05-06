@@ -2,6 +2,7 @@
 
 <script lang="ts">
 import { refreshMilestoneGroups } from "$lib/admin.svelte";
+import AnswerSessionData from "$lib/components/Admin/AnswerSessionData.svelte";
 import Languages from "$lib/components/Admin/Languages.svelte";
 import MilestoneExpectedAges from "$lib/components/Admin/MilestoneExpectedAges.svelte";
 import MilestoneGroups from "$lib/components/Admin/MilestoneGroups.svelte";
@@ -16,6 +17,7 @@ import { TabItem, Tabs } from "flowbite-svelte";
 import {
 	BadgeCheckOutline,
 	ClipboardListOutline,
+	DatabaseOutline,
 	FileImageOutline,
 	LanguageOutline,
 	ScaleBalancedOutline,
@@ -75,6 +77,13 @@ onMount(async () => {
             {i18n.tr.admin.childQuestions}
         </div>
         <Questions kind={"child"}/>
+    </TabItem>
+    <TabItem>
+        <div slot="title" class="flex items-center gap-2">
+            <DatabaseOutline size="md"/>
+            {i18n.tr.admin.data}
+        </div>
+        <AnswerSessionData />
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">

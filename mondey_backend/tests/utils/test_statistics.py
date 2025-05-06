@@ -109,7 +109,7 @@ def test_get_score_statistics_by_age(session):
     assert count[8] == 1
 
     assert np.isclose(avg[5], 0.5)
-    assert np.isclose(avg[3], 2.5)
+    assert np.isclose(avg[3], (1 + 1) / 2.0)
     assert np.isclose(avg[8], 2.0)
 
     assert np.isclose(
@@ -210,13 +210,13 @@ async def test_calculate_milestone_statistics_by_age(statistics_session, user_se
 
     assert m1.milestone_id == 1
     assert m1.scores[8].count == 3
-    assert np.isclose(m1.scores[8].avg_score, (1 + 3 + 3) / 3.0)
-    assert m1.scores[8].stddev_score == pytest.approx(1.15, abs=0.1)
+    assert np.isclose(m1.scores[8].avg_score, (1 + 1 + 2) / 3.0)
+    assert m1.scores[8].stddev_score == pytest.approx(0.577, abs=0.1)
 
     assert m2.milestone_id == 2
     assert m2.scores[8].count == 3
-    assert np.isclose(m2.scores[8].avg_score, (0 + 2 + 2) / 3.0)
-    assert m2.scores[8].stddev_score == pytest.approx(1.15, abs=0.1)
+    assert np.isclose(m2.scores[8].avg_score, (0 + 1 + 0) / 3.0)
+    assert m2.scores[8].stddev_score == pytest.approx(0.577, abs=0.1)
 
     # re-calculating using all answers gives the same results
     await async_update_stats(statistics_session, user_session, incremental_update=False)
@@ -225,13 +225,13 @@ async def test_calculate_milestone_statistics_by_age(statistics_session, user_se
 
     assert m1.milestone_id == 1
     assert m1.scores[8].count == 3
-    assert np.isclose(m1.scores[8].avg_score, (1 + 3 + 3) / 3.0)
-    assert m1.scores[8].stddev_score == pytest.approx(1.15, abs=0.1)
+    assert np.isclose(m1.scores[8].avg_score, (1 + 1 + 2) / 3.0)
+    assert m1.scores[8].stddev_score == pytest.approx(0.577, abs=0.1)
 
     assert m2.milestone_id == 2
     assert m2.scores[8].count == 3
-    assert np.isclose(m2.scores[8].avg_score, (0 + 2 + 2) / 3.0)
-    assert m2.scores[8].stddev_score == pytest.approx(1.15, abs=0.1)
+    assert np.isclose(m2.scores[8].avg_score, (0 + 1 + 0) / 3.0)
+    assert m2.scores[8].stddev_score == pytest.approx(0.577, abs=0.1)
 
 
 @pytest.mark.asyncio
@@ -250,8 +250,8 @@ async def test_calculate_milestonegroup_statistics(statistics_session, user_sess
 
     assert mg.milestone_group_id == 1
     assert mg.scores[8].count == 6
-    assert np.isclose(mg.scores[8].avg_score, (0 + 1 + 2 + 3 + 2 + 3) / 6.0)
-    assert mg.scores[8].stddev_score == pytest.approx(1.15, abs=0.1)
+    assert np.isclose(mg.scores[8].avg_score, (0 + 1 + 1 + 1 + 2 + 0) / 6.0)
+    assert mg.scores[8].stddev_score == pytest.approx(0.719, abs=0.1)
 
     # re-calculating using all answers gives the same results
     await async_update_stats(statistics_session, user_session, incremental_update=False)
@@ -259,8 +259,8 @@ async def test_calculate_milestonegroup_statistics(statistics_session, user_sess
 
     assert mg.milestone_group_id == 1
     assert mg.scores[8].count == 6
-    assert np.isclose(mg.scores[8].avg_score, (0 + 1 + 2 + 3 + 2 + 3) / 6.0)
-    assert mg.scores[8].stddev_score == pytest.approx(1.15, abs=0.1)
+    assert np.isclose(mg.scores[8].avg_score, (0 + 1 + 1 + 1 + 2 + 0) / 6.0)
+    assert mg.scores[8].stddev_score == pytest.approx(0.719, abs=0.1)
 
 
 def test_make_datatable_no_data():

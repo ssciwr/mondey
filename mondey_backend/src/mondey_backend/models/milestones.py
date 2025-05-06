@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 
+from pydantic import BaseModel
 from sqlalchemy.orm import Mapped
 from sqlmodel import Field
 from sqlmodel import SQLModel
@@ -178,6 +179,7 @@ class MilestoneAnswerSession(SQLModel, table=True):
     )
     expired: bool
     included_in_statistics: bool
+    suspicious: bool
     answers: Mapped[dict[int, MilestoneAnswer]] = dict_relationship(key="milestone_id")
 
 
@@ -186,6 +188,19 @@ class MilestoneAnswerSessionPublic(SQLModel):
     child_id: int
     created_at: datetime.datetime
     answers: dict[int, MilestoneAnswerPublic]
+
+
+class MilestoneAnswerAnalysis(BaseModel):
+    milestone_id: int
+    answer: int
+    avg_answer: float
+    stddev_answer: float
+
+
+class MilestoneAnswerSessionAnalysis(BaseModel):
+    child_age: int
+    rms: float
+    answers: list[MilestoneAnswerAnalysis]
 
 
 # models for statistics. README: Perhaps this could be made simpler if the data was stored in a database with array-column support. sqlite apparently doesnt have this: https://stackoverflow.com/questions/3005231/how-to-store-array-in-one-column-in-sqlite3, but postgres does: https://www.postgresql.org/docs/9.1/arrays.html

@@ -1,0 +1,1 @@
+ALTER TABLE milestoneanswersession ADD COLUMN suspicious BOOLEAN NOT NULL DEFAULT FALSE;
