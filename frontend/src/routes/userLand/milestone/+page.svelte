@@ -206,7 +206,7 @@ const breadcrumbdata = $derived([
                         />
                     {/each}
                     <Modal bind:open={modalImagePreviewOpen} size="xl" autoclose outsideclose>
-                        <div class="p-2">
+                        <div class="p-2" on:click={()=>{modalImagePreviewOpen=false}}>
                             {#if currentMilestone?.images && currentMilestone.images.length > 0}
                                 <img
                                         class="w-full rounded-lg"
