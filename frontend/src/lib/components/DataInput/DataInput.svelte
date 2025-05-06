@@ -1,6 +1,7 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
+import { i18n } from "$lib/i18n.svelte";
 import { Label, Textarea } from "flowbite-svelte";
 
 // variables
@@ -55,6 +56,10 @@ let showTextField: boolean = $derived.by(
 	},
 );
 let highlight = $derived(!valid && required === true);
+
+let realPlaceholder = $derived(
+	i18n.tr ? i18n.tr.misc.selectPlaceholder : undefined,
+);
 </script>
 
 {#if label}
@@ -75,7 +80,7 @@ let highlight = $derived(!valid && required === true);
 				componentClass
 			: componentClass}
 		bind:value = {value}
-		{placeholder}
+		{realPlaceholder}
 		{items}
 		{required}
 		{disabled}

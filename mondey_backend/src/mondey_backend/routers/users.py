@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from fastapi import APIRouter
 from fastapi import HTTPException
 from fastapi import Query
@@ -63,6 +65,9 @@ def create_router() -> APIRouter:
         current_active_user: CurrentActiveUserDep,
         child: ChildCreate,
     ):
+        if datetime(child.birth_year, child.birth_month, 1) > datetime.now():
+            raise HTTPException(400, "Birth date must be in the past")
+
         db_child = Child.model_validate(
             child, update={"user_id": current_active_user.id, "has_image": False}
         )

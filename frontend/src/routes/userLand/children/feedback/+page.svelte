@@ -317,7 +317,7 @@ async function loadData(aid: number | null): Promise<void> {
 
 	const summary_ = await loadSummaryFeedbackFor(aid);
 	if (summary_ === null) {
-		alertMessage = `Something went wrong when loading the summary feedback for ${aid}`;
+		alertMessage = i18n.tr.milestone.feedbackLoadingSummaryError;
 		alertStore.showAlert(
 			i18n.tr.childData.alertMessageTitle,
 			alertMessage,
@@ -329,7 +329,7 @@ async function loadData(aid: number | null): Promise<void> {
 
 	const detailed_ = await loadDetailedFeedbackFor(aid);
 	if (detailed_ === null) {
-		alertMessage = `Something went wrong when loading the detailed feedback for ${aid}`;
+		alertMessage = i18n.tr.milestone.feedbackLoadingError;
 		alertStore.showAlert(
 			i18n.tr.childData.alertMessageTitle,
 			alertMessage,
@@ -408,7 +408,7 @@ async function generateReport(): Promise<string | null> {
 		// iterate over all answersessions with aid:key
 		for (let aid of allSessionkeys) {
 			const min = Math.min(...(Object.values(summary[aid]) as number[]));
-			report += `<h2>${i18n.tr.milestone.timeperiod}: ${makeTitle(Number(aid))}</h2> \n`;
+			report += `<h2>${i18n.tr.milestone.timeperiod}: ${formatDate(answerSessions[aid].created_at)}</h2> \n`;
 			report += `<strong>${i18n.tr.milestone.summaryScore}:</strong> ${min === 1 ? i18n.tr.milestone.recommendOk : min === 0 ? i18n.tr.milestone.recommendWatch : min === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
 
 			for (let [mid, score] of Object.entries(summary[aid])) {
@@ -509,20 +509,21 @@ async function printReport(): Promise<void> {
 
 <!--element of the detailed evaluation which shows how the child fared in each milestonegroup-->
 {#snippet evaluationElement(symbol: any, milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, color: string, isMilestone: boolean = false)}
-    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center justify-center m-2 p-6">
-        <svelte:component this={symbol} size="xl" class={`${color}`} />
+    <div class="flex flex-col items-center justify-center p-2 w-full">
+        <div class="flex justify-center w-full mb-2">
+            <svelte:component this={symbol} size="xl" class={`${color}`} />
+        </div>
         {#if color !== "gray"}
 			<div class = {`font-bold ${isMilestone? "text-white dark:text-white": ""}`} >
 				{milestone_or_group?.text[i18n.locale].title}
 			</div>
         {/if}
-        <Hr class="w-full my-1"/>
     </div>
 {/snippet}
 
 <!--Snippet defining how the evaluation for each milestonegroup is shown. 'grade' is the evaluation we get from the backend-->
 {#snippet evaluation( milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, grade: number, isMilestone: boolean,)}
-    <div class={`rounded-lg space-x-2 space-y-2 justify-center p-10 m-2 flex flex-col text-sm text-white ${(grade === 0 || grade === -1) && isMilestone=== true ? "bg-milestone-600" : "bg-green-700"}`}>
+    <div class={`rounded-lg space-x-2 space-y-2 justify-center p-2 pt-0 pb-0 m-2 flex flex-col text-sm text-white bg-milestone-600`}>
         {#if grade === 1}
             {@render evaluationElement(CheckCircleSolid, milestone_or_group, "text-feedback-0", isMilestone)}
         {:else if grade === 0}
@@ -636,8 +637,8 @@ async function printReport(): Promise<void> {
             {:else}
                 {#each relevant_sessionkeys.slice(0, Math.min(numShownAnswersessions, relevant_sessionkeys.length)) as aid}
                     <TabItem defaultClass="font-bold m-1 p-0"
-                             activeClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600 border-1"
-                             inactiveClasses="font-bold m-1 p-4 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 border-additional-color-600 dark:border-additional-color-600 border-1"
+                             activeClasses="font-bold m-1 p-2 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600 border-1"
+                             inactiveClasses="font-bold m-1 p-2 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 border-additional-color-600 dark:border-additional-color-600 border-1"
                              title={makeTitle(aid)}
                              open={aid === relevant_sessionkeys[0]}
                     >

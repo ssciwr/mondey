@@ -16,6 +16,8 @@ export const translationIds = {
 		answer3Text: "Zuverlässig",
 		answer3Desc:
 			"Das Kind zeigt das Verhalten mehrmals sicher und genau wie beschrieben.",
+		"answer-1Text": "Später bewerten",
+		"answer-1Desc": "Falls Sie noch nicht wissen, ob das Kind das tun könnt.",
 		milestones: "Meilensteine",
 		observation: "Beobachtungshinweise",
 		help: "Fördern",
@@ -60,6 +62,9 @@ export const translationIds = {
 		disableHelp: "Ausblenden",
 		noFeedback:
 			"Kein Feedback verfügbar. Sie müssen ein Kind länger als eine Woche beobachten und regelmäßig Meilensteine bewerten um Feedback zu erhalten.",
+		feedbackLoadingSummaryError:
+			"Beim Laden der Zusammenfassung des Feedbacks ist ein Fehler aufgetreten.",
+		feedbackLoadingError: "Beim Laden das Feedback ist ein Fehler aufgetreten.",
 		current: "Aktuell",
 		toTheMilestone: "Zum Meilenstein",
 		older: "Weiter zurück",
@@ -237,7 +242,7 @@ export const translationIds = {
 	},
 	userData: {
 		label: "Persönliche Daten",
-		heading: "Benutzerdaten eingeben",
+		heading: "Daten zur eigenen Person eingeben",
 		alertMessageTitle: "Fehler",
 		alertMessageMissing:
 			"Bitte füllen Sie die benötigten Felder (hervorgehoben) aus.",
@@ -275,7 +280,7 @@ export const translationIds = {
 		newChildHeadingLong: "Neues Kind registrieren",
 		overviewLabel: "Kinder",
 		overviewSummary:
-			"Wählen sie ein Kind zur Beobachtung aus oder legen melden sie ein neues Kind an.",
+			"Wählen sie ein Kind zur Beobachtung aus oder legen sie ein neues Kind an.",
 		alertMessageMissing:
 			"Bitte füllen Sie die benötigten Felder (hervorgehoben) aus.",
 		alertMessageUserNotFound:
@@ -337,6 +342,7 @@ export const translationIds = {
 		latest: "Aktuelles",
 		downloads: "Downloads",
 		contact: "Kontakt",
+		selectPlaceholder: "Option wählen",
 	},
 	frontpage: {
 		heading: "Möchten Sie die Entwicklung von Kindern begleiten und fördern?",
@@ -353,6 +359,8 @@ export const translationIds = {
 			"Sie bewerten, wie gut das Kind bestimmte Alltagshandlungen ausführen kann. Auf dieser Basis bietet MONDEY Ihnen Feedback zum Entwicklungsstand des Kindes.",
 		alt: "Ein kleines Kind hält ein Gänseblümchen in der Hand",
 		tryDemo: "Ausprobieren",
+		tryDemoTooltip:
+			"Sie können das Programm ausprobieren, ohne dass Ihre Daten gespeichert werden; sie lassen sich dann aber auch nicht für die Feedback-Funktion nutzen",
 	},
 	frontpageBookmarks: {
 		title: "Welche Entwicklungsbereiche werden erfasst?",

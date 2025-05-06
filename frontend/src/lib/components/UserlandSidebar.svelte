@@ -14,6 +14,7 @@ import {
 import { goto } from "$app/navigation";
 import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import {
@@ -78,8 +79,12 @@ let { setHideDrawer } = $props();
             <SidebarItem label = {i18n.tr.login.profileButtonLabelLogout} onclick = {async () => {
                     const response = await user.logout();
                     if (response.error) {
-                        alertMessage = i18n.tr.login.alertMessageTitle;
-                        showAlert = true;
+                       alertStore.showAlert(
+                        i18n.tr.login.alertMessageTitle,
+                        "",
+                        true,
+                        true
+                    );
                     } else {
                         user.data = null;
                         currentChild.id = null;

@@ -119,6 +119,21 @@ def test_create_update_and_delete_child(user_client: TestClient):
     assert len(user_client.get("/users/children/").json()) == 2
 
 
+def test_create_future_child_fails(user_client: TestClient):
+    assert len(user_client.get("/users/children/").json()) == 2
+    response_create = user_client.post(
+        "/users/children/",
+        json={
+            "name": "new child with future birth date",
+            "birth_year": 2099,
+            "birth_month": 3,
+            "color": "#000000",
+        },
+    )
+    assert response_create.status_code == 400
+    assert len(user_client.get("/users/children/").json()) == 2
+
+
 def test_delete_dry_run_does_not_delete_child(user_client: TestClient):
     assert len(user_client.get("/users/children/").json()) == 2
     response_create = user_client.post(

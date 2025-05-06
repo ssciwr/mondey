@@ -70,7 +70,7 @@ const asAlert = false;
 </svelte:head>
 
 <div style="position:fixed;padding-top:1.1rem;padding-bottom:1rem;left:0px;right:0px;border-bottom:1px solid lightgray"
-	 class="bg-white dark:bg-gray-800 md:hidden w-full text-center flex justify-center items-center shadow-lg">
+	 class="bg-white z-1000 dark:bg-gray-800 md:hidden w-full text-center flex justify-center items-center shadow-lg">
 	<a href="/#">
 		<img src={logo_light} class="block h-10 dark:hidden" alt="MONDEY Logo" />
 		<img src={logo_dark} class="hidden h-10 dark:block" alt="MONDEY Logo" />
@@ -80,7 +80,7 @@ const asAlert = false;
 <div class="hidden md:block">
 	<Navbar>
 		<div>
-			<NavBrand href="/#">
+			<NavBrand href="/#" class="z-1000">
 				<img src={logo_light} class="mt-6 block h-12 dark:hidden" alt="MONDEY Logo" />
 				<img src={logo_dark} class="mt-6 hidden h-12 dark:block" alt="MONDEY Logo" />
 			</NavBrand>
@@ -122,13 +122,13 @@ const asAlert = false;
 
 	{#if false === isUserLand}
 		<!-- Mobile Log in -->
-		<div class="z-10 fixed" style="top:0.8rem;left:1rem;">
+		<div class="z-1000 fixed" style="top:0.8rem;left:1rem;">
 			<a class="btn-primary btn-icon" href="/login">
 				<UserOutline />
 			</a>
 		</div>
 		<!-- Mobile Navigation -->
-		<div class="z-10 fixed" style="top:0.8rem;right:1rem;">
+		<div class="z-1000 fixed" style="top:0.8rem;right:1rem;">
 			<div class="btn-primary btn-icon" onclick={toggleDrawer} >
 				<BarsOutline class="cursor-pointer" />
 			</div>
