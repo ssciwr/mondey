@@ -8,6 +8,8 @@ import {
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
+import WhiteCircle from "$lib/components/WhiteCircle.svelte";
+import WhiteCircleSolid from "$lib/components/WhiteCircleSolid.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
@@ -140,7 +142,7 @@ async function setup(): Promise<void> {
 							goto("/userLand/milestone");
 						},
 					},
-					auxilliary: complete ? CheckCircleSolid : ExclamationCircleSolid,
+					auxilliary: complete ? WhiteCircleSolid : WhiteCircle,
 				};
 			},
 		);
