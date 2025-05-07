@@ -61,6 +61,13 @@ def align_additional_data_to_current_answers():
 
     import_current_session, import_current_engine = get_import_current_session()
 
+    # todo: First, remove duplicates - determined by detecting if there is a child with a name for this import
+    # CASE ID and a parent with the user id too with the childs case ID in their email.
+    # Remove them from the CSV if so.
+    # this way everything downstream like generating parents for children etc will avoid duplicate data.
+    # since we don't path the dataframe to these functions, we edit the CSV itself. This also lets us inspect
+    # and see which rows the CSV detected as novel/new rows and which it removed as duplicates.
+
     print("Now assigning the additional children their milestones")
     map_children_milestones_data(
         additional_data_path, import_current_session

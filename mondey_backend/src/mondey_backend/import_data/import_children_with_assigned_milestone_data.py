@@ -82,6 +82,7 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
     with (
         overwritten_csv if overwritten_csv else open(csv_path, encoding="utf-16")
     ) as csvfile:
+        print("Opening CSV File:", csv_path)
         reader = list(csv.DictReader(csvfile, delimiter="\t"))
 
         # Make parents in a batch query.
@@ -178,6 +179,7 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
                 expired=True,
                 included_in_statistics=False,
                 created_at=datetime(2025, 1, 1, 1, 0, 1),
+                suspicious=False,
             )
             session.add(answer_session)
             session.commit()

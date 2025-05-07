@@ -36,6 +36,8 @@ current_database_file_path = (
     script_dir / "src/mondey_backend/import_data/current_db/current_mondey.db"
 )
 
+print("Current database file path is: ", current_database_file_path)
+
 current_db_url = "sqlite:////" + str(current_database_file_path)
 current_engine = create_engine(current_db_url)
 

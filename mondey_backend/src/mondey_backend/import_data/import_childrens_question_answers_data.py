@@ -48,10 +48,13 @@ from sqlmodel import select
 from tqdm import tqdm
 
 from mondey_backend.import_data.hardcoded_additional_data_answer_saving import (
-    is_special_answer_case,
+    hardcoded_id_map,
 )
 from mondey_backend.import_data.hardcoded_additional_data_answer_saving import (
-    process_special_answer,
+    hardcoded_other_answers,
+)
+from mondey_backend.import_data.hardcoded_additional_data_answer_saving import (
+    relevant_child_variables,
 )
 from mondey_backend.import_data.utils import data_path
 from mondey_backend.import_data.utils import get_childs_parent_id
@@ -65,9 +68,7 @@ from mondey_backend.import_data.utils import update_or_create_user_answer
 from mondey_backend.models.milestones import Language
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
-from mondey_backend.models.questions import ChildQuestionText
 from mondey_backend.models.questions import UserQuestion
-from mondey_backend.models.questions import UserQuestionText
 
 debug = True
 
@@ -363,15 +364,12 @@ def assign_answers_to_the_imported_questions(
         # Iterate through all variables in labels_df
         print("")
         print("Going through for child ... ", child_row.get("CASE"))
-        previous_variable_label = "Default Label"
-        previous_variable = "Default Variable"
         for _j, label_row in (
             labels_df.groupby("Variable").first().reset_index().iterrows()
         ):
             variable_type = label_row["Variable Type"]
             variable = label_row["Variable"]
             variable_label = label_row["Variable Label"]
-            is_parent_question = False  # default assumption that it is a child question
 
             if variable_label in questions_to_discard:
                 continue
@@ -385,64 +383,48 @@ def assign_answers_to_the_imported_questions(
             Category 3 - variable_label is a free text reference, but not connected to another question. In this case,
             it will be found through variable level like any other question.
             """
-            for variable_label_option in [
-                variable_label,
-            ]:
-                response = child_row.get(variable)
-                answer = str(
-                    labels_df[
-                        (labels_df["Variable"] == variable)
-                        & (labels_df["Response Code"] == response)
-                    ]
+            if variable not in list(hardcoded_id_map.keys()):
+                print("Skipping variable which was not in our variable allowlist")
+                continue
+            response = child_row.get(variable)
+            answer = str(
+                labels_df[
+                    (labels_df["Variable"] == variable)
+                    & (labels_df["Response Code"] == response)
+                ]
+            )
+            """
+            # at this point we check if it is a hardcoded special case:
+            if should_be_saved(variable):
+                process_special_answer(
+                    session, variable_label, answer, variable, child_row.get("CASE")
                 )
-                # at this point we check if it is a hardcoded special case:
-                if is_special_answer_case(variable_label, variable):
-                    process_special_answer(
-                        session, variable_label, answer, variable, child_row.get("CASE")
-                    )
-                    continue
-                preserved_freetext_lookup_key = variable
-                set_only_additional_answer = False
-                if (
-                    " [01]" in variable_label
-                    and "Andere" in variable_label
-                    and previous_variable_label in variable_label
-                ):  # indicates it's linked to previous label (select)
-                    set_only_additional_answer = True
-                    variable_label_option = previous_variable_label
-                    variable = previous_variable
-                    print("Was linked to previous select, so setting additional answer")
-                    print(variable + ": " + variable_label_option)
+                # todo: Only in some cases we should prooced now.
+                continue
+            """
+            preserved_freetext_lookup_key = variable
+            set_only_additional_answer = False
+            # move this logic into special processing.
+            if variable in hardcoded_other_answers:
+                set_only_additional_answer = True
+                variable = hardcoded_other_answers[
+                    variable
+                ]  # find the real parent ID for this
+                # wll be used later when saving.
+                print("Was linked to previous select, so setting additional answer")
+                print(variable)
 
-                # Find the corresponding ChildQuestion
-                query = (
-                    select(ChildQuestion)
-                    .join(ChildQuestionText)
-                    .where(
-                        ChildQuestionText.lang_id == "de",
-                        ChildQuestionText.question == variable_label_option,
-                    )
-                )
+            # Find the corresponding ChildQuestion
+            child_query = select(ChildQuestion).where(
+                ChildQuestion.id == hardcoded_id_map[variable]
+            )
+            user_query = select(UserQuestion).where(
+                UserQuestion.id == hardcoded_id_map[variable]
+            )
 
-                question = session.exec(query).first()
-
-                # todo: Now we know FK = Children, FE/FP = Parents, we could use IF rather than fallback for this.
-                # note: The above doesn't always hold ...
-                if not question:
-                    query = (
-                        select(UserQuestion)
-                        .join(UserQuestionText)
-                        .where(
-                            UserQuestionText.lang_id == "de",
-                            UserQuestionText.question == variable_label_option,
-                        )
-                    )
-
-                    question = session.exec(query).first()
-                    print(
-                        "Intiiated latest search for ...:",
-                        variable + ": " + variable_label_option,
-                    )
+            question = session.exec(
+                child_query if variable in relevant_child_variables else user_query
+            ).first()
 
             # If after all looping no match is found, discard.
             if not question:
@@ -466,11 +448,6 @@ def assign_answers_to_the_imported_questions(
             # Skip if no response
             if pd.isna(response) or response == -9:
                 continue
-
-            if debug and is_parent_question:
-                print("Is parent question.")
-                if "FE" in variable:
-                    print("FE variable! ", variable)
 
             # Handle Multiple Choice
             if (
@@ -504,7 +481,7 @@ def assign_answers_to_the_imported_questions(
                             ),
                             question_id=question.id,
                             answer_text=answer_text,
-                            set_only_additional_answer=False,
+                            set_only_additional_answer=set_only_additional_answer,
                             is_child_question=False,
                         )
                         print(
@@ -595,8 +572,6 @@ def assign_answers_to_the_imported_questions(
                     variable_label,
                 )
                 missing += 1
-            previous_variable_label = variable_label
-            previous_variable = variable
 
     session.commit()
     if debug:

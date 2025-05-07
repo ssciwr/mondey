@@ -24,46 +24,126 @@ from mondey_backend.import_data.utils import update_or_create_user_answer
 
 age_of_birth_questions = ["Geburtsjahr", "Geburtsmonat"]
 eltern_questions = ["Mütter", "Väter", "Eltern", "Andere Verwandte"]
+eltern_question_variables = ["FP01", "FP02", "FP03", "FP04"]
 specific_fruhgeboren_week_questions = ["Fruhgeboren [01]", "Fruhgeboren? [01]"]
+fruhbgeboren_and_teringeboren_variables = ["FK03", "FK04_01"]
 fruhgeboren_questions = [*specific_fruhgeboren_week_questions, "Termingeboren"]
 younger_older_sibling_questions = ["Jüngere Geschwister", "Ältere Geschwister"]
-meta_changed_questions = {  # this maps the "new/latest" version in the data to the old/original question "name" tag.
-    "Fremdbetreuung?": "Fremdbetreuung"
-}
+younger_older_sibling_variables = [
+    "FK08_01",
+    "FK08_02",
+]  # other ones just contain info these have within them?
+
+
 andere_diagnosed_question = "Andere Diagnosen: [01]"
 
 child_age_questions_labels = ["FK01", "FK02"]
+variables_to_ignore_with_reasons = {
+    "FK08": "Needless younger sibling related yes/no question",
+    "FK08_03": "Needless younger sibling related question",
+}
 
-meta_only_changed_questions = list(meta_changed_questions.keys())
+gesundheit_variables = [
+    "FK05_01",
+    "FK05_02",
+    "FK05_03",
+    "FK05_04",
+    "FK05_05",
+    "FK05_06",
+    "FK05_07",
+    "FK06_01",
+]
+# FK06_01 = Andere Diagnosen..
+andere_diagnosen_other_question_variable = "FK06_01"
+nationality_other_question_variable = "FE03_01"  #' Andere Staatsangehörigkeit: [01]
+muttersprache_other_question_variable = "FE05_01"
+additional_answer_variables = [
+    andere_diagnosen_other_question_variable,
+    nationality_other_question_variable,
+    muttersprache_other_question_variable,
+]
+
+
+relevant_child_variables = [
+    *fruhbgeboren_and_teringeboren_variables,
+    *gesundheit_variables,
+    andere_diagnosen_other_question_variable,
+    "FK07",
+    "FK11",
+    "FK12",
+    *younger_older_sibling_variables,
+]
+relevant_user_variables = [
+    *eltern_question_variables,
+    "FE08",
+    "FE07",
+    "FE06",
+    "FE04",
+    muttersprache_other_question_variable,
+    nationality_other_question_variable,
+]
+
+hardcoded_id_map = {
+    # Numeric IDs mapped to variable names
+    "FK05_01": 5,
+    "FK05_02": 6,
+    "FK05_03": 7,
+    "FK05_04": 8,
+    "FK05_05": 9,
+    "FK05_06": 10,  # With additional answer "Andere Diagnosen: [01]"
+    "FK05_07": 11,
+    "FK07": 13,
+    "FK08_01": "FK09",  # Count older siblings or null if 0
+    "FK08_02": "FK10",  # Count younger siblings
+    "FK11": 19,
+    "FK12": 20,
+    "FK03": 3,  # Related to questions 21 & 22
+    "FK04_01": 4,  # Related to questions 21 & 22
+    # we just save answers to the non-existing 3 and 4 question and let the tested working script convert that
+    # to update the asnwers to point to 21/22 for Termingeboren.
+    # User Questions mapped to numeric IDs
+    "FP01": 13,  # Eltern giant question
+    "FP02": 13,  # Eltern giant question
+    "FP03": 13,  # Eltern giant question
+    "FP04": 13,  # The "andere" option # in this case, only one of these will have a non-null, non empty value,
+    # so we just write it.
+    "FE08": 7,
+    "FE07": 6,
+    "FE06": 5,
+    "FE04": 4,  # Muttersprache
+    "FE05_01": 4,  # Muttersprache (andere option)
+    "FE02": 3,  # Nationalität
+    "FE03_01": 3,  # Nationalität (andere option)
+}
+all_relevant_variables = [*relevant_user_variables, *relevant_child_variables]
+
+hardcoded_other_answers = {
+    andere_diagnosen_other_question_variable: 10,
+    nationality_other_question_variable: 4,
+    muttersprache_other_question_variable: 3,
+}
 
 """
-Match based on question text ("Name" attribute). We save as "name" so that researchers can have something
-useable to select the questions with on the research page, but the name can change between form data versions.
-That's why we hardcode to rematch old data. Since we also need to manage merging/flattening some questions,
-it's not a major difference matching by name (We could also match by variable code, which we do in one
-special case below, but storing that as a DB field doesn't add much given we need to do flattening anyway)
-"""
+Hardcoded matching based on specific variable ID for the non-milestone relevant answers we want to store and process
+into the database. Process meaning, for some questions, like the Eltern one, we convert several individual
+questions on the same theme into the """
 
 
-def is_special_answer_case(question_label: str, variable: str) -> bool:
-    # excepts for labels which are the same for parents and children
-    if variable in child_age_questions_labels:
-        return False  # special case because parent also has "Geburtsjahr", but that one, we keep.
-    return question_label in [
-        *eltern_questions,
-        *fruhgeboren_questions,
-        *age_of_birth_questions,
-        *younger_older_sibling_questions,
-    ]
+def should_be_saved(variable: str) -> bool:
+    return variable in all_relevant_variables  # otherwise it is a milestone
 
 
 def process_special_answer(
     session, question_label: str, answer: str, variable: str, child_id: int
 ):
+    print(
+        "Deactivated. JUst save through normal process with an allowlist of approved variable IDs and variable matching now"
+    )
+    return
     if variable in child_age_questions_labels:
         print("Age of birth case - skip, no need to save anything.")
         return
-    elif question_label in eltern_questions:
+    elif variable in eltern_question_variables:
         eltern_question_special_id = 13
         print(eltern_question_special_id)
         if answer is not None and len(answer) > 0:
@@ -78,20 +158,20 @@ def process_special_answer(
                 # - that's just a category, not a way for users to specify in freetext
                 is_child_question=False,
             )
-    elif question_label in fruhgeboren_questions:
+    elif variable in fruhbgeboren_and_teringeboren_variables:
         # Termingeboren/Fruhgeboren = 3
         # Fruhgeboren [01] = 4 (Weeks only if the former is "Fruhgeboren")
         pregnancy_duration_question_id = 21
         incubator_weeks_question_id = 22
         pregnanacy_duration_answer = 41  # 41 weeks assumed if Termingeboren
         incubator_weeks = 0
+        # first bit is Fruhgeboren specific weeks part.
         if (
-            question_label in specific_fruhgeboren_week_questions
-        ):  # Fruhgeboren specific weeks part.
-            if answer is not None and len(answer):  # parse it as before...
-                pregnanacy_duration_answer, incubator_weeks = parse_weeks(answer)
-            # This ignores the users choice for Termingeboren/Fruhgeboren - if any duration period is specified, it assumes
-            # we should record and overwrite the info (which makes sense based on the data)
+            variable == "FK04_01" and answer is not None and len(answer)
+        ):  # parse it as before...
+            pregnanacy_duration_answer, incubator_weeks = parse_weeks(answer)
+        # This ignores the users choice for Termingeboren/Fruhgeboren - if any duration period is specified, it assumes
+        # we should record and overwrite the info (which makes sense based on the data)
 
         update_or_create_user_answer(
             session,
@@ -109,7 +189,7 @@ def process_special_answer(
             set_only_additional_answer=False,
             is_child_question=False,
         )
-    elif question_label in younger_older_sibling_questions:
+    elif variable in younger_older_sibling_variables:
         """
         Relevant questions as in the data:
           FK08 Geschwister?: Ausweichoption (negativ) oder Anzahl ausgewählter Optionen
@@ -146,37 +226,3 @@ def process_special_answer(
             set_only_additional_answer=True,
             is_child_question=False,
         )
-
-
-"""
-Going to change questions and the hardcoded import matching system to use variable IDs, these will need to be saved
-(and manually added for existing questions).
-
--> Add API route which allows the user to upload the CSV.
---- Checks basic format (right columns?)
---- Identifies duplicate row by combo of the survey submission "TIME" variable + Milestone answers matching
------- To avoid the issue of half complete milestones child data with then added on further milestone data, if a subset
-of atleast say 10 milestones match (from the "half complete" previous child) with a future, we assume it's the same child
-with further data to append to it. We don't look for exactly identical milestone data.
---- Duplicate data gets ignored. Since we detect duplicate data based on milestones + submission time, changes to
-question answers would (deliberately) not be updated if the milestone data is exactly the same.
---- Child needs an optional new "timeOfDataAdded" or so field to store the survey submission field
---- We agreed generally that the import process is strict and will error out if input data cannot be processed rather than
-save. Possibly, it can highlight the specific rows which can't be processed (The script does iterate per-row), but won't
-give a specific reason. The rows which could not be processed would be displayed on the frontend.
-"""
-
-
-"""
-Remaining todos:
-Get the titles for andere diagnosen in the new data import.
-
-Important: Do younger/older siblings import right.
-
-=> Get the actual response of the child...
-response_label = labels_df[
-                    (labels_df["Variable"] == variable)
-                    & (labels_df["Response Code"] == response)
-                ]
-
-"""
