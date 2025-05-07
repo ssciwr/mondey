@@ -1,14 +1,18 @@
+import asyncio
+
 import pandas as pd
 from sqlalchemy.orm import Session
 from sqlmodel import col
+from sqlmodel import select
 
 from mondey_backend.import_data.utils import additional_data_path
+from mondey_backend.import_data.utils import async_import_session_maker
+from mondey_backend.import_data.utils import check_parent_exists
 from mondey_backend.import_data.utils import get_import_current_session
 from mondey_backend.models.children import Child
-from mondey_backend.models.users import User
 
 
-def remove_duplicate_cases(
+async def remove_duplicate_cases(
     additional_data_path: str, session: Session, output_path: str | None = None
 ) -> tuple[pd.DataFrame, list[str]]:
     """
@@ -37,25 +41,25 @@ def remove_duplicate_cases(
 
     duplicate_case_ids = []
 
-    # Check each CASE ID for duplicates
-    for case_id in case_ids:
-        # Check if a child with this CASE ID exists in the database
-        imported_child_name = f"Imported Child {case_id}"
-        existing_child = (
-            session.query(Child).where(col(Child.name) == imported_child_name).first()
-        )
+    async with async_import_session_maker() as user_import_session:
+        # Check each CASE ID for duplicates
+        for case_id in case_ids:
+            # Check if a child with this CASE ID exists in the database
+            imported_child_name = f"Imported Child {case_id}"
+            existing_child = session.exec(
+                select(Child).where(col(Child.name) == imported_child_name)
+            ).first()
 
-        if existing_child:
-            # Check if there's a parent user with an email containing the child's CASE ID
-            parent_email_pattern = f"parent_of_{case_id}@artificialimporteddata.csv"
-            existing_parent = (
-                session.query(User).where(User.email == parent_email_pattern).first()
-            )
+            if existing_child:
+                # Check if there's a parent user with an email containing the child's CASE ID
+                existing_parent = await check_parent_exists(
+                    user_import_session, case_id
+                )
 
-            if existing_parent:
-                # Both child and parent exist, this is a duplicate
-                duplicate_case_ids.append(case_id)
-                print(f"Found duplicate CASE ID: {case_id}")
+                if existing_parent:
+                    # Both child and parent exist, this is a duplicate
+                    duplicate_case_ids.append(case_id)
+                    print(f"Found duplicate CASE ID: {case_id}")
 
     # Filter out rows with duplicate CASE IDs
     filtered_df = additional_data_df[
@@ -80,8 +84,10 @@ if __name__ == "__main__":
     filtered_output_path = additional_data_path.replace(".csv", "_filtered.csv")
 
     # Remove duplicates and save filtered data
-    _, duplicate_cases = remove_duplicate_cases(
-        additional_data_path, import_current_session, filtered_output_path
+    _, duplicate_cases = asyncio.run(
+        remove_duplicate_cases(
+            additional_data_path, import_current_session, filtered_output_path
+        )
     )
 
     print(f"Duplicate CASE IDs removed: {duplicate_cases}")

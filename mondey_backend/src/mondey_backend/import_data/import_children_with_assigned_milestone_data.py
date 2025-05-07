@@ -5,8 +5,8 @@ from datetime import datetime
 
 from sqlmodel import select
 
+from mondey_backend.import_data.remove_duplicate_cases import remove_duplicate_cases
 from mondey_backend.import_data.utils import generate_parents_for_children
-from mondey_backend.import_data.utils import get_import_test_session
 from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneAnswer
@@ -41,7 +41,7 @@ def update_milestone_with_name_property(session, milestone_id, var):
     return False
 
 
-def map_children_milestones_data(path, session, overwritten_csv=False):
+def map_children_milestones_data(path: str, session, overwritten_csv=False):
     """
     Based on the data file, this creates the Children and respective User Parents(1 for each child). It fills out
     the required basic (hardcoded) information for each child, like date of birth. It also saves all the milestone
@@ -58,6 +58,9 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
     :param session: The *import* session database for the mondey database.
     :param overwritten_csv: an in memory CSV for testing correct parsing
     """
+    print("Using path for removing duplicates and real data:", path)
+    asyncio.run(remove_duplicate_cases(path, session, path))
+    # todo2: save children with name not child ID (only)
     csv_path = pathlib.Path(path)
     milestone_query = select(Milestone)
     milestones = session.execute(milestone_query).scalars().all()
@@ -85,6 +88,10 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
         print("Opening CSV File:", csv_path)
         reader = list(csv.DictReader(csvfile, delimiter="\t"))
 
+        # todo: fix this. It's wrongly linking parents by the case ID rather than actual child ID
+        # the loop using child_id will need to be fixed at the same time to index correctly.
+        # i.e. we now make children with case ID in their name not by ID, so we need to pass
+        # the actual child IDs for the children, not the row["CASE"] number.
         # Make parents in a batch query.
         child_ids = [row["CASE"] for row in reader]
         parent_id_map = asyncio.run(generate_parents_for_children(child_ids))
@@ -92,7 +99,7 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
 
         # Process each row (child)
         for row in reader:
-            child_id = int(row["CASE"])
+            child_id = row["CASE"]
             if str(row["FK01"]) == "-9" or str(row["FK02"]) == "-9":
                 print(
                     "Skipping child has who is missing essential birth month/year data."
@@ -104,10 +111,6 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
             parents_id = parent_id_map[
                 str(child_id)
             ]  # still works: get_childs_parent_id(child_id)
-            # Check if child already exists
-            existing_child = session.execute(
-                select(Child).where(Child.id == child_id)
-            ).scalar_one_or_none()
 
             # Hardcoded
             birth_year_mapping = {
@@ -137,44 +140,20 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
                 12: 12,  # Dezember
             }
 
-            if not existing_child:
-                # Create a new child
-                child = Child(
-                    id=child_id,
-                    name=f"Imported Child {child_id}",
-                    birth_year=birth_year_mapping[int(row["FK01"])],  # FK01, mapped...
-                    birth_month=birth_month_mapping[int(row["FK02"])],
-                    user_id=parents_id,
-                    has_image=False,
-                )
-                session.add(child)
-                session.commit()
-                print(f"Created child with ID: {child_id}")
-            else:
-                # @liam this supports updating with future milestone answer sessions for the same children, but,
-                # we probably want to know from the researchers whether to overwrite or add new milestones, especially
-                # what to do when the milestone level is the same as existing data (i.e. probably duplicate mistake)
-                # So for now it will raise a ValueError to prevent messing up the data on import, to be safe.
-                child = existing_child
-                print(f"Using existing child with ID: {child_id}")
-                if require_confirmation_of_duplicates:
-                    user_input = input(
-                        "There appears to be duplicate data for a child - they already have data. Are you sure you "
-                        "want to add further milestone/child answer data, possibly duplicating answers? Respond 'yes' "
-                        "to proceed for this one child, or 'always' to allow duplicate data for all children"
-                    )
-                    if user_input in ["yes", "always"]:
-                        print("Okay, silently continuing for this child.")
-                        if user_input == "always":
-                            require_confirmation_of_duplicates = False
-                    else:
-                        raise ValueError(
-                            "Duplicate Child Information found during import"
-                        )
+            child = Child(
+                name=f"Imported Child {child_id}",
+                birth_year=birth_year_mapping[int(row["FK01"])],  # FK01, mapped...
+                birth_month=birth_month_mapping[int(row["FK02"])],
+                user_id=parents_id,
+                has_image=False,
+            )
+            session.add(child)
+            session.commit()
+            print(f"Created child with ID: {child_id}")
 
             # Create a milestone answer session for this child
             answer_session = MilestoneAnswerSession(
-                child_id=child_id,
+                child_id=child.id,
                 user_id=parents_id,
                 expired=True,
                 included_in_statistics=False,
@@ -195,8 +174,7 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
 
                     # Convert answer to integer and adjust for off-by-one difference
                     try:
-                        answer_int = int(answer_value)
-                        # Remap the values: 1->0, 2->1, 3->2, 4->3
+                        answer_int = int(float(str(answer_value).strip()))
                         if 1 <= answer_int <= 4:
                             adjusted_answer = answer_int - 1
 
@@ -217,8 +195,3 @@ def map_children_milestones_data(path, session, overwritten_csv=False):
 
             # Commit all answers for this child
             session.commit()
-
-
-if __name__ == "__main__":
-    import_session, import_engine = get_import_test_session()
-    map_children_milestones_data("data.csv", import_session)

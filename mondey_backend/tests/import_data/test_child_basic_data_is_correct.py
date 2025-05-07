@@ -49,8 +49,9 @@ def test_childs_age_is_recorded_accurately():
         "data.csv", import_session, overwritten_csv=fake_data_csv()
     )
     child_id = 159
+    child_name = f"Imported Child {child_id}"
     child = import_session.execute(
-        select(Child).where(Child.id == child_id)
+        select(Child).where(Child.name == child_name)
     ).scalar_one_or_none()
 
     assert child.birth_year == 2024
