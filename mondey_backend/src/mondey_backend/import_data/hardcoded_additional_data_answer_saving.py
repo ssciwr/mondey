@@ -84,7 +84,7 @@ relevant_user_variables = [
 ]
 
 hardcoded_id_map = {
-    # Numeric IDs mapped to variable names
+    # Variable names to the relevant ID...
     "FK05_01": 5,
     "FK05_02": 6,
     "FK05_03": 7,
@@ -93,8 +93,8 @@ hardcoded_id_map = {
     "FK05_06": 10,  # With additional answer "Andere Diagnosen: [01]"
     "FK05_07": 11,
     "FK07": 13,
-    "FK08_01": "FK09",  # Count older siblings or null if 0
-    "FK08_02": "FK10",  # Count younger siblings
+    "FK09": 17, # ignore FK08_01
+    "FK10": 18, # ignore FK08_02
     "FK11": 19,
     "FK12": 20,
     "FK03": 3,  # Related to questions 21 & 22
@@ -118,9 +118,9 @@ hardcoded_id_map = {
 all_relevant_variables = [*relevant_user_variables, *relevant_child_variables]
 
 hardcoded_other_answers = {
-    andere_diagnosen_other_question_variable: 10,
-    nationality_other_question_variable: 4,
-    muttersprache_other_question_variable: 3,
+    andere_diagnosen_other_question_variable: "FK05_06",
+    nationality_other_question_variable: "FE02",
+    muttersprache_other_question_variable: "FE04",
 }
 
 """
@@ -130,19 +130,27 @@ questions on the same theme into the """
 
 
 def should_be_saved(variable: str) -> bool:
-    return variable in all_relevant_variables  # otherwise it is a milestone
+    return variable in all_relevant_variables  # otherwise it is a milestone or irrelevant variable (like TIME)
+
+
+'''
+What do we definitely want:
+Avoid saving the children YoB and MoB questions answers.
+
+Merge Eltern into question 13.
+
+Merge additional answer in question 10, etc.
+
+so the question is, can postprocessing do all that?
+'''
 
 
 def process_special_answer(
     session, question_label: str, answer: str, variable: str, child_id: int
 ):
-    print(
-        "Deactivated. JUst save through normal process with an allowlist of approved variable IDs and variable matching now"
-    )
-    return
     if variable in child_age_questions_labels:
         print("Age of birth case - skip, no need to save anything.")
-        return
+        return True
     elif variable in eltern_question_variables:
         eltern_question_special_id = 13
         print(eltern_question_special_id)
@@ -158,6 +166,7 @@ def process_special_answer(
                 # - that's just a category, not a way for users to specify in freetext
                 is_child_question=False,
             )
+            return True
     elif variable in fruhbgeboren_and_teringeboren_variables:
         # Termingeboren/Fruhgeboren = 3
         # Fruhgeboren [01] = 4 (Weeks only if the former is "Fruhgeboren")
@@ -189,6 +198,7 @@ def process_special_answer(
             set_only_additional_answer=False,
             is_child_question=False,
         )
+        return True
     elif variable in younger_older_sibling_variables:
         """
         Relevant questions as in the data:
@@ -200,7 +210,8 @@ def process_special_answer(
             FK08_03: Geschwister?: Nein, keine weiteren Geschwister, die mit im Haushalt leben
 
         """
-        relevant_question_id = 17 if question_label == "Jüngere Geschwister" else 18
+        relevant_question_id = 18 if question_label == "Jüngere Geschwister" else 17
+        print("Setting special case younger siblnigs to...", answer)
         update_or_create_user_answer(
             session,
             user_or_child_id=child_id,
@@ -211,18 +222,7 @@ def process_special_answer(
             set_only_additional_answer=False,
             is_child_question=True,
         )
-    elif question_label == andere_diagnosed_question:
-        print("Andere case.. label was: ", question_label, ", and  answer:", answer)
-        # if it is the normal Andere Diagnosen question with Ja/Nein, it will just be saved normally.
-        # What we are doing is writing in the answer to question 12 (the freetext form) when it is selected,
-        # rather than save to question 12.
-        andere_diagnosen_question_id = 10
-        # fix... rerun fresh with  is_Child_question=False now...
-        update_or_create_user_answer(
-            session,
-            user_or_child_id=child_id,
-            question_id=andere_diagnosen_question_id,
-            answer_text=answer,  # set to 0 by default for numerical scales
-            set_only_additional_answer=True,
-            is_child_question=False,
-        )
+        return True
+    else:
+        print("Not a special case variable...", question_label)
+        return False

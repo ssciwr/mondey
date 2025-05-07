@@ -1,4 +1,6 @@
 """
+
+todo: Correct this documentation, it has became outdated with the new additional data import code.
 This file should parse each column and if it is a childs question, save it.
 Select options will (as in `ChildQuestion` class/SQL model) just be saved as plaintext answers.
 
@@ -69,6 +71,11 @@ from mondey_backend.models.milestones import Language
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import UserQuestion
+
+from mondey_backend.import_data.hardcoded_additional_data_answer_saving import \
+    process_special_answer, should_be_saved
+
+from mondey_backend.models.children import Child
 
 debug = True
 
@@ -306,12 +313,12 @@ def import_childrens_question_answers_data(
     session.commit()
     print("All questions have been generated. Now assigning answers to them")
     assign_answers_to_the_imported_questions(
-        session, data_df, labels_df, questions_configured_df
+        session, data_df, labels_df, questions_configured_df, appending_additional_data=False
     )
 
 
 def assign_answers_to_the_imported_questions(
-    session, data_df, labels_df, questions_configured_df
+    session, data_df, labels_df, questions_configured_df, appending_additional_data=False
 ):
     """
     Once the questions have been inserted into UserQuestion and ChildQuestion, we need to add answers.
@@ -343,12 +350,20 @@ def assign_answers_to_the_imported_questions(
     total_answers = 0
     missing = 0
 
-    # Get all unique child_ids that already have answers
-    results = session.query(ChildAnswer.child_id).distinct().all()
-    # Extract the ids into a list
-    children_ids_with_data = [result[0] for result in results]
+    child_case_to_id_map = {}
+    # get all children with their ID and name fields
+    children = session.exec(select(Child.id, Child.name).where(Child.name.like("Imported Child %"))).all()
 
-    print("Children IDs which were already covered by answers:", children_ids_with_data)
+    for child_id, child_name in children:
+        # Extract case_id from the name format "Imported Child {case_id}"
+        if child_name.startswith("Imported Child "):
+            try:
+                case_id = child_name.replace("Imported Child ", "")
+                child_case_to_id_map[case_id] = child_id
+            except Exception as e:
+                # Handle any parsing errors
+                print(f"Error processing child name '{child_name}': {e}")
+
 
     # Process actual data into child answers
     for _, child_row in tqdm(data_df.iterrows()):
@@ -356,11 +371,6 @@ def assign_answers_to_the_imported_questions(
         print("")
         print("")
         # First: If the child has any answers, we assume their data is complete (previously imported). So skip such children
-        if child_row.get("CASE") in children_ids_with_data:
-            print("Skipping done child:", child_row.get("CASE"))
-            continue
-        else:
-            print("Adding answers for child: ", child_row.get("CASE"))
         # Iterate through all variables in labels_df
         print("")
         print("Going through for child ... ", child_row.get("CASE"))
@@ -370,6 +380,7 @@ def assign_answers_to_the_imported_questions(
             variable_type = label_row["Variable Type"]
             variable = label_row["Variable"]
             variable_label = label_row["Variable Label"]
+            print("Doing variable: ", variable, variable_label)
 
             if variable_label in questions_to_discard:
                 continue
@@ -383,25 +394,27 @@ def assign_answers_to_the_imported_questions(
             Category 3 - variable_label is a free text reference, but not connected to another question. In this case,
             it will be found through variable level like any other question.
             """
-            if variable not in list(hardcoded_id_map.keys()):
-                print("Skipping variable which was not in our variable allowlist")
+            if appending_additional_data and (variable not in list(hardcoded_id_map.keys())):
+                print("Skipping variable which was not in our variable allowlist: ", variable)
+                print(list(hardcoded_id_map.keys()))
                 continue
             response = child_row.get(variable)
-            answer = str(
-                labels_df[
+            if should_be_saved(variable):
+                response_label = labels_df[
                     (labels_df["Variable"] == variable)
                     & (labels_df["Response Code"] == response)
-                ]
-            )
-            """
-            # at this point we check if it is a hardcoded special case:
-            if should_be_saved(variable):
-                process_special_answer(
+                    ]
+
+                if response_label.empty:
+                    continue # no data entered.
+                answer = response_label.iloc[0]["Response Label"]
+                print("Answer was set to:", answer)
+
+                have_acted_upon_question = process_special_answer(
                     session, variable_label, answer, variable, child_row.get("CASE")
                 )
-                # todo: Only in some cases we should prooced now.
-                continue
-            """
+                if have_acted_upon_question: # saved/processsed by our hardcoded script
+                    continue
             preserved_freetext_lookup_key = variable
             set_only_additional_answer = False
             # move this logic into special processing.
@@ -470,6 +483,7 @@ def assign_answers_to_the_imported_questions(
                 if not response_label.empty:
                     answer_text = response_label.iloc[0]["Response Label"]
                     print("Saving answer:", answer_text)
+                    print("Whereas response label was:", response_label)
 
                     if get_question_filled_in_to_parent(
                         questions_configured_df, variable, debug_print=True
@@ -477,7 +491,7 @@ def assign_answers_to_the_imported_questions(
                         found_base_question, answer = update_or_create_user_answer(
                             session,
                             user_or_child_id=get_childs_parent_id(
-                                session, child_row["CASE"]
+                                session, child_id
                             ),
                             question_id=question.id,
                             answer_text=answer_text,
@@ -486,7 +500,7 @@ def assign_answers_to_the_imported_questions(
                         )
                         print(
                             "Saved(user question) with parent ID of...:",
-                            get_childs_parent_id(session, child_row["CASE"]),
+                            get_childs_parent_id(session, child_id),
                         )
                     else:
                         print(
@@ -494,7 +508,7 @@ def assign_answers_to_the_imported_questions(
                         )
                         found_base_question, answer = update_or_create_user_answer(
                             session,
-                            user_or_child_id=child_row["CASE"],
+                            user_or_child_id=child_id,
                             question_id=question.id,
                             answer_text=answer_text,
                             set_only_additional_answer=set_only_additional_answer,
@@ -516,7 +530,7 @@ def assign_answers_to_the_imported_questions(
                 )  # For free text, always use the actual look up
                 # coding keys response - this will be e.g. the freetext plaintext for "Other" or whatever the user has
                 # written in.
-                answer_text = str(response)
+                answer_text = str(response) # it will be the direct response, not a look up code.
 
                 # This if condition should not trigger for truly independent free text questions
                 if set_only_additional_answer and (
@@ -536,7 +550,7 @@ def assign_answers_to_the_imported_questions(
                     found_base_question, answer = update_or_create_user_answer(
                         session,
                         user_or_child_id=get_childs_parent_id(
-                            session, child_row["CASE"]
+                            session, child_id
                         ),
                         question_id=question.id,
                         answer_text=answer_text,
@@ -547,13 +561,13 @@ def assign_answers_to_the_imported_questions(
                         "Question ID: ",
                         question.id,
                         "Saved it for user(parent) ID of...:",
-                        get_childs_parent_id(session, child_row["CASE"]),
+                        get_childs_parent_id(session, child_id),
                     )
                 else:
                     print("Saving child answer..", answer_text)
                     found_base_question, answer = update_or_create_user_answer(
                         session,
-                        user_or_child_id=child_row["CASE"],
+                        user_or_child_id=child_id,
                         question_id=question.id,
                         answer_text=answer_text,
                         set_only_additional_answer=set_only_additional_answer,

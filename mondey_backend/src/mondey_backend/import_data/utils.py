@@ -86,6 +86,8 @@ def get_childs_parent_id(session: Session, child_id: int) -> int:
         select(Child).where(Child.id == child_id)
     ).scalar_one_or_none()
     if not child:
+        print("Child ID type:")
+        print(type(child_id))
         raise ValueError(f"Child with ID {child_id} not found")
     return child.user_id
 
