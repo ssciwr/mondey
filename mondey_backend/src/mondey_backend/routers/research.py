@@ -73,9 +73,14 @@ def create_router() -> APIRouter:
         # Read the CSV file
         try:
             contents = await file.read()
-            csv_data = pd.read_csv(io.BytesIO(contents))
+            csv_data = pd.read_csv(
+                io.BytesIO(contents), 
+                sep="\t", 
+                encoding="utf-16", 
+                encoding_errors="replace"
+            )
 
-            print("REad file.")
+            print("Read file.")
 
             # Check for required columns
             required_columns = ["FK05", "CASE"]
