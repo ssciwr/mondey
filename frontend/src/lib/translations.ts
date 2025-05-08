@@ -178,7 +178,8 @@ export const translationIds = {
 			"Hinweis: Als verdächtig markierte Antwortsitzungen werden bei der Berechnung des voraussichtlichen Alters für Meilensteine nicht berücksichtigt, sind aber dennoch in den Forschungsdaten enthalten.",
 		manageData: "Daten verwalten",
 		importData: "Daten Importieren",
-		importFailed: "Importieren fallt aus. Überprüfen Sie das Datenformat, stellen Sie sicher, dass gültige Spalten vorhanden sind und gültige eindeutige CASE-IDs verwendet werden.",
+		importFailed:
+			"Importieren fallt aus. Überprüfen Sie das Datenformat, stellen Sie sicher, dass gültige Spalten vorhanden sind und gültige eindeutige CASE-IDs verwendet werden.",
 		importSuccessful: "Importieren Erfolgreich",
 		confirmImport: "Ja, Importiere",
 		uploadCSV: "CSV Daten hochladen",

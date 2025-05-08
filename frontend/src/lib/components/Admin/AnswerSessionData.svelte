@@ -49,7 +49,7 @@ let isUploading = $state(false);
 let showConfirmImportModal = $state(false);
 let importResult = $state({ status: "", message: "", error: false });
 let showImportResult = $state(false);
-let successfulImport = $state(false)
+let successfulImport = $state(false);
 
 async function doStatsUpdate(incremental: boolean) {
 	show_update_stats_modal = true;
@@ -123,7 +123,7 @@ async function handleImportConfirm() {
 			// Reset file input
 			if (fileInputRef) fileInputRef.value = "";
 			csvFile = null;
-            successfulImport = true;
+			successfulImport = true;
 			// Refresh data as it might have changed
 			stats_out_of_date = true;
 			await refreshMilestoneAnswerSessions();
