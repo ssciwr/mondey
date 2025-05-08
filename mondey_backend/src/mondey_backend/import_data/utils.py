@@ -106,7 +106,6 @@ def get_childs_parent_id(session: Session, child_id: int) -> int:
         raise ValueError(f"Child with ID {child_id} not found")
 
 
-
 async def clear_users_database():
     """Clear all data from the users database (async_users_session)."""
     print("Clearing users database...")
