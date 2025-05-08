@@ -83,15 +83,28 @@ def get_childs_parent_id(session: Session, child_id: int) -> int:
         The user_id of the child's parent
     """
     child_name = f"Imported Child {child_id}"
-    child = session.execute(
+    child_result = session.execute(
         select(Child).where(Child.name == child_name)
     ).first()
-    # this throws the bug!
-    if not child:
+
+    # Debug output to see exactly what we're working with
+    print("Child result type:", type(child_result))
+
+    if child_result is not None:
+        # The result from session.execute().first() is always a Row object
+        # We need to access the first element (index 0) to get the actual Child object
+        child = child_result[0]
+        print("Found a child with the name - they should have a parent:")
+        print(child)
+        print("Child ID:", child.id)
+        print("Child name:", child.name)
+        print("Child user_id:", child.user_id)
+        return child.user_id
+    else:
         print("Child ID type:")
         print(type(child_id))
         raise ValueError(f"Child with ID {child_id} not found")
-    return child.user_id
+
 
 
 async def clear_users_database():
