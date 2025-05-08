@@ -184,6 +184,7 @@ export const translationIds = {
 		confirmImport: "Ja, Importiere",
 		uploadCSV: "CSV Daten hochladen",
 		uploading: "CSV wird hochgeladen",
+		selectFileToImport: "Wahlen Sie das Daten",
 	},
 	researcher: {
 		label: "Wissenschaft",

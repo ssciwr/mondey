@@ -164,18 +164,17 @@ onMount(async () => {
             </div>
         {:else}
             <div>
+                <p>{i18n.tr.admin.selectFileToImport}</p>
+                <Button class="btn btn-primary" disabled={isUploading}>
+                <FileImportSolid />
                 <input
                         type="file"
                         accept=".csv"
                         bind:this={fileInputRef}
                         on:change={handleFileChange}
-                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                         disabled={isUploading}
                         data-testid="csv-file-input"
                 />
-                <Button color="blue" disabled={isUploading || !csvFile}>
-                    <FileImportSolid />
-                    {i18n.tr.admin.uploadCSV}
                 </Button>
             </div>
         {/if}
