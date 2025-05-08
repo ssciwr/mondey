@@ -83,9 +83,9 @@ export default {
 				"feedback-border": {
 					0: "#f8c554",
 				},
-				"red": {
-					50: "rgb(255, 202, 202)"
-				}
+				red: {
+					50: "rgb(255, 202, 202)",
+				},
 			},
 			fontSize: {
 				xs: ".75rem",
