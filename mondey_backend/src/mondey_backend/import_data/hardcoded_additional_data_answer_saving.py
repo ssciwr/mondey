@@ -15,7 +15,7 @@ from mondey_backend.import_data.postprocessing_corrections.convert_fruhgeboren_d
     parse_weeks,
 )
 from mondey_backend.import_data.utils import get_childs_parent_id
-from mondey_backend.import_data.utils import update_or_create_user_answer
+from mondey_backend.import_data.utils import create_answer
 
 # We match by the question name. This is because, we needed to show a readable, understandable name in the frontend.
 # Before, using e.g. the variable like "FP01, FK04" made little sense so we stored the name, but not the variable.
@@ -162,7 +162,7 @@ def process_special_answer(
         if answer is not None and len(answer) > 0:
             # save parent answer for this question, only if it was actually filled out.
             # Check what we did the first time. Did we save direct or as additional answer?
-            update_or_create_user_answer(
+            create_answer(
                 session,
                 user_or_child_id=get_childs_parent_id(session, child_id),
                 question_id=eltern_question_special_id,
@@ -187,7 +187,7 @@ def process_special_answer(
         # This ignores the users choice for Termingeboren/Fruhgeboren - if any duration period is specified, it assumes
         # we should record and overwrite the info (which makes sense based on the data)
 
-        update_or_create_user_answer(
+        create_answer(
             session,
             user_or_child_id=child_id,
             question_id=pregnancy_duration_question_id,
@@ -195,7 +195,7 @@ def process_special_answer(
             set_only_additional_answer=False,
             is_child_question=False,
         )
-        update_or_create_user_answer(
+        create_answer(
             session,
             user_or_child_id=child_id,
             question_id=incubator_weeks_question_id,
@@ -217,7 +217,7 @@ def process_special_answer(
         """
         relevant_question_id = 18 if question_label == "Jüngere Geschwister" else 17
         print("Setting special case younger siblnigs to...", answer)
-        update_or_create_user_answer(
+        create_answer(
             session,
             user_or_child_id=child_id,
             question_id=relevant_question_id,

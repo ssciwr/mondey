@@ -85,7 +85,8 @@ def get_childs_parent_id(session: Session, child_id: int) -> int:
     child_name = f"Imported Child {child_id}"
     child = session.execute(
         select(Child).where(Child.name == child_name)
-    ).scalar_one_or_none()
+    ).first()
+    # this throws the bug!
     if not child:
         print("Child ID type:")
         print(type(child_id))
@@ -232,6 +233,7 @@ def save_select_question(
     :param options_str: Prepared options string
     """
     debug = False
+    print("Saving select question")
     is_to_parent = get_question_filled_in_to_parent(questions_configured_csv, variable)
     is_required = get_question_filled_in_required(questions_configured_csv, variable)
 
@@ -314,6 +316,7 @@ def save_text_question(
     By default as a child question, but as a user question if that has been configured.
     """
     debug = False
+    print("Saving text question.")
     is_to_parent = get_question_filled_in_to_parent(questions_configured_csv, variable)
     is_required = get_question_filled_in_required(questions_configured_csv, variable)
 
@@ -476,7 +479,7 @@ async def generate_parents_for_children(child_ids: list[int]) -> dict[int, int]:
         return child_parent_map
 
 
-def update_or_create_user_answer(
+def create_answer(
     session: Session,
     user_or_child_id: int,
     question_id: int,
@@ -486,101 +489,44 @@ def update_or_create_user_answer(
 ):
     print("Updating Question ID: " + str(question_id) + " with answer: " + answer_text)
     print("(was child question)" if is_child_question else "(is user questions)")
-    """
-    Upsert the answers to questions, by ID, handling different kinds of answers.
-    """
-    # Use with_for_update to lock the row during the transaction
-    query = (
-        (
-            select(ChildAnswer)
-            .where(ChildAnswer.child_id == user_or_child_id)
-            .where(ChildAnswer.question_id == question_id)
-            .with_for_update(skip_locked=True)
+
+    if set_only_additional_answer:
+        print(
+            "Additional answer with no found base question. This could be a question which is independent, "
+            "but happens to have [01] and 'Andere' in the name, like 'Andere Diagnosen', which is okay, "
+            "but it could indicate data processing has gone wrong."
         )
-        if is_child_question
-        else (
-            select(UserAnswer)
-            .where(UserAnswer.user_id == user_or_child_id)
-            .where(UserAnswer.question_id == question_id)
-            .with_for_update(skip_locked=True)
+    # If no existing answer
+    try:
+        print(
+            "Not existing answer, so making a new one..",
+            "Answer:",
+            str(answer_text),
         )
-    )
-
-    print(
-        "Adding or updating question!",
-        "QID: ",
-        str(question_id),
-        "General-ID",
-        str(user_or_child_id),
-    )
-
-    existing_answer = session.execute(query).scalar_one_or_none()
-
-    # If answer exists, update it
-    if existing_answer and answer_text is not None and answer_text != "":
-        print("Existing answer...")
-        try:
-            different = False
-            if set_only_additional_answer:
-                print("Setting additional answer")
-                # Only update additional_answer if flag is set. Leave any set "answer", e.g. "Other", previously set...
-                existing_answer.additional_answer = answer_text
-            else:
-                # Update solely answer property, the default (especially for "select" options).
-                different = existing_answer.answer != answer_text
-                if different:
-                    existing_answer.answer = answer_text
-                # if this is an existing question answer from a previous import, the above will basically do nothing.
-
-            print("Adding to SQL sesion...")
-            if (
-                different
-            ):  # only update the actual rows we need to, not overwritten rows.
-                session.add(existing_answer)
-            return True, existing_answer
-
-        except Exception as e:
-            # Log the error, rollback the session
-            print(f"Error updating existing answer: {e}")
-            session.rollback()
-    else:
-        if set_only_additional_answer:
-            print(
-                "Additional answer with no found base question. This could be a question which is independent, "
-                "but happens to have [01] and 'Andere' in the name, like 'Andere Diagnosen', which is okay, "
-                "but it could indicate data processing has gone wrong."
+        print("Was child answer..." if is_child_question else "Was user answer..")
+        new_answer = (
+            ChildAnswer(
+                child_id=user_or_child_id,
+                question_id=question_id,
+                answer=answer_text,
             )
-        # If no existing answer
-        try:
-            print(
-                "Not existing answer, so making a new one..",
-                "Answer:",
-                str(answer_text),
+            if is_child_question
+            else UserAnswer(
+                user_id=user_or_child_id,
+                question_id=question_id,
+                answer=answer_text,
             )
-            print("Was child answer..." if is_child_question else "Was user answer..")
-            new_answer = (
-                ChildAnswer(
-                    child_id=user_or_child_id,
-                    question_id=question_id,
-                    answer=answer_text,
-                )
-                if is_child_question
-                else UserAnswer(
-                    user_id=user_or_child_id,
-                    question_id=question_id,
-                    answer=answer_text,
-                )
-            )
-            session.add(new_answer)
-            print("ADded new answer")
-            print(new_answer)
-            return False, new_answer
+        )
+        session.add(new_answer)
+        print("Added new answer")
+        print(new_answer)
+        return False, new_answer
 
-        except Exception as e:
-            # Handle potential integrity errors
-            print(f"Error creating new answer: {e}")
-            session.rollback()
-            raise
+    except Exception as e:
+        # Handle potential integrity errors
+        print(f"Error creating new answer: {e}")
+        session.rollback()
+        raise
 
 
 def get_question_filled_in_to_parent(questions_done_df, variable, debug_print=False):

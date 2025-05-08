@@ -71,7 +71,7 @@ from mondey_backend.import_data.utils import labels_path
 from mondey_backend.import_data.utils import questions_configured_path
 from mondey_backend.import_data.utils import save_select_question
 from mondey_backend.import_data.utils import save_text_question
-from mondey_backend.import_data.utils import update_or_create_user_answer
+from mondey_backend.import_data.utils import create_answer
 from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Language
 from mondey_backend.models.questions import ChildQuestion
@@ -130,6 +130,7 @@ def import_childrens_question_answers_data(
     data_path: str,
     questions_configured_path: str,
 ):
+    print("Importing the questions for our data...")
     """
     This loads the "labels_df" which is in social science terms a "coding codebook". It lists several variables, which
     represent Milestones and Questions in our system, with IDs like "DE01_02". It also lists answer options for each
@@ -511,8 +512,9 @@ def assign_answers_to_the_imported_questions(
                     if get_question_filled_in_to_parent(
                         questions_configured_df, variable, debug_print=True
                     ):
+                        print("Now updating/creating user answer..")
                         # goes through here.
-                        found_base_question, answer = update_or_create_user_answer(
+                        found_base_question, answer = create_answer(
                             session,
                             user_or_child_id=get_childs_parent_id(
                                 session, child_row.get("CASE")
@@ -530,7 +532,7 @@ def assign_answers_to_the_imported_questions(
                         print(
                             "Would have looked up isToParent Y status for: ", variable
                         )
-                        found_base_question, answer = update_or_create_user_answer(
+                        found_base_question, answer = create_answer(
                             session,
                             user_or_child_id=db_child_id,
                             question_id=question.id,
@@ -573,7 +575,7 @@ def assign_answers_to_the_imported_questions(
                 )
                 if get_question_filled_in_to_parent(questions_configured_df, variable):
                     print("Saving parent answer..", answer_text)
-                    found_base_question, answer = update_or_create_user_answer(
+                    found_base_question, answer = create_answer(
                         session,
                         user_or_child_id=get_childs_parent_id(
                             session, child_row.get("CASE")
@@ -585,7 +587,7 @@ def assign_answers_to_the_imported_questions(
                     )
                 else:
                     print("Saving child answer..", answer_text)
-                    found_base_question, answer = update_or_create_user_answer(
+                    found_base_question, answer = create_answer(
                         session,
                         user_or_child_id=db_child_id,
                         question_id=question.id,
