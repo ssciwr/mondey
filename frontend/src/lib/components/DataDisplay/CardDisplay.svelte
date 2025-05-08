@@ -90,7 +90,7 @@ let {
 
 		{#if data.auxilliary}
 			<div class="mb-4 flex w-full justify-center">
-				<div class="bg-white p-1 rounded-full">
+				<div class="p-1 rounded-full" style="border: 10px solid white">
 					<data.auxilliary {...styleProps.auxilliary} />
 				</div>
 			</div>
