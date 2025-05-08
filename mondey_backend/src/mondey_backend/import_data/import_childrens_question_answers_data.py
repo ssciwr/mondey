@@ -63,6 +63,7 @@ from mondey_backend.import_data.hardcoded_additional_data_answer_saving import (
 from mondey_backend.import_data.hardcoded_additional_data_answer_saving import (
     should_be_saved,
 )
+from mondey_backend.import_data.utils import create_answer
 from mondey_backend.import_data.utils import data_path
 from mondey_backend.import_data.utils import get_childs_parent_id
 from mondey_backend.import_data.utils import get_import_test_session
@@ -71,7 +72,6 @@ from mondey_backend.import_data.utils import labels_path
 from mondey_backend.import_data.utils import questions_configured_path
 from mondey_backend.import_data.utils import save_select_question
 from mondey_backend.import_data.utils import save_text_question
-from mondey_backend.import_data.utils import create_answer
 from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Language
 from mondey_backend.models.questions import ChildQuestion

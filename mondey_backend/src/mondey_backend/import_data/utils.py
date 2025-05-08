@@ -83,9 +83,7 @@ def get_childs_parent_id(session: Session, child_id: int) -> int:
         The user_id of the child's parent
     """
     child_name = f"Imported Child {child_id}"
-    child = session.execute(
-        select(Child).where(Child.name == child_name)
-    ).first()
+    child = session.execute(select(Child).where(Child.name == child_name)).first()
     # this throws the bug!
     if not child:
         print("Child ID type:")
