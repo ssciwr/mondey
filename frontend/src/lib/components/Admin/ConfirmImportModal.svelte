@@ -1,21 +1,21 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-    import { i18n } from "$lib/i18n.svelte";
-    import { Button, Modal } from "flowbite-svelte";
-    import ExclamationCircleOutline from "flowbite-svelte-icons/ExclamationCircleOutline.svelte";
+import { i18n } from "$lib/i18n.svelte";
+import { Button, Modal } from "flowbite-svelte";
+import ExclamationCircleOutline from "flowbite-svelte-icons/ExclamationCircleOutline.svelte";
 
-    let {
-        open = $bindable(false),
-        filename = $bindable(""),
-        onConfirm,
-        onCancel
-    }: {
-        open: boolean;
-        filename: string;
-        onConfirm: () => void;
-        onCancel: () => void;
-    } = $props();
+let {
+	open = $bindable(false),
+	filename = $bindable(""),
+	onConfirm,
+	onCancel,
+}: {
+	open: boolean;
+	filename: string;
+	onConfirm: () => void;
+	onCancel: () => void;
+} = $props();
 </script>
 
 <Modal bind:open size="xs" autoclose>

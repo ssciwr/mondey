@@ -1,19 +1,15 @@
-import asyncio
 import csv
 import pathlib
 from datetime import datetime
 
 from sqlmodel import select
 
-from mondey_backend.import_data.remove_duplicate_cases import remove_duplicate_cases
 from mondey_backend.import_data.utils import generate_parents_for_children
 from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneText
-
-from asyncer import asyncify, syncify
 
 
 def find_milestone_based_on_label(session, label):

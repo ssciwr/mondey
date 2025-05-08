@@ -2,11 +2,11 @@
 
 <script lang="ts">
 import {
-    adminUpdateStats,
-    getMilestoneAnswerSessions, importCsvData,
+	adminUpdateStats,
+	getMilestoneAnswerSessions,
+	importCsvData,
 } from "$lib/client/sdk.gen";
 
-import ExclamationCircleOutline from "flowbite-svelte-icons/ExclamationCircleOutline.svelte";
 import type { MilestoneAnswerSession } from "$lib/client/types.gen";
 import AnswerSessionAnalysisModal from "$lib/components/Admin/AnswerSessionAnalysisModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
@@ -30,6 +30,7 @@ import {
 	FileImportSolid,
 	RefreshOutline,
 } from "flowbite-svelte-icons";
+import ExclamationCircleOutline from "flowbite-svelte-icons/ExclamationCircleOutline.svelte";
 import { onMount } from "svelte";
 
 let answer_sessions = $state([] as Array<MilestoneAnswerSession>);
@@ -45,7 +46,7 @@ let csvFile = $state(null as File | null);
 let fileInputRef = $state(null);
 let isUploading = $state(false);
 let showConfirmImportModal = $state(false);
-let importResult = $state({ status: '', message: '', error: false });
+let importResult = $state({ status: "", message: "", error: false });
 let showImportResult = $state(false);
 
 async function doStatsUpdate(incremental: boolean) {
@@ -81,70 +82,70 @@ async function answerSessionAnalysisModalCallback() {
 }
 
 function handleFileChange(event) {
-    const target = event.target;
-    const files = target.files;
-    if (files && files.length > 0) {
-        csvFile = files[0];
-        showConfirmImportModal = true;
-    }
+	const target = event.target;
+	const files = target.files;
+	if (files && files.length > 0) {
+		csvFile = files[0];
+		showConfirmImportModal = true;
+	}
 }
 
 async function handleImportConfirm() {
-    if (!csvFile) return;
+	if (!csvFile) return;
 
-    showConfirmImportModal = false;
-    isUploading = true;
-    showImportResult = false;
+	showConfirmImportModal = false;
+	isUploading = true;
+	showImportResult = false;
 
-    const formData = new FormData();
-    formData.append('file', csvFile);
+	const formData = new FormData();
+	formData.append("file", csvFile);
 
-    try {
-        const { data, error } = await importCsvData({
-            body: { file: csvFile },
-        });
+	try {
+		const { data, error } = await importCsvData({
+			body: { file: csvFile },
+		});
 
-        if (error) {
-            console.error(error);
-            importResult = {
-                status: 'error',
-                message: error.message || i18n.tr.admin.importFailed,
-                error: true
-            };
-        } else {
-            importResult = {
-                status: 'success',
-                message: i18n.tr.admin.importSuccessful,
-                error: false
-            };
-            // Reset file input
-            if (fileInputRef) fileInputRef.value = '';
-            csvFile = null;
-            // Refresh data as it might have changed
-            stats_out_of_date = true;
-            await refreshMilestoneAnswerSessions();
-        }
-    } catch (e) {
-        console.error(e);
-        importResult = {
-            status: 'error',
-            message: e.message || i18n.tr.admin.importFailed,
-            error: true
-        };
-    } finally {
-        isUploading = false;
-        showImportResult = true;
-    }
+		if (error) {
+			console.error(error);
+			importResult = {
+				status: "error",
+				message: error.message || i18n.tr.admin.importFailed,
+				error: true,
+			};
+		} else {
+			importResult = {
+				status: "success",
+				message: i18n.tr.admin.importSuccessful,
+				error: false,
+			};
+			// Reset file input
+			if (fileInputRef) fileInputRef.value = "";
+			csvFile = null;
+			// Refresh data as it might have changed
+			stats_out_of_date = true;
+			await refreshMilestoneAnswerSessions();
+		}
+	} catch (e) {
+		console.error(e);
+		importResult = {
+			status: "error",
+			message: e.message || i18n.tr.admin.importFailed,
+			error: true,
+		};
+	} finally {
+		isUploading = false;
+		showImportResult = true;
+	}
 }
 
 function cancelImport() {
-    showConfirmImportModal = false;
-    if (fileInputRef) fileInputRef.value = '';
-    csvFile = null;
+	showConfirmImportModal = false;
+	if (fileInputRef) fileInputRef.value = "";
+	csvFile = null;
 }
 
 onMount(async () => {
-    await refreshMilestoneAnswerSessions();
+	await refreshMilestoneAnswerSessions();
 });
 </script>
 
