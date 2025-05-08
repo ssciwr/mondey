@@ -182,8 +182,7 @@ export const translationIds = {
 		importSuccessful: "Importieren Erfolgreich",
 		confirmImport: "Ja, Importiere",
 		uploadCSV: "CSV Daten hochladen",
-		uploading: "CSV wird hochgeladen"
-
+		uploading: "CSV wird hochgeladen",
 	},
 	researcher: {
 		label: "Wissenschaft",

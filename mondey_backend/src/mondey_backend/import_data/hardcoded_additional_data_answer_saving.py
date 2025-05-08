@@ -93,8 +93,8 @@ hardcoded_id_map = {
     "FK05_06": 10,  # With additional answer "Andere Diagnosen: [01]"
     "FK05_07": 11,
     "FK07": 13,
-    "FK09": 17, # ignore FK08_01
-    "FK10": 18, # ignore FK08_02
+    "FK09": 17,  # ignore FK08_01
+    "FK10": 18,  # ignore FK08_02
     "FK11": 19,
     "FK12": 20,
     "FK03": 3,  # Related to questions 21 & 22
@@ -130,10 +130,12 @@ questions on the same theme into the """
 
 
 def should_be_saved(variable: str) -> bool:
-    return variable in all_relevant_variables  # otherwise it is a milestone or irrelevant variable (like TIME)
+    return (
+        variable in all_relevant_variables
+    )  # otherwise it is a milestone or irrelevant variable (like TIME)
 
 
-'''
+"""
 What do we definitely want:
 Avoid saving the children YoB and MoB questions answers.
 
@@ -142,21 +144,31 @@ Merge Eltern into question 13.
 Merge additional answer in question 10, etc.
 
 so the question is, can postprocessing do all that?
-'''
+"""
 
 
 def process_special_answer(
     session, question_label: str, answer: str, variable: str, child_id: int
 ):
-
     if variable in child_age_questions_labels:
         print("Age of birth case - skip, no need to save anything.")
         return True
     elif variable in eltern_question_variables:
-        if variable == "FP03": # sepcial Eltern overview: don't save to avodi mother / mother in law problem
+        if (
+            variable == "FP03"
+        ):  # sepcial Eltern overview: don't save to avodi mother / mother in law problem
             print("(skipping general overall Eltern answer)")
-            return True # the specific minor ones which are not null will be saved instead
-        print("Variable:", variable, "Q LAbel:", question_label, "Was in eltern! So adding its answer:", answer)
+            return (
+                True  # the specific minor ones which are not null will be saved instead
+            )
+        print(
+            "Variable:",
+            variable,
+            "Q LAbel:",
+            question_label,
+            "Was in eltern! So adding its answer:",
+            answer,
+        )
         eltern_question_special_id = 13
         print(eltern_question_special_id)
         if answer is not None and len(answer) > 0:

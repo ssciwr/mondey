@@ -417,7 +417,12 @@ async def create_parent_for_child(
     user_session.add(user)
     await user_session.flush()
 
-    print("Created the user parent for child ID:", child_id, " with email!!", user_create.email)
+    print(
+        "Created the user parent for child ID:",
+        child_id,
+        " with email!!",
+        user_create.email,
+    )
 
     return user
 

@@ -35,7 +35,7 @@ this is reliable but not ideal
 ## Remove obsolete postprocessing code and other files
 
 ## Consolidate import_all.py with await align_additional_data_to_current_answers.py to be one script, rather than two
-Because right now they do similar things and overlap in terms of code. They could each become one function in a 
+Because right now they do similar things and overlap in terms of code. They could each become one function in a
 Python class for managing processing import data e.g. `initialize` or `run`
 
 ## Refactor import_childrens_question_answers_data.py
@@ -47,6 +47,6 @@ IMO this is high priority alongside handling the child id/case ID better.
 ## Remove all the extra print statements
 mostly for debug between user vs child question answers etc.
 
-## Move soem of the valid CSV validation out of the routers file / controller 
+## Move soem of the valid CSV validation out of the routers file / controller
 
 ## In routers/research.py, improve the path solution/decide where to git commit the labels encoded and questions_specificed CSVs (but not actual data)

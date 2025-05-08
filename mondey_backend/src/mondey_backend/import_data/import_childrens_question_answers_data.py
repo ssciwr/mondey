@@ -56,7 +56,13 @@ from mondey_backend.import_data.hardcoded_additional_data_answer_saving import (
     hardcoded_other_answers,
 )
 from mondey_backend.import_data.hardcoded_additional_data_answer_saving import (
+    process_special_answer,
+)
+from mondey_backend.import_data.hardcoded_additional_data_answer_saving import (
     relevant_child_variables,
+)
+from mondey_backend.import_data.hardcoded_additional_data_answer_saving import (
+    should_be_saved,
 )
 from mondey_backend.import_data.utils import data_path
 from mondey_backend.import_data.utils import get_childs_parent_id
@@ -67,15 +73,10 @@ from mondey_backend.import_data.utils import questions_configured_path
 from mondey_backend.import_data.utils import save_select_question
 from mondey_backend.import_data.utils import save_text_question
 from mondey_backend.import_data.utils import update_or_create_user_answer
+from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Language
-from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import UserQuestion
-
-from mondey_backend.import_data.hardcoded_additional_data_answer_saving import \
-    process_special_answer, should_be_saved
-
-from mondey_backend.models.children import Child
 
 debug = True
 
@@ -313,12 +314,20 @@ def import_childrens_question_answers_data(
     session.commit()
     print("All questions have been generated. Now assigning answers to them")
     assign_answers_to_the_imported_questions(
-        session, data_df, labels_df, questions_configured_df, appending_additional_data=False
+        session,
+        data_df,
+        labels_df,
+        questions_configured_df,
+        appending_additional_data=False,
     )
 
 
 def assign_answers_to_the_imported_questions(
-    session, data_df, labels_df, questions_configured_df, appending_additional_data=False
+    session,
+    data_df,
+    labels_df,
+    questions_configured_df,
+    appending_additional_data=False,
 ):
     """
     Once the questions have been inserted into UserQuestion and ChildQuestion, we need to add answers.
@@ -352,7 +361,9 @@ def assign_answers_to_the_imported_questions(
 
     child_case_to_id_map = {}
     # get all children with their ID and name fields
-    children = session.exec(select(Child.id, Child.name).where(Child.name.like("Imported Child %"))).all()
+    children = session.exec(
+        select(Child.id, Child.name).where(Child.name.like("Imported Child %"))
+    ).all()
 
     for child_id, child_name in children:
         # Extract case_id from the name format "Imported Child {case_id}"
@@ -363,7 +374,6 @@ def assign_answers_to_the_imported_questions(
             except Exception as e:
                 # Handle any parsing errors
                 print(f"Error processing child name '{child_name}': {e}")
-
 
     # Process actual data into child answers
     for _, child_row in tqdm(data_df.iterrows()):
@@ -396,8 +406,13 @@ def assign_answers_to_the_imported_questions(
             Category 3 - variable_label is a free text reference, but not connected to another question. In this case,
             it will be found through variable level like any other question.
             """
-            if appending_additional_data and (variable not in list(hardcoded_id_map.keys())):
-                print("Skipping variable which was not in our variable allowlist: ", variable)
+            if appending_additional_data and (
+                variable not in list(hardcoded_id_map.keys())
+            ):
+                print(
+                    "Skipping variable which was not in our variable allowlist: ",
+                    variable,
+                )
                 print(list(hardcoded_id_map.keys()))
                 continue
             response = child_row.get(variable)
@@ -405,21 +420,25 @@ def assign_answers_to_the_imported_questions(
                 response_label = labels_df[
                     (labels_df["Variable"] == variable)
                     & (labels_df["Response Code"] == response)
-                    ]
+                ]
 
                 if response_label.empty:
-                    continue # no data entered.
-                answer = response_label.iloc[0]["Response Label"] if (
+                    continue  # no data entered.
+                answer = (
+                    response_label.iloc[0]["Response Label"]
+                    if (
                         variable_type == "NOMINAL"
                         or variable_type == "ORDINAL"
                         or variable_type == "DICHOTOMOUS"
-                ) else response_label # will be raw freetext/number, e.g. for questions 17/18 for child (Older/younger siblings)
+                    )
+                    else response_label
+                )  # will be raw freetext/number, e.g. for questions 17/18 for child (Older/younger siblings)
                 print("Answer was set to:", answer)
 
                 have_acted_upon_question = process_special_answer(
                     session, variable_label, answer, variable, child_row.get("CASE")
                 )
-                if have_acted_upon_question: # saved/processsed by our hardcoded script
+                if have_acted_upon_question:  # saved/processsed by our hardcoded script
                     continue
             preserved_freetext_lookup_key = variable
             set_only_additional_answer = False
@@ -536,7 +555,9 @@ def assign_answers_to_the_imported_questions(
                 )  # For free text, always use the actual look up
                 # coding keys response - this will be e.g. the freetext plaintext for "Other" or whatever the user has
                 # written in.
-                answer_text = str(response) # it will be the direct response, not a look up code.
+                answer_text = str(
+                    response
+                )  # it will be the direct response, not a look up code.
 
                 # This if condition should not trigger for truly independent free text questions
                 if set_only_additional_answer and (

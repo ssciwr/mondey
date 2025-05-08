@@ -17,8 +17,11 @@ from mondey_backend.import_data.utils import labels_path
 from mondey_backend.import_data.utils import questions_configured_path
 
 
-async def align_additional_data_to_current_answers(data_path: str = additional_data_path, labelling_path: str = labels_path,
-                                             questions_configuration_path: str = questions_configured_path):
+async def align_additional_data_to_current_answers(
+    data_path: str = additional_data_path,
+    labelling_path: str = labels_path,
+    questions_configuration_path: str = questions_configured_path,
+):
     """
     This function assumes that you have placed the additional data in the additional data file paths,and that the mondey.db and user.db
     file in /import_data are the ones you want to build the data on top of. So it skips importing/aligning
@@ -78,7 +81,11 @@ async def align_additional_data_to_current_answers(data_path: str = additional_d
 
     # Only answers - do not re-add the questions
     assign_answers_to_the_imported_questions(
-        import_current_session, additional_data_df, labels_df, questions_configured_df, appending_additional_data=True
+        import_current_session,
+        additional_data_df,
+        labels_df,
+        questions_configured_df,
+        appending_additional_data=True,
     )
 
     run_postprocessing_corrections(data_path, dry_run=False)
