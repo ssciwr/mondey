@@ -90,7 +90,7 @@ def create_router() -> APIRouter:
 
             # Save the CSV data locally
             try:
-                csv_data.to_csv(csv_file, index=False)
+                csv_data.to_csv(csv_file, index=False, sep="\t", encoding="utf-16")
                 print(f"CSV saved to {csv_file}")
 
                 # Process the CSV data
