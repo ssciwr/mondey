@@ -70,8 +70,8 @@ let filteredComponentProps = $derived(
 	{/if}
 
 	{#if withSearch}
-		<form class="m-2 w-full rounded p-4">
-			{#if searchData.length > 1}
+		<form class="m-2 w-full rounded p-4 {searchData.length > 1 ? 'flex' : ''}">
+		{#if searchData.length > 1}
 				<!-- after example: https://flowbite-svelte.com/docs/forms/search-input#Search_with_dropdown -->
 				<div class="relative">
 					<Button
@@ -115,7 +115,7 @@ let filteredComponentProps = $derived(
 	{/if}
 
 	<div
-		class="grid w-full grid-cols-1 justify-center gap-8 p-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+		class="grid w-full grid-cols-1 justify-center gap-8 p-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"
 	>
 		{#each filteredItems as item, index}
 			<svelte:component
