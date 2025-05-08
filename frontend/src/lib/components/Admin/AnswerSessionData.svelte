@@ -26,6 +26,7 @@ import {
 } from "flowbite-svelte";
 import {
 	ChartPieOutline,
+	CheckCircleOutline,
 	CloseOutline,
 	FileImportSolid,
 	RefreshOutline,
@@ -48,6 +49,7 @@ let isUploading = $state(false);
 let showConfirmImportModal = $state(false);
 let importResult = $state({ status: "", message: "", error: false });
 let showImportResult = $state(false);
+let successfulImport = $state(false)
 
 async function doStatsUpdate(incremental: boolean) {
 	show_update_stats_modal = true;
@@ -121,6 +123,7 @@ async function handleImportConfirm() {
 			// Reset file input
 			if (fileInputRef) fileInputRef.value = "";
 			csvFile = null;
+            successfulImport = true;
 			// Refresh data as it might have changed
 			stats_out_of_date = true;
 			await refreshMilestoneAnswerSessions();
@@ -154,21 +157,28 @@ onMount(async () => {
         {i18n.tr.admin.importData}
     </h3>
     <div class="space-y-4">
-        <div>
-            <input
-                    type="file"
-                    accept=".csv"
-                    bind:this={fileInputRef}
-                    on:change={handleFileChange}
-                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                    disabled={isUploading}
-                    data-testid="csv-file-input"
-            />
-            <Button color="blue" disabled={isUploading || !csvFile}>
-                <FileImportSolid />
-                {i18n.tr.admin.uploadCSV}
-            </Button>
-        </div>
+        {#if successfulImport}
+            <div>
+                <Alert color="green">
+                    <CheckCircleOutline />&nbsp;{i18n.tr.admin.importSuccessful}</Alert>
+            </div>
+        {:else}
+            <div>
+                <input
+                        type="file"
+                        accept=".csv"
+                        bind:this={fileInputRef}
+                        on:change={handleFileChange}
+                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        disabled={isUploading}
+                        data-testid="csv-file-input"
+                />
+                <Button color="blue" disabled={isUploading || !csvFile}>
+                    <FileImportSolid />
+                    {i18n.tr.admin.uploadCSV}
+                </Button>
+            </div>
+        {/if}
 
         {#if isUploading}
             <div class="flex items-center space-x-2">
@@ -177,10 +187,12 @@ onMount(async () => {
             </div>
         {/if}
 
-        {#if showImportResult}
-            <Alert color={importResult.error ? "red" : "green"} dismissable>
-                {importResult.message}
-            </Alert>
+        {#if showImportResult && importResult.error}
+            <div>
+                <Alert color="red" dismissable>
+                    {i18n.tr.admin.importFailed}
+                </Alert>
+            </div>
         {/if}
     </div>
 </Card>
