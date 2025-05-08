@@ -374,9 +374,11 @@ def assign_answers_to_the_imported_questions(
         # Iterate through all variables in labels_df
         print("")
         print("Going through for child ... ", child_row.get("CASE"))
+        print("CASE ID map:", child_case_to_id_map)
         for _j, label_row in (
             labels_df.groupby("Variable").first().reset_index().iterrows()
         ):
+            db_child_id = child_case_to_id_map[str(child_row.get("CASE"))]
             variable_type = label_row["Variable Type"]
             variable = label_row["Variable"]
             variable_label = label_row["Variable Label"]
@@ -407,7 +409,11 @@ def assign_answers_to_the_imported_questions(
 
                 if response_label.empty:
                     continue # no data entered.
-                answer = response_label.iloc[0]["Response Label"]
+                answer = response_label.iloc[0]["Response Label"] if (
+                        variable_type == "NOMINAL"
+                        or variable_type == "ORDINAL"
+                        or variable_type == "DICHOTOMOUS"
+                ) else response_label # will be raw freetext/number, e.g. for questions 17/18 for child (Older/younger siblings)
                 print("Answer was set to:", answer)
 
                 have_acted_upon_question = process_special_answer(
@@ -446,7 +452,6 @@ def assign_answers_to_the_imported_questions(
                     variable,
                     label_row["Variable Label"],
                     "Answer:",
-                    str(child_row.get(variable)),
                     str(
                         labels_df[
                             (labels_df["Variable"] == variable)
@@ -488,10 +493,11 @@ def assign_answers_to_the_imported_questions(
                     if get_question_filled_in_to_parent(
                         questions_configured_df, variable, debug_print=True
                     ):
+                        # goes through here.
                         found_base_question, answer = update_or_create_user_answer(
                             session,
                             user_or_child_id=get_childs_parent_id(
-                                session, child_id
+                                session, child_row.get("CASE")
                             ),
                             question_id=question.id,
                             answer_text=answer_text,
@@ -500,7 +506,7 @@ def assign_answers_to_the_imported_questions(
                         )
                         print(
                             "Saved(user question) with parent ID of...:",
-                            get_childs_parent_id(session, child_id),
+                            get_childs_parent_id(session, child_row.get("CASE")),
                         )
                     else:
                         print(
@@ -508,7 +514,7 @@ def assign_answers_to_the_imported_questions(
                         )
                         found_base_question, answer = update_or_create_user_answer(
                             session,
-                            user_or_child_id=child_id,
+                            user_or_child_id=db_child_id,
                             question_id=question.id,
                             answer_text=answer_text,
                             set_only_additional_answer=set_only_additional_answer,
@@ -550,24 +556,18 @@ def assign_answers_to_the_imported_questions(
                     found_base_question, answer = update_or_create_user_answer(
                         session,
                         user_or_child_id=get_childs_parent_id(
-                            session, child_id
+                            session, child_row.get("CASE")
                         ),
                         question_id=question.id,
                         answer_text=answer_text,
                         set_only_additional_answer=set_only_additional_answer,
                         is_child_question=False,
                     )
-                    print(
-                        "Question ID: ",
-                        question.id,
-                        "Saved it for user(parent) ID of...:",
-                        get_childs_parent_id(session, child_id),
-                    )
                 else:
                     print("Saving child answer..", answer_text)
                     found_base_question, answer = update_or_create_user_answer(
                         session,
-                        user_or_child_id=child_id,
+                        user_or_child_id=db_child_id,
                         question_id=question.id,
                         answer_text=answer_text,
                         set_only_additional_answer=set_only_additional_answer,

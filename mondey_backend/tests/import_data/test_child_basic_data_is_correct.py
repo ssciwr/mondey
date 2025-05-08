@@ -45,7 +45,7 @@ def fake_data_csv():
 def test_childs_age_is_recorded_accurately():
     import_session, import_engine = get_import_test_session(create_tables=True)
     clear_all_data(import_session)
-    map_children_milestones_data(
+    await map_children_milestones_data(
         "data.csv", import_session, overwritten_csv=fake_data_csv()
     )
     child_id = 159
@@ -62,7 +62,7 @@ def test_childs_age_is_recorded_accurately():
 def test_childs_age_is_recorded_accurately_alternative():
     import_session, import_engine = get_import_test_session(create_tables=True)
     clear_all_data(import_session)
-    map_children_milestones_data(
+    await map_children_milestones_data(
         "data.csv", import_session, overwritten_csv=fake_data_csv()
     )
     child_id = 208

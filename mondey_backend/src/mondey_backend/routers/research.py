@@ -15,9 +15,8 @@ from ..dependencies import CurrentActiveResearchDep
 from ..dependencies import ResearchDep
 from ..dependencies import SessionDep
 from ..dependencies import UserAsyncSessionDep
-from ..import_data.align_additional_data_to_current_answers import (
-    align_additional_data_to_current_answers,
-)
+from ..import_data.align_additional_data_to_current_answers import align_additional_data_to_current_answers
+from ..import_data.remove_duplicate_cases import remove_duplicate_cases
 from ..models.milestones import Milestone
 from ..models.questions import ChildQuestion
 from ..models.questions import UserQuestion
@@ -98,8 +97,17 @@ def create_router() -> APIRouter:
                 csv_data.to_csv(csv_file, index=False, sep="\t", encoding="utf-16")
                 print(f"CSV saved to {csv_file}")
 
+                await remove_duplicate_cases(csv_file, session, csv_file)
+                print("Removed duplicates before processing")
+
+
                 # Process the CSV data
-                align_additional_data_to_current_answers(data_path=csv_file)
+                # todo: This path solution is ugly
+                await align_additional_data_to_current_answers(data_path=csv_file,
+                                                         labelling_path=
+                                                         "src/mondey_backend/import_data/labels_encoded.csv",
+                                                         questions_configuration_path=
+                                                         "src/mondey_backend/import_data/questions_specified.csv")
                 # if it errors, it will go through to the throw 400 error block.
                 print("Finished adding additional data")
 

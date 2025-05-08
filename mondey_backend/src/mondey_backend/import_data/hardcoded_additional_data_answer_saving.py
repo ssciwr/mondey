@@ -148,10 +148,15 @@ so the question is, can postprocessing do all that?
 def process_special_answer(
     session, question_label: str, answer: str, variable: str, child_id: int
 ):
+
     if variable in child_age_questions_labels:
         print("Age of birth case - skip, no need to save anything.")
         return True
     elif variable in eltern_question_variables:
+        if variable == "FP03": # sepcial Eltern overview: don't save to avodi mother / mother in law problem
+            print("(skipping general overall Eltern answer)")
+            return True # the specific minor ones which are not null will be saved instead
+        print("Variable:", variable, "Q LAbel:", question_label, "Was in eltern! So adding its answer:", answer)
         eltern_question_special_id = 13
         print(eltern_question_special_id)
         if answer is not None and len(answer) > 0:

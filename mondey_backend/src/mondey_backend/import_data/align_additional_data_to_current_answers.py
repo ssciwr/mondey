@@ -1,3 +1,5 @@
+import asyncio
+
 import pandas as pd
 
 from mondey_backend.import_data.import_children_with_assigned_milestone_data import (
@@ -15,7 +17,8 @@ from mondey_backend.import_data.utils import labels_path
 from mondey_backend.import_data.utils import questions_configured_path
 
 
-def align_additional_data_to_current_answers():
+async def align_additional_data_to_current_answers(data_path: str = additional_data_path, labelling_path: str = labels_path,
+                                             questions_configuration_path: str = questions_configured_path):
     """
     This function assumes that you have placed the additional data in the additional data file paths,and that the mondey.db and user.db
     file in /import_data are the ones you want to build the data on top of. So it skips importing/aligning
@@ -39,20 +42,19 @@ def align_additional_data_to_current_answers():
 
     :return:
     """
-
     # Check we have all additional data files:
     labels_df = pd.read_csv(
-        labels_path,
+        labelling_path,
         sep=",",
         encoding="utf-16",
         encoding_errors="replace",
         index_col=None,
     )
     additional_data_df = pd.read_csv(
-        additional_data_path, sep="\t", encoding="utf-16", encoding_errors="replace"
+        data_path, sep="\t", encoding="utf-16", encoding_errors="replace"
     )
     questions_configured_df = pd.read_csv(
-        questions_configured_path,
+        questions_configuration_path,
         sep=",",
         encoding="utf-8",
         dtype=str,
@@ -69,9 +71,9 @@ def align_additional_data_to_current_answers():
     # and see which rows the CSV detected as novel/new rows and which it removed as duplicates.
 
     print("Now assigning the additional children their milestones")
-    print("Additional data CSV:", additional_data_path)
-    map_children_milestones_data(
-        additional_data_path, import_current_session
+    print("Additional data CSV:", data_path)
+    await map_children_milestones_data(
+        data_path, import_current_session
     )  # already deals with existing children.
 
     # Only answers - do not re-add the questions
@@ -79,7 +81,7 @@ def align_additional_data_to_current_answers():
         import_current_session, additional_data_df, labels_df, questions_configured_df, appending_additional_data=True
     )
 
-    run_postprocessing_corrections(additional_data_path, dry_run=False)
+    run_postprocessing_corrections(data_path, dry_run=False)
     # these largely convert the "chosen/not chosen" into "Yes/No" etc and other similar parsing of encoded characters
 
     print(
@@ -90,4 +92,4 @@ def align_additional_data_to_current_answers():
 
 
 if __name__ == "__main__":
-    align_additional_data_to_current_answers()
+    asyncio.run(align_additional_data_to_current_answers())

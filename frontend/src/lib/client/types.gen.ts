@@ -9,6 +9,10 @@ export type BodyAuthCookieLoginAuthLoginPost = {
     client_secret?: string | null;
 };
 
+export type BodyImportCsvDataResearchImportCsvPost = {
+    file: Blob | File;
+};
+
 export type BodyResetForgotPasswordAuthForgotPasswordPost = {
     email: string;
 };
@@ -2269,6 +2273,29 @@ export type GetResearchNamesResponses = {
 };
 
 export type GetResearchNamesResponse = GetResearchNamesResponses[keyof GetResearchNamesResponses];
+
+export type ImportCsvDataData = {
+    body: BodyImportCsvDataResearchImportCsvPost;
+    path?: never;
+    query?: never;
+    url: '/research/import-csv/';
+};
+
+export type ImportCsvDataErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ImportCsvDataError = ImportCsvDataErrors[keyof ImportCsvDataErrors];
+
+export type ImportCsvDataResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type ClientOptions = {
     baseUrl: `${string}://${string}` | (string & {});

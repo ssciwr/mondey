@@ -77,13 +77,14 @@ def get_childs_parent_id(session: Session, child_id: int) -> int:
 
     Args:
         session: Database session
-        child_id: ID of the child
+        child_id: CASE number of the child - should really be case_id
 
     Returns:
         The user_id of the child's parent
     """
+    child_name = f"Imported Child {child_id}"
     child = session.execute(
-        select(Child).where(Child.id == child_id)
+        select(Child).where(Child.name == child_name)
     ).scalar_one_or_none()
     if not child:
         print("Child ID type:")
@@ -416,7 +417,7 @@ async def create_parent_for_child(
     user_session.add(user)
     await user_session.flush()
 
-    print("Created the user parent!!")
+    print("Created the user parent for child ID:", child_id, " with email!!", user_create.email)
 
     return user
 
@@ -484,6 +485,7 @@ def update_or_create_user_answer(
     is_child_question=True,
 ):
     print("Updating Question ID: " + str(question_id) + " with answer: " + answer_text)
+    print("(was child question)" if is_child_question else "(is user questions)")
     """
     Upsert the answers to questions, by ID, handling different kinds of answers.
     """
@@ -508,7 +510,7 @@ def update_or_create_user_answer(
         "Adding or updating question!",
         "QID: ",
         str(question_id),
-        "UID",
+        "General-ID",
         str(user_or_child_id),
     )
 

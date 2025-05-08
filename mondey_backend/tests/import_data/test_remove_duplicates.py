@@ -1,3 +1,4 @@
+import asyncio
 import codecs
 import os
 import tempfile
@@ -58,7 +59,7 @@ def test_duplicates_are_ignored_during_import(session):
     # First import with the default children (159, 208)
     csv_file1 = os.path.join(temp_dir, "children_import_test1.csv")
     create_test_csv_file(csv_file1)
-    map_children_milestones_data(csv_file1, import_session)
+    asyncio.run(map_children_milestones_data(csv_file1, import_session))
 
     # Verify first child's data
     child_id = 159
@@ -77,7 +78,7 @@ def test_duplicates_are_ignored_during_import(session):
     # Test reimporting the same data doesn't create duplicates
     csv_file2 = os.path.join(temp_dir, "children_import_test2.csv")
     create_test_csv_file(csv_file2)
-    map_children_milestones_data(csv_file2, import_session)
+    await map_children_milestones_data(csv_file2, import_session)
 
     children = import_session.exec(select(Child)).all()
     assert len(children) == 6  # Should still be 6
@@ -85,7 +86,7 @@ def test_duplicates_are_ignored_during_import(session):
     # Test adding one new child while reimporting the existing ones
     csv_file3 = os.path.join(temp_dir, "children_import_test3.csv")
     create_test_csv_file(csv_file3, child_ids=[159, 208, 300])
-    map_children_milestones_data(csv_file3, import_session)
+    await map_children_milestones_data(csv_file3, import_session)
 
     children = import_session.exec(select(Child)).all()
     assert len(children) == 7  # Should now be 7 (6 previous + 1 new)
@@ -93,7 +94,7 @@ def test_duplicates_are_ignored_during_import(session):
     # Test importing just one new child on its own
     csv_file4 = os.path.join(temp_dir, "children_import_test4.csv")
     create_test_csv_file(csv_file4, child_ids=[301])
-    map_children_milestones_data(csv_file4, import_session)
+    await map_children_milestones_data(csv_file4, import_session)
 
     children = import_session.exec(select(Child)).all()
     assert len(children) == 8  # Should now be 8
@@ -101,7 +102,7 @@ def test_duplicates_are_ignored_during_import(session):
     # Test importing multiple new children
     csv_file5 = os.path.join(temp_dir, "children_import_test5.csv")
     create_test_csv_file(csv_file5, child_ids=[302, "400", "401_SomeChars"])
-    map_children_milestones_data(csv_file5, import_session)
+    await map_children_milestones_data(csv_file5, import_session)
 
     children = import_session.exec(select(Child)).all()
     assert len(children) == 11  # Should now be 11
@@ -109,7 +110,7 @@ def test_duplicates_are_ignored_during_import(session):
     # test string based child IDs also don't get duplicated.
     csv_file6 = os.path.join(temp_dir, "children_import_test6.csv")
     create_test_csv_file(csv_file6, child_ids=["401_SomeChars"])
-    map_children_milestones_data(csv_file6, import_session)
+    await map_children_milestones_data(csv_file6, import_session)
 
     children = import_session.exec(select(Child)).all()
     assert len(children) == 11  # Should now be 11
@@ -117,7 +118,7 @@ def test_duplicates_are_ignored_during_import(session):
     # yet another new one with another duplicate.
     csv_file6 = os.path.join(temp_dir, "children_import_test7.csv")
     create_test_csv_file(csv_file6, child_ids=["401_SomeChars", "40634_SomeChars"])
-    map_children_milestones_data(csv_file6, import_session)
+    await map_children_milestones_data(csv_file6, import_session)
 
     children = import_session.exec(select(Child)).all()
     assert len(children) == 12

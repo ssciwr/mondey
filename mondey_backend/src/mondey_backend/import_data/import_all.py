@@ -29,7 +29,7 @@ if __name__ == "__main__":
     import_milestones_metadata(import_current_session, milestones_metadata_path)
 
     print("Now assigning children their milestones")
-    map_children_milestones_data(data_path, import_current_session)
+    await map_children_milestones_data(data_path, import_current_session)
     print("Done assigning children their milestones.")
 
     print("Now setting the custom question/answers pairs")

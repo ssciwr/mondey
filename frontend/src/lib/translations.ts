@@ -176,6 +176,14 @@ export const translationIds = {
 			"Statistiken müssen aktualisiert werden. Klicken Sie dazu auf „alle Statistiken neu berechnen“.",
 		suspiciousSessionNote:
 			"Hinweis: Als verdächtig markierte Antwortsitzungen werden bei der Berechnung des voraussichtlichen Alters für Meilensteine nicht berücksichtigt, sind aber dennoch in den Forschungsdaten enthalten.",
+		manageData: "Daten verwalten",
+		importData: "Daten Importieren",
+		importFailed: "Importieren fallt aus",
+		importSuccessful: "Importieren Erfolgreich",
+		confirmImport: "Ja, Importiere",
+		uploadCSV: "CSV Daten hochladen",
+		uploading: "CSV wird hochgeladen"
+
 	},
 	researcher: {
 		label: "Wissenschaft",

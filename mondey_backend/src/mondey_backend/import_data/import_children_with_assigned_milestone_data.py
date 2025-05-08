@@ -13,6 +13,8 @@ from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneText
 
+from asyncer import asyncify, syncify
+
 
 def find_milestone_based_on_label(session, label):
     # Extract the part after the colon
@@ -41,7 +43,7 @@ def update_milestone_with_name_property(session, milestone_id, var):
     return False
 
 
-def map_children_milestones_data(path: str, session, overwritten_csv=False):
+async def map_children_milestones_data(path: str, session, overwritten_csv=False):
     """
     Based on the data file, this creates the Children and respective User Parents(1 for each child). It fills out
     the required basic (hardcoded) information for each child, like date of birth. It also saves all the milestone
@@ -59,7 +61,7 @@ def map_children_milestones_data(path: str, session, overwritten_csv=False):
     :param overwritten_csv: an in memory CSV for testing correct parsing
     """
     print("Using path for removing duplicates and real data:", path)
-    asyncio.run(remove_duplicate_cases(path, session, path))
+
     # todo2: save children with name not child ID (only)
     csv_path = pathlib.Path(path)
     milestone_query = select(Milestone)
@@ -88,13 +90,11 @@ def map_children_milestones_data(path: str, session, overwritten_csv=False):
         print("Opening CSV File:", csv_path)
         reader = list(csv.DictReader(csvfile, delimiter="\t"))
 
-        # todo: fix this. It's wrongly linking parents by the case ID rather than actual child ID
-        # the loop using child_id will need to be fixed at the same time to index correctly.
         # i.e. we now make children with case ID in their name not by ID, so we need to pass
         # the actual child IDs for the children, not the row["CASE"] number.
         # Make parents in a batch query.
         child_ids = [row["CASE"] for row in reader]
-        parent_id_map = asyncio.run(generate_parents_for_children(child_ids))
+        parent_id_map = await generate_parents_for_children(child_ids)
         print("Parent ID map", parent_id_map)
 
         # Process each row (child)
