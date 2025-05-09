@@ -29,6 +29,7 @@ dependencies = [
     "deepl",
     "pandas",
     "sqlparse",
+    "fuzzywuzzy"
 ]
 dynamic = ["version"]
 
