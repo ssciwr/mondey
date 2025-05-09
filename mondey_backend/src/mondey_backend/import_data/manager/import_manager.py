@@ -23,6 +23,7 @@ from sqlmodel import Session, select
 
 from mondey_backend.databases.mondey import create_mondey_db_and_tables_themselves
 from mondey_backend.import_data.postprocessing_corrections.convert_fruhgeboren_data_into_two_questions import parse_weeks
+from mondey_backend.import_data.postprocessing_corrections.run_postprocess_corrections import run_postprocessing_corrections
 from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import (
     Language,
@@ -384,9 +385,9 @@ class ImportManager:
         # Original implementation always returns False
         return False
     
-    def get_childs_parent_id(self, session: Session, child_id: int) -> int:
+    def get_childs_parent_id(self, session: Session, case_id: int) -> int:
         """Get the parent ID for a child."""
-        child_name = f"Imported Child {child_id}"
+        child_name = f"Imported Child {case_id}"
         child_result = session.execute(
             select(Child).where(Child.name == child_name)
         ).first()
@@ -396,16 +397,16 @@ class ImportManager:
             logger.debug(f"Found child: {child.id}, {child.name}, parent: {child.user_id}")
             return child.user_id
         else:
-            logger.error(f"Child with ID {child_id} not found")
-            raise ValueError(f"Child with ID {child_id} not found")
+            logger.error(f"Child with ID {case_id} not found")
+            raise ValueError(f"Child with ID {case_id} not found")
     
     async def check_parent_exists(
         self, 
         user_session: AsyncSession, 
-        child_id: int
+        case_id: int
     ) -> Optional[User]:
         """Check if a parent exists for a child."""
-        email = f"parent_of_{child_id}@artificialimporteddata.csv"
+        email = f"parent_of_{case_id}@artificialimporteddata.csv"
         logger.debug(f"Checking for parent with email: {email}")
         
         stmt = select(User).where(User.email == email)
@@ -417,12 +418,11 @@ class ImportManager:
     
     async def create_parent_for_child(
         self, 
-        user_session: AsyncSession, 
-        user_db: SQLAlchemyUserDatabase, 
-        child_id: int
+        user_session: AsyncSession,
+        case_id: int
     ) -> User:
         """Create a parent user for a child."""
-        username = f"parent_of_{child_id}"
+        username = f"parent_of_{case_id}"
         email = f"{username}@artificialimporteddata.csv"
         
         user_create = UserCreate(
@@ -447,7 +447,7 @@ class ImportManager:
         user_session.add(user)
         await user_session.flush()
         
-        logger.info(f"Created parent for child ID: {child_id} with email: {user_create.email}")
+        logger.info(f"Created parent for child ID: {case_id} with email: {user_create.email}")
         return user
     
     async def generate_parents_for_children(
@@ -467,7 +467,7 @@ class ImportManager:
                     child_parent_map[str(child_id)] = existing_parent.id
                 else:
                     parent = await self.create_parent_for_child(
-                        user_import_session, user_db, child_id
+                        user_import_session, child_id
                     )
                     logger.info(f"Created parent {parent.id} for child {child_id}")
                     child_parent_map[str(child_id)] = parent.id
@@ -477,6 +477,7 @@ class ImportManager:
         logger.debug(f"Final child_parent_map: {child_parent_map}")
         self.child_parent_map = child_parent_map
         return child_parent_map
+        # not updating Child.user_id here. Could do that.
     
     def find_milestone_based_on_label(
         self, 
@@ -1324,17 +1325,21 @@ class ImportManager:
         additional_data_df = self.load_additional_data_df()
         labels_df = self.load_labels_df()
         questions_configured_df = self.load_questions_configured_df()
+        # maybe make it so
+        # load_data_df
+        # loads the data from the imported router CSV temp file (incl. temp file stuff here too)
+        # if additional data, otherwise it loads normal data.
         
         # First import children with milestone data
-        await self.import_children_with_milestone_data(session)
+        await self.import_children_with_milestone_data(session) # todo: Pass additional data/store in this class
         
         # Then import answers
-        self.import_answers(session)
-        
-        # Run postprocessing corrections
-        from mondey_backend.import_data.postprocessing_corrections.run_postprocess_corrections import run_postprocessing_corrections
+        self.import_answers(session) # todo: Pass additional data/store in this class
+
         run_postprocessing_corrections(str(self.import_paths.additional_data_path), dry_run=False)
-        
+
+        # delete the temp CSV file.
+        # todo: make sure to return success status
         logger.info("Additional data imported successfully")
     
     # -------------------------------------------------------------------------
@@ -1375,7 +1380,11 @@ class ImportManager:
         
         # Get sessions
         import_session, _ = self.get_current_session()
-        
+
+        # todo: ADapt to take in variable CSV/data
+
+        # todo: Add the validation & deduplicationh ere, not in the router controller.
+
         try:
             # Import additional data
             await self.import_additional_data(import_session)
@@ -1386,67 +1395,6 @@ class ImportManager:
             logger.error(f"Error during additional data import: {e}")
             import_session.rollback()
             raise
-    
-    async def clear_users_database(self) -> bool:
-        """Clear all data from the users database."""
-        logger.info("Clearing users database")
-        
-        async with self.async_users_engine.begin() as session:
-            user_count = await session.execute(text('SELECT COUNT(*) FROM "user"'))
-            user_count = user_count.scalar()
-            
-            count_users = await session.execute(
-                text("SELECT COUNT(*) FROM \"user\" WHERE email LIKE '%parent_of_%'")
-            )
-            total_users = count_users.scalar()
-            has_test_user = total_users in [321, 642]
-            
-            logger.info(f"Total users: {total_users}")
-            if total_users == 0:
-                logger.info(f"Nothing to do - {count_users} no test users exist, so none deleted")
-                return False
-                
-            if not has_test_user or user_count < 250:
-                raise Exception(
-                    f"Safety check failed! Found {user_count} users and no test users with example.com emails. "
-                    "This could be real data - operation aborted."
-                )
-            
-            # Get sample of emails for debugging
-            result = await session.execute(
-                text(
-                    "SELECT id, email FROM \"user\" WHERE email LIKE '%artificialimporteddata.csv%' LIMIT 3"
-                )
-            )
-            sample_users = result.fetchall()
-            logger.debug("Sample users that should be deleted:")
-            for user_id, email in sample_users:
-                logger.debug(f"  ID: {user_id}, Email: {email}")
-            
-            try:
-                # Delete the users
-                result = await session.execute(
-                    text("DELETE FROM \"user\" WHERE email LIKE '%parent_of_%'")
-                )
-                rows_deleted = result.rowcount
-                logger.info(f"DELETE statement affected {rows_deleted} rows")
-                
-                # Verify deletion
-                result = await session.execute(
-                    text(
-                        "SELECT COUNT(*) FROM \"user\" WHERE email LIKE '%artificialimporteddata.csv%'"
-                    )
-                )
-                remaining = result.scalar()
-                logger.info(f"Remaining matching users after deletion: {remaining}")
-                logger.info("Successfully cleared all data from users database")
-                
-                # Commit the transaction
-                await session.commit()
-                logger.info("Transaction committed successfully")
-                return True
-                
-            except Exception as err:
-                logger.error(f"Error encountered: {err}")
-                await session.rollback()
-                return False
+
+
+# Todo: Update tests to use this module.

@@ -2,6 +2,9 @@
 
 The Import Manager is a centralized system for handling data import operations in the Mondey backend.
 
+*This has been AI generated on the first path as a refactoring of the dispersed function-based import code that existed
+before.*
+
 ## Overview
 
 This module provides a more maintainable and cohesive approach to importing data, replacing the previous system that was spread across multiple scripts. It handles:

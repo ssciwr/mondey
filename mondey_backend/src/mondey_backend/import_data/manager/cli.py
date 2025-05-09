@@ -150,34 +150,5 @@ def additional_import(ctx, additional_data, confirm):
     click.echo("Additional data import completed successfully.")
 
 
-@cli.command()
-@click.option(
-    "--confirm/--no-confirm",
-    default=True,
-    help="Confirm before clearing users database",
-)
-@click.pass_context
-def clear_users(ctx, confirm):
-    """Clear all data from the users database."""
-    manager = ctx.obj["manager"]
-    
-    # Confirm before running
-    if confirm:
-        click.echo("This will clear all data from the users database.")
-        click.echo(f"Users DB: {manager.users_db_path}")
-        
-        if not click.confirm("Do you want to continue?"):
-            click.echo("Operation cancelled.")
-            return
-    
-    # Run clear
-    result = asyncio.run(manager.clear_users_database())
-    
-    if result:
-        click.echo("Users database cleared successfully.")
-    else:
-        click.echo("No users were deleted or an error occurred.")
-
-
 if __name__ == "__main__":
     cli(obj={})

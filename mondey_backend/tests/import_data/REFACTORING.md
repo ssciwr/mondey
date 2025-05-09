@@ -22,27 +22,30 @@ So the argument should become case_id.
 (As it can be confusing to the reader of this code in the future - child_id is misleading when it is the CASE ID and not
 the actual child.id variable.)
 
-## Avoid importing the import_session in small utility functions - either pass it as an arg or dependency inject it
+## X Avoid importing the import_session in small utility functions - either pass it as an arg or dependency inject it
 Right now in order to have a separate DB for the import process, we use a local directory and session. But importing
 it this way is not ideal.
 
-## Pass the data around as a dataframe between functions, rather than reading from the same data_path CSVs
+## X Pass the data around as a dataframe between functions, rather than reading from the same data_path CSVs
 This way of doing things means we do data deduplication by modifying the actual CSV before the script runs;
 this is reliable but not ideal
 
-## Consolidate the functionality which is linked together, maybe into a Python class, rather than having these files
+## X Consolidate the functionality which is linked together, maybe into a Python class, rather than having these files
 
 ## Remove obsolete postprocessing code and other files
+todo: Still importing some, so can delete unused ones soon.
 
-## Consolidate import_all.py with await align_additional_data_to_current_answers.py to be one script, rather than two
+## X Consolidate import_all.py with await align_additional_data_to_current_answers.py to be one script, rather than two
 Because right now they do similar things and overlap in terms of code. They could each become one function in a
 Python class for managing processing import data e.g. `initialize` or `run`
 
-## Refactor import_childrens_question_answers_data.py
+## X Refactor import_childrens_question_answers_data.py
 IMO this is high priority alongside handling the child id/case ID better.
 - It should become two files:
 - One for creation initial questions from the labels CSV (only on initial first import) and
 - One for importing answers to the (pre-existing, just created) children
+
+This has been done, refactored into the import_manager.py class itself
 
 ## Remove all the extra print statements
 mostly for debug between user vs child question answers etc.
