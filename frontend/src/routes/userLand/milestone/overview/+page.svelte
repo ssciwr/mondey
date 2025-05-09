@@ -133,7 +133,7 @@ async function setup(): Promise<void> {
 				return {
 					header: item?.text?.[i18n.locale]?.title ?? "",
 					complete: complete,
-					summary: item?.text?.[i18n.locale]?.desc ?? "",
+					summary: "",
 					events: {
 						onclick: () => {
 							contentStore.milestone = item.id;
