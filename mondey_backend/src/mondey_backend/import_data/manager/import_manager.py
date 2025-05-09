@@ -1283,7 +1283,7 @@ class ImportManager:
         logger.info("Starting additional data import")
 
         # Get sessions
-        import_session, _ = self.data_manager.get_current_session()
+        import_session, _ = self.data_manager.get_import_session()
 
         try:
             # Import additional data

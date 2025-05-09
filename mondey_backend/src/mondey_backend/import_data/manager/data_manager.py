@@ -27,6 +27,7 @@ from sqlmodel import Session
 
 from mondey_backend.databases.mondey import create_mondey_db_and_tables_themselves
 from mondey_backend.import_data.remove_duplicate_cases import remove_duplicate_cases
+from mondey_backend.src.mondey_backend.settings import app_settings
 
 logger = logging.getLogger(__name__)
 
@@ -64,10 +65,7 @@ class ImportPaths:
     @classmethod
     def default(cls, base_dir: Path | None = None) -> ImportPaths:
         """Create default ImportPaths."""
-        if base_dir is None:
-            base_dir = Path(__file__).parent.parent.parent.parent.parent.absolute()
-
-        import_dir = base_dir / "src/mondey_backend/import_data"
+        import_dir = app_settings.PRIVATE_FILES_PATH
 
         return cls(
             labels_path=import_dir / "labels_encoded.csv",
@@ -121,12 +119,12 @@ class DataManager:
         )
 
         # Database connections
+        # When we want this to work directly on the live DB, we can change these paths to be the same as the normal ones.
         self.current_db_url = f"sqlite:////{self.current_db_path}"
         self.users_db_url = f"sqlite+aiosqlite:///{self.users_db_path}"
 
         # Create engines
         self.mondey_engine = create_engine(self.current_db_url)
-        self.current_engine = self.mondey_engine
         self.async_users_engine = create_async_engine(self.users_db_url)
 
         # Cached data
@@ -257,12 +255,6 @@ class DataManager:
             if create_tables:
                 create_mondey_db_and_tables_themselves(self.mondey_engine)
             return session, self.mondey_engine
-
-    # todo: Delete below and cosnolidate. THis and the one above are the same thing!
-    def get_current_session(self) -> tuple[Session, Engine]:
-        """Get a session for the current database."""
-        with Session(self.current_engine) as session:
-            return session, self.current_engine
 
     async def get_async_users_session(self) -> AsyncSession:
         """Get an async session for the users database."""
