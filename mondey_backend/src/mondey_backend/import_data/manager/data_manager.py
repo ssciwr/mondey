@@ -15,19 +15,17 @@ import logging
 import os
 from dataclasses import dataclass
 from http.client import HTTPException
-from fastapi import status
 from pathlib import Path
-from typing import Optional, Tuple
 
 import pandas as pd
-from fastapi_users.db import SQLAlchemyUserDatabase
-from sqlalchemy import Engine, create_engine
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
+from fastapi import status
+from sqlalchemy import Engine
+from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel import Session
 
 from mondey_backend.databases.mondey import create_mondey_db_and_tables_themselves
-from mondey_backend.models.users import User
-
 from mondey_backend.import_data.remove_duplicate_cases import remove_duplicate_cases
 
 logger = logging.getLogger(__name__)
@@ -41,26 +39,30 @@ class ImportPaths:
     data_path: Path
     questions_configured_path: Path
     milestones_metadata_path: Path
-    additional_data_path: Optional[Path] = None
+    additional_data_path: Path | None = None
 
     @classmethod
-    def from_strings(cls,
-                     labels_path: str,
-                     data_path: str,
-                     questions_configured_path: str,
-                     milestones_metadata_path: str,
-                     additional_data_path: Optional[str] = None) -> ImportPaths:
+    def from_strings(
+        cls,
+        labels_path: str,
+        data_path: str,
+        questions_configured_path: str,
+        milestones_metadata_path: str,
+        additional_data_path: str | None = None,
+    ) -> ImportPaths:
         """Create ImportPaths from string paths."""
         return cls(
             labels_path=Path(labels_path),
             data_path=Path(data_path),
             questions_configured_path=Path(questions_configured_path),
             milestones_metadata_path=Path(milestones_metadata_path),
-            additional_data_path=Path(additional_data_path) if additional_data_path else None
+            additional_data_path=Path(additional_data_path)
+            if additional_data_path
+            else None,
         )
 
     @classmethod
-    def default(cls, base_dir: Optional[Path] = None) -> ImportPaths:
+    def default(cls, base_dir: Path | None = None) -> ImportPaths:
         """Create default ImportPaths."""
         if base_dir is None:
             base_dir = Path(__file__).parent.parent.parent.parent.parent.absolute()
@@ -72,7 +74,7 @@ class ImportPaths:
             data_path=import_dir / "data.csv",
             questions_configured_path=import_dir / "questions_specified.csv",
             milestones_metadata_path=import_dir / "milestones_metadata_(variables).csv",
-            additional_data_path=import_dir / "additional_data.csv"
+            additional_data_path=import_dir / "additional_data.csv",
         )
 
 
@@ -86,12 +88,12 @@ class DataManager:
     """
 
     def __init__(
-            self,
-            import_paths: Optional[ImportPaths] = None,
-            mondey_db_path: Optional[Path] = None,
-            current_db_path: Optional[Path] = None,
-            users_db_path: Optional[Path] = None,
-            debug: bool = False
+        self,
+        import_paths: ImportPaths | None = None,
+        mondey_db_path: Path | None = None,
+        current_db_path: Path | None = None,
+        users_db_path: Path | None = None,
+        debug: bool = False,
     ):
         """
         Initialize the DataManager.
@@ -111,8 +113,12 @@ class DataManager:
         self.import_paths = import_paths or ImportPaths.default(script_dir)
 
         # Database paths
-        self.current_db_path = current_db_path or (script_dir / "src/mondey_backend/import_data/current_db/current_mondey.db")
-        self.users_db_path = users_db_path or (script_dir / "src/mondey_backend/import_data/current_db/current_users.db")
+        self.current_db_path = current_db_path or (
+            script_dir / "src/mondey_backend/import_data/current_db/current_mondey.db"
+        )
+        self.users_db_path = users_db_path or (
+            script_dir / "src/mondey_backend/import_data/current_db/current_users.db"
+        )
 
         # Database connections
         self.current_db_url = f"sqlite:////{self.current_db_path}"
@@ -134,7 +140,7 @@ class DataManager:
         """Set up logging configuration."""
         logging.basicConfig(
             level=logging.DEBUG if self.debug else logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         )
 
     # -------------------------------------------------------------------------
@@ -150,7 +156,7 @@ class DataManager:
                 sep=",",
                 encoding="utf-16",
                 encoding_errors="replace",
-                index_col=None
+                index_col=None,
             )
         return self._labels_df
 
@@ -162,44 +168,52 @@ class DataManager:
                 self.import_paths.data_path,
                 sep="\t",
                 encoding="utf-16",
-                encoding_errors="replace"
+                encoding_errors="replace",
             )
         return self._data_df
 
     def load_questions_configured_df(self, force_reload: bool = False) -> pd.DataFrame:
         """Load the questions configured DataFrame."""
         if self._questions_configured_df is None or force_reload:
-            logger.info(f"Loading questions configuration from {self.import_paths.questions_configured_path}")
+            logger.info(
+                f"Loading questions configuration from {self.import_paths.questions_configured_path}"
+            )
             self._questions_configured_df = pd.read_csv(
                 self.import_paths.questions_configured_path,
                 sep=",",
                 encoding="utf-8",
                 dtype=str,
-                encoding_errors="replace"
+                encoding_errors="replace",
             )
-            self._questions_configured_df.columns = self._questions_configured_df.columns.str.strip()
+            self._questions_configured_df.columns = (
+                self._questions_configured_df.columns.str.strip()
+            )
         return self._questions_configured_df
 
     def load_milestones_metadata_df(self, force_reload: bool = False) -> pd.DataFrame:
         """Load the milestones metadata DataFrame."""
         if self._milestones_metadata_df is None or force_reload:
-            logger.info(f"Loading milestones metadata from {self.import_paths.milestones_metadata_path}")
+            logger.info(
+                f"Loading milestones metadata from {self.import_paths.milestones_metadata_path}"
+            )
             self._milestones_metadata_df = pd.read_csv(
-                self.import_paths.milestones_metadata_path,
-                sep="\t",
-                encoding="utf-16"
+                self.import_paths.milestones_metadata_path, sep="\t", encoding="utf-16"
             )
         return self._milestones_metadata_df
 
     def load_additional_data_df(self, force_reload: bool = False) -> pd.DataFrame:
         """Load the additional data DataFrame."""
-        if self._additional_data_df is None or (force_reload and self.import_paths.additional_data_path):
-            logger.info(f"Loading additional data from {self.import_paths.additional_data_path}")
+        if self._additional_data_df is None or (
+            force_reload and self.import_paths.additional_data_path
+        ):
+            logger.info(
+                f"Loading additional data from {self.import_paths.additional_data_path}"
+            )
             self._additional_data_df = pd.read_csv(
                 self.import_paths.additional_data_path,
                 sep="\t",
                 encoding="utf-16",
-                encoding_errors="replace"
+                encoding_errors="replace",
             )
         return self._additional_data_df
 
@@ -215,8 +229,9 @@ class DataManager:
                 detail=f"CSV must contain the following columns: {', '.join(required_columns)}",
             )
 
-    async def save_additional_import_csv_into_dataframe(self, csv_data, csv_file: str):# Define a path for the CSV file
-
+    async def save_additional_import_csv_into_dataframe(
+        self, csv_data, csv_file: str
+    ):  # Define a path for the CSV file
         # Save the CSV data locally
         csv_data.to_csv(csv_file, index=False, sep="\t", encoding="utf-16")
         print(f"CSV saved to {csv_file}")
@@ -229,16 +244,14 @@ class DataManager:
         self.import_paths.additional_data_path = Path(csv_file)
         self.load_additional_data_df(force_reload=True)
 
-
     def cleanup_additional_data_import(self, csv_file):
         os.remove(csv_file)
-
 
     # -------------------------------------------------------------------------
     # Database Session Methods
     # -------------------------------------------------------------------------
 
-    def get_import_session(self, create_tables: bool = False) -> Tuple[Session, Engine]:
+    def get_import_session(self, create_tables: bool = False) -> tuple[Session, Engine]:
         """Get a session for the import database."""
         with Session(self.mondey_engine) as session:
             if create_tables:
@@ -246,7 +259,7 @@ class DataManager:
             return session, self.mondey_engine
 
     # todo: Delete below and cosnolidate. THis and the one above are the same thing!
-    def get_current_session(self) -> Tuple[Session, Engine]:
+    def get_current_session(self) -> tuple[Session, Engine]:
         """Get a session for the current database."""
         with Session(self.current_engine) as session:
             return session, self.current_engine

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import io
+import random
+import string
 
 import pandas as pd
 from fastapi import APIRouter
@@ -15,18 +17,12 @@ from ..dependencies import CurrentActiveResearchDep
 from ..dependencies import ResearchDep
 from ..dependencies import SessionDep
 from ..dependencies import UserAsyncSessionDep
-from ..import_data.align_additional_data_to_current_answers import (
-    align_additional_data_to_current_answers,
-)
 from ..import_data.manager.import_manager import ImportManager
-from ..import_data.remove_duplicate_cases import remove_duplicate_cases
 from ..models.milestones import Milestone
 from ..models.questions import ChildQuestion
 from ..models.questions import UserQuestion
 from ..statistics import extract_research_data
 
-import random
-import string
 
 def create_router() -> APIRouter:
     router = APIRouter(
@@ -86,15 +82,16 @@ def create_router() -> APIRouter:
 
             manager = ImportManager(debug=True)
             manager.data_manager.validate_additional_import_csv(csv_data)
-            random_string = ''.join(random.choices(string.digits, k=10))
+            random_string = "".join(random.choices(string.digits, k=10))
             # Create the filename with the random string
             csv_file = f"temp_uploaded_data_{random_string}.csv"
             try:
-                await manager.data_manager.save_additional_import_csv_into_dataframe(csv_data, csv_file) # this also cleans it up, deleting it.
+                await manager.data_manager.save_additional_import_csv_into_dataframe(
+                    csv_data, csv_file
+                )  # this also cleans it up, deleting it.
                 await manager.run_additional_data_import()
             finally:
                 manager.data_manager.cleanup_additional_data_import(csv_file)
-
 
         except Exception as e:
             print("Error!", e)

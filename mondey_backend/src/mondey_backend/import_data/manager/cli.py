@@ -7,14 +7,12 @@ using the ImportManager class.
 
 import asyncio
 import logging
-import sys
 from pathlib import Path
 
 import click
 
 from mondey_backend.import_data.manager import ImportManager
 from mondey_backend.import_data.manager.import_manager import ImportPaths
-
 from mondey_backend.import_data.remove_duplicate_cases import remove_duplicate_cases
 
 
@@ -43,13 +41,9 @@ def cli(ctx, debug, mondey_db, current_db, users_db):
         level=logging.DEBUG if debug else logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
-    
+
     # Create ImportManager
-    ctx.obj = {
-        "manager": ImportManager(
-            debug=debug
-        )
-    }
+    ctx.obj = {"manager": ImportManager(debug=debug)}
 
 
 @cli.command()
@@ -82,17 +76,21 @@ def cli(ctx, debug, mondey_db, current_db, users_db):
 def full_import(ctx, labels, data, questions, milestones, confirm):
     """Run a full import of all data."""
     manager = ctx.obj["manager"]
-    
+
     # Update paths if provided
     if any([labels, data, questions, milestones]):
         import_paths = ImportPaths(
             labels_path=Path(labels) if labels else manager.import_paths.labels_path,
             data_path=Path(data) if data else manager.import_paths.data_path,
-            questions_configured_path=Path(questions) if questions else manager.import_paths.questions_configured_path,
-            milestones_metadata_path=Path(milestones) if milestones else manager.import_paths.milestones_metadata_path,
+            questions_configured_path=Path(questions)
+            if questions
+            else manager.import_paths.questions_configured_path,
+            milestones_metadata_path=Path(milestones)
+            if milestones
+            else manager.import_paths.milestones_metadata_path,
         )
         manager.import_paths = import_paths
-    
+
     # Confirm before running
     if confirm:
         click.echo("This will import all data into the Mondey system.")
@@ -103,11 +101,11 @@ def full_import(ctx, labels, data, questions, milestones, confirm):
         click.echo(f"Mondey DB: {manager.mondey_db_path}")
         click.echo(f"Current DB: {manager.current_db_path}")
         click.echo(f"Users DB: {manager.users_db_path}")
-        
+
         if not click.confirm("Do you want to continue?"):
             click.echo("Import cancelled.")
             return
-    
+
     # Run import
     asyncio.run(manager.run_full_import())
     click.echo("Import completed successfully.")
@@ -127,7 +125,11 @@ def additional_import(ctx, confirm):
     if click.confirm("Deduplicate the data first? (this will alter your CSV)"):
         click.echo("Deduplicating...")
         session_obj, _ = manager.data_manager.get_import_session()
-        asyncio.run(remove_duplicate_cases(str(manager.data_manager.import_paths.additional_data_path), session_obj))
+        asyncio.run(
+            remove_duplicate_cases(
+                str(manager.data_manager.import_paths.additional_data_path), session_obj
+            )
+        )
         click.echo("Successful Deduplication.")
 
     manager.data_manager.load_additional_data_df()
@@ -136,17 +138,16 @@ def additional_import(ctx, confirm):
     # Confirm before running
     if confirm:
         click.echo("This will import additional data into the Mondey system.")
-        click.echo(f"Additional data: {manager.data_manager.import_paths.additional_data_path}")
+        click.echo(
+            f"Additional data: {manager.data_manager.import_paths.additional_data_path}"
+        )
         click.echo(f"Current DB: {manager.data_manager.current_db_path}")
         click.echo(f"Users DB: {manager.data_manager.users_db_path}")
 
-
-
-        
         if not click.confirm("Do you want to continue?"):
             click.echo("Import cancelled.")
             return
-    
+
     # Run import
     asyncio.run(manager.run_additional_data_import())
     click.echo("Additional data import completed successfully.")

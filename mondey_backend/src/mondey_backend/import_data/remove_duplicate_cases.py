@@ -31,7 +31,7 @@ async def remove_duplicate_cases(
             - The filtered DataFrame with duplicates removed
             - List of CASE IDs that were identified as duplicates and removed
     """
-    output_path = additional_data_path # used to be an option, but was always the same as input, and confusing in the code.
+    output_path = additional_data_path  # used to be an option, but was always the same as input, and confusing in the code.
     additional_data_df = pd.read_csv(
         additional_data_path, sep="\t", encoding="utf-16", encoding_errors="replace"
     )

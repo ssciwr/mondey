@@ -7,44 +7,40 @@ multiple scripts, providing a more maintainable and cohesive approach.
 
 from __future__ import annotations
 
-import asyncio
 import logging
-from dataclasses import dataclass
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 from fastapi_users.db import SQLAlchemyUserDatabase
 from fuzzywuzzy import fuzz
-from sqlalchemy import Engine, MetaData, create_engine, text
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
-from sqlmodel import Session, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import Session
+from sqlmodel import select
 
-from mondey_backend.databases.mondey import create_mondey_db_and_tables_themselves
-from mondey_backend.import_data.postprocessing_corrections.convert_fruhgeboren_data_into_two_questions import parse_weeks
-from mondey_backend.import_data.postprocessing_corrections.run_postprocess_corrections import run_postprocessing_corrections
+from mondey_backend.import_data.manager.data_manager import DataManager
+from mondey_backend.import_data.postprocessing_corrections.convert_fruhgeboren_data_into_two_questions import (
+    parse_weeks,
+)
+from mondey_backend.import_data.postprocessing_corrections.run_postprocess_corrections import (
+    run_postprocessing_corrections,
+)
 from mondey_backend.models.children import Child
-from mondey_backend.models.milestones import (
-    Language,
-    Milestone,
-    MilestoneAnswer,
-    MilestoneAnswerSession,
-    MilestoneText,
-)
-from mondey_backend.models.questions import (
-    ChildAnswer,
-    ChildQuestion,
-    ChildQuestionText,
-    UserAnswer,
-    UserQuestion,
-    UserQuestionText,
-)
+from mondey_backend.models.milestones import Language
+from mondey_backend.models.milestones import Milestone
+from mondey_backend.models.milestones import MilestoneAnswer
+from mondey_backend.models.milestones import MilestoneAnswerSession
+from mondey_backend.models.milestones import MilestoneText
+from mondey_backend.models.questions import ChildAnswer
+from mondey_backend.models.questions import ChildQuestion
+from mondey_backend.models.questions import ChildQuestionText
+from mondey_backend.models.questions import UserAnswer
+from mondey_backend.models.questions import UserQuestion
+from mondey_backend.models.questions import UserQuestionText
 from mondey_backend.models.users import User
 from mondey_backend.models.users import UserCreate
-from mondey_backend.import_data.manager.data_manager import DataManager, ImportPaths
 
 logger = logging.getLogger(__name__)
+
 
 class ImportManager:
     """
@@ -59,10 +55,7 @@ class ImportManager:
     6. Aligning additional data with existing data
     """
 
-    def __init__(
-            self,
-            debug: bool = False
-    ):
+    def __init__(self, debug: bool = False):
         """
         Initialize the ImportManager.
 
@@ -82,13 +75,30 @@ class ImportManager:
 
         # Hardcoded mappings from the original code
         self.birth_year_mapping = {
-            9: 2025, 1: 2024, 2: 2023, 3: 2022, 4: 2021,
-            5: 2020, 6: 2019, 7: 2018, 8: 2017
+            9: 2025,
+            1: 2024,
+            2: 2023,
+            3: 2022,
+            4: 2021,
+            5: 2020,
+            6: 2019,
+            7: 2018,
+            8: 2017,
         }
 
         self.birth_month_mapping = {
-            1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-            7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12
+            1: 1,
+            2: 2,
+            3: 3,
+            4: 4,
+            5: 5,
+            6: 6,
+            7: 7,
+            8: 8,
+            9: 9,
+            10: 10,
+            11: 11,
+            12: 12,
         }
 
         # Milestone group mappings
@@ -106,10 +116,19 @@ class ImportManager:
         self.age_of_birth_questions = ["Geburtsjahr", "Geburtsmonat"]
         self.eltern_questions = ["Mütter", "Väter", "Eltern", "Andere Verwandte"]
         self.eltern_question_variables = ["FP01", "FP02", "FP03", "FP04"]
-        self.specific_fruhgeboren_week_questions = ["Fruhgeboren [01]", "Fruhgeboren? [01]"]
+        self.specific_fruhgeboren_week_questions = [
+            "Fruhgeboren [01]",
+            "Fruhgeboren? [01]",
+        ]
         self.fruhbgeboren_and_teringeboren_variables = ["FK03", "FK04_01"]
-        self.fruhgeboren_questions = [*self.specific_fruhgeboren_week_questions, "Termingeboren"]
-        self.younger_older_sibling_questions = ["Jüngere Geschwister", "Ältere Geschwister"]
+        self.fruhgeboren_questions = [
+            *self.specific_fruhgeboren_week_questions,
+            "Termingeboren",
+        ]
+        self.younger_older_sibling_questions = [
+            "Jüngere Geschwister",
+            "Ältere Geschwister",
+        ]
         self.younger_older_sibling_variables = ["FK08_01", "FK08_02"]
 
         self.andere_diagnosed_question = "Andere Diagnosen: [01]"
@@ -120,8 +139,14 @@ class ImportManager:
         }
 
         self.gesundheit_variables = [
-            "FK05_01", "FK05_02", "FK05_03", "FK05_04",
-            "FK05_05", "FK05_06", "FK05_07", "FK06_01"
+            "FK05_01",
+            "FK05_02",
+            "FK05_03",
+            "FK05_04",
+            "FK05_05",
+            "FK05_06",
+            "FK05_07",
+            "FK06_01",
         ]
 
         self.andere_diagnosen_other_question_variable = "FK06_01"
@@ -137,18 +162,26 @@ class ImportManager:
             *self.fruhbgeboren_and_teringeboren_variables,
             *self.gesundheit_variables,
             self.andere_diagnosen_other_question_variable,
-            "FK07", "FK11", "FK12",
+            "FK07",
+            "FK11",
+            "FK12",
             *self.younger_older_sibling_variables,
         ]
 
         self.relevant_user_variables = [
             *self.eltern_question_variables,
-            "FE08", "FE07", "FE06", "FE04",
+            "FE08",
+            "FE07",
+            "FE06",
+            "FE04",
             self.muttersprache_other_question_variable,
             self.nationality_other_question_variable,
         ]
 
-        self.all_relevant_variables = [*self.relevant_user_variables, *self.relevant_child_variables]
+        self.all_relevant_variables = [
+            *self.relevant_user_variables,
+            *self.relevant_child_variables,
+        ]
 
         self.hardcoded_id_map = {
             # Variable names to the relevant ID...
@@ -190,31 +223,30 @@ class ImportManager:
         """Set up logging configuration."""
         logging.basicConfig(
             level=logging.DEBUG if self.debug else logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         )
 
     def get_question_filled_in_to_parent(
-            self,
-            questions_df: pd.DataFrame,
-            variable: str,
-            debug_print: bool = False
+        self, questions_df: pd.DataFrame, variable: str, debug_print: bool = False
     ) -> bool:
         """Check if a question is filled in by the parent."""
         csv_match = questions_df[questions_df["variable"] == variable]
 
         match_found = not csv_match.empty and str(csv_match.iloc[0]["isToParent"]) in [
-            "true", "ja", "yes"
+            "true",
+            "ja",
+            "yes",
         ]
 
         if debug_print:
-            logger.debug(f"Is to parent variable was: {'True' if match_found else 'False'}")
+            logger.debug(
+                f"Is to parent variable was: {'True' if match_found else 'False'}"
+            )
 
         return match_found
 
     def get_question_filled_in_required(
-            self,
-            questions_df: pd.DataFrame,
-            variable: str
+        self, questions_df: pd.DataFrame, variable: str
     ) -> bool:
         """Check if a question is required."""
         # Original implementation always returns False
@@ -229,17 +261,17 @@ class ImportManager:
 
         if child_result is not None:
             child = child_result[0]
-            logger.debug(f"Found child: {child.id}, {child.name}, parent: {child.user_id}")
+            logger.debug(
+                f"Found child: {child.id}, {child.name}, parent: {child.user_id}"
+            )
             return child.user_id
         else:
             logger.error(f"Child with ID {case_id} not found")
             raise ValueError(f"Child with ID {case_id} not found")
 
     async def check_parent_exists(
-            self,
-            user_session: AsyncSession,
-            case_id: int
-    ) -> Optional[User]:
+        self, user_session: AsyncSession, case_id: int
+    ) -> User | None:
         """Check if a parent exists for a child."""
         email = f"parent_of_{case_id}@artificialimporteddata.csv"
         logger.debug(f"Checking for parent with email: {email}")
@@ -252,9 +284,7 @@ class ImportManager:
         return existing_parent
 
     async def create_parent_for_child(
-            self,
-            user_session: AsyncSession,
-            case_id: int
+        self, user_session: AsyncSession, case_id: int
     ) -> User:
         """Create a parent user for a child."""
         username = f"parent_of_{case_id}"
@@ -282,21 +312,26 @@ class ImportManager:
         user_session.add(user)
         await user_session.flush()
 
-        logger.info(f"Created parent for child ID: {case_id} with email: {user_create.email}")
+        logger.info(
+            f"Created parent for child ID: {case_id} with email: {user_create.email}"
+        )
         return user
 
     async def generate_parents_for_children(
-            self,
-            child_ids: List[int]
-    ) -> Dict[str, int]:
+        self, child_ids: list[int]
+    ) -> dict[str, int]:
         """Generate parents for children."""
         child_parent_map = {}
 
-        async with AsyncSession(self.data_manager.async_users_engine) as user_import_session:
+        async with AsyncSession(
+            self.data_manager.async_users_engine
+        ) as user_import_session:
             user_db = SQLAlchemyUserDatabase(user_import_session, User)
 
             for child_id in child_ids:
-                existing_parent = await self.check_parent_exists(user_import_session, child_id)
+                existing_parent = await self.check_parent_exists(
+                    user_import_session, child_id
+                )
 
                 if existing_parent:
                     child_parent_map[str(child_id)] = existing_parent.id
@@ -314,16 +349,14 @@ class ImportManager:
         return child_parent_map
         # not updating Child.user_id here. Could do that.
 
-    def find_milestone_based_on_label(
-            self,
-            session: Session,
-            label: str
-    ) -> Optional[int]:
+    def find_milestone_based_on_label(self, session: Session, label: str) -> int | None:
         """Find a milestone based on its label."""
         if ":" in label:
             label = label.split(":", 1)[1].lstrip()
 
-        logger.debug(f"Milestone search - using preprocessed label for desc search as: {label}")
+        logger.debug(
+            f"Milestone search - using preprocessed label for desc search as: {label}"
+        )
 
         # Try exact match first
         stmt = select(MilestoneText).where(MilestoneText.desc == label)
@@ -339,8 +372,8 @@ class ImportManager:
             if dasified_label == "Kind erkennt, ob sich zwei Worte reimen oder nicht.":
                 dasified_label = "Kind erkennt, ob sich zwei Worte reimen oder nicht. "
             if (
-                    dasified_label
-                    == "Kind erkennt, wenn Wörter mit dem gleichen Buchstaben beginnen (z.B. Haus/Hose, Brot/Besen, Ampel/Apfel)."
+                dasified_label
+                == "Kind erkennt, wenn Wörter mit dem gleichen Buchstaben beginnen (z.B. Haus/Hose, Brot/Besen, Ampel/Apfel)."
             ):
                 dasified_label = "Kind erkennt, wenn Wörter mit dem gleichen Buchstaben beginnen (z.B. Haus/Hose, Brot/Besen, Ampel/Apfel."
 
@@ -376,10 +409,7 @@ class ImportManager:
         return None
 
     def update_milestone_with_name_property(
-            self,
-            session: Session,
-            milestone_id: int,
-            var: str
+        self, session: Session, milestone_id: int, var: str
     ) -> bool:
         """Update a milestone with a name property."""
         stmt = select(Milestone).where(Milestone.id == milestone_id)
@@ -391,7 +421,9 @@ class ImportManager:
             return True
         return False
 
-    def derive_milestone_group_from_milestone_string_id(self, string_id: str) -> Optional[str]:
+    def derive_milestone_group_from_milestone_string_id(
+        self, string_id: str
+    ) -> str | None:
         """Derive the milestone group from a milestone string ID."""
         if len(string_id) > 2 and string_id[0:2] in self.milestone_group_id_map:
             return self.milestone_group_id_map[string_id[0:2]]
@@ -414,7 +446,7 @@ class ImportManager:
             return False
         return len(label) > 10
 
-    def extract_milestone_prefix(self, text: str) -> Optional[str]:
+    def extract_milestone_prefix(self, text: str) -> str | None:
         """Extract the prefix from a milestone title."""
         if ":" in text:
             return text.split(":", 1)[0].strip()
@@ -427,14 +459,14 @@ class ImportManager:
         return text.strip()
 
     def create_answer(
-            self,
-            session: Session,
-            user_or_child_id: int,
-            question_id: int,
-            answer_text: str,
-            set_only_additional_answer: bool = False,
-            is_child_question: bool = True
-    ) -> Tuple[bool, Union[ChildAnswer, UserAnswer]]:
+        self,
+        session: Session,
+        user_or_child_id: int,
+        question_id: int,
+        answer_text: str,
+        set_only_additional_answer: bool = False,
+        is_child_question: bool = True,
+    ) -> tuple[bool, ChildAnswer | UserAnswer]:
         """Create an answer for a question."""
         logger.debug(f"Creating answer for question {question_id}: {answer_text}")
         logger.debug(f"{'Child question' if is_child_question else 'User question'}")
@@ -476,12 +508,12 @@ class ImportManager:
         return variable in self.all_relevant_variables
 
     def process_special_answer(
-            self,
-            session: Session,
-            question_label: str,
-            answer: str,
-            variable: str,
-            child_id: int
+        self,
+        session: Session,
+        question_label: str,
+        answer: str,
+        variable: str,
+        child_id: int,
     ) -> bool:
         """
         Process special answers that need custom handling.
@@ -506,7 +538,9 @@ class ImportManager:
             )
 
             eltern_question_special_id = 13
-            logger.debug(f"Using special Eltern question ID: {eltern_question_special_id}")
+            logger.debug(
+                f"Using special Eltern question ID: {eltern_question_special_id}"
+            )
 
             if answer is not None and len(answer) > 0:
                 # Save parent answer for this question, only if it was actually filled out
@@ -564,7 +598,9 @@ class ImportManager:
                 session,
                 user_or_child_id=child_id,
                 question_id=relevant_question_id,
-                answer_text=answer if answer is not None and len(str(answer)) > 0 else "0",
+                answer_text=answer
+                if answer is not None and len(str(answer)) > 0
+                else "0",
                 set_only_additional_answer=False,
                 is_child_question=True,
             )
@@ -609,9 +645,9 @@ class ImportManager:
 
             # Check if this is an affix group
             if (
-                    isinstance(question, str)
-                    and question.startswith("__")
-                    and question.endswith("__")
+                isinstance(question, str)
+                and question.startswith("__")
+                and question.endswith("__")
             ):
                 affix = question.removeprefix("__").removesuffix("__")
                 if affix not in affix_groups:
@@ -626,7 +662,9 @@ class ImportManager:
             if not self.is_milestone(row):
                 continue
 
-            derived_milestone_group = self.derive_milestone_group_from_milestone_string_id(var)
+            derived_milestone_group = (
+                self.derive_milestone_group_from_milestone_string_id(var)
+            )
 
             # Get the prefix from the label
             prefix = self.extract_milestone_prefix(label)
@@ -648,7 +686,9 @@ class ImportManager:
 
         # Update milestones with name property
         missing = 0
-        for _order, (_prefix, milestones) in enumerate(milestone_groups.items(), start=1):
+        for _order, (_prefix, milestones) in enumerate(
+            milestone_groups.items(), start=1
+        ):
             for _milestone_order, (var, label) in enumerate(milestones, start=1):
                 milestone_id = self.find_milestone_based_on_label(session, label)
 
@@ -670,7 +710,9 @@ class ImportManager:
             f"milestones in {len(milestone_groups)} groups"
         )
 
-    async def import_children_with_milestone_data(self, session: Session, data_df) -> None:
+    async def import_children_with_milestone_data(
+        self, session: Session, data_df
+    ) -> None:
         """Import children with milestone data."""
         logger.info("Importing children with milestone data")
 
@@ -697,7 +739,9 @@ class ImportManager:
             child_id = row["CASE"]
 
             if str(row["FK01"]) == "-9" or str(row["FK02"]) == "-9":
-                logger.warning(f"Skipping child {child_id} who is missing essential birth month/year data")
+                logger.warning(
+                    f"Skipping child {child_id} who is missing essential birth month/year data"
+                )
                 continue
 
             # Get parent ID
@@ -733,7 +777,12 @@ class ImportManager:
                     answer_value = row[column]
 
                     # Skip if not answered
-                    if answer_value == "-9" or answer_value == "" or pd.isna(answer_value) or str(answer_value).lower() == "nan":
+                    if (
+                        answer_value == "-9"
+                        or answer_value == ""
+                        or pd.isna(answer_value)
+                        or str(answer_value).lower() == "nan"
+                    ):
                         continue
 
                     # Convert and adjust answer
@@ -746,7 +795,9 @@ class ImportManager:
                             milestone_answer = MilestoneAnswer(
                                 answer_session_id=answer_session.id,
                                 milestone_id=milestone_id,
-                                milestone_group_id=self.milestone_group_mapping.get(milestone_id),
+                                milestone_group_id=self.milestone_group_mapping.get(
+                                    milestone_id
+                                ),
                                 answer=adjusted_answer,
                             )
                             session.add(milestone_answer)
@@ -772,7 +823,9 @@ class ImportManager:
         previous_variable_label = None
         processed_variables = set()
 
-        for _, label_row in labels_df.groupby("Variable").first().reset_index().iterrows():
+        for _, label_row in (
+            labels_df.groupby("Variable").first().reset_index().iterrows()
+        ):
             variable = label_row["Variable"]
 
             # Skip if already processed
@@ -787,8 +840,8 @@ class ImportManager:
 
             # Handle different variable types
             if (
-                    (variable_type == "NOMINAL" or variable_type == "ORDINAL")
-                    and input_type == "MC"
+                (variable_type == "NOMINAL" or variable_type == "ORDINAL")
+                and input_type == "MC"
             ) or (variable_type == "DICHOTOMOUS" and input_type == "CK"):
                 # Multiple Choice Question
                 options = labels_df[labels_df["Variable"] == variable]
@@ -818,6 +871,7 @@ class ImportManager:
                     options_display.append(escaped_label)
 
                 import json
+
                 options_json = json.dumps(prepared_options)
                 options_str = ";".join(options_display)
 
@@ -855,7 +909,9 @@ class ImportManager:
                 else:
                     # Check for existing ChildQuestion
                     existing_question = session.execute(
-                        select(ChildQuestion).where(ChildQuestion.name == variable_label)
+                        select(ChildQuestion).where(
+                            ChildQuestion.name == variable_label
+                        )
                     ).scalar_one_or_none()
 
                     if not existing_question:
@@ -882,14 +938,16 @@ class ImportManager:
             elif variable_type == "TEXT" and input_type == "TXT":
                 # Check if this is an 'Andere' option for a previous question
                 if (
-                        type(variable_label) is str
-                        and ": [01]" in variable_label
-                        and (
+                    type(variable_label) is str
+                    and ": [01]" in variable_label
+                    and (
                         previous_variable_label
                         and f"{previous_variable_label}: [01]" in variable_label
-                )
+                    )
                 ):
-                    logger.debug("Not creating question for this Other option - its free text response will be merged")
+                    logger.debug(
+                        "Not creating question for this Other option - its free text response will be merged"
+                    )
                     continue
 
                 # Independent free text question
@@ -927,7 +985,9 @@ class ImportManager:
                 else:
                     # Check for existing ChildQuestion
                     existing_question = session.execute(
-                        select(ChildQuestion).where(ChildQuestion.name == variable_label)
+                        select(ChildQuestion).where(
+                            ChildQuestion.name == variable_label
+                        )
                     ).scalar_one_or_none()
 
                     if not existing_question:
@@ -981,7 +1041,9 @@ class ImportManager:
         for _, child_row in data_df.iterrows():
             logger.debug(f"Processing child {child_row.get('CASE')}")
 
-            for _, label_row in labels_df.groupby("Variable").first().reset_index().iterrows():
+            for _, label_row in (
+                labels_df.groupby("Variable").first().reset_index().iterrows()
+            ):
                 db_child_id = child_case_to_id_map[str(child_row.get("CASE"))]
                 variable_type = label_row["Variable Type"]
                 variable = label_row["Variable"]
@@ -1005,7 +1067,7 @@ class ImportManager:
                     response_label = labels_df[
                         (labels_df["Variable"] == variable)
                         & (labels_df["Response Code"] == response)
-                        ]
+                    ]
 
                     if response_label.empty:
                         continue  # No data entered
@@ -1013,9 +1075,9 @@ class ImportManager:
                     answer = (
                         response_label.iloc[0]["Response Label"]
                         if (
-                                variable_type == "NOMINAL"
-                                or variable_type == "ORDINAL"
-                                or variable_type == "DICHOTOMOUS"
+                            variable_type == "NOMINAL"
+                            or variable_type == "ORDINAL"
+                            or variable_type == "DICHOTOMOUS"
                         )
                         else response_label
                     )
@@ -1045,7 +1107,9 @@ class ImportManager:
                 )
 
                 question = session.exec(
-                    child_query if variable in self.relevant_child_variables else user_query
+                    child_query
+                    if variable in self.relevant_child_variables
+                    else user_query
                 ).first()
 
                 if not question:
@@ -1058,22 +1122,26 @@ class ImportManager:
 
                 # Handle Multiple Choice
                 if (
-                        variable_type == "NOMINAL"
-                        or variable_type == "ORDINAL"
-                        or variable_type == "DICHOTOMOUS"
+                    variable_type == "NOMINAL"
+                    or variable_type == "ORDINAL"
+                    or variable_type == "DICHOTOMOUS"
                 ):
                     response_label = labels_df[
                         (labels_df["Variable"] == variable)
                         & (labels_df["Response Code"] == response)
-                        ]
+                    ]
 
                     if not response_label.empty:
                         answer_text = response_label.iloc[0]["Response Label"]
 
                         # Check if question is for parent or child
-                        if self.get_question_filled_in_to_parent(questions_configured_df, variable):
+                        if self.get_question_filled_in_to_parent(
+                            questions_configured_df, variable
+                        ):
                             # Create user answer
-                            parent_id = self.get_childs_parent_id(session, child_row.get("CASE"))
+                            parent_id = self.get_childs_parent_id(
+                                session, child_row.get("CASE")
+                            )
                             _, answer = self.create_answer(
                                 session,
                                 user_or_child_id=parent_id,
@@ -1100,21 +1168,29 @@ class ImportManager:
                 elif variable_type == "TEXT":
                     # Check if this is an 'Andere' option for a previous question
                     if " [01]" in variable_label and "Andere" in variable_label:
-                        logger.debug(f"Free text Andere triggered! {variable}, {variable_label}")
+                        logger.debug(
+                            f"Free text Andere triggered! {variable}, {variable_label}"
+                        )
                         set_only_additional_answer = True
 
                     response = child_row.get(preserved_freetext_lookup_key)
                     answer_text = str(response)
 
                     # Skip if 'nan' or None for additional answers
-                    if set_only_additional_answer and (answer_text == "nan" or answer_text is None):
+                    if set_only_additional_answer and (
+                        answer_text == "nan" or answer_text is None
+                    ):
                         logger.debug("Skipping save due to 'nan' additional answer")
                         continue
 
                     # Check if question is for parent or child
-                    if self.get_question_filled_in_to_parent(questions_configured_df, variable):
+                    if self.get_question_filled_in_to_parent(
+                        questions_configured_df, variable
+                    ):
                         # Create user answer
-                        parent_id = self.get_childs_parent_id(session, child_row.get("CASE"))
+                        parent_id = self.get_childs_parent_id(
+                            session, child_row.get("CASE")
+                        )
                         _, answer = self.create_answer(
                             session,
                             user_or_child_id=parent_id,
@@ -1138,7 +1214,9 @@ class ImportManager:
                     session.add(answer)
 
                 else:
-                    logger.warning(f"Variable type has no clear processing method: {variable_type}, {variable_label}")
+                    logger.warning(
+                        f"Variable type has no clear processing method: {variable_type}, {variable_label}"
+                    )
                     missing += 1
 
         session.commit()
@@ -1163,8 +1241,7 @@ class ImportManager:
 
         # Run post-processing corrections
         run_postprocessing_corrections(
-            str(self.data_manager.import_paths.additional_data_path),
-            dry_run=False
+            str(self.data_manager.import_paths.additional_data_path), dry_run=False
         )
 
         logger.info("Additional data imported successfully")
