@@ -18,12 +18,10 @@ from sqlmodel import Session
 from sqlmodel import select
 
 from mondey_backend.import_data.manager.data_manager import DataManager
-from mondey_backend.import_data.postprocessing_corrections.convert_fruhgeboren_data_into_two_questions import (
-    parse_weeks,
-)
 from mondey_backend.import_data.postprocessing_corrections.run_postprocess_corrections import (
     run_postprocessing_corrections,
 )
+from mondey_backend.import_data.utils import parse_weeks
 from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Language
 from mondey_backend.models.milestones import Milestone

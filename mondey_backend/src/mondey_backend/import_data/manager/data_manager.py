@@ -27,7 +27,8 @@ from sqlmodel import Session
 
 from mondey_backend.databases.mondey import create_mondey_db_and_tables_themselves
 from mondey_backend.import_data.remove_duplicate_cases import remove_duplicate_cases
-from mondey_backend.src.mondey_backend.settings import app_settings
+
+from ...settings import app_settings
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +67,8 @@ class ImportPaths:
     def default(cls, base_dir: Path | None = None) -> ImportPaths:
         """Create default ImportPaths."""
         import_dir = app_settings.PRIVATE_FILES_PATH
+
+        import_dir = Path(import_dir)
 
         return cls(
             labels_path=import_dir / "labels_encoded.csv",
