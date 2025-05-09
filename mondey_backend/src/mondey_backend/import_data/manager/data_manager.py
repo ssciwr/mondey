@@ -12,7 +12,10 @@ Splitting it this way makes it a lot more readable
 from __future__ import annotations
 
 import logging
+import os
 from dataclasses import dataclass
+from http.client import HTTPException
+from fastapi import status
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -24,6 +27,8 @@ from sqlmodel import Session
 
 from mondey_backend.databases.mondey import create_mondey_db_and_tables_themselves
 from mondey_backend.models.users import User
+
+from mondey_backend.import_data.remove_duplicate_cases import remove_duplicate_cases
 
 logger = logging.getLogger(__name__)
 
@@ -106,18 +111,16 @@ class DataManager:
         self.import_paths = import_paths or ImportPaths.default(script_dir)
 
         # Database paths
-        self.mondey_db_path = mondey_db_path or (script_dir / "src/mondey_backend/import_data/db/mondey.db")
         self.current_db_path = current_db_path or (script_dir / "src/mondey_backend/import_data/current_db/current_mondey.db")
         self.users_db_path = users_db_path or (script_dir / "src/mondey_backend/import_data/current_db/current_users.db")
 
         # Database connections
-        self.mondey_db_url = f"sqlite:////{self.mondey_db_path}"
         self.current_db_url = f"sqlite:////{self.current_db_path}"
         self.users_db_url = f"sqlite+aiosqlite:///{self.users_db_path}"
 
         # Create engines
-        self.mondey_engine = create_engine(self.mondey_db_url)
-        self.current_engine = create_engine(self.current_db_url)
+        self.mondey_engine = create_engine(self.current_db_url)
+        self.current_engine = self.mondey_engine
         self.async_users_engine = create_async_engine(self.users_db_url)
 
         # Cached data
@@ -190,7 +193,7 @@ class DataManager:
 
     def load_additional_data_df(self, force_reload: bool = False) -> pd.DataFrame:
         """Load the additional data DataFrame."""
-        if self._additional_data_df is None or force_reload and self.import_paths.additional_data_path:
+        if self._additional_data_df is None or (force_reload and self.import_paths.additional_data_path):
             logger.info(f"Loading additional data from {self.import_paths.additional_data_path}")
             self._additional_data_df = pd.read_csv(
                 self.import_paths.additional_data_path,
@@ -199,6 +202,37 @@ class DataManager:
                 encoding_errors="replace"
             )
         return self._additional_data_df
+
+    # -------------------------------------------------------------------------
+    # Additional Data Import methods
+    # -------------------------------------------------------------------------
+
+    def validate_additional_import_csv(self, csv_data):
+        required_columns = ["FK05", "CASE"]
+        if not all(column in csv_data.columns for column in required_columns):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"CSV must contain the following columns: {', '.join(required_columns)}",
+            )
+
+    async def save_additional_import_csv_into_dataframe(self, csv_data, csv_file: str):# Define a path for the CSV file
+
+        # Save the CSV data locally
+        csv_data.to_csv(csv_file, index=False, sep="\t", encoding="utf-16")
+        print(f"CSV saved to {csv_file}")
+
+        import_session, _ = self.get_import_session()
+
+        await remove_duplicate_cases(csv_file, import_session)
+        print("Removed duplicates before processing")
+
+        self.import_paths.additional_data_path = Path(csv_file)
+        self.load_additional_data_df(force_reload=True)
+
+
+    def cleanup_additional_data_import(self, csv_file):
+        os.remove(csv_file)
+
 
     # -------------------------------------------------------------------------
     # Database Session Methods
@@ -211,6 +245,7 @@ class DataManager:
                 create_mondey_db_and_tables_themselves(self.mondey_engine)
             return session, self.mondey_engine
 
+    # todo: Delete below and cosnolidate. THis and the one above are the same thing!
     def get_current_session(self) -> Tuple[Session, Engine]:
         """Get a session for the current database."""
         with Session(self.current_engine) as session:

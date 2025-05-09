@@ -18,12 +18,15 @@ from ..dependencies import UserAsyncSessionDep
 from ..import_data.align_additional_data_to_current_answers import (
     align_additional_data_to_current_answers,
 )
+from ..import_data.manager.import_manager import ImportManager
 from ..import_data.remove_duplicate_cases import remove_duplicate_cases
 from ..models.milestones import Milestone
 from ..models.questions import ChildQuestion
 from ..models.questions import UserQuestion
 from ..statistics import extract_research_data
 
+import random
+import string
 
 def create_router() -> APIRouter:
     router = APIRouter(
@@ -81,53 +84,17 @@ def create_router() -> APIRouter:
                 encoding_errors="replace",
             )
 
-            print("Read file.")
-
-            # Check for required columns
-            required_columns = ["FK05", "CASE"]
-            if not all(column in csv_data.columns for column in required_columns):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"CSV must contain the following columns: {', '.join(required_columns)}",
-                )
-
-            # Define a path for the CSV file
-            csv_file = "temp_uploaded_data.csv"
-
-            # Save the CSV data locally
+            manager = ImportManager(debug=True)
+            manager.data_manager.validate_additional_import_csv(csv_data)
+            random_string = ''.join(random.choices(string.digits, k=10))
+            # Create the filename with the random string
+            csv_file = f"temp_uploaded_data_{random_string}.csv"
             try:
-                csv_data.to_csv(csv_file, index=False, sep="\t", encoding="utf-16")
-                print(f"CSV saved to {csv_file}")
-
-                await remove_duplicate_cases(csv_file, session, csv_file)
-                print("Removed duplicates before processing")
-
-                # Process the CSV data
-                # todo: This path solution is ugly
-                await align_additional_data_to_current_answers(
-                    data_path=csv_file,
-                    labelling_path="src/mondey_backend/import_data/labels_encoded.csv",
-                    questions_configuration_path="src/mondey_backend/import_data/questions_specified.csv",
-                )
-                # if it errors, it will go through to the throw 400 error block.
-                print("Finished adding additional data")
-
-                return {
-                    "status": "success",
-                    "message": "CSV data successfully imported",
-                }
-
+                await manager.data_manager.save_additional_import_csv_into_dataframe(csv_data, csv_file) # this also cleans it up, deleting it.
+                await manager.run_additional_data_import()
             finally:
-                try:
-                    import os
+                manager.data_manager.cleanup_additional_data_import(csv_file)
 
-                    if "csv_file" in locals() and os.path.exists(csv_file):
-                        os.remove(csv_file)
-                        print(f"Cleanup - deleted the temporary CSV file: {csv_file}")
-                except Exception as cleanup_error:
-                    print(
-                        f"Warning: Failed to delete temporary CSV file: {str(cleanup_error)}"
-                    )
 
         except Exception as e:
             print("Error!", e)

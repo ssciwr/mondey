@@ -15,6 +15,8 @@ import click
 from mondey_backend.import_data.manager import ImportManager
 from mondey_backend.import_data.manager.import_manager import ImportPaths
 
+from mondey_backend.import_data.remove_duplicate_cases import remove_duplicate_cases
+
 
 @click.group()
 @click.option("--debug/--no-debug", default=False, help="Enable debug logging")
@@ -45,10 +47,7 @@ def cli(ctx, debug, mondey_db, current_db, users_db):
     # Create ImportManager
     ctx.obj = {
         "manager": ImportManager(
-            mondey_db_path=Path(mondey_db) if mondey_db else None,
-            current_db_path=Path(current_db) if current_db else None,
-            users_db_path=Path(users_db) if users_db else None,
-            debug=debug,
+            debug=debug
         )
     }
 
@@ -116,30 +115,33 @@ def full_import(ctx, labels, data, questions, milestones, confirm):
 
 @cli.command()
 @click.option(
-    "--additional-data",
-    type=click.Path(exists=True),
-    required=True,
-    help="Path to the additional data CSV file",
-)
-@click.option(
     "--confirm/--no-confirm",
     default=True,
     help="Confirm before running import",
 )
 @click.pass_context
-def additional_import(ctx, additional_data, confirm):
+def additional_import(ctx, confirm):
     """Run import of additional data."""
     manager = ctx.obj["manager"]
-    
-    # Update additional data path
-    manager.import_paths.additional_data_path = Path(additional_data)
-    
+
+    if click.confirm("Deduplicate the data first? (this will alter your CSV)"):
+        click.echo("Deduplicating...")
+        session_obj, _ = manager.data_manager.get_import_session()
+        asyncio.run(remove_duplicate_cases(str(manager.data_manager.import_paths.additional_data_path), session_obj))
+        click.echo("Successful Deduplication.")
+
+    manager.data_manager.load_additional_data_df()
+    click.echo("Additional data ready.")
+
     # Confirm before running
     if confirm:
         click.echo("This will import additional data into the Mondey system.")
-        click.echo(f"Additional data: {manager.import_paths.additional_data_path}")
-        click.echo(f"Current DB: {manager.current_db_path}")
-        click.echo(f"Users DB: {manager.users_db_path}")
+        click.echo(f"Additional data: {manager.data_manager.import_paths.additional_data_path}")
+        click.echo(f"Current DB: {manager.data_manager.current_db_path}")
+        click.echo(f"Users DB: {manager.data_manager.users_db_path}")
+
+
+
         
         if not click.confirm("Do you want to continue?"):
             click.echo("Import cancelled.")

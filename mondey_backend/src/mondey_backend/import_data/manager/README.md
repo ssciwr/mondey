@@ -2,19 +2,12 @@
 
 The Import Manager is a centralized system for handling data import operations in the Mondey backend.
 
+It contains a data_manager which covers just the database/file path/validation of CSV work, to have a clearer separation
+of concerns.
+
 *This has been AI generated on the first path as a refactoring of the dispersed function-based import code that existed
 before.*
 
-## Overview
-
-This module provides a more maintainable and cohesive approach to importing data, replacing the previous system that was spread across multiple scripts. It handles:
-
-1. Loading and parsing CSV data
-2. Creating and managing database connections
-3. Importing milestones metadata
-4. Importing children with milestone data
-5. Importing question/answer data
-6. Aligning additional data with existing data
 
 ## Usage
 
@@ -52,44 +45,6 @@ asyncio.run(manager.run_additional_data_import())
 # Clear users database
 asyncio.run(manager.clear_users_database())
 ```
-
-## Configuration
-
-The Import Manager can be configured with custom paths for data files and databases:
-
-```python
-from pathlib import Path
-from mondey_backend.import_data.manager import ImportManager
-from mondey_backend.import_data.manager.import_manager import ImportPaths
-
-# Create custom import paths
-import_paths = ImportPaths(
-    labels_path=Path("path/to/labels.csv"),
-    data_path=Path("path/to/data.csv"),
-    questions_configured_path=Path("path/to/questions.csv"),
-    milestones_metadata_path=Path("path/to/milestones.csv"),
-    additional_data_path=Path("path/to/additional_data.csv")
-)
-
-# Create ImportManager with custom paths
-manager = ImportManager(
-    import_paths=import_paths,
-    mondey_db_path=Path("path/to/mondey.db"),
-    current_db_path=Path("path/to/current.db"),
-    users_db_path=Path("path/to/users.db"),
-    debug=True
-)
-```
-
-## Benefits Over Previous Implementation
-
-1. **Centralized Management**: All import functionality is now managed through a single class.
-2. **Improved Error Handling**: Better logging and error handling throughout the import process.
-3. **Dependency Injection**: Database sessions are passed to methods rather than created within them.
-4. **Data Flow**: DataFrames are passed between methods instead of file paths.
-5. **Configuration**: Flexible configuration options for paths and settings.
-6. **CLI Interface**: Easy-to-use command-line interface for running import operations.
-7. **Hardcoded Mappings**: All hardcoded mappings and special case handling are centralized in the ImportManager class.
 
 ## Hardcoded Mappings
 

@@ -13,7 +13,7 @@ from mondey_backend.models.children import Child
 
 
 async def remove_duplicate_cases(
-    additional_data_path: str, session: Session, output_path: str | None = None
+    additional_data_path: str, session: Session
 ) -> tuple[pd.DataFrame, list[str]]:
     """
     Remove duplicate cases from the additional data CSV.
@@ -31,6 +31,7 @@ async def remove_duplicate_cases(
             - The filtered DataFrame with duplicates removed
             - List of CASE IDs that were identified as duplicates and removed
     """
+    output_path = additional_data_path # used to be an option, but was always the same as input, and confusing in the code.
     additional_data_df = pd.read_csv(
         additional_data_path, sep="\t", encoding="utf-16", encoding_errors="replace"
     )
@@ -46,6 +47,7 @@ async def remove_duplicate_cases(
         for case_id in case_ids:
             # Check if a child with this CASE ID exists in the database
             imported_child_name = f"Imported Child {case_id}"
+            print("Looked up: ", imported_child_name)
             existing_child = session.exec(
                 select(Child).where(col(Child.name) == imported_child_name)
             ).first()
