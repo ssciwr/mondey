@@ -33,7 +33,7 @@ def test_get_child_fail(
     assert response.status_code == 404
 
 
-def test_get_children(
+def test_get_children_of_user(
     user_client: TestClient, children: list[dict[str, str | bool | int]]
 ):
     response = user_client.get("/users/children/")
@@ -42,16 +42,30 @@ def test_get_children(
     for child, response_child in zip(children, response.json(), strict=False):
         for key, value in child.items():
             assert response_child[key] == value
+        # both children have no active session
+        # (child 1 answered all the milestones in their only session so it is completed, child 2 has no sessions at all)
+        assert response.json()[0]["active_answer_session"] is False
 
-    # child 1 has an active session and has answered all milestones
-    assert response.json()[0]["active_answer_session"] is True
-    assert response.json()[0]["session_progress"] == pytest.approx(1.0)
-    assert response.json()[0]["session_remaining_seconds"] > 0
+    # create a new session for both children
+    for child_id in [1, 2]:
+        assert (
+            user_client.get(f"/users/milestone-answers/{child_id}").status_code == 200
+        )
 
-    # child 2 has no active session
-    assert response.json()[1]["active_answer_session"] is False
-    assert response.json()[1]["session_progress"] == pytest.approx(0.0)
-    assert response.json()[1]["session_remaining_seconds"] == 0
+    response = user_client.get("/users/children/")
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+
+    for child, response_child in zip(children, response.json(), strict=False):
+        for key, value in child.items():
+            assert response_child[key] == value
+        # both children now have an active session with zero progress and approx 14 days remaining
+        assert response.json()[0]["active_answer_session"] is True
+        assert response.json()[0]["session_progress"] == pytest.approx(0.0)
+        seconds_in_a_day = 60 * 60 * 24
+        assert response.json()[0][
+            "session_remaining_seconds"
+        ] / seconds_in_a_day == pytest.approx(14)
 
 
 def test_get_children_no_children(research_client: TestClient):
