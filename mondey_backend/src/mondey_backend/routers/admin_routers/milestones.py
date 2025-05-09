@@ -258,9 +258,8 @@ def create_router() -> APIRouter:
     def get_milestone_answer_sessions(
         session: SessionDep,
     ) -> Sequence[MilestoneAnswerSession]:
-        return session.exec(
-            select(MilestoneAnswerSession).where(col(MilestoneAnswerSession.expired))
-        ).all()
+        milestone_answer_sessions = session.exec(select(MilestoneAnswerSession)).all()
+        return milestone_answer_sessions
 
     @router.post("/milestone-answer-sessions/{answer_session_id}")
     def modify_milestone_answer_session(

@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 import pathlib
 
+import numpy as np
 import pytest
 import pytest_asyncio
 from dateutil.relativedelta import relativedelta
@@ -257,7 +258,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             session.add(Child.model_validate(child, update={"user_id": user_id}))
         today = datetime.datetime.today()
         last_month = today - relativedelta(months=1)
-        # add an (expired) milestone answer session for child 1 / user (id 3) with 2 answers
+        # expired, completed, included in stats milestone answer session for child 1 / user (id 3) with 2 answers
         session.add(
             MilestoneAnswerSession(
                 id=1,
@@ -265,6 +266,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 user_id=3,
                 created_at=datetime.datetime(last_month.year, last_month.month, 15),
                 expired=True,
+                completed=True,
                 included_in_statistics=True,
                 suspicious=False,
             )
@@ -285,14 +287,15 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 answer=0,
             )
         )
-        # add another (unexpired but old, not yet included in stats) milestone answer session for child 1 / user (id 3) with 2 answers to the same questions
+        # expired, completed, not yet included in stats milestone answer session for child 1 / user (id 3) with 2 answers to the same questions
         session.add(
             MilestoneAnswerSession(
                 id=2,
                 child_id=1,
                 user_id=3,
                 created_at=datetime.datetime(last_month.year, last_month.month, 20),
-                expired=False,
+                completed=True,
+                expired=True,
                 included_in_statistics=False,
                 suspicious=False,
             )
@@ -308,14 +311,15 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 answer_session_id=2, milestone_id=2, milestone_group_id=1, answer=1
             )
         )
-        # add an (un-expired) milestone answer session for child 3 / admin user (id 1) with 1 answer
+        # un-expired, completed milestone answer session for child 3 / admin user (id 1) with 1 answer
         session.add(
             MilestoneAnswerSession(
                 id=3,
                 child_id=3,
                 user_id=1,
                 created_at=datetime.datetime.today(),
-                expired=False,
+                completed=True,
+                expired=True,
                 included_in_statistics=False,
                 suspicious=False,
             )
@@ -328,13 +332,78 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 answer=2,
             )
         )
-        # add an (expired) milestone answer session for child 4 / test account user (id 5) with 2 answers
+        # un-expired, incompleted milestone answer session for child 3 / admin user (id 1) with 1 missing answer
+        session.add(
+            MilestoneAnswerSession(
+                id=6,
+                child_id=3,
+                user_id=1,
+                created_at=datetime.datetime.today(),
+                completed=False,
+                expired=False,
+                included_in_statistics=False,
+                suspicious=False,
+            )
+        )
+        session.add(
+            MilestoneAnswer(
+                answer_session_id=6,
+                milestone_id=5,
+                milestone_group_id=2,
+                answer=-1,
+            )
+        )
+        # expired, completed, not included in stats milestoneanswersession for milestones 1, 2 for child 1
+        session.add(
+            MilestoneAnswerSession(
+                id=4,
+                child_id=1,
+                user_id=3,
+                created_at=datetime.datetime(last_month.year, last_month.month, 20),
+                completed=True,
+                expired=True,
+                included_in_statistics=False,
+                suspicious=False,
+            )
+        )
+        session.add(
+            MilestoneAnswer(
+                answer_session_id=4, milestone_id=1, milestone_group_id=1, answer=2
+            )
+        )
+        session.add(
+            MilestoneAnswer(
+                answer_session_id=4, milestone_id=2, milestone_group_id=1, answer=0
+            )
+        )
+
+        # expired, incomplete, not included in stats answersession for child 3 with answers for milestone 7 & 8, 1 year ago
+        session.add(
+            MilestoneAnswerSession(
+                id=5,
+                child_id=3,
+                user_id=1,
+                created_at=datetime.datetime(today.year - 1, today.month, 10),
+                completed=False,
+                expired=True,
+                included_in_statistics=False,
+                suspicious=False,
+            )
+        )
+        session.add(
+            MilestoneAnswer(
+                answer_session_id=5, milestone_id=5, milestone_group_id=2, answer=-1
+            )
+        )
+
+        # expired, completed, included in stats milestone answer session for child 4 / test account user (id 5) with 2 answers
         session.add(
             MilestoneAnswerSession(
                 id=99,
                 child_id=4,
                 user_id=5,
                 created_at=datetime.datetime(last_month.year, last_month.month, 15),
+                completed=True,
                 expired=True,
                 included_in_statistics=True,
                 suspicious=False,
@@ -356,6 +425,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 answer=0,
             )
         )
+
         # add MilestoneAgeScoreCollection for milestone 1
         session.add(
             MilestoneAgeScoreCollection(
@@ -376,7 +446,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                     count=1 if age == 8 else 0,
                     avg_score=1.0 if age == 8 else 0,
                     stddev_score=0.0,
-                    expected_score=2 if age >= 8 else 0,
                 )
             )
 
@@ -400,7 +469,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                     count=1 if age == 8 else 0,
                     avg_score=0.0 if age == 8 else 0,
                     stddev_score=0.0,
-                    expected_score=2 if age >= 8 else 0,
                 )
             )
 
@@ -415,16 +483,26 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 ),
             )
         )
+        age_8_milestone_group1_scores = (
+            1,
+            0,
+            0,
+        )  # answers for milestone 1,2,3 from answer session 1 (#3 is imputed)
         for age in range(0, 73):
             session.add(
                 MilestoneGroupAgeScore(
                     age=age,
                     milestone_group_id=1,
-                    count=2 if age == 8 else 0,
-                    avg_score=0.5 if age == 8 else 0.0,
-                    stddev_score=0.5 if age == 8 else 0.0,
+                    count=3 if age == 8 else 0,
+                    avg_score=np.mean(age_8_milestone_group1_scores)
+                    if age == 8
+                    else 0.0,
+                    stddev_score=np.std(age_8_milestone_group1_scores)
+                    if age == 8
+                    else 0.0,
                 )
             )
+
         # add a research group (that user with id 3 is part of, and researcher with id 2 has access to)
         session.add(ResearchGroup(id="123451"))
         # add user questions for admin
@@ -667,57 +745,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         )
         session.commit()
         yield session
-
-
-@pytest.fixture
-def statistics_session(session):
-    today = datetime.datetime.today()
-    last_month = today - relativedelta(months=1)
-
-    # add another expired milestoneanswersession for milestones 1, 2 for child
-    # this answersession is not part of the statistics yet
-    session.add(
-        MilestoneAnswerSession(
-            id=4,
-            child_id=1,
-            user_id=3,
-            created_at=datetime.datetime(last_month.year, last_month.month, 20),
-            expired=True,
-            included_in_statistics=False,
-            suspicious=False,
-        )
-    )
-    session.add(
-        MilestoneAnswer(
-            answer_session_id=4, milestone_id=1, milestone_group_id=1, answer=2
-        )
-    )
-    session.add(
-        MilestoneAnswer(
-            answer_session_id=4, milestone_id=2, milestone_group_id=1, answer=0
-        )
-    )
-
-    # add an expired answersession for child 3 with answers for milestone 7 & 8
-    session.add(
-        MilestoneAnswerSession(
-            id=5,
-            child_id=3,
-            user_id=1,
-            created_at=datetime.datetime(today.year - 1, 1, 10),
-            expired=True,
-            included_in_statistics=False,
-            suspicious=False,
-        )
-    )
-    session.add(
-        MilestoneAnswer(
-            answer_session_id=5, milestone_id=5, milestone_group_id=2, answer=1
-        )
-    )
-
-    session.commit()
-    yield session
 
 
 visible_user_questions = [
@@ -1089,7 +1116,7 @@ def active_test_account_user():
 @pytest.fixture
 def active_research_user_full_data_access():
     return UserRead(
-        id=5,
+        id=6,
         email="research@mondey.de",
         is_active=True,
         is_superuser=False,
@@ -1176,20 +1203,6 @@ def research_client_full_data_access(
 def admin_client(
     app: FastAPI,
     session: Session,
-    user_session: AsyncSession,
-    active_admin_user: UserRead,
-):
-    app.dependency_overrides[current_active_user] = lambda: active_admin_user
-    app.dependency_overrides[current_active_superuser] = lambda: active_admin_user
-    client = TestClient(app)
-    yield client
-    app.dependency_overrides.clear()
-
-
-@pytest.fixture
-def admin_client_stat(
-    app: FastAPI,
-    statistics_session: Session,
     user_session: AsyncSession,
     active_admin_user: UserRead,
 ):

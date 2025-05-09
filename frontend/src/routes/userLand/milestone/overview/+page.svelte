@@ -142,7 +142,7 @@ async function setup(): Promise<void> {
 							goto("/userLand/milestone");
 						},
 					},
-					auxilliary: complete ? WhiteCircleSolid : WhiteCircle,
+					auxiliary: complete ? WhiteCircleSolid : WhiteCircle,
 				};
 			},
 		);
@@ -158,7 +158,7 @@ function createStyle(data: any[]) {
 				class:
 					"text-center m-2 max-w-prose dark:text-white text-white hover:cursor-pointer bg-milestone-300 dark:bg-milestone-300 hover:bg-milestone-500 dark:hover:bg-milestone-500",
 			},
-			auxilliary: {
+			auxiliary: {
 				class: "w-14 h-14",
 				color: item.complete === true ? "green" : "red",
 			},

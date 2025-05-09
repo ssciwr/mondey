@@ -94,23 +94,27 @@ def test_get_score_statistics_by_age(session):
         1: 5,
         2: 3,
         3: 8,
-        4: 11,
+        4: 5,
+        5: 17,
+        6: 28,
         99: 60,
     }
 
     count, avg, stddev = _get_statistics_by_age(answers, child_ages)
 
-    answers_5 = [answer.answer for answer in answers if answer.answer_session_id == 1]
+    answers_5 = [
+        answer.answer for answer in answers if answer.answer_session_id in [1, 4]
+    ]
     answers_3 = [answer.answer for answer in answers if answer.answer_session_id == 2]
     answers_8 = [answer.answer for answer in answers if answer.answer_session_id == 3]
 
-    assert count[5] == 2
+    assert count[5] == 4
     assert count[3] == 2
     assert count[8] == 1
 
-    assert np.isclose(avg[5], 0.5)
-    assert np.isclose(avg[3], (1 + 1) / 2.0)
-    assert np.isclose(avg[8], 2.0)
+    assert np.isclose(avg[5], np.mean(answers_5))
+    assert np.isclose(avg[3], np.mean(answers_3))
+    assert np.isclose(avg[8], np.mean(answers_8))
 
     assert np.isclose(
         stddev[5],
@@ -160,7 +164,7 @@ def test_get_score_statistics_by_age(session):
         second_answers, child_ages, count, avg, stddev
     )
 
-    assert count[5] == 4
+    assert count[5] == 8
     assert count[3] == 4
     assert count[8] == 2
     assert np.isclose(avg[5], np.mean(answers_5))
@@ -172,14 +176,22 @@ def test_get_score_statistics_by_age(session):
     assert np.isclose(stddev[8], np.std(answers_8, ddof=1))
 
 
-def test_get_score_statistics_by_age_no_data(statistics_session):
-    answers = statistics_session.exec(select(MilestoneAnswer)).all()
+def test_get_score_statistics_by_age_no_data(session):
+    answers = session.exec(select(MilestoneAnswer)).all()
     child_ages = {}  # no answer sessions ==> empty child ages
     count, avg, stddev = _get_statistics_by_age(answers, child_ages)
     assert np.all(np.isclose(avg, 0))
     assert np.all(np.isclose(stddev, 0))
 
-    child_ages = {1: 5, 2: 3, 3: 8, 4: 11, 99: 60}
+    child_ages = {
+        1: 5,
+        2: 3,
+        3: 8,
+        4: 11,
+        5: 17,
+        99: 60,
+        6: 28,
+    }
     answers = []  # no answers ==> empty answers
     count, avg, stddev = _get_statistics_by_age(answers, child_ages)
     assert np.all(count == 0)
@@ -188,9 +200,9 @@ def test_get_score_statistics_by_age_no_data(statistics_session):
 
 
 @pytest.mark.asyncio
-async def test_calculate_milestone_statistics_by_age(statistics_session, user_session):
-    m1 = statistics_session.get(MilestoneAgeScoreCollection, 1)
-    m2 = statistics_session.get(MilestoneAgeScoreCollection, 2)
+async def test_calculate_milestone_statistics_by_age(session, user_session):
+    m1 = session.get(MilestoneAgeScoreCollection, 1)
+    m2 = session.get(MilestoneAgeScoreCollection, 2)
 
     # existing stats (only answer session 1)
     assert m1.milestone_id == 1
@@ -204,9 +216,9 @@ async def test_calculate_milestone_statistics_by_age(statistics_session, user_se
     assert np.isclose(m2.scores[8].stddev_score, 0.0)
 
     # updated stats (answer sessions 1, 2, 4)
-    await async_update_stats(statistics_session, user_session, incremental_update=True)
-    m1 = statistics_session.get(MilestoneAgeScoreCollection, 1)
-    m2 = statistics_session.get(MilestoneAgeScoreCollection, 2)
+    await async_update_stats(session, user_session, incremental_update=True)
+    m1 = session.get(MilestoneAgeScoreCollection, 1)
+    m2 = session.get(MilestoneAgeScoreCollection, 2)
 
     assert m1.milestone_id == 1
     assert m1.scores[8].count == 3
@@ -219,9 +231,9 @@ async def test_calculate_milestone_statistics_by_age(statistics_session, user_se
     assert m2.scores[8].stddev_score == pytest.approx(0.577, abs=0.1)
 
     # re-calculating using all answers gives the same results
-    await async_update_stats(statistics_session, user_session, incremental_update=False)
-    m1 = statistics_session.get(MilestoneAgeScoreCollection, 1)
-    m2 = statistics_session.get(MilestoneAgeScoreCollection, 2)
+    await async_update_stats(session, user_session, incremental_update=False)
+    m1 = session.get(MilestoneAgeScoreCollection, 1)
+    m2 = session.get(MilestoneAgeScoreCollection, 2)
 
     assert m1.milestone_id == 1
     assert m1.scores[8].count == 3
@@ -235,32 +247,34 @@ async def test_calculate_milestone_statistics_by_age(statistics_session, user_se
 
 
 @pytest.mark.asyncio
-async def test_calculate_milestonegroup_statistics(statistics_session, user_session):
-    mg = statistics_session.get(MilestoneGroupAgeScoreCollection, 1)
+async def test_calculate_milestonegroup_statistics(session, user_session):
+    mg = session.get(MilestoneGroupAgeScoreCollection, 1)
 
     # existing stats (only answer session 1)
+    answers = [1, 0, 0]
     assert mg.milestone_group_id == 1
-    assert mg.scores[8].count == 2
-    assert np.isclose(mg.scores[8].avg_score, (0 + 1) / 2.0)
-    assert np.isclose(mg.scores[8].stddev_score, 0.5)
+    assert mg.scores[8].count == len(answers)
+    assert np.isclose(mg.scores[8].avg_score, np.mean(answers))
+    assert np.isclose(mg.scores[8].stddev_score, np.std(answers))
 
     # updated stats (answer sessions 1, 2, 4)
-    await async_update_stats(statistics_session, user_session, incremental_update=True)
-    mg = statistics_session.get(MilestoneGroupAgeScoreCollection, 1)
+    updated_answers = answers + [1, 1, 0] + [2, 0, 0]
+    await async_update_stats(session, user_session, incremental_update=True)
+    mg = session.get(MilestoneGroupAgeScoreCollection, 1)
 
     assert mg.milestone_group_id == 1
-    assert mg.scores[8].count == 6
-    assert np.isclose(mg.scores[8].avg_score, (0 + 1 + 1 + 1 + 2 + 0) / 6.0)
-    assert mg.scores[8].stddev_score == pytest.approx(0.719, abs=0.1)
+    assert mg.scores[8].count == len(updated_answers)
+    assert np.isclose(mg.scores[8].avg_score, np.mean(updated_answers))
+    assert mg.scores[8].stddev_score == pytest.approx(np.std(updated_answers), abs=0.1)
 
     # re-calculating using all answers gives the same results
-    await async_update_stats(statistics_session, user_session, incremental_update=False)
-    mg = statistics_session.get(MilestoneGroupAgeScoreCollection, 1)
+    await async_update_stats(session, user_session, incremental_update=False)
+    mg = session.get(MilestoneGroupAgeScoreCollection, 1)
 
     assert mg.milestone_group_id == 1
-    assert mg.scores[8].count == 6
-    assert np.isclose(mg.scores[8].avg_score, (0 + 1 + 1 + 1 + 2 + 0) / 6.0)
-    assert mg.scores[8].stddev_score == pytest.approx(0.719, abs=0.1)
+    assert mg.scores[8].count == len(updated_answers)
+    assert np.isclose(mg.scores[8].avg_score, np.mean(updated_answers))
+    assert mg.scores[8].stddev_score == pytest.approx(np.std(updated_answers), abs=0.1)
 
 
 def test_make_datatable_no_data():

@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from sqlmodel import select
 
@@ -32,7 +33,6 @@ def test_compute_feedback_simple():
         age_months=8,
         avg_score=2.0,
         stddev_score=0.8,
-        expected_score=1.0,
     )
     score = 0
     assert compute_feedback_simple(dummy_scores, score) == -1
@@ -46,68 +46,71 @@ def test_compute_feedback_simple():
 
 @pytest.mark.asyncio
 async def test_compute_summary_milestonegroup_feedback_for_answersession_with_recompute(
-    statistics_session, user_session
+    session, user_session
 ):
     child_age = 8
-    # existing statistics for milestonegroup 1 at age 8 months: [0,1] -> mean = 0.5 +/- 0.5
-    statistics = statistics_session.exec(
+    existing_age_8_milestone_group1_scores = [1, 0, 0]  # existing statistics
+    statistics = session.exec(
         select(MilestoneGroupAgeScoreCollection).where(
             MilestoneGroupAgeScoreCollection.milestone_group_id == 1
         )
     ).all()
     assert len(statistics) == 1
-    assert statistics[0].scores[child_age].avg_score == pytest.approx(0.5, abs=0.001)
-    assert statistics[0].scores[child_age].stddev_score == pytest.approx(0.5, abs=0.001)
-    # answer session 1 scores: [0, 1] -> mean 0.5 -> green
+    assert statistics[0].scores[child_age].avg_score == pytest.approx(
+        np.mean(existing_age_8_milestone_group1_scores), abs=0.001
+    )
+    assert statistics[0].scores[child_age].stddev_score == pytest.approx(
+        np.std(existing_age_8_milestone_group1_scores), abs=0.001
+    )
+    # answer session 1 scores for milestone group 1: [1, 0, 0] -> mean 0.33 -> green
     feedback = compute_milestonegroup_feedback_summary(
-        statistics_session, child_id=1, answersession_id=1
+        session, session.get(MilestoneAnswerSession, 1)
     )
     assert feedback[1] == TrafficLight.green.value
     assert len(feedback) == 1
-    # answer session 2 scores: [1, 1] -> mean 1.0 -> green
+    # answer session 2 scores for milestone group 1: [1, 1, 0] -> mean 0.66 -> green
     feedback = compute_milestonegroup_feedback_summary(
-        statistics_session, child_id=1, answersession_id=2
+        session, session.get(MilestoneAnswerSession, 2)
     )
     assert feedback[1] == TrafficLight.green.value
     assert len(feedback) == 1
-    for update_existing_statistics in [True, False]:
+    for incremental_update in [True, False]:
         await async_update_stats(
-            statistics_session,
+            session,
             user_session,
-            incremental_update=update_existing_statistics,
+            incremental_update=incremental_update,
         )
-        # updated stats for milestonegroup 1 at age 8 months: [0,1,1,1,2,0] -> mean = 0.8333 +/- ~0.688
-        statistics = statistics_session.exec(
-            select(MilestoneGroupAgeScoreCollection).where(
-                MilestoneGroupAgeScoreCollection.milestone_group_id == 1
-            )
-        ).all()
-        assert len(statistics) == 1
-        assert statistics[0].scores[child_age].avg_score == pytest.approx(
-            0.83333, abs=0.001
+        updated_age_8_milestone_group1_scores = (
+            existing_age_8_milestone_group1_scores.copy()
         )
-        assert statistics[0].scores[child_age].stddev_score == pytest.approx(
-            0.688, abs=0.1
+        updated_age_8_milestone_group1_scores.extend([1, 1, 0])  # answer session 2
+        updated_age_8_milestone_group1_scores.extend([2, 0, 0])  # answer session 4
+        statistics = session.get(MilestoneGroupAgeScoreCollection, 1)
+        assert statistics.scores[child_age].avg_score == pytest.approx(
+            np.mean(updated_age_8_milestone_group1_scores), abs=0.001
+        )
+        assert statistics.scores[child_age].stddev_score == pytest.approx(
+            np.std(updated_age_8_milestone_group1_scores), abs=0.1
         )
         # answer session 1 score 0.5 -> remains green
         feedback = compute_milestonegroup_feedback_summary(
-            statistics_session, child_id=1, answersession_id=1
+            session, session.get(MilestoneAnswerSession, 1)
         )
         assert feedback[1] == TrafficLight.green.value
         assert len(feedback) == 1
-        # answer session 2 score 2.5 remain green
+        # answer session 2 score 1.5 -> remains green
         feedback = compute_milestonegroup_feedback_summary(
-            statistics_session, child_id=1, answersession_id=2
+            session, session.get(MilestoneAnswerSession, 2)
         )
         assert feedback[1] == TrafficLight.green.value
         assert len(feedback) == 1
 
 
 def test_compute_summary_milestonegroup_feedback_for_answersession_no_existing_stat(
-    statistics_session,
+    session,
 ):
     feedback = compute_milestonegroup_feedback_summary(
-        statistics_session, child_id=3, answersession_id=3
+        session, session.get(MilestoneAnswerSession, 3)
     )
 
     assert len(feedback) == 1
@@ -116,11 +119,11 @@ def test_compute_summary_milestonegroup_feedback_for_answersession_no_existing_s
 
 @pytest.mark.asyncio
 async def test_compute_detailed_milestonegroup_feedback_for_answersession_with_recompute(
-    statistics_session, user_session
+    session, user_session
 ):
     # initial stats only include answer session 1: all feedback green
     feedback = compute_milestonegroup_feedback_detailed(
-        statistics_session, child_id=1, answersession_id=1
+        session, session.get(MilestoneAnswerSession, 1)
     )
     assert len(feedback) == 1
     assert len(feedback[1]) == 2
@@ -128,9 +131,9 @@ async def test_compute_detailed_milestonegroup_feedback_for_answersession_with_r
     assert feedback[1][2] == TrafficLight.green.value
 
     # updated stats include more answer sessions
-    await async_update_stats(statistics_session, user_session, incremental_update=True)
+    await async_update_stats(session, user_session, incremental_update=True)
     feedback = compute_milestonegroup_feedback_detailed(
-        statistics_session, child_id=1, answersession_id=1
+        session, session.get(MilestoneAnswerSession, 1)
     )
     assert len(feedback) == 1
     assert len(feedback[1]) == 2
@@ -139,10 +142,10 @@ async def test_compute_detailed_milestonegroup_feedback_for_answersession_with_r
 
 
 def test_compute_detailed_milestonegroup_feedback_for_answersession_no_existing_stat(
-    statistics_session,
+    session,
 ):
     feedback = compute_milestonegroup_feedback_detailed(
-        statistics_session, child_id=3, answersession_id=3
+        session, session.get(MilestoneAnswerSession, 3)
     )
     assert len(feedback) == 1
     assert feedback[2][5] == TrafficLight.invalid.value

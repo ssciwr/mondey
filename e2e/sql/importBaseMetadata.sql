@@ -143,8 +143,8 @@ VALUES (1000, 3, 'Test Child',
         false, '#f0f0ff');
 
 -- Create milestone answer session for the child
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious)
-VALUES (1000, 1000, 3, datetime('now', '-1 day'), false, false, false);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious, completed)
+VALUES (1000, 1000, 3, datetime('now', '-1 day'), false, false, false, true);
 
 -- Add answers for Reading Text milestones
 INSERT INTO milestoneanswer (answer_session_id, milestone_id, milestone_group_id, answer)
@@ -179,8 +179,8 @@ INSERT INTO milestoneanswer (answer_session_id, milestone_id, milestone_group_id
 VALUES (1000, 1009, 1001, 0); -- Creating Dance Patterns (not yet)
 
 -- Create a second milestone answer session from 2 months ago
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious)
-VALUES (1001, 1000, 3, datetime('now', '-2 months'), true, true, false);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious, completed)
+VALUES (1001, 1000, 3, datetime('now', '-2 months'), true, true, false, true);
 
 -- Add answers for Reading Text milestones (previous session)
 INSERT INTO milestoneanswer (answer_session_id, milestone_id, milestone_group_id, answer)

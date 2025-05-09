@@ -57,7 +57,7 @@ let filteredComponentProps = $derived(
 );
 </script>
 
-<div class="mx-auto p-4">
+<div class="mx-auto p-4 w-full">
 	{#if header !== null}
 		<Heading
 			tag="h1"

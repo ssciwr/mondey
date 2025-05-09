@@ -129,7 +129,7 @@ async function saveNewExpectedAges() {
 {#key currentMilestoneId}
     <Modal title={currentTitle} bind:open={showMilestoneExpectedAgeModal} size="lg" outsideclose>
         {#if currentMilestoneId}
-            <PlotScoreAge scores={expectedAges?.[currentMilestoneId].scores}/>
+            <PlotScoreAge scoreCollection={expectedAges?.[currentMilestoneId]}/>
         {/if}
     </Modal>
 {/key}

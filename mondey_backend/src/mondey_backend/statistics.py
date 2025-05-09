@@ -27,8 +27,8 @@ from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import UserAnswer
 from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.users import User
-from mondey_backend.routers.utils import _get_answer_session_child_ages_in_months
 from mondey_backend.routers.utils import _get_expected_age_from_scores
+from mondey_backend.routers.utils import get_answer_session_child_ages_in_months
 from mondey_backend.routers.utils import get_child_age_in_months
 
 
@@ -169,7 +169,7 @@ def _get_statistics_by_age(
     Returns
     -------
     tuple[np.ndarray, np.ndarray, np.ndarray]
-        Updated count, avg and stddev arrays.
+        Updated count, avg and stddev arrays, where the index in the array corresponds to the child age in months.
     """
     if count is None or avg is None or stddev is None:
         max_age_months = 100
@@ -206,36 +206,6 @@ async def get_test_account_user_ids(user_session: UserAsyncSessionDep) -> list[i
         select(User.id).where(col(User.email).like("%tester@testaccount.com"))
     )
     return list(res.scalars().all())
-
-
-def make_any_stale_answer_sessions_inactive(
-    session: SessionDep, test_account_user_ids_to_exclude: list[int]
-) -> None:
-    """
-    mark any answersession that is older than 9 days as inactive by setting the expired flag. Delete any older than 9 days which are test account answersessions.
-    This includes a grace period of 2 days wrt the normal expiration timedelta of 7 days to avoid setting currently in-use answersessions to expired.
-    """
-    days_after_which_session_is_stale = 9
-    stale_date = datetime.datetime.now() - datetime.timedelta(
-        days=days_after_which_session_is_stale
-    )
-    for stale_milestone_answer_session in session.exec(
-        select(MilestoneAnswerSession)
-        .where(~col(MilestoneAnswerSession.expired))
-        .where(col(MilestoneAnswerSession.created_at) <= stale_date)
-    ).all():
-        # Now, if it is a test account one, delete it rather than set it to expired? It will cascade to the milestone_answers?
-        # Can we soft-delete it, have a "deleted" variable instead?
-        if (
-            stale_milestone_answer_session.user_id in test_account_user_ids_to_exclude
-            and stale_milestone_answer_session.user_id is not None
-        ):
-            # Below is dangerous as it deletes data.
-            session.delete(stale_milestone_answer_session)
-        else:
-            stale_milestone_answer_session.expired = True
-            session.add(stale_milestone_answer_session)
-    session.commit()
 
 
 def analyse_answer_session(
@@ -302,11 +272,11 @@ def flag_suspicious_answer_sessions(
     logger = logging.getLogger(__name__)
     milestone_answer_sessions = session.exec(
         select(MilestoneAnswerSession)
+        .where(col(MilestoneAnswerSession.completed))
         .where(~col(MilestoneAnswerSession.suspicious))
         .where(
             col(MilestoneAnswerSession.user_id).not_in(test_account_user_ids_to_exclude)
         )
-        .where(col(MilestoneAnswerSession.expired))
         .where(~col(MilestoneAnswerSession.included_in_statistics))
     ).all()
     logger.debug(
@@ -332,13 +302,14 @@ async def async_update_stats(
     incremental_update: bool = True,
 ):
     """Update the recorded statistics of the milestonegroups and milestones.
-    It only uses expired milestoneanswersesssions. If `incremental_update` is True, it will only update the current statistics wit the new answersessions. Else, it will recalculate all statistics completely. The latter may be necessary if admins change the answersessions in the database by hand.
+    It only uses completed milestoneanswersesssions, excluding those from test users or those that are marked as suspicious.
     Args:
         session (SessionDep): database session
-        incremental_update (bool, optional): Whether or not to recalculate the statistics completely. Defaults to True.
+        user_session (UserAsyncSessionDep): user session
+        incremental_update (bool, optional): If True (default) only update stats with new data, otherwise recalculate all statistics.
 
     Returns:
-        str: Message string indicating successful statistics calculation or update
+        str: Message string indicating successful statistics update
     """
     logger = logging.getLogger(__name__)
     logger.debug(
@@ -347,7 +318,6 @@ async def async_update_stats(
 
     # We gather these first then exclude later so that we don't do a FK join on the user_id<->email for stale+filtering
     test_account_user_ids_to_exclude = await get_test_account_user_ids(user_session)
-    make_any_stale_answer_sessions_inactive(session, test_account_user_ids_to_exclude)
 
     flag_suspicious_answer_sessions(session, test_account_user_ids_to_exclude)
 
@@ -358,10 +328,10 @@ async def async_update_stats(
             session.add(answer_session)
         session.commit()
 
-    # get MilestoneAnswerSessions to be used for calculating statistics - exclude any flagged as suspicious
+    # get MilestoneAnswerSessions to be used for calculating statistics - exclude any flagged as suspicious or from test accounts
     answer_session_filter = (
         select(MilestoneAnswerSession)
-        .where(col(MilestoneAnswerSession.expired))
+        .where(col(MilestoneAnswerSession.completed))
         .where(
             col(MilestoneAnswerSession.user_id).not_in(test_account_user_ids_to_exclude)
         )
@@ -373,29 +343,52 @@ async def async_update_stats(
         )
     milestone_answer_sessions = session.exec(answer_session_filter).all()
 
-    child_ages = _get_answer_session_child_ages_in_months(
+    child_ages = get_answer_session_child_ages_in_months(
         session, milestone_answer_sessions
     )
     logger.debug(f"  - found {len(milestone_answer_sessions)} answer sessions")
+    logger.debug(f"    {[m.id for m in milestone_answer_sessions]}")
 
     # construct a list of MilestoneAnswers for each Milestone and MilestoneGroup
+    milestones = session.exec(select(Milestone)).all()
     milestone_answers: dict[int, list[MilestoneAnswer]] = defaultdict(list)
     milestone_group_answers: dict[int, list[MilestoneAnswer]] = defaultdict(list)
     for milestone_answer_session in milestone_answer_sessions:
-        for milestone_id, answer in milestone_answer_session.answers.items():
-            milestone_answers[milestone_id].append(answer)
-            milestone_group_answers[answer.milestone_group_id].append(answer)
+        for milestone in milestones:
+            answer = milestone_answer_session.answers.get(milestone.id)  # type: ignore
+            if answer is not None:
+                milestone_answers[milestone.id].append(answer)  # type: ignore
+                milestone_group_answers[milestone.group_id].append(answer)  # type: ignore
+                logger.debug(f"    - {answer}")
+            else:
+                # if a milestone is not included in the answer session, we still need a value when calculating
+                # the average and std dev of answers for the milestone group.
+                # We assume a full score if the child is older than the expected age for the milestone,
+                # and a zero score if child is younger.
+                imputed_answer = MilestoneAnswer(
+                    answer_session_id=milestone_answer_session.id,
+                    milestone_id=milestone.id,
+                    milestone_group_id=milestone.group_id,
+                    answer=3
+                    if milestone.expected_age_months
+                    < child_ages[milestone_answer_session.id]  # type: ignore
+                    else 0,
+                )
+                milestone_group_answers[milestone.group_id].append(imputed_answer)  # type: ignore
+                logger.debug(f"    - {imputed_answer} [imputed]")
+    for gid, answers in milestone_group_answers.items():
+        logger.debug(f"    - group {gid}: {[a.answer for a in answers]}")
 
     # update milestone statistics
     logger.debug(f"  - updating {len(milestone_answers)} milestone statistics...")
-    for milestone_id, answers in milestone_answers.items():
+    for milestone_id, milestone_answer in milestone_answers.items():
         existing_milestone_statistics = (
             session.get(MilestoneAgeScoreCollection, milestone_id)
             if incremental_update
             else None
         )
         milestone_age_score_collection = calculate_milestone_statistics_by_age(
-            milestone_id, answers, child_ages, existing_milestone_statistics
+            milestone_id, milestone_answer, child_ages, existing_milestone_statistics
         )
         session.merge(milestone_age_score_collection)
 
@@ -403,7 +396,7 @@ async def async_update_stats(
     logger.debug(
         f"  - updating {len(milestone_group_answers)} milestone group statistics..."
     )
-    for milestone_group_id, answers in milestone_group_answers.items():
+    for milestone_group_id, milestone_group_answer in milestone_group_answers.items():
         existing_milestone_group_statistics = (
             session.get(MilestoneGroupAgeScoreCollection, milestone_group_id)
             if incremental_update
@@ -412,7 +405,7 @@ async def async_update_stats(
         milestone_group_age_score_collection = (
             calculate_milestonegroup_statistics_by_age(
                 milestone_group_id,
-                answers,
+                milestone_group_answer,
                 child_ages,
                 existing_milestone_group_statistics,
             )
@@ -493,7 +486,7 @@ def calculate_milestone_statistics_by_age(
         answers, child_ages, count=count, avg=avg_scores, stddev=stddev_scores
     )
 
-    expected_age = _get_expected_age_from_scores(avg_scores)
+    expected_age = _get_expected_age_from_scores(avg_scores, count)
 
     # overwrite last_statistics with updated stuff --> set primary keys explicitly
     return MilestoneAgeScoreCollection(
@@ -509,7 +502,6 @@ def calculate_milestone_statistics_by_age(
                 ),  # need a conversion to avoid numpy.int32 being stored as byte object
                 avg_score=avg_scores[age],
                 stddev_score=stddev_scores[age],
-                expected_score=3 if age >= expected_age else 0,
             )
             for age in range(0, len(avg_scores))
         ],
@@ -674,10 +666,14 @@ async def extract_research_data(
 ) -> pd.DataFrame:
     logger = logging.getLogger(__name__)
     logger.info("Extracting research data...")
-    user_ids_to_exclude = await get_test_account_user_ids(user_session)
-    logger.info(f"  - collected {len(user_ids_to_exclude)} user ids to exclude")
-    answer_session_filter = select(MilestoneAnswerSession).where(
-        col(MilestoneAnswerSession.user_id).not_in(user_ids_to_exclude)
+    test_user_ids_to_exclude = await get_test_account_user_ids(user_session)
+    logger.info(
+        f"  - collected {len(test_user_ids_to_exclude)} test user ids to exclude"
+    )
+    answer_session_filter = (
+        select(MilestoneAnswerSession)
+        .where(col(MilestoneAnswerSession.completed))
+        .where(col(MilestoneAnswerSession.user_id).not_in(test_user_ids_to_exclude))
     )
     if research_group_id is not None:
         user_ids = await get_user_ids(user_session, research_group_id)
@@ -690,7 +686,7 @@ async def extract_research_data(
     )
     milestone_answers = get_milestone_answers(session)
     logger.info(f"  - collected {len(milestone_answers)} milestone answers")
-    child_ages = _get_answer_session_child_ages_in_months(
+    child_ages = get_answer_session_child_ages_in_months(
         session, milestone_answer_sessions
     )
     logger.info(f"  - collected {len(child_ages)} child ages")

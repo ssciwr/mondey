@@ -169,6 +169,8 @@ export const translationIds = {
 		suspicious: "verdächtig",
 		notSuspicious: "nicht verdächtig",
 		showSuspiciousOnly: "nur verdächtige anzeigen",
+		completed: "vollständig",
+		showCompletedOnly: "nur vollständige anzeigen",
 		updateStatistics: "Statistiken aktualisieren",
 		recalculateAllStatistics: "alle Statistiken neu berechnen",
 		statisticsAreBeingUpdated: "Statistiken werden aktualisiert...",

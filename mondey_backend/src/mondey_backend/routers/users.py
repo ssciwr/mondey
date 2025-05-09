@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime
 
+import numpy as np
 from fastapi import APIRouter
 from fastapi import HTTPException
 from fastapi import Query
@@ -16,7 +18,9 @@ from ..dependencies import SessionDep
 from ..models.children import Child
 from ..models.children import ChildCreate
 from ..models.children import ChildPublic
+from ..models.children import ChildSummaryPublic
 from ..models.milestones import MilestoneAnswerPublic
+from ..models.milestones import MilestoneAnswerResponse
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneAnswerSessionPublic
 from ..models.milestones import MilestoneGroupPublic
@@ -32,11 +36,13 @@ from .scores import compute_milestonegroup_feedback_detailed
 from .scores import compute_milestonegroup_feedback_summary
 from .utils import add
 from .utils import child_image_path
+from .utils import current_milestone_answer_session
 from .utils import get
 from .utils import get_childs_answering_sessions
 from .utils import get_db_child
 from .utils import get_milestonegroups_for_answersession
 from .utils import get_or_create_current_milestone_answer_session
+from .utils import session_remaining_seconds
 from .utils import write_image_file
 
 
@@ -45,12 +51,35 @@ def create_router() -> APIRouter:
     router.include_router(fastapi_users.get_users_router(UserRead, UserUpdate))
 
     # children endpoints
-    @router.get("/children/", response_model=list[ChildPublic])
+    @router.get("/children/", response_model=list[ChildSummaryPublic])
     def get_children(session: SessionDep, current_active_user: CurrentActiveUserDep):
+        child_summaries: list[ChildSummaryPublic] = []
         children = session.exec(
             select(Child).where(col(Child.user_id) == current_active_user.id)
         ).all()
-        return children
+        for child in children:
+            milestone_answer_session = current_milestone_answer_session(
+                session, current_active_user, child
+            )
+            child_summary = ChildSummaryPublic.model_validate(
+                child,
+                update={
+                    "active_answer_session": False,
+                    "session_progress": 0,
+                    "session_remaining_seconds": 0,
+                },
+            )
+            if milestone_answer_session is not None:
+                child_summary.active_answer_session = True
+                answers = np.array(
+                    list(a.answer for a in milestone_answer_session.answers.values())
+                )
+                child_summary.session_progress = np.mean(answers >= 0, dtype=np.float64)
+                child_summary.session_remaining_seconds = session_remaining_seconds(
+                    milestone_answer_session
+                )
+            child_summaries.append(child_summary)
+        return child_summaries
 
     @router.get("/children/{child_id}", response_model=ChildPublic)
     def get_child(
@@ -178,7 +207,7 @@ def create_router() -> APIRouter:
 
     @router.put(
         "/milestone-answers/{milestone_answer_session_id}",
-        response_model=MilestoneAnswerPublic,
+        response_model=MilestoneAnswerResponse,
     )
     def update_milestone_answer(
         session: SessionDep,
@@ -198,7 +227,21 @@ def create_router() -> APIRouter:
             raise HTTPException(401)
         milestone_answer.answer = answer.answer
         session.commit()
-        return milestone_answer
+        session.refresh(milestone_answer_session)
+        logging.warning(milestone_answer_session)
+        if all(a.answer >= 0 for a in milestone_answer_session.answers.values()):
+            logging.warning(
+                sum(a.answer >= 0 for a in milestone_answer_session.answers.values())
+            )
+            milestone_answer_session.expired = True
+            milestone_answer_session.completed = True
+            session.add(milestone_answer_session)
+            session.commit()
+            session.refresh(milestone_answer_session)
+        return MilestoneAnswerResponse(
+            answer=MilestoneAnswerPublic.model_validate(milestone_answer),
+            session_completed=milestone_answer_session.completed,
+        )
 
     # Endpoints for answers to user question
     @router.get("/user-answers/", response_model=list[UserAnswerPublic])
@@ -279,7 +322,7 @@ def create_router() -> APIRouter:
         "/milestone-answers-sessions/{child_id}",
         response_model=dict[int, MilestoneAnswerSessionPublic],
     )
-    def get_expired_milestone_answer_sessions(
+    def get_completed_milestone_answer_sessions(
         session: SessionDep, current_active_user: CurrentActiveUserDep, child_id: int
     ) -> dict[int, MilestoneAnswerSessionPublic]:
         milestone_answer_sessions = {
@@ -288,7 +331,7 @@ def create_router() -> APIRouter:
                 select(MilestoneAnswerSession).where(
                     (col(MilestoneAnswerSession.user_id) == current_active_user.id)
                     & (col(MilestoneAnswerSession.child_id) == child_id)
-                    & col(MilestoneAnswerSession.expired)
+                    & col(MilestoneAnswerSession.completed)
                 )
             ).all()
         }
@@ -314,12 +357,7 @@ def create_router() -> APIRouter:
         answersession_id: int,
     ) -> dict[int, int]:
         answersession = get(session, MilestoneAnswerSession, answersession_id)
-        if answersession is None:
-            raise HTTPException(404, detail="Answer session not found")
-        child_id = answersession.child_id
-        feedback = compute_milestonegroup_feedback_summary(
-            session, child_id, answersession_id
-        )
+        feedback = compute_milestonegroup_feedback_summary(session, answersession)
         return feedback
 
     @router.get(
@@ -330,13 +368,8 @@ def create_router() -> APIRouter:
         session: SessionDep,
         answersession_id: int,
     ) -> dict[int, dict[int, int]]:
-        answersession = session.get(MilestoneAnswerSession, answersession_id)
-        if answersession is None:
-            raise HTTPException(404, detail="Answer session not found")
-        child_id = answersession.child_id
-        feedback = compute_milestonegroup_feedback_detailed(
-            session, child_id, answersession_id
-        )
+        answersession = get(session, MilestoneAnswerSession, answersession_id)
+        feedback = compute_milestonegroup_feedback_detailed(session, answersession)
         return feedback
 
     return router

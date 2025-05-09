@@ -167,24 +167,45 @@ def delete_texts_for_language(session: SessionDep, lang_id: str):
     i18n_language_path(lang_id).unlink(missing_ok=True)
 
 
-def _session_has_expired(milestone_answer_session: MilestoneAnswerSession) -> bool:
-    session_lifetime_days = 7
+def session_remaining_seconds(
+    milestone_answer_session: MilestoneAnswerSession,
+) -> float:
+    session_lifetime_days = 14
     return (
-        datetime.datetime.now() - milestone_answer_session.created_at
-        > datetime.timedelta(days=session_lifetime_days)
-    )
+        datetime.datetime.now()
+        + datetime.timedelta(days=session_lifetime_days)
+        - milestone_answer_session.created_at
+    ).total_seconds()
+
+
+def _session_has_expired(milestone_answer_session: MilestoneAnswerSession) -> bool:
+    return session_remaining_seconds(milestone_answer_session) <= 0
+
+
+def current_milestone_answer_session(
+    session: SessionDep, current_active_user: User, child: Child
+) -> MilestoneAnswerSession | None:
+    milestone_answer_session = session.exec(
+        select(MilestoneAnswerSession)
+        .where(col(MilestoneAnswerSession.user_id) == current_active_user.id)
+        .where(col(MilestoneAnswerSession.child_id) == child.id)
+        .where(~col(MilestoneAnswerSession.expired))
+        .where(~col(MilestoneAnswerSession.completed))
+        .order_by(col(MilestoneAnswerSession.created_at).desc())
+    ).first()
+    return milestone_answer_session
 
 
 def get_or_create_current_milestone_answer_session(
     session: SessionDep, current_active_user: User, child: Child
 ) -> MilestoneAnswerSession:
-    milestone_answer_session = session.exec(
-        select(MilestoneAnswerSession)
-        .where(col(MilestoneAnswerSession.user_id) == current_active_user.id)
-        .where(col(MilestoneAnswerSession.child_id) == child.id)
-        .order_by(col(MilestoneAnswerSession.created_at).desc())
-    ).first()
-    if milestone_answer_session and _session_has_expired(milestone_answer_session):
+    milestone_answer_session = current_milestone_answer_session(
+        session, current_active_user, child
+    )
+    if milestone_answer_session and (
+        _session_has_expired(milestone_answer_session)
+        or milestone_answer_session.completed
+    ):
         milestone_answer_session.expired = True
         session.add(milestone_answer_session)
         session.commit()
@@ -194,6 +215,7 @@ def get_or_create_current_milestone_answer_session(
             child_id=child.id,
             user_id=current_active_user.id,
             created_at=datetime.datetime.now(),
+            completed=False,
             expired=False,
             included_in_statistics=False,
             suspicious=False,
@@ -241,22 +263,41 @@ def get_db_child(
     return child
 
 
-def _get_answer_session_child_ages_in_months(
+def get_answer_session_child_age_in_months(
+    session: SessionDep, answer_session: MilestoneAnswerSession
+) -> int:
+    child = session.get(Child, answer_session.child_id)
+    if child is None:
+        raise ValueError("No Child with id: ", answer_session.child_id)
+    return get_child_age_in_months(child, answer_session.created_at)
+
+
+def get_answer_session_child_ages_in_months(
     session: SessionDep, answer_sessions: Sequence[MilestoneAnswerSession]
 ) -> dict[int, int]:
-    child_ages: dict[int, int] = {}
-    for answer_session in answer_sessions:
-        child = session.get(Child, answer_session.child_id)
-        if child is not None:
-            child_ages[answer_session.id] = get_child_age_in_months(  # type: ignore
-                child, answer_session.created_at
-            )
-    return child_ages
+    return {
+        answer_session.id: get_answer_session_child_age_in_months(
+            session, answer_session
+        )
+        for answer_session in answer_sessions
+        if answer_session.id is not None
+    }
 
 
-def _get_expected_age_from_scores(scores: np.ndarray) -> int:
-    # TODO: placeholder algorithm: returns first age with avg score > 3
-    return int(np.argmax(scores >= 3.0))
+def _get_expected_age_from_scores(scores: np.ndarray, count: np.ndarray) -> int:
+    """
+    Returns the expected age for a milestone based on the average scores for each child age.
+    :param scores: the average score for each age, where the index in the array is the age in months
+    :param count: the count of answers for each age, where the index in the array is the age in months
+    :return: the expected age in months for this milestone
+    """
+    # require at least `min_number_of_answers` answers for each age
+    min_number_of_answers = 3
+    # expected age is the first age with an average score >= `min_avg_score`
+    min_avg_score = 2.1
+    valid_scores = scores.copy()
+    valid_scores[count < min_number_of_answers] = 0
+    return int(np.argmax(valid_scores >= min_avg_score))
 
 
 def child_image_path(child_id: int | None) -> pathlib.Path:
