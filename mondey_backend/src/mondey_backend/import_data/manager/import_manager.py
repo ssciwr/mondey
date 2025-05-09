@@ -45,54 +45,10 @@ from mondey_backend.models.users import UserCreate
 
 logger = logging.getLogger(__name__)
 
-
-@dataclass
-class ImportPaths:
-    """Dataclass to hold all import file paths."""
-    
-    labels_path: Path
-    data_path: Path
-    questions_configured_path: Path
-    milestones_metadata_path: Path
-    additional_data_path: Optional[Path] = None
-    
-    @classmethod
-    def from_strings(cls, 
-                    labels_path: str,
-                    data_path: str,
-                    questions_configured_path: str,
-                    milestones_metadata_path: str,
-                    additional_data_path: Optional[str] = None) -> ImportPaths:
-        """Create ImportPaths from string paths."""
-        return cls(
-            labels_path=Path(labels_path),
-            data_path=Path(data_path),
-            questions_configured_path=Path(questions_configured_path),
-            milestones_metadata_path=Path(milestones_metadata_path),
-            additional_data_path=Path(additional_data_path) if additional_data_path else None
-        )
-    
-    @classmethod
-    def default(cls, base_dir: Optional[Path] = None) -> ImportPaths:
-        """Create default ImportPaths."""
-        if base_dir is None:
-            base_dir = Path(__file__).parent.parent.parent.parent.parent.absolute()
-        
-        import_dir = base_dir / "src/mondey_backend/import_data"
-        
-        return cls(
-            labels_path=import_dir / "labels_encoded.csv",
-            data_path=import_dir / "data.csv",
-            questions_configured_path=import_dir / "questions_specified.csv",
-            milestones_metadata_path=import_dir / "milestones_metadata_(variables).csv",
-            additional_data_path=import_dir / "additional_data.csv"
-        )
-
-
 class ImportManager:
     """
     Centralized manager for all data import operations.
-    
+
     This class handles:
     1. Loading and parsing CSV data
     2. Creating and managing database connections
@@ -101,23 +57,15 @@ class ImportManager:
     5. Importing question/answer data
     6. Aligning additional data with existing data
     """
-    
+
     def __init__(
         self,
-        import_paths: Optional[ImportPaths] = None,
-        mondey_db_path: Optional[Path] = None,
-        current_db_path: Optional[Path] = None,
-        users_db_path: Optional[Path] = None,
         debug: bool = False
     ):
         """
         Initialize the ImportManager.
         
         Args:
-            import_paths: Paths to import data files
-            mondey_db_path: Path to the Mondey database
-            current_db_path: Path to the current database
-            users_db_path: Path to the users database
             debug: Enable debug logging
         """
         self.debug = debug
@@ -125,6 +73,7 @@ class ImportManager:
         
         # Set up paths
         script_dir = Path(__file__).parent.parent.parent.parent.parent.absolute()
+        # all the below needs to come from initialising the data_manager.py...
         self.import_paths = import_paths or ImportPaths.default(script_dir)
         
         # Database paths
@@ -271,93 +220,7 @@ class ImportManager:
     # Data Loading Methods
     # -------------------------------------------------------------------------
     
-    def load_labels_df(self, force_reload: bool = False) -> pd.DataFrame:
-        """Load the labels DataFrame."""
-        if self._labels_df is None or force_reload:
-            logger.info(f"Loading labels from {self.import_paths.labels_path}")
-            self._labels_df = pd.read_csv(
-                self.import_paths.labels_path,
-                sep=",",
-                encoding="utf-16",
-                encoding_errors="replace",
-                index_col=None
-            )
-        return self._labels_df
-    
-    def load_data_df(self, force_reload: bool = False) -> pd.DataFrame:
-        """Load the data DataFrame."""
-        if self._data_df is None or force_reload:
-            logger.info(f"Loading data from {self.import_paths.data_path}")
-            self._data_df = pd.read_csv(
-                self.import_paths.data_path,
-                sep="\t",
-                encoding="utf-16",
-                encoding_errors="replace"
-            )
-        return self._data_df
-    
-    def load_questions_configured_df(self, force_reload: bool = False) -> pd.DataFrame:
-        """Load the questions configured DataFrame."""
-        if self._questions_configured_df is None or force_reload:
-            logger.info(f"Loading questions configuration from {self.import_paths.questions_configured_path}")
-            self._questions_configured_df = pd.read_csv(
-                self.import_paths.questions_configured_path,
-                sep=",",
-                encoding="utf-8",
-                dtype=str,
-                encoding_errors="replace"
-            )
-            self._questions_configured_df.columns = self._questions_configured_df.columns.str.strip()
-        return self._questions_configured_df
-    
-    def load_milestones_metadata_df(self, force_reload: bool = False) -> pd.DataFrame:
-        """Load the milestones metadata DataFrame."""
-        if self._milestones_metadata_df is None or force_reload:
-            logger.info(f"Loading milestones metadata from {self.import_paths.milestones_metadata_path}")
-            self._milestones_metadata_df = pd.read_csv(
-                self.import_paths.milestones_metadata_path,
-                sep="\t",
-                encoding="utf-16"
-            )
-        return self._milestones_metadata_df
-    
-    def load_additional_data_df(self, force_reload: bool = False) -> pd.DataFrame:
-        """Load the additional data DataFrame."""
-        if self._additional_data_df is None or force_reload and self.import_paths.additional_data_path:
-            logger.info(f"Loading additional data from {self.import_paths.additional_data_path}")
-            self._additional_data_df = pd.read_csv(
-                self.import_paths.additional_data_path,
-                sep="\t",
-                encoding="utf-16",
-                encoding_errors="replace"
-            )
-        return self._additional_data_df
-    
-    # -------------------------------------------------------------------------
-    # Database Session Methods
-    # -------------------------------------------------------------------------
-    
-    def get_import_session(self, create_tables: bool = False) -> Tuple[Session, Engine]:
-        """Get a session for the import database."""
-        with Session(self.mondey_engine) as session:
-            if create_tables:
-                create_mondey_db_and_tables_themselves(self.mondey_engine)
-            return session, self.mondey_engine
-    
-    def get_current_session(self) -> Tuple[Session, Engine]:
-        """Get a session for the current database."""
-        with Session(self.current_engine) as session:
-            return session, self.current_engine
-    
-    async def get_async_users_session(self) -> AsyncSession:
-        """Get an async session for the users database."""
-        async with AsyncSession(self.async_users_engine) as session:
-            return session
-    
-    # -------------------------------------------------------------------------
-    # Utility Methods
-    # -------------------------------------------------------------------------
-    
+
     def get_question_filled_in_to_parent(
         self, 
         questions_df: pd.DataFrame, 
