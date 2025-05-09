@@ -17,10 +17,10 @@ def get_childs_parent_id(session: Session, child_id: int) -> int:
 Originally this genuinely took the child ID. However, now, it takes the childs CASE name, which then must look up by
 email for the right child to find their parent.
 
-So the argument should because case_id.
+So the argument should become case_id.
 
-As it can be confusing to the reader of this code in the future - child_id is misleading when it is the CASE ID and not
-the actual child.id variable.
+(As it can be confusing to the reader of this code in the future - child_id is misleading when it is the CASE ID and not
+the actual child.id variable.)
 
 ## Avoid importing the import_session in small utility functions - either pass it as an arg or dependency inject it
 Right now in order to have a separate DB for the import process, we use a local directory and session. But importing
@@ -47,9 +47,15 @@ IMO this is high priority alongside handling the child id/case ID better.
 ## Remove all the extra print statements
 mostly for debug between user vs child question answers etc.
 
-## Move soem of the valid CSV validation out of the routers file / controller
+## Move some of the valid CSV validation out of the routers file / controller
+Should probably be a function in import_data
 
 ## Make a util function for managing parent_of and Imported Child look ups (so a change somewhere doesn't break the
 look ups throughout the code for this when they play the role of IDs)
 
 ## In routers/research.py, improve the path solution/decide where to git commit the labels encoded and questions_specificed CSVs (but not actual data)
+- Basically the router lives far away from the import_data directory and the path relies on the exact files being in
+that exact directory
+
+## Possibly create copy of .db file immediately before import (has negative implications, could cause server to crash from running out of storage)
+- IMO better solved by having say daily back ups.
