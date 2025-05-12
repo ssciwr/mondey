@@ -3,7 +3,6 @@ import { afterNavigate, goto } from "$app/navigation";
 import UserVerify from "$lib/components/UserVerify.svelte";
 import UserlandSidebar from "$lib/components/UserlandSidebar.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import { activePage, componentTable } from "$lib/stores/componentStore";
 import { user } from "$lib/stores/userStore.svelte";
 import { Button } from "flowbite-svelte";
 import { Drawer } from "flowbite-svelte";
@@ -14,10 +13,6 @@ let hideDrawer: boolean = $state(true);
 
 // get user state
 onMount(user.load);
-
-// set this initially to user data such that the user data page is shown first
-// todo: Remove this before #242 is PR merged, just here to compare and test the old version and new version of routing.
-activePage.set("childrenGallery");
 
 afterNavigate(() => {
 	hideDrawer = true;
@@ -41,10 +36,6 @@ afterNavigate(() => {
 				<Drawer transitionType="fly" placement="right" transitionParams={{duration: 200}} bind:hidden = {hideDrawer} id="menuDrawer">
 					<UserlandSidebar setHideDrawer={(to) => { hideDrawer = to }} />
 				</Drawer>
-
-				<div class = "m-2 p-2 w-full pl-12 md:pl-2 md:w-auto">
-					<svelte:component this={componentTable[$activePage]}/>
-				</div>
 			</div>
 		{:else}
 			<UserVerify />

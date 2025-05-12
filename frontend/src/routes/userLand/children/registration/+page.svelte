@@ -27,7 +27,6 @@ import { displayChildImages } from "$lib/features";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { activePage, componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
 import {
 	Button,
@@ -156,16 +155,9 @@ async function setup(): Promise<{
 			answers = currentAnswers.data;
 			disableEdit = true;
 		}
-	}
-
-	// DEBUG/TEMPORARY: when we have no answers for existing questions,
-	// we need to create empty
-	// ones that bind to the form. this might not be necessary in the final
-	// version b/c it only can happen when the admin changes questions on the
-	// fly in the database. Doing so should eventually elicit database
-	// migration though, which should assure consistency
-	for (const question of questionnaire) {
-		if (answers[question.id] === undefined) {
+	} else {
+		// if the child doesn't exist yet (i.e. user clicked "new") then we need empty answers for all questions
+		for (const question of questionnaire) {
 			answers[question.id] = {
 				question_id: question.id,
 				answer: "",
@@ -173,16 +165,17 @@ async function setup(): Promise<{
 			};
 		}
 	}
+
 	return { questionnaire: questionnaire, answers: answers };
 }
 
-let birthmonthtext = $derived.by(() => {
-	return birthmonth !== null
-		? Intl.DateTimeFormat(i18n.locale || "en", { month: "long" }).format(
-				new Date(birthmonth.toString()),
-			)
-		: "";
-});
+let birthmonthtext = $derived(
+	birthmonth !== null
+		? new Date(birthmonth.toString()).toLocaleString(i18n.locale, {
+				month: "long",
+			})
+		: "",
+);
 
 async function submitChildData(): Promise<void> {
 	console.log("SubmitChild Data was called.");
@@ -322,6 +315,22 @@ async function submitData(): Promise<void> {
 	console.log("submission of child data successful.");
 	goto("/userLand/children/gallery");
 }
+
+// localised months
+const monthOptions = Array.from({ length: 12 }, (x, i) => {
+	return {
+		name: new Date(1980, i, 1).toLocaleString(i18n.locale, { month: "long" }),
+		value: i + 1,
+	};
+});
+// years from 2019 up to current year
+const yearOptions = Array.from(
+	{ length: new Date().getFullYear() - 2018 },
+	(x, i) => {
+		const year = new Date().getFullYear();
+		return { name: year - i, value: year - i };
+	},
+);
 </script>
 
 {#if i18n.locale}
@@ -364,7 +373,7 @@ async function submitData(): Promise<void> {
                     >
                         {#if false === disableEdit && showChildQuestions === false}
                             <DataInput
-                                    component={componentTable["input"]}
+                                    component="input"
                                     bind:value={name}
                                     label={i18n.tr.childData.childName}
                                     required={true}
@@ -375,29 +384,29 @@ async function submitData(): Promise<void> {
                             />
 
                             <DataInput
-                                    component={componentTable["input"]}
+                                    component="select"
                                     bind:value={birthmonth}
                                     label={i18n.tr.childData.childBirthMonth}
                                     required={true}
-                                    placeholder={i18n.tr.childData.pleaseEnterNumber}
                                     disabled={disableEdit}
                                     id="child_birthmonth"
-                                    kwargs = {{type: "number", min: 0, max:12, step: '1'}}
+                                    items={monthOptions}
+                                    testid="birthMonth"
                             />
 
                             <DataInput
-                                    component={componentTable["input"]}
+                                    component="select"
                                     bind:value={birthyear}
                                     label={i18n.tr.childData.childBirthYear}
                                     required={true}
-                                    placeholder={i18n.tr.childData.pleaseEnterNumber}
                                     disabled={disableEdit}
                                     id="child_birthyear"
-                                    kwargs = {{type: "number", min: 2007, step: '1', max: new Date().getFullYear()}}
+                                    items={yearOptions}
+                                    testid="birthYear"
                             />
 
                             <DataInput
-                                    component={Input}
+                                    component="input"
                                     bind:value={color}
                                     label={i18n.tr.childData.childColor}
                                     required={false}
@@ -410,7 +419,7 @@ async function submitData(): Promise<void> {
 
                             {#if displayChildImages}
                                 <DataInput
-                                        component={componentTable["fileupload"]}
+                                        component="fileupload"
                                         bind:value={image}
                                         label={image !== null ? i18n.tr.childData.imageOfChildChange : i18n.tr.childData.imageOfChildNew}
                                         required={false}
@@ -491,7 +500,7 @@ async function submitData(): Promise<void> {
                         {#if (!disableEdit || (disableEdit && showChildQuestions))}
                             {#each questionnaire as element, i}
                                 <DataInput
-                                        component={element.component ? componentTable[element.component] : undefined}
+                                        component={element?.component}
                                         bind:value={answers[element.id].answer}
                                         bind:additionalValue={answers[element.id].additional_answer}
                                         label={element?.text?.[i18n.locale].question}
@@ -505,7 +514,6 @@ async function submitData(): Promise<void> {
                                               element?.text?.[i18n.locale].options_json ?? '',
                                           )}
                                         disabled={disableEdit}
-                                        placeholder=""
                                 />
                             {/each}
                         {/if}
