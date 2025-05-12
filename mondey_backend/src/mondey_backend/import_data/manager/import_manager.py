@@ -23,17 +23,14 @@ from mondey_backend.import_data.postprocessing_corrections.run_postprocess_corre
 )
 from mondey_backend.import_data.utils import parse_weeks
 from mondey_backend.models.children import Child
-from mondey_backend.models.milestones import Language
 from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneText
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
-from mondey_backend.models.questions import ChildQuestionText
 from mondey_backend.models.questions import UserAnswer
 from mondey_backend.models.questions import UserQuestion
-from mondey_backend.models.questions import UserQuestionText
 from mondey_backend.models.users import User
 from mondey_backend.models.users import UserCreate
 
@@ -54,15 +51,6 @@ class ImportManager:
     """
 
     def __init__(self, debug: bool = False):
-        """
-        Initialize the ImportManager.
-
-        Args:
-            debug: Enable debug logging
-        """
-        self.debug = debug
-        self._setup_logging()
-
         # Initialize DataManager
         self.data_manager = DataManager(debug=debug)
 
@@ -216,13 +204,6 @@ class ImportManager:
             self.nationality_other_question_variable: "FE02",
             self.muttersprache_other_question_variable: "FE04",
         }
-
-    def _setup_logging(self):
-        """Set up logging configuration."""
-        logging.basicConfig(
-            level=logging.DEBUG if self.debug else logging.INFO,
-            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        )
 
     def get_question_filled_in_to_parent(
         self, questions_df: pd.DataFrame, variable: str, debug_print: bool = False
@@ -607,107 +588,6 @@ class ImportManager:
         logger.debug(f"Not a special case variable: {question_label}")
         return False
 
-    # -------------------------------------------------------------------------
-    # Import Methods
-    # -------------------------------------------------------------------------
-
-    def import_milestones_metadata(self, session: Session) -> None:
-        """Import milestones metadata."""
-        logger.info("Importing milestones metadata")
-
-        df = self.data_manager.load_milestones_metadata_df()
-
-        # Filter for milestone rows
-        milestone_df = df[df["VAR"].str.contains("_")]
-
-        # Ensure German language exists
-        if not session.get(Language, "de"):
-            session.add(Language(id="de"))
-            session.commit()
-
-        # Group milestones by their prefixes
-        milestone_groups = {}
-        affix_groups = {}
-
-        # First, identify affixes from the QUESTION column
-        for _, row in milestone_df.iterrows():
-            var = row["VAR"]
-            label = row["LABEL"]
-            question = row.get("QUESTION", "")
-
-            if not self.is_milestone(row):
-                logger.debug(f"Skipping {label}")
-                continue
-            else:
-                logger.debug(f"Keeping {label}")
-
-            # Check if this is an affix group
-            if (
-                isinstance(question, str)
-                and question.startswith("__")
-                and question.endswith("__")
-            ):
-                affix = question.removeprefix("__").removesuffix("__")
-                if affix not in affix_groups:
-                    affix_groups[affix] = []
-                affix_groups[affix].append(var)
-
-        # Now process all milestones and assign them to groups
-        for _, row in milestone_df.iterrows():
-            var = row["VAR"]
-            label = row["LABEL"]
-
-            if not self.is_milestone(row):
-                continue
-
-            derived_milestone_group = (
-                self.derive_milestone_group_from_milestone_string_id(var)
-            )
-
-            # Get the prefix from the label
-            prefix = self.extract_milestone_prefix(label)
-
-            # Check if it belongs to an affix group
-            for affix, vars_list in affix_groups.items():
-                if var in vars_list:
-                    prefix = affix if not prefix else affix + " " + prefix
-                    break
-
-            if derived_milestone_group:
-                if derived_milestone_group not in milestone_groups:
-                    milestone_groups[derived_milestone_group] = []
-                milestone_groups[derived_milestone_group].append((var, label))
-            elif prefix:
-                if prefix not in milestone_groups:
-                    milestone_groups[prefix] = []
-                milestone_groups[prefix].append((var, label))
-
-        # Update milestones with name property
-        missing = 0
-        for _order, (_prefix, milestones) in enumerate(
-            milestone_groups.items(), start=1
-        ):
-            for _milestone_order, (var, label) in enumerate(milestones, start=1):
-                milestone_id = self.find_milestone_based_on_label(session, label)
-
-                if not milestone_id:
-                    logger.warning("Unaccounted for milestone!")
-                    missing += 1
-                    if missing == 1:  # Only one exception, milestone 92
-                        milestone_id = 92
-                    else:
-                        raise ValueError("At least 2 missing milestones.")
-
-                self.update_milestone_with_name_property(session, milestone_id, var)
-                logger.debug(f"Updated milestone {milestone_id} with name {var}")
-
-        logger.info(f"Missing milestones: {missing}")
-        session.commit()
-        logger.info(
-            f"Successfully imported {sum(len(m) for m in milestone_groups.values())} "
-            f"milestones in {len(milestone_groups)} groups"
-        )
-
     async def import_children_with_milestone_data(
         self, session: Session, data_df
     ) -> None:
@@ -806,206 +686,6 @@ class ImportManager:
 
             # Commit all answers for this child
             session.commit()
-
-    def import_questions(self, session: Session) -> None:
-        """Import questions."""
-        logger.info("Importing questions")
-
-        labels_df = self.data_manager.load_labels_df()
-        questions_configured_df = self.data_manager.load_questions_configured_df()
-
-        # Filter out milestones
-        labels_df = labels_df.loc[(labels_df.index > 170) & (labels_df.index < 395)]
-
-        free_text_questions = []
-        previous_variable_label = None
-        processed_variables = set()
-
-        for _, label_row in (
-            labels_df.groupby("Variable").first().reset_index().iterrows()
-        ):
-            variable = label_row["Variable"]
-
-            # Skip if already processed
-            if variable in processed_variables:
-                continue
-            processed_variables.add(variable)
-
-            # Determine question type and properties
-            variable_type = label_row["Variable Type"]
-            input_type = label_row["Input Type"]
-            variable_label = label_row["Variable Label"]
-
-            # Handle different variable types
-            if (
-                (variable_type == "NOMINAL" or variable_type == "ORDINAL")
-                and input_type == "MC"
-            ) or (variable_type == "DICHOTOMOUS" and input_type == "CK"):
-                # Multiple Choice Question
-                options = labels_df[labels_df["Variable"] == variable]
-
-                # Filter out non-response codes
-                valid_options = options[options["Response Code"] != -9]
-
-                # Prepare options
-                options_dict = {
-                    str(row["Response Code"]): row["Response Label"]
-                    for _, row in valid_options.iterrows()
-                }
-
-                # Prepare options JSON
-                prepared_options = []
-                options_display = []
-
-                for _, row in valid_options.iterrows():
-                    escaped_label = row["Response Label"].replace(",", "&#44;")
-
-                    option = {
-                        "value": str(row["Response Code"]),
-                        "name": escaped_label,
-                        "disabled": False,
-                    }
-                    prepared_options.append(option)
-                    options_display.append(escaped_label)
-
-                import json
-
-                options_json = json.dumps(prepared_options)
-                options_str = ";".join(options_display)
-
-                # Save select question
-                is_to_parent = self.get_question_filled_in_to_parent(
-                    questions_configured_df, variable
-                )
-                is_required = self.get_question_filled_in_required(
-                    questions_configured_df, variable
-                )
-
-                if is_to_parent:
-                    # Check for existing UserQuestion
-                    existing_question = session.execute(
-                        select(UserQuestion).where(UserQuestion.name == variable_label)
-                    ).scalar_one_or_none()
-
-                    if not existing_question:
-                        # Create UserQuestion
-                        user_question = UserQuestion(
-                            component="select",
-                            type="text",
-                            required=is_required,
-                            name=variable_label,
-                            text={
-                                "de": UserQuestionText(
-                                    question=variable_label,
-                                    options_json=options_json,
-                                    options=options_str,
-                                    lang_id="de",
-                                )
-                            },
-                        )
-                        session.add(user_question)
-                else:
-                    # Check for existing ChildQuestion
-                    existing_question = session.execute(
-                        select(ChildQuestion).where(
-                            ChildQuestion.name == variable_label
-                        )
-                    ).scalar_one_or_none()
-
-                    if not existing_question:
-                        # Create ChildQuestion
-                        child_question = ChildQuestion(
-                            component="select",
-                            type="text",
-                            required=is_required,
-                            name=variable_label,
-                            text={
-                                "de": ChildQuestionText(
-                                    question=variable_label,
-                                    options_json=options_json,
-                                    options=options_str,
-                                    lang_id="de",
-                                )
-                            },
-                        )
-                        session.add(child_question)
-
-                # Track previous variable for 'Andere' handling
-                previous_variable_label = variable_label
-
-            elif variable_type == "TEXT" and input_type == "TXT":
-                # Check if this is an 'Andere' option for a previous question
-                if (
-                    type(variable_label) is str
-                    and ": [01]" in variable_label
-                    and (
-                        previous_variable_label
-                        and f"{previous_variable_label}: [01]" in variable_label
-                    )
-                ):
-                    logger.debug(
-                        "Not creating question for this Other option - its free text response will be merged"
-                    )
-                    continue
-
-                # Independent free text question
-                free_text_questions.append((variable, variable_label))
-
-                # Save text question
-                is_to_parent = self.get_question_filled_in_to_parent(
-                    questions_configured_df, variable
-                )
-                is_required = self.get_question_filled_in_required(
-                    questions_configured_df, variable
-                )
-
-                if is_to_parent:
-                    # Check for existing UserQuestion
-                    existing_question = session.execute(
-                        select(UserQuestion).where(UserQuestion.name == variable_label)
-                    ).scalar_one_or_none()
-
-                    if not existing_question:
-                        # Create UserQuestion
-                        user_question = UserQuestion(
-                            component="textarea",
-                            type="text",
-                            required=is_required,
-                            name=variable_label,
-                            text={
-                                "de": UserQuestionText(
-                                    question=variable_label,
-                                    lang_id="de",
-                                )
-                            },
-                        )
-                        session.add(user_question)
-                else:
-                    # Check for existing ChildQuestion
-                    existing_question = session.execute(
-                        select(ChildQuestion).where(
-                            ChildQuestion.name == variable_label
-                        )
-                    ).scalar_one_or_none()
-
-                    if not existing_question:
-                        # Create ChildQuestion
-                        child_question = ChildQuestion(
-                            component="textarea",
-                            type="text",
-                            required=is_required,
-                            name=variable_label,
-                            text={
-                                "de": ChildQuestionText(
-                                    question=variable_label,
-                                    lang_id="de",
-                                )
-                            },
-                        )
-                        session.add(child_question)
-
-        session.commit()
-        logger.info("Questions imported successfully")
 
     def import_answers(self, session: Session, data_df) -> None:
         """Import answers to questions."""
@@ -1245,36 +925,8 @@ class ImportManager:
         logger.info("Additional data imported successfully")
 
     # -------------------------------------------------------------------------
-    # Main Import Methods
+    # Import Method
     # -------------------------------------------------------------------------
-
-    async def run_full_import(self) -> None:
-        """Run a full import of all data."""
-        logger.info("Starting full import")
-
-        # Get sessions
-        import_session, _ = self.data_manager.get_import_session(create_tables=True)
-        data_df = data_df = self.data_manager.load_data_df()
-
-        try:
-            # Import milestones metadata
-            self.import_milestones_metadata(import_session)
-
-            # Import children with milestone data
-            await self.import_children_with_milestone_data(import_session, data_df)
-
-            # Import questions
-            self.import_questions(import_session)
-
-            # Import answers
-            self.import_answers(import_session, data_df)
-
-            logger.info("Full import completed successfully")
-
-        except Exception as e:
-            logger.error(f"Error during import: {e}")
-            import_session.rollback()
-            raise
 
     async def run_additional_data_import(self) -> None:
         """Run import of additional data."""
