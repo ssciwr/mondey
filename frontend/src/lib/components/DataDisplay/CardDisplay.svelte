@@ -4,7 +4,7 @@ import { i18n } from "$lib/i18n.svelte";
 import { type CardElement, type CardStyle } from "$lib/util";
 import { Button, Card, Progressbar, Tooltip } from "flowbite-svelte";
 import { ArrowRightOutline, ClockOutline } from "flowbite-svelte-icons";
-import { Duration } from "luxon";
+import { Duration, type DurationUnit } from "luxon";
 
 let {
 	data = {
@@ -29,6 +29,16 @@ let {
 	},
 }: { data: CardElement; styleProps: CardStyle } = $props();
 
+function bestDurationUnit(duration: Duration): DurationUnit {
+	if (duration.days > 0) {
+		return "days";
+	}
+	if (duration.hours > 0) {
+		return "hours";
+	}
+	return "minutes";
+}
+
 let remainingTimeAsString = $derived.by(() => {
 	if (!data.secondsRemaining) {
 		return "";
@@ -39,9 +49,7 @@ let remainingTimeAsString = $derived.by(() => {
 	)
 		.shiftTo("days", "hours", "minutes")
 		.normalize();
-	const unit =
-		duration.days > 0 ? "days" : duration.hours > 0 ? "hours" : "minutes";
-	return duration.shiftTo(unit).toHuman({
+	return duration.shiftTo(bestDurationUnit(duration)).toHuman({
 		maximumFractionDigits: 0,
 	});
 });
