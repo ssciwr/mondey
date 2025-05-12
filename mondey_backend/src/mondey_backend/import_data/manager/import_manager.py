@@ -55,9 +55,9 @@ class ImportManager:
         self.data_manager = DataManager(debug=debug)
 
         # Mappings
-        self.child_parent_map = {}
-        self.milestone_mapping = {}
-        self.milestone_group_mapping = {}
+        self.child_parent_map: dict[str, int] = {}
+        self.milestone_mapping: dict[str, int] = {}
+        self.milestone_group_mapping: dict[int, int] = {}
 
         # Hardcoded mappings from the original code
         self.birth_year_mapping = {
@@ -460,6 +460,7 @@ class ImportManager:
         try:
             logger.debug(f"Creating new answer: {answer_text}")
 
+            new_answer: ChildAnswer | UserAnswer
             if is_child_question:
                 new_answer = ChildAnswer(
                     child_id=user_or_child_id,
@@ -704,25 +705,31 @@ class ImportManager:
         # Get child mapping
         child_case_to_id_map = {}
         children = session.exec(
-            select(Child.id, Child.name).where(Child.name.like("Imported Child %"))
+            select(Child).where(Child.name.startswith("Imported Child "))
         ).all()
 
-        for child_id, child_name in children:
-            if child_name.startswith("Imported Child "):
-                try:
-                    case_id = child_name.replace("Imported Child ", "")
-                    child_case_to_id_map[case_id] = child_id
-                except Exception as e:
-                    logger.error(f"Error processing child name '{child_name}': {e}")
+        for child in children:
+            try:
+                case_id = child.name.replace("Imported Child ", "")
+                child_case_to_id_map[case_id] = child.id
+            except Exception as e:
+                logger.error(f"Error processing child name '{child.name}': {e}")
 
         # Process data into answers
         for _, child_row in data_df.iterrows():
             logger.debug(f"Processing child {child_row.get('CASE')}")
+            case_id = str(child_row.get("CASE"))
 
             for _, label_row in (
                 labels_df.groupby("Variable").first().reset_index().iterrows()
             ):
-                db_child_id = child_case_to_id_map[str(child_row.get("CASE"))]
+                if case_id not in child_case_to_id_map:
+                    continue  # it always will be but to assure the typer for the create_answer functions
+                db_child_id = child_case_to_id_map[case_id]
+                if (
+                    type(db_child_id) is not int
+                ):  # this is to keep the type checker better; may be a better way to do this.
+                    continue
                 variable_type = label_row["Variable Type"]
                 variable = label_row["Variable"]
                 variable_label = label_row["Variable Label"]
@@ -790,7 +797,7 @@ class ImportManager:
                     else user_query
                 ).first()
 
-                if not question:
+                if not question or question.id is None:
                     logger.warning(
                         f"Discarding question answer without found saved question: "
                         f"{variable}, {label_row['Variable Label']}"
