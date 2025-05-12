@@ -8,7 +8,7 @@ ratehr than use the UI to manually add the data etc.
 import { expect, test } from "@playwright/test";
 import { login } from "./utils";
 
-test("/userLand/children/gallery - The gallery of children includes feedback with the relevant milestone groups", async ({
+test("/userLand/children - The gallery of children includes feedback with the relevant milestone groups", async ({
 	page,
 }) => {
 	await login(page, "admin@mondey.de", "admin");

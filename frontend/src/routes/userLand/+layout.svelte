@@ -46,7 +46,7 @@ let { children } = $props();
                     <UserlandSidebar setHideDrawer={(to) => { hideDrawer = to }} />
                 </Drawer>
 
-                <div class = "m-2 p-2 w-full pl-2 md:pl-12 md:w-auto grow">
+                <div class = "m-2 p-2 w-full px-2 md:px-2 md:w-auto grow">
                     {@render children?.()}
                 </div>
             </div>

@@ -35,6 +35,9 @@ importers:
       svelte-dnd-action:
         specifier: ^0.9.60
         version: 0.9.60(svelte@5.25.6)
+      wcag-contrast-utils:
+        specifier: ^1.0.1
+        version: 1.0.1
     devDependencies:
       '@hey-api/openapi-ts':
         specifier: 0.66.1
@@ -3588,6 +3591,10 @@ packages:
   walk-back@5.1.1:
     resolution: {integrity: sha512-e/FRLDVdZQWFrAzU6Hdvpm7D7m2ina833gIKLptQykRK49mmCYHLHq7UqjPDbxbKLZkTkW1rFqbengdE3sLfdw==}
     engines: {node: '>=12.17'}
+
+  wcag-contrast-utils@1.0.1:
+    resolution: {integrity: sha512-XDO0ZoIzJmZa/+dDA3hsZTRb/enObfSpo5khBHiW++s+u7ydrFZv4l/0KkomjAlsHZHSI4QCr0n6DJmqwIJOHw==}
+    engines: {node: '>=10'}
 
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
@@ -7400,6 +7407,8 @@ snapshots:
       xml-name-validator: 5.0.0
 
   walk-back@5.1.1: {}
+
+  wcag-contrast-utils@1.0.1: {}
 
   webidl-conversions@3.0.1: {}
 

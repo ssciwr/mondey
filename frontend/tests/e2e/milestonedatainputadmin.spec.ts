@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { DateTime } from "luxon";
 import { login } from "./utils";
 
-test("/userLand/children/gallery - Childs Milestone % gets updated when you select it to have been achieved", async ({
+test("/userLand/children - Childs Milestone % gets updated when you select it to have been achieved", async ({
 	page,
 	isMobile,
 }) => {
@@ -60,7 +60,7 @@ test("/userLand/children/gallery - Childs Milestone % gets updated when you sele
 	await page.getByRole("button", { name: "Weitgehend" }).click();
 
 	// Part 2: We now check that the actual score was updated from 0 to 25% for the milestone group:
-	await page.goto("/userLand/children/gallery", { waitUntil: "networkidle" });
+	await page.goto("/userLand/children", { waitUntil: "networkidle" });
 
 	await page.getByText(childName).click();
 

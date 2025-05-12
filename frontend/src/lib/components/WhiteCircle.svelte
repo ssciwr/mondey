@@ -2,7 +2,7 @@
 let { solid = false } = $props();
 </script>
 
-<div
-        style="border-radius:50%;min-height:3rem;min-width:3rem;"
-        class={solid ? "bg-white" : ""}
-></div>
+<div class="p-1 rounded-full border-[10px] border-solid border-white">
+    <div class={`rounded-full h-12 w-12 ${solid ? "bg-white" : ""}`}>
+    </div>
+</div>

@@ -33,7 +33,7 @@ test("/userLand/admin - Questions on Children : New child question can be added,
 	await expect(page.getByText(childQuestionText)).toBeVisible();
 
 	// go to child gallery to see new question
-	await page.goto("/userLand/children/gallery");
+	await page.goto("/userLand/children");
 	await page.locator('h5:has-text("+ Neu")').click();
 	await expect(page.getByText(childQuestionText)).toBeVisible();
 });

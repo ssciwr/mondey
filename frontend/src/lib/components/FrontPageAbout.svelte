@@ -23,24 +23,19 @@ const registerTestUser = async () => {
 		is_active: true,
 		research_group_id: 0,
 	};
-	let registerRequestTestAccountData: RegisterRegisterData = {
-		body: testAccountData,
-	};
 	registerTestUserButtonDisabled = true;
-	const result = await registerRegister(registerRequestTestAccountData);
+	const result = await registerRegister({ body: testAccountData });
 
 	if (result.error) {
 		alertMessage = `${i18n.tr.registration.alertMessageError}: ${result.error.detail}`;
 		showAlert = true;
 	} else {
-		const loginData: AuthCookieLoginData = {
+		const authReturn = await authCookieLogin({
 			body: {
 				username: testAccountData.email,
 				password: testAccountData.password,
 			},
-		};
-
-		const authReturn = await authCookieLogin(loginData);
+		});
 
 		if (authReturn.error) {
 			showAlert = true;
@@ -51,7 +46,7 @@ const registerTestUser = async () => {
 			if (status !== "success") {
 				alertMessage = `${i18n.tr.login.badCredentials}`;
 			}
-			goto("/userLand/children/gallery");
+			goto("/userLand/children");
 		}
 	}
 };

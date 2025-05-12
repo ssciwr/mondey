@@ -12,6 +12,7 @@ import {
 	deleteChild,
 	deleteChildImage,
 	getChild,
+	getChildImage,
 	getChildQuestions,
 	getCurrentChildAnswers,
 	updateChild,
@@ -63,7 +64,7 @@ let {
 	birthmonth = $bindable(null),
 }: {
 	name: string | null | undefined;
-	image: File | boolean | null;
+	image: File | null;
 	color: string | null | undefined;
 	birthyear: number | null;
 	birthmonth: number | null;
@@ -80,7 +81,7 @@ let breadcrumbdata = $derived([
 	{
 		label: i18n.tr.childData.overviewLabel,
 		onclick: () => {
-			goto("/userLand/children/gallery");
+			goto("/userLand/children");
 		},
 		symbol: GridPlusSolid,
 	},
@@ -130,8 +131,16 @@ async function setup(): Promise<{
 			name = child.data.name ?? null;
 			birthyear = child.data.birth_year;
 			birthmonth = child.data.birth_month;
-			image = child.data.has_image ? true : null;
+			image = null;
 			color = child.data.color ?? null;
+			if (child.data.has_image) {
+				const { data, error } = await getChildImage({
+					path: { child_id: currentChild.id },
+				});
+				if (!error && data) {
+					image = data as File;
+				}
+			}
 		}
 
 		// get existing answers
@@ -313,7 +322,7 @@ async function submitData(): Promise<void> {
 
 	// disable all elements to make editing a conscious choice amd go back to childrenGallery
 	console.log("submission of child data successful.");
-	goto("/userLand/children/gallery");
+	goto("/userLand/children");
 }
 
 // localised months
@@ -348,7 +357,7 @@ const yearOptions = Array.from(
                     >{childLabel}
                         {#if disableEdit}
                              <DangerousDeleteModal bind:open={showDeleteModal}
-                                    afterDelete={() => goto("/userLand/children/gallery")}
+                                    afterDelete={() => goto("/userLand/children")}
                                     intendedConfirmCode={i18n.tr.admin.delete}
                                     deleteDryRunnableRequest={(dryRun) =>
                                     deleteChild({
@@ -453,26 +462,27 @@ const yearOptions = Array.from(
                         {/if}
 
 
+                        {#if disableEdit}
                         <span>
-                            {#if disableEdit}
-                                <EditButton onclick={() => disableEdit = false} />
-                            {/if}
+                                <EditButton onclick={() => {
+                                    showChildQuestions = false;
+                                    disableEdit = false;
+                                }} />
 
-                            {#if currentChild.id !== null && disableEdit === true}
-                                    <DeleteButton onclick={() => showDeleteModal = true} />
-                                {/if}
-                            {#if !showChildQuestions && disableEdit}
+                            {#if currentChild.id !== null}
+                                <DeleteButton onclick={() => showDeleteModal = true} />
+                            {/if}
+                            {#if !showChildQuestions}
                                 <Button class="btn-secondary btn-icon" style="padding: 9.5px 20px" on:click={() => {
                                     showChildQuestions = true;
                                     disableEdit = false;
                                 }}>
                                       <ClipboardCheckOutline /> {questionnaire.length} {i18n.tr.admin.questions}
-
                                 </Button>
                                 <Tooltip>{questionnaire.length} {i18n.tr.admin.childQuestions}</Tooltip>
                             {/if}
-
                         </span>
+                        {/if}
 
                         <hr style="margin-bottom:10px" />
 

@@ -148,7 +148,7 @@ const breadcrumbdata: any[] = [
 	{
 		label: i18n.tr.childData.overviewLabel,
 		onclick: () => {
-			goto("/userLand/children/gallery");
+			goto("/userLand/children");
 		},
 		symbol: GridPlusSolid,
 	},

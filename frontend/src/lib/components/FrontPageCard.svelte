@@ -9,7 +9,6 @@ import { Card, Tooltip } from "flowbite-svelte";
   <h1 class="h1">{i18n.tr.frontpage.heading}</h1>
   <p class="text-muted">{i18n.tr.frontpage.summary}</p>
   <div class="justify-center mb-1 items-center mt-2">
-
       <button class="btn-primary" onclick ={() => {
         goto("/signup");
       }}>{i18n.tr.frontpage.buttonLabel}</button>
