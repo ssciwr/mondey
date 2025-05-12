@@ -295,9 +295,15 @@ def _get_expected_age_from_scores(scores: np.ndarray, count: np.ndarray) -> int:
     min_number_of_answers = 3
     # expected age is the first age with an average score >= `min_avg_score`
     min_avg_score = 2.1
+    # default expected age if no data or no age has a score >= `min_avg_score`
+    default_expected_age = 72
     valid_scores = scores.copy()
     valid_scores[count < min_number_of_answers] = 0
-    return int(np.argmax(valid_scores >= min_avg_score))
+    successful_scores = valid_scores >= min_avg_score
+    # if no age has a score >= `min_avg_score`, return 72
+    if not np.any(successful_scores):
+        return default_expected_age
+    return int(np.argmax(successful_scores))
 
 
 def child_image_path(child_id: int | None) -> pathlib.Path:
