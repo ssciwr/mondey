@@ -8,7 +8,6 @@ multiple scripts, providing a more maintainable and cohesive approach.
 from __future__ import annotations
 
 import logging
-from datetime import datetime
 
 import pandas as pd
 from fuzzywuzzy import fuzz
@@ -42,11 +41,8 @@ class ImportManager:
 
     This class handles:
     1. Loading and parsing CSV data
-    2. Creating and managing database connections
-    3. Importing milestones metadata
-    4. Importing children with milestone data
-    5. Importing question/answer data
-    6. Aligning additional data with existing data
+    2. Importing additional data to the right existing question IDs and types (user/chld),
+    including milestone data, and parsing the text format
     """
 
     def __init__(self, debug: bool = False):
@@ -447,11 +443,26 @@ class ImportManager:
         logger.debug(f"Creating answer for question {question_id}: {answer_text}")
         logger.debug(f"{'Child question' if is_child_question else 'User question'}")
 
-        if set_only_additional_answer:
-            logger.debug(
-                "Additional answer with no found base question. This could be a question which is independent, "
-                "but happens to have [01] and 'Andere' in the name, like 'Andere Diagnosen', which is okay, "
-                "but it could indicate data processing has gone wrong."
+        # Postprocessing
+        answer_text = answer_text.replace("&#44;", ",").replace("<tab>", " ")
+
+        term_not_chosen = "nicht gewählt"
+        term_not_chosen_encoded = "ausgew\\u00e4hlt"
+        term_chosen = "ausgewählt"
+        term_chosen_encoded = "ausgew\\u00e4hlt"
+        if answer_text.strip(" ") in [
+            term_chosen,
+            term_chosen_encoded,
+        ]:  # whole answer is Ja/Nein
+            answer_text = answer_text.replace(term_chosen, "Ja").replace(
+                term_chosen_encoded, "Ja"
+            )
+        elif answer_text.strip(" ") in [
+            term_not_chosen,
+            term_not_chosen_encoded,
+        ]:  # again whole answer is Ja/Nein
+            answer_text = answer_text.replace(term_not_chosen, "Nein").replace(
+                term_chosen_encoded, "Nein"
             )
 
         try:
@@ -632,7 +643,7 @@ class ImportManager:
                 has_image=False,
             )
             session.add(child)
-            session.commit()
+            session.flush()
             logger.info(f"Created child with ID: {child.id}")
 
             # Create milestone answer session
@@ -641,7 +652,7 @@ class ImportManager:
                 user_id=parent_id,
                 expired=True,
                 included_in_statistics=False,
-                created_at=datetime(2025, 1, 1, 1, 0, 1),
+                created_at=row["STARTED"],
                 suspicious=False,
             )
             session.add(answer_session)
@@ -682,7 +693,7 @@ class ImportManager:
                             f"Unable to save milestone {column} with value {answer_value}"
                         ) from err
 
-            # Commit all answers for this child
+            # Commit all milestone answers for this child
             session.commit()
 
     def import_answers(self, session: Session, data_df) -> None:
