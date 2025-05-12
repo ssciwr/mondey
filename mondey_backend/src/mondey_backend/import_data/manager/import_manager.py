@@ -11,7 +11,6 @@ import logging
 from datetime import datetime
 
 import pandas as pd
-from fastapi_users.db import SQLAlchemyUserDatabase
 from fuzzywuzzy import fuzz
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import Session
@@ -305,8 +304,6 @@ class ImportManager:
         async with AsyncSession(
             self.data_manager.async_users_engine
         ) as user_import_session:
-            user_db = SQLAlchemyUserDatabase(user_import_session, User)
-
             for child_id in child_ids:
                 existing_parent = await self.check_parent_exists(
                     user_import_session, child_id
@@ -597,16 +594,16 @@ class ImportManager:
 
         # Get all milestones
         milestone_query = select(Milestone)
-        milestones = session.execute(milestone_query).scalars().all()
+        milestones = session.exec(milestone_query).all()
 
         # Create mappings
         self.milestone_mapping = {}
         self.milestone_group_mapping = {}
 
         for milestone in milestones:
-            if milestone.name:
-                self.milestone_mapping[milestone.name] = milestone.id
-                self.milestone_group_mapping[milestone.id] = milestone.group_id
+            if milestone.name:  # type: ignore
+                self.milestone_mapping[milestone.name] = milestone.id  # type: ignore
+                self.milestone_group_mapping[milestone.id] = milestone.group_id  # type: ignore
 
         # Generate parents for children
         child_ids = [row["CASE"] for _, row in data_df.iterrows()]

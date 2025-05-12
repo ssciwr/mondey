@@ -14,10 +14,10 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass
-from http.client import HTTPException
 from pathlib import Path
 
 import pandas as pd
+from fastapi import HTTPException
 from fastapi import status
 from sqlalchemy import Engine
 from sqlalchemy import create_engine
@@ -66,9 +66,7 @@ class ImportPaths:
     @classmethod
     def default(cls, base_dir: Path | None = None) -> ImportPaths:
         """Create default ImportPaths."""
-        import_dir = app_settings.PRIVATE_FILES_PATH
-
-        import_dir = Path(import_dir)
+        import_dir: Path = Path(app_settings.PRIVATE_FILES_PATH)
 
         return cls(
             labels_path=import_dir / "labels_encoded.csv",
@@ -130,12 +128,11 @@ class DataManager:
         self.mondey_engine = create_engine(self.current_db_url)
         self.async_users_engine = create_async_engine(self.users_db_url)
 
-        # Cached data
-        self._labels_df = None
-        self._data_df = None
-        self._questions_configured_df = None
-        self._milestones_metadata_df = None
-        self._additional_data_df = None
+        self._labels_df: pd.DataFrame | None = None
+        self._data_df: pd.DataFrame | None = None
+        self._questions_configured_df: pd.DataFrame | None = None
+        self._milestones_metadata_df: pd.DataFrame | None = None
+        self._additional_data_df: pd.DataFrame | None = None
 
     def _setup_logging(self):
         """Set up logging configuration."""
@@ -186,6 +183,7 @@ class DataManager:
                 dtype=str,
                 encoding_errors="replace",
             )
+            # Only strip columns if the dataframe was successfully loaded
             self._questions_configured_df.columns = (
                 self._questions_configured_df.columns.str.strip()
             )
@@ -202,7 +200,9 @@ class DataManager:
             )
         return self._milestones_metadata_df
 
-    def load_additional_data_df(self, force_reload: bool = False) -> pd.DataFrame:
+    def load_additional_data_df(
+        self, force_reload: bool = False
+    ) -> pd.DataFrame | None:
         """Load the additional data DataFrame."""
         if self._additional_data_df is None or (
             force_reload and self.import_paths.additional_data_path
@@ -222,7 +222,7 @@ class DataManager:
     # Additional Data Import methods
     # -------------------------------------------------------------------------
 
-    def validate_additional_import_csv(self, csv_data):
+    def validate_additional_import_csv(self, csv_data: pd.DataFrame) -> None:
         required_columns = ["FK05", "CASE"]
         if not all(column in csv_data.columns for column in required_columns):
             raise HTTPException(
@@ -231,8 +231,8 @@ class DataManager:
             )
 
     async def save_additional_import_csv_into_dataframe(
-        self, csv_data, csv_file: str
-    ):  # Define a path for the CSV file
+        self, csv_data: pd.DataFrame, csv_file: str
+    ) -> None:  # Define a path for the CSV file
         # Save the CSV data locally
         csv_data.to_csv(csv_file, index=False, sep="\t", encoding="utf-16")
         print(f"CSV saved to {csv_file}")
@@ -245,7 +245,7 @@ class DataManager:
         self.import_paths.additional_data_path = Path(csv_file)
         self.load_additional_data_df(force_reload=True)
 
-    def cleanup_additional_data_import(self, csv_file):
+    def cleanup_additional_data_import(self, csv_file: str) -> None:
         os.remove(csv_file)
 
     # -------------------------------------------------------------------------
