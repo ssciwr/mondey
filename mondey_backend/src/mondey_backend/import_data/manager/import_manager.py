@@ -10,7 +10,6 @@ from __future__ import annotations
 import logging
 
 import pandas as pd
-from fuzzywuzzy import fuzz
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import Session
 from sqlmodel import select
@@ -21,7 +20,6 @@ from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
-from mondey_backend.models.milestones import MilestoneText
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import UserAnswer
@@ -318,86 +316,6 @@ class ImportManager:
         return child_parent_map
         # not updating Child.user_id here. Could do that.
 
-    def find_milestone_based_on_label(self, session: Session, label: str) -> int | None:
-        """Find a milestone based on its label."""
-        if ":" in label:
-            label = label.split(":", 1)[1].lstrip()
-
-        logger.debug(
-            f"Milestone search - using preprocessed label for desc search as: {label}"
-        )
-
-        # Try exact match first
-        stmt = select(MilestoneText).where(MilestoneText.desc == label)
-        milestone_text = session.scalars(stmt).first()
-
-        if not milestone_text:
-            stmt = select(MilestoneText).where(MilestoneText.desc == label.rstrip("."))
-            milestone_text = session.scalars(stmt).first()
-
-        # Some German translations are missing the starting "Das"
-        if not milestone_text:
-            dasified_label = label.removeprefix("Das ")
-            if dasified_label == "Kind erkennt, ob sich zwei Worte reimen oder nicht.":
-                dasified_label = "Kind erkennt, ob sich zwei Worte reimen oder nicht. "
-            if (
-                dasified_label
-                == "Kind erkennt, wenn Wörter mit dem gleichen Buchstaben beginnen (z.B. Haus/Hose, Brot/Besen, Ampel/Apfel)."
-            ):
-                dasified_label = "Kind erkennt, wenn Wörter mit dem gleichen Buchstaben beginnen (z.B. Haus/Hose, Brot/Besen, Ampel/Apfel."
-
-            logger.debug(f"Trying with Dasified label: {dasified_label}")
-            stmt = select(MilestoneText).where(MilestoneText.desc == dasified_label)
-            milestone_text = session.scalars(stmt).first()
-
-        # If all direct matches fail, try fuzzy matching
-        if not milestone_text:
-            logger.debug("Direct matches failed. Trying fuzzy matching...")
-            stmt = select(MilestoneText)
-            all_milestone_texts = session.scalars(stmt).all()
-
-            best_match = None
-            best_score = 0
-            threshold = 85  # Minimum score to consider a match
-
-            for mt in all_milestone_texts:
-                if mt.desc:
-                    score = fuzz.partial_ratio(label, mt.desc)
-                    if score > best_score and score >= threshold:
-                        best_score = score
-                        best_match = mt
-
-            if best_match:
-                logger.debug(f"Found fuzzy match with score {best_score}:")
-                logger.debug(f"Original: {label}")
-                logger.debug(f"Matched:  {best_match.desc}")
-                milestone_text = best_match
-
-        if milestone_text:
-            return milestone_text.milestone_id
-        return None
-
-    def update_milestone_with_name_property(
-        self, session: Session, milestone_id: int, var: str
-    ) -> bool:
-        """Update a milestone with a name property."""
-        stmt = select(Milestone).where(Milestone.id == milestone_id)
-        milestone = session.scalars(stmt).first()
-
-        if milestone:
-            milestone.name = var
-            session.commit()
-            return True
-        return False
-
-    def derive_milestone_group_from_milestone_string_id(
-        self, string_id: str
-    ) -> str | None:
-        """Derive the milestone group from a milestone string ID."""
-        if len(string_id) > 2 and string_id[0:2] in self.milestone_group_id_map:
-            return self.milestone_group_id_map[string_id[0:2]]
-        return None
-
     def is_milestone(self, row: pd.Series) -> bool:
         """Check if a row represents a milestone."""
         var = row["VAR"]
@@ -462,8 +380,41 @@ class ImportManager:
                 term_chosen_encoded, "Nein"
             )
 
+        if set_only_additional_answer:
+            # It's not ideal to do this(keeping an update operation when we want to just create) but basically:
+            # All Freetext answers are always after the "Other" option multi select answer
+            # Updating said "Other" option "additional_answer" property is what frontend/the rest of the code expects
+            # The "Other" option saves anyway. We could prevent the code from saving Other answers until it had the
+            # additional answer, but that's a bit tricky to manage.
+            # The below worked exactly as expected in the sample and additioanl data.
+            # We only update the additional_answer property, so we can always know the "answer" property is 100% as imported
+            query = (
+                (
+                    select(ChildAnswer)
+                    .where(ChildAnswer.child_id == user_or_child_id)
+                    .where(ChildAnswer.question_id == question_id)
+                    .with_for_update(skip_locked=True)
+                )
+                if is_child_question
+                else (
+                    select(UserAnswer)
+                    .where(UserAnswer.user_id == user_or_child_id)
+                    .where(UserAnswer.question_id == question_id)
+                    .with_for_update(skip_locked=True)
+                )
+            )
+
+            existing_answer = session.execute(query).scalar_one_or_none()
+
+            if existing_answer and answer_text is not None and answer_text != "":
+                existing_answer.additional_answer = answer_text
+                session.add(existing_answer)
+                return True, existing_answer
+
         try:
             logger.debug(f"Creating new answer: {answer_text}")
+            # if set only additional answer it should look up the existing question tho? no
+            # it needs a magical way to know what the "answer" should be for e.g. nationality question.
 
             new_answer: ChildAnswer | UserAnswer
             if is_child_question:
