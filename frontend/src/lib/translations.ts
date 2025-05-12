@@ -303,7 +303,6 @@ export const translationIds = {
 		searchRemarkLabel: "Bemerkung",
 		searchRemarkPlaceholder: "Bemerkungen zu Kindern durchsuchen",
 		pleaseEnter: "Bitte eintragen",
-		pleaseEnterNumber: "Bitte als Zahl eintragen",
 		childName: "Name des Kindes?",
 		childBirthYear: "Geburtsjahr des Kindes?",
 		childBirthMonth: "Geburtsmonat des Kindes?",

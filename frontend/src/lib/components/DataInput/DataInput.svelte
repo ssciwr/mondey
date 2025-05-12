@@ -1,12 +1,27 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
+import Fileupload from "$lib/components/DataInput/Fileupload.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import { Label, Textarea } from "flowbite-svelte";
+import {
+	Input,
+	Label,
+	Select,
+	type SelectOptionType,
+	Textarea,
+} from "flowbite-svelte";
+export type Component = "input" | "textarea" | "select" | "fileupload";
+
+const componentTable = {
+	input: Input,
+	textarea: Textarea,
+	select: Select,
+	fileupload: Fileupload,
+};
 
 // variables
 let {
-	component = null,
+	component = "input",
 	value = $bindable(null),
 	additionalValue = $bindable(null),
 	label = null,
@@ -19,8 +34,9 @@ let {
 	items = [],
 	placeholder = undefined,
 	kwargs = {},
+	testid = undefined,
 }: {
-	component?: any;
+	component?: Component;
 	value?: any;
 	additionalRequired?: boolean;
 	label?: string | null;
@@ -30,9 +46,10 @@ let {
 	required?: boolean;
 	disabled?: boolean;
 	id?: string | undefined;
-	items?: any[];
+	items?: SelectOptionType<string | number>[];
 	placeholder?: string | undefined;
 	kwargs?: any;
+	testid?: string;
 } = $props();
 
 let valid: boolean = $state(false);
@@ -56,9 +73,9 @@ let showTextField: boolean = $derived.by(
 	},
 );
 let highlight = $derived(!valid && required === true);
-
-let realPlaceholder = $derived(
-	i18n.tr ? i18n.tr.misc.selectPlaceholder : undefined,
+let derivedPlaceholder = $derived(
+	placeholder ??
+		(component === "select" ? i18n.tr.misc.selectPlaceholder : undefined),
 );
 </script>
 
@@ -74,23 +91,23 @@ let realPlaceholder = $derived(
 
 <div class="space-y-4">
 	<svelte:component
-		this={component}
+		this={componentTable[component]}
 		class={highlight
 			? "rounded border-2 border-primary-600 dark:border-primary-600 " +
 				componentClass
 			: componentClass}
 		bind:value = {value}
-		{realPlaceholder}
+		placeholder = {derivedPlaceholder}
 		{items}
 		{required}
 		{disabled}
 		{...kwargs}
 		for={label}
+		data-testid={testid}
 	/>
 
 	{#if showTextField === true}
 		<Textarea
-
 			bind:value={additionalValue}
 			required={additionalRequired}
 			{disabled}

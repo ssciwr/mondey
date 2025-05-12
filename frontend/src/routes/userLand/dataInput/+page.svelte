@@ -13,7 +13,6 @@ import {
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
-import { componentTable } from "$lib/stores/componentStore";
 import { preventDefault } from "$lib/util";
 import { Button, Card, Heading } from "flowbite-svelte";
 
@@ -135,7 +134,7 @@ function safeParseJsonList(str: string | null | undefined): any[] {
                 {#each questionnaire as element, i}
                     {#if element.text && element.component}
                         <DataInput
-                                component={componentTable[element.component]}
+                                component={element.component}
                                 bind:value={answers[element.id].answer}
                                 bind:additionalValue={answers[element.id]
 								.additional_answer}
