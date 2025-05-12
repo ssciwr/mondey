@@ -16,9 +16,6 @@ from sqlmodel import Session
 from sqlmodel import select
 
 from mondey_backend.import_data.manager.data_manager import DataManager
-from mondey_backend.import_data.postprocessing_corrections.run_postprocess_corrections import (
-    run_postprocessing_corrections,
-)
 from mondey_backend.import_data.utils import parse_weeks
 from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Milestone
@@ -931,11 +928,6 @@ class ImportManager:
 
         # Then import answers
         self.import_answers(session, additional_data_df)
-
-        # Run post-processing corrections
-        run_postprocessing_corrections(
-            str(self.data_manager.import_paths.additional_data_path), dry_run=False
-        )
 
         logger.info("Additional data imported successfully")
 

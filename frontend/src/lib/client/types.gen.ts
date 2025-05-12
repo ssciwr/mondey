@@ -9,7 +9,7 @@ export type BodyAuthCookieLoginAuthLoginPost = {
     client_secret?: string | null;
 };
 
-export type BodyImportCsvDataResearchImportCsvPost = {
+export type BodyImportCsvDataAdminResearchImportCsvPost = {
     file: Blob | File;
 };
 
@@ -1403,6 +1403,29 @@ export type DeleteResearchGroupResponses = {
     200: unknown;
 };
 
+export type ImportCsvDataData = {
+    body: BodyImportCsvDataAdminResearchImportCsvPost;
+    path?: never;
+    query?: never;
+    url: '/admin/research/import-csv/';
+};
+
+export type ImportCsvDataErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ImportCsvDataError = ImportCsvDataErrors[keyof ImportCsvDataErrors];
+
+export type ImportCsvDataResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
 export type UsersCurrentUserData = {
     body?: never;
     path?: never;
@@ -2273,29 +2296,6 @@ export type GetResearchNamesResponses = {
 };
 
 export type GetResearchNamesResponse = GetResearchNamesResponses[keyof GetResearchNamesResponses];
-
-export type ImportCsvDataData = {
-    body: BodyImportCsvDataResearchImportCsvPost;
-    path?: never;
-    query?: never;
-    url: '/research/import-csv/';
-};
-
-export type ImportCsvDataErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ImportCsvDataError = ImportCsvDataErrors[keyof ImportCsvDataErrors];
-
-export type ImportCsvDataResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
 
 export type ClientOptions = {
     baseUrl: `${string}://${string}` | (string & {});
