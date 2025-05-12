@@ -1,7 +1,7 @@
 import asyncio
 
 import pandas as pd
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 from sqlmodel import col
 from sqlmodel import select
 
@@ -87,9 +87,7 @@ if __name__ == "__main__":
 
     # Remove duplicates and save filtered data
     _, duplicate_cases = asyncio.run(
-        remove_duplicate_cases(
-            additional_data_path, import_current_session, filtered_output_path
-        )
+        remove_duplicate_cases(additional_data_path, import_current_session)
     )
 
     print(f"Duplicate CASE IDs removed: {duplicate_cases}")
