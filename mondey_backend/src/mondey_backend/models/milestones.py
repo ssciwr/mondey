@@ -156,6 +156,11 @@ class MilestoneAnswerPublic(SQLModel):
     answer: int
 
 
+class MilestoneAnswerResponse(BaseModel):
+    answer: MilestoneAnswerPublic
+    session_completed: bool
+
+
 class MilestoneAnswer(SQLModel, table=True):
     answer_session_id: int | None = Field(
         default=None, foreign_key="milestoneanswersession.id", primary_key=True
@@ -178,6 +183,7 @@ class MilestoneAnswerSession(SQLModel, table=True):
         }
     )
     expired: bool
+    completed: bool
     included_in_statistics: bool
     suspicious: bool
     answers: Mapped[dict[int, MilestoneAnswer]] = dict_relationship(key="milestone_id")
@@ -216,7 +222,6 @@ class MilestoneAgeScore(SQLModel, table=True):
     count: int
     avg_score: float
     stddev_score: float
-    expected_score: float
 
 
 class MilestoneAgeScoreCollection(SQLModel, table=True):

@@ -79,7 +79,11 @@ async function nextMilestone() {
 		console.log(error);
 		return;
 	}
-	milestoneAnswerSession.answers[`${currentMilestone.id}`] = data;
+	milestoneAnswerSession.answers[`${currentMilestone.id}`] = data.answer;
+	if (data.session_completed) {
+		goto("/userLand/children/feedback");
+		return;
+	}
 	if (
 		currentMilestoneIndex + 1 ===
 		contentStore.milestoneGroupData.milestones.length
