@@ -79,7 +79,6 @@ async function nextMilestone() {
 		console.log(error);
 		return;
 	}
-	console.log(data);
 	milestoneAnswerSession.answers[`${currentMilestone.id}`] = data.answer;
 	if (data.session_completed) {
 		goto("/userLand/children/feedback");
