@@ -16,7 +16,8 @@ engine = create_engine(
     connect_args={"check_same_thread": False},
 )
 
-
+# todo: Refacror this back to what it was since we nolonger create duplicate table sets.. it's easier to
+# copy an existing .db to work with than create fresh tables programatically anyhow.
 def create_mondey_db_and_tables_themselves(provided_engine: Engine) -> None:
     SQLModel.metadata.create_all(provided_engine)
     with Session(provided_engine) as session:

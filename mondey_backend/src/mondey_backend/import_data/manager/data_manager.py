@@ -20,12 +20,12 @@ import pandas as pd
 from fastapi import HTTPException
 from fastapi import status
 from sqlalchemy import Engine
-from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel import Session
 
-from mondey_backend.databases.mondey import create_mondey_db_and_tables_themselves
+from mondey_backend.databases.mondey import engine as mondey_engine
+from mondey_backend.databases.users import async_session_maker
+from mondey_backend.databases.users import engine as users_engine
 from mondey_backend.import_data.remove_duplicate_cases import remove_duplicate_cases
 
 from ...settings import app_settings
@@ -45,12 +45,12 @@ class ImportPaths:
 
     @classmethod
     def from_strings(
-        cls,
-        labels_path: str,
-        data_path: str,
-        questions_configured_path: str,
-        milestones_metadata_path: str,
-        additional_data_path: str | None = None,
+            cls,
+            labels_path: str,
+            data_path: str,
+            questions_configured_path: str,
+            milestones_metadata_path: str,
+            additional_data_path: str | None = None,
     ) -> ImportPaths:
         """Create ImportPaths from string paths."""
         return cls(
@@ -87,21 +87,15 @@ class DataManager:
     """
 
     def __init__(
-        self,
-        import_paths: ImportPaths | None = None,
-        mondey_db_path: Path | None = None,
-        current_db_path: Path | None = None,
-        users_db_path: Path | None = None,
-        debug: bool = False,
+            self,
+            import_paths: ImportPaths | None = None,
+            debug: bool = False,
     ):
         """
         Initialize the DataManager.
 
         Args:
             import_paths: Paths to import data files
-            mondey_db_path: Path to the Mondey database
-            current_db_path: Path to the current database
-            users_db_path: Path to the users database
             debug: Enable debug logging
         """
         self.debug = debug
@@ -110,23 +104,6 @@ class DataManager:
         # Set up paths
         script_dir = Path(__file__).parent.parent.parent.parent.parent.absolute()
         self.import_paths = import_paths or ImportPaths.default(script_dir)
-
-        # Database paths
-        self.current_db_path = current_db_path or (
-            script_dir / "src/mondey_backend/import_data/current_db/current_mondey.db"
-        )
-        self.users_db_path = users_db_path or (
-            script_dir / "src/mondey_backend/import_data/current_db/current_users.db"
-        )
-
-        # Database connections
-        # When we want this to work directly on the live DB, we can change these paths to be the same as the normal ones.
-        self.current_db_url = f"sqlite:////{self.current_db_path}"
-        self.users_db_url = f"sqlite+aiosqlite:///{self.users_db_path}"
-
-        # Create engines
-        self.mondey_engine = create_engine(self.current_db_url)
-        self.async_users_engine = create_async_engine(self.users_db_url)
 
         self._labels_df: pd.DataFrame | None = None
         self._data_df: pd.DataFrame | None = None
@@ -201,11 +178,11 @@ class DataManager:
         return self._milestones_metadata_df
 
     def load_additional_data_df(
-        self, force_reload: bool = False
+            self, force_reload: bool = False
     ) -> pd.DataFrame | None:
         """Load the additional data DataFrame."""
         if self._additional_data_df is None or (
-            force_reload and self.import_paths.additional_data_path
+                force_reload and self.import_paths.additional_data_path
         ):
             logger.info(
                 f"Loading additional data from {self.import_paths.additional_data_path}"
@@ -230,21 +207,23 @@ class DataManager:
                 detail=f"CSV must contain the following columns: {', '.join(required_columns)}",
             )
 
+    # todo: use tempfile.
     async def save_additional_import_csv_into_dataframe(
-        self, csv_data: pd.DataFrame, csv_file: str
+            self, csv_data: pd.DataFrame, csv_file: str
     ) -> None:  # Define a path for the CSV file
         # Save the CSV data locally
         csv_data.to_csv(csv_file, index=False, sep="\t", encoding="utf-16")
-        print(f"CSV saved to {csv_file}")
+        logger.debug(f"CSV saved to {csv_file}")
 
         import_session, _ = self.get_import_session()
 
         await remove_duplicate_cases(csv_file, import_session)
-        print("Removed duplicates before processing")
+        logger.debug("Removed duplicates before processing")
 
         self.import_paths.additional_data_path = Path(csv_file)
         self.load_additional_data_df(force_reload=True)
 
+    # todo: use tempfile.
     def cleanup_additional_data_import(self, csv_file: str) -> None:
         os.remove(csv_file)
 
@@ -252,14 +231,11 @@ class DataManager:
     # Database Session Methods
     # -------------------------------------------------------------------------
 
-    def get_import_session(self, create_tables: bool = False) -> tuple[Session, Engine]:
-        """Get a session for the import database."""
-        with Session(self.mondey_engine) as session:
-            if create_tables:
-                create_mondey_db_and_tables_themselves(self.mondey_engine)
-            return session, self.mondey_engine
+    def get_import_session(self) -> tuple[Session, Engine]:
+        with Session(mondey_engine) as session:
+            return session, mondey_engine
 
     async def get_async_users_session(self) -> AsyncSession:
         """Get an async session for the users database."""
-        async with AsyncSession(self.async_users_engine) as session:
+        async with async_session_maker() as session:
             return session

@@ -71,3 +71,6 @@ def test_childs_age_is_recorded_accurately_alternative():
     ).scalar_one_or_none()
     assert child.birth_year == 2020
     assert child.birth_month == 6
+
+# todo: Update both of these to use import_manager and to overwrite the data path in import_manager.data_manager.data_paths
+# as in test_import_additional.

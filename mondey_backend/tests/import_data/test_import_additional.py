@@ -1,40 +1,59 @@
+import asyncio
 import os
 import shutil
 import pytest
+import pytest_asyncio  # Import this for newer versions
 import pandas as pd
 from sqlmodel import select
 
-from mondey_backend.import_data.utils import get_import_test_session
 from mondey_backend.models.children import Child
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import UserAnswer
 
-from mondey_backend.import_data.await align_additional_data_to_current_answers import \
-    await align_additional_data_to_current_answers
-
-from mondey_backend.import_data.utils import additional_data_path, labels_path
-
-from mondey_backend.import_data.utils import questions_configured_path
+from mondey_backend.import_data.manager.import_manager import ImportManager
+from mondey_backend.import_data.manager.data_manager import ImportPaths
 
 # Path constants
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-BASE_CSV_PATH = os.path.join(PROJECT_ROOT, "src", "mondey_backend", "import_data", additional_data_path)
-LABELS_CSV_PATH = os.path.join(PROJECT_ROOT, "src", "mondey_backend", "import_data", labels_path)
-QUESTIONS_CONFIGURATION_CSV_PATH = os.path.join(PROJECT_ROOT, "src", "mondey_backend", "import_data", questions_configured_path)
+BASE_CSV_PATH = os.path.join(PROJECT_ROOT, "src", "mondey_backend", "import_data", "additional_data_full_backup.csv")
+LABELS_CSV_PATH = os.path.join(PROJECT_ROOT, "src", "mondey_backend", "import_data", "labels.csv")
+QUESTIONS_CONFIGURATION_CSV_PATH = os.path.join(PROJECT_ROOT, "src", "mondey_backend", "import_data", "questions_configured.csv")
 
-# Similarly, update the TEST_DIR path if needed:
+# Test directory
 TEST_DIR = os.path.join(os.path.dirname(__file__))  # Current directory
 TEST_CSV_PATH = os.path.join(TEST_DIR, "test_data.csv")
 
 
+# async test
+
+# Create a minimal test to check if async is working
+@pytest.mark.asyncio
+async def test_minimal_async():
+    """Test basic async functionality"""
+    await asyncio.sleep(0.1)
+    assert True
+
+# For newer versions of pytest-asyncio, use this decorator
+@pytest_asyncio.fixture
+async def async_fixture():
+    await asyncio.sleep(0.1)
+    return "test_value"
+
+@pytest.mark.asyncio
+async def test_with_async_fixture(async_fixture):
+    """Test async fixture"""
+    value = async_fixture  # This should now be the resolved value
+    assert value == "test_value"
+
 @pytest.fixture(scope="module")
 def setup_test_data():
+    # todo: Problem here is that our code edits the CSV in place.
+    # Which is a bad code smell really. Maybe fix it editing the CSV in place before fixing these tests?
     """Create test directory and verify base data exists"""
     # Verify the base data file exists and has the expected number of rows
     assert os.path.exists(BASE_CSV_PATH), f"Base data file not found at {BASE_CSV_PATH}"
     df = pd.read_csv(BASE_CSV_PATH, sep="\t", encoding="utf-16", encoding_errors="replace")
     assert len(df) == 427, f"Base file should contain exactly 427 rows, found {len(df)}"
-
 
     # Create test directory if it doesn't exist
     os.makedirs(TEST_DIR, exist_ok=True)
@@ -64,14 +83,32 @@ def test_csv_file():
 
     return TEST_CSV_PATH
 
+
+@pytest_asyncio.fixture
+async def import_manager(test_csv_file):
+    """Create and configure ImportManager for testing"""
+    # Create ImportPaths with test data paths
+    import_paths = ImportPaths(
+        additional_data_path=test_csv_file,
+        labels_path=LABELS_CSV_PATH,
+        questions_configured_path=QUESTIONS_CONFIGURATION_CSV_PATH,
+    )
+
+    # Create ImportManager with custom paths
+    manager = ImportManager(debug=True)
+    manager.data_manager.import_paths = import_paths
+
+    # Run the import
+    await manager.run_additional_data_import()
+
+    return manager
+
+
 @pytest.mark.skip(reason="Requires actual data CSVs which are not present")
-def test_user_answers_exist(setup_test_data, test_csv_file):
-    await align_additional_data_to_current_answers(data_path=test_csv_file, labelling_path=LABELS_CSV_PATH, questions_configuration_path=QUESTIONS_CONFIGURATION_CSV_PATH)
-
-    import_session, import_engine = get_import_test_session()
-
+@pytest.mark.asyncio
+async def test_user_answers_exist(session, setup_test_data, import_manager):
     # Test that answers exist for a specific user
-    user_answers = import_session.exec(
+    user_answers = session.exec(
         select(UserAnswer).where(UserAnswer.user_id == 443)
     ).all()
 
@@ -79,14 +116,12 @@ def test_user_answers_exist(setup_test_data, test_csv_file):
 
 
 @pytest.mark.skip(reason="Requires actual data CSVs which are not present")
-def test_child_answers_for_child_1874(setup_test_data, test_csv_file):
-    await align_additional_data_to_current_answers(data_path=test_csv_file, labelling_path=LABELS_CSV_PATH, questions_configuration_path=QUESTIONS_CONFIGURATION_CSV_PATH)
-
-    import_session, import_engine = get_import_test_session()
+@pytest.mark.asyncio
+async def test_child_answers_for_child_1874(session, setup_test_data, import_manager):
     child_id = 1874
 
     # Test language answer
-    language_answer = import_session.exec(
+    language_answer = session.exec(
         select(ChildAnswer).where(
             ChildAnswer.child_id == child_id,
             ChildAnswer.question_id == 20
@@ -97,7 +132,7 @@ def test_child_answers_for_child_1874(setup_test_data, test_csv_file):
     assert language_answer.answer == "Deutsch"
 
     # Test birth year answer
-    birth_year_answer = import_session.exec(
+    birth_year_answer = session.exec(
         select(ChildAnswer).where(
             ChildAnswer.child_id == child_id,
             ChildAnswer.question_id == 2
@@ -108,7 +143,7 @@ def test_child_answers_for_child_1874(setup_test_data, test_csv_file):
     assert birth_year_answer.answer == "2021"
 
     # Test numeric value answer
-    numeric_answer = import_session.exec(
+    numeric_answer = session.exec(
         select(ChildAnswer).where(
             ChildAnswer.child_id == child_id,
             ChildAnswer.question_id == 17
@@ -120,14 +155,12 @@ def test_child_answers_for_child_1874(setup_test_data, test_csv_file):
 
 
 @pytest.mark.skip(reason="Requires actual data CSVs which are not present")
-def test_child_answers_for_child_1857(setup_test_data, test_csv_file):
-    await align_additional_data_to_current_answers(data_path=test_csv_file, labelling_path=LABELS_CSV_PATH, questions_configuration_path=QUESTIONS_CONFIGURATION_CSV_PATH)
-
-    import_session, import_engine = get_import_test_session()
+@pytest.mark.asyncio
+async def test_child_answers_for_child_1857(session, setup_test_data, import_manager):
     child_id = 1857
 
     # Test yes/no answer
-    yes_no_answer = import_session.exec(
+    yes_no_answer = session.exec(
         select(ChildAnswer).where(
             ChildAnswer.child_id == child_id,
             ChildAnswer.question_id == 11
@@ -138,7 +171,7 @@ def test_child_answers_for_child_1857(setup_test_data, test_csv_file):
     assert yes_no_answer.answer == "Ja"
 
     # Test gender answer
-    gender_answer = import_session.exec(
+    gender_answer = session.exec(
         select(ChildAnswer).where(
             ChildAnswer.child_id == child_id,
             ChildAnswer.question_id == 13
@@ -150,13 +183,10 @@ def test_child_answers_for_child_1857(setup_test_data, test_csv_file):
 
 
 @pytest.mark.skip(reason="Requires actual data CSVs which are not present")
-def test_specific_user_answers(setup_test_data, test_csv_file):
-    await align_additional_data_to_current_answers(data_path=test_csv_file, labelling_path=LABELS_CSV_PATH, questions_configuration_path=QUESTIONS_CONFIGURATION_CSV_PATH)
-
-    import_session, import_engine = get_import_test_session()
-
+@pytest.mark.asyncio
+async def test_specific_user_answers(session, setup_test_data, import_manager):
     # This is from the original data: checking it is preserved
-    job_answer = import_session.exec(
+    job_answer = session.exec(
         select(UserAnswer).where(
             UserAnswer.user_id == 29,
             UserAnswer.question_id == 6
@@ -167,7 +197,7 @@ def test_specific_user_answers(setup_test_data, test_csv_file):
     assert job_answer.answer == "Führungskraft 2 (z.B. Vertriebs-/Verkaufsleitung, Führung kleinerer Unternehmen)"
 
     # Special eltern question
-    parent_type_answer = import_session.exec(
+    parent_type_answer = session.exec(
         select(UserAnswer).where(
             UserAnswer.user_id == 283,
             UserAnswer.question_id == 13
@@ -179,13 +209,10 @@ def test_specific_user_answers(setup_test_data, test_csv_file):
 
 
 @pytest.mark.skip(reason="Requires actual data CSVs which are not present")
-def test_answer_with_additional_information(setup_test_data, test_csv_file):
-    await align_additional_data_to_current_answers(data_path=test_csv_file, labelling_path=LABELS_CSV_PATH, questions_configuration_path=QUESTIONS_CONFIGURATION_CSV_PATH)
-
-    import_session, import_engine = get_import_test_session()
-
+@pytest.mark.asyncio
+async def test_answer_with_additional_information(session, setup_test_data, import_manager):
     # Find an answer with additional_answer field populated
-    answer_with_additional = import_session.exec(
+    answer_with_additional = session.exec(
         select(UserAnswer).where(
             UserAnswer.additional_answer != None
         ).limit(1)
@@ -197,14 +224,11 @@ def test_answer_with_additional_information(setup_test_data, test_csv_file):
 
 
 @pytest.mark.skip(reason="Requires actual data CSVs which are not present")
-def test_child_parent_relationship(setup_test_data, test_csv_file):
-    await align_additional_data_to_current_answers(data_path=test_csv_file, labelling_path=LABELS_CSV_PATH, questions_configuration_path=QUESTIONS_CONFIGURATION_CSV_PATH)
-
-    import_session, import_engine = get_import_test_session()
-
+@pytest.mark.asyncio
+async def test_child_parent_relationship(session, setup_test_data, import_manager):
     # Test that child has correct parent relationship
     child_id = 1874
-    child = import_session.exec(
+    child = session.exec(
         select(Child).where(Child.id == child_id)
     ).first()
 
@@ -212,7 +236,7 @@ def test_child_parent_relationship(setup_test_data, test_csv_file):
     assert child.user_id is not None
 
     # Verify parent has answers
-    parent_answers = import_session.exec(
+    parent_answers = session.exec(
         select(UserAnswer).where(UserAnswer.user_id == child.user_id)
     ).all()
 
@@ -220,13 +244,10 @@ def test_child_parent_relationship(setup_test_data, test_csv_file):
 
 
 @pytest.mark.skip(reason="Requires actual data CSVs which are not present")
-def test_negative_cases(setup_test_data, test_csv_file):
-    await align_additional_data_to_current_answers(data_path=test_csv_file, labelling_path=LABELS_CSV_PATH, questions_configuration_path=QUESTIONS_CONFIGURATION_CSV_PATH)
-
-    import_session, import_engine = get_import_test_session()
-
+@pytest.mark.asyncio
+async def test_negative_cases(session, setup_test_data, import_manager):
     # Test non-existent child ID
-    non_existent_child_answer = import_session.exec(
+    non_existent_child_answer = session.exec(
         select(ChildAnswer).where(
             ChildAnswer.child_id == 99999,
             ChildAnswer.question_id == 1
@@ -236,7 +257,7 @@ def test_negative_cases(setup_test_data, test_csv_file):
     assert non_existent_child_answer is None
 
     # Test non-existent user ID
-    non_existent_user_answer = import_session.exec(
+    non_existent_user_answer = session.exec(
         select(UserAnswer).where(
             UserAnswer.user_id == 99999,
             UserAnswer.question_id == 1
