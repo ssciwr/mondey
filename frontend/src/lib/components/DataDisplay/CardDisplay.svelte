@@ -56,13 +56,13 @@ let remainingTimeAsString = $derived.by(() => {
 </script>
 
 <Card
-        {...styleProps.card}
+        img={data.image}
+        imgClass="max-md:hidden object-scale-down"
+        href={data.button ? undefined : data?.href}
         class={data.button
        ? 'm-2 max-w-prose flex flex-col h-full text-gray-700 dark:text-white'
        : 'hover:transition-color m-2 max-w-prose flex flex-col h-full cursor-pointer text-gray-700 hover:bg-gray-300 dark:text-white dark:hover:bg-gray-600 '}
-        href={data.button ? undefined : data?.href}
-        img={data.image}
-        imgClass="max-md:hidden object-scale-down"
+        {...styleProps.card}
         on:click={data?.events?.['onclick'] ?? (()=>{})}
 >
     <!-- Fixed height container for header -->
