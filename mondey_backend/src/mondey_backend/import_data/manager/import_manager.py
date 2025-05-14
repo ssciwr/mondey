@@ -776,11 +776,18 @@ class ImportManager:
                     UserQuestion.id == self.hardcoded_id_map[variable]
                 )
 
+                logger.debug(
+                    f"Lookuped question with this ID: {variable} & ID: {self.hardcoded_id_map[variable]}"
+                )
+
                 question = session.exec(
                     child_query
                     if variable in self.relevant_child_variables
                     else user_query
                 ).first()
+
+                logger.debug("Question result was then:")
+                logger.debug(question)
 
                 if not question or question.id is None:
                     logger.warning(

@@ -12,9 +12,9 @@ Splitting it this way makes it a lot more readable
 from __future__ import annotations
 
 import logging
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+from typing import IO
 
 import pandas as pd
 from fastapi import HTTPException
@@ -197,7 +197,7 @@ class DataManager:
             )
 
     async def save_additional_import_csv_into_dataframe(
-        self, csv_data: pd.DataFrame, temp_file: tempfile.NamedTemporaryFile
+        self, csv_data: pd.DataFrame, temp_file: IO[bytes]
     ) -> None:
         """Save additional data CSV using a temporary file."""
         # Save the CSV data to the temporary file
@@ -213,7 +213,7 @@ class DataManager:
         self.load_additional_data_df(force_reload=True)
 
     async def save_labels_csv_into_dataframe(
-        self, csv_data: pd.DataFrame, temp_file: tempfile.NamedTemporaryFile
+        self, csv_data: pd.DataFrame, temp_file: IO[bytes]
     ) -> None:
         """Save labels CSV using a temporary file."""
         # Save the CSV data to the temporary file
