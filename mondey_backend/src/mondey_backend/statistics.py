@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import logging
 from collections import defaultdict
 from collections.abc import Sequence
 
@@ -12,6 +11,7 @@ from sqlmodel import select
 
 from mondey_backend.dependencies import SessionDep
 from mondey_backend.dependencies import UserAsyncSessionDep
+from mondey_backend.logging import logger
 from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneAgeScore
@@ -27,9 +27,9 @@ from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import UserAnswer
 from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.users import User
-from mondey_backend.routers.utils import _get_expected_age_from_scores
 from mondey_backend.routers.utils import get_answer_session_child_ages_in_months
 from mondey_backend.routers.utils import get_child_age_in_months
+from mondey_backend.routers.utils import get_expected_age_from_scores
 
 
 # see: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
@@ -171,8 +171,9 @@ def _get_statistics_by_age(
     tuple[np.ndarray, np.ndarray, np.ndarray]
         Updated count, avg and stddev arrays, where the index in the array corresponds to the child age in months.
     """
+
     if count is None or avg is None or stddev is None:
-        max_age_months = 100
+        max_age_months = 72
         count = np.zeros(max_age_months + 1, dtype=np.int32)
         avg = np.zeros(max_age_months + 1, dtype=np.float64)
         stddev = np.zeros(max_age_months + 1, dtype=np.float64)
@@ -186,12 +187,13 @@ def _get_statistics_by_age(
 
     for answer in answers:
         age = child_ages[answer.answer_session_id]  # type: ignore
-        new_count, new_avg, new_m2 = _add_sample(
-            count[age], avg[age], m2[age], answer.answer
-        )
-        count[age] = new_count
-        avg[age] = new_avg
-        m2[age] = new_m2
+        if 0 <= age < len(count):
+            new_count, new_avg, new_m2 = _add_sample(
+                count[age], avg[age], m2[age], answer.answer
+            )
+            count[age] = new_count
+            avg[age] = new_avg
+            m2[age] = new_m2
 
     count, avg, stddev = _finalize_statistics(count, avg, m2)
 
@@ -211,7 +213,6 @@ async def get_test_account_user_ids(user_session: UserAsyncSessionDep) -> list[i
 def analyse_answer_session(
     session: SessionDep, milestone_answer_session: MilestoneAnswerSession
 ) -> MilestoneAnswerSessionAnalysis:
-    logger = logging.getLogger(__name__)
     analysis = MilestoneAnswerSessionAnalysis(rms=0, child_age=0, answers=[])
     child = session.get(Child, milestone_answer_session.child_id)
     if child is None:
@@ -269,7 +270,6 @@ def flag_suspicious_answer_sessions(
     """
     Flag any new answer sessions with rms difference to average answers for that age greater than `threshold` as suspicious
     """
-    logger = logging.getLogger(__name__)
     milestone_answer_sessions = session.exec(
         select(MilestoneAnswerSession)
         .where(col(MilestoneAnswerSession.completed))
@@ -311,7 +311,6 @@ async def async_update_stats(
     Returns:
         str: Message string indicating successful statistics update
     """
-    logger = logging.getLogger(__name__)
     logger.debug(
         f"Starting {'incremental' if incremental_update else 'full'} statistics update"
     )
@@ -486,7 +485,7 @@ def calculate_milestone_statistics_by_age(
         answers, child_ages, count=count, avg=avg_scores, stddev=stddev_scores
     )
 
-    expected_age = _get_expected_age_from_scores(avg_scores, count)
+    expected_age = get_expected_age_from_scores(avg_scores, count)
 
     # overwrite last_statistics with updated stuff --> set primary keys explicitly
     return MilestoneAgeScoreCollection(
@@ -664,7 +663,6 @@ async def extract_research_data(
     user_session: UserAsyncSessionDep,
     research_group_id: int | None = None,
 ) -> pd.DataFrame:
-    logger = logging.getLogger(__name__)
     logger.info("Extracting research data...")
     test_user_ids_to_exclude = await get_test_account_user_ids(user_session)
     logger.info(

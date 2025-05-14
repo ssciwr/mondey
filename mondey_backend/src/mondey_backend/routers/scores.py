@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 from collections import defaultdict
 from enum import Enum
 
@@ -8,6 +7,7 @@ import numpy as np
 from sqlmodel import select
 
 from ..dependencies import SessionDep
+from ..logging import logger
 from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAgeScore
 from ..models.milestones import MilestoneAgeScoreCollection
@@ -103,7 +103,6 @@ def compute_milestonegroup_feedback_summary(
     dict[int, int]
         Dictionary of milestonegroup_id -> feedback
     """
-    logger = logging.getLogger(__name__)
     logger.debug("compute_milestonegroup_feedback_summary")
     logger.debug(
         f"  answersession id: {answersession.id}, created_at: {answersession.created_at}"
@@ -171,8 +170,6 @@ def compute_milestonegroup_feedback_detailed(
     dict[int, dict[int, int]]
         Dictionary of milestonegroup_id -> [milestone_id -> feedback]
     """
-    logger = logging.getLogger(__name__)
-
     logger.debug("compute_milestonegroup_feedback_detailed")
     logger.debug(
         f"  answersession id: {answersession.id} created_at: {answersession.created_at}"

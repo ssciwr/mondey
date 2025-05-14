@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 from datetime import datetime
 
 import numpy as np
@@ -228,11 +227,7 @@ def create_router() -> APIRouter:
         milestone_answer.answer = answer.answer
         session.commit()
         session.refresh(milestone_answer_session)
-        logging.warning(milestone_answer_session)
         if all(a.answer >= 0 for a in milestone_answer_session.answers.values()):
-            logging.warning(
-                sum(a.answer >= 0 for a in milestone_answer_session.answers.values())
-            )
             milestone_answer_session.expired = True
             milestone_answer_session.completed = True
             session.add(milestone_answer_session)

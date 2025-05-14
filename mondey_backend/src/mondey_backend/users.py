@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 import smtplib
 from email.message import EmailMessage
 from typing import Annotated
@@ -23,6 +22,7 @@ from .databases.users import User
 from .databases.users import async_session_maker
 from .databases.users import get_access_token_db
 from .databases.users import get_user_db
+from .logging import logger
 from .models.research import ResearchGroup
 from .settings import app_settings
 
@@ -35,10 +35,10 @@ def send_email(msg: EmailMessage) -> None:
                     s.login(app_settings.SMTP_USERNAME, app_settings.SMTP_PASSWORD)
                 s.send_message(msg)
         else:
-            logging.warning(f"Email {msg} not sent as SMTP_HOST is not set")
+            logger.warning(f"Email {msg} not sent as SMTP_HOST is not set")
     except smtplib.SMTPException as e:
-        logging.error(f"Email {msg} not sent due to SMTP error: {e}")
-        logging.exception(e)
+        logger.error(f"Email {msg} not sent due to SMTP error: {e}")
+        logger.exception(e)
 
 
 def send_email_validation_link(email: str, token: str) -> None:
@@ -77,17 +77,17 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     verification_token_secret = app_settings.SECRET
 
     async def on_after_register(self, user: User, request: Request | None = None):
-        logging.info(f"User {user.email} registered.")
+        logger.info(f"User {user.email} registered.")
         if is_test_account_user(user):
             async with async_session_maker() as user_session:
-                logging.warning(f"Updating test user to verified {user.email}")
+                logger.warning(f"Updating test user to verified {user.email}")
                 user_db = await user_session.get(User, user.id)
                 if user_db is not None:
                     user_db.is_verified = True
                 await user_session.commit()
         with Session(mondey_engine) as mondey_session:
             if mondey_session.get(ResearchGroup, user.research_group_id) is None:
-                logging.warning(
+                logger.warning(
                     f"Invalid research code {user.research_group_id} used by User {user.email} - ignoring."
                 )
                 async with async_session_maker() as user_session:
@@ -100,7 +100,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     async def on_after_forgot_password(
         self, user: User, token: str, request: Request | None = None
     ):
-        logging.info(f"User {user.id} has forgot their password. Reset token: {token}")
+        logger.info(f"User {user.id} has forgot their password. Reset token: {token}")
         send_reset_password_link(user.email, token)
 
     async def on_after_request_verify(
@@ -108,7 +108,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     ):
         if is_test_account_user(user):
             return
-        logging.info(
+        logger.info(
             f"Verification requested for user {user.id}. Verification token: {token}"
         )
         send_email_validation_link(user.email, token)
