@@ -10,7 +10,14 @@ export type BodyAuthCookieLoginAuthLoginPost = {
 };
 
 export type BodyImportCsvDataAdminResearchImportCsvPost = {
-    file: Blob | File;
+    /**
+     * Additional data CSV file
+     */
+    additional_data_file: Blob | File;
+    /**
+     * Labels CSV file
+     */
+    labels_file?: Blob | File;
 };
 
 export type BodyResetForgotPasswordAuthForgotPasswordPost = {

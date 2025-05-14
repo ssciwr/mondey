@@ -8,12 +8,14 @@ multiple scripts, providing a more maintainable and cohesive approach.
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 
 import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import Session
 from sqlmodel import select
 
+from mondey_backend.databases.users import async_session_maker
 from mondey_backend.import_data.manager.data_manager import DataManager
 from mondey_backend.import_data.utils import parse_weeks
 from mondey_backend.models.children import Child
@@ -196,21 +198,52 @@ class ImportManager:
         }
 
     def get_question_filled_in_to_parent(
-        self, questions_df: pd.DataFrame, variable: str, debug_print: bool = False
+        self, variable: str, debug_print: bool = False
     ) -> bool:
         """Check if a question is filled in by the parent."""
-        csv_match = questions_df[questions_df["variable"] == variable]
+        # Hardcoded mapping based on CSV data specific to the survey as of April 2025
+        is_to_parent_mapping = {
+            "FE01": True,
+            "FE02": True,
+            "FE03_01": True,
+            "FE04": True,
+            "FE05_01": True,
+            "FE06": True,
+            "FE07": True,
+            "FE08": True,
+            "FK02": False,
+            "FK03": False,
+            "FK04_01": False,
+            "FK05": False,
+            "FK05_01": False,
+            "FK05_02": False,
+            "FK05_03": False,
+            "FK05_04": False,
+            "FK05_05": False,
+            "FK05_06": False,
+            "FK05_07": False,
+            "FK06_01": False,
+            "FK07": False,
+            "FK08": False,
+            "FK08_01": False,
+            "FK08_02": False,
+            "FK08_03": False,
+            "FK09": False,
+            "FK10": False,
+            "FK11": False,
+            "FK12": False,
+            "FP01": True,
+            "FP02": True,
+            "FP03": True,
+            "FP04": True,
+            "FP05": True,
+        }
 
-        match_found = not csv_match.empty and str(csv_match.iloc[0]["isToParent"]) in [
-            "true",
-            "ja",
-            "yes",
-        ]
+        # Get the mapping for the variable, default to False if not found
+        match_found = is_to_parent_mapping.get(variable, False)
 
         if debug_print:
-            logger.debug(
-                f"Is to parent variable was: {'True' if match_found else 'False'}"
-            )
+            logger.debug(f"Is to parent variable {variable}: {match_found}")
 
         return match_found
 
@@ -231,7 +264,7 @@ class ImportManager:
         if child_result is not None:
             child = child_result[0]
             logger.debug(
-                f"Found child: {child.id}, {child.name}, parent: {child.user_id}"
+                f"Found child: {child.id}, {child.name}, parent: {child.user_id} - for case ID: {case_id}"
             )
             return child.user_id
         else:
@@ -292,9 +325,7 @@ class ImportManager:
         """Generate parents for children."""
         child_parent_map = {}
 
-        async with AsyncSession(
-            self.data_manager.async_users_engine
-        ) as user_import_session:
+        async with async_session_maker() as user_import_session:
             for child_id in child_ids:
                 existing_parent = await self.check_parent_exists(
                     user_import_session, child_id
@@ -600,7 +631,7 @@ class ImportManager:
                 user_id=parent_id,
                 expired=True,
                 included_in_statistics=False,
-                created_at=row["STARTED"],
+                created_at=datetime.strptime(row["STARTED"], "%Y-%m-%d %H:%M:%S"),
                 suspicious=False,
             )
             session.add(answer_session)
@@ -649,8 +680,6 @@ class ImportManager:
         logger.info("Importing answers to questions")
 
         labels_df = self.data_manager.load_labels_df()
-        questions_configured_df = self.data_manager.load_questions_configured_df()
-
         # Filter out milestones
         labels_df = labels_df.loc[(labels_df.index > 170) & (labels_df.index < 395)]
 
@@ -776,9 +805,7 @@ class ImportManager:
                         answer_text = response_label.iloc[0]["Response Label"]
 
                         # Check if question is for parent or child
-                        if self.get_question_filled_in_to_parent(
-                            questions_configured_df, variable
-                        ):
+                        if self.get_question_filled_in_to_parent(variable):
                             # Create user answer
                             parent_id = self.get_childs_parent_id(
                                 session, child_row.get("CASE")
@@ -825,9 +852,7 @@ class ImportManager:
                         continue
 
                     # Check if question is for parent or child
-                    if self.get_question_filled_in_to_parent(
-                        questions_configured_df, variable
-                    ):
+                    if self.get_question_filled_in_to_parent(variable):
                         # Create user answer
                         parent_id = self.get_childs_parent_id(
                             session, child_row.get("CASE")
@@ -865,7 +890,8 @@ class ImportManager:
         logger.info(f"Missing answers: {missing}")
 
     async def import_additional_data(self, session: Session) -> None:
-        """Import additional data."""
+        """Import additional data.
+        @param session is so we can overwrite this for tests (like test_import_additional.py)"""
         logger.info("Importing additional data")
 
         if not self.data_manager.import_paths.additional_data_path:
@@ -887,7 +913,7 @@ class ImportManager:
     # -------------------------------------------------------------------------
 
     async def run_additional_data_import(self) -> None:
-        """Run import of additional data."""
+        """Run import of additional data with DB rollback for any errors."""
         logger.info("Starting additional data import")
 
         # Get sessions
@@ -902,4 +928,18 @@ class ImportManager:
         except Exception as e:
             logger.error(f"Error during additional data import: {e}")
             import_session.rollback()
+            # so this is actually pretty pointless (not really but...)
+            # it will only rollback changes from the last called commit
+            # so the code is designed to only commit once all children answers are
+            # processed and not to add duplicate milestones, to avoid this problem.
             raise
+
+
+"""
+Todos 14th May:
+- Refactor to remove labels dependency, by hardcoding question IDs for answer Variable IDs
+- Check tests now run with a fresh database each with the hardcoded import
+- Expand tests a little to have questions for the hardcoded added IDs
+- Refactor to use tempfile for actual additional import
+
+"""

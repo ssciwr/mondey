@@ -12,7 +12,7 @@ Splitting it this way makes it a lot more readable
 from __future__ import annotations
 
 import logging
-import os
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -20,12 +20,9 @@ import pandas as pd
 from fastapi import HTTPException
 from fastapi import status
 from sqlalchemy import Engine
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import Session
 
 from mondey_backend.databases.mondey import engine as mondey_engine
-from mondey_backend.databases.users import async_session_maker
-from mondey_backend.databases.users import engine as users_engine
 from mondey_backend.import_data.remove_duplicate_cases import remove_duplicate_cases
 
 from ...settings import app_settings
@@ -35,46 +32,43 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ImportPaths:
-    """Dataclass to hold all import file paths."""
+    """Dataclass to hold all import file paths. Data and milestones_metadata paths are optional."""
 
     labels_path: Path
-    data_path: Path
-    questions_configured_path: Path
-    milestones_metadata_path: Path
+    data_path: Path | None = None
     additional_data_path: Path | None = None
 
     @classmethod
     def from_strings(
-            cls,
-            labels_path: str,
-            data_path: str,
-            questions_configured_path: str,
-            milestones_metadata_path: str,
-            additional_data_path: str | None = None,
+        cls,
+        labels_path: str,
+        data_path: str | None = None,
+        additional_data_path: str | None = None,
     ) -> ImportPaths:
         """Create ImportPaths from string paths."""
         return cls(
             labels_path=Path(labels_path),
-            data_path=Path(data_path),
-            questions_configured_path=Path(questions_configured_path),
-            milestones_metadata_path=Path(milestones_metadata_path),
+            data_path=Path(data_path) if data_path else None,
             additional_data_path=Path(additional_data_path)
             if additional_data_path
             else None,
         )
 
     @classmethod
-    def default(cls, base_dir: Path | None = None) -> ImportPaths:
-        """Create default ImportPaths."""
+    def default(cls, base_dir: Path | None = None, **kwargs) -> ImportPaths:
+        """Create default ImportPaths with ability to override specific paths."""
         import_dir: Path = Path(app_settings.PRIVATE_FILES_PATH)
 
-        return cls(
-            labels_path=import_dir / "labels_encoded.csv",
-            data_path=import_dir / "data.csv",
-            questions_configured_path=import_dir / "questions_specified.csv",
-            milestones_metadata_path=import_dir / "milestones_metadata_(variables).csv",
-            additional_data_path=import_dir / "additional_data.csv",
-        )
+        default_paths = {
+            "labels_path": import_dir / "labels_encoded.csv",
+            "data_path": import_dir / "data.csv",
+            "additional_data_path": import_dir / "additional_data.csv",
+        }
+
+        # Override defaults with any provided values
+        final_paths = {**default_paths, **kwargs}
+
+        return cls(**final_paths)
 
 
 class DataManager:
@@ -87,9 +81,9 @@ class DataManager:
     """
 
     def __init__(
-            self,
-            import_paths: ImportPaths | None = None,
-            debug: bool = False,
+        self,
+        import_paths: ImportPaths | None = None,
+        debug: bool = False,
     ):
         """
         Initialize the DataManager.
@@ -107,8 +101,6 @@ class DataManager:
 
         self._labels_df: pd.DataFrame | None = None
         self._data_df: pd.DataFrame | None = None
-        self._questions_configured_df: pd.DataFrame | None = None
-        self._milestones_metadata_df: pd.DataFrame | None = None
         self._additional_data_df: pd.DataFrame | None = None
 
     def _setup_logging(self):
@@ -135,60 +127,48 @@ class DataManager:
             )
         return self._labels_df
 
-    def load_data_df(self, force_reload: bool = False) -> pd.DataFrame:
+    def load_data_df(self, force_reload: bool = False) -> pd.DataFrame | None:
         """Load the data DataFrame."""
         if self._data_df is None or force_reload:
-            logger.info(f"Loading data from {self.import_paths.data_path}")
+            if self.import_paths.data_path is None:
+                logger.debug("Data file path not specified")
+                return None
+
+            # Ensure we have a Path object
+            data_path = Path(self.import_paths.data_path)
+            if not data_path.exists():
+                logger.debug(f"Data file not found at: {data_path}")
+                return None
+
+            logger.info(f"Loading data from {data_path}")
             self._data_df = pd.read_csv(
-                self.import_paths.data_path,
+                data_path,
                 sep="\t",
                 encoding="utf-16",
                 encoding_errors="replace",
             )
         return self._data_df
 
-    def load_questions_configured_df(self, force_reload: bool = False) -> pd.DataFrame:
-        """Load the questions configured DataFrame."""
-        if self._questions_configured_df is None or force_reload:
-            logger.info(
-                f"Loading questions configuration from {self.import_paths.questions_configured_path}"
-            )
-            self._questions_configured_df = pd.read_csv(
-                self.import_paths.questions_configured_path,
-                sep=",",
-                encoding="utf-8",
-                dtype=str,
-                encoding_errors="replace",
-            )
-            # Only strip columns if the dataframe was successfully loaded
-            self._questions_configured_df.columns = (
-                self._questions_configured_df.columns.str.strip()
-            )
-        return self._questions_configured_df
-
-    def load_milestones_metadata_df(self, force_reload: bool = False) -> pd.DataFrame:
-        """Load the milestones metadata DataFrame."""
-        if self._milestones_metadata_df is None or force_reload:
-            logger.info(
-                f"Loading milestones metadata from {self.import_paths.milestones_metadata_path}"
-            )
-            self._milestones_metadata_df = pd.read_csv(
-                self.import_paths.milestones_metadata_path, sep="\t", encoding="utf-16"
-            )
-        return self._milestones_metadata_df
-
     def load_additional_data_df(
-            self, force_reload: bool = False
+        self, force_reload: bool = False
     ) -> pd.DataFrame | None:
         """Load the additional data DataFrame."""
         if self._additional_data_df is None or (
-                force_reload and self.import_paths.additional_data_path
+            force_reload and self.import_paths.additional_data_path
         ):
-            logger.info(
-                f"Loading additional data from {self.import_paths.additional_data_path}"
-            )
+            if self.import_paths.additional_data_path is None:
+                logger.debug("Additional data file path not specified")
+                return None
+
+            # Ensure we have a Path object
+            additional_path = Path(self.import_paths.additional_data_path)
+            if not additional_path.exists():
+                logger.debug(f"Additional data file not found at: {additional_path}")
+                return None
+
+            logger.info(f"Loading additional data from {additional_path}")
             self._additional_data_df = pd.read_csv(
-                self.import_paths.additional_data_path,
+                additional_path,
                 sep="\t",
                 encoding="utf-16",
                 encoding_errors="replace",
@@ -207,25 +187,41 @@ class DataManager:
                 detail=f"CSV must contain the following columns: {', '.join(required_columns)}",
             )
 
-    # todo: use tempfile.
+    def validate_labels_csv(self, csv_data: pd.DataFrame) -> None:
+        """Validate that the labels CSV has required structure."""
+        # Add any specific validation for labels CSV if needed
+        if csv_data.empty:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Labels CSV cannot be empty",
+            )
+
     async def save_additional_import_csv_into_dataframe(
-            self, csv_data: pd.DataFrame, csv_file: str
-    ) -> None:  # Define a path for the CSV file
-        # Save the CSV data locally
-        csv_data.to_csv(csv_file, index=False, sep="\t", encoding="utf-16")
-        logger.debug(f"CSV saved to {csv_file}")
+        self, csv_data: pd.DataFrame, temp_file: tempfile.NamedTemporaryFile
+    ) -> None:
+        """Save additional data CSV using a temporary file."""
+        # Save the CSV data to the temporary file
+        csv_data.to_csv(temp_file.name, index=False, sep="\t", encoding="utf-16")
+        logger.debug(f"CSV saved to temporary file {temp_file.name}")
 
         import_session, _ = self.get_import_session()
 
-        await remove_duplicate_cases(csv_file, import_session)
+        await remove_duplicate_cases(temp_file.name, import_session)
         logger.debug("Removed duplicates before processing")
 
-        self.import_paths.additional_data_path = Path(csv_file)
+        self.import_paths.additional_data_path = Path(temp_file.name)
         self.load_additional_data_df(force_reload=True)
 
-    # todo: use tempfile.
-    def cleanup_additional_data_import(self, csv_file: str) -> None:
-        os.remove(csv_file)
+    async def save_labels_csv_into_dataframe(
+        self, csv_data: pd.DataFrame, temp_file: tempfile.NamedTemporaryFile
+    ) -> None:
+        """Save labels CSV using a temporary file."""
+        # Save the CSV data to the temporary file
+        csv_data.to_csv(temp_file.name, index=False, sep=",", encoding="utf-16")
+        logger.debug(f"Labels CSV saved to temporary file {temp_file.name}")
+
+        self.import_paths.labels_path = Path(temp_file.name)
+        self.load_labels_df(force_reload=True)
 
     # -------------------------------------------------------------------------
     # Database Session Methods
@@ -234,8 +230,7 @@ class DataManager:
     def get_import_session(self) -> tuple[Session, Engine]:
         with Session(mondey_engine) as session:
             return session, mondey_engine
-
-    async def get_async_users_session(self) -> AsyncSession:
-        """Get an async session for the users database."""
-        async with async_session_maker() as session:
-            return session
+        # todo: change to just use the normal session in code that currently calls this?
+        # no: we'll keep this so in tests we can easily overwrite for the per-test session DB
+        # not sure if the tests already hook into the normal get_session call and overwrite it so this is
+        # unnecessary though? low priority.

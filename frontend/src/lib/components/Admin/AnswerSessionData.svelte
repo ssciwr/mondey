@@ -43,8 +43,10 @@ let update_stats_result = $state("");
 let stats_out_of_date = $state(false);
 
 // CSV Import related states
-let csvFile = $state(null as File | null);
-let fileInputRef = $state(null);
+let dataFile = $state(null as File | null);
+let labelsFile = $state(null as File | null);
+let dataFileInputRef = $state(null);
+let labelsFileInputRef = $state(null);
 let isUploading = $state(false);
 let showConfirmImportModal = $state(false);
 let importResult = $state({ status: "", message: "", error: false });
@@ -83,28 +85,47 @@ async function answerSessionAnalysisModalCallback() {
 	await refreshMilestoneAnswerSessions();
 }
 
-function handleFileChange(event) {
+function handleDataFileChange(event) {
 	const target = event.target;
 	const files = target.files;
 	if (files && files.length > 0) {
-		csvFile = files[0];
+		dataFile = files[0];
+		checkIfBothFilesUploaded();
+	}
+}
+
+function handleLabelsFileChange(event) {
+	const target = event.target;
+	const files = target.files;
+	if (files && files.length > 0) {
+		labelsFile = files[0];
+		checkIfBothFilesUploaded();
+	}
+}
+
+function checkIfBothFilesUploaded() {
+	if (dataFile && labelsFile) {
 		showConfirmImportModal = true;
 	}
 }
 
 async function handleImportConfirm() {
-	if (!csvFile) return;
+	if (!dataFile || !labelsFile) return;
 
 	showConfirmImportModal = false;
 	isUploading = true;
 	showImportResult = false;
 
 	const formData = new FormData();
-	formData.append("file", csvFile);
+	formData.append("additional_data_file", dataFile);
+	formData.append("labels_file", labelsFile);
 
 	try {
 		const { data, error } = await importCsvData({
-			body: { file: csvFile },
+			body: {
+				additional_data_file: dataFile,
+				labels_file: labelsFile,
+			},
 		});
 
 		if (error) {
@@ -120,9 +141,11 @@ async function handleImportConfirm() {
 				message: i18n.tr.admin.importSuccessful,
 				error: false,
 			};
-			// Reset file input
-			if (fileInputRef) fileInputRef.value = "";
-			csvFile = null;
+			// Reset file inputs
+			if (dataFileInputRef) dataFileInputRef.value = "";
+			if (labelsFileInputRef) labelsFileInputRef.value = "";
+			dataFile = null;
+			labelsFile = null;
 			successfulImport = true;
 			// Refresh data as it might have changed
 			stats_out_of_date = true;
@@ -143,8 +166,10 @@ async function handleImportConfirm() {
 
 function cancelImport() {
 	showConfirmImportModal = false;
-	if (fileInputRef) fileInputRef.value = "";
-	csvFile = null;
+	if (dataFileInputRef) dataFileInputRef.value = "";
+	if (labelsFileInputRef) labelsFileInputRef.value = "";
+	dataFile = null;
+	labelsFile = null;
 }
 
 onMount(async () => {
@@ -158,24 +183,76 @@ onMount(async () => {
     </h3>
     <div class="space-y-4">
         {#if successfulImport}
-            <div>
                 <Alert color="green">
-                    <CheckCircleOutline />&nbsp;{i18n.tr.admin.importSuccessful}</Alert>
-            </div>
+                    <CheckCircleOutline class="inline" />&nbsp;{i18n.tr.admin.importSuccessful}
+                </Alert>
         {:else}
-            <div>
+            <div class="space-y-4">
                 <p>{i18n.tr.admin.selectFileToImport}</p>
-                <Button class="btn btn-primary" disabled={isUploading}>
-                <FileImportSolid />
-                <input
-                        type="file"
-                        accept=".csv"
-                        bind:this={fileInputRef}
-                        on:change={handleFileChange}
-                        disabled={isUploading}
-                        data-testid="csv-file-input"
-                />
-                </Button>
+
+                <!-- Data File Upload -->
+                <div>
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                        Data CSV File
+                    </label>
+                    <div class="flex items-center space-x-2">
+                        <Button
+                                class="btn btn-primary"
+                                disabled={isUploading || dataFile !== null}
+                                onclick={() => dataFileInputRef?.click()}
+                        >
+                            <FileImportSolid />
+                            {dataFile ? dataFile.name : 'Choose Data File'}
+                        </Button>
+                        <input
+                                type="file"
+                                accept=".csv"
+                                bind:this={dataFileInputRef}
+                                on:change={handleDataFileChange}
+                                disabled={isUploading || dataFile !== null}
+                                data-testid="data-csv-file-input"
+                                style="display: none;"
+                        />
+                        {#if dataFile}
+                            <CheckCircleOutline class="text-green-500" />
+                        {/if}
+                    </div>
+                </div>
+
+                <!-- Labels File Upload -->
+                <div>
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                        Labels CSV File
+                    </label>
+                    <div class="flex items-center space-x-2">
+                        <Button
+                                class="btn btn-primary"
+                                disabled={isUploading || labelsFile !== null}
+                                onclick={() => labelsFileInputRef?.click()}
+                        >
+                            <FileImportSolid />
+                            {labelsFile ? labelsFile.name : 'Choose Labels File'}
+                        </Button>
+                        <input
+                                type="file"
+                                accept=".csv"
+                                bind:this={labelsFileInputRef}
+                                on:change={handleLabelsFileChange}
+                                disabled={isUploading || labelsFile !== null}
+                                data-testid="labels-csv-file-input"
+                                style="display: none;"
+                        />
+                        {#if labelsFile}
+                            <CheckCircleOutline class="text-green-500" />
+                        {/if}
+                    </div>
+                </div>
+
+                {#if (dataFile && !labelsFile) || (!dataFile && labelsFile)}
+                    <Alert color="yellow">
+                        <ExclamationCircleOutline class="inline" />&nbsp;{i18n.tr.admin.needToUploadBothFiles}
+                    </Alert>
+                {/if}
             </div>
         {/if}
 
@@ -277,7 +354,11 @@ onMount(async () => {
     <div class="text-center">
         <ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-gray-400 dark:text-gray-200" />
         <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-            {csvFile?.name ? `${i18n.tr.admin.confirmImport} "${csvFile.name}"?` : i18n.tr.admin.confirmImport}
+            {i18n.tr.admin.confirmImport}
+            <br />
+            Data: {dataFile?.name || 'No file'}
+            <br />
+            Labels: {labelsFile?.name || 'No file'}
         </h3>
         <Button color="blue" class="me-2" onclick={handleImportConfirm} data-testid="confirm-import">
             {i18n.tr.admin.yes}
