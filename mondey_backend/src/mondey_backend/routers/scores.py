@@ -1,19 +1,20 @@
 from __future__ import annotations
 
 import logging
+from collections import defaultdict
 from enum import Enum
-from typing import cast
 
 import numpy as np
+from sqlmodel import select
 
 from ..dependencies import SessionDep
-from ..models.children import Child
+from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAgeScore
 from ..models.milestones import MilestoneAgeScoreCollection
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneGroupAgeScore
 from ..models.milestones import MilestoneGroupAgeScoreCollection
-from .utils import get_child_age_in_months
+from .utils import get_answer_session_child_age_in_months
 
 
 class TrafficLight(Enum):
@@ -78,22 +79,23 @@ def compute_feedback_simple(
 
 
 def compute_milestonegroup_feedback_summary(
-    session: SessionDep, child_id: int, answersession_id: int
+    session: SessionDep, answersession: MilestoneAnswerSession
 ) -> dict[int, int]:
     """
-    Compute the summary milestonegroup feedback for a single milestonegroup. This is done
-    by first calculating the mean score over all milestones that belong to the milestonegroup that
-    are relevant for the child when the given answersession was created. The mean is then
-    compared against the mean and standard deviation over the known population of children for the child's age.
+    Compute the summary milestonegroup feedback for each milestonegroup.
+    This is done by first calculating the mean score over all milestones that belong to the milestonegroup.
+    If a milestone from the group is not included in the answer session then a score is inferred:
+      * 0 if the child is younger than the expected age of the milestone
+      * 3 if the child is older than the expected age of the milestone
+    The mean is then compared against the mean and standard deviation of scores for this milestone group over the
+    known population of children for the child's age.
     See `compute_feedback_simple` for the feedback logic.
 
     Parameters
     ----------
     session : SessionDep
         database session
-    child_id : int
-        child to compute feedback for. Needed for age computation
-    answersession_id : int
+    answersession : MilestoneAnswerSession
         answersession to compute feedback for. This contains the answers on which basis the feedback is computed
 
     Returns
@@ -103,70 +105,65 @@ def compute_milestonegroup_feedback_summary(
     """
     logger = logging.getLogger(__name__)
     logger.debug("compute_milestonegroup_feedback_summary")
-    answersession = session.get(MilestoneAnswerSession, answersession_id)
-
-    if answersession is None:
-        raise ValueError("No answersession with id: ", answersession_id)
     logger.debug(
-        f"  answersession id: {answersession_id}, created_at: {answersession.created_at}"
+        f"  answersession id: {answersession.id}, created_at: {answersession.created_at}"
     )
 
-    # get child age
-    child = session.get(Child, child_id)
-    if child is None:
-        raise ValueError("No child with id: ", child_id)
-    age = get_child_age_in_months(child, answersession.created_at)
-    logger.debug(f"  child age in months: {age}")
-    # extract milestonegroups
-    groups = set(answer.milestone_group_id for answer in answersession.answers.values())
+    child_age = get_answer_session_child_age_in_months(session, answersession)
+    logger.debug(f"  child age in months: {child_age}")
+
+    # get answers for each MilestoneGroup
+    milestones = session.exec(select(Milestone)).all()
+    milestone_group_answers: dict[int, list[int]] = defaultdict(list)
+    for milestone in milestones:
+        # if a milestone is not included in the answer session,
+        # assume full score if child is older than the expected age for the milestone,
+        # and assume zero score if child is younger than the expected age
+        answer = answersession.answers.get(milestone.id)  # type: ignore
+        score_if_missing = 3 if milestone.expected_age_months < child_age else 0
+        milestone_group_answers[milestone.group_id].append(  # type: ignore
+            answer.answer if answer is not None else score_if_missing
+        )
 
     # for each milestonegroup, get the statistics, compute the current mean, and compute the feedback
+    answersession_groups = set(
+        answer.milestone_group_id for answer in answersession.answers.values()
+    )
     feedback: dict[int, int] = {}
-    for group in groups:
+    for group, scores in milestone_group_answers.items():
         logger.debug(f"  group: {group}")
+        logger.debug(f"  scores: {scores}")
+        avg_score = float(np.mean(scores))
+        logger.debug(f"  mean: {avg_score}")
         stats = session.get(MilestoneGroupAgeScoreCollection, group)
-        if stats is None:
-            logger.debug("  no stats")
-            feedback[group] = TrafficLight.invalid.value
-        else:
-            logger.debug(f"  stats: {stats}")
-            for i, score in enumerate(stats.scores):
-                if score.count > 0:
-                    logger.debug(
-                        f"   score: , {i}, {score.count}, {score.avg_score}, {score.stddev_score}"
-                    )
-            # extract the answers for the current milestone group
-            group_answers = [
-                answer.answer
-                for answer in answersession.answers.values()
-                if answer.milestone_group_id == group
-            ]
-            logger.debug(
-                f'  group answers: , {group_answers}, "mean: ", {np.mean(group_answers)}'
-            )
-            # use the statistics recorded for a certain age as the basis for the feedback computation
-            feedback[group] = compute_feedback_simple(
-                stats.scores[age], float(np.mean(group_answers))
-            )
+        if group in answersession_groups:
+            # only provide feedback for a milestonegroup if the answer session contains at least one milestone in the group
+            if stats is None:
+                logger.debug("  no stats")
+                feedback[group] = TrafficLight.invalid.value
+            else:
+                logger.debug(f"  stats: {stats.scores[child_age]}")
+                feedback[group] = compute_feedback_simple(
+                    stats.scores[child_age], avg_score
+                )
     logger.debug(f"summary feedback: {feedback}")
     return feedback
 
 
 def compute_milestonegroup_feedback_detailed(
-    session: SessionDep, child_id: int, answersession_id: int
+    session: SessionDep, answersession: MilestoneAnswerSession
 ) -> dict[int, dict[int, int]]:
     """
     Compute the per-milestone (detailed) feedback for all answers in a given answersession.
-    This is done by comparing the given answer per milestone against the mean and standard deviation of the known population of children for the child's age.
+    This is done by comparing the given answer for a milestone against the mean and standard deviation of the
+    known population of children for the child's age.
     See `compute_feedback_simple` for the feedback logic.
-    Return a dictionary mapping milestonegroup -> [milestone -> feedback].
+    Return a dictionary mapping milestonegroup_id -> [milestone_id -> feedback].
     Parameters
     ----------
     session : SessionDep
         database session
-    child_id : int
-        child to compute feedback for. Needed for age computation
-    answersession_id : int
+    answersession : MilestoneAnswerSession
         answersession to compute feedback for. This contains the answers on which basis the feedback is computed
 
     Returns
@@ -177,41 +174,28 @@ def compute_milestonegroup_feedback_detailed(
     logger = logging.getLogger(__name__)
 
     logger.debug("compute_milestonegroup_feedback_detailed")
-    answersession = session.get(MilestoneAnswerSession, answersession_id)
-
-    if answersession is None:
-        raise ValueError("No answersession with id: ", answersession_id)
     logger.debug(
-        f"  answersession id: {answersession_id} created_at: {answersession.created_at}"
+        f"  answersession id: {answersession.id} created_at: {answersession.created_at}"
     )
-    # get child age
-    child = session.get(Child, child_id)
+    child_age = get_answer_session_child_age_in_months(session, answersession)
+    logger.debug(f"  child age in months: {child_age}")
 
-    if child is None:
-        raise ValueError("No child with id: ", child_id)
-
-    age = get_child_age_in_months(child, answersession.created_at)
-    logger.debug(f"  child age in months: {age}")
-
-    # for each milestonegroup, get the statistics, compute the current mean, and compute the feedback
-    feedback: dict[int, dict[int, int]] = {}
+    # for each milestone in the answer session, get the statistics, compute the current mean, and compute the feedback
+    feedback: dict[int, dict[int, int]] = defaultdict(dict)
     for milestone_id, answer in answersession.answers.items():
+        logger.debug(f"  milestone_id: {milestone_id}, answer: {answer.answer}")
         stats = session.get(MilestoneAgeScoreCollection, milestone_id)
-        if answer.milestone_group_id not in feedback:
-            feedback[answer.milestone_group_id] = {}
         if stats is None:
-            feedback[answer.milestone_group_id][cast(int, answer.milestone_id)] = (
-                TrafficLight.invalid.value
-            )
+            logger.debug("    -> no stats")
+            feedback_value = TrafficLight.invalid.value
         else:
-            for i, score in enumerate(stats.scores):
-                if score.count > 0:
-                    logger.debug(
-                        f"   score: {i}, {score.count}, {score.avg_score}, {score.stddev_score}"
-                    )
-            feedback[answer.milestone_group_id][cast(int, answer.milestone_id)] = (
-                compute_feedback_simple(stats.scores[age], answer.answer)
+            feedback_value = compute_feedback_simple(
+                stats.scores[child_age], answer.answer
             )
+            logger.debug(
+                f"    -> avg: {stats.scores[child_age].avg_score}, stddev: {stats.scores[child_age].stddev_score}, feedback: {feedback_value}"
+            )
+        feedback[answer.milestone_group_id][answer.milestone_id] = feedback_value  # type: ignore
 
     logger.debug(f" detailed feedback: {feedback}")
 

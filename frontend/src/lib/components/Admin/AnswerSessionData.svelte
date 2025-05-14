@@ -4,9 +4,7 @@
 import {
 	adminUpdateStats,
 	getMilestoneAnswerSessions,
-	importCsvData,
 } from "$lib/client/sdk.gen";
-
 import type { MilestoneAnswerSession } from "$lib/client/types.gen";
 import AnswerSessionAnalysisModal from "$lib/components/Admin/AnswerSessionAnalysisModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
@@ -26,7 +24,6 @@ import {
 } from "flowbite-svelte";
 import {
 	ChartPieOutline,
-	CheckCircleOutline,
 	CloseOutline,
 	FileImportSolid,
 	RefreshOutline,
@@ -38,6 +35,7 @@ let answer_sessions = $state([] as Array<MilestoneAnswerSession>);
 let current_answer_session_id = $state(null as null | number);
 let show_analysis_modal = $state(false);
 let show_suspicious_only = $state(true);
+let show_completed_only = $state(true);
 let show_update_stats_modal = $state(false);
 let update_stats_result = $state("");
 let stats_out_of_date = $state(false);
@@ -172,6 +170,10 @@ function cancelImport() {
 	labelsFile = null;
 }
 
+function boolToStr(bool: boolean): string {
+	return bool ? i18n.tr.admin.yes : i18n.tr.admin.no;
+}
+
 onMount(async () => {
 	await refreshMilestoneAnswerSessions();
 });
@@ -292,18 +294,22 @@ onMount(async () => {
     <Checkbox bind:checked={show_suspicious_only} class="my-2">
         {i18n.tr.admin.showSuspiciousOnly}
     </Checkbox>
+    <Checkbox bind:checked={show_completed_only} class="my-2">
+        {i18n.tr.admin.showCompletedOnly}
+    </Checkbox>
     <div class="overflow-x-scroll overflow-y-scroll">
         <Table class="w-max max-h-[600px]">
             <TableHead>
                 <TableHeadCell>Id</TableHeadCell>
                 <TableHeadCell>{i18n.tr.admin.date}</TableHeadCell>
+                <TableHeadCell>{i18n.tr.admin.completed}</TableHeadCell>
                 <TableHeadCell>{i18n.tr.admin.includedInStatistics}</TableHeadCell>
                 <TableHeadCell>{i18n.tr.admin.suspicious}</TableHeadCell>
                 <TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
             </TableHead>
             <TableBody>
                 {#each answer_sessions as answer_session (answer_session.id)}
-                    {#if !show_suspicious_only || answer_session.suspicious}
+                    {#if (!show_suspicious_only || answer_session.suspicious) && (!show_completed_only || answer_session.completed)}
                         <TableBodyRow color={answer_session.suspicious ? 'red' : 'default'}>
                             <TableBodyCell>
                                 {answer_session.id}
@@ -312,10 +318,13 @@ onMount(async () => {
                                 {new Date(answer_session.created_at).toLocaleDateString(i18n.locale)}
                             </TableBodyCell>
                             <TableBodyCell>
-                                {answer_session.included_in_statistics ? i18n.tr.admin.yes : i18n.tr.admin.no}
+                                {boolToStr(answer_session.completed)}
                             </TableBodyCell>
                             <TableBodyCell>
-                                {answer_session.suspicious ? i18n.tr.admin.yes : i18n.tr.admin.no}
+                                {boolToStr(answer_session.included_in_statistics)}
+                            </TableBodyCell>
+                            <TableBodyCell>
+                                {boolToStr(answer_session.suspicious)}
                             </TableBodyCell>
                             <TableBodyCell>
                                 <Button onclick={() => {if(answer_session.id) {current_answer_session_id=answer_session.id;

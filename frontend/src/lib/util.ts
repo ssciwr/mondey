@@ -15,9 +15,10 @@ export type CardElement = {
 	image?: string | undefined;
 	progress?: number | undefined;
 	events?: { [key: string]: EventHandler } | undefined;
-	auxilliary?: any | undefined;
+	auxiliary?: any | undefined;
 	buttonIcon?: Component | undefined;
 	color?: string | null | undefined;
+	secondsRemaining?: number | undefined;
 };
 
 export type CardStyle = {
@@ -29,11 +30,11 @@ export type CardStyle = {
 		size: string | undefined;
 		divClass: string | undefined;
 		color: any;
-		labelInsideClass: string | undefined;
+		labelInsideClass?: string | undefined;
 		completeColor: any;
-		labelInside: boolean | undefined;
+		labelInside?: boolean | undefined;
 	} | null;
-	auxilliary?: { [key: string]: string | boolean | null | undefined } | null;
+	auxiliary?: { [key: string]: string | boolean | null | undefined } | null;
 };
 
 export type PlotDatum = {

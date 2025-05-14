@@ -46,7 +46,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e .[tests]
-      - run: python -m pytest --cov=mondey_backend --cov-report=xml -svvv
+      - run: python -m pytest --cov=mondey_backend --cov-report=xml -svvv --log-level=debug
       - uses: codecov/codecov-action@v5
         with:
           files: ./mondey_backend/coverage.xml

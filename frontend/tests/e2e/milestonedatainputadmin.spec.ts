@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { DateTime } from "luxon";
 import { login } from "./utils";
 
 test("/userLand/children/gallery - Childs Milestone % gets updated when you select it to have been achieved", async ({
@@ -8,6 +9,8 @@ test("/userLand/children/gallery - Childs Milestone % gets updated when you sele
 	await login(page, "admin@mondey.de", "admin");
 
 	// Create a new child so existing milestone data isn't affected
+	// set the date of birth to 6 months ago to ensure we see the expected milestones
+	const birthDate = DateTime.now().minus({ months: 6 });
 	// and use a unique name for each child to allow tests to run in parallel without affecting each other
 	const childName = `child-${crypto.randomUUID()}`;
 
@@ -17,9 +20,9 @@ test("/userLand/children/gallery - Childs Milestone % gets updated when you sele
 
 	await page.locator('input[for="Name des Kindes?"]').fill(childName);
 	await page
-		.locator('input[for="Geburtsjahr des Kindes?"]')
-		.fill((new Date().getFullYear() - 1).toString());
-	await page.locator('input[for="Geburtsmonat des Kindes?"]').fill("9");
+		.getByTestId("birthMonth")
+		.selectOption(birthDate.setLocale("de").toLocaleString({ month: "long" }));
+	await page.getByTestId("birthYear").selectOption(`${birthDate.year}`);
 
 	// Make sure the button is visible before clicking
 	const finishButton = page.getByRole("button", { name: "Abschließen" });

@@ -10,7 +10,7 @@ import { preventDefault } from "$lib/util";
 import { Button, Card, Heading, Input } from "flowbite-svelte";
 
 const maildata = {
-	component: Input,
+	component: "input",
 	type: "email",
 	props: {
 		placeholder: i18n.tr.forgotPw.placeholder,

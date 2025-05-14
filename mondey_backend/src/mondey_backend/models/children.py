@@ -24,3 +24,9 @@ class ChildCreate(ChildBase):
 class ChildPublic(ChildBase):
     id: int
     has_image: bool
+
+
+class ChildSummaryPublic(ChildPublic):
+    active_answer_session: bool
+    session_progress: float
+    session_remaining_seconds: float

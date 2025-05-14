@@ -6,7 +6,7 @@ import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { preventDefault } from "$lib/util";
-import { Button, Card, Heading, Input } from "flowbite-svelte";
+import { Button, Card, Heading } from "flowbite-svelte";
 import { CheckCircleOutline } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 
@@ -86,9 +86,9 @@ async function submitData(): Promise<void> {
         <form onsubmit={preventDefault(submitData)} class = "space-y-4">
             <div class="m-2 mx-auto w-full flex-col space-y-6 p-2">
 
-                <DataInput component = {Input} bind:value={pw} required={true} id="restPw" kwargs={{type: "password"}} label={i18n.tr.forgotPw.inputLabelPw}/>
+                <DataInput component="input" bind:value={pw} required={true} id="restPw" kwargs={{type: "password"}} label={i18n.tr.forgotPw.inputlabelPw}/>
 
-                <DataInput component = {Input} bind:value={confirmPw} required={true} id="restConfirmPw" kwargs={{type: "password"}} label={i18n.tr.forgotPw.inputlabelPwConfirm}/>
+                <DataInput component="input" bind:value={confirmPw} required={true} id="restConfirmPw" kwargs={{type: "password"}} label={i18n.tr.forgotPw.inputlabelPwConfirm}/>
             </div>
 			<div class="m-2 flex w-full items-center justify-center p-2">
                 <Button size="md" type="submit">{i18n.tr.forgotPw.pending}</Button>

@@ -8,6 +8,8 @@ import {
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
+import WhiteCircle from "$lib/components/WhiteCircle.svelte";
+import WhiteCircleSolid from "$lib/components/WhiteCircleSolid.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
@@ -131,7 +133,7 @@ async function setup(): Promise<void> {
 				return {
 					header: item?.text?.[i18n.locale]?.title ?? "",
 					complete: complete,
-					summary: item?.text?.[i18n.locale]?.desc ?? "",
+					summary: "",
 					events: {
 						onclick: () => {
 							contentStore.milestone = item.id;
@@ -140,7 +142,7 @@ async function setup(): Promise<void> {
 							goto("/userLand/milestone");
 						},
 					},
-					auxilliary: complete ? CheckCircleSolid : ExclamationCircleSolid,
+					auxiliary: complete ? WhiteCircleSolid : WhiteCircle,
 				};
 			},
 		);
@@ -156,7 +158,7 @@ function createStyle(data: any[]) {
 				class:
 					"text-center m-2 max-w-prose dark:text-white text-white hover:cursor-pointer bg-milestone-300 dark:bg-milestone-300 hover:bg-milestone-500 dark:hover:bg-milestone-500",
 			},
-			auxilliary: {
+			auxiliary: {
 				class: "w-14 h-14",
 				color: item.complete === true ? "green" : "red",
 			},

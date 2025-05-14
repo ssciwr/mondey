@@ -68,8 +68,14 @@ function createStyle(data: CardElement[]): CardStyle[] {
 							class: `opacity-60 ${contextualTextColor}`,
 						},
 			button: null,
-			progress: null,
-			auxilliary: null,
+			progress: {
+				labelInside: true,
+				size: "h-4",
+				divClass: `h-full rounded-full w-${100 * (item.progress ?? 0)}`,
+				color: "red",
+				completeColor: "green",
+			},
+			auxiliary: null,
 		};
 	});
 }
@@ -91,7 +97,6 @@ function searchName(data: CardElement[], key: string): CardElement[] {
 
 async function setup(): Promise<CardElement[]> {
 	const children = await getChildren();
-
 	if (children.error) {
 		console.log("Error when retrieving child data");
 		alertStore.showAlert(
@@ -117,6 +122,14 @@ async function setup(): Promise<CardElement[]> {
 					image,
 					summary: `${child.birth_month}/${child.birth_year}`,
 					color: child.color,
+					progress: child.active_answer_session
+						? child.session_progress < 0.01
+							? 0.01
+							: child.session_progress
+						: undefined,
+					secondsRemaining: child.active_answer_session
+						? child.session_remaining_seconds
+						: undefined,
 					events: {
 						onclick: async () => {
 							currentChild.id = child.id;
