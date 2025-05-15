@@ -30,6 +30,7 @@ from mondey_backend.models.users import User
 from mondey_backend.routers.utils import get_answer_session_child_ages_in_months
 from mondey_backend.routers.utils import get_child_age_in_months
 from mondey_backend.routers.utils import get_expected_age_from_scores
+from mondey_backend.settings import app_settings
 
 
 # see: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
@@ -173,7 +174,7 @@ def _get_statistics_by_age(
     """
 
     if count is None or avg is None or stddev is None:
-        max_age_months = 72
+        max_age_months = app_settings.MAX_CHILD_AGE_MONTHS
         count = np.zeros(max_age_months + 1, dtype=np.int32)
         avg = np.zeros(max_age_months + 1, dtype=np.float64)
         stddev = np.zeros(max_age_months + 1, dtype=np.float64)

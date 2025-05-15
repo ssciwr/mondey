@@ -148,6 +148,8 @@ export const translationIds = {
 		analyze: "analysieren",
 		milestoneAnswerSession: "Meilenstein-Antwortsitzung",
 		expectedAge: "Voraussichtliches Alter",
+		milestoneChildAgeRanges: "Meilenstein-Kinderaltersspanne",
+		monthsForChildrenAged: "Monate für Kinder im Alter",
 		recalculateExpectedAge: "Voraussichtliches Alter neu berechnen",
 		newExpectedAge: "Neues Voraussichtliches Alter",
 		editUserQuestionTitle: "Frage an Benutzer editieren",

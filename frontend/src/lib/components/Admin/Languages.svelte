@@ -54,51 +54,49 @@ async function deleteLanguageAndUpdateLanguages() {
 }
 </script>
 
-<Card size="xl" class="m-5">
-	<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">{i18n.tr.admin.languages}</h3>
-	<Table>
-		<TableHead>
-			<TableHeadCell>Code (ISO 639-1)</TableHeadCell>
-			<TableHeadCell>Name</TableHeadCell>
-			<TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
-		</TableHead>
-		<TableBody>
-			{#each i18n.locales as lang_id}
-				<TableBodyRow>
-					<TableBodyCell>
-						{lang_id}
-					</TableBodyCell>
-					<TableBodyCell>
-						{ISO6391.getNativeName(lang_id)}
-					</TableBodyCell>
-					<TableBodyCell>
-						{#if !['de', 'en'].includes(lang_id)}
-							<DeleteButton
-								onclick={() => {
-									currentLanguageId = lang_id;
-									showDeleteModal = true;
-								}}
-							/>
-						{/if}
-					</TableBodyCell>
-				</TableBodyRow>
-			{/each}
+<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">{i18n.tr.admin.languages}</h3>
+<Table>
+	<TableHead>
+		<TableHeadCell>Code (ISO 639-1)</TableHeadCell>
+		<TableHeadCell>Name</TableHeadCell>
+		<TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
+	</TableHead>
+	<TableBody>
+		{#each i18n.locales as lang_id}
 			<TableBodyRow>
-				<TableBodyCell></TableBodyCell>
 				<TableBodyCell>
-					<Select
-						class="mt-2"
-						items={langItems}
-						bind:value={selectedLangId}
-						placeholder="Select a language..."
-					/>
+					{lang_id}
 				</TableBodyCell>
 				<TableBodyCell>
-					<AddButton onclick={createLanguageAndUpdateLanguages} disabled={selectedLangId === ''} />
+					{ISO6391.getNativeName(lang_id)}
+				</TableBodyCell>
+				<TableBodyCell>
+					{#if !['de', 'en'].includes(lang_id)}
+						<DeleteButton
+							onclick={() => {
+								currentLanguageId = lang_id;
+								showDeleteModal = true;
+							}}
+						/>
+					{/if}
 				</TableBodyCell>
 			</TableBodyRow>
-		</TableBody>
-	</Table>
-</Card>
+		{/each}
+		<TableBodyRow>
+			<TableBodyCell></TableBodyCell>
+			<TableBodyCell>
+				<Select
+					class="mt-2"
+					items={langItems}
+					bind:value={selectedLangId}
+					placeholder="Select a language..."
+				/>
+			</TableBodyCell>
+			<TableBodyCell>
+				<AddButton onclick={createLanguageAndUpdateLanguages} disabled={selectedLangId === ''} />
+			</TableBodyCell>
+		</TableBodyRow>
+	</TableBody>
+</Table>
 
 <DeleteModal bind:open={showDeleteModal} onclick={deleteLanguageAndUpdateLanguages}></DeleteModal>

@@ -111,57 +111,55 @@ onMount(async () => {
 </script>
 
 {#if i18n.locale}
-<Card size="xl" class="m-5 w-full">
-	<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">
-		{i18n.tr.admin[`${kind}Questions`]}
-		<ReorderButton
-				onclick={() => {
-							currentOrderItems = $questions.map((question) => {return {id: question.id, text: question.text[i18n.locale]?.question};});
-							showOrderItemsModal = true;
-						}}
-		/>
-	</h3>
-	<Table>
-		<TableHead>
-			<TableHeadCell>Question</TableHeadCell>
-			<TableHeadCell>Input type</TableHeadCell>
-			<TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
-		</TableHead>
-		<TableBody>
-			{#each $questions as question, groupIndex (question.id)}
-				<TableBodyRow>
-					<TableBodyCell>
-						{question?.text[i18n.locale]?.question}
-					</TableBodyCell>
-					<TableBodyCell>
-						{question?.component}
-					</TableBodyCell>
-					<TableBodyCell>
-						<EditButton
-							onclick={() => {
-								currentQuestion = $questions[groupIndex];
-								showEditQuestionModal = true;
-							}}
-						/>
-						<DeleteButton
-							onclick={() => {
-								currentQuestionId = question.id;
-								showDeleteModal = true;
-							}}
-						/>
-					</TableBodyCell>
-				</TableBodyRow>
-			{/each}
+<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">
+	{i18n.tr.admin[`${kind}Questions`]}
+	<ReorderButton
+			onclick={() => {
+						currentOrderItems = $questions.map((question) => {return {id: question.id, text: question.text[i18n.locale]?.question};});
+						showOrderItemsModal = true;
+					}}
+	/>
+</h3>
+<Table>
+	<TableHead>
+		<TableHeadCell>Question</TableHeadCell>
+		<TableHeadCell>Input type</TableHeadCell>
+		<TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
+	</TableHead>
+	<TableBody>
+		{#each $questions as question, groupIndex (question.id)}
 			<TableBodyRow>
-				<TableBodyCell></TableBodyCell>
-				<TableBodyCell></TableBodyCell>
 				<TableBodyCell>
-					<AddButton onclick={addQuestion} />
+					{question?.text[i18n.locale]?.question}
+				</TableBodyCell>
+				<TableBodyCell>
+					{question?.component}
+				</TableBodyCell>
+				<TableBodyCell>
+					<EditButton
+						onclick={() => {
+							currentQuestion = $questions[groupIndex];
+							showEditQuestionModal = true;
+						}}
+					/>
+					<DeleteButton
+						onclick={() => {
+							currentQuestionId = question.id;
+							showDeleteModal = true;
+						}}
+					/>
 				</TableBodyCell>
 			</TableBodyRow>
-		</TableBody>
-	</Table>
-</Card>
+		{/each}
+		<TableBodyRow>
+			<TableBodyCell></TableBodyCell>
+			<TableBodyCell></TableBodyCell>
+			<TableBodyCell>
+				<AddButton onclick={addQuestion} />
+			</TableBodyCell>
+		</TableBodyRow>
+	</TableBody>
+</Table>
 
 {#key showEditQuestionModal}
 	<EditQuestionModal
