@@ -12,7 +12,6 @@ from datetime import datetime
 
 import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import self.data_manager.session
 from sqlmodel import select
 
 from mondey_backend.databases.users import async_session_maker
