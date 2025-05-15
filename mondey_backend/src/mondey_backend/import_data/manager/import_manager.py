@@ -292,6 +292,7 @@ class ImportManager:
         username = f"parent_of_{case_id}"
         email = f"{username}@artificialimporteddata.csv"
 
+
         user_create = UserCreate(
             email=email,
             password="$$$$testUser$$$$432hjdfioj3409lk",
@@ -299,7 +300,8 @@ class ImportManager:
             full_data_access=False,
             research_group_id=0,
         )
-
+        """
+        # deprecated: old way of creating users.
         user = User(
             email=user_create.email,
             hashed_password="$$$$testUser$$$$432hjdfioj3409lk$$$$hashed$$$$",
@@ -312,7 +314,13 @@ class ImportManager:
         )
 
         self.data_manager.user_session.add(user)
+        """
+
+        user = User.model_validate(user_create) # we may need: , update={"user_id": ...properties etc}
+        self.data_manager.user_session.add(user)
+        
         await self.data_manager.user_session.flush()
+
 
         logger.info(
             f"Created parent for child ID: {case_id} with email: {user_create.email}"
@@ -324,23 +332,24 @@ class ImportManager:
     ) -> dict[str, int]:
         """Generate parents for children."""
         child_parent_map = {}
-
-        async with async_session_maker() as user_import_session:
+        try:
             for child_id in child_ids:
                 existing_parent = await self.check_parent_exists(
-                    user_import_session, child_id
+                    child_id
                 )
 
                 if existing_parent:
                     child_parent_map[str(child_id)] = existing_parent.id
                 else:
                     parent = await self.create_parent_for_child(
-                        user_import_session, child_id
+                        child_id
                     )
                     logger.info(f"Created parent {parent.id} for child {child_id}")
                     child_parent_map[str(child_id)] = parent.id
 
-            await user_import_session.commit()
+            await self.data_manager.user_session.commit()
+        except:
+            await self.data_manager.user_session.rollback()
 
         logger.debug(f"Final child_parent_map: {child_parent_map}")
         self.child_parent_map = child_parent_map
@@ -575,10 +584,15 @@ class ImportManager:
         return False
 
     async def import_children_with_milestone_data(
-        self, data_df
-    ) -> None:
-        """Import children with milestone data."""
+            self, data_df
+        ) -> int:  # Modified return type
+        """Import children with milestone data.
+
+        Returns:
+            int: Number of children successfully imported
+        """
         logger.info("Importing children with milestone data")
+        children_imported = 0  # Counter for successfully imported children
 
         # Get all milestones
         milestone_query = select(Milestone)
@@ -608,70 +622,81 @@ class ImportManager:
                 )
                 continue
 
-            # Get parent ID
-            parent_id = self.child_parent_map[str(child_id)]
+            try:
+                # Get parent ID
+                parent_id = self.child_parent_map[str(child_id)]
 
-            # Create child
-            child = Child(
-                name=f"Imported Child {child_id}",
-                birth_year=self.birth_year_mapping[int(row["FK01"])],
-                birth_month=self.birth_month_mapping[int(row["FK02"])],
-                user_id=parent_id,
-                has_image=False,
-            )
-            self.data_manager.session.add(child)
-            self.data_manager.session.flush()
-            logger.info(f"Created child with ID: {child.id}")
+                # Create child
+                child = Child(
+                    name=f"Imported Child {child_id}",
+                    birth_year=self.birth_year_mapping[int(row["FK01"])],
+                    birth_month=self.birth_month_mapping[int(row["FK02"])],
+                    user_id=parent_id,
+                    has_image=False,
+                )
+                self.data_manager.session.add(child)
+                self.data_manager.session.flush()
+                logger.info(f"Created child with ID: {child.id}")
 
-            # Create milestone answer self.data_manager.session
-            answer_session = MilestoneAnswerSession(
-                child_id=child.id,
-                user_id=parent_id,
-                expired=True,
-                included_in_statistics=False,
-                created_at=datetime.strptime(row["STARTED"], "%Y-%m-%d %H:%M:%S"),
-                suspicious=False,
-            )
-            self.data_manager.session.add(answer_session)
-            self.data_manager.session.commit()
+                # Create milestone answer session
+                answer_session = MilestoneAnswerSession(
+                    child_id=child.id,
+                    user_id=parent_id,
+                    expired=True,
+                    included_in_statistics=False,
+                    completed=True,
+                    created_at=datetime.strptime(row["STARTED"], "%Y-%m-%d %H:%M:%S"),
+                    suspicious=False,
+                )
+                self.data_manager.session.add(answer_session)
+                self.data_manager.session.commit()
 
-            # Process each milestone column
-            for column, milestone_id in self.milestone_mapping.items():
-                if column in row:
-                    answer_value = row[column]
+                # Process each milestone column
+                for column, milestone_id in self.milestone_mapping.items():
+                    if column in row:
+                        answer_value = row[column]
 
-                    # Skip if not answered
-                    if (
-                        answer_value == "-9"
-                        or answer_value == ""
-                        or pd.isna(answer_value)
-                        or str(answer_value).lower() == "nan"
-                    ):
-                        continue
+                        # Skip if not answered
+                        if (
+                            answer_value == "-9"
+                            or answer_value == ""
+                            or pd.isna(answer_value)
+                            or str(answer_value).lower() == "nan"
+                        ):
+                            continue
 
-                    # Convert and adjust answer
-                    try:
-                        answer_int = int(float(str(answer_value).strip()))
-                        if 1 <= answer_int <= 4:
-                            adjusted_answer = answer_int - 1
+                        # Convert and adjust answer
+                        try:
+                            answer_int = int(float(str(answer_value).strip()))
+                            if 1 <= answer_int <= 4:
+                                adjusted_answer = answer_int - 1
 
-                            # Create milestone answer
-                            milestone_answer = MilestoneAnswer(
-                                answer_session_id=answer_session.id,
-                                milestone_id=milestone_id,
-                                milestone_group_id=self.milestone_group_mapping.get(
-                                    milestone_id
-                                ),
-                                answer=adjusted_answer,
-                            )
-                            self.data_manager.session.add(milestone_answer)
-                    except (ValueError, TypeError) as err:
-                        raise ValueError(
-                            f"Unable to save milestone {column} with value {answer_value}"
-                        ) from err
+                                # Create milestone answer
+                                milestone_answer = MilestoneAnswer(
+                                    answer_session_id=answer_session.id,
+                                    milestone_id=milestone_id,
+                                    milestone_group_id=self.milestone_group_mapping.get(
+                                        milestone_id
+                                    ),
+                                    answer=adjusted_answer,
+                                )
+                                self.data_manager.session.add(milestone_answer)
+                        except (ValueError, TypeError) as err:
+                            raise ValueError(
+                                f"Unable to save milestone {column} with value {answer_value}"
+                            ) from err
 
-            # Commit all milestone answers for this child
-            self.data_manager.session.commit()
+                # Commit all milestone answers for this child
+                self.data_manager.session.commit()
+                children_imported += 1  # Increment counter on successful import
+
+            except Exception as e:
+                logger.error(f"Error importing child {child_id}: {e}")
+                self.data_manager.session.rollback()
+                # Continue with next child instead of failing entire import
+                continue
+
+        return children_imported
 
     def import_answers(self, data_df) -> None:
         """Import answers to questions."""
@@ -894,45 +919,46 @@ class ImportManager:
         logger.info(f"Total answers saved: {total_answers}")
         logger.info(f"Missing answers: {missing}")
 
-    async def import_additional_data(self) -> None:
+    async def import_additional_data(self) -> int:  # Modified return type
         """Import additional data.
-        @param self.data_manager.session is so we can overwrite this for tests (like test_import_additional.py)"""
+
+        Returns:
+            int: Number of children successfully imported
+        """
         logger.info("Importing additional data")
 
         if not self.data_manager.import_paths.additional_data_path:
             logger.warning("No additional data path provided")
-            return
+            return 0
 
         additional_data_df = self.data_manager.load_additional_data_df()
 
         # First import children with milestone data
-        await self.import_children_with_milestone_data(additional_data_df)
+        children_imported = await self.import_children_with_milestone_data(additional_data_df)
 
         # Then import answers
         self.import_answers(additional_data_df)
 
         logger.info("Additional data imported successfully")
+        return children_imported
 
-    # -------------------------------------------------------------------------
-    # Import Method
-    # -------------------------------------------------------------------------
+    async def run_additional_data_import(self) -> int:  # Modified return type
+        """Run import of additional data with DB rollback for any errors.
 
-    async def run_additional_data_import(self) -> None:
-        """Run import of additional data with DB rollback for any errors."""
+        Returns:
+            int: Number of children successfully imported
+        """
         logger.info("Starting additional data import")
 
         try:
             # Import additional data
-            await self.import_additional_data(self.data_manager.self.data_manager.session)
+            children_imported = await self.import_additional_data()
 
-            logger.info("Additional data import completed successfully")
+            logger.info(f"Additional data import completed successfully. {children_imported} children imported.")
+            return children_imported
 
         except Exception as e:
             logger.error(f"Error during additional data import: {e}")
-            self.data_manager.self.data_manager.session.rollback()
-            # so this is actually pretty pointless (not really but...)
-            # it will only rollback changes from the last called commit
-            # so the code is designed to only commit once all children answers are
-            # processed and not to add duplicate milestones, to avoid this problem.
+            self.data_manager.session.rollback()
             raise
 

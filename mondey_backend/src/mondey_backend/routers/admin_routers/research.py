@@ -31,6 +31,9 @@ def create_router() -> APIRouter:
         Args:
             additional_data_file: The main data CSV file (required)
             labels_file: Optional labels CSV file
+
+        Returns:
+            dict: Message and count of imported children
         """
         # Create temporary files for both CSVs
         temp_additional_file = None
@@ -79,10 +82,13 @@ def create_router() -> APIRouter:
                     labels_csv_data, temp_labels_file
                 )
 
-            # Run the import process
-            await manager.run_additional_data_import()
+            # Run the import process and get the count of imported children
+            children_imported = await manager.run_additional_data_import()
 
-            return {"message": "CSV data imported successfully"}
+            return {
+                "message": "CSV data imported successfully",
+                "children_imported": children_imported
+            }
 
         except Exception as e:
             print("Error!", e)
