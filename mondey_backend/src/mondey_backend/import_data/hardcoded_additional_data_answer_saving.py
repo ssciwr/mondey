@@ -11,6 +11,8 @@ We also need a test.
 
 """
 
+# todo: Delete, import_manager does this as its core function. This code is duplicated there.
+
 from mondey_backend.import_data.postprocessing_corrections.convert_fruhgeboren_data_into_two_questions import (
     parse_weeks,
 )

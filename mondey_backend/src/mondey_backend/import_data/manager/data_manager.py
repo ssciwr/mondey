@@ -82,6 +82,8 @@ class DataManager:
 
     def __init__(
         self,
+        session: Session,
+        user_session: UserSession,
         import_paths: ImportPaths | None = None,
         debug: bool = False,
     ):
@@ -222,15 +224,3 @@ class DataManager:
 
         self.import_paths.labels_path = Path(temp_file.name)
         self.load_labels_df(force_reload=True)
-
-    # -------------------------------------------------------------------------
-    # Database Session Methods
-    # -------------------------------------------------------------------------
-
-    def get_import_session(self) -> tuple[Session, Engine]:
-        with Session(mondey_engine) as session:
-            return session, mondey_engine
-        # todo: change to just use the normal session in code that currently calls this?
-        # no: we'll keep this so in tests we can easily overwrite for the per-test session DB
-        # not sure if the tests already hook into the normal get_session call and overwrite it so this is
-        # unnecessary though? low priority.

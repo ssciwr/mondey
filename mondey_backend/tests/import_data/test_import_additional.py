@@ -112,7 +112,7 @@ def test_csv_file():
 
 
 @pytest_asyncio.fixture
-async def import_manager(test_csv_file, session):
+async def import_manager(test_csv_file, session, user_session):
     """Create and configure ImportManager for testing"""
     # Create ImportPaths with test data paths
     import_paths = ImportPaths(
@@ -124,10 +124,8 @@ async def import_manager(test_csv_file, session):
     # await remove_duplicate_cases(test_csv_file, session)
     # logger.debug(f"Removed duplicates from test file {test_csv_file}")
 
-    # Create ImportManager with custom paths
-    manager = ImportManager(debug=True)
+    manager = ImportManager(session=session, user_session=user_session, debug=True)
     manager.data_manager.import_paths = import_paths
-    manager.data_manager.get_import_session = lambda: (session, engine)
 
     insert_test_questions(session)
 

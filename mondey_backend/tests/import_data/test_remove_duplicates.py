@@ -88,7 +88,7 @@ def locate_child_id_for_case_id(session, case_id):
     return None
 
 
-async def import_with_manager(additional_csv_path, labels_csv_path, session):
+async def import_with_manager(additional_csv_path, labels_csv_path, session, user_session):
     """
     Import data using the ImportManager class.
 
@@ -96,9 +96,10 @@ async def import_with_manager(additional_csv_path, labels_csv_path, session):
         additional_csv_path: Path to the additional data CSV file
         labels_csv_path: Path to the labels CSV file
         session: Database session
+        user_session: the async user session
     """
     # Create ImportManager instance
-    manager = ImportManager(debug=True)
+    manager = ImportManager(session, user_session, debug=True)
 
     # Read the CSVs into dataframes
     additional_df = pd.read_csv(
@@ -127,9 +128,6 @@ async def import_with_manager(additional_csv_path, labels_csv_path, session):
         await manager.data_manager.save_labels_csv_into_dataframe(
             labels_df, temp_labels
         )
-
-    # Override the session factory to use our test session
-    manager.data_manager.get_import_session = lambda: (session, None)
 
     # Run the import
     await manager.run_additional_data_import()
