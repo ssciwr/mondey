@@ -69,46 +69,44 @@ onMount(async () => {
 });
 </script>
 
-<Card size="xl" class="m-5 w-full">
-    <h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">
-        {i18n.tr.admin.users}
-    </h3>
-    <Table>
-        <TableHead>
-            <TableHeadCell>{i18n.tr.admin.milestone}</TableHeadCell>
-            <TableHeadCell>{i18n.tr.admin.image}</TableHeadCell>
-            <TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
-        </TableHead>
-        <TableBody>
-            {#each $milestoneGroups as milestoneGroup (milestoneGroup.id)}
-                {@const groupTitle = milestoneGroup.text[i18n.locale].title}
-                {#each milestoneGroup.milestones as milestone (milestone.id)}
-                    {@const milestoneTitle = `${groupTitle} / ${milestone.text[i18n.locale].title}`}
-                    {#each images as image (image.id)}
-                        {#if image.milestone_id === milestone.id}
-                            <TableBodyRow>
-                                <TableBodyCell>
-                                    {milestoneTitle}
-                                </TableBodyCell>
-                                <TableBodyCell>
-                                    <img src={`${import.meta.env.VITE_MONDEY_API_URL}/static/ms/${image.id}.webp`}
-                                         alt={`${image.id}`}/>
-                                </TableBodyCell>
-                                <TableBodyCell>
-                                    <SaveButton text={i18n.tr.admin.approve} onclick={() => {approveImage(image.id)}}/>
-                                    <DeleteButton onclick={() => {
-                                currentImageId = image.id;
-                                showDeleteModal = true;
-                            }}
-                                    />
-                                </TableBodyCell>
-                            </TableBodyRow>
-                        {/if}
-                    {/each}
+<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">
+    {i18n.tr.admin.users}
+</h3>
+<Table>
+    <TableHead>
+        <TableHeadCell>{i18n.tr.admin.milestone}</TableHeadCell>
+        <TableHeadCell>{i18n.tr.admin.image}</TableHeadCell>
+        <TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
+    </TableHead>
+    <TableBody>
+        {#each $milestoneGroups as milestoneGroup (milestoneGroup.id)}
+            {@const groupTitle = milestoneGroup.text[i18n.locale].title}
+            {#each milestoneGroup.milestones as milestone (milestone.id)}
+                {@const milestoneTitle = `${groupTitle} / ${milestone.text[i18n.locale].title}`}
+                {#each images as image (image.id)}
+                    {#if image.milestone_id === milestone.id}
+                        <TableBodyRow>
+                            <TableBodyCell>
+                                {milestoneTitle}
+                            </TableBodyCell>
+                            <TableBodyCell>
+                                <img src={`${import.meta.env.VITE_MONDEY_API_URL}/static/ms/${image.id}.webp`}
+                                     alt={`${image.id}`}/>
+                            </TableBodyCell>
+                            <TableBodyCell>
+                                <SaveButton text={i18n.tr.admin.approve} onclick={() => {approveImage(image.id)}}/>
+                                <DeleteButton onclick={() => {
+                            currentImageId = image.id;
+                            showDeleteModal = true;
+                        }}
+                                />
+                            </TableBodyCell>
+                        </TableBodyRow>
+                    {/if}
                 {/each}
             {/each}
-        </TableBody>
-    </Table>
-</Card>
+        {/each}
+    </TableBody>
+</Table>
 
 <DeleteModal bind:open={showDeleteModal} onclick={deleteCurrentImage}></DeleteModal>

@@ -30,3 +30,15 @@ class ChildSummaryPublic(ChildPublic):
     active_answer_session: bool
     session_progress: float
     session_remaining_seconds: float
+
+
+class ChildMilestoneExpectedAgeRange(SQLModel, table=True):
+    child_age: int | None = Field(default=None, primary_key=True)
+    min_expected_age: int
+    max_expected_age: int
+
+
+class ChildMilestoneExpectedAgeRangeAdmin(SQLModel):
+    child_age: int
+    min_expected_age: int
+    max_expected_age: int

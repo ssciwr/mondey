@@ -129,138 +129,136 @@ async function doDeleteMilestone(dry_run = true) {
 </script>
 
 {#if i18n.locale}
-<Card size="xl" class="m-5">
-	{#if milestoneGroups}
-		<Table>
-			<TableHead>
-				<TableHeadCell colSpan="4">{i18n.tr.admin.milestoneGroups}</TableHeadCell>
-			</TableHead>
-			<TableBody>
-				{#each $milestoneGroups as milestoneGroup, groupIndex (milestoneGroup.id)}
-					{@const groupTitle = milestoneGroup.text[i18n.locale]?.title}
-					<TableBodyRow
-						on:click={() => {
-							toggleOpenGroupIndex(groupIndex);
-						}}
-						class={`${openMilestoneGroupIndex === null || openMilestoneGroupIndex === groupIndex ? 'opacity-100' : 'opacity-25'} ${openMilestoneGroupIndex === groupIndex ? 'bg-blue-100' : ''}`}
-					>
-						<TableBodyCell>
-							{#if openMilestoneGroupIndex === groupIndex}
-								<ChevronUpOutline />
-							{:else}
-								<ChevronDownOutline />
-							{/if}
-						</TableBodyCell>
-						<TableBodyCell>
-							<img
-								src={milestoneGroupImageUrl(milestoneGroup.id)}
-								width="64"
-								height="64"
-								alt={groupTitle}
-								class="p-2"
-							/>
-						</TableBodyCell>
-						<TableBodyCell>
-							{groupTitle}
-						</TableBodyCell>
-						<TableBodyCell>
-							<EditButton
-								onclick={(event: Event) => {
-									event.stopPropagation();
-									currentMilestoneGroup = milestoneGroup;
-									showEditMilestoneGroupModal = true;
-								}}
-							/>
-							<DeleteButton
-								onclick={(event: Event) => {
-									event.stopPropagation();
-									currentMilestoneGroup = milestoneGroup;
-									showDeleteMilestoneGroupModal = true;
-								}}
-							/>
-						</TableBodyCell>
-					</TableBodyRow>
-					{#if openMilestoneGroupIndex === groupIndex}
-						<TableBodyRow class="bg-blue-100">
-							<TableBodyCell></TableBodyCell>
-							<TableBodyCell colSpan="3">
-								<Table>
-									<TableHead>
-										<TableHeadCell colspan="4">{i18n.tr.admin.milestones}</TableHeadCell>
-									</TableHead>
-									<TableBody>
-										{#each milestoneGroup.milestones as milestone (milestone.id)}
-											{@const milestoneTitle = milestone?.text[i18n.locale]?.title}
-											<TableBodyRow>
-												<TableBodyCell>
-													{#if milestone?.images?.length}
-														<img
-															src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${milestone.images[0].id}.webp`}
-															width="64"
-															height="64"
-															alt={milestoneTitle}
-															class="p-2"
-														/>
-													{/if}
-												</TableBodyCell>
-												<TableBodyCell>{milestoneTitle}</TableBodyCell>
-												<TableBodyCell>
-													<EditButton
-														onclick={(event: Event) => {
-															event.stopPropagation();
-															currentMilestone = milestone;
-															showEditMilestoneModal = true;
-														}}
-													/>
-													<DeleteButton
-														onclick={(event: Event) => {
-															event.stopPropagation();
-															currentMilestone = milestone;
-															showDeleteMilestoneModal = true;
-														}}
-													/>
-												</TableBodyCell>
-											</TableBodyRow>
-										{/each}
-										<TableBodyRow>
-											<TableBodyCell></TableBodyCell>
-											<TableBodyCell></TableBodyCell>
-											<TableBodyCell>
-												<ReorderButton
-														onclick={(event: Event) => {
-															event.stopPropagation();
-															currentOrderEndpoint = orderMilestonesAdmin;
-															currentOrderItems = milestoneGroup.milestones.map((milestone) => {return {id: milestone.id, text: milestone.text[i18n.locale]?.title};});
-															showOrderItemsModal = true;
-														}} />
-												<AddButton onclick={() => addMilestone(milestoneGroup.id)} />
-											</TableBodyCell>
-										</TableBodyRow>
-									</TableBody>
-								</Table>
-							</TableBodyCell>
-						</TableBodyRow>
-					{/if}
-				{/each}
-				<TableBodyRow>
-					<TableBodyCell></TableBodyCell>
-					<TableBodyCell></TableBodyCell>
-					<TableBodyCell></TableBodyCell>
+{#if milestoneGroups}
+	<Table>
+		<TableHead>
+			<TableHeadCell colSpan="4">{i18n.tr.admin.milestoneGroups}</TableHeadCell>
+		</TableHead>
+		<TableBody>
+			{#each $milestoneGroups as milestoneGroup, groupIndex (milestoneGroup.id)}
+				{@const groupTitle = milestoneGroup.text[i18n.locale]?.title}
+				<TableBodyRow
+					on:click={() => {
+						toggleOpenGroupIndex(groupIndex);
+					}}
+					class={`${openMilestoneGroupIndex === null || openMilestoneGroupIndex === groupIndex ? 'opacity-100' : 'opacity-25'} ${openMilestoneGroupIndex === groupIndex ? 'bg-blue-100' : ''}`}
+				>
 					<TableBodyCell>
-						<ReorderButton
-								onclick={(event: Event) => {
-									event.stopPropagation();
-									currentOrderEndpoint = orderMilestoneGroupsAdmin;
-									currentOrderItems = $milestoneGroups.map((milestoneGroup) => {return {id: milestoneGroup.id, text: milestoneGroup.text[i18n.locale]?.title};});
-									showOrderItemsModal = true;
-								}} />
-						<AddButton onclick={addMilestoneGroup} />
+						{#if openMilestoneGroupIndex === groupIndex}
+							<ChevronUpOutline />
+						{:else}
+							<ChevronDownOutline />
+						{/if}
+					</TableBodyCell>
+					<TableBodyCell>
+						<img
+							src={milestoneGroupImageUrl(milestoneGroup.id)}
+							width="64"
+							height="64"
+							alt={groupTitle}
+							class="p-2"
+						/>
+					</TableBodyCell>
+					<TableBodyCell>
+						{groupTitle}
+					</TableBodyCell>
+					<TableBodyCell>
+						<EditButton
+							onclick={(event: Event) => {
+								event.stopPropagation();
+								currentMilestoneGroup = milestoneGroup;
+								showEditMilestoneGroupModal = true;
+							}}
+						/>
+						<DeleteButton
+							onclick={(event: Event) => {
+								event.stopPropagation();
+								currentMilestoneGroup = milestoneGroup;
+								showDeleteMilestoneGroupModal = true;
+							}}
+						/>
 					</TableBodyCell>
 				</TableBodyRow>
-			</TableBody>
-		</Table>
-	{/if}
-</Card>
+				{#if openMilestoneGroupIndex === groupIndex}
+					<TableBodyRow class="bg-blue-100">
+						<TableBodyCell></TableBodyCell>
+						<TableBodyCell colSpan="3">
+							<Table>
+								<TableHead>
+									<TableHeadCell colspan="4">{i18n.tr.admin.milestones}</TableHeadCell>
+								</TableHead>
+								<TableBody>
+									{#each milestoneGroup.milestones as milestone (milestone.id)}
+										{@const milestoneTitle = milestone?.text[i18n.locale]?.title}
+										<TableBodyRow>
+											<TableBodyCell>
+												{#if milestone?.images?.length}
+													<img
+														src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${milestone.images[0].id}.webp`}
+														width="64"
+														height="64"
+														alt={milestoneTitle}
+														class="p-2"
+													/>
+												{/if}
+											</TableBodyCell>
+											<TableBodyCell>{milestoneTitle}</TableBodyCell>
+											<TableBodyCell>
+												<EditButton
+													onclick={(event: Event) => {
+														event.stopPropagation();
+														currentMilestone = milestone;
+														showEditMilestoneModal = true;
+													}}
+												/>
+												<DeleteButton
+													onclick={(event: Event) => {
+														event.stopPropagation();
+														currentMilestone = milestone;
+														showDeleteMilestoneModal = true;
+													}}
+												/>
+											</TableBodyCell>
+										</TableBodyRow>
+									{/each}
+									<TableBodyRow>
+										<TableBodyCell></TableBodyCell>
+										<TableBodyCell></TableBodyCell>
+										<TableBodyCell>
+											<ReorderButton
+													onclick={(event: Event) => {
+														event.stopPropagation();
+														currentOrderEndpoint = orderMilestonesAdmin;
+														currentOrderItems = milestoneGroup.milestones.map((milestone) => {return {id: milestone.id, text: milestone.text[i18n.locale]?.title};});
+														showOrderItemsModal = true;
+													}} />
+											<AddButton onclick={() => addMilestone(milestoneGroup.id)} />
+										</TableBodyCell>
+									</TableBodyRow>
+								</TableBody>
+							</Table>
+						</TableBodyCell>
+					</TableBodyRow>
+				{/if}
+			{/each}
+			<TableBodyRow>
+				<TableBodyCell></TableBodyCell>
+				<TableBodyCell></TableBodyCell>
+				<TableBodyCell></TableBodyCell>
+				<TableBodyCell>
+					<ReorderButton
+							onclick={(event: Event) => {
+								event.stopPropagation();
+								currentOrderEndpoint = orderMilestoneGroupsAdmin;
+								currentOrderItems = $milestoneGroups.map((milestoneGroup) => {return {id: milestoneGroup.id, text: milestoneGroup.text[i18n.locale]?.title};});
+								showOrderItemsModal = true;
+							}} />
+					<AddButton onclick={addMilestoneGroup} />
+				</TableBodyCell>
+			</TableBodyRow>
+		</TableBody>
+	</Table>
+{/if}
 
 {#key showEditMilestoneGroupModal}
 	<EditMilestoneGroupModal

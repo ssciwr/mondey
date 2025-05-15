@@ -88,30 +88,28 @@ async function saveChanges() {
 onMount(() => getTranslations());
 </script>
 
-<Card size="xl" class="m-5">
-	<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">{i18n.tr.admin.translations}</h3>
-	<Accordion flush>
-		{#each Object.entries(translationIds) as [section_key, section]}
-			<AccordionItem>
-				<span slot="header" class="flex gap-2 text-base">
-					{section_key}
-				</span>
-				{#each Object.keys(section) as item_key}
-					<div class="m-2 mb-4 rounded-md border p-2">
-						<Label class="mb-2">{item_key}</Label>
-						{#each i18n.locales as lang}
-							<div class="mb-1">
-								<InputAutoTranslate bind:value={translations[lang][section_key][item_key]} locale={lang} de_text={translations["de"][section_key][item_key]}/>
-							</div>
-						{/each}
-					</div>
-				{/each}
-				<div class="my-2 content-center">
-					<SaveButton onclick={saveChanges} />
+<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">{i18n.tr.admin.translations}</h3>
+<Accordion flush>
+	{#each Object.entries(translationIds) as [section_key, section]}
+		<AccordionItem>
+			<span slot="header" class="flex gap-2 text-base">
+				{section_key}
+			</span>
+			{#each Object.keys(section) as item_key}
+				<div class="m-2 mb-4 rounded-md border p-2">
+					<Label class="mb-2">{item_key}</Label>
+					{#each i18n.locales as lang}
+						<div class="mb-1">
+							<InputAutoTranslate bind:value={translations[lang][section_key][item_key]} locale={lang} de_text={translations["de"][section_key][item_key]}/>
+						</div>
+					{/each}
 				</div>
-			</AccordionItem>
-		{/each}
-	</Accordion>
-</Card>
+			{/each}
+			<div class="my-2 content-center">
+				<SaveButton onclick={saveChanges} />
+			</div>
+		</AccordionItem>
+	{/each}
+</Accordion>
 
 <EditTranslationModal bind:open={open_edit_translation_modal} bind:translations={translations} missing_translations={missing_translations} onsave={saveChanges}/>

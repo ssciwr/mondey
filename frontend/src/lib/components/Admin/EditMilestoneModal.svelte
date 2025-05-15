@@ -98,7 +98,7 @@ async function deleteMilestoneImageAndUpdate() {
         {/each}
         <div class="mb-5">
             <Label>{`${i18n.tr.admin.expectedAge}: ${milestone.expected_age_months}m`}</Label>
-            <Range id="expectedAge-months" min="1" max="72" bind:value={milestone.expected_age_months}/>
+            <input type="range" id="expectedAge-months" min="1" max="72" bind:value={milestone.expected_age_months}/>
             <Button onclick={() => {showMilestoneExpectedAgeModal = true;}}>View data</Button>
         </div>
         <div class="mb-5">
