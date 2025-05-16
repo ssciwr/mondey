@@ -22,9 +22,9 @@ let {
 
 let bg_color = `bg-milestone-answer-${index}`;
 const text_color =
-	index > 2 || index === -1
+	index > 2 || index === -1 // Either the last level option ("Zuverlaessig") or Spaeter bewrten(-1)
 		? "text-white dark:text-black"
-		: "text-gray dark:text-white";
+		: "text-gray dark:text-black"; // keep everything always as text-black on dark mode.
 </script>
 
 <div class="flex flex-col">
