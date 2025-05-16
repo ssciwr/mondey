@@ -30,7 +30,7 @@ afterNavigate(() => {
 				</div>
 
 				<!-- mobile version: drawer instead of fixed sidebar-->
-				<button id="drawerButton" class="fixed right-6 top-7 bg-white text-gray-800 dark:bg-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded md:hidden"
+				<button id="drawerButton" class="z-1001 fixed right-6 top-7 bg-white text-gray-800 dark:bg-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded md:hidden"
 				onclick={()=>{hideDrawer = !hideDrawer}}> <BarsOutline size="lg" /></button>
 
 				<Drawer transitionType="fly" placement="right" transitionParams={{duration: 200}} bind:hidden = {hideDrawer} id="menuDrawer">
