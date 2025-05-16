@@ -88,7 +88,9 @@ def locate_child_id_for_case_id(session, case_id):
     return None
 
 
-async def import_with_manager(additional_csv_path, labels_csv_path, session, user_session):
+async def import_with_manager(
+    additional_csv_path, labels_csv_path, session, user_session
+):
     """
     Import data using the ImportManager class.
 

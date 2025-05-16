@@ -19,10 +19,8 @@ from typing import IO
 import pandas as pd
 from fastapi import HTTPException
 from fastapi import status
-from sqlalchemy import Engine
 from sqlmodel import Session
 
-from mondey_backend.databases.mondey import engine as mondey_engine
 from mondey_backend.import_data.remove_duplicate_cases import remove_duplicate_cases
 
 from ...settings import app_settings

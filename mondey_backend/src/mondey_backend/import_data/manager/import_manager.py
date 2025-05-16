@@ -14,7 +14,6 @@ import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
-from mondey_backend.databases.users import async_session_maker
 from mondey_backend.import_data.manager.data_manager import DataManager
 from mondey_backend.import_data.utils import parse_weeks
 from mondey_backend.models.children import Child
@@ -41,7 +40,9 @@ class ImportManager:
     including milestone data, and parsing the text format
     """
 
-    def __init__(self, session: Session, user_session: AsyncSession, debug: bool = False):
+    def __init__(
+        self, session: Session, user_session: AsyncSession, debug: bool = False
+    ):
         # Initialize DataManager
         self.data_manager = DataManager(session, user_session, debug=debug)
 
@@ -270,9 +271,7 @@ class ImportManager:
             logger.error(f"Child with ID {case_id} not found")
             raise ValueError(f"Child with ID {case_id} not found")
 
-    async def check_parent_exists(
-        self, case_id: int
-    ) -> User | None:
+    async def check_parent_exists(self, case_id: int) -> User | None:
         """Check if a parent exists for a child."""
         email = f"parent_of_{case_id}@artificialimporteddata.csv"
         logger.debug(f"Checking for parent with email: {email}")
@@ -284,13 +283,10 @@ class ImportManager:
         logger.debug(f"Existing parent: {existing_parent}")
         return existing_parent
 
-    async def create_parent_for_child(
-        self, case_id: int
-    ) -> User:
+    async def create_parent_for_child(self, case_id: int) -> User:
         """Create a parent user for a child."""
         username = f"parent_of_{case_id}"
         email = f"{username}@artificialimporteddata.csv"
-
 
         user_create = UserCreate(
             email=email,
@@ -315,11 +311,12 @@ class ImportManager:
         self.data_manager.user_session.add(user)
         """
 
-        user = User.model_validate(user_create) # we may need: , update={"user_id": ...properties etc}
+        user = User.model_validate(
+            user_create
+        )  # we may need: , update={"user_id": ...properties etc}
         self.data_manager.user_session.add(user)
-        
-        await self.data_manager.user_session.flush()
 
+        await self.data_manager.user_session.flush()
 
         logger.info(
             f"Created parent for child ID: {case_id} with email: {user_create.email}"
@@ -333,16 +330,12 @@ class ImportManager:
         child_parent_map = {}
         try:
             for child_id in child_ids:
-                existing_parent = await self.check_parent_exists(
-                    child_id
-                )
+                existing_parent = await self.check_parent_exists(child_id)
 
                 if existing_parent:
                     child_parent_map[str(child_id)] = existing_parent.id
                 else:
-                    parent = await self.create_parent_for_child(
-                        child_id
-                    )
+                    parent = await self.create_parent_for_child(child_id)
                     logger.info(f"Created parent {parent.id} for child {child_id}")
                     child_parent_map[str(child_id)] = parent.id
 
@@ -442,7 +435,9 @@ class ImportManager:
                 )
             )
 
-            existing_answer = self.data_manager.session.execute(query).scalar_one_or_none()
+            existing_answer = self.data_manager.session.execute(
+                query
+            ).scalar_one_or_none()
 
             if existing_answer and answer_text is not None and answer_text != "":
                 existing_answer.additional_answer = answer_text
@@ -519,7 +514,9 @@ class ImportManager:
                 # Save parent answer for this question, only if it was actually filled out
                 self.create_answer(
                     self.data_manager.session,
-                    user_or_child_id=self.get_childs_parent_id(self.data_manager.session, child_id),
+                    user_or_child_id=self.get_childs_parent_id(
+                        self.data_manager.session, child_id
+                    ),
                     question_id=eltern_question_special_id,
                     answer_text=answer,
                     set_only_additional_answer=False,
@@ -583,8 +580,8 @@ class ImportManager:
         return False
 
     async def import_children_with_milestone_data(
-            self, data_df
-        ) -> int:  # Modified return type
+        self, data_df
+    ) -> int:  # Modified return type
         """Import children with milestone data.
 
         Returns:
@@ -776,7 +773,11 @@ class ImportManager:
 
                     # Process special answers (Eltern, Fruhgeboren, etc.)
                     have_acted_upon_question = self.process_special_answer(
-                        self.data_manager.session, variable_label, answer, variable, child_row.get("CASE")
+                        self.data_manager.session,
+                        variable_label,
+                        answer,
+                        variable,
+                        child_row.get("CASE"),
                     )
 
                     if have_acted_upon_question:
@@ -933,7 +934,9 @@ class ImportManager:
         additional_data_df = self.data_manager.load_additional_data_df()
 
         # First import children with milestone data
-        children_imported = await self.import_children_with_milestone_data(additional_data_df)
+        children_imported = await self.import_children_with_milestone_data(
+            additional_data_df
+        )
 
         # Then import answers
         self.import_answers(additional_data_df)
@@ -953,11 +956,12 @@ class ImportManager:
             # Import additional data
             children_imported = await self.import_additional_data()
 
-            logger.info(f"Additional data import completed successfully. {children_imported} children imported.")
+            logger.info(
+                f"Additional data import completed successfully. {children_imported} children imported."
+            )
             return children_imported
 
         except Exception as e:
             logger.error(f"Error during additional data import: {e}")
             self.data_manager.session.rollback()
             raise
-

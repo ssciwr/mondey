@@ -9,7 +9,6 @@ from sqlalchemy import func
 from sqlmodel import select
 from sqlmodel import text
 
-from mondey_backend.databases.mondey import engine
 from mondey_backend.import_data.manager.data_manager import ImportPaths
 from mondey_backend.import_data.manager.import_manager import ImportManager
 from mondey_backend.models.children import Child

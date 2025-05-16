@@ -87,7 +87,7 @@ def create_router() -> APIRouter:
 
             return {
                 "message": "CSV data imported successfully",
-                "children_imported": children_imported
+                "children_imported": children_imported,
             }
 
         except Exception as e:
