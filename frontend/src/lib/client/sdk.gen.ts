@@ -810,6 +810,9 @@ export const deleteResearchGroup = <ThrowOnError extends boolean = false>(option
  * Args:
  * additional_data_file: The main data CSV file (required)
  * labels_file: Optional labels CSV file
+ *
+ * Returns:
+ * dict: Message and count of imported children
  */
 export const importCsvData = <ThrowOnError extends boolean = false>(options: Options<ImportCsvDataData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<unknown, ImportCsvDataError, ThrowOnError>({
