@@ -33,20 +33,17 @@ class ImportPaths:
     """Dataclass to hold all import file paths. Data and milestones_metadata paths are optional."""
 
     labels_path: Path
-    data_path: Path | None = None
     additional_data_path: Path | None = None
 
     @classmethod
     def from_strings(
         cls,
         labels_path: str,
-        data_path: str | None = None,
         additional_data_path: str | None = None,
     ) -> ImportPaths:
         """Create ImportPaths from string paths."""
         return cls(
             labels_path=Path(labels_path),
-            data_path=Path(data_path) if data_path else None,
             additional_data_path=Path(additional_data_path)
             if additional_data_path
             else None,
@@ -59,7 +56,6 @@ class ImportPaths:
 
         default_paths = {
             "labels_path": import_dir / "labels_encoded.csv",
-            "data_path": import_dir / "data.csv",
             "additional_data_path": import_dir / "additional_data.csv",
         }
 
@@ -102,7 +98,6 @@ class DataManager:
         self.import_paths = import_paths or ImportPaths.default(script_dir)
 
         self._labels_df: pd.DataFrame | None = None
-        self._data_df: pd.DataFrame | None = None
         self._additional_data_df: pd.DataFrame | None = None
 
     def _setup_logging(self):
@@ -128,28 +123,6 @@ class DataManager:
                 index_col=None,
             )
         return self._labels_df
-
-    def load_data_df(self, force_reload: bool = False) -> pd.DataFrame | None:
-        """Load the data DataFrame."""
-        if self._data_df is None or force_reload:
-            if self.import_paths.data_path is None:
-                logger.debug("Data file path not specified")
-                return None
-
-            # Ensure we have a Path object
-            data_path = Path(self.import_paths.data_path)
-            if not data_path.exists():
-                logger.debug(f"Data file not found at: {data_path}")
-                return None
-
-            logger.info(f"Loading data from {data_path}")
-            self._data_df = pd.read_csv(
-                data_path,
-                sep="\t",
-                encoding="utf-16",
-                encoding_errors="replace",
-            )
-        return self._data_df
 
     def load_additional_data_df(
         self, force_reload: bool = False

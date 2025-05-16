@@ -158,6 +158,7 @@ async function handleImportConfirm() {
 			message: e.message || i18n.tr.admin.importFailed,
 			error: true,
 		};
+		cancelImport();
 	} finally {
 		isUploading = false;
 		showImportResult = true;

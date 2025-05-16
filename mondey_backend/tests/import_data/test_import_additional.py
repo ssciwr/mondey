@@ -118,11 +118,6 @@ async def import_manager(test_csv_file, session, user_session):
         additional_data_path=test_csv_file, labels_path=LABELS_CSV_PATH
     )
 
-    # For these purposes we deduplicate to avoid unique constraint errors.
-    # should not be needed for general test and test DB should be have no import data (only conftest data)
-    # await remove_duplicate_cases(test_csv_file, session)
-    # logger.debug(f"Removed duplicates from test file {test_csv_file}")
-
     manager = ImportManager(session=session, user_session=user_session, debug=True)
     manager.data_manager.import_paths = import_paths
 
