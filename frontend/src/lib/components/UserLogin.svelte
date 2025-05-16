@@ -50,7 +50,7 @@ async function submitData(): Promise<void> {
 				console.log("Redirecting user to intended path: ", intendedPath);
 				goto(intendedPath);
 			} else {
-				goto("/userLand/children/gallery");
+				goto("/userLand/children");
 			}
 		}
 	}

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import logging
 import pathlib
 from collections.abc import Iterable
 from collections.abc import Sequence
@@ -20,6 +19,7 @@ from sqlmodel import select
 from webp import WebPPreset
 
 from ..dependencies import SessionDep
+from ..logging import logger
 from ..models.children import Child
 from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAdmin
@@ -60,7 +60,7 @@ def write_image_file(file: UploadFile, filename: pathlib.Path | str):
                 img, filename, preset=WebPPreset.PHOTO, quality=image_quality
             )
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
         raise HTTPException(status_code=404, detail="Error saving uploaded file") from e
     finally:
         file.file.close()
@@ -284,7 +284,7 @@ def get_answer_session_child_ages_in_months(
     }
 
 
-def _get_expected_age_from_scores(scores: np.ndarray, count: np.ndarray) -> int:
+def get_expected_age_from_scores(scores: np.ndarray, count: np.ndarray) -> int:
     """
     Returns the expected age for a milestone based on the average scores for each child age.
     :param scores: the average score for each age, where the index in the array is the age in months

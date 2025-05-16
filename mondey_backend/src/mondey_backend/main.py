@@ -19,6 +19,7 @@ from .databases.mondey import create_mondey_db_and_tables
 from .databases.mondey import engine as mondey_engine
 from .databases.users import create_user_db_and_tables
 from .databases.users import engine as users_engine
+from .logging import logger
 from .routers import admin
 from .routers import auth
 from .routers import milestones
@@ -107,7 +108,6 @@ def main():
         format="%(asctime)s.%(msecs)03d :: %(levelname)s :: %(name)s :: %(funcName)s :: %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
-    logger = logging.getLogger(__name__)
     if not app_settings.DATABASE_PATH:
         logger.warning(
             "No database path set. Using temporary directory, all data will be lost when server is stopped."

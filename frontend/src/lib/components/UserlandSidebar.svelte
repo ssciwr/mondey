@@ -37,7 +37,7 @@ let { setHideDrawer } = $props();
                 </svelte:fragment>
             </SidebarItem>
 
-            <SidebarItem label = {i18n.tr.childData.overviewLabel} href="/userLand/children/gallery">
+            <SidebarItem label = {i18n.tr.childData.overviewLabel} href="/userLand/children">
                 <svelte:fragment slot="icon">
                     <GridPlusSolid size="lg" />
                 </svelte:fragment>

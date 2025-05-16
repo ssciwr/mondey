@@ -6,7 +6,7 @@ test("/ : Anonymous users can log in", async ({ page }) => {
 	await page.goto("/", { waitUntil: "networkidle" });
 	const button = page.getByTestId("anonymousLogin");
 	await button.click();
-	await expect(page).toHaveURL("/userLand/children/gallery", {
+	await expect(page).toHaveURL("/userLand/children", {
 		timeout: 30000,
 	});
 	await expect(page.getByRole("heading", { name: "Kinder" })).toBeVisible();

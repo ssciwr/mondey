@@ -55,8 +55,8 @@
 		"file-saver": "^2.0.5",
 		"iso-639-1": "3.1.5",
 		"luxon": "^3.6.1",
-		"pnpm": "^10.11.0",
-		"svelte-dnd-action": "^0.9.60"
+		"svelte-dnd-action": "^0.9.60",
+		"wcag-contrast-utils": "^1.0.1"
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": [

@@ -1,4 +1,4 @@
-<svelte:options runes={true} />
+<svelte:options runes={true}/>
 <script lang="ts">
 import { goto } from "$app/navigation";
 import {
@@ -9,6 +9,7 @@ import {
 } from "$lib/client";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
+import Progress from "$lib/components/DataDisplay/Progress.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
@@ -28,28 +29,26 @@ function computeProgress(
 	if (milestones === undefined) {
 		return 0;
 	}
-
 	if (milestones.length === 0) {
 		return 0;
 	}
-	const progress = milestones.filter((item) => {
+	const answeredMilestones = milestones.filter((item) => {
 		return (
 			item.id in answerSession.answers &&
 			answerSession.answers[item.id].answer >= 0
 		);
 	}).length;
-	if (progress < 0.01) {
-		return 0.01;
-	}
-	return progress / milestones.length;
+	return answeredMilestones / milestones.length;
 }
 
-async function setup(): Promise<any> {
-	if (i18n.locale === undefined || i18n.locale === null) {
-		console.log("locale not set");
-		return [];
-	}
+type MilestoneGroupDisplayData = {
+	title: string;
+	text: string;
+	progress: number;
+	onclick: () => void;
+};
 
+async function setup(): Promise<MilestoneGroupDisplayData[] | null> {
 	await currentChild.load_data();
 
 	if (currentChild.id === null || currentChild.id === undefined) {
@@ -60,13 +59,23 @@ async function setup(): Promise<any> {
 			true,
 			false,
 		);
-		data = [];
-		return data;
+		return null;
 	}
 
-	const milestonegroups = await getMilestoneGroups({
+	const milestoneGroups = await getMilestoneGroups({
 		path: { child_id: currentChild.id },
 	});
+
+	if (milestoneGroups.error) {
+		console.log("Error when retrieving milestone group data");
+		alertStore.showAlert(
+			i18n.tr.milestone.alertMessageError,
+			i18n.tr.milestone.alertMessageRetrieving + milestoneGroups.error.detail,
+			true,
+			false,
+		);
+		return null;
+	}
 
 	const answerSession = await getCurrentMilestoneAnswerSession({
 		path: { child_id: currentChild.id },
@@ -80,47 +89,28 @@ async function setup(): Promise<any> {
 			true,
 			false,
 		);
-		data = [];
-		return data;
+		return null;
 	}
 
-	if (milestonegroups.error) {
-		console.log("Error when retrieving milestone group data");
-		alertStore.showAlert(
-			i18n.tr.milestone.alertMessageError,
-			i18n.tr.milestone.alertMessageRetrieving + milestonegroups.error.detail,
-			true,
-			false,
-		);
-		data = [];
-		return data;
-	}
-
-	data = milestonegroups.data.map((item) => {
-		const res = {
-			header: item.text ? item.text[i18n.locale].title : undefined,
-			summary: item.text?.[i18n.locale]?.desc,
-			image: null,
+	return milestoneGroups.data.map((item) => {
+		return {
+			title: item?.text?.[i18n.locale]?.title ?? "",
+			text: item?.text?.[i18n.locale]?.desc ?? "",
 			progress: computeProgress(item.milestones, answerSession.data),
-			events: {
-				onclick: () => {
-					goto("/userLand/milestone/overview");
-					contentStore.milestoneGroup = item.id;
-					contentStore.milestoneGroupData = item;
-				},
+			onclick: () => {
+				goto("/userLand/milestone/overview");
+				contentStore.milestoneGroup = item.id;
+				contentStore.milestoneGroupData = item;
 			},
 		};
-		return res;
 	});
-
-	return data;
 }
 
 const breadcrumbdata: any[] = [
 	{
 		label: i18n.tr.childData.overviewLabel,
 		onclick: () => {
-			goto("/userLand/children/gallery");
+			goto("/userLand/children");
 		},
 		symbol: GridPlusSolid,
 	},
@@ -140,113 +130,32 @@ const breadcrumbdata: any[] = [
 	},
 ];
 
-function searchByStatus(data: any[], key: string): any[] {
-	if (key === "") {
-		return data;
-	}
-	return data.filter((item) => {
-		// button label contains info about completion status => use for search
-		if (key === i18n.tr.search.complete) {
-			return item.progress === 1;
-		}
-		return item.progress < 1;
-	});
-}
-
-function searchBySurveyDescription(data: any[], key: string): any[] {
-	if (key === "") {
-		return data;
-	}
-	return data.filter((item) => {
-		return item.summary.toLowerCase().includes(key.toLowerCase());
-	});
-}
-
-function searchBySurveyTitle(data: any[], key: string): any[] {
-	if (key === "") {
-		return data;
-	}
-	const filtered = data.filter((item) => {
-		return item.header.toLowerCase().includes(key.toLowerCase());
-	});
-	return filtered;
-}
-
-// README: this is slow and quite a bit of work because a lot of text has to be searched. Kill it?
-function searchAll(data: any[], key: string): any[] {
-	return [
-		...new Set([
-			...searchByStatus(data, key),
-			...searchBySurveyTitle(data, key),
-			...searchBySurveyDescription(data, key),
-		]),
-	];
-}
-
-export function createStyle(data: any[]) {
-	return data.map((item) => {
-		return {
-			card: {
-				class:
-					"m-2 max-w-prose dark:text-white text-white hover:cursor-pointer bg-milestone-700 dark:bg-milestone-900 hover:bg-milestone-800 dark:hover:bg-milestone-700",
-			},
-			progress: {
-				labelInside: true,
-				size: "h-4",
-				divClass: `h-full rounded-full w-${100 * item.progress}`,
-				color: "red",
-				completeColor: "green",
-			},
-		};
-	});
-}
-
 let promise = $state(setup());
-let data: any[] = $state([]);
-const searchData: any[] = [
-	{
-		label: i18n.tr.search.allLabel,
-		placeholder: i18n.tr.search.allPlaceholder,
-		filterFunction: searchAll,
-	},
-	{
-		label: i18n.tr.search.descriptionLabel,
-		placeholder: i18n.tr.search.descriptionPlaceholder,
-		filterFunction: searchBySurveyDescription,
-	},
-	{
-		label: i18n.tr.search.surveyLabel,
-		placeholder: i18n.tr.search.surveyPlaceholder,
-		filterFunction: searchBySurveyTitle,
-	},
-	{
-		label: i18n.tr.search.statusLabel,
-		placeholder: i18n.tr.search.statusPlaceholder,
-		filterFunction: searchByStatus,
-	},
-];
-
-$effect(() => {
-	console.log("Data now: ", data);
-});
+let searchTerm = $state("");
 </script>
 
 {#await promise}
-    <Spinner /> <p>{i18n.tr.userData.loadingMessage}</p>
-{:then data}
-
-    <div class="flex flex-col md:rounded-t-lg">
-        <Breadcrumbs data={breadcrumbdata} />
-        <div class="grid gap-y-8">
-                <GalleryDisplay
-                        data={data}
-                        itemComponent={CardDisplay}
-                        componentProps={createStyle(data)}
-                        withSearch={true}
-                        {searchData}
-                />
+    <Spinner/>
+    <p>{i18n.tr.userData.loadingMessage}</p>
+{:then milestoneGroups}
+    {#if milestoneGroups}
+        <div class="flex flex-col md:rounded-t-lg">
+            <Breadcrumbs data={breadcrumbdata}/>
+            <GalleryDisplay bind:searchTerm={searchTerm}>
+                {#each milestoneGroups as milestoneGroup}
+                    {#if milestoneGroup.title.toLowerCase().includes(searchTerm.toLowerCase())}
+                        <CardDisplay title={milestoneGroup.title}
+                                     text={milestoneGroup.text}
+                                     onclick={milestoneGroup.onclick}
+                                     cardClasses="dark:text-white text-white bg-milestone-700 dark:bg-milestone-900 hover:bg-milestone-800 dark:hover:bg-milestone-700"
+                        >
+                            <Progress progress={milestoneGroup.progress}/>
+                        </CardDisplay>
+                    {/if}
+                {/each}
+            </GalleryDisplay>
         </div>
-    </div>
+    {/if}
 {:catch error}
     {alertStore.showAlert(i18n.tr.milestone.alertMessageError, error.message, true, true, () => goto("/userLand/milestone/overview"))}
 {/await}
