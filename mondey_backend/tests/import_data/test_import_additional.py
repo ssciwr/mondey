@@ -137,12 +137,13 @@ async def import_manager(test_csv_file, session, user_session):
 @pytest.mark.skip(reason="Requires actual data CSVs which are not present")
 @pytest.mark.asyncio
 async def test_user_answers_exist(session, setup_test_data, import_manager):
-    # Test that answers exist for a specific user
+    # Test that answers exist for a random test User which will have been created (with incremental 300 ID because
+    # there are >300 chidlren in the data set).
     user_answers = session.exec(
-        select(UserAnswer).where(UserAnswer.user_id == 443)
+        select(UserAnswer).where(UserAnswer.user_id == 300)
     ).all()
 
-    assert len(user_answers) > 0, "No user answers found for user_id 443"
+    assert len(user_answers) > 0, "No user answers found for user_id 300"
 
 
 def locate_child_id_for_case_id(session, case_id):

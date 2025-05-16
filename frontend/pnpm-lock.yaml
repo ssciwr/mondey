@@ -32,6 +32,9 @@ importers:
       luxon:
         specifier: ^3.6.1
         version: 3.6.1
+      pnpm:
+        specifier: ^10.11.0
+        version: 10.11.0
       svelte-dnd-action:
         specifier: ^0.9.60
         version: 0.9.60(svelte@5.25.6)
@@ -2880,6 +2883,11 @@ packages:
 
   plotly.js-dist-min@2.8.0:
     resolution: {integrity: sha512-6OOg/D7OEffYq1WJt4XKNHzJAd9uN3kCuKZcCr0RGvnSB3wvP7fDmfsUpxZR2q0M+3j7SKejJ8qv1HGkarnObg==}
+
+  pnpm@10.11.0:
+    resolution: {integrity: sha512-ZUBYP0HMX2KOs9l3Ps7oAvT575kjzEW2mJD7R5kdSwkpZGlOw6T3OKQgyRijMwYsi5JdMS9C5PDCY+tgNVH5dw==}
+    engines: {node: '>=18.12'}
+    hasBin: true
 
   postcss-import@15.1.0:
     resolution: {integrity: sha512-hpr+J05B2FVYUAXHeK1YyI267J/dDDhMU6B6civm8hSY1jYJnBXxzKDKDswzJmtLHryrjhnDjqqp/49t8FALew==}
@@ -6668,6 +6676,8 @@ snapshots:
       fsevents: 2.3.2
 
   plotly.js-dist-min@2.8.0: {}
+
+  pnpm@10.11.0: {}
 
   postcss-import@15.1.0(postcss@8.5.3):
     dependencies:
