@@ -38,10 +38,8 @@ const text_color =
 
 	{#if tooltip}
 		<!-- Desktop: Use Tooltip component -->
-		<div class="hidden md:block">
-			<Tooltip class={`${bg_color} ${text_color} dark:${bg_color} `}>
-				{tooltip}
-			</Tooltip>
-		</div>
+		<Tooltip class={`${bg_color} ${text_color} dark:${bg_color} hidden md:block`}>
+			{tooltip}
+		</Tooltip>
 	{/if}
 </div>
