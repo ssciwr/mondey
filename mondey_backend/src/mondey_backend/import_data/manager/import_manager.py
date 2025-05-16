@@ -334,8 +334,6 @@ class ImportManager:
                     parent = await self.create_parent_for_child(child_id)
                     logger.info(f"Created parent {parent.id} for child {child_id}")
                     child_parent_map[str(child_id)] = parent.id
-
-            await self.data_manager.user_session.commit()
         except Exception as e:
             logger.warning(e)
             await self.data_manager.user_session.rollback()
@@ -645,7 +643,7 @@ class ImportManager:
                     suspicious=False,
                 )
                 self.data_manager.session.add(answer_session)
-                self.data_manager.session.commit()
+                self.data_manager.session.flush()
 
                 # Process each milestone column
                 for column, milestone_id in self.milestone_mapping.items():
@@ -683,7 +681,7 @@ class ImportManager:
                             ) from err
 
                 # Commit all milestone answers for this child
-                self.data_manager.session.commit()
+                self.data_manager.session.flush()
                 children_imported += 1  # Increment counter on successful import
 
             except Exception as e:
@@ -906,7 +904,6 @@ class ImportManager:
                     )
                     missing += 1
 
-        self.data_manager.session.commit()
         logger.info(f"Total answers saved: {total_answers}")
         logger.info(f"Missing answers: {missing}")
 
@@ -931,6 +928,10 @@ class ImportManager:
 
         # Then import answers
         self.import_answers(additional_data_df)
+
+        print("Committing changes to databases")
+        self.data_manager.session.commit()
+        await self.data_manager.user_session.commit()
 
         logger.info("Additional data imported successfully")
         return children_imported
