@@ -4,6 +4,7 @@
 import {
 	adminUpdateStats,
 	getMilestoneAnswerSessions,
+	importCsvData,
 } from "$lib/client/sdk.gen";
 import type { MilestoneAnswerSession } from "$lib/client/types.gen";
 import AnswerSessionAnalysisModal from "$lib/components/Admin/AnswerSessionAnalysisModal.svelte";
@@ -24,11 +25,12 @@ import {
 } from "flowbite-svelte";
 import {
 	ChartPieOutline,
+	CheckCircleOutline,
 	CloseOutline,
+	ExclamationCircleOutline,
 	FileImportSolid,
 	RefreshOutline,
 } from "flowbite-svelte-icons";
-import ExclamationCircleOutline from "flowbite-svelte-icons/ExclamationCircleOutline.svelte";
 import { onMount } from "svelte";
 
 let answer_sessions = $state([] as Array<MilestoneAnswerSession>);
