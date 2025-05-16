@@ -64,7 +64,7 @@ const promise = $state(setup());
                 {/each}
                 <CardDisplay title={i18n.tr.childData.newChildHeading}
                              text={i18n.tr.childData.newChildHeadingLong}
-                             color="#7c9e9d"
+                             cardClasses="text-white dark:text-white bg-primary dark:bg-primary hover:bg-additional-color-800 dark:hover:bg-additional-color-700"
                              onclick={() => {currentChild.id = null; goto("/userLand/children/registration");}} />
             </GalleryDisplay>
         </div>
