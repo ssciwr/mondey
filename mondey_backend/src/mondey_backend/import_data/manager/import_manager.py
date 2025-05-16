@@ -296,27 +296,22 @@ class ImportManager:
             full_data_access=False,
             research_group_id=0,
         )
-        """
-        # deprecated: old way of creating users.
+
+        # Hash the password
+        hashed_password = "$$$$testUser$$$$432hjdfioj3409lk$$$$hashed$$$$"
+
         user = User(
             email=user_create.email,
-            hashed_password="$$$$testUser$$$$432hjdfioj3409lk$$$$hashed$$$$",
+            hashed_password=hashed_password,
             is_active=True,
             is_superuser=False,
             is_verified=False,
-            is_researcher=user_create.is_researcher or False,
-            full_data_access=user_create.full_data_access or False,
-            research_group_id=user_create.research_group_id or 0,
+            is_researcher=False,
+            full_data_access=False,
+            research_group_id=0,
         )
 
         self.data_manager.user_session.add(user)
-        """
-
-        user = User.model_validate(
-            user_create
-        )  # we may need: , update={"user_id": ...properties etc}
-        self.data_manager.user_session.add(user)
-
         await self.data_manager.user_session.flush()
 
         logger.info(
