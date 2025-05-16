@@ -14,7 +14,6 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import IO
 
 import pandas as pd
 from fastapi import HTTPException
@@ -200,26 +199,26 @@ class DataManager:
             )
 
     async def save_additional_import_csv_into_dataframe(
-        self, csv_data: pd.DataFrame, temp_file: IO[bytes]
+        self, csv_data: pd.DataFrame, temp_file_name: str
     ) -> None:
         """Save additional data CSV using a temporary file."""
         # Save the CSV data to the temporary file
-        csv_data.to_csv(temp_file.name, index=False, sep="\t", encoding="utf-16")
-        logger.debug(f"CSV saved to temporary file {temp_file.name}")
+        csv_data.to_csv(temp_file_name, index=False, sep="\t", encoding="utf-16")
+        logger.debug(f"CSV saved to temporary file {temp_file_name}")
 
-        await remove_duplicate_cases(temp_file.name, self.session)
+        await remove_duplicate_cases(temp_file_name, self.session)
         logger.debug("Removed duplicates before processing")
 
-        self.import_paths.additional_data_path = Path(temp_file.name)
+        self.import_paths.additional_data_path = Path(temp_file_name)
         self.load_additional_data_df(force_reload=True)
 
     async def save_labels_csv_into_dataframe(
-        self, csv_data: pd.DataFrame, temp_file: IO[bytes]
+        self, csv_data: pd.DataFrame, temp_file_name: str
     ) -> None:
         """Save labels CSV using a temporary file."""
         # Save the CSV data to the temporary file
-        csv_data.to_csv(temp_file.name, index=False, sep=",", encoding="utf-16")
-        logger.debug(f"Labels CSV saved to temporary file {temp_file.name}")
+        csv_data.to_csv(temp_file_name, index=False, sep=",", encoding="utf-16")
+        logger.debug(f"Labels CSV saved to temporary file {temp_file_name}")
 
-        self.import_paths.labels_path = Path(temp_file.name)
+        self.import_paths.labels_path = Path(temp_file_name)
         self.load_labels_df(force_reload=True)
