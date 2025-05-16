@@ -29,6 +29,7 @@ def create_test_csv_file(filename, child_ids=None):
         "FK01",
         "FK02",
         "FK05",  # Added required column
+        "STARTED",
     ]
 
     # Create the content as tab-separated data
@@ -36,7 +37,7 @@ def create_test_csv_file(filename, child_ids=None):
 
     # Add each row
     for child_id in child_ids:
-        row = [str(child_id), "1", "9", "1"]  # Added value for FK05
+        row = [str(child_id), "1", "9", "1", "2025-01-27 11:58:51"]
         content += "\t".join(row) + "\n"
 
     # Write the content to a UTF-16 encoded file with BOM
@@ -57,7 +58,7 @@ def create_labels_csv_file(filename):
         Path to the created CSV file
     """
     # Create minimal labels content
-    content = 'CASE,VARIABLE,"Variable Label", "Variable Type",label2\n159,value1,value2\n208,value1,value2\n'
+    content = 'CASE,"Variable","Variable Label", "Variable Type",label2\n159,value1,value2\n208,value1,value2\n'
 
     # Write the content to a UTF-16 encoded file
     with codecs.open(filename, "w", encoding="utf-16") as f:
@@ -226,6 +227,8 @@ async def test_duplicates_are_ignored_during_import(session, user_session):
 
         children = import_session.exec(select(Child)).all()
         assert len(children) == 11  # Should still be 11 (no duplicate)
+        # this is where the test is failing... it's still creating the child from test file test6.csv even though..
+        # the previous insert should have added it and the child id was not none before.
 
         # Yet another new one with another duplicate.
         csv_file7 = os.path.join(temp_dir, "children_import_test7.csv")

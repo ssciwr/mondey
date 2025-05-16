@@ -609,6 +609,15 @@ class ImportManager:
                 )
                 continue
 
+            child_name = f"Imported Child {child_id}"
+            existing_child = self.data_manager.session.exec(
+                select(Child).where(Child.name == child_name)
+            ).first()
+            if existing_child:
+                logger.info(
+                    f"Child with CASE ID {child_id} already exists, skipping creation"
+                )
+                continue  # Skip to next child
             try:
                 # Get parent ID
                 parent_id = self.child_parent_map[str(child_id)]
