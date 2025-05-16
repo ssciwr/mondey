@@ -1,6 +1,7 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
+import { isDark } from "$lib/components/DataDisplay/color_utils";
 import { Tooltip } from "flowbite-svelte";
 
 let {
@@ -20,7 +21,10 @@ let {
 } = $props();
 
 let bg_color = `bg-milestone-answer-${index}`;
-const text_color = index < 2 ? "dark:text-black" : "dark:text-white";
+const text_color =
+	index > 2 || index === -1
+		? "text-white dark:text-black"
+		: "text-gray dark:text-white";
 </script>
 
 <button
@@ -30,6 +34,6 @@ const text_color = index < 2 ? "dark:text-black" : "dark:text-white";
 >
 	{@render children?.()}
 </button>
-<Tooltip class={`${bg_color} text-gray-700 dark:${bg_color} dark:text-gray-700`}>
+<Tooltip class={`${bg_color} ${text_color} dark:${bg_color} `}>
 	{tooltip}
 </Tooltip>
