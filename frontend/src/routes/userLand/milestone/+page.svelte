@@ -155,7 +155,7 @@ const breadcrumbdata = $derived([
 	{
 		label: i18n.tr.childData.overviewLabel,
 		onclick: () => {
-			goto("/userLand/children/gallery");
+			goto("/userLand/children");
 		},
 		symbol: GridPlusSolid,
 	},
@@ -190,9 +190,7 @@ const breadcrumbdata = $derived([
 {#await promise}
     <p>{i18n.tr.userData.loadingMessage}</p>
 {:then}
-    <div
-            class="mx-auto flex flex-col p-4 md:rounded-t-lg"
-    >
+    <div class="mx-auto flex flex-col md:rounded-t-lg">
         {#if i18n.locale && contentStore.milestoneGroupData && contentStore.milestoneGroupData.text && contentStore.milestoneGroupData.milestones && currentMilestone && currentMilestone.text && currentMilestone.images}
 
             <Breadcrumbs data={breadcrumbdata} />

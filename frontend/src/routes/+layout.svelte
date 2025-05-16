@@ -104,7 +104,7 @@ const asAlert = false;
 					<Button
 							type="button"
 							class="m-2 w-full"
-							href="{base}/userLand/children/gallery"
+							href="{base}/userLand/children"
 							size="lg">{i18n.tr.registration.goHome}</Button
 					>
 				{/if}
@@ -165,7 +165,7 @@ const asAlert = false;
 							</SidebarItem>
 						{:else}
 							<SidebarItem label={i18n.tr.registration.goHome}
-										 href="/userLand/children/gallery">
+										 href="/userLand/children">
 								<svelte:fragment slot="icon">
 									<ProfileCardSolid size="lg" />
 								</svelte:fragment>

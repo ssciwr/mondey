@@ -19,7 +19,7 @@ let { data }: { data: any[] } = $props();
 		<div class="flex items-center justify-center">
 			{#if item.href}
 				{#if item.symbol !== undefined && item.symbol !== null}
-				<item.symbol  size = "xl" />
+				<item.symbol size = "xl" />
 				{:else}
 				<PlayOutline size = "xl" />
 				{/if}
@@ -31,7 +31,7 @@ let { data }: { data: any[] } = $props();
 					>
 					<div class="flex items-center justify-center">
 						{#if item.symbol !== undefined && item.symbol !== null}
-						<item.symbol  size = "xl" />
+						<item.symbol size = "xl" />
 						{:else}
 						<PlayOutline size = "xl" />
 						{/if}

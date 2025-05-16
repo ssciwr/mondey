@@ -1,133 +1,57 @@
 <svelte:options runes={true}/>
 <script lang="ts">
-import { i18n } from "$lib/i18n.svelte";
-import { type CardElement, type CardStyle } from "$lib/util";
-import { Button, Card, Progressbar, Tooltip } from "flowbite-svelte";
-import { ArrowRightOutline, ClockOutline } from "flowbite-svelte-icons";
-import { Duration, type DurationUnit } from "luxon";
+import { isDark } from "$lib/components/DataDisplay/color_utils";
+import { Card } from "flowbite-svelte";
+import type { Snippet } from "svelte";
 
 let {
-	data = {
-		header: undefined,
-		summary: undefined,
-		button: undefined,
-		href: undefined,
-		image: undefined,
-		progress: undefined,
-		events: undefined,
-		auxiliary: undefined,
-		buttonIcon: undefined,
-		secondsRemaining: undefined,
-	},
-	styleProps = {
-		card: {},
-		header: {},
-		summary: {},
-		button: {},
-		progress: null,
-		auxiliary: {},
-	},
-}: { data: CardElement; styleProps: CardStyle } = $props();
+	title = "",
+	text = "",
+	image = "",
+	color = undefined,
+	cardClasses = "",
+	titleClasses = "",
+	onclick,
+	children,
+}: {
+	title?: string;
+	text?: string;
+	image?: string;
+	color?: string;
+	onclick: () => void;
+	cardClasses?: string;
+	titleClasses?: string;
+	children?: Snippet;
+} = $props();
 
-function bestDurationUnit(duration: Duration): DurationUnit {
-	if (duration.days > 0) {
-		return "days";
-	}
-	if (duration.hours > 0) {
-		return "hours";
-	}
-	return "minutes";
-}
-
-let remainingTimeAsString = $derived.by(() => {
-	if (!data.secondsRemaining) {
-		return "";
-	}
-	const duration = Duration.fromObject(
-		{ seconds: data.secondsRemaining },
-		{ locale: i18n.locale },
-	)
-		.shiftTo("days", "hours", "minutes")
-		.normalize();
-	return duration.shiftTo(bestDurationUnit(duration)).toHuman({
-		maximumFractionDigits: 0,
-	});
-});
+let textColor = $derived(isDark(color) ? "text-white" : "text-black");
 </script>
 
 <Card
-        img={data.image}
+        class={`hover:transition-color flex flex-col h-full cursor-pointer hover:scale-105 child-card hover:cursor-pointer mr-2 max-w-prose ${cardClasses}`}
+        style={color ? `background-color: ${color}` : ""}
+        horizontal={false}
+        img={image}
         imgClass="max-md:hidden object-scale-down"
-        href={data.button ? undefined : data?.href}
-        class={data.button
-       ? 'm-2 max-w-prose flex flex-col h-full text-gray-700 dark:text-white'
-       : 'hover:transition-color m-2 max-w-prose flex flex-col h-full cursor-pointer text-gray-700 hover:bg-gray-300 dark:text-white dark:hover:bg-gray-600 '}
-        {...styleProps.card}
-        on:click={data?.events?.['onclick'] ?? (()=>{})}
+        on:click={onclick}
 >
-    <!-- Fixed height container for header -->
-    <div>
-        {#if data.header}
-            <h5 class="text-xl font-bold break-words hyphens-auto " {...styleProps.header}>
-                {data.header}
-            </h5>
-        {/if}
-    </div>
-
-    <!-- Summary text starts at consistent height -->
-    <div class="flex-grow">
-        {#if data.summary}
-            <p class="font-normal leading-tight" {...styleProps.summary}>
-                {data.summary}
-            </p>
-        {/if}
-    </div>
-
-    <!-- Push all the following content to bottom -->
-    <div class="mt-auto pt-4 flex flex-col">
-        {#if data.button}
-            <Button
-                    href={data.href}
-                    class="w-fit"
-                    {...styleProps.button}
-                    on:click={data.button?.events.onclick ?? (()=>{})}
-            >{data.button}
-
-                {#if data.buttonIcon}
-                    <data.buttonIcon class="ms-2 h-6 w-6 text-white"/>
-                {:else}
-                    <ArrowRightOutline class="ms-2 h-6 w-6 text-white"/>
-                {/if}
-            </Button>
-            <Tooltip>Fortfahren</Tooltip>
-        {/if}
-
-        {#if data.progress}
-            <div class="rounded-lg bg-white p-2 pb-4 w-full">
-                <Progressbar
-                        labelInside={styleProps.progress?.labelInside}
-                        progress={String(100 * data.progress)}
-                        animate={true}
-                        color={data.progress === 1 ? styleProps.progress?.completeColor : styleProps.progress?.color}
-                        size={styleProps.progress?.size}
-                        divClass={styleProps.progress?.divClass}
-                        labelInsideClass={`{styleProps.progress?.labelInsideClass} {data.progress === 1 ? 'text-white' : 'text-black'} rounded-md text-small pl-2`}
-                />
+        {#if title}
+            <div>
+                <h5 class={`break-words hyphens-auto mb-2 text-xl font-bold tracking-tight ${color ? textColor : ''} ${titleClasses}`}>
+                    {title}
+                </h5>
             </div>
         {/if}
 
-        {#if remainingTimeAsString}
-            <div class="flex flex-row pt-4">
-                <ClockOutline class="me-2 h-6 w-6"/> {remainingTimeAsString}
-            </div>
-        {/if}
+        <div class="flex-grow mb-2">
+            {#if text}
+                <p class={`font-normal leading-tight opacity-60 ${color ? textColor : ''}`}>
+                    {text}
+                </p>
+            {/if}
+        </div>
 
-        {#if data.auxiliary}
-            <div class="mb-4 flex w-full justify-center">
-                <div class="p-1 rounded-full" style="border: 10px solid white">
-                    <data.auxiliary {...styleProps.auxiliary}/>
-                </div>
-            </div>
-        {/if}
-    </div>
+        <div class={`mt-auto pt-4 flex flex-col ${color ? textColor : ''}`}>
+            {@render children?.()}
+        </div>
 </Card>
