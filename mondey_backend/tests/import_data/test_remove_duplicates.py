@@ -57,7 +57,7 @@ def create_labels_csv_file(filename):
         Path to the created CSV file
     """
     # Create minimal labels content
-    content = "CASE,label1,label2\n159,value1,value2\n208,value1,value2\n"
+    content = 'CASE,VARIABLE,"Variable Label", "Variable Type",label2\n159,value1,value2\n208,value1,value2\n'
 
     # Write the content to a UTF-16 encoded file
     with codecs.open(filename, "w", encoding="utf-16") as f:
@@ -142,7 +142,7 @@ async def import_with_manager(
 # doesn't work currently, child 159 does not get added despite being in the first CSV
 @pytest.mark.skip(reason="Requires actual data CSVs which are not present")
 @pytest.mark.asyncio
-async def test_duplicates_are_ignored_during_import(session):
+async def test_duplicates_are_ignored_during_import(session, user_session):
     """Test that duplicate children are ignored when importing data"""
     print("Importing.")
     import_session = session  # use per-test reset DB for this purpose.
@@ -158,7 +158,7 @@ async def test_duplicates_are_ignored_during_import(session):
         # First import with the default children (159, 208)
         csv_file1 = os.path.join(temp_dir, "children_import_test1.csv")
         create_test_csv_file(csv_file1)
-        await import_with_manager(csv_file1, labels_file, import_session)
+        await import_with_manager(csv_file1, labels_file, import_session, user_session)
 
         # Verify first child's data
         case_id = 159
@@ -181,7 +181,7 @@ async def test_duplicates_are_ignored_during_import(session):
         # Test reimporting the same data doesn't create duplicates
         csv_file2 = os.path.join(temp_dir, "children_import_test2.csv")
         create_test_csv_file(csv_file2)
-        await import_with_manager(csv_file2, labels_file, import_session)
+        await import_with_manager(csv_file2, labels_file, import_session, user_session)
 
         children = import_session.exec(select(Child)).all()
         assert len(children) == 6  # Should still be 6
@@ -189,7 +189,7 @@ async def test_duplicates_are_ignored_during_import(session):
         # Test adding one new child while reimporting the existing ones
         csv_file3 = os.path.join(temp_dir, "children_import_test3.csv")
         create_test_csv_file(csv_file3, child_ids=[159, 208, 300])
-        await import_with_manager(csv_file3, labels_file, import_session)
+        await import_with_manager(csv_file3, labels_file, import_session, user_session)
 
         children = import_session.exec(select(Child)).all()
         assert len(children) == 7  # Should now be 7 (6 previous + 1 new)
@@ -201,7 +201,7 @@ async def test_duplicates_are_ignored_during_import(session):
         # Test importing just one new child on its own
         csv_file4 = os.path.join(temp_dir, "children_import_test4.csv")
         create_test_csv_file(csv_file4, child_ids=[301])
-        await import_with_manager(csv_file4, labels_file, import_session)
+        await import_with_manager(csv_file4, labels_file, import_session, user_session)
 
         children = import_session.exec(select(Child)).all()
         assert len(children) == 8  # Should now be 8
@@ -209,7 +209,7 @@ async def test_duplicates_are_ignored_during_import(session):
         # Test importing multiple new children
         csv_file5 = os.path.join(temp_dir, "children_import_test5.csv")
         create_test_csv_file(csv_file5, child_ids=[302, "400", "401_SomeChars"])
-        await import_with_manager(csv_file5, labels_file, import_session)
+        await import_with_manager(csv_file5, labels_file, import_session, user_session)
 
         children = import_session.exec(select(Child)).all()
         assert len(children) == 11  # Should now be 11
@@ -222,7 +222,7 @@ async def test_duplicates_are_ignored_during_import(session):
         # Test string based child IDs also don't get duplicated.
         csv_file6 = os.path.join(temp_dir, "children_import_test6.csv")
         create_test_csv_file(csv_file6, child_ids=["401_SomeChars"])
-        await import_with_manager(csv_file6, labels_file, import_session)
+        await import_with_manager(csv_file6, labels_file, import_session, user_session)
 
         children = import_session.exec(select(Child)).all()
         assert len(children) == 11  # Should still be 11 (no duplicate)
@@ -230,7 +230,7 @@ async def test_duplicates_are_ignored_during_import(session):
         # Yet another new one with another duplicate.
         csv_file7 = os.path.join(temp_dir, "children_import_test7.csv")
         create_test_csv_file(csv_file7, child_ids=["401_SomeChars", "40634_SomeChars"])
-        await import_with_manager(csv_file7, labels_file, import_session)
+        await import_with_manager(csv_file7, labels_file, import_session, user_session)
 
         children = import_session.exec(select(Child)).all()
         assert len(children) == 12  # Should now be 12
