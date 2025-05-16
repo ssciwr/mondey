@@ -16,6 +16,7 @@ from sqlmodel import Session
 from sqlmodel import select
 
 from mondey_backend.import_data.manager.data_manager import DataManager
+from mondey_backend.import_data.utils import check_parent_exists
 from mondey_backend.import_data.utils import parse_weeks
 from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Milestone
@@ -272,18 +273,6 @@ class ImportManager:
             logger.error(f"Child with ID {case_id} not found")
             raise ValueError(f"Child with ID {case_id} not found")
 
-    async def check_parent_exists(self, case_id: int) -> User | None:
-        """Check if a parent exists for a child."""
-        email = f"parent_of_{case_id}@artificialimporteddata.csv"
-        logger.debug(f"Checking for parent with email: {email}")
-
-        stmt = select(User).where(User.email == email)
-        result = await self.data_manager.user_session.execute(stmt)
-        existing_parent = result.scalars().first()
-
-        logger.debug(f"Existing parent: {existing_parent}")
-        return existing_parent
-
     async def create_parent_for_child(self, case_id: int) -> User:
         """Create a parent user for a child."""
         username = f"parent_of_{case_id}"
@@ -326,8 +315,9 @@ class ImportManager:
         child_parent_map = {}
         try:
             for child_id in child_ids:
-                existing_parent = await self.check_parent_exists(child_id)
-
+                existing_parent = await check_parent_exists(
+                    self.data_manager.user_session, child_id
+                )
                 if existing_parent:
                     child_parent_map[str(child_id)] = existing_parent.id
                 else:
@@ -341,7 +331,6 @@ class ImportManager:
         logger.debug(f"Final child_parent_map: {child_parent_map}")
         self.child_parent_map = child_parent_map
         return child_parent_map
-        # not updating Child.user_id here. Could do that.
 
     def is_milestone(self, row: pd.Series) -> bool:
         """Check if a row represents a milestone."""
@@ -606,7 +595,7 @@ class ImportManager:
                     f"Skipping child {child_id} who is missing essential birth month/year data"
                 )
                 continue
-
+            logger.info(f"Checking if child case exists: {child_id}")
             child_name = f"Imported Child {child_id}"
             existing_child = self.data_manager.session.exec(
                 select(Child).where(Child.name == child_name)

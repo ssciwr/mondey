@@ -49,7 +49,12 @@ let dataFileInputRef = $state(null);
 let labelsFileInputRef = $state(null);
 let isUploading = $state(false);
 let showConfirmImportModal = $state(false);
-let importResult = $state({ status: "", message: "", error: false });
+let importResult = $state({
+	status: "",
+	message: "",
+	error: false,
+	childrenImported: 0,
+});
 let showImportResult = $state(false);
 let successfulImport = $state(false);
 
@@ -134,12 +139,14 @@ async function handleImportConfirm() {
 				status: "error",
 				message: error.message || i18n.tr.admin.importFailed,
 				error: true,
+				childrenImported: 0,
 			};
 		} else {
 			importResult = {
 				status: "success",
 				message: i18n.tr.admin.importSuccessful,
 				error: false,
+				childrenImported: data?.children_imported || 0,
 			};
 			// Reset file inputs
 			if (dataFileInputRef) dataFileInputRef.value = "";
@@ -157,8 +164,10 @@ async function handleImportConfirm() {
 			status: "error",
 			message: e.message || i18n.tr.admin.importFailed,
 			error: true,
+			childrenImported: 0,
 		};
 		cancelImport();
+		console.log("Cancelled import..");
 	} finally {
 		isUploading = false;
 		showImportResult = true;
@@ -188,9 +197,14 @@ onMount(async () => {
     </h3>
     <div class="space-y-4">
         {#if successfulImport}
-                <Alert color="green">
-                    <CheckCircleOutline class="inline" />&nbsp;{i18n.tr.admin.importSuccessful}
-                </Alert>
+            <Alert color="green">
+                <CheckCircleOutline class="inline" />&nbsp;
+                {#if importResult.childrenImported > 0}
+                    {importResult.childrenImported} {i18n.tr.admin.importSuccessfulChildren}
+                {:else}
+                    {i18n.tr.admin.importSuccessful}
+                {/if}
+            </Alert>
         {:else}
             <div class="space-y-4">
                 <p>{i18n.tr.admin.selectFileToImport}</p>

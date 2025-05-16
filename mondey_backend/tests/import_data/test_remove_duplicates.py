@@ -121,15 +121,19 @@ async def import_with_manager(
     with tempfile.NamedTemporaryFile(
         mode="w", delete=False, suffix=".csv"
     ) as temp_additional:
+        # Pass the name attribute instead of the file object
         await manager.data_manager.save_additional_import_csv_into_dataframe(
-            additional_df, temp_additional
+            additional_df,
+            temp_additional.name,  # Use .name here
         )
 
     with tempfile.NamedTemporaryFile(
         mode="w", delete=False, suffix=".csv"
     ) as temp_labels:
+        # Pass the name attribute instead of the file object
         await manager.data_manager.save_labels_csv_into_dataframe(
-            labels_df, temp_labels
+            labels_df,
+            temp_labels.name,  # Use .name here
         )
 
     # Run the import

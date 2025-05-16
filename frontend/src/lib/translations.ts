@@ -189,6 +189,7 @@ export const translationIds = {
 		selectFileToImport: "Wahlen Sie das Daten",
 		needToUploadBothFiles:
 			"Sie müssen beide die Daten CSV und Labels CSV hochladen.",
+		importSuccessfulChildren: "Kinder importiert",
 	},
 	researcher: {
 		label: "Wissenschaft",

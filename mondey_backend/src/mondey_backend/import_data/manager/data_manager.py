@@ -179,11 +179,17 @@ class DataManager:
         csv_data.to_csv(temp_file_name, index=False, sep="\t", encoding="utf-16")
         logger.debug(f"CSV saved to temporary file {temp_file_name}")
 
-        await remove_duplicate_cases(temp_file_name, self.session)
+        filtered_df, duplicates = await remove_duplicate_cases(
+            csv_data, self.session, self.user_session
+        )
+
+        filtered_df.to_csv(temp_file_name, index=False, sep="\t", encoding="utf-16")
         logger.debug("Removed duplicates before processing")
 
-        self.import_paths.additional_data_path = Path(temp_file_name)
-        self.load_additional_data_df(force_reload=True)
+        self.import_paths.additional_data_path = Path(
+            temp_file_name
+        )  # for consistency but not vital
+        self._additional_data_df = filtered_df
 
     async def save_labels_csv_into_dataframe(
         self, csv_data: pd.DataFrame, temp_file_name: str
