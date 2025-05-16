@@ -19,6 +19,7 @@ from typing import IO
 import pandas as pd
 from fastapi import HTTPException
 from fastapi import status
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import Session
 
 from mondey_backend.import_data.remove_duplicate_cases import remove_duplicate_cases
@@ -81,7 +82,7 @@ class DataManager:
     def __init__(
         self,
         session: Session,
-        user_session: UserSession,
+        user_session: AsyncSession,
         import_paths: ImportPaths | None = None,
         debug: bool = False,
     ):
@@ -92,6 +93,8 @@ class DataManager:
             import_paths: Paths to import data files
             debug: Enable debug logging
         """
+        self.session: Session = session
+        self.user_session: AsyncSession = user_session
         self.debug = debug
         self._setup_logging()
 
@@ -204,9 +207,7 @@ class DataManager:
         csv_data.to_csv(temp_file.name, index=False, sep="\t", encoding="utf-16")
         logger.debug(f"CSV saved to temporary file {temp_file.name}")
 
-        import_session, _ = self.get_import_session()
-
-        await remove_duplicate_cases(temp_file.name, import_session)
+        await remove_duplicate_cases(temp_file.name, self.session)
         logger.debug("Removed duplicates before processing")
 
         self.import_paths.additional_data_path = Path(temp_file.name)

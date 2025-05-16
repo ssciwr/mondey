@@ -12,6 +12,7 @@ from datetime import datetime
 
 import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import Session
 from sqlmodel import select
 
 from mondey_backend.import_data.manager.data_manager import DataManager
@@ -44,7 +45,7 @@ class ImportManager:
         self, session: Session, user_session: AsyncSession, debug: bool = False
     ):
         # Initialize DataManager
-        self.data_manager = DataManager(session, user_session, debug=debug)
+        self.data_manager: DataManager = DataManager(session, user_session, debug=debug)
 
         # Mappings
         self.child_parent_map: dict[str, int] = {}
@@ -340,7 +341,8 @@ class ImportManager:
                     child_parent_map[str(child_id)] = parent.id
 
             await self.data_manager.user_session.commit()
-        except:
+        except Exception as e:
+            logger.warning(e)
             await self.data_manager.user_session.rollback()
 
         logger.debug(f"Final child_parent_map: {child_parent_map}")
@@ -513,10 +515,7 @@ class ImportManager:
             if answer is not None and len(answer) > 0:
                 # Save parent answer for this question, only if it was actually filled out
                 self.create_answer(
-                    self.data_manager.session,
-                    user_or_child_id=self.get_childs_parent_id(
-                        self.data_manager.session, child_id
-                    ),
+                    user_or_child_id=self.get_childs_parent_id(child_id),
                     question_id=eltern_question_special_id,
                     answer_text=answer,
                     set_only_additional_answer=False,
@@ -540,7 +539,6 @@ class ImportManager:
 
             # Create answers for pregnancy duration and incubator weeks
             self.create_answer(
-                self.data_manager.session,
                 user_or_child_id=child_id,
                 question_id=pregnancy_duration_question_id,
                 answer_text=str(pregnanacy_duration_answer),
@@ -549,7 +547,6 @@ class ImportManager:
             )
 
             self.create_answer(
-                self.data_manager.session,
                 user_or_child_id=child_id,
                 question_id=incubator_weeks_question_id,
                 answer_text=str(incubator_weeks),
@@ -565,7 +562,6 @@ class ImportManager:
             logger.debug(f"Setting special case younger siblings to: {answer}")
 
             self.create_answer(
-                self.data_manager.session,
                 user_or_child_id=child_id,
                 question_id=relevant_question_id,
                 answer_text=answer
@@ -773,7 +769,6 @@ class ImportManager:
 
                     # Process special answers (Eltern, Fruhgeboren, etc.)
                     have_acted_upon_question = self.process_special_answer(
-                        self.data_manager.session,
                         variable_label,
                         answer,
                         variable,
@@ -837,11 +832,8 @@ class ImportManager:
                         # Check if question is for parent or child
                         if self.get_question_filled_in_to_parent(variable):
                             # Create user answer
-                            parent_id = self.get_childs_parent_id(
-                                self.data_manager.session, child_row.get("CASE")
-                            )
+                            parent_id = self.get_childs_parent_id(child_row.get("CASE"))
                             _, answer = self.create_answer(
-                                self.data_manager.session,
                                 user_or_child_id=parent_id,
                                 question_id=question.id,
                                 answer_text=answer_text,
@@ -851,7 +843,6 @@ class ImportManager:
                         else:
                             # Create child answer
                             _, answer = self.create_answer(
-                                self.data_manager.session,
                                 user_or_child_id=db_child_id,
                                 question_id=question.id,
                                 answer_text=answer_text,
@@ -884,11 +875,8 @@ class ImportManager:
                     # Check if question is for parent or child
                     if self.get_question_filled_in_to_parent(variable):
                         # Create user answer
-                        parent_id = self.get_childs_parent_id(
-                            self.data_manager.session, child_row.get("CASE")
-                        )
+                        parent_id = self.get_childs_parent_id(child_row.get("CASE"))
                         _, answer = self.create_answer(
-                            self.data_manager.session,
                             user_or_child_id=parent_id,
                             question_id=question.id,
                             answer_text=answer_text,
@@ -898,7 +886,6 @@ class ImportManager:
                     else:
                         # Create child answer
                         _, answer = self.create_answer(
-                            self.data_manager.session,
                             user_or_child_id=db_child_id,
                             question_id=question.id,
                             answer_text=answer_text,
