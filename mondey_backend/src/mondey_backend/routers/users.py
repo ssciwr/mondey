@@ -73,7 +73,9 @@ def create_router() -> APIRouter:
                 answers = np.array(
                     list(a.answer for a in milestone_answer_session.answers.values())
                 )
-                child_summary.session_progress = np.mean(answers >= 0, dtype=np.float64)
+                child_summary.session_progress = np.nan_to_num(
+                    np.mean(answers >= 0, dtype=np.float64)
+                )
                 child_summary.session_remaining_seconds = session_remaining_seconds(
                     milestone_answer_session
                 )
