@@ -138,7 +138,7 @@ const asAlert = false;
 		<Drawer placement="right" bind:hidden={hideDrawer} id="sidebar">
 			<Sidebar>
 				<SidebarWrapper>
-					<SidebarGroup>
+					<SidebarGroup class="mt-10">
 						<!-- Navigation Items -->
 						<SidebarItem label={i18n.tr.misc.latest} href={base}>
 							<svelte:fragment slot="icon">

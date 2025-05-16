@@ -6,6 +6,7 @@ import { type PlotData } from "$lib/util";
 import {
 	Axis,
 	BulletLegend,
+	type BulletLegendItemInterface,
 	CurveType,
 	Line,
 	Scale,
@@ -16,22 +17,61 @@ import { onMount } from "svelte";
 let { plot_data = { keys: [], data: [] } }: { plot_data: PlotData } = $props();
 let legend_container: HTMLDivElement;
 let xy_container: HTMLDivElement;
+let legendItems = $state([] as BulletLegendItemInterface[]);
+let chart: XYContainer | null = $state(null);
 
 onMount(() => {
 	if (!plot_data.keys || plot_data.keys.length === 0) {
 		return;
 	}
-	const legend = new BulletLegend(legend_container, {
-		items: plot_data.keys.map((key: string) => ({ name: key })),
+
+	legendItems = plot_data.keys.map((key: string) => ({
+		name: key,
+		inactive: false,
+		pointer: true,
+	}));
+
+	createChart();
+
+	new BulletLegend(legend_container, {
+		items: legendItems,
+		onLegendItemClick: handleLegendClick,
 	});
-	const chart = new XYContainer(
+});
+
+function handleLegendClick(item: BulletLegendItemInterface, index: number) {
+	legendItems[index].inactive = !legendItems[index].inactive;
+
+	while (legend_container.firstChild) {
+		legend_container.removeChild(legend_container.firstChild);
+	}
+
+	// reuse the clickhandler to keep it responsive
+	new BulletLegend(legend_container, {
+		items: legendItems.map((item) => ({
+			...item,
+			pointer: true,
+		})),
+		onLegendItemClick: handleLegendClick,
+	});
+
+	createChart();
+}
+
+function createChart() {
+	// Destroy existing chart if any (needed because of it becoming out of date/freezing and not responding to onClicks)
+	if (chart) {
+		chart.destroy();
+	}
+
+	chart = new XYContainer(
 		xy_container,
 		{
 			components: [
 				new Line({
 					x: (d) => d.age,
-					y: plot_data.keys.map((k) => {
-						return (d) => d[k];
+					y: plot_data.keys.map((k, i) => {
+						return legendItems[i].inactive ? () => null : (d) => d[k];
 					}),
 					lineWidth: 3,
 					curveType: CurveType.Linear,
@@ -49,7 +89,7 @@ onMount(() => {
 		},
 		plot_data.data,
 	);
-});
+}
 </script>
 
 <div class="w-full">
