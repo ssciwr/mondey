@@ -22,6 +22,7 @@ import {
 	SidebarGroup,
 	SidebarItem,
 	SidebarWrapper,
+	Tooltip,
 } from "flowbite-svelte";
 
 let { setHideDrawer } = $props();
@@ -29,8 +30,12 @@ let { setHideDrawer } = $props();
 
 <Sidebar>
     <SidebarWrapper>
-        <SidebarGroup>
-            <SidebarItem label = {user.data?.email} class = "font-bold"/>
+        <SidebarGroup class="mt-10">
+            <SidebarItem label  = {user.data?.email ?
+              (user.data.email.length > 20 ?
+                user.data.email.substring(0, 20) + "..." :
+                user.data.email) :
+              ""}  class = "font-bold"/><Tooltip title={user.data?.email} placement="top">{user.data?.email}</Tooltip>
             <SidebarItem label = {i18n.tr.userData.label} href="/userLand/dataInput">
                 <svelte:fragment slot="icon">
                     <ProfileCardSolid size="lg" />

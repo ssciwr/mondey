@@ -18,6 +18,7 @@ export const translationIds = {
 			"Das Kind zeigt das Verhalten mehrmals sicher und genau wie beschrieben.",
 		"answer-1Text": "Später bewerten",
 		"answer-1Desc": "Falls Sie noch nicht wissen, ob das Kind das tun könnt.",
+		adviceOnAnswerLevel: "Einstufungshinweis",
 		milestones: "Meilensteine",
 		observation: "Beobachtungshinweise",
 		help: "Fördern",
