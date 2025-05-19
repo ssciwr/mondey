@@ -226,6 +226,18 @@ def analyse_answer_session(
     diff = 0
     count = 0
     for milestone_id, answer in milestone_answer_session.answers.items():
+        if answer.answer < 0:
+            if milestone_answer_session.completed:
+                logger.warning(
+                    f"    - completed answer session {milestone_answer_session.id} missing score for milestone {milestone_id} - marking session as incomplete!"
+                )
+                milestone_answer_session.completed = False
+                session.commit()
+                session.refresh(milestone_answer_session)
+            logger.debug(
+                f"    - no answer available for milestone {milestone_id} - skipping"
+            )
+            continue
         score = session.exec(
             select(MilestoneAgeScore)
             .where(col(MilestoneAgeScore.age) == child_age)
@@ -236,14 +248,6 @@ def analyse_answer_session(
                 f"    - no statistics available for milestone {milestone_id} - skipping"
             )
             continue
-        if answer.answer < 0:
-            logger.debug(
-                f"    - no answer available for milestone {milestone_id} - skipping"
-            )
-            continue
-        logger.debug(
-            f"    - milestone {milestone_id}: answer {answer}, avg score {score.avg_score}"
-        )
         analysis.answers.append(
             MilestoneAnswerAnalysis(
                 milestone_id=milestone_id,
@@ -381,35 +385,22 @@ async def async_update_stats(
     # update milestone statistics
     logger.debug(f"  - updating {len(milestone_answers)} milestone statistics...")
     for milestone_id, milestone_answer in milestone_answers.items():
-        existing_milestone_statistics = (
-            session.get(MilestoneAgeScoreCollection, milestone_id)
-            if incremental_update
-            else None
+        calculate_milestone_statistics_by_age(
+            session, milestone_id, milestone_answer, child_ages, incremental_update
         )
-        milestone_age_score_collection = calculate_milestone_statistics_by_age(
-            milestone_id, milestone_answer, child_ages, existing_milestone_statistics
-        )
-        session.merge(milestone_age_score_collection)
 
     # update milestone group statistics
     logger.debug(
         f"  - updating {len(milestone_group_answers)} milestone group statistics..."
     )
     for milestone_group_id, milestone_group_answer in milestone_group_answers.items():
-        existing_milestone_group_statistics = (
-            session.get(MilestoneGroupAgeScoreCollection, milestone_group_id)
-            if incremental_update
-            else None
+        calculate_milestonegroup_statistics_by_age(
+            session,
+            milestone_group_id,
+            milestone_group_answer,
+            child_ages,
+            incremental_update,
         )
-        milestone_group_age_score_collection = (
-            calculate_milestonegroup_statistics_by_age(
-                milestone_group_id,
-                milestone_group_answer,
-                child_ages,
-                existing_milestone_group_statistics,
-            )
-        )
-        session.merge(milestone_group_age_score_collection)
 
     for milestone_answer_session in milestone_answer_sessions:
         milestone_answer_session.included_in_statistics = True
@@ -450,36 +441,40 @@ def _extract_stats(
 
 
 def calculate_milestone_statistics_by_age(
+    session: SessionDep,
     milestone_id: int,
     answers: Sequence[MilestoneAnswer],
     child_ages: dict[int, int],
-    existing_statistics: MilestoneAgeScoreCollection | None,
-) -> MilestoneAgeScoreCollection | None:
+    incremental_update: bool,
+) -> None:
     """
-    Calculate the mean, variance of a milestone per age in months.
-    If existing statistics are provided they are updated using the provided answers.
+    Calculate the mean, variance of a milestone per age in months,
+    and update or create a MilestoneAgeScoreCollection of MilestoneAgeScores for this milestone.
+    If incremental_update is True then the supplied answers are added to the existing statistics,
+    otherwise the statistics are recalculated from scratch.
 
     Parameters
     ----------
+    session: SessionDep
+        the database session
     milestone_id : int
         id of the milestone to calculate the statistics for
     answers: Sequence[MilestoneAnswer]
         the new answers to include in the statistics.
     child_ages : dict[int, int]
         dict of answer_session_id -> child age in months
-    existing_statistics: MilestoneAgeScoreCollection | None
-        the existing statistics to update, if any
-    Returns
-    -------
-    MilestoneAgeScoreCollection | None
-        updated statistics, or None if there are no new answers and no existing statistics.
+    incremental_update: bool
+        if True, add the new answers to the existing statistics, otherwise recalculate the statistics from scratch
     """
     if len(answers) == 0:
-        # return existing statistics if no new answers are available
-        return existing_statistics
+        return
 
-    # initialize avg and stddev scores with the existing statistics or to None if no statistics are available
-    count, avg_scores, stddev_scores = _extract_stats(existing_statistics)
+    collection = session.get(MilestoneAgeScoreCollection, milestone_id)
+
+    # initialize avg and stddev scores with any existing statistics if doing an incremental update
+    count, avg_scores, stddev_scores = _extract_stats(
+        collection if incremental_update else None
+    )
 
     count, avg_scores, stddev_scores = _get_statistics_by_age(
         answers, child_ages, count=count, avg=avg_scores, stddev=stddev_scores
@@ -487,77 +482,108 @@ def calculate_milestone_statistics_by_age(
 
     expected_age = get_expected_age_from_scores(avg_scores, count)
 
-    # overwrite last_statistics with updated stuff --> set primary keys explicitly
-    return MilestoneAgeScoreCollection(
-        milestone_id=milestone_id,
-        expected_age=expected_age,
-        created_at=datetime.datetime.now(),
-        scores=[
-            MilestoneAgeScore(
+    if collection is None:
+        collection = MilestoneAgeScoreCollection(
+            milestone_id=milestone_id,
+            expected_age=expected_age,
+            created_at=datetime.datetime.now(),
+        )
+        session.add(collection)
+        session.commit()
+        session.refresh(collection)
+
+    for age in range(0, len(avg_scores)):
+        score = session.get(
+            MilestoneAgeScore, ({"milestone_id": milestone_id, "age": age})
+        )
+        if score is None:
+            score = MilestoneAgeScore(
                 age=age,
                 milestone_id=milestone_id,
-                count=int(
-                    count[age]
-                ),  # need a conversion to avoid numpy.int32 being stored as byte object
-                avg_score=avg_scores[age],
-                stddev_score=stddev_scores[age],
+                count=0,
+                avg_score=0.0,
+                stddev_score=0.0,
             )
-            for age in range(0, len(avg_scores))
-        ],
-    )
+        score.count = int(
+            count[age]
+        )  # need a conversion to avoid numpy.int32 being stored as byte object
+        score.avg_score = avg_scores[age]
+        score.stddev_score = stddev_scores[age]
+        session.add(score)
+    session.commit()
 
 
 def calculate_milestonegroup_statistics_by_age(
+    session: SessionDep,
     milestone_group_id: int,
     answers: Sequence[MilestoneAnswer],
     child_ages: dict[int, int],
-    existing_statistics: MilestoneGroupAgeScoreCollection | None,
-) -> MilestoneGroupAgeScoreCollection | None:
+    incremental_update: bool,
+) -> None:
     """
     Calculate the mean, variance of a milestone group per age in months.
-    If existing statistics are provided they are updated using the provided answers.
+    and update or create a MilestoneGroupAgeScoreCollection of MilestoneGroupAgeScores for this milestone.
+    If incremental_update is True then the supplied answers are added to the existing statistics,
+    otherwise the statistics are recalculated from scratch.
 
     Parameters
     ----------
+    session: SessionDep
+        the database session
     milestone_group_id : int
         id of the milestone group to calculate the statistics for
     answers: Sequence[MilestoneAnswer]
         the new answers to include in the statistics.
     child_ages : dict[int, int]
         dict of answer_session_id -> child age in months
-    existing_statistics: MilestoneGroupAgeScoreCollection | None
-        the existing statistics to update, if any
+    incremental_update: bool
+        if True, add the new answers to the existing statistics, otherwise recalculate the statistics from scratch
     Returns
     -------
-    MilestoneGroupAgeScoreCollection | None
-        updated statistics, or None if there are no new answers and no existing statistics.
+    None
     """
     if len(answers) == 0:
-        # return existing statistics if no new answers are available
-        return existing_statistics
+        return
 
-    # initialize avg and stddev scores with the existing statistics or to None if no statistics are available
-    count, avg_scores, stddev_scores = _extract_stats(existing_statistics)
+    collection = session.get(MilestoneGroupAgeScoreCollection, milestone_group_id)
+
+    # initialize avg and stddev scores with any existing statistics if doing an incremental update
+    count, avg_scores, stddev_scores = _extract_stats(
+        collection if incremental_update else None
+    )
+
     count, avg_scores, stddev_scores = _get_statistics_by_age(
         answers, child_ages, count=count, avg=avg_scores, stddev=stddev_scores
     )
 
-    return MilestoneGroupAgeScoreCollection(
-        milestone_group_id=milestone_group_id,
-        scores=[
-            MilestoneGroupAgeScore(
-                milestone_group_id=milestone_group_id,
+    if collection is None:
+        collection = MilestoneGroupAgeScoreCollection(
+            milestone_group_id=milestone_group_id
+        )
+        session.add(collection)
+        session.commit()
+        session.refresh(collection)
+
+    for age in range(0, len(avg_scores)):
+        score = session.get(
+            MilestoneGroupAgeScore,
+            ({"milestone_group_id": milestone_group_id, "age": age}),
+        )
+        if score is None:
+            score = MilestoneGroupAgeScore(
                 age=age,
-                count=int(
-                    count[age]
-                ),  # need a conversion to avoid numpy.int32 being stored as byte object
-                avg_score=avg_scores[age],
-                stddev_score=stddev_scores[age],
+                milestone_group_id=milestone_group_id,
+                count=0,
+                avg_score=0.0,
+                stddev_score=0.0,
             )
-            for age in range(0, len(avg_scores))
-        ],
-        created_at=datetime.datetime.now(),
-    )
+        score.count = int(
+            count[age]
+        )  # need a conversion to avoid numpy.int32 being stored as byte object
+        score.avg_score = avg_scores[age]
+        score.stddev_score = stddev_scores[age]
+        session.add(score)
+    session.commit()
 
 
 async def get_user_ids(
