@@ -4,7 +4,7 @@ import datetime
 from enum import Enum as RealEnum  # to avoid name clash
 
 from pydantic import BaseModel
-from sqlalchemy import Column
+from sqlalchemy import Column, String, text
 from sqlalchemy import Enum as SQLAlchemyEnum
 from sqlalchemy.orm import Mapped
 from sqlmodel import Field
@@ -196,14 +196,11 @@ class MilestoneAnswerSession(SQLModel, table=True):
     completed: bool
     included_in_statistics: bool
     suspicious_state: SuspiciousState = Field(
+        default=SuspiciousState.NOT_SUSPICIOUS,
         sa_column=Column(
-            SQLAlchemyEnum(
-                SuspiciousState,
-                name="suspiciousstate",
-                create_constraint=True,
-                native_enum=True,
-            ),
-            default=SuspiciousState.NOT_SUSPICIOUS,
+            String,  # Use String instead of SQLAlchemyEnum
+            default=SuspiciousState.NOT_SUSPICIOUS.value,
+            nullable=False,
         )
     )
 
