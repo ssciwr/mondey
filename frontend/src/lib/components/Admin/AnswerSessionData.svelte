@@ -5,7 +5,10 @@ import {
 	adminUpdateStats,
 	getMilestoneAnswerSessions,
 } from "$lib/client/sdk.gen";
-import type { MilestoneAnswerSession } from "$lib/client/types.gen";
+import type {
+	MilestoneAnswerSession,
+	SuspiciousState,
+} from "$lib/client/types.gen";
 import AnswerSessionAnalysisModal from "$lib/components/Admin/AnswerSessionAnalysisModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import {
@@ -74,6 +77,10 @@ function boolToStr(bool: boolean): string {
 	return bool ? i18n.tr.admin.yes : i18n.tr.admin.no;
 }
 
+function isSuspicious(state: SuspiciousState): boolean {
+	return state === "suspicious" || state === "admin_suspicious";
+}
+
 onMount(async () => {
 	await refreshMilestoneAnswerSessions();
 });
@@ -113,8 +120,8 @@ onMount(async () => {
             </TableHead>
             <TableBody>
                 {#each answer_sessions as answer_session (answer_session.id)}
-                    {#if (!show_suspicious_only || answer_session.suspicious) && (!show_completed_only || answer_session.completed)}
-                        <TableBodyRow color={answer_session.suspicious ? 'red' : 'default'}>
+                    {#if (!show_suspicious_only || isSuspicious(answer_session.suspicious_state)) && (!show_completed_only || answer_session.completed)}
+                        <TableBodyRow color={isSuspicious(answer_session.suspicious_state) ? 'red' : 'default'}>
                             <TableBodyCell>
                                 {answer_session.id}
                             </TableBodyCell>
@@ -128,7 +135,7 @@ onMount(async () => {
                                 {boolToStr(answer_session.included_in_statistics)}
                             </TableBodyCell>
                             <TableBodyCell>
-                                {boolToStr(answer_session.suspicious)}
+                                {boolToStr(isSuspicious(answer_session.suspicious_state))}
                             </TableBodyCell>
                             <TableBodyCell>
                                 <Button onclick={() => {if(answer_session.id) {current_answer_session_id=answer_session.id;

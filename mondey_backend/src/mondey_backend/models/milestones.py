@@ -195,14 +195,16 @@ class MilestoneAnswerSession(SQLModel, table=True):
     expired: bool
     completed: bool
     included_in_statistics: bool
-    suspicious_state: SuspiciousState = Column(
-        SQLAlchemyEnum(
-            SuspiciousState,
-            name="suspiciousstate",
-            create_constraint=True,
-            native_enum=True,
-        ),
-        default=SuspiciousState.NOT_SUSPICIOUS,
+    suspicious_state: SuspiciousState = Field(
+        sa_column=Column(
+            SQLAlchemyEnum(
+                SuspiciousState,
+                name="suspiciousstate",
+                create_constraint=True,
+                native_enum=True,
+            ),
+            default=SuspiciousState.NOT_SUSPICIOUS,
+        )
     )
 
     answers: Mapped[dict[int, MilestoneAnswer]] = dict_relationship(key="milestone_id")

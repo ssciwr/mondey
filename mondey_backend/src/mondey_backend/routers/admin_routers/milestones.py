@@ -24,6 +24,7 @@ from ...models.milestones import MilestoneImage
 from ...models.milestones import MilestoneText
 from ...models.milestones import SubmittedMilestoneImage
 from ...models.milestones import SubmittedMilestoneImagePublic
+from ...models.milestones import SuspiciousState
 from ...models.utils import DeleteResponse
 from ...models.utils import ItemOrder
 from ...statistics import analyse_answer_session
@@ -266,7 +267,10 @@ def create_router() -> APIRouter:
         session: SessionDep, answer_session_id: int, suspicious: bool
     ):
         answer_session = get(session, MilestoneAnswerSession, answer_session_id)
-        answer_session.suspicious = suspicious
+        if suspicious:
+            answer_session.suspicious_state = SuspiciousState.ADMIN_SUSPICIOUS
+        else:
+            answer_session.suspicious_state = SuspiciousState.ADMIN_NOT_SUSPICIOUS
         session.add(answer_session)
         session.commit()
         return {"ok": True}
