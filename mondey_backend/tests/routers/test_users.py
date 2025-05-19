@@ -8,6 +8,7 @@ from sqlmodel import col
 
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
+from mondey_backend.models.milestones import SuspiciousState
 from mondey_backend.models.questions import ChildAnswer
 
 
@@ -227,7 +228,7 @@ def test_delete_child_removes_answering_sessions(session, user_client: TestClien
         expired=False,
         completed=False,
         included_in_statistics=True,
-        suspicious=False,
+        suspicious=SuspiciousState.NOT_SUSPICIOUS,
     )
     session.add(milestone_answer_session)
     session.flush()

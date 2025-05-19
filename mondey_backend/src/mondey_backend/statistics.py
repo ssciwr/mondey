@@ -277,7 +277,7 @@ def flag_suspicious_answer_sessions(
         .where(col(MilestoneAnswerSession.completed))
         .where(
             col(MilestoneAnswerSession.suspicious_state)
-            == SuspiciousState.NOT_SUSPICIOUS
+            == SuspiciousState.NOT_SUSPICIOUS  # so if the user sets it to admin_non_suspicious, it won't be processed.
         )
         .where(
             col(MilestoneAnswerSession.user_id).not_in(test_account_user_ids_to_exclude)
@@ -294,6 +294,7 @@ def flag_suspicious_answer_sessions(
                 logger.debug(
                     f"Marking answer session {milestone_answer_session.id} with rms difference {analysis.rms} as suspicious"
                 )
+                # will be properely set now.
                 milestone_answer_session.suspicious_state = SuspiciousState.SUSPICIOUS
                 session.add(milestone_answer_session)
         except AttributeError as e:
