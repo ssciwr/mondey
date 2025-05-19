@@ -186,7 +186,6 @@ let headers = $derived.by(() => {
 
 <div class="w-full grow">
 
-
     <div class="flex flex-col items-stretch m-2">
         <h4>{i18n.tr.researcher.researchData}</h4>
         <Button class="mt-9 mb-3" disabled={is_downloading} onclick={handleDownloadAll} data-testid="downloadAllResearchData">{i18n.tr.researcher.downloadAll}</Button>
