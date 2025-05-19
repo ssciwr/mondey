@@ -8,7 +8,7 @@ import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import type { Translation } from "$lib/i18n.svelte";
 import { translationIds } from "$lib/translations";
-import { Accordion, AccordionItem, Card, Label } from "flowbite-svelte";
+import { Accordion, AccordionItem, Label } from "flowbite-svelte";
 import { onMount } from "svelte";
 
 let translations: Record<string, Translation> = $state(

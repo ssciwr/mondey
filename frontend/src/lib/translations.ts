@@ -189,7 +189,7 @@ export const translationIds = {
 		downloadAll: "Alles als CSV herunterladen",
 		downloadingAllResearchData: "Herunterladen von Daten...",
 		dataPlotsHeading: "Datenvisualisierungen",
-		researchData: "Wissenshaftlichen Daten",
+		researchData: "Wissenschaftliche Daten",
 		filter: "filtern",
 		selectColumns: "Spalten auswählen",
 		milestone: "Meilenstein",

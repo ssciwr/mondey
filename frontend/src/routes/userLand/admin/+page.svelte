@@ -1,7 +1,6 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { refreshMilestoneGroups } from "$lib/admin.svelte";
 import AnswerSessionData from "$lib/components/Admin/AnswerSessionData.svelte";
 import Languages from "$lib/components/Admin/Languages.svelte";
 import MilestoneChildAgeRanges from "$lib/components/Admin/MilestoneChildAgeRanges.svelte";
@@ -12,6 +11,7 @@ import SubmittedMilestoneImages from "$lib/components/Admin/SubmittedMilestoneIm
 import Translations from "$lib/components/Admin/Translations.svelte";
 import Users from "$lib/components/Admin/Users.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { milestoneGroups } from "$lib/stores/adminStore.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { TabItem, Tabs } from "flowbite-svelte";
@@ -30,7 +30,7 @@ import { onMount } from "svelte";
 onMount(async () => {
 	try {
 		await user.load();
-		await refreshMilestoneGroups();
+		await milestoneGroups.refresh();
 	} catch (error) {
 		alertStore.showAlert(error.message, "", true, true);
 	}

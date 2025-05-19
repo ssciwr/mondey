@@ -193,14 +193,14 @@ function retrieve_all_data() {
 		return;
 	}
 	const df = get_raw_data();
-	// using \t as seperator causes issues - some answers have columns. This protects against it
+	// using \t as separator causes issues - some answers have columns. This protects against it
 	// since danfojs version supports sep but not quoting args. And sep = \t will be ignored by users device, even if
-	// we hint it with delimiter=tab in the file type, in my case at least it still used "," as a seperator too,
+	// we hint it with delimiter=tab in the file type, in my case at least it still used "," as a separator too,
 	const csvVersionOfData = toCSV(
-		df.applyMap((val) =>
+		df.applyMap((val: any) =>
 			val !== null && val !== undefined ? `"${val}"` : val,
 		),
-	);
+	) as string;
 
 	const message: WorkerFullData = {
 		type: WorkerTypes.FULL_DATA,

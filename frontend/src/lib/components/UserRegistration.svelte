@@ -1,6 +1,6 @@
 <script lang="ts">
 import { registerRegister } from "$lib/client/sdk.gen";
-import { type RegisterRegisterData } from "$lib/client/types.gen";
+import { type UserCreate } from "$lib/client/types.gen";
 import ResearchCodeInput from "$lib/components/DataInput/ResearchCodeInput.svelte";
 import UserVerify from "$lib/components/UserVerify.svelte";
 import { i18n } from "$lib/i18n.svelte";
@@ -15,15 +15,13 @@ async function submitData(): Promise<void> {
 		await user.logout();
 	}
 
-	const userData: RegisterRegisterData = {
-		body: {
-			email: email,
-			password: password,
-			is_active: true,
-			research_group_id: Number(researchCode),
-		},
+	const userData: UserCreate = {
+		email: email,
+		password: password,
+		is_active: true,
+		research_group_id: Number(researchCode),
 	};
-	const result = await registerRegister(userData);
+	const result = await registerRegister({ body: userData });
 
 	if (result.error) {
 		console.log("error: ", result.response.status, result.error.detail);
