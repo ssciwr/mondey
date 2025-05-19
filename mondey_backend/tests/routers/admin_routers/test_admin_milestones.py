@@ -535,6 +535,9 @@ def test_child_milestone_expected_age_ranges(admin_client: TestClient):
         assert row["min_expected_age"] == i - 6
         assert row["max_expected_age"] == i + 6
 
+    # this means we get x milestones for child 3 who is ~55 months old
+    admin_client.get("/milestones/3").json()
+
     # set new values
     for row in data:
         row["min_expected_age"] = row["child_age"] // 2
