@@ -2,7 +2,7 @@
 
 <script lang="ts">
 import { i18n } from "$lib/i18n.svelte";
-import { type PlotData } from "$lib/util";
+import { type PlotData, type PlotDatum } from "$lib/util";
 import {
 	Axis,
 	BulletLegend,
@@ -17,65 +17,30 @@ import { onMount } from "svelte";
 let { plot_data = { keys: [], data: [] } }: { plot_data: PlotData } = $props();
 let legend_container: HTMLDivElement;
 let xy_container: HTMLDivElement;
-let legendItems = $state([] as BulletLegendItemInterface[]);
-let chart: XYContainer | null = $state(null);
 
 onMount(() => {
 	if (!plot_data.keys || plot_data.keys.length === 0) {
 		return;
 	}
-
-	legendItems = plot_data.keys.map((key: string) => ({
-		name: key,
-		inactive: false,
-		pointer: true,
-	}));
-
 	createChart();
-
-	new BulletLegend(legend_container, {
-		items: legendItems,
-		onLegendItemClick: handleLegendClick,
-	});
 });
 
-function handleLegendClick(item: BulletLegendItemInterface, index: number) {
-	legendItems[index].inactive = !legendItems[index].inactive;
-
-	while (legend_container.firstChild) {
-		legend_container.removeChild(legend_container.firstChild);
-	}
-
-	// reuse the clickhandler to keep it responsive
-	new BulletLegend(legend_container, {
-		items: legendItems.map((item) => ({
-			...item,
-			pointer: true,
-		})),
-		onLegendItemClick: handleLegendClick,
-	});
-
-	createChart();
-}
-
 function createChart() {
-	// Destroy existing chart if any (needed because of it becoming out of date/freezing and not responding to onClicks)
-	if (chart) {
-		chart.destroy();
-	}
-
-	chart = new XYContainer(
+	const lineConfig = {
+		x: (d: PlotDatum) => d.age,
+		lineWidth: 3,
+		curveType: CurveType.Linear,
+		interpolateMissingData: true,
+	};
+	const chart = new XYContainer<PlotDatum>(
 		xy_container,
 		{
 			components: [
 				new Line({
-					x: (d) => d.age,
+					...lineConfig,
 					y: plot_data.keys.map((k, i) => {
-						return legendItems[i].inactive ? () => null : (d) => d[k];
+						return (d) => d[k];
 					}),
-					lineWidth: 3,
-					curveType: CurveType.Linear,
-					interpolateMissingData: true,
 				}),
 			],
 			xAxis: new Axis({
@@ -89,6 +54,27 @@ function createChart() {
 		},
 		plot_data.data,
 	);
+	function toggleItem(item: BulletLegendItemInterface, i: number): void {
+		const items = legend.config.items;
+		items[i].inactive = !items[i].inactive;
+		legend.update({ ...legend.config, items: items });
+		chart.updateComponents([
+			{
+				...lineConfig,
+				y: plot_data.keys.map((k, i) => {
+					return items[i].inactive ? () => undefined : (d) => d[k];
+				}),
+			},
+		]);
+	}
+	const legend = new BulletLegend(legend_container, {
+		items: plot_data.keys.map((key: string) => ({
+			name: key,
+			inactive: false,
+			pointer: true,
+		})),
+		onLegendItemClick: toggleItem,
+	});
 }
 </script>
 
