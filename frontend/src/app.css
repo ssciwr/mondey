@@ -108,4 +108,9 @@
 			min-width: unset;
 		}
 	}
+
+	:root {
+		--range-handle: #3322ff;
+		--range-range-inactive: #000000;
+	}
 }

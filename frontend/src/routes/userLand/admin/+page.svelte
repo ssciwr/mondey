@@ -16,6 +16,7 @@ import { alertStore } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { TabItem, Tabs } from "flowbite-svelte";
 import {
+	AdjustmentsHorizontalOutline,
 	BadgeCheckOutline,
 	ClipboardListOutline,
 	DatabaseOutline,
@@ -46,7 +47,7 @@ onMount(async () => {
     </TabItem>
     <TabItem open>
         <div slot="title" class="flex items-center gap-2">
-            <BadgeCheckOutline size="md"/>
+            <AdjustmentsHorizontalOutline size="md"/>
             {i18n.tr.admin.milestoneChildAgeRanges}
         </div>
         <MilestoneChildAgeRanges/>

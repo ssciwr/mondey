@@ -26,6 +26,7 @@ import {
 	Range,
 	Textarea,
 } from "flowbite-svelte";
+import RangeSlider from "svelte-range-slider-pips";
 
 let {
 	open = $bindable(false),
@@ -98,7 +99,7 @@ async function deleteMilestoneImageAndUpdate() {
         {/each}
         <div class="mb-5">
             <Label>{`${i18n.tr.admin.expectedAge}: ${milestone.expected_age_months}m`}</Label>
-            <input type="range" id="expectedAge-months" min="1" max="72" bind:value={milestone.expected_age_months}/>
+            <RangeSlider id="expectedAge-months" min={1} max={72} step={1} pips={true} bind:value={milestone.expected_age_months}/>
             <Button onclick={() => {showMilestoneExpectedAgeModal = true;}}>View data</Button>
         </div>
         <div class="mb-5">
