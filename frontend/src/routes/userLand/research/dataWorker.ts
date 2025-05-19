@@ -2,12 +2,7 @@ import type { GetResearchNamesResponse } from "$lib/client";
 import { client } from "$lib/client/client.gen";
 import { getResearchData, getResearchNames } from "$lib/client/sdk.gen";
 import type { PlotData } from "$lib/util";
-import {
-	DataFrame,
-	concat,
-	toCSV,
-	toJSON,
-} from "danfojs/dist/danfojs-browser/src";
+import { DataFrame, concat, toCSV, toJSON } from "danfojs";
 import type { SelectOptionType } from "flowbite-svelte";
 import {
 	type WorkerFullData,

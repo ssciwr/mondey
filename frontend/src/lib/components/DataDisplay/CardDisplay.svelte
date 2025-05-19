@@ -28,7 +28,7 @@ let textColor = $derived(isDark(color) ? "text-white" : "text-black");
 </script>
 
 <Card
-        class={`hover:transition-color flex flex-col h-full cursor-pointer hover:scale-105 child-card hover:cursor-pointer mr-2 max-w-prose ${cardClasses}`}
+        class={`hover:transition-color flex flex-col h-full cursor-pointer hover:scale-105 hover:cursor-pointer mr-2 max-w-prose ${cardClasses}`}
         style={color ? `background-color: ${color}` : ""}
         horizontal={false}
         img={image}
