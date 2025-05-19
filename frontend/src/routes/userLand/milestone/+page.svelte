@@ -269,6 +269,18 @@ const breadcrumbdata = $derived([
                             {i18n.tr.milestone[`answer${answerIndex}Text`]}
                         </MilestoneButton>
                     {/each}
+                    <div class="md:hidden px-2 py-1 text-sm text-center mt-1 rounded-md border-gray-200 border-2 mt-4 p-2 pt-4">
+                        <h4>{i18n.tr.milestone.adviceOnAnswerLevel}</h4>
+                        {#each [0, 1, 2, 3, -1] as answerIndex}
+                            <div class="mb-2 mt-3">
+                                <div><b>
+                                    <span class={`circle bg-milestone-answer-${answerIndex}`}></span>
+                                    {i18n.tr.milestone[`answer${answerIndex}Text`]}:</b></div>
+                                <p><small>{i18n.tr.milestone[`answer${answerIndex}Desc`]}</small></p>
+                            </div>
+                        {/each}
+                    </div>
+
                     <div class="flex flex-row justify-center ">
                         <Button
                                 color="light"
