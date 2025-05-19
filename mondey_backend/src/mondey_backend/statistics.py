@@ -540,8 +540,7 @@ def calculate_milestonegroup_statistics_by_age(
         if True, add the new answers to the existing statistics, otherwise recalculate the statistics from scratch
     Returns
     -------
-    MilestoneGroupAgeScoreCollection | None
-        updated statistics, or None if there are no new answers and no existing statistics.
+    None
     """
     if len(answers) == 0:
         return
