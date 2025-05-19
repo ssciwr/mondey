@@ -4,12 +4,14 @@ import datetime
 from enum import Enum as RealEnum  # to avoid name clash
 
 from pydantic import BaseModel
-from sqlalchemy import Column, String, text
-from sqlalchemy import Enum as SQLAlchemyEnum
+from pydantic import field_serializer
+from pydantic import field_validator
+from sqlalchemy import Column
+from sqlalchemy import String
+from sqlalchemy import text
 from sqlalchemy.orm import Mapped
 from sqlmodel import Field
 from sqlmodel import SQLModel
-from sqlmodel import text
 
 from .utils import back_populates
 from .utils import dict_relationship
@@ -195,14 +197,28 @@ class MilestoneAnswerSession(SQLModel, table=True):
     expired: bool
     completed: bool
     included_in_statistics: bool
-    suspicious_state: SuspiciousState = Field(
-        default=SuspiciousState.NOT_SUSPICIOUS,
+    suspicious_state: str = Field(
+        default=SuspiciousState.NOT_SUSPICIOUS.value,
         sa_column=Column(
-            String,  # Use String instead of SQLAlchemyEnum
-            default=SuspiciousState.NOT_SUSPICIOUS.value,
+            String,
             nullable=False,
-        )
+        ),
     )
+
+    # Add model validators
+    @field_validator("suspicious_state")
+    @classmethod
+    def validate_suspicious_state(cls, v):
+        if isinstance(v, str):
+            return SuspiciousState(v)
+        return v
+
+    # Add model serializer
+    @field_serializer("suspicious_state")
+    def serialize_suspicious_state(self, v):
+        if isinstance(v, SuspiciousState):
+            return v.value
+        return v
 
     answers: Mapped[dict[int, MilestoneAnswer]] = dict_relationship(key="milestone_id")
 
