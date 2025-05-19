@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import datetime
+from enum import Enum as RealEnum  # to avoid name clash
 
 from pydantic import BaseModel
+from sqlalchemy import Column
+from sqlalchemy import Enum as SQLAlchemyEnum
 from sqlalchemy.orm import Mapped
 from sqlmodel import Field
 from sqlmodel import SQLModel
@@ -173,6 +176,13 @@ class MilestoneAnswer(SQLModel, table=True):
     milestone: Milestone = back_populates("answers")
 
 
+class SuspiciousState(str, RealEnum):
+    ADMIN_NOT_SUSPICIOUS = "admin_not_suspicious"
+    NOT_SUSPICIOUS = "not_suspicious"
+    SUSPICIOUS = "suspicious"
+    ADMIN_SUSPICIOUS = "admin_suspicious"
+
+
 class MilestoneAnswerSession(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     child_id: int = Field(foreign_key="child.id", ondelete="CASCADE")
@@ -185,7 +195,16 @@ class MilestoneAnswerSession(SQLModel, table=True):
     expired: bool
     completed: bool
     included_in_statistics: bool
-    suspicious: bool
+    suspicious_state: SuspiciousState = Column(
+        SQLAlchemyEnum(
+            SuspiciousState,
+            name="suspiciousstate",
+            create_constraint=True,
+            native_enum=True,
+        ),
+        default=SuspiciousState.NOT_SUSPICIOUS,
+    )
+
     answers: Mapped[dict[int, MilestoneAnswer]] = dict_relationship(key="milestone_id")
 
 

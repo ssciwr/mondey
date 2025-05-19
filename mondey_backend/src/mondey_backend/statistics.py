@@ -22,6 +22,7 @@ from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneAnswerSessionAnalysis
 from mondey_backend.models.milestones import MilestoneGroupAgeScore
 from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
+from mondey_backend.models.milestones import SuspiciousState
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import UserAnswer
@@ -268,12 +269,16 @@ def flag_suspicious_answer_sessions(
     threshold: float = 1.0,
 ):
     """
-    Flag any new answer sessions with rms difference to average answers for that age greater than `threshold` as suspicious
+    Flag any new answer sessions with rms difference to average answers for that age greater than `threshold` as suspicious.
+    Only updates sessions that haven't been manually tagged by an admin.
     """
     milestone_answer_sessions = session.exec(
         select(MilestoneAnswerSession)
         .where(col(MilestoneAnswerSession.completed))
-        .where(~col(MilestoneAnswerSession.suspicious))
+        .where(
+            col(MilestoneAnswerSession.suspicious_state)
+            == SuspiciousState.NOT_SUSPICIOUS
+        )
         .where(
             col(MilestoneAnswerSession.user_id).not_in(test_account_user_ids_to_exclude)
         )
@@ -289,7 +294,7 @@ def flag_suspicious_answer_sessions(
                 logger.debug(
                     f"Marking answer session {milestone_answer_session.id} with rms difference {analysis.rms} as suspicious"
                 )
-                milestone_answer_session.suspicious = True
+                milestone_answer_session.suspicious_state = SuspiciousState.SUSPICIOUS
                 session.add(milestone_answer_session)
         except AttributeError as e:
             logger.exception(e)
@@ -327,15 +332,26 @@ async def async_update_stats(
             session.add(answer_session)
         session.commit()
 
-    # get MilestoneAnswerSessions to be used for calculating statistics - exclude any flagged as suspicious or from test accounts
+    # get MilestoneAnswerSessions to be used for calculating statistics
+    # filter to keep only those that are test accounts, or explicitly marked as not suspicious (either by system or admin)
     answer_session_filter = (
         select(MilestoneAnswerSession)
         .where(col(MilestoneAnswerSession.completed))
         .where(
             col(MilestoneAnswerSession.user_id).not_in(test_account_user_ids_to_exclude)
         )
-        .where(~col(MilestoneAnswerSession.suspicious))
+        .where(
+            (
+                col(MilestoneAnswerSession.suspicious_state)
+                == SuspiciousState.NOT_SUSPICIOUS
+            )
+            | (
+                col(MilestoneAnswerSession.suspicious_state)
+                == SuspiciousState.ADMIN_NOT_SUSPICIOUS
+            )
+        )
     )
+
     if incremental_update:
         answer_session_filter = answer_session_filter.where(
             ~col(MilestoneAnswerSession.included_in_statistics)
