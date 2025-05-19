@@ -16,16 +16,7 @@ import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";
 import DeleteModal from "$lib/components/DeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import {
-	Button,
-	ButtonGroup,
-	Input,
-	InputAddon,
-	Label,
-	Modal,
-	Range,
-	Textarea,
-} from "flowbite-svelte";
+import { Button, Input, Label, Modal, Range } from "flowbite-svelte";
 
 let {
 	open = $bindable(false),
@@ -98,7 +89,7 @@ async function deleteMilestoneImageAndUpdate() {
         {/each}
         <div class="mb-5">
             <Label>{`${i18n.tr.admin.expectedAge}: ${milestone.expected_age_months}m`}</Label>
-            <input type="range" id="expectedAge-months" min="1" max="72" bind:value={milestone.expected_age_months}/>
+            <Range id="expectedAge-months" min="1" max="72" bind:value={milestone.expected_age_months}/>
             <Button onclick={() => {showMilestoneExpectedAgeModal = true;}}>View data</Button>
         </div>
         <div class="mb-5">

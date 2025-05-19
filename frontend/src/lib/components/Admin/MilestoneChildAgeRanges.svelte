@@ -8,7 +8,7 @@ import {
 import type { ChildMilestoneExpectedAgeRangeAdmin } from "$lib/client/types.gen";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import { Card, Label } from "flowbite-svelte";
+import { Card, Label, Range } from "flowbite-svelte";
 import { onMount } from "svelte";
 
 let childAgeRanges = $state([] as ChildMilestoneExpectedAgeRangeAdmin[]);
@@ -74,7 +74,7 @@ onMount(refreshChildAgeRanges);
                     <span class="font-bold text-lg mr-1">{`± ${childAgeInterval.value}`}</span>
                     {`${i18n.tr.admin.monthsForChildrenAged} ${childAgeInterval.from} - ${childAgeInterval.to}`}
                 </Label>
-                <input type="range" id="range-steps" min="0" max="36" step="1"
+                <Range id="range-steps" min="0" max="36" step="1"
                        bind:value={childAgeInterval.value}
                        class="w-full"/>
             </div>
