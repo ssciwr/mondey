@@ -193,7 +193,7 @@ export type MilestoneAnswerSession = {
     expired: boolean;
     completed: boolean;
     included_in_statistics: boolean;
-    suspicious_state?: SuspiciousState;
+    suspicious_state?: string;
 };
 
 export type MilestoneAnswerSessionAnalysis = {
@@ -290,8 +290,6 @@ export type SubmittedMilestoneImagePublic = {
     milestone_id: number;
     user_id: number;
 };
-
-export type SuspiciousState = 'admin_not_suspicious' | 'not_suspicious' | 'suspicious' | 'admin_suspicious';
 
 export type UserAnswerPublic = {
     answer: string;
