@@ -309,7 +309,6 @@ def flag_suspicious_answer_sessions(
                 logger.debug(
                     f"Marking answer session {milestone_answer_session.id} with rms difference {analysis.rms} as suspicious"
                 )
-                # will be properely set now.
                 milestone_answer_session.suspicious_state = SuspiciousState.SUSPICIOUS
                 session.add(milestone_answer_session)
         except AttributeError as e:
