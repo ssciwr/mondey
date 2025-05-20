@@ -9,65 +9,60 @@ import type {
 	UserQuestionAdmin,
 } from "$lib/client/types.gen";
 
-function createMilestoneGroups() {
-	let data = $state([] as MilestoneGroupAdmin[]);
+function createAdminStore<T>(
+	fetchFn: () => Promise<{ data?: T[]; error?: any }>,
+	entityName: string,
+) {
+	let data = $state([] as T[]);
+	let isLoading = $state(false);
+	let error = $state(null as string | null);
+
 	return {
 		refresh: async (): Promise<void> => {
-			const response = await getMilestoneGroupsAdmin();
-			if (response.error || response.data === undefined) {
-				console.log("Failed to get MilestoneGroups");
+			isLoading = true;
+			error = null;
+
+			try {
+				const response = await fetchFn();
+				if (response.error || response.data === undefined) {
+					error = `Failed to get ${entityName}: ${response.error || "Unknown error"}`;
+					data = [];
+				} else {
+					data = response.data;
+				}
+			} catch (e) {
+				error = `Exception while fetching ${entityName}: ${e instanceof Error ? e.message : String(e)}`;
 				data = [];
-			} else {
-				data = response.data;
+			} finally {
+				isLoading = false;
 			}
 		},
 		get data() {
 			return data;
 		},
-	};
-}
-
-const milestoneGroups = createMilestoneGroups();
-
-function createUserQuestions() {
-	let data = $state([] as UserQuestionAdmin[]);
-	return {
-		refresh: async (): Promise<void> => {
-			const response = await getUserQuestionsAdmin();
-			if (response.error || response.data === undefined) {
-				console.log("Failed to get UserQuestions");
-				data = [];
-			} else {
-				data = response.data;
-			}
+		get isLoading() {
+			return isLoading;
 		},
-		get data() {
-			return data;
+		get error() {
+			return error;
 		},
 	};
 }
 
-const userQuestions = createUserQuestions();
+const milestoneGroups = createAdminStore<MilestoneGroupAdmin>(
+	getMilestoneGroupsAdmin,
+	"MilestoneGroupAdmin",
+);
 
-function createChildQuestions() {
-	let data = $state([] as ChildQuestionAdmin[]);
-	return {
-		refresh: async (): Promise<void> => {
-			const response = await getChildQuestionsAdmin();
-			if (response.error || response.data === undefined) {
-				console.log("Failed to get ChildQuestions");
-				data = [];
-			} else {
-				data = response.data;
-			}
-		},
-		get data() {
-			return data;
-		},
-	};
-}
+const userQuestions = createAdminStore<UserQuestionAdmin>(
+	getUserQuestionsAdmin,
+	"UserQuestionAdmin",
+);
 
-const childQuestions = createChildQuestions();
+const childQuestions = createAdminStore<ChildQuestionAdmin>(
+	getChildQuestionsAdmin,
+	"ChildQuestionAdmin",
+);
 
 function milestoneGroupImageUrl(id: number) {
 	return `${import.meta.env.VITE_MONDEY_API_URL}/static/mg/${id}.webp`;

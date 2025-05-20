@@ -18,7 +18,7 @@ async function onclick() {
 
 <CardDisplay title={child.name} text={`${child.birth_month}/${child.birth_year}`} color={child.color} image={child.image} {onclick}>
     {#if child.active_answer_session}
-        <Progress progress={child.session_progress} />
+        <Progress progress={child.session_progress} color={child.color} />
         <TimeRemaining secondsRemaining={child.session_remaining_seconds}/>
     {/if}
 </CardDisplay>
