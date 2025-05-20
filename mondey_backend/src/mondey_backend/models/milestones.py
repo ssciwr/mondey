@@ -179,6 +179,15 @@ class MilestoneAnswer(SQLModel, table=True):
 
 
 class SuspiciousState(str, RealEnum):
+    """Enum for tracking suspicious state of an answer session.
+
+    States:
+    - ADMIN_NOT_SUSPICIOUS: Explicitly marked as not suspicious by admin, should not be overridden
+    - NOT_SUSPICIOUS: Not marked as suspicious by system (yet), can possibly be marked as susp. next time stats update
+    - SUSPICIOUS: Automatically marked as suspicious by system, may be overridden by admin
+    - ADMIN_SUSPICIOUS: Explicitly marked as suspicious by admin, should not be overridden
+    """
+
     ADMIN_NOT_SUSPICIOUS = "admin_not_suspicious"
     NOT_SUSPICIOUS = "not_suspicious"
     SUSPICIOUS = "suspicious"

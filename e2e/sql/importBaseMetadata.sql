@@ -135,16 +135,16 @@ VALUES (1000, 3, 'Test Child',
         CASE
             WHEN strftime('%m', 'now') <= '06' THEN strftime('%Y', 'now') - 1
             ELSE strftime('%Y', 'now')
-        END,
+            END,
         CASE
             WHEN strftime('%m', 'now') <= '06' THEN strftime('%m', 'now') + 6
             ELSE strftime('%m', 'now') - 6
-        END,
+            END,
         false, '#f0f0ff');
 
 -- Create milestone answer session for the child
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious, completed)
-VALUES (1000, 1000, 3, datetime('now', '-1 day'), false, false, false, true);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious_state, completed)
+VALUES (1000, 1000, 3, datetime('now', '-1 day'), false, false, 'not_suspicious', true);
 
 -- Add answers for Reading Text milestones
 INSERT INTO milestoneanswer (answer_session_id, milestone_id, milestone_group_id, answer)
@@ -179,8 +179,8 @@ INSERT INTO milestoneanswer (answer_session_id, milestone_id, milestone_group_id
 VALUES (1000, 1009, 1001, 0); -- Creating Dance Patterns (not yet)
 
 -- Create a second milestone answer session from 2 months ago
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious, completed)
-VALUES (1001, 1000, 3, datetime('now', '-2 months'), true, true, false, true);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious_state, completed)
+VALUES (1001, 1000, 3, datetime('now', '-2 months'), true, true, 'not_suspicious', true);
 
 -- Add answers for Reading Text milestones (previous session)
 INSERT INTO milestoneanswer (answer_session_id, milestone_id, milestone_group_id, answer)

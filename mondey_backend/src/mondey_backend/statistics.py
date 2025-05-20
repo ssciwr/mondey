@@ -272,18 +272,28 @@ def flag_suspicious_answer_sessions(
     Flag any new answer sessions with rms difference to average answers for that age greater than `threshold` as suspicious.
     Only updates sessions that haven't been manually tagged by an admin.
     """
-    milestone_answer_sessions = session.exec(
-        select(MilestoneAnswerSession)
-        .where(col(MilestoneAnswerSession.completed))
-        .where(
-            col(MilestoneAnswerSession.suspicious_state)
-            == SuspiciousState.NOT_SUSPICIOUS  # so if the user sets it to admin_non_suspicious, it won't be processed.
-        )
-        .where(
-            col(MilestoneAnswerSession.user_id).not_in(test_account_user_ids_to_exclude)
-        )
-        .where(~col(MilestoneAnswerSession.included_in_statistics))
-    ).all()
+    milestone_answer_sessions = (
+        session.exec(
+            select(MilestoneAnswerSession)
+            .where(col(MilestoneAnswerSession.completed))
+            .where(
+                (
+                    col(MilestoneAnswerSession.suspicious_state)
+                    == SuspiciousState.NOT_SUSPICIOUS
+                )
+                | (
+                    col(MilestoneAnswerSession.suspicious_state).is_(None)
+                )  # only consider these to mark as suspicious
+                # i.e. ignore any admin set ones at this point.
+            )
+            .where(
+                col(MilestoneAnswerSession.user_id).not_in(
+                    test_account_user_ids_to_exclude
+                )
+            )
+            .where(~col(MilestoneAnswerSession.included_in_statistics))
+        ).all()
+    )  # this is a bit convoluted due to pre-commit complained about == None comparison.
     logger.debug(
         f"  - found {len(milestone_answer_sessions)} answer sessions to check for suspiciousness"
     )

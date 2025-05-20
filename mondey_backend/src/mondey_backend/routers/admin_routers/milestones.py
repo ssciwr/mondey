@@ -266,6 +266,7 @@ def create_router() -> APIRouter:
     def modify_milestone_answer_session(
         session: SessionDep, answer_session_id: int, suspicious: bool
     ):
+        # We accept bool input rather than enum since the admin only ever marks it as suspicious or not.
         answer_session = get(session, MilestoneAnswerSession, answer_session_id)
         if suspicious:
             answer_session.suspicious_state = SuspiciousState.ADMIN_SUSPICIOUS
