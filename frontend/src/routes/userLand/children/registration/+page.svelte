@@ -29,24 +29,13 @@ import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { preventDefault } from "$lib/util";
-import {
-	Button,
-	Card,
-	Heading,
-	Hr,
-	Input,
-	Spinner,
-	Tooltip,
-} from "flowbite-svelte";
+import { Button, Card, Heading, Spinner, Tooltip } from "flowbite-svelte";
 import {
 	ChartLineUpOutline,
 	CheckCircleOutline,
 	ClipboardCheckOutline,
 	FlagOutline,
 	GridPlusSolid,
-	PenOutline,
-	QuestionCircleSolid,
-	TrashBinOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 // questions and answers about child that are not part of the child object

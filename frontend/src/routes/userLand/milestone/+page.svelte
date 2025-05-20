@@ -118,6 +118,7 @@ function selectAnswer(answer: number) {
 async function setup() {
 	if (currentChild.id === null || currentChild.id === undefined) {
 		console.log("No current child");
+		await goto("/userLand/children");
 		return;
 	}
 

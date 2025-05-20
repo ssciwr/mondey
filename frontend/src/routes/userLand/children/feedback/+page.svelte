@@ -59,16 +59,16 @@ const breakpoints = {
 	xl: 1280,
 	"2xl": 1536,
 };
-let windowidth = $state(0);
+let windowWidth = $state(0);
 
-// adjustment of displayed data based on current windowwidth
+// adjustment of displayed data based on current window width
 onMount(() => {
 	// Set initial width
-	windowidth = window.innerWidth;
+	windowWidth = window.innerWidth;
 
 	// Add event listener
 	const handleResize = () => {
-		windowidth = window.innerWidth;
+		windowWidth = window.innerWidth;
 	};
 
 	window.addEventListener("resize", handleResize);
@@ -80,19 +80,19 @@ onMount(() => {
 });
 
 let numShownAnswersessions = $derived.by(() => {
-	if (windowidth >= breakpoints["2xl"]) {
+	if (windowWidth >= breakpoints["2xl"]) {
 		return 10;
 	}
-	if (windowidth >= breakpoints.xl) {
+	if (windowWidth >= breakpoints.xl) {
 		return 8;
 	}
-	if (windowidth >= breakpoints.lg) {
+	if (windowWidth >= breakpoints.lg) {
 		return 6;
 	}
-	if (windowidth >= breakpoints.md) {
+	if (windowWidth >= breakpoints.md) {
 		return 4;
 	}
-	if (windowidth >= breakpoints.sm) {
+	if (windowWidth >= breakpoints.sm) {
 		return 3;
 	}
 	return 2;
@@ -116,7 +116,6 @@ let showHelp = $state(false);
 
 // promises to load the data and steer page loading
 let sessionPromise = $state(loadAnswersessions());
-let stillLoading = $state(true);
 
 // data defining the legend for the feedback
 let milestonePresentation = [
@@ -181,18 +180,13 @@ async function loadAnswersessions(): Promise<void> {
 	}
 	await currentChild.load_data();
 	if (currentChild.id === null || user.id === null) {
-		alertStore.showAlert(
-			i18n.tr.childData.alertMessageTitle,
-			i18n.tr.childData.alertMessageError,
-			true,
-			false,
-		);
+		await goto("/userLand/children");
 		return;
 	}
 
 	// load all answersessions initially
 	const responseAnswerSessions = await getCompletedMilestoneAnswerSessions({
-		path: { child_id: currentChild.id as number },
+		path: { child_id: currentChild.id },
 	});
 
 	if (responseAnswerSessions.error) {
@@ -205,7 +199,9 @@ async function loadAnswersessions(): Promise<void> {
 		return;
 	}
 	answerSessions = responseAnswerSessions.data;
-	await loadData(relevant_sessionkeys[0]);
+	if (Object.keys(answerSessions).length > 0) {
+		await loadData(relevant_sessionkeys[0]);
+	}
 }
 
 /**

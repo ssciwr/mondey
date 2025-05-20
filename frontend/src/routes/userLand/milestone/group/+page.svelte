@@ -53,13 +53,8 @@ async function setup(): Promise<MilestoneGroupDisplayData[] | null> {
 
 	if (currentChild.id === null || currentChild.id === undefined) {
 		console.log("Error when retrieving child data");
-		alertStore.showAlert(
-			i18n.tr.milestone.alertMessageError,
-			i18n.tr.childData.alertMessageRetrieving,
-			true,
-			false,
-		);
-		return null;
+		await goto("/userLand/children");
+		return;
 	}
 
 	const milestoneGroups = await getMilestoneGroups({

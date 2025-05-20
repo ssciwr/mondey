@@ -44,7 +44,7 @@ async function setup() {
 	if (userQuestions.error || userQuestions.data === undefined) {
 		console.log(
 			"Error when getting userquestions: ",
-			userQuestions.error.detail,
+			userQuestions.error?.detail,
 		);
 		alertStore.showAlert(
 			i18n.tr.userData.alertMessageTitle,
