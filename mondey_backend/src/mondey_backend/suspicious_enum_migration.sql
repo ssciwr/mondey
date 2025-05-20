@@ -8,3 +8,5 @@ SET suspicious_state = CASE
                            WHEN suspicious = TRUE THEN 'suspicious'
                            ELSE 'not_suspicious'
 END;
+ALTER TABLE milestoneanswersession
+DROP COLUMN suspicious;
