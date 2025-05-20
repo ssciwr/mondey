@@ -6,13 +6,13 @@ let { progress = 0.0, color = "red" }: { progress: number; color: string } =
 
 let displayProgress = $derived(progress < 0.01 ? 1 : 100 * progress);
 
-const dynamicColorClass = `dynamic-bg-color-${id}`;
+const dynamicColorClass = "dynamic-bg-color";
 
-let wrapperStyle = $derived(`--dynamic-bg-color-${id}: ${color};`);
+let wrapperStyle = $derived(`--dynamic-bg-color: ${color};`);
 
 let labelClass = $derived(
 	progress === 100
-		? "text-white rounded-md text-small pl-2 bg-green"
+		? "text-white rounded-md text-small pl-2"
 		: `text-black rounded-md text-small pl-2 ${dynamicColorClass}`,
 );
 </script>
@@ -29,8 +29,8 @@ let labelClass = $derived(
 </div>
 
 <style>
-    /* Dynamic selector based on the instance ID */
-    :global(.dynamic-bg-color-progress-1) {
-        background-color: var(--dynamic-bg-color-progress-1);
+    /* Define the dynamic background color class that we'll use in labelInsideClass */
+    :global(.dynamic-bg-color) {
+        background-color: var(--dynamic-bg-color);
     }
 </style>
