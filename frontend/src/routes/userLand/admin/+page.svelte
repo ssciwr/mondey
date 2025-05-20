@@ -4,6 +4,7 @@
 import { refreshMilestoneGroups } from "$lib/admin.svelte";
 import AnswerSessionData from "$lib/components/Admin/AnswerSessionData.svelte";
 import Languages from "$lib/components/Admin/Languages.svelte";
+import MilestoneChildAgeRanges from "$lib/components/Admin/MilestoneChildAgeRanges.svelte";
 import MilestoneExpectedAges from "$lib/components/Admin/MilestoneExpectedAges.svelte";
 import MilestoneGroups from "$lib/components/Admin/MilestoneGroups.svelte";
 import Questions from "$lib/components/Admin/Questions.svelte";
@@ -15,6 +16,7 @@ import { alertStore } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { TabItem, Tabs } from "flowbite-svelte";
 import {
+	AdjustmentsHorizontalOutline,
 	BadgeCheckOutline,
 	ClipboardListOutline,
 	DatabaseOutline,
@@ -35,13 +37,20 @@ onMount(async () => {
 });
 </script>
 
-<Tabs tabStyle="underline" class="w-full">
+<Tabs tabStyle="underline">
     <TabItem open>
         <div slot="title" class="flex items-center gap-2">
             <BadgeCheckOutline size="md"/>
             {i18n.tr.admin.milestones}
         </div>
         <MilestoneGroups/>
+    </TabItem>
+    <TabItem open>
+        <div slot="title" class="flex items-center gap-2">
+            <AdjustmentsHorizontalOutline size="md"/>
+            {i18n.tr.admin.milestoneChildAgeRanges}
+        </div>
+        <MilestoneChildAgeRanges/>
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">

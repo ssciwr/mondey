@@ -102,6 +102,9 @@ importers:
       svelte-check:
         specifier: ^4.1.5
         version: 4.1.5(picomatch@4.0.2)(svelte@5.25.6)(typescript@5.8.2)
+      svelte-range-slider-pips:
+        specifier: ^3.2.2
+        version: 3.2.2(svelte@5.25.6)
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -3250,6 +3253,11 @@ packages:
     resolution: {integrity: sha512-PTz9RlJiSTNXo0mIUGPmYXRMcqzLG/ghr79YqLrsOrq0dM4gQhXn97AkuImTalNuIxl/tohFK3uQPsEML+ZKeQ==}
     peerDependencies:
       svelte: '>=3.23.0 || ^5.0.0-next.0'
+
+  svelte-range-slider-pips@3.2.2:
+    resolution: {integrity: sha512-Q2+hn5jEP2CtbWFrvFZoThRUURbijWSCsoOR6Z8UUKjA5ftYQI7Z+mHYxHQpnGd3LCb9OlkHX2wM1If+Vbci6g==}
+    peerDependencies:
+      svelte: ^4.2.7 || ^5.0.0
 
   svelte@5.25.6:
     resolution: {integrity: sha512-RGkaeAXDuJdvhA1fdSM5GgD++vYfJYijZL0uN6kM2s/TRJ663jktBhZlF0qjzAJGR/34PtaeT3G8MKJY1EKeqg==}
@@ -7055,6 +7063,10 @@ snapshots:
       - picomatch
 
   svelte-dnd-action@0.9.60(svelte@5.25.6):
+    dependencies:
+      svelte: 5.25.6
+
+  svelte-range-slider-pips@3.2.2(svelte@5.25.6):
     dependencies:
       svelte: 5.25.6
 

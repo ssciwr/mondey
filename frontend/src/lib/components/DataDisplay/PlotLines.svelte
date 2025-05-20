@@ -2,10 +2,11 @@
 
 <script lang="ts">
 import { i18n } from "$lib/i18n.svelte";
-import { type PlotData } from "$lib/util";
+import { type PlotData, type PlotDatum } from "$lib/util";
 import {
 	Axis,
 	BulletLegend,
+	type BulletLegendItemInterface,
 	CurveType,
 	Line,
 	Scale,
@@ -21,21 +22,25 @@ onMount(() => {
 	if (!plot_data.keys || plot_data.keys.length === 0) {
 		return;
 	}
-	const legend = new BulletLegend(legend_container, {
-		items: plot_data.keys.map((key: string) => ({ name: key })),
-	});
-	const chart = new XYContainer(
+	createChart();
+});
+
+function createChart() {
+	const lineConfig = {
+		x: (d: PlotDatum) => d.age,
+		lineWidth: 3,
+		curveType: CurveType.Linear,
+		interpolateMissingData: true,
+	};
+	const chart = new XYContainer<PlotDatum>(
 		xy_container,
 		{
 			components: [
 				new Line({
-					x: (d) => d.age,
-					y: plot_data.keys.map((k) => {
+					...lineConfig,
+					y: plot_data.keys.map((k, i) => {
 						return (d) => d[k];
 					}),
-					lineWidth: 3,
-					curveType: CurveType.Linear,
-					interpolateMissingData: true,
 				}),
 			],
 			xAxis: new Axis({
@@ -49,7 +54,28 @@ onMount(() => {
 		},
 		plot_data.data,
 	);
-});
+	function toggleItem(item: BulletLegendItemInterface, i: number): void {
+		const items = legend.config.items;
+		items[i].inactive = !items[i].inactive;
+		legend.update({ ...legend.config, items: items });
+		chart.updateComponents([
+			{
+				...lineConfig,
+				y: plot_data.keys.map((k, i) => {
+					return items[i].inactive ? () => undefined : (d) => d[k];
+				}),
+			},
+		]);
+	}
+	const legend = new BulletLegend(legend_container, {
+		items: plot_data.keys.map((key: string) => ({
+			name: key,
+			inactive: false,
+			pointer: true,
+		})),
+		onLegendItemClick: toggleItem,
+	});
+}
 </script>
 
 <div class="w-full">

@@ -10,6 +10,8 @@ from sqlmodel import select
 
 from ...dependencies import SessionDep
 from ...dependencies import UserAsyncSessionDep
+from ...models.children import ChildMilestoneExpectedAgeRange
+from ...models.children import ChildMilestoneExpectedAgeRangeAdmin
 from ...models.milestones import Language
 from ...models.milestones import Milestone
 from ...models.milestones import MilestoneAdmin
@@ -287,5 +289,33 @@ def create_router() -> APIRouter:
             session, MilestoneAnswerSession, answer_session_id
         )
         return analyse_answer_session(session, milestone_answer_session)
+
+    @router.get(
+        "/child-milestone-expected-age-ranges/",
+        response_model=list[ChildMilestoneExpectedAgeRangeAdmin],
+    )
+    def get_child_milestone_expected_age_ranges(
+        session: SessionDep,
+    ) -> Sequence[ChildMilestoneExpectedAgeRange]:
+        expected_age_ranges = session.exec(
+            select(ChildMilestoneExpectedAgeRange).order_by(
+                col(ChildMilestoneExpectedAgeRange.child_age)
+            )
+        ).all()
+        return expected_age_ranges
+
+    @router.post("/child-milestone-expected-age-ranges/")
+    def post_child_milestone_expected_age_ranges(
+        session: SessionDep, child_age_ranges: list[ChildMilestoneExpectedAgeRangeAdmin]
+    ):
+        for child_age_range in child_age_ranges:
+            db_child_age_range = get(
+                session, ChildMilestoneExpectedAgeRange, child_age_range.child_age
+            )
+            db_child_age_range.sqlmodel_update(
+                child_age_range.model_dump(exclude={"child_age"})
+            )
+        session.commit()
+        return {"ok": True}
 
     return router

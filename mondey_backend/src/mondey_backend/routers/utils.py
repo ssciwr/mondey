@@ -21,6 +21,7 @@ from webp import WebPPreset
 from ..dependencies import SessionDep
 from ..logging import logger
 from ..models.children import Child
+from ..models.children import ChildMilestoneExpectedAgeRange
 from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAdmin
 from ..models.milestones import MilestoneAnswer
@@ -222,16 +223,19 @@ def get_or_create_current_milestone_answer_session(
             suspicious=SuspiciousState.NOT_SUSPICIOUS,
         )
         add(session, milestone_answer_session)
-        delta_months = 6
         child_age_months = get_child_age_in_months(child)
+        age_range = session.get(ChildMilestoneExpectedAgeRange, child_age_months)
+        if age_range is None:
+            default_delta_months = 12
+            age_range = ChildMilestoneExpectedAgeRange(
+                child_age=child_age_months,
+                min_expected_age=child_age_months - default_delta_months,
+                max_expected_age=child_age_months + default_delta_months,
+            )
         milestones = session.exec(
             select(Milestone)
-            .where(
-                child_age_months >= col(Milestone.expected_age_months) - delta_months
-            )
-            .where(
-                child_age_months <= col(Milestone.expected_age_months) + delta_months
-            )
+            .where(col(Milestone.expected_age_months) <= age_range.max_expected_age)
+            .where(col(Milestone.expected_age_months) >= age_range.min_expected_age)
         ).all()
         for milestone in milestones:
             session.add(
@@ -296,14 +300,12 @@ def get_expected_age_from_scores(scores: np.ndarray, count: np.ndarray) -> int:
     min_number_of_answers = 3
     # expected age is the first age with an average score >= `min_avg_score`
     min_avg_score = 2.1
-    # default expected age if no data or no age has a score >= `min_avg_score`
-    default_expected_age = 72
     valid_scores = scores.copy()
     valid_scores[count < min_number_of_answers] = 0
     successful_scores = valid_scores >= min_avg_score
-    # if no age has a score >= `min_avg_score`, return 72
+    # if no age has a score >= `min_avg_score`, return the maximum child age
     if not np.any(successful_scores):
-        return default_expected_age
+        return app_settings.MAX_CHILD_AGE_MONTHS
     return int(np.argmax(successful_scores))
 
 
