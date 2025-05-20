@@ -348,7 +348,7 @@ async def async_update_stats(
         session.commit()
 
     # get MilestoneAnswerSessions to be used for calculating statistics
-    # filter to keep only those that are test accounts, or explicitly marked as not suspicious (either by system or admin)
+    # filter to keep only those that are not test accounts and are explicitly marked as not suspicious (either by system or admin)
     answer_session_filter = (
         select(MilestoneAnswerSession)
         .where(col(MilestoneAnswerSession.completed))
