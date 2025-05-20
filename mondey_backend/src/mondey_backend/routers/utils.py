@@ -220,7 +220,7 @@ def get_or_create_current_milestone_answer_session(
             completed=False,
             expired=False,
             included_in_statistics=False,
-            suspicious=SuspiciousState.NOT_SUSPICIOUS,
+            suspicious=SuspiciousState.not_suspicious,
         )
         add(session, milestone_answer_session)
         child_age_months = get_child_age_in_months(child)

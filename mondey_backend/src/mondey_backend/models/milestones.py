@@ -1,15 +1,13 @@
 from __future__ import annotations
 
 import datetime
-from enum import Enum as RealEnum  # to avoid name clash
+import enum
 
 from pydantic import BaseModel
-from pydantic import field_serializer
-from pydantic import field_validator
 from sqlalchemy import Column
-from sqlalchemy import String
 from sqlalchemy import text
 from sqlalchemy.orm import Mapped
+from sqlmodel import Enum
 from sqlmodel import Field
 from sqlmodel import SQLModel
 
@@ -178,20 +176,20 @@ class MilestoneAnswer(SQLModel, table=True):
     milestone: Milestone = back_populates("answers")
 
 
-class SuspiciousState(str, RealEnum):
+class SuspiciousState(str, enum.Enum):
     """Enum for tracking suspicious state of an answer session.
 
     States:
-    - ADMIN_NOT_SUSPICIOUS: Explicitly marked as not suspicious by admin, should not be overridden
-    - NOT_SUSPICIOUS: Not marked as suspicious by system (yet), can possibly be marked as susp. next time stats update
-    - SUSPICIOUS: Automatically marked as suspicious by system, may be overridden by admin
-    - ADMIN_SUSPICIOUS: Explicitly marked as suspicious by admin, should not be overridden
+    - admin_not_suspicious: Explicitly marked as not suspicious by admin, should not be overridden
+    - not_suspicious: Not marked as suspicious by system (yet), can possibly be marked as susp. next time stats update
+    - suspicious: Automatically marked as suspicious by system, may be overridden by admin
+    - admin_suspicious: Explicitly marked as suspicious by admin, should not be overridden
     """
 
-    ADMIN_NOT_SUSPICIOUS = "admin_not_suspicious"
-    NOT_SUSPICIOUS = "not_suspicious"
-    SUSPICIOUS = "suspicious"
-    ADMIN_SUSPICIOUS = "admin_suspicious"
+    admin_not_suspicious = "admin_not_suspicious"
+    not_suspicious = "not_suspicious"
+    suspicious = "suspicious"
+    admin_suspicious = "admin_suspicious"
 
 
 class MilestoneAnswerSession(SQLModel, table=True):
@@ -207,27 +205,12 @@ class MilestoneAnswerSession(SQLModel, table=True):
     completed: bool
     included_in_statistics: bool
     suspicious_state: str = Field(
-        default=SuspiciousState.NOT_SUSPICIOUS.value,
+        default=None,
         sa_column=Column(
-            String,
+            Enum(SuspiciousState),
             nullable=False,
         ),
     )
-
-    # Add model validators
-    @field_validator("suspicious_state")
-    @classmethod
-    def validate_suspicious_state(cls, v):
-        if isinstance(v, str):
-            return SuspiciousState(v)
-        return v
-
-    # Add model serializer
-    @field_serializer("suspicious_state")
-    def serialize_suspicious_state(self, v):
-        if isinstance(v, SuspiciousState):
-            return v.value
-        return v
 
     answers: Mapped[dict[int, MilestoneAnswer]] = dict_relationship(key="milestone_id")
 
