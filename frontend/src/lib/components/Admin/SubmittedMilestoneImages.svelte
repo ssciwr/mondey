@@ -1,7 +1,6 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { refreshMilestoneGroups } from "$lib/admin.svelte";
 import {
 	approveSubmittedMilestoneImage,
 	deleteSubmittedMilestoneImage,
@@ -12,9 +11,8 @@ import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import DeleteModal from "$lib/components/DeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import { milestoneGroups } from "$lib/stores/adminStore";
+import { milestoneGroups } from "$lib/stores/adminStore.svelte";
 import {
-	Card,
 	Table,
 	TableBody,
 	TableBodyCell,
@@ -60,7 +58,7 @@ async function approveImage(image_id: number) {
 		console.log(error);
 	} else {
 		await refreshImages();
-		await refreshMilestoneGroups();
+		await milestoneGroups.refresh();
 	}
 }
 
@@ -79,7 +77,7 @@ onMount(async () => {
         <TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
     </TableHead>
     <TableBody>
-        {#each $milestoneGroups as milestoneGroup (milestoneGroup.id)}
+        {#each milestoneGroups.data as milestoneGroup (milestoneGroup.id)}
             {@const groupTitle = milestoneGroup.text[i18n.locale].title}
             {#each milestoneGroup.milestones as milestone (milestone.id)}
                 {@const milestoneTitle = `${groupTitle} / ${milestone.text[i18n.locale].title}`}

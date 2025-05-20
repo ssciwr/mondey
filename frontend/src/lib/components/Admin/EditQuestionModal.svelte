@@ -1,7 +1,6 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { refreshChildQuestions, refreshUserQuestions } from "$lib/admin.svelte";
 import { updateChildQuestion, updateUserQuestion } from "$lib/client/sdk.gen";
 import type {
 	ChildQuestionAdmin,
@@ -11,6 +10,8 @@ import CancelButton from "$lib/components/Admin/CancelButton.svelte";
 import InputPreview from "$lib/components/Admin/InputPreview.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { childQuestions, userQuestions } from "$lib/stores/adminStore.svelte";
+import { user } from "$lib/stores/userStore.svelte";
 import {
 	Badge,
 	Button,
@@ -57,10 +58,10 @@ let refresh: any;
 
 if (kind === "user") {
 	update = updateUserQuestion;
-	refresh = refreshUserQuestions;
+	refresh = userQuestions.refresh;
 } else if (kind === "child") {
 	update = updateChildQuestion;
-	refresh = refreshChildQuestions;
+	refresh = childQuestions.refresh;
 } else {
 	console.log(
 		"Error, kind must be either 'user' or 'child', currently is: ",

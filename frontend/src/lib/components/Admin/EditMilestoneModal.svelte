@@ -1,7 +1,6 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { refreshMilestoneGroups } from "$lib/admin.svelte";
 import {
 	deleteMilestoneImage,
 	updateMilestone,
@@ -16,17 +15,9 @@ import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";
 import DeleteModal from "$lib/components/DeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import {
-	Button,
-	ButtonGroup,
-	Input,
-	InputAddon,
-	Label,
-	Modal,
-	Range,
-	Textarea,
-} from "flowbite-svelte";
-import RangeSlider from "svelte-range-slider-pips";
+import { milestoneGroups } from "$lib/stores/adminStore.svelte";
+import { Button, Input, Label, Modal } from "flowbite-svelte";
+import { RangeSlider } from "svelte-range-slider-pips";
 
 let {
 	open = $bindable(false),
@@ -58,7 +49,7 @@ async function saveChanges() {
 				});
 			}
 		}
-		await refreshMilestoneGroups();
+		await milestoneGroups.refresh();
 	}
 }
 
@@ -75,7 +66,7 @@ async function deleteMilestoneImageAndUpdate() {
 		milestone.images = milestone.images.filter(
 			(e) => e.id !== currentMilestoneImageId,
 		);
-		await refreshMilestoneGroups();
+		await milestoneGroups.refresh();
 	}
 }
 </script>

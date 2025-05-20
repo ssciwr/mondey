@@ -10,7 +10,7 @@ import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { Label } from "flowbite-svelte";
 import { onMount } from "svelte";
-import RangeSlider from "svelte-range-slider-pips";
+import { RangeSlider } from "svelte-range-slider-pips";
 
 let childAgeRanges = $state([] as ChildMilestoneExpectedAgeRangeAdmin[]);
 let childAgeIntervals = $state([

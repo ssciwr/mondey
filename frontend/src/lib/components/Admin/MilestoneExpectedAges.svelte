@@ -1,16 +1,14 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { refreshMilestoneGroups } from "$lib/admin.svelte";
 import { getMilestoneAgeScores, updateMilestone } from "$lib/client/sdk.gen";
 import type { MilestoneAgeScoreCollectionPublic } from "$lib/client/types.gen";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import PlotScoreAge from "$lib/components/DataDisplay/PlotScoreAge.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import { milestoneGroups } from "$lib/stores/adminStore";
+import { milestoneGroups } from "$lib/stores/adminStore.svelte";
 import {
 	Button,
-	Card,
 	Modal,
 	Progressbar,
 	Table,
@@ -44,11 +42,11 @@ async function getNewExpectedAge(milestoneId: number) {
 
 async function getNewExpectedAges() {
 	expectedAges = {};
-	const total = $milestoneGroups.length;
+	const total = milestoneGroups.data.length;
 	const delta = 1.0 / total;
 	calculateProgress = 0;
 	saveProgress = 0;
-	for (const group of $milestoneGroups) {
+	for (const group of milestoneGroups.data) {
 		if (group.milestones) {
 			for (const milestone of group.milestones) {
 				await getNewExpectedAge(milestone.id);
@@ -60,10 +58,10 @@ async function getNewExpectedAges() {
 }
 
 async function saveNewExpectedAges() {
-	const total = $milestoneGroups.length;
+	const total = milestoneGroups.data.length;
 	const delta = 1.0 / total;
 	saveProgress = 0;
-	for (const group of $milestoneGroups) {
+	for (const group of milestoneGroups.data) {
 		if (group.milestones) {
 			for (const milestone of group.milestones) {
 				milestone.expected_age_months = expectedAges[milestone.id].expected_age;
@@ -77,12 +75,12 @@ async function saveNewExpectedAges() {
 		saveProgress += delta;
 	}
 	saveProgress = 100;
-	await refreshMilestoneGroups();
+	await milestoneGroups.refresh();
 	console.log(saveProgress);
 }
 </script>
 
-{#if milestoneGroups && i18n.locale}
+{#if milestoneGroups.data && i18n.locale}
     <h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">
         {i18n.tr.admin.expectedAge}
     </h3>
@@ -109,7 +107,7 @@ async function saveNewExpectedAges() {
             <TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
         </TableHead>
         <TableBody>
-            {#each $milestoneGroups as milestoneGroup (milestoneGroup.id)}
+            {#each milestoneGroups.data as milestoneGroup (milestoneGroup.id)}
                 {@const groupTitle = milestoneGroup.text[i18n.locale].title}
                 {#each milestoneGroup.milestones as milestone (milestone.id)}
                     {@const milestoneTitle = `${groupTitle} / ${milestone.text[i18n.locale].title}`}
