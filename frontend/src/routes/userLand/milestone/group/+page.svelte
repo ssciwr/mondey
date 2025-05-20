@@ -46,6 +46,7 @@ type MilestoneGroupDisplayData = {
 	text: string;
 	progress: number;
 	onclick: () => void;
+	disabled: boolean;
 };
 
 async function setup(): Promise<MilestoneGroupDisplayData[] | null> {
@@ -92,6 +93,7 @@ async function setup(): Promise<MilestoneGroupDisplayData[] | null> {
 			title: item?.text?.[i18n.locale]?.title ?? "",
 			text: item?.text?.[i18n.locale]?.desc ?? "",
 			progress: computeProgress(item.milestones, answerSession.data),
+			disabled: item.milestones.length === 0,
 			onclick: () => {
 				goto("/userLand/milestone/overview");
 				contentStore.milestoneGroup = item.id;
@@ -142,7 +144,8 @@ let searchTerm = $state("");
                         <CardDisplay title={milestoneGroup.title}
                                      text={milestoneGroup.text}
                                      onclick={milestoneGroup.onclick}
-                                     cardClasses="dark:text-white text-white bg-milestone-700 dark:bg-milestone-900 hover:bg-milestone-800 dark:hover:bg-milestone-700"
+                                     disabled={milestoneGroup.disabled}
+                                     cardClasses={`dark:text-white text-white bg-milestone-700 dark:bg-milestone-900 ${milestoneGroup.disabled ? '' : 'hover:bg-milestone-800 dark:hover:bg-milestone-700'}`}
                         >
                             <Progress progress={milestoneGroup.progress}/>
                         </CardDisplay>

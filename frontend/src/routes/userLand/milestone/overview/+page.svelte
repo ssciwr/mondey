@@ -20,6 +20,10 @@ import {
 } from "flowbite-svelte-icons";
 
 async function setup(): Promise<MilestoneAnswerSessionPublic | null> {
+	if (!currentChild?.id) {
+		await goto("/userLand/children");
+		return null;
+	}
 	if (
 		!contentStore.milestoneGroupData?.milestones ||
 		contentStore.milestoneGroupData?.milestones?.length === 0
@@ -28,10 +32,6 @@ async function setup(): Promise<MilestoneAnswerSessionPublic | null> {
 			"Error when retrieving milestone groups ",
 			contentStore.milestoneGroupData,
 		);
-		await goto("/userLand/children");
-		return null;
-	}
-	if (!currentChild?.id) {
 		await goto("/userLand/children");
 		return null;
 	}
