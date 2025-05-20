@@ -85,7 +85,7 @@ async function deleteMilestoneImageAndUpdate() {
                     <div class="mb-1">
                         <InputAutoTranslate bind:value={milestone.text[lang_id][textKey]}
                                             locale={lang_id} de_text={milestone.text["de"][textKey]}
-                                            placeholder={title} multiline={textKey === "obs"} />
+                                            placeholder={title} multiline={["obs", "help"].indexOf(textKey) !== -1} />
                     </div>
                 {/each}
             </div>
