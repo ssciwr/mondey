@@ -14,6 +14,7 @@ from sqlmodel import SQLModel
 from .utils import back_populates
 from .utils import dict_relationship
 from .utils import fixed_length_string_field
+from .utils import list_relationship
 
 # Note: models with relationships are defined in the same file to
 # avoid the weird hacks required to make relationships work across files
@@ -61,8 +62,8 @@ class MilestoneGroup(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     order: int = 0
     text: Mapped[dict[str, MilestoneGroupText]] = dict_relationship(key="lang_id")
-    milestones: Mapped[list[Milestone]] = back_populates(
-        "group", order_by="asc(Milestone.order)", cascade="all, delete-orphan"
+    milestones: Mapped[list[Milestone]] = list_relationship(
+        "group", order_by="asc(Milestone.order)"
     )
 
 
@@ -117,11 +118,9 @@ class Milestone(SQLModel, table=True):
     expected_age_delta: int = 6
     group: MilestoneGroup = back_populates("milestones")
     text: Mapped[dict[str, MilestoneText]] = dict_relationship(key="lang_id")
-    images: Mapped[list[MilestoneImage]] = back_populates("milestone")
+    images: Mapped[list[MilestoneImage]] = list_relationship("milestone")
     name: str = ""
-    answers: Mapped[list[MilestoneAnswer]] = back_populates(
-        "milestone", cascade="all, delete-orphan"
-    )
+    answers: Mapped[list[MilestoneAnswer]] = list_relationship("milestone")
 
 
 class MilestonePublic(SQLModel):
@@ -234,7 +233,6 @@ class MilestoneAnswerSession(SQLModel, table=True):
             nullable=False,
         ),
     )
-
     answers: Mapped[dict[int, MilestoneAnswer]] = dict_relationship(key="milestone_id")
 
 
@@ -258,8 +256,6 @@ class MilestoneAnswerSessionAnalysis(BaseModel):
     answers: list[MilestoneAnswerAnalysis]
 
 
-# models for statistics. README: Perhaps this could be made simpler if the data was stored in a database with array-column support. sqlite apparently doesnt have this: https://stackoverflow.com/questions/3005231/how-to-store-array-in-one-column-in-sqlite3, but postgres does: https://www.postgresql.org/docs/9.1/arrays.html
-# will be returned to later. Issue no. 119
 class MilestoneAgeScore(SQLModel, table=True):
     milestone_id: int | None = Field(
         default=None,
@@ -280,7 +276,7 @@ class MilestoneAgeScoreCollection(SQLModel, table=True):
     )
     expected_age: int
     expected_age_delta: int
-    scores: Mapped[list[MilestoneAgeScore]] = back_populates("collection")
+    scores: Mapped[list[MilestoneAgeScore]] = list_relationship("collection")
     created_at: datetime.datetime = Field(
         sa_column_kwargs={
             "server_default": text("CURRENT_TIMESTAMP"),
@@ -316,4 +312,4 @@ class MilestoneGroupAgeScoreCollection(SQLModel, table=True):
         foreign_key="milestonegroup.id",
         ondelete="CASCADE",
     )
-    scores: Mapped[list[MilestoneGroupAgeScore]] = back_populates("collection")
+    scores: Mapped[list[MilestoneGroupAgeScore]] = list_relationship("collection")

@@ -163,10 +163,28 @@ Notes on the (one-off) process used to migrate the sqlite databases to postgres 
 
 - temporarily add `- ./db:/db` to the mondeydb and usersdb volumes in docker-compose.yml to mount the db folder
 - recreate the containers (this will also create the postgres databases and tables): `docker compose up -d --force-recreate`
-- ssh into the `mondeydb` docker container: `docker exec -it $(docker ps | grep mondeydb | awk '{print $1}') bash`
+- ssh into the `mondeydb` docker container: `docker exec -it $(docker ps | grep mondeydb-1 | awk '{print $1}') bash`
 - install pgloader: `apk update && apk add pgloader`
 - import the data from sqlite without modifying any tables: `pgloader --with "data only" sqlite:///db/mondey.db pgsql://postgres@127.0.0.1/mondey`
 - do the same for the usersdb container:
-  - `docker exec -it $(docker ps | grep usersdb | awk '{print $1}') bash`
+  - `docker exec -it $(docker ps | grep usersdb-1 | awk '{print $1}') bash`
   - `apk update && apk add pgloader`
   - `pgloader --with "data only" sqlite:///db/users.db pgsql://postgres@127.0.0.1/users`
+
+#### postgres database backups
+
+The docker-compose.yml file includes [docker-postgres-backup-local](https://github.com/prodrigestivill/docker-postgres-backup-local)
+which is configured to make daily backups of the mondey and users databases in the `POSTGRES_DATA_PATH_MONDEY_BACKUPS` and `POSTGRES_DATA_PATH_USER_BACKUPS`
+directories, which by default are `db_backups/mondey` and `db_backups/users` if not set explicitly.
+Backups are kept for the last 7 days, one per week for the last 4 weeks, and one per month for the last 6 months, and are stored in folders named accordingly.
+To restore the most recent mondeydb backup:
+
+```
+zstdcat db_backups/mondey/last/mondey-latest.sql.gz | docker exec -i $(docker ps | grep mondeydb-1 | awk '{print $1}') psql --username=postgres --dbname=mondey
+```
+
+And similarly for the usersdb:
+
+```
+zstdcat db_backups/users/last/users-latest.sql.gz | docker exec -i $(docker ps | grep usersdb-1 | awk '{print $1}') psql --username=postgres --dbname=users
+```
