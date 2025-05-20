@@ -11,6 +11,9 @@ concurrency:
   group: docker-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  COMPOSE_BAKE: true
+
 jobs:
   docker:
     runs-on: ubuntu-latest

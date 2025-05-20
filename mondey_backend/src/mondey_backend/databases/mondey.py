@@ -11,9 +11,16 @@ from ..models.children import ChildMilestoneExpectedAgeRange
 from ..models.milestones import Language
 from ..settings import app_settings
 
+db_url = (
+    f"postgresql+psycopg://{app_settings.DATABASE_USER}:{app_settings.DATABASE_PASSWORD}@{app_settings.DATABASE_HOST_MONDEYDB}:{app_settings.DATABASE_PORT}/mondey"
+    if app_settings.DATABASE_HOST_MONDEYDB
+    else f"sqlite:///{tempfile.mkdtemp()}/mondey.db"
+)
 engine = create_engine(
-    f"sqlite:///{app_settings.DATABASE_PATH if app_settings.DATABASE_PATH else tempfile.mkdtemp()}/mondey.db",
-    connect_args={"check_same_thread": False},
+    db_url,
+    connect_args={"check_same_thread": False}
+    if not app_settings.DATABASE_HOST_MONDEYDB
+    else {},
 )
 
 
