@@ -83,7 +83,9 @@ async function deleteMilestoneImageAndUpdate() {
                 <Label class="mb-2">{title}</Label>
                 {#each i18n.locales as lang_id}
                     <div class="mb-1">
-                        <InputAutoTranslate bind:value={milestone.text[lang_id][textKey]} locale={lang_id} de_text={milestone.text["de"][textKey]} placeholder={title} />
+                        <InputAutoTranslate bind:value={milestone.text[lang_id][textKey]}
+                                            locale={lang_id} de_text={milestone.text["de"][textKey]}
+                                            placeholder={title} multiline={textKey === "obs"} />
                     </div>
                 {/each}
             </div>
@@ -122,7 +124,7 @@ async function deleteMilestoneImageAndUpdate() {
 
 {#key milestone}
     {#if milestone}
-    <MilestoneExpectedAgeModal bind:open={showMilestoneExpectedAgeModal}
+        <MilestoneExpectedAgeModal bind:open={showMilestoneExpectedAgeModal}
                                milestoneId={milestone.id}></MilestoneExpectedAgeModal>
     {/if}
 {/key}

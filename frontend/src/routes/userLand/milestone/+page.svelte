@@ -225,24 +225,29 @@ const breadcrumbdata = $derived([
                     </h2>
                     <p class="mb-2 text-base">{currentMilestone.text[i18n.locale].desc}</p>
                     <Accordion flush>
+                        {#if currentMilestone.text[i18n.locale].obs && currentMilestone.text[i18n.locale].obs.length > 0}
+                            <AccordionItem>
+                            <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
+                                <InfoCircleSolid class="mt-0.5" />
+                                <span>{i18n.tr.milestone.observation}</span>
+                            </span>
+                                <p class="whitespace-pre-line">
+                                    {currentMilestone.text[i18n.locale].obs}
+                                </p>
+                            </AccordionItem>
+                        {/if}
+
+                        {#if currentMilestone.text[i18n.locale].help && currentMilestone.text[i18n.locale].help > 0}
                         <AccordionItem>
-						<span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
-							<InfoCircleSolid class="mt-0.5" />
-							<span>{i18n.tr.milestone.observation}</span>
-						</span>
-                            <p>
-                                {currentMilestone.text[i18n.locale].obs}
-                            </p>
-                        </AccordionItem>
-                        <AccordionItem>
-						<span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
-							<QuestionCircleSolid class="mt-0.5" />
-							<span>{i18n.tr.milestone.help}</span>
-						</span>
-                            <p>
-                                {currentMilestone.text[i18n.locale].help}
-                            </p>
-                        </AccordionItem>
+                            <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
+                                <QuestionCircleSolid class="mt-0.5" />
+                                <span>{i18n.tr.milestone.help}</span>
+                            </span>
+                                <p class="whitespace-pre-line">
+                                    {currentMilestone.text[i18n.locale].help}
+                                </p>
+                            </AccordionItem>
+                        {/if}
                         <AccordionItem>
 						<span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
 							<UploadOutline class="mt-0.5"/>
