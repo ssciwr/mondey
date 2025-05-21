@@ -26,6 +26,7 @@ from ...models.milestones import MilestoneImage
 from ...models.milestones import MilestoneText
 from ...models.milestones import SubmittedMilestoneImage
 from ...models.milestones import SubmittedMilestoneImagePublic
+from ...models.milestones import SuspiciousState
 from ...models.utils import DeleteResponse
 from ...models.utils import ItemOrder
 from ...statistics import analyse_answer_session
@@ -267,8 +268,12 @@ def create_router() -> APIRouter:
     def modify_milestone_answer_session(
         session: SessionDep, answer_session_id: int, suspicious: bool
     ):
+        # We accept bool input rather than enum since the admin only ever marks it as suspicious or not.
         answer_session = get(session, MilestoneAnswerSession, answer_session_id)
-        answer_session.suspicious = suspicious
+        if suspicious:
+            answer_session.suspicious_state = SuspiciousState.admin_suspicious
+        else:
+            answer_session.suspicious_state = SuspiciousState.admin_not_suspicious
         session.add(answer_session)
         session.commit()
         return {"ok": True}

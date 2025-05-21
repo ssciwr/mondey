@@ -30,6 +30,7 @@ from ..models.milestones import MilestoneGroup
 from ..models.milestones import MilestoneGroupAdmin
 from ..models.milestones import MilestoneGroupText
 from ..models.milestones import MilestoneText
+from ..models.milestones import SuspiciousState
 from ..models.questions import ChildQuestion
 from ..models.questions import ChildQuestionAdmin
 from ..models.questions import ChildQuestionText
@@ -219,7 +220,7 @@ def get_or_create_current_milestone_answer_session(
             completed=False,
             expired=False,
             included_in_statistics=False,
-            suspicious=False,
+            suspicious_state=SuspiciousState.not_suspicious,
         )
         add(session, milestone_answer_session)
         child_age_months = get_child_age_in_months(child)

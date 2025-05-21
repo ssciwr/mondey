@@ -9,6 +9,7 @@ from sqlmodel import select
 
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
+from mondey_backend.models.milestones import SuspiciousState
 from mondey_backend.routers.utils import count_milestone_answers_for_milestone
 from mondey_backend.settings import app_settings
 
@@ -408,7 +409,7 @@ def test_get_milestone_answer_sessions(admin_client: TestClient, session):
     assert len(answer_sessions) == 7
     for answer_session in answer_sessions:
         # none of them are marked as suspicious
-        assert not answer_session["suspicious"]
+        assert answer_session["suspicious_state"] == SuspiciousState.not_suspicious
     # add a completed answer session with answers that should be flagged as suspicious
     today = datetime.datetime.today()
     last_month = today - relativedelta(months=1)
@@ -423,7 +424,7 @@ def test_get_milestone_answer_sessions(admin_client: TestClient, session):
             expired=True,
             completed=True,
             included_in_statistics=False,
-            suspicious=False,
+            suspicious_state=SuspiciousState.not_suspicious,
         )
     )
     session.add(
@@ -440,33 +441,61 @@ def test_get_milestone_answer_sessions(admin_client: TestClient, session):
     new_answer_sessions = admin_client.get("/admin/milestone-answer-sessions/").json()
     assert len(new_answer_sessions) == 8
     assert new_answer_sessions[-1]["id"] == 666
-    assert not new_answer_sessions[-1]["suspicious"]
+    assert new_answer_sessions[-1]["suspicious_state"] == SuspiciousState.not_suspicious
     assert not new_answer_sessions[-1]["included_in_statistics"]
     # after running an incremental stats update, the new answer session should be marked as suspicious & remain not included in statistics
     assert admin_client.post("/admin/update-stats/true").status_code == 200
     new_answer_sessions = admin_client.get("/admin/milestone-answer-sessions/").json()
     assert len(new_answer_sessions) == 8
     assert new_answer_sessions[-1]["id"] == 666
-    assert new_answer_sessions[-1]["suspicious"]
+    assert new_answer_sessions[-1]["suspicious_state"] == SuspiciousState.suspicious
     assert not new_answer_sessions[-1]["included_in_statistics"]
 
 
 def test_modify_milestone_answer_session(admin_client: TestClient):
     assert (
-        admin_client.get("/admin/milestone-answer-sessions/").json()[0]["suspicious"]
-        is False
+        admin_client.get("/admin/milestone-answer-sessions/").json()[0][
+            "suspicious_state"
+        ]
+        == SuspiciousState.not_suspicious
     )
     response = admin_client.post("/admin/milestone-answer-sessions/1?suspicious=true")
     assert response.status_code == 200
     assert (
-        admin_client.get("/admin/milestone-answer-sessions/").json()[0]["suspicious"]
-        is True
+        admin_client.get("/admin/milestone-answer-sessions/").json()[0][
+            "suspicious_state"
+        ]
+        == SuspiciousState.admin_suspicious
+    )
+
+    # now it should be explicitly not suspicious by admins command...
+    response = admin_client.post("/admin/milestone-answer-sessions/1?suspicious=false")
+    assert response.status_code == 200
+    assert (
+        admin_client.get("/admin/milestone-answer-sessions/").json()[0][
+            "suspicious_state"
+        ]
+        == SuspiciousState.admin_not_suspicious
+    )
+
+
+# A test because the enum SuspiciousState has 4 values depending on whether the admin has manually overriden the "suspicious-detection".
+def test_modify_milestone_answer_session_to_admin_set_non_suspicious_first(
+    admin_client: TestClient,
+):
+    assert (
+        admin_client.get("/admin/milestone-answer-sessions/").json()[0][
+            "suspicious_state"
+        ]
+        == SuspiciousState.not_suspicious
     )
     response = admin_client.post("/admin/milestone-answer-sessions/1?suspicious=false")
     assert response.status_code == 200
     assert (
-        admin_client.get("/admin/milestone-answer-sessions/").json()[0]["suspicious"]
-        is False
+        admin_client.get("/admin/milestone-answer-sessions/").json()[0][
+            "suspicious_state"
+        ]
+        == SuspiciousState.admin_not_suspicious
     )
 
 

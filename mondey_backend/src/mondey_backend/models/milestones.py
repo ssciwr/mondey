@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import datetime
+import enum
 
 from pydantic import BaseModel
+from sqlalchemy import Column
+from sqlalchemy import text
 from sqlalchemy.orm import Mapped
+from sqlmodel import Enum
 from sqlmodel import Field
 from sqlmodel import SQLModel
-from sqlmodel import text
 
 from .utils import back_populates
 from .utils import dict_relationship
@@ -173,6 +176,22 @@ class MilestoneAnswer(SQLModel, table=True):
     milestone: Milestone = back_populates("answers")
 
 
+class SuspiciousState(str, enum.Enum):
+    """Enum for tracking suspicious state of an answer session.
+
+    States:
+    - admin_not_suspicious: Explicitly marked as not suspicious by admin, should not be overridden
+    - not_suspicious: Not marked as suspicious by system (yet), can possibly be marked as susp. next time stats update
+    - suspicious: Automatically marked as suspicious by system, may be overridden by admin
+    - admin_suspicious: Explicitly marked as suspicious by admin, should not be overridden
+    """
+
+    admin_not_suspicious = "admin_not_suspicious"
+    not_suspicious = "not_suspicious"
+    suspicious = "suspicious"
+    admin_suspicious = "admin_suspicious"
+
+
 class MilestoneAnswerSession(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     child_id: int = Field(foreign_key="child.id", ondelete="CASCADE")
@@ -185,7 +204,14 @@ class MilestoneAnswerSession(SQLModel, table=True):
     expired: bool
     completed: bool
     included_in_statistics: bool
-    suspicious: bool
+    suspicious_state: str = Field(
+        default=None,
+        sa_column=Column(
+            Enum(SuspiciousState),
+            nullable=False,
+        ),
+    )
+
     answers: Mapped[dict[int, MilestoneAnswer]] = dict_relationship(key="milestone_id")
 
 

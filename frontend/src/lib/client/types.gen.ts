@@ -199,7 +199,7 @@ export type MilestoneAnswerSession = {
     expired: boolean;
     completed: boolean;
     included_in_statistics: boolean;
-    suspicious: boolean;
+    suspicious_state?: string;
 };
 
 export type MilestoneAnswerSessionAnalysis = {
