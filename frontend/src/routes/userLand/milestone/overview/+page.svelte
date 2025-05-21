@@ -20,20 +20,19 @@ import {
 } from "flowbite-svelte-icons";
 
 async function setup(): Promise<MilestoneAnswerSessionPublic | null> {
+	if (!currentChild?.id) {
+		await goto("/userLand/children");
+		return null;
+	}
 	if (
-		!contentStore.milestoneGroupData.milestones ||
-		contentStore.milestoneGroupData.milestones.length === 0
+		!contentStore.milestoneGroupData?.milestones ||
+		contentStore.milestoneGroupData?.milestones?.length === 0
 	) {
-		// todo: should probably redirect e.g. to login here rather than show an error
 		console.log(
 			"Error when retrieving milestone groups ",
 			contentStore.milestoneGroupData,
 		);
-		const message =
-			contentStore.milestoneGroupData.milestones.length === 0
-				? i18n.tr.milestone.alertMessageNoRelevantMilestones
-				: i18n.tr.milestone.alertMessageRetrieving;
-		alertStore.showAlert(i18n.tr.milestone.alertMessageError, message, true);
+		await goto("/userLand/children");
 		return null;
 	}
 	await currentChild.load_data();
@@ -73,7 +72,7 @@ const breadcrumbdata: any[] = [
 		symbol: RectangleListOutline,
 	},
 	{
-		label: contentStore.milestoneGroupData.text[i18n.locale].title,
+		label: contentStore.milestoneGroupData?.text?.[i18n.locale]?.title,
 		onclick: () => {
 			goto("/userLand/milestone/overview");
 		},

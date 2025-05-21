@@ -11,6 +11,7 @@ let {
 	color = undefined,
 	cardClasses = "",
 	titleClasses = "",
+	disabled = false,
 	onclick,
 	children,
 }: {
@@ -21,6 +22,7 @@ let {
 	onclick: () => void;
 	cardClasses?: string;
 	titleClasses?: string;
+	disabled?: boolean;
 	children?: Snippet;
 } = $props();
 
@@ -28,12 +30,12 @@ let textColor = $derived(isDark(color) ? "text-white" : "text-black");
 </script>
 
 <Card
-        class={`hover:transition-color flex flex-col h-full cursor-pointer hover:scale-105 child-card hover:cursor-pointer mr-2 max-w-prose ${cardClasses}`}
+        class={`${disabled ? 'opacity-30' : 'cursor-pointer hover:scale-105 hover:transition-color hover:cursor-pointer'} flex flex-col h-full mr-2 max-w-prose ${cardClasses}`}
         style={color ? `background-color: ${color}` : ""}
         horizontal={false}
         img={image}
         imgClass="max-md:hidden object-scale-down"
-        on:click={onclick}
+        on:click={!disabled ? onclick : () => {}}
 >
         {#if title}
             <div>
@@ -52,6 +54,8 @@ let textColor = $derived(isDark(color) ? "text-white" : "text-black");
         </div>
 
         <div class={`mt-auto pt-4 flex flex-col ${color ? textColor : ''}`}>
-            {@render children?.()}
+            {#if !disabled}
+                {@render children?.()}
+            {/if}
         </div>
 </Card>
