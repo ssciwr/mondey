@@ -144,6 +144,7 @@ async function handleImportConfirm() {
 				error: true,
 				childrenImported: 0,
 			};
+			cancelImport();
 		} else if (data?.children_imported === 0) {
 			importResult = {
 				status: "error",
@@ -151,6 +152,7 @@ async function handleImportConfirm() {
 				error: true,
 				childrenImported: 0,
 			};
+			cancelImport();
 		} else {
 			importResult = {
 				status: "success",
