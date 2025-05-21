@@ -11,7 +11,6 @@ Splitting it this way makes it a lot more readable
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -23,9 +22,8 @@ from sqlmodel import Session
 
 from mondey_backend.import_data.remove_duplicate_cases import remove_duplicate_cases
 
+from ...logging import logger
 from ...settings import app_settings
-
-logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -91,7 +89,6 @@ class DataManager:
         self.session: Session = session
         self.user_session: AsyncSession = user_session
         self.debug = debug
-        self._setup_logging()
 
         # Set up paths
         script_dir = Path(__file__).parent.parent.parent.parent.parent.absolute()
@@ -99,13 +96,6 @@ class DataManager:
 
         self._labels_df: pd.DataFrame | None = None
         self._additional_data_df: pd.DataFrame | None = None
-
-    def _setup_logging(self):
-        """Set up logging configuration."""
-        logging.basicConfig(
-            level=logging.DEBUG if self.debug else logging.INFO,
-            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        )
 
     # -------------------------------------------------------------------------
     # Data Loading Methods

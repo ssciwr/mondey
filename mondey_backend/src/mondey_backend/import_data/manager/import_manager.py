@@ -1,13 +1,10 @@
 """
-ImportManager class for handling all data import operations.
+ImportManager class for handling data import operations via CSV input.
 
-This class centralizes the import functionality that was previously spread across
-multiple scripts, providing a more maintainable and cohesive approach.
 """
 
 from __future__ import annotations
 
-import logging
 from datetime import datetime
 
 import pandas as pd
@@ -30,13 +27,11 @@ from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.users import User
 from mondey_backend.models.users import UserCreate
 
-logger = logging.getLogger(__name__)
+from ...logging import logger
 
 
 class ImportManager:
     """
-    Centralized manager for all data import operations.
-
     This class handles:
     1. Loading and parsing CSV data
     2. Importing additional data to the right existing question IDs and types (user/chld),
@@ -897,6 +892,8 @@ class ImportManager:
         logger.info(f"Total answers saved: {total_answers}")
         logger.info(f"Missing answers: {missing}")
 
+        self.data_manager.session.flush()
+
     async def import_additional_data(self) -> int:  # Modified return type
         """Import additional data.
 
@@ -946,4 +943,5 @@ class ImportManager:
         except Exception as e:
             logger.error(f"Error during additional data import: {e}")
             self.data_manager.session.rollback()
+            await self.data_manager.user_session.rollback()
             raise
