@@ -27,6 +27,11 @@ function createI18n() {
 			}
 		},
 		get locales(): Array<string> {
+			return locales.filter((loc) => {
+				return loc !== idLocale;
+			});
+		},
+		get selectableLocales(): Array<string> {
 			return locales;
 		},
 		load: async () => {
