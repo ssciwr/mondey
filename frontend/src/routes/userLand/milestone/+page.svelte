@@ -197,7 +197,7 @@ const breadcrumbdata = $derived([
             <Breadcrumbs data={breadcrumbdata} />
 
             <div class="flex w-full flex-col md:flex-row pt-3">
-                <div class="relative w-full h-48 md:h-96 md:w-24 lg:w-60 xl:w-72 overflow-hidden mt-1.5">
+                <div class="relative w-full h-48 md:w-1/5 md:h-48 lg:h-64 xl:h-80 2xl:h-96 overflow-hidden mt-1.5">
                     {#each currentMilestone.images as image, imageIndex}
                         <img
                                 class={` min-w-20 absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
@@ -220,7 +220,7 @@ const breadcrumbdata = $derived([
                         </div>
                     </Modal>
                 </div>
-                <div class="m-2 md:m-4 grow">
+                <div class="m-2 md:m-4 md:w-3/5">
                     <h2 class="mb-2 text-2xl font-bold text-gray-700 dark:text-gray-400">
                         {currentMilestone.text[i18n.locale].title}
                     </h2>
@@ -262,7 +262,7 @@ const breadcrumbdata = $derived([
                         </AccordionItem>
                     </Accordion>
                 </div>
-                <div class="m-1 mt-0 flex flex-col justify-items-stretch rounded-lg">
+                <div class="md:w-1/5 m-1 mt-0 flex flex-col justify-items-stretch rounded-lg">
                     {#each [0, 1, 2, 3, -1] as answerIndex}
                         <MilestoneButton
                                 index={answerIndex}
@@ -275,7 +275,7 @@ const breadcrumbdata = $derived([
                             {i18n.tr.milestone[`answer${answerIndex}Text`]}
                         </MilestoneButton>
                     {/each}
-                    <div class="md:hidden px-2 py-1 text-sm text-left mt-1 rounded-md border-gray-200 border-2 mt-4 p-2 pt-4">
+                    <div class="md:hidden px-2 py-1 text-sm text-left rounded-md border-gray-200 border-2 mt-4 p-2 pt-4">
                         <h4>{i18n.tr.milestone.adviceOnAnswerLevel}</h4>
                         {#each [0, 1, 2, 3, -1] as answerIndex}
                             <div class="mb-2 mt-3">

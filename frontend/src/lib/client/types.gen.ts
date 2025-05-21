@@ -9,6 +9,17 @@ export type BodyAuthCookieLoginAuthLoginPost = {
     client_secret?: string | null;
 };
 
+export type BodyImportCsvDataAdminResearchImportCsvPost = {
+    /**
+     * Additional data CSV file
+     */
+    additional_data_file: Blob | File;
+    /**
+     * Labels CSV file
+     */
+    labels_file?: Blob | File;
+};
+
 export type BodyResetForgotPasswordAuthForgotPasswordPost = {
     email: string;
 };
@@ -1455,6 +1466,29 @@ export type DeleteResearchGroupErrors = {
 export type DeleteResearchGroupError = DeleteResearchGroupErrors[keyof DeleteResearchGroupErrors];
 
 export type DeleteResearchGroupResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ImportCsvDataData = {
+    body: BodyImportCsvDataAdminResearchImportCsvPost;
+    path?: never;
+    query?: never;
+    url: '/admin/research/import-csv/';
+};
+
+export type ImportCsvDataErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ImportCsvDataError = ImportCsvDataErrors[keyof ImportCsvDataErrors];
+
+export type ImportCsvDataResponses = {
     /**
      * Successful Response
      */
