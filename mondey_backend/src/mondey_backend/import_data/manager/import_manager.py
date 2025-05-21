@@ -105,7 +105,12 @@ class ImportManager:
             "Jüngere Geschwister",
             "Ältere Geschwister",
         ]
-        self.younger_older_sibling_variables = ["FK08_01", "FK08_02"]
+        # self.younger_older_sibling_variables = ["FK08_01", "FK08_02"] # these are the yes/no ones.
+        self.younger_sibling_variable_count_answer_coding = "FK10"
+        self.younger_older_sibling_variables = [
+            "FK09",
+            self.younger_sibling_variable_count_answer_coding,
+        ]
 
         self.andere_diagnosed_question = "Andere Diagnosen: [01]"
         self.child_age_questions_labels = ["FK01", "FK02"]
@@ -536,7 +541,11 @@ class ImportManager:
 
         # Handle younger/older sibling questions
         elif variable in self.younger_older_sibling_variables:
-            relevant_question_id = 18 if question_label == "Jüngere Geschwister" else 17
+            relevant_question_id = (
+                18
+                if variable == self.younger_sibling_variable_count_answer_coding
+                else 17
+            )
             logger.debug(f"Setting special case younger siblings to: {answer}")
 
             self.create_answer(
