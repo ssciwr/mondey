@@ -10,6 +10,8 @@ from sqlmodel import select
 
 from ...dependencies import SessionDep
 from ...dependencies import UserAsyncSessionDep
+from ...models.children import ChildMilestoneExpectedAgeRange
+from ...models.children import ChildMilestoneExpectedAgeRangeAdmin
 from ...models.milestones import Language
 from ...models.milestones import Milestone
 from ...models.milestones import MilestoneAdmin
@@ -24,6 +26,7 @@ from ...models.milestones import MilestoneImage
 from ...models.milestones import MilestoneText
 from ...models.milestones import SubmittedMilestoneImage
 from ...models.milestones import SubmittedMilestoneImagePublic
+from ...models.milestones import SuspiciousState
 from ...models.utils import DeleteResponse
 from ...models.utils import ItemOrder
 from ...statistics import analyse_answer_session
@@ -265,8 +268,12 @@ def create_router() -> APIRouter:
     def modify_milestone_answer_session(
         session: SessionDep, answer_session_id: int, suspicious: bool
     ):
+        # We accept bool input rather than enum since the admin only ever marks it as suspicious or not.
         answer_session = get(session, MilestoneAnswerSession, answer_session_id)
-        answer_session.suspicious = suspicious
+        if suspicious:
+            answer_session.suspicious_state = SuspiciousState.admin_suspicious
+        else:
+            answer_session.suspicious_state = SuspiciousState.admin_not_suspicious
         session.add(answer_session)
         session.commit()
         return {"ok": True}
@@ -282,5 +289,33 @@ def create_router() -> APIRouter:
             session, MilestoneAnswerSession, answer_session_id
         )
         return analyse_answer_session(session, milestone_answer_session)
+
+    @router.get(
+        "/child-milestone-expected-age-ranges/",
+        response_model=list[ChildMilestoneExpectedAgeRangeAdmin],
+    )
+    def get_child_milestone_expected_age_ranges(
+        session: SessionDep,
+    ) -> Sequence[ChildMilestoneExpectedAgeRange]:
+        expected_age_ranges = session.exec(
+            select(ChildMilestoneExpectedAgeRange).order_by(
+                col(ChildMilestoneExpectedAgeRange.child_age)
+            )
+        ).all()
+        return expected_age_ranges
+
+    @router.post("/child-milestone-expected-age-ranges/")
+    def post_child_milestone_expected_age_ranges(
+        session: SessionDep, child_age_ranges: list[ChildMilestoneExpectedAgeRangeAdmin]
+    ):
+        for child_age_range in child_age_ranges:
+            db_child_age_range = get(
+                session, ChildMilestoneExpectedAgeRange, child_age_range.child_age
+            )
+            db_child_age_range.sqlmodel_update(
+                child_age_range.model_dump(exclude={"child_age"})
+            )
+        session.commit()
+        return {"ok": True}
 
     return router

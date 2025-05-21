@@ -82,40 +82,40 @@ VALUES (1007, 5, 'Sophia Taylor',
 -- Each child will have 1-2 sessions
 
 -- Child 1 (Emma) - Session 1 (recent)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious, completed)
-VALUES (1002, 1001, 3, '2025-02-04 11:42:49', true, false, false, true);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious_state, completed)
+VALUES (1002, 1001, 3, '2025-02-04 11:42:49', true, false, 'not_suspicious', true);
 
 -- Child 2 (Liam) - Session 1 (recent)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious, completed)
-VALUES (1003, 1002, 3, '2025-02-04 11:42:49', true, false, false, true);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious_state, completed)
+VALUES (1003, 1002, 3, '2025-02-04 11:42:49', true, false, 'not_suspicious', true);
 
 -- Child 2 (Liam) - Session 2 (older & contains suspicious answers)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious, completed)
-VALUES (1004, 1002, 3, '2025-01-04 11:42:49', true, false, true, true);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious_state, completed)
+VALUES (1004, 1002, 3, '2025-01-04 11:42:49', true, false, 'suspicious', true);
 
 -- Child 3 (Olivia) - Session 1 (recent)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious, completed)
-VALUES (1005, 1003, 3, '2025-02-04 11:42:49', false, false, false, true);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious_state, completed)
+VALUES (1005, 1003, 3, '2025-02-04 11:42:49', false, false, 'not_suspicious', true);
 
 -- Child 3 (Olivia) - Session 2 (older)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious, completed)
-VALUES (1006, 1003, 3, '2025-01-04 11:42:49', true, false, false, true);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious_state, completed)
+VALUES (1006, 1003, 3, '2025-01-04 11:42:49', true, false, 'not_suspicious', true);
 
 -- Child 4 (Noah) - Session 1 (recent)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious, completed)
-VALUES (1007, 1004, 4, '2025-02-04 11:42:49', true, false, false, true);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious_state, completed)
+VALUES (1007, 1004, 4, '2025-02-04 11:42:49', true, false, 'not_suspicious', true);
 
 -- Child 6 (Ethan) - Session 1 (recent)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious, completed)
-VALUES (1010, 1006, 5, '2025-02-04 11:42:49', false, false, false, true);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious_state, completed)
+VALUES (1010, 1006, 5, '2025-02-04 11:42:49', false, false, 'not_suspicious', true);
 
 -- Child 7 (Sophia) - Session 1 (recent)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious, completed)
-VALUES (1011, 1007, 5, '2025-02-04 11:42:49', false, false, false, true);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious_state, completed)
+VALUES (1011, 1007, 5, '2025-02-04 11:42:49', false, false, 'not_suspicious', true);
 
 -- Child 7 (Sophia) - Session 2 (older)
-INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious, completed)
-VALUES (1012, 1007, 5, '2025-01-04 11:42:49', true, false, false, true);
+INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious_state, completed)
+VALUES (1012, 1007, 5, '2025-01-04 11:42:49', true, false, 'not_suspicious', true);
 
 -- Now add milestone answers for each session
 -- Using milestone IDs 1000-1009 from importBaseMetadata.sql

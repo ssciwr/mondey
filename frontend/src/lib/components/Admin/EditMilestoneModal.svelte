@@ -1,7 +1,6 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { refreshMilestoneGroups } from "$lib/admin.svelte";
 import {
 	deleteMilestoneImage,
 	updateMilestone,
@@ -16,16 +15,9 @@ import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";
 import DeleteModal from "$lib/components/DeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import {
-	Button,
-	ButtonGroup,
-	Input,
-	InputAddon,
-	Label,
-	Modal,
-	Range,
-	Textarea,
-} from "flowbite-svelte";
+import { milestoneGroups } from "$lib/stores/adminStore.svelte";
+import { Button, Input, Label, Modal } from "flowbite-svelte";
+import { RangeSlider } from "svelte-range-slider-pips";
 
 let {
 	open = $bindable(false),
@@ -57,7 +49,7 @@ async function saveChanges() {
 				});
 			}
 		}
-		await refreshMilestoneGroups();
+		await milestoneGroups.refresh();
 	}
 }
 
@@ -74,7 +66,7 @@ async function deleteMilestoneImageAndUpdate() {
 		milestone.images = milestone.images.filter(
 			(e) => e.id !== currentMilestoneImageId,
 		);
-		await refreshMilestoneGroups();
+		await milestoneGroups.refresh();
 	}
 }
 </script>
@@ -91,14 +83,16 @@ async function deleteMilestoneImageAndUpdate() {
                 <Label class="mb-2">{title}</Label>
                 {#each i18n.locales as lang_id}
                     <div class="mb-1">
-                        <InputAutoTranslate bind:value={milestone.text[lang_id][textKey]} locale={lang_id} de_text={milestone.text["de"][textKey]} placeholder={title} />
+                        <InputAutoTranslate bind:value={milestone.text[lang_id][textKey]}
+                                            locale={lang_id} de_text={milestone.text["de"][textKey]}
+                                            placeholder={title} multiline={["obs", "help"].indexOf(textKey) !== -1} />
                     </div>
                 {/each}
             </div>
         {/each}
         <div class="mb-5">
             <Label>{`${i18n.tr.admin.expectedAge}: ${milestone.expected_age_months}m`}</Label>
-            <Range id="expectedAge-months" min="1" max="72" bind:value={milestone.expected_age_months}/>
+            <RangeSlider id="expectedAge-months" min={1} max={72} step={1} pips={true} bind:value={milestone.expected_age_months}/>
             <Button onclick={() => {showMilestoneExpectedAgeModal = true;}}>View data</Button>
         </div>
         <div class="mb-5">
@@ -130,7 +124,7 @@ async function deleteMilestoneImageAndUpdate() {
 
 {#key milestone}
     {#if milestone}
-    <MilestoneExpectedAgeModal bind:open={showMilestoneExpectedAgeModal}
+        <MilestoneExpectedAgeModal bind:open={showMilestoneExpectedAgeModal}
                                milestoneId={milestone.id}></MilestoneExpectedAgeModal>
     {/if}
 {/key}

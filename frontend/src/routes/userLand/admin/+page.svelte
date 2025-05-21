@@ -1,9 +1,9 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { refreshMilestoneGroups } from "$lib/admin.svelte";
 import AnswerSessionData from "$lib/components/Admin/AnswerSessionData.svelte";
 import Languages from "$lib/components/Admin/Languages.svelte";
+import MilestoneChildAgeRanges from "$lib/components/Admin/MilestoneChildAgeRanges.svelte";
 import MilestoneExpectedAges from "$lib/components/Admin/MilestoneExpectedAges.svelte";
 import MilestoneGroups from "$lib/components/Admin/MilestoneGroups.svelte";
 import Questions from "$lib/components/Admin/Questions.svelte";
@@ -11,10 +11,12 @@ import SubmittedMilestoneImages from "$lib/components/Admin/SubmittedMilestoneIm
 import Translations from "$lib/components/Admin/Translations.svelte";
 import Users from "$lib/components/Admin/Users.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { milestoneGroups } from "$lib/stores/adminStore.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { TabItem, Tabs } from "flowbite-svelte";
 import {
+	AdjustmentsHorizontalOutline,
 	BadgeCheckOutline,
 	ClipboardListOutline,
 	DatabaseOutline,
@@ -28,20 +30,27 @@ import { onMount } from "svelte";
 onMount(async () => {
 	try {
 		await user.load();
-		await refreshMilestoneGroups();
+		await milestoneGroups.refresh();
 	} catch (error) {
 		alertStore.showAlert(error.message, "", true, true);
 	}
 });
 </script>
 
-<Tabs tabStyle="underline" class="w-full">
+<Tabs tabStyle="underline">
     <TabItem open>
         <div slot="title" class="flex items-center gap-2">
             <BadgeCheckOutline size="md"/>
             {i18n.tr.admin.milestones}
         </div>
         <MilestoneGroups/>
+    </TabItem>
+    <TabItem open>
+        <div slot="title" class="flex items-center gap-2">
+            <AdjustmentsHorizontalOutline size="md"/>
+            {i18n.tr.admin.milestoneChildAgeRanges}
+        </div>
+        <MilestoneChildAgeRanges/>
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">

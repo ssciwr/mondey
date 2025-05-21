@@ -2,10 +2,6 @@
 
 <script lang="ts">
 import {
-	milestoneGroupImageUrl,
-	refreshMilestoneGroups,
-} from "$lib/admin.svelte";
-import {
 	updateMilestoneGroupAdmin,
 	uploadMilestoneGroupImage,
 } from "$lib/client/sdk.gen";
@@ -19,12 +15,10 @@ import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import {
-	ButtonGroup,
-	InputAddon,
-	Label,
-	Modal,
-	Textarea,
-} from "flowbite-svelte";
+	milestoneGroupImageUrl,
+	milestoneGroups,
+} from "$lib/stores/adminStore.svelte";
+import { Label, Modal } from "flowbite-svelte";
 import { onMount } from "svelte";
 
 let {
@@ -69,7 +63,7 @@ export async function saveChanges() {
 			});
 			await reloadImg(milestoneGroupImageUrl(milestoneGroup.id));
 		}
-		await refreshMilestoneGroups();
+		await milestoneGroups.refresh();
 	}
 }
 </script>

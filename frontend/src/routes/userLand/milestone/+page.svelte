@@ -225,24 +225,29 @@ const breadcrumbdata = $derived([
                     </h2>
                     <p class="mb-2 text-base">{currentMilestone.text[i18n.locale].desc}</p>
                     <Accordion flush>
+                        {#if currentMilestone.text[i18n.locale].obs && currentMilestone.text[i18n.locale].obs.length > 0}
+                            <AccordionItem>
+                            <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
+                                <InfoCircleSolid class="mt-0.5" />
+                                <span>{i18n.tr.milestone.observation}</span>
+                            </span>
+                                <p class="whitespace-pre-line">
+                                    {currentMilestone.text[i18n.locale].obs}
+                                </p>
+                            </AccordionItem>
+                        {/if}
+
+                        {#if currentMilestone.text[i18n.locale].help && currentMilestone.text[i18n.locale].help > 0}
                         <AccordionItem>
-						<span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
-							<InfoCircleSolid class="mt-0.5" />
-							<span>{i18n.tr.milestone.observation}</span>
-						</span>
-                            <p>
-                                {currentMilestone.text[i18n.locale].obs}
-                            </p>
-                        </AccordionItem>
-                        <AccordionItem>
-						<span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
-							<QuestionCircleSolid class="mt-0.5" />
-							<span>{i18n.tr.milestone.help}</span>
-						</span>
-                            <p>
-                                {currentMilestone.text[i18n.locale].help}
-                            </p>
-                        </AccordionItem>
+                            <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
+                                <QuestionCircleSolid class="mt-0.5" />
+                                <span>{i18n.tr.milestone.help}</span>
+                            </span>
+                                <p class="whitespace-pre-line">
+                                    {currentMilestone.text[i18n.locale].help}
+                                </p>
+                            </AccordionItem>
+                        {/if}
                         <AccordionItem>
 						<span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
 							<UploadOutline class="mt-0.5"/>
@@ -269,6 +274,18 @@ const breadcrumbdata = $derived([
                             {i18n.tr.milestone[`answer${answerIndex}Text`]}
                         </MilestoneButton>
                     {/each}
+                    <div class="md:hidden px-2 py-1 text-sm text-left mt-1 rounded-md border-gray-200 border-2 mt-4 p-2 pt-4">
+                        <h4>{i18n.tr.milestone.adviceOnAnswerLevel}</h4>
+                        {#each [0, 1, 2, 3, -1] as answerIndex}
+                            <div class="mb-2 mt-3">
+                                <div><b>
+                                    <span class={`circle bg-milestone-answer-${answerIndex}`}></span>
+                                    {i18n.tr.milestone[`answer${answerIndex}Text`]}:</b></div>
+                                <p><small>{i18n.tr.milestone[`answer${answerIndex}Desc`]}</small></p>
+                            </div>
+                        {/each}
+                    </div>
+
                     <div class="flex flex-row justify-center ">
                         <Button
                                 color="light"

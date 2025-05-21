@@ -22,6 +22,7 @@ from mondey_backend.models.children import Child
 from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
+from mondey_backend.models.milestones import SuspiciousState
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import UserAnswer
@@ -629,7 +630,7 @@ class ImportManager:
                     included_in_statistics=False,
                     completed=True,
                     created_at=datetime.strptime(row["STARTED"], "%Y-%m-%d %H:%M:%S"),
-                    suspicious=False,
+                    suspicious_state=SuspiciousState.not_suspicious,
                 )
                 self.data_manager.session.add(answer_session)
                 self.data_manager.session.flush()

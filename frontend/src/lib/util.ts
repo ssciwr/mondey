@@ -7,7 +7,7 @@ export function preventDefault(fn: (event: Event) => void) {
 
 export type PlotDatum = {
 	age: number;
-	[key: string]: string | number;
+	[key: string]: number;
 };
 
 export type PlotData = {

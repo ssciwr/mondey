@@ -2,8 +2,6 @@
 
 <script lang="ts">
 import {
-	Card,
-	Checkbox,
 	Table,
 	TableBody,
 	TableBodyCell,
@@ -12,8 +10,8 @@ import {
 	TableHeadCell,
 } from "flowbite-svelte";
 
-import { refreshChildQuestions, refreshUserQuestions } from "$lib/admin.svelte";
 import {
+	createChild,
 	createChildQuestion,
 	createUserQuestion,
 	deleteChildQuestion,
@@ -32,11 +30,9 @@ import EditQuestionModal from "$lib/components/Admin/EditQuestionModal.svelte";
 import OrderItemsModal from "$lib/components/Admin/OrderItemsModal.svelte";
 import ReorderButton from "$lib/components/Admin/ReorderButton.svelte";
 import DangerousDeleteModal from "$lib/components/DangerousDeleteModal.svelte";
-import DeleteModal from "$lib/components/DeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import { childQuestions, userQuestions } from "$lib/stores/adminStore";
+import { childQuestions, userQuestions } from "$lib/stores/adminStore.svelte";
 import { onMount } from "svelte";
-import type { Writable } from "svelte/store";
 import AlertMessage from "../AlertMessage.svelte";
 
 let currentQuestion = $state(
@@ -45,44 +41,33 @@ let currentQuestion = $state(
 let currentQuestionId = $state(null as number | null);
 let showEditQuestionModal = $state(false);
 let showDeleteModal = $state(false);
-let { kind }: { kind: string } = $props();
+let { kind }: { kind: "user" | "child" } = $props();
 let currentOrderItems = $state([] as Array<{ id: number; text: string }>);
 let showOrderItemsModal = $state(false);
 
-let create: any;
-let doDelete: any;
-let refresh: any = $state(undefined);
-let build: any;
-let order: any = $state(undefined);
-let questions:
-	| Writable<Array<UserQuestionAdmin>>
-	| Writable<Array<ChildQuestionAdmin>> = $state(userQuestions);
-
-if (kind === "user") {
-	create = createUserQuestion;
-	doDelete = deleteUserQuestion;
-	refresh = refreshUserQuestions;
-	build = (dry_run = true) => {
+let create: typeof createUserQuestion | typeof createChildQuestion =
+	$state(createUserQuestion);
+let doDelete: typeof deleteUserQuestion | typeof deleteChildQuestion =
+	$state(deleteUserQuestion);
+let build = $derived.by(() => {
+	return (dry_run = true) => {
 		return {
-			path: { user_question_id: currentQuestionId },
+			path: { [`${kind}_question_id`]: currentQuestionId },
 			query: { dry_run: dry_run },
 		};
 	};
-	order = orderUserQuestionsAdmin;
-	questions = userQuestions;
-} else if (kind === "child") {
+});
+let order: typeof orderUserQuestionsAdmin | typeof orderChildQuestionsAdmin =
+	$state(orderUserQuestionsAdmin);
+let questions: typeof userQuestions | typeof childQuestions =
+	$state(userQuestions);
+
+if (kind === "child") {
 	create = createChildQuestion;
 	doDelete = deleteChildQuestion;
-	refresh = refreshChildQuestions;
-	build = (dry_run = true) => {
-		return {
-			path: { child_question_id: currentQuestionId },
-			query: { dry_run: dry_run },
-		};
-	};
 	order = orderChildQuestionsAdmin;
 	questions = childQuestions;
-} else {
+} else if (kind !== "user") {
 	console.log("Error, kind must be 'user' or 'child', currently is", kind);
 }
 
@@ -92,7 +77,7 @@ async function addQuestion() {
 		console.log(error);
 		currentQuestion = undefined;
 	} else {
-		await refresh();
+		await questions.refresh();
 		currentQuestion = data;
 		showEditQuestionModal = true;
 	}
@@ -102,66 +87,64 @@ async function doDeleteQuestion(dry_run = true) {
 	if (!currentQuestionId) {
 		return;
 	}
-	return await doDelete(build(dry_run));
+	return doDelete(build(dry_run));
 }
 
 onMount(async () => {
-	await refresh();
+	await questions.refresh();
 });
 </script>
 
 {#if i18n.locale}
-<Card size="xl" class="m-5 w-full">
-	<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">
-		{i18n.tr.admin[`${kind}Questions`]}
-		<ReorderButton
-				onclick={() => {
-							currentOrderItems = $questions.map((question) => {return {id: question.id, text: question.text[i18n.locale]?.question};});
-							showOrderItemsModal = true;
-						}}
-		/>
-	</h3>
-	<Table>
-		<TableHead>
-			<TableHeadCell>Question</TableHeadCell>
-			<TableHeadCell>Input type</TableHeadCell>
-			<TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
-		</TableHead>
-		<TableBody>
-			{#each $questions as question, groupIndex (question.id)}
-				<TableBodyRow>
-					<TableBodyCell>
-						{question?.text[i18n.locale]?.question}
-					</TableBodyCell>
-					<TableBodyCell>
-						{question?.component}
-					</TableBodyCell>
-					<TableBodyCell>
-						<EditButton
-							onclick={() => {
-								currentQuestion = $questions[groupIndex];
-								showEditQuestionModal = true;
-							}}
-						/>
-						<DeleteButton
-							onclick={() => {
-								currentQuestionId = question.id;
-								showDeleteModal = true;
-							}}
-						/>
-					</TableBodyCell>
-				</TableBodyRow>
-			{/each}
+<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">
+	{i18n.tr.admin[`${kind}Questions`]}
+	<ReorderButton
+			onclick={() => {
+						currentOrderItems = questions.data.map((question) => {return {id: question.id, text: question?.text?.[i18n.locale]?.question ?? ''};});
+						showOrderItemsModal = true;
+					}}
+	/>
+</h3>
+<Table>
+	<TableHead>
+		<TableHeadCell>Question</TableHeadCell>
+		<TableHeadCell>Input type</TableHeadCell>
+		<TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
+	</TableHead>
+	<TableBody>
+		{#each questions.data as question, groupIndex (question.id)}
 			<TableBodyRow>
-				<TableBodyCell></TableBodyCell>
-				<TableBodyCell></TableBodyCell>
 				<TableBodyCell>
-					<AddButton onclick={addQuestion} />
+					{question?.text?.[i18n.locale]?.question}
+				</TableBodyCell>
+				<TableBodyCell>
+					{question?.component}
+				</TableBodyCell>
+				<TableBodyCell>
+					<EditButton
+						onclick={() => {
+							currentQuestion = questions.data[groupIndex];
+							showEditQuestionModal = true;
+						}}
+					/>
+					<DeleteButton
+						onclick={() => {
+							currentQuestionId = question.id;
+							showDeleteModal = true;
+						}}
+					/>
 				</TableBodyCell>
 			</TableBodyRow>
-		</TableBody>
-	</Table>
-</Card>
+		{/each}
+		<TableBodyRow>
+			<TableBodyCell></TableBodyCell>
+			<TableBodyCell></TableBodyCell>
+			<TableBodyCell>
+				<AddButton onclick={addQuestion} />
+			</TableBodyCell>
+		</TableBodyRow>
+	</TableBody>
+</Table>
 
 {#key showEditQuestionModal}
 	<EditQuestionModal
@@ -171,12 +154,12 @@ onMount(async () => {
 	/>
 {/key}
 <DangerousDeleteModal bind:open={showDeleteModal}
-					  deleteDryRunnableRequest={(dry_run) => doDeleteQuestion(dry_run)}
-					  afterDelete={async() => await refresh()}
+					  deleteDryRunnableRequest={doDeleteQuestion}
+					  afterDelete={questions.refresh}
 					  intendedConfirmCode={i18n.tr.admin.delete}
 />
 
-<OrderItemsModal bind:open={showOrderItemsModal} items={currentOrderItems} endpoint={order} callback={refresh}/>
+<OrderItemsModal bind:open={showOrderItemsModal} items={currentOrderItems} endpoint={order} callback={questions.refresh}/>
 {:else}
 	<AlertMessage title={i18n.tr.userData.alertMessageTitle} message={i18n.tr.userData.alertMessageError} />
 {/if}

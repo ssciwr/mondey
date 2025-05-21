@@ -26,6 +26,7 @@ from mondey_backend.dependencies import current_active_user
 from mondey_backend.dependencies import get_session
 from mondey_backend.main import create_app
 from mondey_backend.models.children import Child
+from mondey_backend.models.children import ChildMilestoneExpectedAgeRange
 from mondey_backend.models.milestones import Language
 from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneAgeScore
@@ -39,6 +40,7 @@ from mondey_backend.models.milestones import MilestoneGroupText
 from mondey_backend.models.milestones import MilestoneImage
 from mondey_backend.models.milestones import MilestoneText
 from mondey_backend.models.milestones import SubmittedMilestoneImage
+from mondey_backend.models.milestones import SuspiciousState
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import ChildQuestionText
@@ -185,6 +187,16 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         lang_ids = ["de", "en", "fr"]
         for lang_id in lang_ids:
             session.add(Language(id=lang_id))
+        # add milestone age ranges for each child age
+        for age in range(0, settings.app_settings.MAX_CHILD_AGE_MONTHS + 1):
+            delta_months = 6
+            session.add(
+                ChildMilestoneExpectedAgeRange(
+                    child_age=age,
+                    min_expected_age=age - delta_months,
+                    max_expected_age=age + delta_months,
+                )
+            )
         # add a milestone group with 3 milestones
         session.add(MilestoneGroup(order=2))
         for lang_id in lang_ids:
@@ -268,7 +280,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 expired=True,
                 completed=True,
                 included_in_statistics=True,
-                suspicious=False,
+                suspicious_state=SuspiciousState.not_suspicious,
             )
         )
         session.add(
@@ -297,7 +309,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=True,
                 expired=True,
                 included_in_statistics=False,
-                suspicious=False,
+                suspicious_state=SuspiciousState.not_suspicious,
             )
         )
         # add two milestone answers
@@ -321,7 +333,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=True,
                 expired=True,
                 included_in_statistics=False,
-                suspicious=False,
+                suspicious_state=SuspiciousState.not_suspicious,
             )
         )
         session.add(
@@ -342,7 +354,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=False,
                 expired=False,
                 included_in_statistics=False,
-                suspicious=False,
+                suspicious_state=SuspiciousState.not_suspicious,
             )
         )
         session.add(
@@ -363,7 +375,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=True,
                 expired=True,
                 included_in_statistics=False,
-                suspicious=False,
+                suspicious_state=SuspiciousState.not_suspicious,
             )
         )
         session.add(
@@ -387,7 +399,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=False,
                 expired=True,
                 included_in_statistics=False,
-                suspicious=False,
+                suspicious_state=SuspiciousState.not_suspicious,
             )
         )
         session.add(
@@ -406,7 +418,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=True,
                 expired=True,
                 included_in_statistics=True,
-                suspicious=False,
+                suspicious_state=SuspiciousState.not_suspicious,
             )
         )
         session.add(
@@ -438,7 +450,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 ),
             )
         )
-        for age in range(0, 73):
+        for age in range(0, settings.app_settings.MAX_CHILD_AGE_MONTHS + 1):
             session.add(
                 MilestoneAgeScore(
                     age=age,
@@ -461,7 +473,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 ),
             )
         )
-        for age in range(0, 73):
+        for age in range(0, settings.app_settings.MAX_CHILD_AGE_MONTHS + 1):
             session.add(
                 MilestoneAgeScore(
                     age=age,
@@ -488,7 +500,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             0,
             0,
         )  # answers for milestone 1,2,3 from answer session 1 (#3 is imputed)
-        for age in range(0, 73):
+        for age in range(0, settings.app_settings.MAX_CHILD_AGE_MONTHS + 1):
             session.add(
                 MilestoneGroupAgeScore(
                     age=age,
