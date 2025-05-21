@@ -13,12 +13,12 @@ import {
 
 import { goto } from "$app/navigation";
 import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
-import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import {
 	Sidebar,
+	SidebarDropdownWrapper,
 	SidebarGroup,
 	SidebarItem,
 	SidebarWrapper,
@@ -26,6 +26,7 @@ import {
 } from "flowbite-svelte";
 
 let { setHideDrawer } = $props();
+let localeDropdownIsOpen = $state(false);
 </script>
 
 <Sidebar>
@@ -102,14 +103,15 @@ let { setHideDrawer } = $props();
                     <ArrowRightToBracketOutline size="lg" />
                 </svelte:fragment>
             </SidebarItem>
-            <SidebarItem>
+            <SidebarDropdownWrapper isOpen={localeDropdownIsOpen} label={i18n.locale}
+                                    onclick={() => {localeDropdownIsOpen=!localeDropdownIsOpen;}}>
                 <svelte:fragment slot="icon">
                     <LanguageOutline size="lg" />
                 </svelte:fragment>
-                <svelte:fragment slot="subtext">
-                    <LocaleChooser />
-                </svelte:fragment>
-            </SidebarItem>
+                {#each i18n.locales as locale}
+                    <SidebarItem label={locale} onclick={() => {localeDropdownIsOpen=false; i18n.locale = locale;}}/>
+                {/each}
+            </SidebarDropdownWrapper>
         </SidebarGroup>
     </SidebarWrapper>
 </Sidebar>
