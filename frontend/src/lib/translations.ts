@@ -179,6 +179,20 @@ export const translationIds = {
 			"Statistiken müssen aktualisiert werden. Klicken Sie dazu auf „alle Statistiken neu berechnen“.",
 		suspiciousSessionNote:
 			"Hinweis: Als verdächtig markierte Antwortsitzungen werden bei der Berechnung des voraussichtlichen Alters für Meilensteine nicht berücksichtigt, sind aber dennoch in den Forschungsdaten enthalten.",
+		manageData: "Daten verwalten",
+		importData: "Daten Importieren",
+		importFailed:
+			"Importieren fallt aus. Überprüfen Sie das Datenformat, stellen Sie sicher, dass gültige Spalten vorhanden sind und gültige eindeutige CASE-IDs verwendet werden.",
+		importSuccessful: "Importieren Erfolgreich",
+		emptyImport:
+			"Es wurden keine Kinder importiert. Bitte überprüfen Sie erneut, ob es neue Zeilen in den Daten gibt, die noch nicht in der Datenbank vorhanden sind",
+		confirmImport: "Ja, Importiere",
+		uploadCSV: "CSV Daten hochladen",
+		uploading: "CSV wird hochgeladen",
+		selectFileToImport: "Wahlen Sie das Daten",
+		needToUploadBothFiles:
+			"Sie müssen beide die Daten CSV und Labels CSV hochladen.",
+		importSuccessfulChildren: "Kinder importiert",
 	},
 	researcher: {
 		label: "Wissenschaft",
@@ -368,7 +382,7 @@ export const translationIds = {
 		title: "Welche Entwicklungsbereiche werden erfasst?",
 		headingMotor: "Grobmotorik",
 		headingFineMotor: "Handmotorik",
-		headingThinking: "Denken",
+		headingThinking: "Wahrnehmung und Denken",
 		headingLanguage: "Sprache",
 		headingSocialDevelopment: "Soziale Entwicklung",
 		headingInnerStates: "Innere Zustände",
