@@ -368,7 +368,7 @@ export const translationIds = {
 		title: "Welche Entwicklungsbereiche werden erfasst?",
 		headingMotor: "Grobmotorik",
 		headingFineMotor: "Handmotorik",
-		headingThinking: "Denken",
+		headingThinking: "Wahrnehmung und Denken",
 		headingLanguage: "Sprache",
 		headingSocialDevelopment: "Soziale Entwicklung",
 		headingInnerStates: "Innere Zustände",
