@@ -280,7 +280,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 expired=True,
                 completed=True,
                 included_in_statistics=True,
-                suspicious=SuspiciousState.not_suspicious,
+                suspicious_state=SuspiciousState.not_suspicious,
             )
         )
         session.add(
@@ -309,7 +309,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=True,
                 expired=True,
                 included_in_statistics=False,
-                suspicious=SuspiciousState.not_suspicious,
+                suspicious_state=SuspiciousState.not_suspicious,
             )
         )
         # add two milestone answers
@@ -333,7 +333,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=True,
                 expired=True,
                 included_in_statistics=False,
-                suspicious=SuspiciousState.not_suspicious,
+                suspicious_state=SuspiciousState.not_suspicious,
             )
         )
         session.add(
@@ -354,7 +354,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=False,
                 expired=False,
                 included_in_statistics=False,
-                suspicious=SuspiciousState.not_suspicious,
+                suspicious_state=SuspiciousState.not_suspicious,
             )
         )
         session.add(
@@ -375,7 +375,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=True,
                 expired=True,
                 included_in_statistics=False,
-                suspicious=SuspiciousState.not_suspicious,
+                suspicious_state=SuspiciousState.not_suspicious,
             )
         )
         session.add(
@@ -399,7 +399,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=False,
                 expired=True,
                 included_in_statistics=False,
-                suspicious=SuspiciousState.not_suspicious,
+                suspicious_state=SuspiciousState.not_suspicious,
             )
         )
         session.add(
@@ -418,7 +418,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=True,
                 expired=True,
                 included_in_statistics=True,
-                suspicious=SuspiciousState.not_suspicious,
+                suspicious_state=SuspiciousState.not_suspicious,
             )
         )
         session.add(

@@ -228,7 +228,7 @@ def test_delete_child_removes_answering_sessions(session, user_client: TestClien
         expired=False,
         completed=False,
         included_in_statistics=True,
-        suspicious=SuspiciousState.not_suspicious,
+        suspicious_state=SuspiciousState.not_suspicious,
     )
     session.add(milestone_answer_session)
     session.flush()
