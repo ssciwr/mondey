@@ -5,27 +5,19 @@ import { base } from "$app/paths";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 
 import { goto } from "$app/navigation";
-import { authCookieLogin, usersCurrentUser } from "$lib/client/sdk.gen";
-import { type AuthCookieLoginData } from "$lib/client/types.gen";
 import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { preventDefault } from "$lib/util";
-import { refresh } from "$lib/utils/login";
 import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
 
 import { page } from "$app/state";
 
 // functionality
 async function submitData(): Promise<void> {
-	const loginData: AuthCookieLoginData = {
-		body: {
-			username: username,
-			password: password,
-		},
-	};
-
-	const authReturn = await authCookieLogin(loginData);
-
+	const authReturn = await user.login({
+		username: username,
+		password: password,
+	});
 	if (authReturn.error) {
 		alertStore.showAlert(
 			i18n.tr.login.alertMessageTitle,
@@ -35,12 +27,12 @@ async function submitData(): Promise<void> {
 		);
 		console.log("error during login ", authReturn.error.detail);
 	} else {
-		const status: string = await refresh();
-		if (status !== "success") {
-			console.log("error during retrieving active users: ", status);
+		await user.load();
+		if (user.data === null) {
+			console.log("error retrieving active user");
 			alertStore.showAlert(
 				i18n.tr.login.alertMessageTitle,
-				`${i18n.tr.login.unauthorized}: ${status}`,
+				i18n.tr.login.unauthorized,
 				true,
 				false,
 			);

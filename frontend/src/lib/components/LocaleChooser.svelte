@@ -26,7 +26,7 @@ let dropdownOpen = $state(false);
 		{#if withIcon}
 			<LanguageOutline size="lg" />
 		{/if}
-		{i18n.locale}
+		{i18n.selectedLocale}
 		<ChevronDownOutline class="ms-2 h-6 w-6" />
 	</button>
 	<Dropdown triggeredBy={buttonId} bind:open={dropdownOpen}>

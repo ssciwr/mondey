@@ -101,12 +101,10 @@ async function setup(): Promise<{
 			true,
 		);
 	} else {
-		console.log("Set questionnaire");
 		questionnaire = questions.data;
 	}
 
 	if (currentChild.id !== null) {
-		console.log("Current child ID is: ", currentChild.id);
 		const child = await getChild({ path: { child_id: currentChild.id } });
 
 		if (child.error) {

@@ -1,4 +1,6 @@
-<script>
+<svelte:options runes={true} />
+
+<script lang="ts">
 import logo_dark from "$lib/assets/mondey_dark.svg";
 import { i18n } from "$lib/i18n.svelte";
 import {
