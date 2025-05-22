@@ -16,15 +16,15 @@ function sanitizeHtml(html) {
 <Accordion class="min-w-full px-4 mt-10">
     <AccordionItem>
         <span slot="header">{i18n.tr.frontpageAccordion.heading1}</span>
-        <p class="mb-4 mt-4 px-4 text-gray-700 dark:text-gray-400 whitespace-pre-line">
+        <div class="mb-4 mt-4 px-4 text-gray-700 dark:text-gray-400 whitespace-pre-line restore-default">
             {@html sanitizeHtml(i18n.tr.frontpageAccordion.summary1)}
-        </p>
+        </div>
     </AccordionItem>
 
     <AccordionItem>
         <span slot="header">{i18n.tr.frontpageAccordion.heading2}</span>
-        <p class="mb-4 mt-4 px-4 text-gray-700 dark:text-gray-400 whitespace-pre-line">
+        <div class="mb-4 mt-4 px-4 text-gray-700 dark:text-gray-400 whitespace-pre-line restore-default">
             {@html sanitizeHtml(i18n.tr.frontpageAccordion.summary2)}
-        </p>
+        </div>
     </AccordionItem>
 </Accordion>

@@ -113,4 +113,21 @@
 		--range-handle: #3322ff;
 		--range-range-inactive: #000000;
 	}
+
+	/* For countering tailwind wiping list item defaults etc */
+	.restore-default ul {
+		list-style-type: disc;
+		padding-left: 1.5rem;
+		margin: 1rem 0;
+	}
+
+	.restore-default ol {
+		list-style-type: decimal;
+		padding-left: 1.5rem;
+		margin: 1rem 0;
+	}
+
+	.restore-default li {
+		margin: 0.25rem 0;
+	}
 }
