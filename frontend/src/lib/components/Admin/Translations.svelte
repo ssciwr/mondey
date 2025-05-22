@@ -100,7 +100,9 @@ onMount(() => getTranslations());
 					<Label class="mb-2">{item_key}</Label>
 					{#each i18n.locales as lang}
 						<div class="mb-1">
-							<InputAutoTranslate bind:value={translations[lang][section_key][item_key]} locale={lang} de_text={translations["de"][section_key][item_key]}/>
+							<InputAutoTranslate bind:value={translations[lang][section_key][item_key]}
+												multiline={section_key === "frontpageAccordion" && ["summary1", "summary2"].indexOf(item_key) !== -1}
+												locale={lang} de_text={translations["de"][section_key][item_key]}/>
 						</div>
 					{/each}
 				</div>
