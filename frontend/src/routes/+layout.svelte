@@ -66,6 +66,8 @@ function toggleDrawer() {
 
 <svelte:head>
 	<title>MONDEY :: Milestones of Normal Development in Early Years</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<!-- For iPhone 12 Chrome view width issues -->
 </svelte:head>
 
 <div style="position:fixed;padding-top:1.1rem;padding-bottom:1rem;left:0px;right:0px;border-bottom:1px solid lightgray"
