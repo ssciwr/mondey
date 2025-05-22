@@ -26,11 +26,11 @@ let dropdownOpen = $state(false);
 		{#if withIcon}
 			<LanguageOutline size="lg" />
 		{/if}
-		{i18n.locale}
+		{i18n.selectedLocale}
 		<ChevronDownOutline class="ms-2 h-6 w-6" />
 	</button>
 	<Dropdown triggeredBy={buttonId} bind:open={dropdownOpen}>
-		{#each i18n.locales as locale}
+		{#each i18n.selectableLocales as locale}
 			<DropdownItem
 				class="flex items-center"
 				on:click={preventDefault(() => {

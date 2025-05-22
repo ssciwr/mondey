@@ -45,7 +45,7 @@ onMount(async () => {
         </div>
         <MilestoneGroups/>
     </TabItem>
-    <TabItem open>
+    <TabItem>
         <div slot="title" class="flex items-center gap-2">
             <AdjustmentsHorizontalOutline size="md"/>
             {i18n.tr.admin.milestoneChildAgeRanges}

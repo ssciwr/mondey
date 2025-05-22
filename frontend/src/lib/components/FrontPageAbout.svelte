@@ -1,16 +1,12 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import babyFlower from "$lib/assets/babyFlower.jpg";
-import type {
-	AuthCookieLoginData,
-	RegisterRegisterData,
-	UserCreate,
-} from "$lib/client/index.js";
-import { authCookieLogin, registerRegister } from "$lib/client/sdk.gen";
+import type { UserCreate } from "$lib/client/index.js";
+import { registerRegister } from "$lib/client/sdk.gen";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import { refresh } from "$lib/utils/login";
-import { Button, Card, Tooltip } from "flowbite-svelte";
+import { user } from "$lib/stores/userStore.svelte";
+import { Card, Tooltip } from "flowbite-svelte";
 
 let showAlert = $state(false);
 let alertMessage = $state(i18n.tr.registration.alertMessageError);
@@ -30,11 +26,9 @@ const registerTestUser = async () => {
 		alertMessage = `${i18n.tr.registration.alertMessageError}: ${result.error.detail}`;
 		showAlert = true;
 	} else {
-		const authReturn = await authCookieLogin({
-			body: {
-				username: testAccountData.email,
-				password: testAccountData.password,
-			},
+		const authReturn = await user.login({
+			username: testAccountData.email,
+			password: testAccountData.password,
 		});
 
 		if (authReturn.error) {
@@ -42,11 +36,12 @@ const registerTestUser = async () => {
 			alertMessage = i18n.tr.login.badCredentials;
 			console.log("error during login ", authReturn.error.detail);
 		} else {
-			const status: string = await refresh();
-			if (status !== "success") {
+			await user.load();
+			if (user.data === null) {
 				alertMessage = `${i18n.tr.login.badCredentials}`;
+			} else {
+				goto("/userLand/children");
 			}
-			goto("/userLand/children");
 		}
 	}
 };

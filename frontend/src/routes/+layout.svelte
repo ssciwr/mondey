@@ -37,6 +37,7 @@ import "../app.css";
 
 import { afterNavigate } from "$app/navigation";
 import { page } from "$app/state";
+import LocaleSidebarDropdown from "$lib/components/LocaleSidebarDropdown.svelte";
 
 /* So basically it's not ideal to detect user being in the userland this way, but the main menu for non-logged in users
 does make sense to be here.
@@ -55,14 +56,12 @@ let { children } = $props();
 let hideDrawer = $state(true);
 
 onMount(async () => {
-	await i18n.load();
 	await user.load();
+	await i18n.load();
 });
 function toggleDrawer() {
 	hideDrawer = !hideDrawer;
 }
-
-const asAlert = false;
 </script>
 
 <svelte:head>
@@ -182,15 +181,7 @@ const asAlert = false;
 								<DarkModeChooser />
 							</svelte:fragment>
 						</SidebarItem>
-
-						<SidebarItem>
-							<svelte:fragment slot="icon">
-								<LanguageOutline size="lg" />
-							</svelte:fragment>
-							<svelte:fragment slot="subtext">
-								<LocaleChooser />
-							</svelte:fragment>
-						</SidebarItem>
+						<LocaleSidebarDropdown />
 					</SidebarGroup>
 				</SidebarWrapper>
 			</Sidebar>
