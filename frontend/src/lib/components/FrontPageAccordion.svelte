@@ -1,4 +1,6 @@
-<script>
+<svelte:options runes={true} />
+
+<script lang="ts">
 import { i18n } from "$lib/i18n.svelte";
 import { Accordion, AccordionItem } from "flowbite-svelte";
 </script>

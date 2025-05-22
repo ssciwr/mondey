@@ -1,14 +1,47 @@
-<script>
-export let bookmarks = [];
+<svelte:options runes={true} />
 
-let activeIndex = 0;
-let interval;
+<script lang="ts">
+import { i18n } from "$lib/i18n.svelte.js";
+import { onMount } from "svelte";
+
+const bookmarks = [
+	{
+		titleKey: i18n.tr.frontpageBookmarks.headingMotor,
+		contentKey: i18n.tr.frontpageBookmarks.summaryMotor,
+	},
+	{
+		titleKey: i18n.tr.frontpageBookmarks.headingFineMotor,
+		contentKey: i18n.tr.frontpageBookmarks.summaryFineMotor,
+	},
+	{
+		titleKey: i18n.tr.frontpageBookmarks.headingThinking,
+		contentKey: i18n.tr.frontpageBookmarks.summaryThinking,
+	},
+	{
+		titleKey: i18n.tr.frontpageBookmarks.headingLanguage,
+		contentKey: i18n.tr.frontpageBookmarks.summaryLanguage,
+	},
+	{
+		titleKey: i18n.tr.frontpageBookmarks.headingSocialDevelopment,
+		contentKey: i18n.tr.frontpageBookmarks.summarySocialDevelopment,
+	},
+	{
+		titleKey: i18n.tr.frontpageBookmarks.headingInnerStates,
+		contentKey: i18n.tr.frontpageBookmarks.summaryInnerStates,
+	},
+	{
+		titleKey: i18n.tr.frontpageBookmarks.headingSchool,
+		contentKey: i18n.tr.frontpageBookmarks.summarySchool,
+	},
+];
+
+let activeIndex = $state(0);
+let interval: ReturnType<typeof setInterval>;
 
 function changeTab() {
 	activeIndex = (activeIndex + 1) % bookmarks.length;
 }
 
-import { onMount } from "svelte";
 onMount(() => {
 	interval = setInterval(changeTab, 4000);
 
@@ -17,7 +50,7 @@ onMount(() => {
 	};
 });
 
-function selectTab(index) {
+function selectTab(index: number) {
 	activeIndex = index;
 	clearInterval(interval);
 }
@@ -31,7 +64,7 @@ function selectTab(index) {
           class="flex-1 rounded-lg text-base text-center lg:min-h-fit max-lg:hover:text-white max-md:hover:text-white h-16 max-lg:min-w-80 py-2 px-4 dark:text-white hover:dark:text-white text-gray-600 transition-colors hover:text-gray-900 max-lg:hover:bg-primary-800 dark:hover:text-gray-900 hover:bg-gray-100 hover:dark:bg-gray-800"
           class:bg-primary-600={activeIndex === index}
           class:text-white={activeIndex === index}
-          on:click={() => selectTab(index)}
+          onclick={() => selectTab(index)}
         >
           {titleKey}
         </button>
