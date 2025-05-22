@@ -147,7 +147,7 @@ let searchTerm = $state("");
                                      disabled={milestoneGroup.disabled}
                                      cardClasses={`dark:text-white text-white bg-milestone-700 dark:bg-milestone-900 ${milestoneGroup.disabled ? '' : 'hover:bg-milestone-800 dark:hover:bg-milestone-700'}`}
                         >
-                            <Progress progress={milestoneGroup.progress}/>
+                            <Progress progress={milestoneGroup.progress} color="#556499"/>
                         </CardDisplay>
                     {/if}
                 {/each}

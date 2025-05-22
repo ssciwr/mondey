@@ -13,12 +13,13 @@ import {
 
 import { goto } from "$app/navigation";
 import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
-import LocaleChooser from "$lib/components/LocaleChooser.svelte";
+import LocaleSidebarDropdown from "$lib/components/LocaleSidebarDropdown.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import {
 	Sidebar,
+	SidebarDropdownWrapper,
 	SidebarGroup,
 	SidebarItem,
 	SidebarWrapper,
@@ -102,14 +103,7 @@ let { setHideDrawer } = $props();
                     <ArrowRightToBracketOutline size="lg" />
                 </svelte:fragment>
             </SidebarItem>
-            <SidebarItem>
-                <svelte:fragment slot="icon">
-                    <LanguageOutline size="lg" />
-                </svelte:fragment>
-                <svelte:fragment slot="subtext">
-                    <LocaleChooser />
-                </svelte:fragment>
-            </SidebarItem>
+            <LocaleSidebarDropdown />
         </SidebarGroup>
     </SidebarWrapper>
 </Sidebar>
