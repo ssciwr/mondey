@@ -16,6 +16,7 @@ dependencies = [
     "uvicorn",
     "sqlmodel",
     "aiosqlite",
+    "psycopg[binary,pool]",
     "python-multipart",
     "pydantic-settings",
     "types-python-dateutil",

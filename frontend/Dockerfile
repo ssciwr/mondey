@@ -19,7 +19,7 @@ COPY . .
 
 RUN echo "VITE_MONDEY_API_URL=${MONDEY_API_URL}" > .env && pnpm run build
 
-FROM nginx:1.27.3
+FROM nginx:1.27.5-alpine-slim
 
 COPY --from=builder /app/build /usr/share/nginx/html
 

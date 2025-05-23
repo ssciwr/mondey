@@ -1,5 +1,3 @@
-node_modules
-
 # Output
 .output
 .vercel
@@ -177,6 +175,7 @@ mondey_backend/static/*.jpg
 # project specific
 private
 static
+db
 
 # playwright
 /frontend/node_modules/
@@ -185,6 +184,3 @@ static
 /frontend/blob-report/
 /frontend/playwright/.cache/
 .aider*
-
-# generated e2e test database
-/e2e/db/mondey.db

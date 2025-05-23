@@ -16,9 +16,12 @@ from ..models.users import Base
 from ..models.users import User
 from ..settings import app_settings
 
-engine = create_async_engine(
-    f"sqlite+aiosqlite:///{app_settings.DATABASE_PATH if app_settings.DATABASE_PATH else tempfile.mkdtemp()}/users.db"
+db_url = (
+    f"postgresql+psycopg://{app_settings.DATABASE_USER}:{app_settings.DATABASE_PASSWORD}@{app_settings.DATABASE_HOST_USERSDB}:{app_settings.DATABASE_PORT}/users"
+    if app_settings.DATABASE_HOST_USERSDB
+    else f"sqlite+aiosqlite:///{tempfile.mkdtemp()}/users.db"
 )
+engine = create_async_engine(db_url)
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
 

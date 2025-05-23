@@ -108,13 +108,20 @@ def main():
         format="%(asctime)s.%(msecs)03d :: %(levelname)s :: %(name)s :: %(funcName)s :: %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
-    if not app_settings.DATABASE_PATH:
-        logger.warning(
-            "No database path set. Using temporary directory, all data will be lost when server is stopped."
-        )
+    for db_host in ("DATABASE_HOST_USERSDB", "DATABASE_HOST_MONDEYDB"):
+        if not getattr(app_settings, db_host):
+            logger.warning(
+                f"{db_host} not set. Using temporary sqlite database, all data will be lost when server is stopped."
+            )
+    sensitive_settings = [
+        "SECRET",
+        "DATABASE_PASSWORD",
+        "SMTP_PASSWORD",
+        "DEEPL_API_KEY",
+    ]
     for key, value in app_settings:
         logger.info(
-            f"{key}: {'****************' if key in {'SECRET', 'DEEPL_API_KEY', 'SMTP_PASSWORD'} else value}"
+            f"{key}: {'****************' if key in sensitive_settings else value}"
         )
     uvicorn.run(
         "mondey_backend.main:create_app",
