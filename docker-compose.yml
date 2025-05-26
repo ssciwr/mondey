@@ -26,6 +26,7 @@ services:
       - STATS_CRONTAB=${STATS_CRONTAB:-0 3 * * mon}
       - DEEPL_API_KEY=${DEEPL_API_KEY:-}
       - MONDEY_HOST=${MONDEY_HOST:-mondey.lkeegan.dev}
+      - SERVE_API_DOCS=${SERVE_API_DOCS:-false}
     depends_on:
       - mondeydb
       - usersdb

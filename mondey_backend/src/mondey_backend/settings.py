@@ -30,6 +30,7 @@ class AppSettings(BaseSettings):
     E2E_TEST_USER_SQL_FILES: str = ""
     E2E_TEST_MONDEY_SQL_FILES: str = ""
     MAX_CHILD_AGE_MONTHS: int = 72
+    SERVE_API_DOCS: bool = True
 
 
 app_settings = AppSettings()
