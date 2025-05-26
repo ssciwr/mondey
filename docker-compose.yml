@@ -56,7 +56,7 @@ services:
         max-size: 20m
         max-file: 25
   mondeydb:
-    image: postgres
+    image: postgres:17-alpine
     restart: always
     shm_size: 128mb
     volumes:
@@ -72,7 +72,7 @@ services:
         max-size: 20m
         max-file: 5
   usersdb:
-    image: postgres
+    image: postgres:17-alpine
     restart: always
     shm_size: 128mb
     volumes:

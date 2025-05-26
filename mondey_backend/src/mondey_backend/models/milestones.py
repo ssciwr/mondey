@@ -31,10 +31,17 @@ class MilestoneGroupTextBase(SQLModel):
 
 class MilestoneGroupText(MilestoneGroupTextBase, table=True):
     group_id: int | None = Field(
-        default=None, foreign_key="milestonegroup.id", primary_key=True
+        default=None,
+        foreign_key="milestonegroup.id",
+        primary_key=True,
+        ondelete="CASCADE",
     )
     lang_id: str | None = fixed_length_string_field(
-        max_length=2, default=None, foreign_key="language.id", primary_key=True
+        max_length=2,
+        default=None,
+        foreign_key="language.id",
+        primary_key=True,
+        ondelete="CASCADE",
     )
 
 
@@ -84,10 +91,14 @@ class MilestoneTextBase(SQLModel):
 
 class MilestoneText(MilestoneTextBase, table=True):
     milestone_id: int | None = Field(
-        default=None, foreign_key="milestone.id", primary_key=True
+        default=None, foreign_key="milestone.id", primary_key=True, ondelete="CASCADE"
     )
     lang_id: str | None = fixed_length_string_field(
-        max_length=2, default=None, foreign_key="language.id", primary_key=True
+        max_length=2,
+        default=None,
+        foreign_key="language.id",
+        primary_key=True,
+        ondelete="CASCADE",
     )
 
 
@@ -98,7 +109,9 @@ class MilestoneTextPublic(MilestoneTextBase):
 ## Milestone
 class Milestone(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    group_id: int | None = Field(default=None, foreign_key="milestonegroup.id")
+    group_id: int | None = Field(
+        default=None, foreign_key="milestonegroup.id", ondelete="CASCADE"
+    )
     order: int = 0
     expected_age_months: int = 12
     group: MilestoneGroup = back_populates("milestones")
@@ -131,7 +144,9 @@ class MilestoneAdmin(SQLModel):
 ## MilestoneImage
 class MilestoneImage(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    milestone_id: int | None = Field(default=None, foreign_key="milestone.id")
+    milestone_id: int | None = Field(
+        default=None, foreign_key="milestone.id", ondelete="CASCADE"
+    )
     milestone: Milestone = back_populates("images")
 
 
@@ -141,7 +156,9 @@ class MilestoneImagePublic(SQLModel):
 
 class SubmittedMilestoneImage(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    milestone_id: int | None = Field(default=None, foreign_key="milestone.id")
+    milestone_id: int | None = Field(
+        default=None, foreign_key="milestone.id", ondelete="CASCADE"
+    )
     user_id: int
 
 
@@ -166,12 +183,17 @@ class MilestoneAnswerResponse(BaseModel):
 
 class MilestoneAnswer(SQLModel, table=True):
     answer_session_id: int | None = Field(
-        default=None, foreign_key="milestoneanswersession.id", primary_key=True
+        default=None,
+        foreign_key="milestoneanswersession.id",
+        primary_key=True,
+        ondelete="CASCADE",
     )
     milestone_id: int | None = Field(
-        default=None, foreign_key="milestone.id", primary_key=True
+        default=None, foreign_key="milestone.id", primary_key=True, ondelete="CASCADE"
     )
-    milestone_group_id: int = Field(default=None, foreign_key="milestonegroup.id")
+    milestone_group_id: int = Field(
+        default=None, foreign_key="milestonegroup.id", ondelete="CASCADE"
+    )
     answer: int  # ranges from 0-3, where 0 is noch gar nichts and 3 is zuverlaessig, or -1 if not answered.
     milestone: Milestone = back_populates("answers")
 
@@ -242,6 +264,7 @@ class MilestoneAgeScore(SQLModel, table=True):
         default=None,
         primary_key=True,
         foreign_key="milestoneagescorecollection.milestone_id",
+        ondelete="CASCADE",
     )
     age: int = Field(primary_key=True)
     collection: MilestoneAgeScoreCollection = back_populates("scores")
@@ -252,7 +275,7 @@ class MilestoneAgeScore(SQLModel, table=True):
 
 class MilestoneAgeScoreCollection(SQLModel, table=True):
     milestone_id: int = Field(
-        default=None, primary_key=True, foreign_key="milestone.id"
+        default=None, primary_key=True, foreign_key="milestone.id", ondelete="CASCADE"
     )
     expected_age: int
     scores: Mapped[list[MilestoneAgeScore]] = back_populates("collection")
@@ -275,6 +298,7 @@ class MilestoneGroupAgeScore(SQLModel, table=True):
         default=None,
         primary_key=True,
         foreign_key="milestonegroupagescorecollection.milestone_group_id",
+        ondelete="CASCADE",
     )
     collection: MilestoneGroupAgeScoreCollection = back_populates("scores")
     count: int
@@ -284,6 +308,9 @@ class MilestoneGroupAgeScore(SQLModel, table=True):
 
 class MilestoneGroupAgeScoreCollection(SQLModel, table=True):
     milestone_group_id: int = Field(
-        default=None, primary_key=True, foreign_key="milestonegroup.id"
+        default=None,
+        primary_key=True,
+        foreign_key="milestonegroup.id",
+        ondelete="CASCADE",
     )
     scores: Mapped[list[MilestoneGroupAgeScore]] = back_populates("collection")
