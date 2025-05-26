@@ -3,7 +3,6 @@
 <script lang="ts">
 import AnswerSessionData from "$lib/components/Admin/AnswerSessionData.svelte";
 import Languages from "$lib/components/Admin/Languages.svelte";
-import MilestoneChildAgeRanges from "$lib/components/Admin/MilestoneChildAgeRanges.svelte";
 import MilestoneExpectedAges from "$lib/components/Admin/MilestoneExpectedAges.svelte";
 import MilestoneGroups from "$lib/components/Admin/MilestoneGroups.svelte";
 import Questions from "$lib/components/Admin/Questions.svelte";
@@ -44,13 +43,6 @@ onMount(async () => {
             {i18n.tr.admin.milestones}
         </div>
         <MilestoneGroups/>
-    </TabItem>
-    <TabItem>
-        <div slot="title" class="flex items-center gap-2">
-            <AdjustmentsHorizontalOutline size="md"/>
-            {i18n.tr.admin.milestoneChildAgeRanges}
-        </div>
-        <MilestoneChildAgeRanges/>
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">

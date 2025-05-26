@@ -17,7 +17,6 @@ import DeleteModal from "$lib/components/DeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { milestoneGroups } from "$lib/stores/adminStore.svelte";
 import { Button, Input, Label, Modal } from "flowbite-svelte";
-import { RangeSlider } from "svelte-range-slider-pips";
 
 let {
 	open = $bindable(false),
@@ -91,9 +90,11 @@ async function deleteMilestoneImageAndUpdate() {
             </div>
         {/each}
         <div class="mb-5">
-            <Label>{`${i18n.tr.admin.expectedAge}: ${milestone.expected_age_months}m`}</Label>
-            <RangeSlider id="expectedAge-months" min={1} max={72} step={1} pips={true} bind:value={milestone.expected_age_months}/>
-            <Button onclick={() => {showMilestoneExpectedAgeModal = true;}}>View data</Button>
+            <Label>{i18n.tr.admin.expectedAge}</Label>
+            <div class="flex-row mt-2">
+                {`${milestone.expected_age_months}m ± ${milestone.expected_age_delta}m`}
+                <Button class="mx-4" onclick={() => {showMilestoneExpectedAgeModal = true;}}>{i18n.tr.admin.edit}</Button>
+            </div>
         </div>
         <div class="mb-5">
             <Label for="img_upload" class="pb-2">{i18n.tr.admin.images}</Label>
@@ -122,9 +123,8 @@ async function deleteMilestoneImageAndUpdate() {
 
 <DeleteModal bind:open={showDeleteMilestoneImageModal} onclick={deleteMilestoneImageAndUpdate}></DeleteModal>
 
-{#key milestone}
+{#key showMilestoneExpectedAgeModal}
     {#if milestone}
-        <MilestoneExpectedAgeModal bind:open={showMilestoneExpectedAgeModal}
-                               milestoneId={milestone.id}></MilestoneExpectedAgeModal>
+        <MilestoneExpectedAgeModal bind:open={showMilestoneExpectedAgeModal} bind:milestone={milestone} />
     {/if}
 {/key}

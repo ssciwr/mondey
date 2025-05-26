@@ -391,37 +391,58 @@ def test_update_milestone_answer_no_current_answer_session(
     assert current_answer_session["child_id"] == 2
     # a new answer session is created with id 100 (id 99 is the last one in the db)
     assert current_answer_session["id"] == 100
-    # child 2 is 20 months old, so relevant milestones are 3 and 4, initially unanswered
-    assert sorted(current_answer_session["answers"].keys()) == ["3", "4"]
+    # child 2 is 20 months old, so relevant milestones are
+    # 3 (18 +/- 8)
+    # 4 (24 +/- 10)
+    # 5 (30 +/- 12)
+    # all initially unanswered
+    assert sorted(current_answer_session["answers"].keys()) == ["3", "4", "5"]
     assert current_answer_session["answers"]["3"]["answer"] == -1
     assert current_answer_session["answers"]["4"]["answer"] == -1
+    assert current_answer_session["answers"]["5"]["answer"] == -1
 
     # answer milestone 4
-    new_answer = {
+    new_answer_4 = {
         "milestone_id": 4,
         "answer": 2,
     }
     response = user_client.put(
-        f"/users/milestone-answers/{current_answer_session['id']}", json=new_answer
+        f"/users/milestone-answers/{current_answer_session['id']}", json=new_answer_4
     )
     assert response.status_code == 200
-    assert response.json()["answer"] == new_answer
+    assert response.json()["answer"] == new_answer_4
     assert response.json()["session_completed"] is False
-    # check that the answer session is still the same
+    # check that the answer session is still the same one
     new_answer_session = user_client.get("/users/milestone-answers/2").json()
     assert new_answer_session["id"] == 100
-    assert new_answer_session["answers"]["4"] == new_answer
+    assert new_answer_session["answers"]["4"] == new_answer_4
+
+    # answer milestone 5
+    new_answer_5 = {
+        "milestone_id": 5,
+        "answer": 3,
+    }
+    response = user_client.put(
+        f"/users/milestone-answers/{current_answer_session['id']}", json=new_answer_5
+    )
+    assert response.status_code == 200
+    assert response.json()["answer"] == new_answer_5
+    assert response.json()["session_completed"] is False
+    # check that the answer session is still the same one
+    new_answer_session = user_client.get("/users/milestone-answers/2").json()
+    assert new_answer_session["id"] == 100
+    assert new_answer_session["answers"]["5"] == new_answer_5
 
     # answer the final milestone in the session
-    new_answer = {
+    new_answer_3 = {
         "milestone_id": 3,
         "answer": 1,
     }
     response = user_client.put(
-        f"/users/milestone-answers/{current_answer_session['id']}", json=new_answer
+        f"/users/milestone-answers/{current_answer_session['id']}", json=new_answer_3
     )
     assert response.status_code == 200
-    assert response.json()["answer"] == new_answer
+    assert response.json()["answer"] == new_answer_3
     assert response.json()["session_completed"] is True
     # check that we get a new answer session
     new_answer_session = user_client.get("/users/milestone-answers/2").json()

@@ -2,7 +2,10 @@
 
 <script lang="ts">
 import { getMilestoneAgeScores, updateMilestone } from "$lib/client/sdk.gen";
-import type { MilestoneAgeScoreCollectionPublic } from "$lib/client/types.gen";
+import type {
+	MilestoneAdmin,
+	MilestoneAgeScoreCollectionPublic,
+} from "$lib/client/types.gen";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import PlotScoreAge from "$lib/components/DataDisplay/PlotScoreAge.svelte";
 import { i18n } from "$lib/i18n.svelte";
@@ -20,7 +23,7 @@ import {
 } from "flowbite-svelte";
 import { RefreshOutline } from "flowbite-svelte-icons";
 
-let currentMilestoneId = $state(null as number | null);
+let currentMilestone = $state(null as MilestoneAdmin | null);
 let showMilestoneExpectedAgeModal = $state(false);
 let currentTitle = $state("");
 let expectedAges = $state(
@@ -65,6 +68,8 @@ async function saveNewExpectedAges() {
 		if (group.milestones) {
 			for (const milestone of group.milestones) {
 				milestone.expected_age_months = expectedAges[milestone.id].expected_age;
+				milestone.expected_age_delta =
+					expectedAges[milestone.id].expected_age_delta;
 				const { data, error } = await updateMilestone({ body: milestone });
 				if (error) {
 					console.log(error);
@@ -112,12 +117,13 @@ async function saveNewExpectedAges() {
                 {#each milestoneGroup.milestones as milestone (milestone.id)}
                     {@const milestoneTitle = `${groupTitle} / ${milestone.text[i18n.locale].title}`}
                     {@const newExpectedAge = expectedAges?.[milestone.id]?.expected_age ?? '-'}
+                    {@const newExpectedAgeDelta = expectedAges?.[milestone.id]?.expected_age_delta ?? '-'}
                     <TableBodyRow>
                         <TableBodyCell>{milestoneTitle}</TableBodyCell>
-                        <TableBodyCell>{milestone.expected_age_months}</TableBodyCell>
-                        <TableBodyCell>{newExpectedAge}</TableBodyCell>
+                        <TableBodyCell>{milestone.expected_age_months} ± {milestone.expected_age_delta}</TableBodyCell>
+                        <TableBodyCell>{newExpectedAge} ± {newExpectedAgeDelta}</TableBodyCell>
                         <Button class="m-2" disabled={!expectedAges?.[milestone.id]}
-                                onclick={() => {currentMilestoneId = milestone.id; currentTitle = `${milestoneTitle} ${i18n.tr.admin.newExpectedAge}: ${newExpectedAge}m`; showMilestoneExpectedAgeModal = true;}}>{i18n.tr.admin.viewData}</Button>
+                                onclick={() => {currentMilestone = milestone; currentTitle = `${milestoneTitle} ${i18n.tr.admin.newExpectedAge}: ${newExpectedAge}m ± ${newExpectedAgeDelta}m`; showMilestoneExpectedAgeModal = true;}}>{i18n.tr.admin.data}</Button>
                     </TableBodyRow>
                 {/each}
             {/each}
@@ -125,10 +131,10 @@ async function saveNewExpectedAges() {
     </Table>
 {/if}
 
-{#key currentMilestoneId}
+{#key currentMilestone}
     <Modal title={currentTitle} bind:open={showMilestoneExpectedAgeModal} size="lg" outsideclose>
-        {#if currentMilestoneId}
-            <PlotScoreAge scoreCollection={expectedAges?.[currentMilestoneId]}/>
+        {#if currentMilestone}
+            <PlotScoreAge scoreCollection={expectedAges?.[currentMilestone.id]} expected_age_months={expectedAges?.[currentMilestone.id]?.expected_age} expected_age_delta={expectedAges?.[currentMilestone.id]?.expected_age_delta}/>
         {/if}
     </Modal>
 {/key}
