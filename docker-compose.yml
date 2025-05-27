@@ -1,14 +1,18 @@
 services:
   backend:
     image: ghcr.io/ssciwr/mondey_backend:${MONDEY_DOCKER_IMAGE_TAG:-latest}
+    restart: always
     build: ./mondey_backend
     volumes:
       - ${STATIC_FILES_PATH:-./static}:/app/static
-      - ${DATABASE_PATH:-./db}:/app/db
       - ${PRIVATE_FILES_PATH:-./private}:/app/private
     environment:
       - SECRET=${SECRET:-}
-      - DATABASE_PATH=/app/db
+      - DATABASE_HOST_MONDEYDB=${DATABASE_HOST_MONDEYDB:-mondeydb}
+      - DATABASE_HOST_USERSDB=${DATABASE_HOST_USERSDB:-usersdb}
+      - DATABASE_USER=${DATABASE_USER:-postgres}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-}
+      - DATABASE_PORT=${DATABASE_PORT:-5432}
       - STATIC_FILES_PATH=/app/static
       - PRIVATE_FILES_PATH=/app/private
       - HOST=${HOST:-backend}
@@ -22,6 +26,10 @@ services:
       - STATS_CRONTAB=${STATS_CRONTAB:-0 3 * * mon}
       - DEEPL_API_KEY=${DEEPL_API_KEY:-}
       - MONDEY_HOST=${MONDEY_HOST:-mondey.lkeegan.dev}
+    depends_on:
+      - mondeydb
+      - usersdb
+      - email
     logging:
       driver: "local"
       options:
@@ -29,6 +37,7 @@ services:
         max-file: 25
   frontend:
     image: ghcr.io/ssciwr/mondey_frontend:${MONDEY_DOCKER_IMAGE_TAG:-latest}
+    restart: always
     build:
       context: ./frontend
       args:
@@ -46,6 +55,38 @@ services:
       options:
         max-size: 20m
         max-file: 25
+  mondeydb:
+    image: postgres:17-alpine
+    restart: always
+    shm_size: 128mb
+    volumes:
+      - ${POSTGRES_DATA_PATH_MONDEY:-./db/mondey}:/var/lib/postgresql/data
+      - ./db:/db
+    environment:
+      - POSTGRES_USER=${DATABASE_USER:-postgres}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-}
+      - POSTGRES_DB=mondey
+    logging:
+      driver: "local"
+      options:
+        max-size: 20m
+        max-file: 5
+  usersdb:
+    image: postgres:17-alpine
+    restart: always
+    shm_size: 128mb
+    volumes:
+      - ${POSTGRES_DATA_PATH_USER:-./db/users}:/var/lib/postgresql/data
+      - ./db:/db
+    environment:
+      - POSTGRES_USER=${DATABASE_USER:-postgres}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-}
+      - POSTGRES_DB=users
+    logging:
+      driver: "local"
+      options:
+        max-size: 20m
+        max-file: 5
   email:
     image: "boky/postfix"
     hostname: mail.mondey.lkeegan.dev

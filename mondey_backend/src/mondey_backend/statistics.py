@@ -229,13 +229,6 @@ def analyse_answer_session(
     count = 0
     for milestone_id, answer in milestone_answer_session.answers.items():
         if answer.answer < 0:
-            if milestone_answer_session.completed:
-                logger.warning(
-                    f"    - completed answer session {milestone_answer_session.id} missing score for milestone {milestone_id} - marking session as incomplete!"
-                )
-                milestone_answer_session.completed = False
-                session.commit()
-                session.refresh(milestone_answer_session)
             logger.debug(
                 f"    - no answer available for milestone {milestone_id} - skipping"
             )
@@ -266,6 +259,25 @@ def analyse_answer_session(
         analysis.rms = np.sqrt(diff / count)
     logger.debug(f"    rms {analysis.rms}")
     return analysis
+
+
+def flag_incomplete_answer_sessions(session: SessionDep):
+    """
+    Check for any answer sessions that are marked `completed` but have `-1` as an answer for any milestone,
+    and set `complete` to `False` for those sessions.
+    """
+    for milestone_answer_session in session.exec(
+        select(MilestoneAnswerSession).where(col(MilestoneAnswerSession.completed))
+    ).all():
+        for answer in milestone_answer_session.answers.values():
+            if answer.answer < 0:
+                logger.warning(
+                    f"Answer session {milestone_answer_session.id} was marked completed but has missing answers, marking as incomplete"
+                )
+                milestone_answer_session.completed = False
+                session.add(milestone_answer_session)
+                break
+        session.commit()
 
 
 def flag_suspicious_answer_sessions(
@@ -326,6 +338,8 @@ async def async_update_stats(
     logger.debug(
         f"Starting {'incremental' if incremental_update else 'full'} statistics update"
     )
+
+    flag_incomplete_answer_sessions(session)
 
     # We gather these first then exclude later so that we don't do a FK join on the user_id<->email for stale+filtering
     test_account_user_ids_to_exclude = await get_test_account_user_ids(user_session)

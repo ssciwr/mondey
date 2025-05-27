@@ -49,10 +49,17 @@ class QuestionPublic(SQLModel):
 
 class UserQuestionText(QuestionTextBase, table=True):
     user_question_id: int | None = Field(
-        default=None, foreign_key="userquestion.id", primary_key=True
+        default=None,
+        foreign_key="userquestion.id",
+        primary_key=True,
+        ondelete="CASCADE",
     )
     lang_id: str | None = fixed_length_string_field(
-        max_length=2, default=None, foreign_key="language.id", primary_key=True
+        max_length=2,
+        default=None,
+        foreign_key="language.id",
+        primary_key=True,
+        ondelete="CASCADE",
     )
 
 
@@ -78,10 +85,17 @@ class UserQuestionAdmin(QuestionAdmin):
 
 class ChildQuestionText(QuestionTextBase, table=True):
     child_question_id: int | None = Field(
-        default=None, foreign_key="childquestion.id", primary_key=True
+        default=None,
+        foreign_key="childquestion.id",
+        primary_key=True,
+        ondelete="CASCADE",
     )
     lang_id: str | None = fixed_length_string_field(
-        max_length=2, default=None, foreign_key="language.id", primary_key=True
+        max_length=2,
+        default=None,
+        foreign_key="language.id",
+        primary_key=True,
+        ondelete="CASCADE",
     )
 
 
@@ -115,7 +129,10 @@ class AnswerPublicBase(AnswerBase):
 class UserAnswer(AnswerBase, table=True):
     user_id: int = Field(default=None, primary_key=True)
     question_id: int = Field(
-        default=None, primary_key=True, foreign_key="userquestion.id"
+        default=None,
+        primary_key=True,
+        foreign_key="userquestion.id",
+        ondelete="CASCADE",
     )
     question: UserQuestion = back_populates("answers")
 
@@ -127,7 +144,10 @@ class UserAnswerPublic(AnswerPublicBase):
 class ChildAnswer(AnswerBase, table=True):
     child_id: int = Field(default=None, primary_key=True)
     question_id: int = Field(
-        default=None, primary_key=True, foreign_key="childquestion.id"
+        default=None,
+        primary_key=True,
+        foreign_key="childquestion.id",
+        ondelete="CASCADE",
     )
     question: ChildQuestion = back_populates("answers")
 

@@ -155,3 +155,18 @@ Some resources to check if all this worked:
 - https://easydmarc.com/tools/domain-scanner?domain=mondey.lkeegan.dev
 - https://mxtoolbox.com/SuperTool.aspx
 - https://www.mail-tester.com/spf-dkim-check
+
+
+#### sqlite to postgres migration
+
+Notes on the (one-off) process used to migrate the sqlite databases to postgres in production:
+
+- temporarily add `- ./db:/db` to the mondeydb and usersdb volumes in docker-compose.yml to mount the db folder
+- recreate the containers (this will also create the postgres databases and tables): `docker compose up -d --force-recreate`
+- ssh into the `mondeydb` docker container: `docker exec -it $(docker ps | grep mondeydb | awk '{print $1}') bash`
+- install pgloader: `apk update && apk add pgloader`
+- import the data from sqlite without modifying any tables: `pgloader --with "data only" sqlite:///db/mondey.db pgsql://postgres@127.0.0.1/mondey`
+- do the same for the usersdb container:
+  - `docker exec -it $(docker ps | grep usersdb | awk '{print $1}') bash`
+  - `apk update && apk add pgloader`
+  - `pgloader --with "data only" sqlite:///db/users.db pgsql://postgres@127.0.0.1/users`
