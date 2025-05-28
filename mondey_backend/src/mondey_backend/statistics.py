@@ -20,6 +20,7 @@ from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerAnalysis
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneAnswerSessionAnalysis
+from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.models.milestones import MilestoneGroupAgeScore
 from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
 from mondey_backend.models.milestones import SuspiciousState
@@ -321,6 +322,59 @@ def flag_suspicious_answer_sessions(
     session.commit()
 
 
+def create_age_score_collections_if_missing(session: SessionDep) -> None:
+    for milestone_id in session.exec(select(Milestone.id)).all():
+        if session.get(MilestoneAgeScoreCollection, milestone_id) is None:
+            collection = MilestoneAgeScoreCollection(
+                milestone_id=milestone_id, expected_age=12, expected_age_delta=6
+            )
+            session.add(collection)
+            for age in range(0, app_settings.MAX_CHILD_AGE_MONTHS + 1):
+                score = MilestoneAgeScore(
+                    age=age,
+                    milestone_id=milestone_id,
+                    n0=0,
+                    n1=0,
+                    n2=0,
+                    n3=0,
+                    avg_score=0.0,
+                    stddev_score=0.0,
+                )
+                session.add(score)
+    for milestone_group_id in session.exec(select(MilestoneGroup.id)).all():
+        if session.get(MilestoneGroupAgeScoreCollection, milestone_group_id) is None:
+            collection = MilestoneGroupAgeScoreCollection(
+                milestone_group_id=milestone_group_id,
+                expected_age=12,
+                expected_age_delta=6,
+            )
+            session.add(collection)
+            for age in range(0, app_settings.MAX_CHILD_AGE_MONTHS + 1):
+                score = MilestoneGroupAgeScore(
+                    age=age,
+                    milestone_group_id=milestone_group_id,
+                    n0=0,
+                    n1=0,
+                    n2=0,
+                    n3=0,
+                    avg_score=0.0,
+                    stddev_score=0.0,
+                )
+                session.add(score)
+    session.commit()
+
+
+def update_score(score: MilestoneAgeScore | MilestoneGroupAgeScore, answer: int):
+    if answer == 0:
+        score.n0 += 1
+    elif answer == 1:
+        score.n1 += 1
+    elif answer == 2:
+        score.n2 += 1
+    elif answer == 3:
+        score.n3 += 1
+
+
 async def async_update_stats(
     session: SessionDep,
     user_session: UserAsyncSessionDep,
@@ -346,13 +400,6 @@ async def async_update_stats(
     test_account_user_ids_to_exclude = await get_test_account_user_ids(user_session)
 
     flag_suspicious_answer_sessions(session, test_account_user_ids_to_exclude)
-
-    if not incremental_update:
-        # if doing a full update, initially set the included_in_statistics flag to false for all sessions
-        for answer_session in session.exec(select(MilestoneAnswerSession)).all():
-            answer_session.included_in_statistics = False
-            session.add(answer_session)
-        session.commit()
 
     # get MilestoneAnswerSessions to be used for calculating statistics
     # filter to keep only those that are not test accounts and are explicitly marked as not suspicious (either by system or admin)
@@ -386,59 +433,38 @@ async def async_update_stats(
     logger.debug(f"  - found {len(milestone_answer_sessions)} answer sessions")
     logger.debug(f"    {[m.id for m in milestone_answer_sessions]}")
 
-    # construct a list of MilestoneAnswers for each Milestone and MilestoneGroup
+    create_age_score_collections_if_missing(session)
+
+    # update answer counts for each Milestone and MilestoneGroup
+    logger.debug("  - updating answer counts...")
     milestones = session.exec(select(Milestone)).all()
-    milestone_answers: dict[int, list[MilestoneAnswer]] = defaultdict(list)
-    milestone_group_answers: dict[int, list[MilestoneAnswer]] = defaultdict(list)
     for milestone_answer_session in milestone_answer_sessions:
         for milestone in milestones:
+            age = child_ages[milestone_answer_session.id]  # type: ignore
             answer = milestone_answer_session.answers.get(milestone.id)  # type: ignore
             if answer is not None:
-                milestone_answers[milestone.id].append(answer)  # type: ignore
-                milestone_group_answers[milestone.group_id].append(answer)  # type: ignore
-                logger.debug(f"    - {answer}")
-            else:
-                # if a milestone is not included in the answer session, we still need a value when calculating
-                # the average and std dev of answers for the milestone group.
-                # We assume a full score if the child is older than the expected age for the milestone,
-                # and a zero score if child is younger.
-                imputed_answer = MilestoneAnswer(
-                    answer_session_id=milestone_answer_session.id,
-                    milestone_id=milestone.id,
-                    milestone_group_id=milestone.group_id,
-                    answer=3
-                    if milestone.expected_age_months
-                    < child_ages[milestone_answer_session.id]  # type: ignore
-                    else 0,
+                # if there is an answer for this milestone, update the count for the milestone age score
+                milestone_score = session.get(
+                    MilestoneAgeScore, {"milestone_id": milestone.id, "age": age}
                 )
-                milestone_group_answers[milestone.group_id].append(imputed_answer)  # type: ignore
-                logger.debug(f"    - {imputed_answer} [imputed]")
-    for gid, answers in milestone_group_answers.items():
-        logger.debug(f"    - group {gid}: {[a.answer for a in answers]}")
-
-    # update milestone statistics
-    logger.debug(f"  - updating {len(milestone_answers)} milestone statistics...")
-    for milestone_id, milestone_answer in milestone_answers.items():
-        calculate_milestone_statistics_by_age(
-            session, milestone_id, milestone_answer, child_ages, incremental_update
-        )
-
-    # update milestone group statistics
-    logger.debug(
-        f"  - updating {len(milestone_group_answers)} milestone group statistics..."
-    )
-    for milestone_group_id, milestone_group_answer in milestone_group_answers.items():
-        calculate_milestonegroup_statistics_by_age(
-            session,
-            milestone_group_id,
-            milestone_group_answer,
-            child_ages,
-            incremental_update,
-        )
-
-    for milestone_answer_session in milestone_answer_sessions:
+                update_score(milestone_score, answer.answer)
+            # even if a milestone is not included in the answer session, we still need a value when calculating
+            # the average and std dev of answers for the milestone group.
+            # We assume a full score if the child is older than the expected age for the milestone,
+            # and a zero score if child is younger.
+            answer_value = (
+                answer.answer
+                if answer is not None
+                else (3 if milestone.expected_age_months < age else 0)
+            )  # type: ignore
+            milestone_group_score = session.get(
+                MilestoneGroupAgeScore, {"milestone_group_id": milestone.id, "age": age}
+            )
+            update_score(milestone_group_score, answer_value)
         milestone_answer_session.included_in_statistics = True
-        session.add(milestone_answer_session)
+
+    logger.debug("  - recalculating avg/std_dev values...")
+    update_age_score_collections_avg_std_dev(session)
 
     session.commit()
     logger.debug("  - done")

@@ -258,8 +258,6 @@ class MilestoneAnswerSessionAnalysis(BaseModel):
     answers: list[MilestoneAnswerAnalysis]
 
 
-# models for statistics. README: Perhaps this could be made simpler if the data was stored in a database with array-column support. sqlite apparently doesnt have this: https://stackoverflow.com/questions/3005231/how-to-store-array-in-one-column-in-sqlite3, but postgres does: https://www.postgresql.org/docs/9.1/arrays.html
-# will be returned to later. Issue no. 119
 class MilestoneAgeScore(SQLModel, table=True):
     milestone_id: int | None = Field(
         default=None,
@@ -269,7 +267,10 @@ class MilestoneAgeScore(SQLModel, table=True):
     )
     age: int = Field(primary_key=True)
     collection: MilestoneAgeScoreCollection = back_populates("scores")
-    count: int
+    n0: int
+    n1: int
+    n2: int
+    n3: int
     avg_score: float
     stddev_score: float
 
@@ -281,11 +282,6 @@ class MilestoneAgeScoreCollection(SQLModel, table=True):
     expected_age: int
     expected_age_delta: int
     scores: Mapped[list[MilestoneAgeScore]] = back_populates("collection")
-    created_at: datetime.datetime = Field(
-        sa_column_kwargs={
-            "server_default": text("CURRENT_TIMESTAMP"),
-        }
-    )
 
 
 class MilestoneAgeScoreCollectionPublic(SQLModel):
@@ -304,7 +300,10 @@ class MilestoneGroupAgeScore(SQLModel, table=True):
         ondelete="CASCADE",
     )
     collection: MilestoneGroupAgeScoreCollection = back_populates("scores")
-    count: int
+    n0: int
+    n1: int
+    n2: int
+    n3: int
     avg_score: float
     stddev_score: float
 
