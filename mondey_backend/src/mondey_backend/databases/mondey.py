@@ -7,7 +7,6 @@ from sqlmodel import SQLModel
 from sqlmodel import create_engine
 from sqlmodel import select
 
-from ..models.children import ChildMilestoneExpectedAgeRange
 from ..models.milestones import Language
 from ..settings import app_settings
 
@@ -31,15 +30,4 @@ def create_mondey_db_and_tables():
         if session.exec(select(Language)).first() is None:
             session.add(Language(id="de"))
             session.add(Language(id="en"))
-        # add default child age ranges for milestones if not present:
-        for age in range(0, app_settings.MAX_CHILD_AGE_MONTHS + 1):
-            if session.get(ChildMilestoneExpectedAgeRange, age) is None:
-                delta_months = 6
-                session.add(
-                    ChildMilestoneExpectedAgeRange(
-                        child_age=age,
-                        min_expected_age=age - delta_months,
-                        max_expected_age=age + delta_months,
-                    )
-                )
         session.commit()

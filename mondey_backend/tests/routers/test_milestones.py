@@ -20,10 +20,14 @@ def test_get_milestone_groups_child1(
     response = user_client.get("/milestone-groups/1")
     assert response.status_code == 200
     assert len(response.json()) == 2
-    # child 1 age is ~9 months old, so no milestones from group2
+    # milestones have expected age 6*id +/- 2*(id+1):
+    # 6 +/- 4
+    # 12 +/- 6
+    # 18 +/- 8
+    # ...
+    # child 1 age is 9 months old, so get last 2 milestones with ids 2 & 1 from group 1, none from group 2
     milestone_group2["milestones"] = []
-    # and only last two milestones (6m, 12m) from group1:
-    milestone_group1["milestones"] = milestone_group1["milestones"][1:]
+    milestone_group1["milestones"] = milestone_group1["milestones"][-2:]
     assert response.json() == [milestone_group2, milestone_group1]
 
 
@@ -33,11 +37,10 @@ def test_get_milestone_groups_child2(
     response = user_client.get("/milestone-groups/2")
     assert response.status_code == 200
     assert len(response.json()) == 2
-    # child 2 age is 20 months old, so first milestone from group1 (18m):
+    # child 2 age is 20 months old, so only milestone 3 from group1 (18 +/- 8)
     milestone_group1["milestones"] = milestone_group1["milestones"][0:1]
 
-    # and first milestone from group2 (24m):
-    milestone_group2["milestones"] = milestone_group2["milestones"][0:1]
+    # and both milestones from group2 (24 +/- 10, 30 +/- 12):
     assert response.json() == [milestone_group2, milestone_group1]
 
 
@@ -47,6 +50,7 @@ def test_get_milestone_groups_child3(
     response = admin_client.get("/milestone-groups/3")
     assert response.status_code == 200
     assert len(response.json()) == 2
+    # child 3 has a current answersession defined in conftest with one milestone in it:
     milestone_group1["milestones"] = []
     milestone_group2["milestones"] = milestone_group2["milestones"][1:]
 

@@ -66,12 +66,6 @@ export type ChildCreate = {
     color?: string | null;
 };
 
-export type ChildMilestoneExpectedAgeRangeAdmin = {
-    child_age: number;
-    min_expected_age: number;
-    max_expected_age: number;
-};
-
 export type ChildPublic = {
     name?: string;
     birth_year: number;
@@ -164,6 +158,7 @@ export type MilestoneAdmin = {
     group_id: number;
     order: number;
     expected_age_months: number;
+    expected_age_delta: number;
     text: {
         [key: string]: MilestoneText;
     };
@@ -182,6 +177,7 @@ export type MilestoneAgeScore = {
 export type MilestoneAgeScoreCollectionPublic = {
     milestone_id: number;
     expected_age: number;
+    expected_age_delta: number;
     scores: Array<MilestoneAgeScore>;
 };
 
@@ -268,7 +264,6 @@ export type MilestoneImagePublic = {
 
 export type MilestonePublic = {
     id: number;
-    expected_age_months: number;
     text: {
         [key: string]: MilestoneTextPublic;
     };
@@ -1124,45 +1119,6 @@ export type GetMilestoneAnswerSessionAnalysisResponses = {
 };
 
 export type GetMilestoneAnswerSessionAnalysisResponse = GetMilestoneAnswerSessionAnalysisResponses[keyof GetMilestoneAnswerSessionAnalysisResponses];
-
-export type GetChildMilestoneExpectedAgeRangesData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/admin/child-milestone-expected-age-ranges/';
-};
-
-export type GetChildMilestoneExpectedAgeRangesResponses = {
-    /**
-     * Successful Response
-     */
-    200: Array<ChildMilestoneExpectedAgeRangeAdmin>;
-};
-
-export type GetChildMilestoneExpectedAgeRangesResponse = GetChildMilestoneExpectedAgeRangesResponses[keyof GetChildMilestoneExpectedAgeRangesResponses];
-
-export type PostChildMilestoneExpectedAgeRangesData = {
-    body: Array<ChildMilestoneExpectedAgeRangeAdmin>;
-    path?: never;
-    query?: never;
-    url: '/admin/child-milestone-expected-age-ranges/';
-};
-
-export type PostChildMilestoneExpectedAgeRangesErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type PostChildMilestoneExpectedAgeRangesError = PostChildMilestoneExpectedAgeRangesErrors[keyof PostChildMilestoneExpectedAgeRangesErrors];
-
-export type PostChildMilestoneExpectedAgeRangesResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
 
 export type GetUserQuestionsAdminData = {
     body?: never;

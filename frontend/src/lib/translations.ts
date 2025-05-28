@@ -146,6 +146,7 @@ export const translationIds = {
 			"Effektivwert-Differenz zum Durchschnittspunktzahl",
 		analyze: "analysieren",
 		milestoneAnswerSession: "Meilenstein-Antwortsitzung",
+		ageRange: "Meilenstein-Altersspanne",
 		expectedAge: "Voraussichtliches Alter",
 		milestoneChildAgeRanges: "Meilenstein-Kinderaltersspanne",
 		monthsForChildrenAged: "Monate für Kinder im Alter",

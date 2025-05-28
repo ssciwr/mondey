@@ -6,19 +6,18 @@ import type {
 	MilestoneAgeScoreCollectionPublic,
 } from "$lib/client/types.gen";
 import { i18n } from "$lib/i18n.svelte";
-import {
-	Axis,
-	CurveType,
-	Line,
-	Scale,
-	StackedBar,
-	XYContainer,
-} from "@unovis/ts";
+import { Axis, Scale, StackedBar, XYContainer, colors } from "@unovis/ts";
 import { onMount } from "svelte";
 
 let {
-	scoreCollection = null,
-}: { scoreCollection: MilestoneAgeScoreCollectionPublic | null } = $props();
+	scoreCollection,
+	expected_age_months,
+	expected_age_delta,
+}: {
+	scoreCollection: MilestoneAgeScoreCollectionPublic | null;
+	expected_age_months: number;
+	expected_age_delta: number;
+} = $props();
 let container: HTMLDivElement;
 
 onMount(() => {
@@ -32,15 +31,15 @@ onMount(() => {
 						y: (d: MilestoneAgeScore) => d.avg_score,
 						barMinHeight1Px: true,
 						barPadding: 0.0,
-					}),
-					new Line<MilestoneAgeScore>({
-						x: (d: MilestoneAgeScore) => d.age,
-						y: (d: MilestoneAgeScore) =>
-							d.age >= scoreCollection.expected_age ? 3.0 : 0.0,
-						lineWidth: 3,
-						curveType: CurveType.Step,
-						lineDashArray: [5],
-						color: "#000000",
+						color: (d: MilestoneAgeScore) => {
+							if (Math.abs(d.age - expected_age_months) >= expected_age_delta) {
+								return "#aaaaaa";
+							}
+							if (d.age === expected_age_months) {
+								return colors[5];
+							}
+							return colors[0];
+						},
 					}),
 				],
 				xAxis: new Axis<MilestoneAgeScore>({
