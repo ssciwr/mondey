@@ -5,10 +5,9 @@ from sqlmodel import Field
 from sqlmodel import SQLModel
 
 from .utils import back_populates
-
-# Different format to dict-relationship
 from .utils import dict_relationship
 from .utils import fixed_length_string_field
+from .utils import list_relationship
 
 
 # user questions
@@ -66,9 +65,7 @@ class UserQuestionText(QuestionTextBase, table=True):
 class UserQuestion(Question, table=True):
     id: int | None = Field(default=None, primary_key=True)
     text: Mapped[dict[str, UserQuestionText]] = dict_relationship(key="lang_id")
-    answers: Mapped[list[UserAnswer]] = back_populates(
-        "question", cascade="all, delete-orphan"
-    )
+    answers: Mapped[list[UserAnswer]] = list_relationship("question")
     name: str = ""
 
 
@@ -102,9 +99,7 @@ class ChildQuestionText(QuestionTextBase, table=True):
 class ChildQuestion(Question, table=True):
     id: int | None = Field(default=None, primary_key=True)
     text: Mapped[dict[str, ChildQuestionText]] = dict_relationship(key="lang_id")
-    answers: Mapped[list[ChildAnswer]] = back_populates(
-        "question", cascade="all, delete-orphan"
-    )
+    answers: Mapped[list[ChildAnswer]] = list_relationship("question")
     name: str = ""
 
 
@@ -116,7 +111,7 @@ class ChildQuestionAdmin(QuestionAdmin):
     text: dict[str, ChildQuestionText] = {}
 
 
-# Answers to user questions. Internal model and 'public' model exposed to the forntend app
+# Answers to user questions. Internal model and 'public' model exposed to the frontend app
 class AnswerBase(SQLModel):
     answer: str
     additional_answer: str | None
