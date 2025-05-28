@@ -409,6 +409,8 @@ export const translationIds = {
 		imprint: "Presse und Medien",
 		privacy: "Datenschutzerklärung",
 		bottom: "Psychologisches Institut Heidelberg",
+		website: "Webseite",
+		developedByThe: "entwickelt vom",
 	},
 	frontpageAccordion: {
 		heading1: "Wie funktioniert MONDEY?",

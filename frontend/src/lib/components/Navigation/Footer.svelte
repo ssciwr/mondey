@@ -47,8 +47,12 @@ import { FacebookSolid, InstagramSolid } from "flowbite-svelte-icons";
     <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
     <div class="sm:flex sm:items-center sm:justify-between">
       <div class="flex mt-4 space-x-6 rtl:space-x-reverse sm:mt-0">
-        <span class="block text-xs text-zinc-400 sm:text-center dark:text-gray-400">© 2025 <a href="/" class="hover:underline">{i18n.tr.footer.bottom}</a>
-      </span>
+        <span class="block text-xs text-zinc-400 sm:text-center dark:text-gray-400">
+          © 2025 <a href="/" class="hover:underline">{i18n.tr.footer.bottom}</a>
+        </span>
+        <span class="block text-xs text-zinc-400 sm:text-center dark:text-gray-400">
+          <a href="https://github.com/ssciwr/mondey" class="hover:underline">{i18n.tr.footer.website}</a> {i18n.tr.footer.developedByThe} <a href="https://ssc.uni-heidelberg.de" class="hover:underline">Scientific Software Center, Heidelberg University</a>
+        </span>
         <FooterIcon href="/">
           <FacebookSolid class="w-5 h-5 text-white dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white" />
         </FooterIcon>
