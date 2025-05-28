@@ -85,7 +85,7 @@ function selectTab(index: number) {
                     <div class="flex items-center gap-3">
                         <div class="flex-shrink-0 {iconBgClass}">
                             {#if emoji}
-                                <span class="text-2xl emoji-gray">{emoji}</span>
+                                <span class="text-2xl emoji-solid-gray">{emoji}</span>
                             {:else}
                                 <svelte:component this={icon} size="md" color={iconColor} />
                             {/if}
@@ -117,6 +117,12 @@ function selectTab(index: number) {
 <style>
     .emoji-gray {
         filter: grayscale(100%);
+        opacity:0.8;
+        font-size:1em;
+    }
+    .emoji-solid-gray {
+        color: transparent;
+        text-shadow: 0 0 0 rgb(145,145,155);
         opacity:0.8;
         font-size:1em;
     }
