@@ -170,3 +170,12 @@ Notes on the (one-off) process used to migrate the sqlite databases to postgres 
   - `docker exec -it $(docker ps | grep usersdb | awk '{print $1}') bash`
   - `apk update && apk add pgloader`
   - `pgloader --with "data only" sqlite:///db/users.db pgsql://postgres@127.0.0.1/users`
+
+#### Modifying the database
+
+To modify the database, you can connect to the running postgres database in the `mondeydb` container and then enter an SQL command:
+
+```
+docker exec -it $(docker ps | grep mondeydb-1 | awk '{print $1}') bash
+psql -U postgres -d mondey
+```
