@@ -20,6 +20,7 @@ from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerAnalysis
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneAnswerSessionAnalysis
+from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.models.milestones import MilestoneGroupAgeScore
 from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
 from mondey_backend.models.milestones import SuspiciousState
@@ -33,174 +34,6 @@ from mondey_backend.routers.utils import get_child_age_in_months
 from mondey_backend.routers.utils import get_expected_age_delta
 from mondey_backend.routers.utils import get_expected_age_from_scores
 from mondey_backend.settings import app_settings
-
-
-# see: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
-# reason for not using existing package: bessel correction usually not respected
-# we are using Welford's method here. This necessitates recording the count.
-def _add_sample(
-    count: int,
-    mean: float,
-    m2: float,
-    new_value: float,
-) -> tuple[int, float, float]:
-    """
-    Add a sample to the current statistics.
-    This function uses an online algorithm to compute the mean (directly) and an intermediate for the variance.
-    This uses Welford's method with a slight modification to avoid numerical instability.
-    See https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
-
-    Parameters
-    ----------
-    count : int
-        number of samples added so far.
-    mean : float
-        current mean of the samples.
-    m2 : float
-        intermediate value for the variance computation.
-    new_value : float
-        new sample to be added to the statistics.
-
-    Returns
-    -------
-    tuple[int, float, float]
-        updated count, mean, and m2 values.
-    """
-    count += 1
-    delta = new_value - mean
-    mean += delta / count
-    delta2 = new_value - mean
-    m2 += delta * delta2
-    return count, mean, m2
-
-
-def _finalize_statistics(
-    count: int | np.ndarray,
-    mean: float | np.ndarray,
-    m2: float | np.ndarray,
-    min_num_samples: int = 2,
-) -> tuple[int | np.ndarray, float | np.ndarray, float | np.ndarray]:
-    """
-    Compute the mean and standard deviation from the intermediate values.
-    This function is used to finalize the statistics after a batch of new samples have been added.
-    If arrays are supplied, they all need to have the same shape.
-    Values for the standard deviation for which the count is less than min_num_samples are set to -1.
-
-    Parameters
-    ----------
-    count : int | np.ndarray
-        Current counts of samples. If ndarray, it contains the number of samples for each entry.
-    mean : float | np.ndarray
-        Current mean value of the samples. If ndarray, it contains the mean for each entry.
-    m2 : float | np.ndarray
-        Current intermediate value for variance computation. If ndarray, it contains the intermediate value for each entry.
-    min_num_samples: int
-        Minumum number of samples required to compute a valid standard deviation.
-
-    Returns
-    -------
-    tuple[int | np.ndarray, float | np.ndarray, float | np.ndarray]
-        updated count, mean, and standard deviation values.
-
-    Raises
-    ------
-    ValueError
-        If arguments of incompatible types are given
-
-    ValueError
-        If arrays have different shapes.
-    """
-    if all(isinstance(x, float | int) for x in [count, mean, m2]):
-        if count < min_num_samples:
-            return count, mean, -1.0
-        else:
-            var = m2 / (count - 1)
-            return count, mean, np.sqrt(var)
-    elif (
-        isinstance(count, np.ndarray)
-        and isinstance(mean, np.ndarray)
-        and isinstance(m2, np.ndarray)
-    ):
-        if count.shape != m2.shape or mean.shape != m2.shape:
-            raise ValueError(
-                "Given arrays for statistics computation must have the same shape."
-            )
-
-        with np.errstate(invalid="ignore"):
-            valid_counts = count >= 2
-            variance = m2
-            variance[valid_counts] /= count[valid_counts] - 1
-            variance[np.invert(valid_counts)] = 0.0
-            return (
-                count,
-                np.nan_to_num(mean),
-                np.nan_to_num(np.sqrt(variance)),
-            )  # get stddev
-    else:
-        raise ValueError(
-            "Given values for statistics computation must be of type int|float|np.ndarray"
-        )
-
-
-def _get_statistics_by_age(
-    answers: Sequence[MilestoneAnswer],
-    child_ages: dict[int, int],
-    count: np.ndarray | None = None,
-    avg: np.ndarray | None = None,
-    stddev: np.ndarray | None = None,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Calculate mean and variance for a set of answers by age in months. Makes use of an online
-    algorithm for variance and mean calculation that updates preexisting statistics with the
-    values provided in the answers.
-
-    Parameters
-    ----------
-    answers : Sequence[MilestoneAnswer]
-        Answers to include in the statistics.
-    child_ages : dict[int, int]
-        Dictionary of answer_session_id -> age in months.
-    count : np.ndarray | None, optional
-        Number of elements from which the current statistics is built, by default None.
-        Will be initialized as a zero array if None.
-    avg : np.ndarray | None, optional
-        Current mean values per age, by default None.
-        Will be initialized as a zero array if None.
-    stddev : np.ndarray | None, optional
-        Current standard deviation values per age, by default None.
-        Will be initialized as a zero array if None.
-    Returns
-    -------
-    tuple[np.ndarray, np.ndarray, np.ndarray]
-        Updated count, avg and stddev arrays, where the index in the array corresponds to the child age in months.
-    """
-
-    if count is None or avg is None or stddev is None:
-        max_age_months = app_settings.MAX_CHILD_AGE_MONTHS
-        count = np.zeros(max_age_months + 1, dtype=np.int32)
-        avg = np.zeros(max_age_months + 1, dtype=np.float64)
-        stddev = np.zeros(max_age_months + 1, dtype=np.float64)
-
-    if child_ages == {}:
-        return count, avg, stddev
-
-    # online algorithm computes variance, compute m2 from stddev
-    # we can ignore count-1 <= 0 because stddev is zero in this case
-    m2 = np.pow(stddev, 2) * (count - 1)
-
-    for answer in answers:
-        age = child_ages[answer.answer_session_id]  # type: ignore
-        if 0 <= age < len(count):
-            new_count, new_avg, new_m2 = _add_sample(
-                count[age], avg[age], m2[age], answer.answer
-            )
-            count[age] = new_count
-            avg[age] = new_avg
-            m2[age] = new_m2
-
-    count, avg, stddev = _finalize_statistics(count, avg, m2)
-
-    return count, avg, stddev
 
 
 async def get_test_account_user_ids(user_session: UserAsyncSessionDep) -> list[int]:
@@ -321,6 +154,96 @@ def flag_suspicious_answer_sessions(
     session.commit()
 
 
+def create_age_score_collections_if_missing(session: SessionDep) -> None:
+    for milestone_id in session.exec(select(Milestone.id)).all():
+        if session.get(MilestoneAgeScoreCollection, milestone_id) is None:
+            collection = MilestoneAgeScoreCollection(
+                milestone_id=milestone_id, expected_age=12, expected_age_delta=6
+            )
+            session.add(collection)
+            for age in range(0, app_settings.MAX_CHILD_AGE_MONTHS + 1):
+                score = MilestoneAgeScore(
+                    age=age,
+                    milestone_id=milestone_id,
+                    n0=0,
+                    n1=0,
+                    n2=0,
+                    n3=0,
+                    avg_score=0.0,
+                    stddev_score=0.0,
+                )
+                session.add(score)
+    for milestone_group_id in session.exec(select(MilestoneGroup.id)).all():
+        if session.get(MilestoneGroupAgeScoreCollection, milestone_group_id) is None:
+            collection = MilestoneGroupAgeScoreCollection(
+                milestone_group_id=milestone_group_id,
+                expected_age=12,
+                expected_age_delta=6,
+            )
+            session.add(collection)
+            for age in range(0, app_settings.MAX_CHILD_AGE_MONTHS + 1):
+                score = MilestoneGroupAgeScore(
+                    age=age,
+                    milestone_group_id=milestone_group_id,
+                    n0=0,
+                    n1=0,
+                    n2=0,
+                    n3=0,
+                    avg_score=0.0,
+                    stddev_score=0.0,
+                )
+                session.add(score)
+    session.commit()
+
+
+def update_score(score: MilestoneAgeScore | MilestoneGroupAgeScore, answer: int):
+    if answer == 0:
+        score.n0 += 1
+    elif answer == 1:
+        score.n1 += 1
+    elif answer == 2:
+        score.n2 += 1
+    elif answer == 3:
+        score.n3 += 1
+
+
+def update_age_score_collection_avg_std_dev(
+    score_collection: MilestoneAgeScoreCollection | MilestoneGroupAgeScoreCollection,
+):
+    """
+    Update the average and standard deviation of each score in the given score collection from the counts of each answer.
+
+    $N = n_0+n_1+n_2+n_3$
+    $\langle X \rangle = (n_1 + 2n_2 + 3n_3)/N$
+    $\langle X^2 \rangle = (n_1 + 4 n_2 + 9n_3)/N$
+    $\sigma^2 = \langle X^2 \rangle - \langle X \rangle^2$
+    """
+    minimum_number_of_samples = 2
+    for score in score_collection.scores:
+        count = score.n0 + score.n1 + score.n2 + score.n3
+        if count == 0:
+            score.avg_score = 0.0
+            score.stddev_score = 0.0
+        else:
+            score.avg_score = (score.n1 + 2 * score.n2 + 3 * score.n3) / count
+            if count < minimum_number_of_samples:
+                score.stddev_score = -1.0
+            else:
+                score.stddev_score = np.sqrt(
+                    (score.n1 + 4 * score.n2 + 9 * score.n3) / count
+                    - np.pow(score.avg_score, 2)
+                )
+
+
+def update_age_score_collections_avg_std_dev(session: SessionDep):
+    for score_collection in session.exec(select(MilestoneAgeScoreCollection)).all():
+        update_age_score_collection_avg_std_dev(score_collection)
+    for group_score_collection in session.exec(
+        select(MilestoneGroupAgeScoreCollection)
+    ).all():
+        update_age_score_collection_avg_std_dev(group_score_collection)
+
+
 async def async_update_stats(
     session: SessionDep,
     user_session: UserAsyncSessionDep,
@@ -346,13 +269,6 @@ async def async_update_stats(
     test_account_user_ids_to_exclude = await get_test_account_user_ids(user_session)
 
     flag_suspicious_answer_sessions(session, test_account_user_ids_to_exclude)
-
-    if not incremental_update:
-        # if doing a full update, initially set the included_in_statistics flag to false for all sessions
-        for answer_session in session.exec(select(MilestoneAnswerSession)).all():
-            answer_session.included_in_statistics = False
-            session.add(answer_session)
-        session.commit()
 
     # get MilestoneAnswerSessions to be used for calculating statistics
     # filter to keep only those that are not test accounts and are explicitly marked as not suspicious (either by system or admin)
@@ -386,59 +302,38 @@ async def async_update_stats(
     logger.debug(f"  - found {len(milestone_answer_sessions)} answer sessions")
     logger.debug(f"    {[m.id for m in milestone_answer_sessions]}")
 
-    # construct a list of MilestoneAnswers for each Milestone and MilestoneGroup
+    create_age_score_collections_if_missing(session)
+
+    # update answer counts for each Milestone and MilestoneGroup
+    logger.debug("  - updating answer counts...")
     milestones = session.exec(select(Milestone)).all()
-    milestone_answers: dict[int, list[MilestoneAnswer]] = defaultdict(list)
-    milestone_group_answers: dict[int, list[MilestoneAnswer]] = defaultdict(list)
     for milestone_answer_session in milestone_answer_sessions:
         for milestone in milestones:
+            age = child_ages[milestone_answer_session.id]  # type: ignore
             answer = milestone_answer_session.answers.get(milestone.id)  # type: ignore
             if answer is not None:
-                milestone_answers[milestone.id].append(answer)  # type: ignore
-                milestone_group_answers[milestone.group_id].append(answer)  # type: ignore
-                logger.debug(f"    - {answer}")
-            else:
-                # if a milestone is not included in the answer session, we still need a value when calculating
-                # the average and std dev of answers for the milestone group.
-                # We assume a full score if the child is older than the expected age for the milestone,
-                # and a zero score if child is younger.
-                imputed_answer = MilestoneAnswer(
-                    answer_session_id=milestone_answer_session.id,
-                    milestone_id=milestone.id,
-                    milestone_group_id=milestone.group_id,
-                    answer=3
-                    if milestone.expected_age_months
-                    < child_ages[milestone_answer_session.id]  # type: ignore
-                    else 0,
+                # if there is an answer for this milestone, update the count for the milestone age score
+                milestone_score = session.get(
+                    MilestoneAgeScore, {"milestone_id": milestone.id, "age": age}
                 )
-                milestone_group_answers[milestone.group_id].append(imputed_answer)  # type: ignore
-                logger.debug(f"    - {imputed_answer} [imputed]")
-    for gid, answers in milestone_group_answers.items():
-        logger.debug(f"    - group {gid}: {[a.answer for a in answers]}")
-
-    # update milestone statistics
-    logger.debug(f"  - updating {len(milestone_answers)} milestone statistics...")
-    for milestone_id, milestone_answer in milestone_answers.items():
-        calculate_milestone_statistics_by_age(
-            session, milestone_id, milestone_answer, child_ages, incremental_update
-        )
-
-    # update milestone group statistics
-    logger.debug(
-        f"  - updating {len(milestone_group_answers)} milestone group statistics..."
-    )
-    for milestone_group_id, milestone_group_answer in milestone_group_answers.items():
-        calculate_milestonegroup_statistics_by_age(
-            session,
-            milestone_group_id,
-            milestone_group_answer,
-            child_ages,
-            incremental_update,
-        )
-
-    for milestone_answer_session in milestone_answer_sessions:
+                update_score(milestone_score, answer.answer)
+            # even if a milestone is not included in the answer session, we still need a value when calculating
+            # the average and std dev of answers for the milestone group.
+            # We assume a full score if the child is older than the expected age for the milestone,
+            # and a zero score if child is younger.
+            answer_value = (
+                answer.answer
+                if answer is not None
+                else (3 if milestone.expected_age_months < age else 0)
+            )  # type: ignore
+            milestone_group_score = session.get(
+                MilestoneGroupAgeScore, {"milestone_group_id": milestone.id, "age": age}
+            )
+            update_score(milestone_group_score, answer_value)
         milestone_answer_session.included_in_statistics = True
-        session.add(milestone_answer_session)
+
+    logger.debug("  - recalculating avg/std_dev values...")
+    update_age_score_collections_avg_std_dev(session)
 
     session.commit()
     logger.debug("  - done")
@@ -504,15 +399,6 @@ def calculate_milestone_statistics_by_age(
         return
 
     collection = session.get(MilestoneAgeScoreCollection, milestone_id)
-
-    # initialize avg and stddev scores with any existing statistics if doing an incremental update
-    count, avg_scores, stddev_scores = _extract_stats(
-        collection if incremental_update else None
-    )
-
-    count, avg_scores, stddev_scores = _get_statistics_by_age(
-        answers, child_ages, count=count, avg=avg_scores, stddev=stddev_scores
-    )
 
     expected_age = get_expected_age_from_scores(avg_scores, count)
 

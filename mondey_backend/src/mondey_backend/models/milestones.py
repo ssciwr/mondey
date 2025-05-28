@@ -265,7 +265,10 @@ class MilestoneAgeScore(SQLModel, table=True):
     )
     age: int = Field(primary_key=True)
     collection: MilestoneAgeScoreCollection = back_populates("scores")
-    count: int
+    n0: int
+    n1: int
+    n2: int
+    n3: int
     avg_score: float
     stddev_score: float
 
@@ -277,11 +280,6 @@ class MilestoneAgeScoreCollection(SQLModel, table=True):
     expected_age: int
     expected_age_delta: int
     scores: Mapped[list[MilestoneAgeScore]] = list_relationship("collection")
-    created_at: datetime.datetime = Field(
-        sa_column_kwargs={
-            "server_default": text("CURRENT_TIMESTAMP"),
-        }
-    )
 
 
 class MilestoneAgeScoreCollectionPublic(SQLModel):
@@ -300,7 +298,10 @@ class MilestoneGroupAgeScore(SQLModel, table=True):
         ondelete="CASCADE",
     )
     collection: MilestoneGroupAgeScoreCollection = back_populates("scores")
-    count: int
+    n0: int
+    n1: int
+    n2: int
+    n3: int
     avg_score: float
     stddev_score: float
 
