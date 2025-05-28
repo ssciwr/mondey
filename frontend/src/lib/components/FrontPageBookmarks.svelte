@@ -26,7 +26,6 @@ const bookmarks = [
 		titleKey: i18n.tr.frontpageBookmarks.headingMotor,
 		contentKey: i18n.tr.frontpageBookmarks.summaryMotor,
 		icon: RocketOutline,
-		useEmoji: true, // Special flag for gross motor
 		emoji: "🏃",
 		...styleTemplate,
 	},
@@ -77,7 +76,7 @@ function selectTab(index: number) {
 
 <div class="w-full px-4 mx-auto">
     <div class="max-w-2xl mx-auto space-y-2">
-        {#each bookmarks as { titleKey, contentKey, icon, useEmoji, emoji, buttonClass, activeButtonClass, contentClass, iconBgClass, iconColor }, index}
+        {#each bookmarks as { titleKey, contentKey, icon, emoji, buttonClass, activeButtonClass, contentClass, iconBgClass, iconColor }, index}
             <div class="w-full">
                 <button
                         class={activeIndex === index ? activeButtonClass : buttonClass}
@@ -85,7 +84,7 @@ function selectTab(index: number) {
                 >
                     <div class="flex items-center gap-3">
                         <div class="flex-shrink-0 {iconBgClass}">
-                            {#if useEmoji}
+                            {#if emoji}
                                 <span class="text-2xl emoji-gray">{emoji}</span>
                             {:else}
                                 <svelte:component this={icon} size="md" color={iconColor} />
