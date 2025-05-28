@@ -447,8 +447,11 @@ def test_update_milestone_answer_no_current_answer_session(
     # check that we get a new answer session
     new_answer_session = user_client.get("/users/milestone-answers/2").json()
     assert new_answer_session["id"] == 101
+    # answers are initially set to -1
     assert new_answer_session["answers"]["3"]["answer"] == -1
     assert new_answer_session["answers"]["4"]["answer"] == -1
+    # except if that milestone was previously answered with a 3, in which case it is set to 3:
+    assert new_answer_session["answers"]["5"]["answer"] == 3
 
 
 def test_update_milestone_answer_update_existing_answer(user_client: TestClient):

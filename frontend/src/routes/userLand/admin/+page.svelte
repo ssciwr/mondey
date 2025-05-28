@@ -15,7 +15,6 @@ import { alertStore } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { TabItem, Tabs } from "flowbite-svelte";
 import {
-	AdjustmentsHorizontalOutline,
 	BadgeCheckOutline,
 	ClipboardListOutline,
 	DatabaseOutline,

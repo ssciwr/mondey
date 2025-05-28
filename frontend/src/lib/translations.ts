@@ -95,6 +95,7 @@ export const translationIds = {
 		milestonePlaceholder: "Nach enthaltenem Meilenstein durchsuchen",
 		complete: "fertig",
 		incomplete: "unfertig",
+		showIncompleteOnly: "nur unvollständige anzeigen",
 	},
 	admin: {
 		close: "Schließen",
