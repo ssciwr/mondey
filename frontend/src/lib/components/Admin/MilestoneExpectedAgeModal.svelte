@@ -23,7 +23,7 @@ let scoreCollection = $state(null as MilestoneAgeScoreCollectionPublic | null);
 let expected_age_months = $state(0);
 let expected_age_delta = $state(0);
 
-async function updateAnswerData() {
+async function getScores() {
 	if (!milestone?.id) {
 		return;
 	}
@@ -42,10 +42,10 @@ onMount(async () => {
 		expected_age_months = milestone.expected_age_months;
 		expected_age_delta = milestone.expected_age_delta;
 	}
-	await updateAnswerData();
+	await getScores();
 });
 
-function saveChanges() {
+function applyChangesToMilestone() {
 	open = false;
 	if (milestone) {
 		milestone.expected_age_months = expected_age_months;
@@ -71,7 +71,7 @@ function saveChanges() {
 		{/key}
 	{/if}
 	<svelte:fragment slot="footer">
-		<SaveButton onclick={saveChanges}/>
+		<SaveButton onclick={applyChangesToMilestone}/>
 		<CancelButton onclick={() => {open = false;}}/>
 	</svelte:fragment>
 </Modal>
