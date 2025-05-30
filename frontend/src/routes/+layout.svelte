@@ -89,9 +89,9 @@ function toggleDrawer() {
 		{#if false === isUserLand}
 			<NavHamburger />
 			<NavUl ulClass="flex flex-col md:flex-row md:space-x-6 md:justify-right items-center">
-				<NavLi class="hover:cursor-pointer" href={base}>{i18n.tr.misc.latest}</NavLi>
-				<NavLi class="hover:cursor-pointer" href={base}>{i18n.tr.misc.downloads}</NavLi>
-				<NavLi class="hover:cursor-pointer" href={base}>{i18n.tr.misc.contact}</NavLi>
+				<NavLi class="hover:cursor-pointer" href="/static/aktuelles">{i18n.tr.misc.latest}</NavLi>
+				<NavLi class="hover:cursor-pointer" href="/static/downloads">{i18n.tr.misc.downloads}</NavLi>
+				<NavLi class="hover:cursor-pointer" href="/static/kontakt">{i18n.tr.misc.contact}</NavLi>
 
 				<DarkModeChooser />
 				{#if user.data === null}
@@ -141,17 +141,17 @@ function toggleDrawer() {
 				<SidebarWrapper>
 					<SidebarGroup class="mt-10">
 						<!-- Navigation Items -->
-						<SidebarItem label={i18n.tr.misc.latest} href={base}>
+						<SidebarItem label={i18n.tr.misc.latest} href="/static/aktuelles">
 							<svelte:fragment slot="icon">
 								<BarsOutline size="lg" />
 							</svelte:fragment>
 						</SidebarItem>
-						<SidebarItem label={i18n.tr.misc.downloads} href={base}>
+						<SidebarItem label={i18n.tr.misc.downloads} href="/static/downloads">
 							<svelte:fragment slot="icon">
 								<BarsOutline size="lg" />
 							</svelte:fragment>
 						</SidebarItem>
-						<SidebarItem label={i18n.tr.misc.contact} href={base}>
+						<SidebarItem label={i18n.tr.misc.contact} href="/static/kontakt">
 							<svelte:fragment slot="icon">
 								<BarsOutline size="lg" />
 							</svelte:fragment>
@@ -192,7 +192,7 @@ function toggleDrawer() {
 </div>
 
 <div
-		class="flex-auto items-center justify-center overflow-y-auto pb-2 mb-2"
+		class="flex-auto items-center justify-center overflow-y-auto pb-2 mb-2 main-content"
 >
 	{@render children?.()}
 </div>
