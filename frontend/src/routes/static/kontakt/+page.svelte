@@ -8,5 +8,5 @@
     </p>
 
     <h1 class="text-xl pt-10">Participate in the research</h1>
-    <p>Get in touch and <a href="somegoodform.com/lsdflsdflsdfl">register to participate and use Mondey</a></p>
+    <p>Get in touch and <a href="https://somegoodform.com/lsdflsdflsdfl">register to participate and use Mondey</a></p>
 </div>
