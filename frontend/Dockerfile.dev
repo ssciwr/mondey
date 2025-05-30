@@ -3,8 +3,6 @@ FROM node:22-slim
 LABEL org.opencontainers.image.source=https://github.com/ssciwr/mondey
 LABEL org.opencontainers.image.description="MONDEY frontend development image"
 
-ENV MONDEY_API_URL=/api
-
 ENV VITE_MONDEY_API_URL=/api
 
 WORKDIR /app
