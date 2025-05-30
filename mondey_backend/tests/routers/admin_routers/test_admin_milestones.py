@@ -5,13 +5,11 @@ import pytest
 from dateutil.relativedelta import relativedelta
 from fastapi.testclient import TestClient
 from PIL import Image
-from sqlmodel import select
 
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import SuspiciousState
 from mondey_backend.routers.utils import count_milestone_answers_for_milestone
-from mondey_backend.settings import app_settings
 
 
 def test_get_milestone_groups(
@@ -123,6 +121,7 @@ def test_post_milestone(admin_client: TestClient):
         "group_id": 2,
         "order": 0,
         "expected_age_months": 12,
+        "expected_age_delta": 6,
         "text": {
             "de": {
                 "milestone_id": 6,
@@ -155,9 +154,23 @@ def test_post_milestone(admin_client: TestClient):
 
 def test_put_milestone(admin_client: TestClient, milestone_group_admin1: dict):
     milestone = milestone_group_admin1["milestones"][0]
+    assert milestone["id"] == 3
+    # create a new ~6 year child & check that they don't see the milestone 3 in their answer session
+    create_child = {
+        "name": "new child",
+        "birth_year": datetime.datetime.now().year - 6,
+        "birth_month": 3,
+        "color": "#000000",
+    }
+    new_child_id = admin_client.post("/users/children/", json=create_child).json()["id"]
+    response = admin_client.get(f"/milestone-groups/{new_child_id}")
+    milestone_ids = [m["id"] for group in response.json() for m in group["milestones"]]
+    assert 3 not in milestone_ids
+    # modify a milestone such that a 6 year old child should now see it in their milestone answer session
     milestone["name"] = "bob"
     milestone["order"] = 6
     milestone["expected_age_months"] = 11
+    milestone["expected_age_delta"] = 99
     milestone["text"]["de"]["title"] = "asdsd"
     milestone["text"]["de"]["desc"] = "12xzascdasdf"
     milestone["text"]["de"]["obs"] = "asdrgf"
@@ -167,6 +180,11 @@ def test_put_milestone(admin_client: TestClient, milestone_group_admin1: dict):
     response = admin_client.put("/admin/milestones", json=milestone)
     assert response.status_code == 200
     assert response.json() == milestone
+    # check that a child of this age now sees milestone 3 in their milestone answer session
+    new_child_id = admin_client.post("/users/children/", json=create_child).json()["id"]
+    response = admin_client.get(f"/milestone-groups/{new_child_id}")
+    milestone_ids = [m["id"] for group in response.json() for m in group["milestones"]]
+    assert 3 in milestone_ids
 
 
 def test_delete_milestone(admin_client: TestClient):
@@ -233,6 +251,7 @@ def test_get_milestone_age_scores(admin_client: TestClient):
     assert response.status_code == 200
 
     assert response.json()["expected_age"] == 8
+    assert response.json()["expected_age_delta"] == 4
 
     assert response.json()["scores"][7]["avg_score"] == pytest.approx(0.0)
     assert response.json()["scores"][7]["stddev_score"] == pytest.approx(0.0)
@@ -552,59 +571,3 @@ def test_get_milestone_answer_session_analysis_no_answer_session(
         admin_client.get("/admin/milestone-answer-session-analysis/348").status_code
         == 404
     )
-
-
-def test_child_milestone_expected_age_ranges(admin_client: TestClient, session):
-    # initial values as set in conftest are age +/- 6 months
-    get_reponse = admin_client.get("/admin/child-milestone-expected-age-ranges")
-    assert get_reponse.status_code == 200
-    data = get_reponse.json()
-    assert len(data) == app_settings.MAX_CHILD_AGE_MONTHS + 1
-    for i, row in enumerate(data):
-        assert row["child_age"] == i
-        assert row["min_expected_age"] == i - 6
-        assert row["max_expected_age"] == i + 6
-
-    # delete all milestone answer sessions so that we get a new one using the current age ranges
-    for answer_session in session.exec(select(MilestoneAnswerSession)).all():
-        session.delete(answer_session)
-    session.commit()
-    # milestones in conftest have expected age 6 * id, with ids 1,2,3,4,5
-    # child 3 is ~55 months old -> age range 49-61 -> no milestones
-    milestones = sorted(
-        m["id"]
-        for mg in admin_client.get("/milestone-groups/3").json()
-        for m in mg["milestones"]
-    )
-    assert milestones == []
-
-    # set new values
-    for row in data:
-        row["min_expected_age"] = row["child_age"] // 3
-        row["max_expected_age"] = row["child_age"] * 2
-    post_response = admin_client.post(
-        "/admin/child-milestone-expected-age-ranges", json=data
-    )
-    assert post_response.status_code == 200
-
-    # check that the new values are set
-    new_get_response = admin_client.get("/admin/child-milestone-expected-age-ranges")
-    assert new_get_response.status_code == 200
-    new_data = new_get_response.json()
-    assert len(new_data) == app_settings.MAX_CHILD_AGE_MONTHS + 1
-    for i, row in enumerate(new_data):
-        assert row["child_age"] == i
-        assert row["min_expected_age"] == i // 3
-        assert row["max_expected_age"] == i * 2
-
-    # delete all milestone answer sessions so that we get a new one using the current age ranges
-    for answer_session in session.exec(select(MilestoneAnswerSession)).all():
-        session.delete(answer_session)
-    session.commit()
-    # child 3 is ~55 months old -> age range 18-110 includes milestones 5,4,3 with expected ages 30, 25, 20
-    milestones = sorted(
-        m["id"]
-        for mg in admin_client.get("/milestone-groups/3").json()
-        for m in mg["milestones"]
-    )
-    assert milestones == [3, 4, 5]

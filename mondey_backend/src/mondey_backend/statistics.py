@@ -30,6 +30,7 @@ from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.users import User
 from mondey_backend.routers.utils import get_answer_session_child_ages_in_months
 from mondey_backend.routers.utils import get_child_age_in_months
+from mondey_backend.routers.utils import get_expected_age_delta
 from mondey_backend.routers.utils import get_expected_age_from_scores
 from mondey_backend.settings import app_settings
 
@@ -515,15 +516,19 @@ def calculate_milestone_statistics_by_age(
 
     expected_age = get_expected_age_from_scores(avg_scores, count)
 
+    expected_age_delta = get_expected_age_delta(expected_age, avg_scores, count)
+
     if collection is None:
         collection = MilestoneAgeScoreCollection(
             milestone_id=milestone_id,
             expected_age=expected_age,
+            expected_age_delta=expected_age_delta,
             created_at=datetime.datetime.now(),
         )
         session.add(collection)
-        session.commit()
-        session.refresh(collection)
+    else:
+        collection.expected_age = expected_age
+        collection.expected_age_delta = expected_age_delta
 
     for age in range(0, len(avg_scores)):
         score = session.get(

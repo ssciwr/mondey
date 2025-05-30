@@ -146,6 +146,7 @@ export const translationIds = {
 			"Effektivwert-Differenz zum Durchschnittspunktzahl",
 		analyze: "analysieren",
 		milestoneAnswerSession: "Meilenstein-Antwortsitzung",
+		ageRange: "Meilenstein-Altersspanne",
 		expectedAge: "Voraussichtliches Alter",
 		milestoneChildAgeRanges: "Meilenstein-Kinderaltersspanne",
 		monthsForChildrenAged: "Monate für Kinder im Alter",
@@ -409,6 +410,8 @@ export const translationIds = {
 		imprint: "Presse und Medien",
 		privacy: "Datenschutzerklärung",
 		bottom: "Psychologisches Institut Heidelberg",
+		website: "Webseite",
+		developedByThe: "entwickelt vom",
 	},
 	frontpageAccordion: {
 		heading1: "Wie funktioniert MONDEY?",

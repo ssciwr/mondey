@@ -26,7 +26,6 @@ from mondey_backend.dependencies import current_active_user
 from mondey_backend.dependencies import get_session
 from mondey_backend.main import create_app
 from mondey_backend.models.children import Child
-from mondey_backend.models.children import ChildMilestoneExpectedAgeRange
 from mondey_backend.models.milestones import Language
 from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneAgeScore
@@ -116,7 +115,7 @@ def children():
             "has_image": True,
             "color": "#ffffff",
         },
-        # ~5 year old child for admin user (id 1)
+        # ~55month old child for admin user (id 1)
         {
             "birth_month": fiftyfive_months_ago.month,
             "birth_year": fiftyfive_months_ago.year,
@@ -187,16 +186,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         lang_ids = ["de", "en", "fr"]
         for lang_id in lang_ids:
             session.add(Language(id=lang_id))
-        # add milestone age ranges for each child age
-        for age in range(0, settings.app_settings.MAX_CHILD_AGE_MONTHS + 1):
-            delta_months = 6
-            session.add(
-                ChildMilestoneExpectedAgeRange(
-                    child_age=age,
-                    min_expected_age=age - delta_months,
-                    max_expected_age=age + delta_months,
-                )
-            )
         # add a milestone group with 3 milestones
         session.add(MilestoneGroup(order=2))
         for lang_id in lang_ids:
@@ -207,12 +196,14 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 )
             )
         for milestone_id in [1, 2, 3]:
+            # milestones have expected ages 6*id +/- 2*(id+1), so 6 +/- 4, 12 +/- 6, ...
             session.add(
                 Milestone(
                     name=f"m{milestone_id}",
                     order=14 - milestone_id,
                     group_id=1,
                     expected_age_months=milestone_id * 6,
+                    expected_age_delta=(milestone_id + 1) * 2,
                 )
             )
             for lang_id in lang_ids:
@@ -245,6 +236,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                     order=milestone_id,
                     group_id=2,
                     expected_age_months=milestone_id * 6,
+                    expected_age_delta=(milestone_id + 1) * 2,
                 )
             )
             for lang_id in lang_ids:
@@ -443,6 +435,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             MilestoneAgeScoreCollection(
                 milestone_id=1,
                 expected_age=8,
+                expected_age_delta=4,
                 created_at=datetime.datetime(
                     last_month.year,
                     last_month.month,
@@ -466,6 +459,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             MilestoneAgeScoreCollection(
                 milestone_id=2,
                 expected_age=8,
+                expected_age_delta=4,
                 created_at=datetime.datetime(
                     last_month.year,
                     last_month.month,
@@ -1262,7 +1256,6 @@ def milestone_group1():
             {
                 "id": 3,
                 "name": "m3",
-                "expected_age_months": 18,
                 "text": {
                     "de": {
                         "title": "m3_de_t",
@@ -1288,7 +1281,6 @@ def milestone_group1():
             {
                 "id": 2,
                 "name": "m2",
-                "expected_age_months": 12,
                 "text": {
                     "de": {
                         "title": "m2_de_t",
@@ -1314,7 +1306,6 @@ def milestone_group1():
             {
                 "id": 1,
                 "name": "m1",
-                "expected_age_months": 6,
                 "text": {
                     "de": {
                         "title": "m1_de_t",
@@ -1373,6 +1364,7 @@ def milestone_group_admin1():
                 "id": 3,
                 "name": "m3",
                 "expected_age_months": 18,
+                "expected_age_delta": 8,
                 "images": [],
                 "text": {
                     "de": {
@@ -1407,6 +1399,7 @@ def milestone_group_admin1():
                 "id": 2,
                 "name": "m2",
                 "expected_age_months": 12,
+                "expected_age_delta": 6,
                 "images": [
                     {
                         "id": 3,
@@ -1446,6 +1439,7 @@ def milestone_group_admin1():
                 "id": 1,
                 "name": "m1",
                 "expected_age_months": 6,
+                "expected_age_delta": 4,
                 "images": [
                     {
                         "id": 1,
@@ -1500,7 +1494,6 @@ def milestone_group2():
             {
                 "id": 4,
                 "name": "m4",
-                "expected_age_months": 24,
                 "images": [],
                 "text": {
                     "de": {
@@ -1526,7 +1519,6 @@ def milestone_group2():
             {
                 "id": 5,
                 "name": "m5",
-                "expected_age_months": 30,
                 "images": [],
                 "text": {
                     "de": {
@@ -1585,6 +1577,7 @@ def milestone_group_admin2():
                 "id": 4,
                 "name": "m4",
                 "expected_age_months": 24,
+                "expected_age_delta": 10,
                 "images": [],
                 "text": {
                     "de": {
@@ -1619,6 +1612,7 @@ def milestone_group_admin2():
                 "id": 5,
                 "name": "m5",
                 "expected_age_months": 30,
+                "expected_age_delta": 12,
                 "images": [],
                 "text": {
                     "de": {

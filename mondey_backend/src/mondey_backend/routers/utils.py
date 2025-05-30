@@ -21,7 +21,6 @@ from webp import WebPPreset
 from ..dependencies import SessionDep
 from ..logging import logger
 from ..models.children import Child
-from ..models.children import ChildMilestoneExpectedAgeRange
 from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAdmin
 from ..models.milestones import MilestoneAnswer
@@ -224,20 +223,21 @@ def get_or_create_current_milestone_answer_session(
         )
         add(session, milestone_answer_session)
         child_age_months = get_child_age_in_months(child)
-        age_range = session.get(ChildMilestoneExpectedAgeRange, child_age_months)
-        if age_range is None:
-            default_delta_months = 12
-            age_range = ChildMilestoneExpectedAgeRange(
-                child_age=child_age_months,
-                min_expected_age=child_age_months - default_delta_months,
-                max_expected_age=child_age_months + default_delta_months,
-            )
         milestones = session.exec(
             select(Milestone)
-            .where(col(Milestone.expected_age_months) <= age_range.max_expected_age)
-            .where(col(Milestone.expected_age_months) >= age_range.min_expected_age)
+            .where(
+                col(Milestone.expected_age_months) - col(Milestone.expected_age_delta)
+                <= child_age_months
+            )
+            .where(
+                col(Milestone.expected_age_months) + col(Milestone.expected_age_delta)
+                >= child_age_months
+            )
         ).all()
         for milestone in milestones:
+            logger.error(
+                f"Child age {child_age_months}: milestone {milestone.id} expected age {milestone.expected_age_months} +/- {milestone.expected_age_delta}"
+            )
             session.add(
                 MilestoneAnswer(
                     answer_session_id=milestone_answer_session.id,
@@ -307,6 +307,39 @@ def get_expected_age_from_scores(scores: np.ndarray, count: np.ndarray) -> int:
     if not np.any(successful_scores):
         return app_settings.MAX_CHILD_AGE_MONTHS
     return int(np.argmax(successful_scores))
+
+
+def get_expected_age_delta(
+    expected_age: int, scores: np.ndarray, count: np.ndarray
+) -> int:
+    """
+    Returns the +/- range on the expected age for a milestone based on the average scores for each child age.
+    :param expected_age: the expected age in months for this milestone
+    :param scores: the average score for each age, where the index in the array is the age in months
+    :param count: the count of answers for each age, where the index in the array is the age in months
+    :return: the +/- range on the expected age in months for this milestone
+    """
+    # require at least `min_number_of_answers` answers for each age
+    min_number_of_answers = 3
+    near_perfect_score = 2.95
+    near_zero_score = 0.05
+    max_age = app_settings.MAX_CHILD_AGE_MONTHS
+    # set max_age to only exclude ages with near-perfect scores
+    while (
+        scores[max_age] >= near_perfect_score
+        and count[max_age] >= min_number_of_answers
+        and max_age >= expected_age
+    ):
+        max_age -= 1
+    min_age = 0
+    # set min_age to only exclude ages with near-zero scores
+    while (
+        scores[min_age] <= near_zero_score
+        and count[min_age] >= min_number_of_answers
+        and min_age <= expected_age
+    ):
+        min_age += 1
+    return max(max_age - expected_age, expected_age - min_age)
 
 
 def child_image_path(child_id: int | None) -> pathlib.Path:
