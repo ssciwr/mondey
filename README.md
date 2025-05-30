@@ -36,3 +36,10 @@ These API interfaces are only temporarily public for convenience during developm
 ### Licensing
 
 The source code in this repository is distributed under [AGPL-3.0-or-later](LICENSE).
+
+## To run from local development:
+From this directory: `docker-compose -f docker-compose.dev.yml up --build`
+
+This will build a local set of containers. The frontend container will be mounting your code volume and running the command
+`pnpm run dev`, so via hot reload it will automatically trigger reacting to code changes and updated the frontend you access rather than need
+to rebuild the frontend container each time.
