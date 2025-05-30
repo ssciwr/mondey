@@ -115,11 +115,6 @@ function selectTab(index: number) {
 </div>
 
 <style>
-    .emoji-gray {
-        filter: grayscale(100%);
-        opacity:0.8;
-        font-size:1em;
-    }
     .emoji-solid-gray {
         color: transparent;
         text-shadow: 0 0 0 rgb(145,145,155);
