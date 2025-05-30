@@ -192,7 +192,7 @@ function toggleDrawer() {
 </div>
 
 <div
-		class="flex-auto items-center justify-center overflow-y-auto pb-2 mb-2"
+		class="flex-auto items-center justify-center overflow-y-auto pb-2 mb-2 main-content"
 >
 	{@render children?.()}
 </div>
