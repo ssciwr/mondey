@@ -11,8 +11,8 @@ either in env vars or in a file `.env` in the same location as the docker compos
 For example the current test deployment on heicloud looks like this:
 
 ```
-MONDEY_SSL_CERT="/etc/letsencrypt/live/mondey.lkeegan.dev/fullchain.pem"
-MONDEY_SSL_KEY="/etc/letsencrypt/live/mondey.lkeegan.dev/privkey.pem"
+MONDEY_SSL_CERT="/etc/letsencrypt/live/mondey.de/fullchain.pem"
+MONDEY_SSL_KEY="/etc/letsencrypt/live/mondey.de/privkey.pem"
 DEEPL_API_KEY=abc123
 ```
 
@@ -36,22 +36,22 @@ sudo docker compose logs
 
 ### SSL certificates
 
-To generate SSL certificates for the domain `mondey.lkeegan.dev` from [Let's Encrypt](https://letsencrypt.org/) using [Certbot](https://certbot.eff.org/):
+To generate SSL certificates for the domain `mondey.de` from [Let's Encrypt](https://letsencrypt.org/) using [Certbot](https://certbot.eff.org/):
 
 ```
-sudo docker run -it --rm -v/etc/letsencrypt:/etc/letsencrypt -v/var/www/certbot:/var/www/certbot certbot/certbot certonly --webroot --webroot-path /var/www/certbot/ -n -d mondey.lkeegan.dev
+sudo docker run -it --rm -v/etc/letsencrypt:/etc/letsencrypt -v/var/www/certbot:/var/www/certbot certbot/certbot certonly --webroot --webroot-path /var/www/certbot/ -n -d mondey.de
 ```
 
 The certificates needs renewing every three months, which can be done manually using the same command.
 To automatically renew once a week you can use cron, e.g. `sudo crontab -e`, then add the following line:
 
 ```
-0 0 * * 0 docker run -it --rm -v/etc/letsencrypt:/etc/letsencrypt -v/var/www/certbot:/var/www/certbot certbot/certbot certonly --webroot --webroot-path /var/www/certbot/ -n -d mondey.lkeegan.dev
+0 0 * * 0 docker run -it --rm -v/etc/letsencrypt:/etc/letsencrypt -v/var/www/certbot:/var/www/certbot certbot/certbot certonly --webroot --webroot-path /var/www/certbot/ -n -d mondey.de
 ```
 
 To check that the production website SSL certificates are configured correctly:
 
-https://decoder.link/sslchecker/mondey.lkeegan.dev/443
+https://decoder.link/sslchecker/mondey.de/443
 
 ### Give users admin rights
 
@@ -116,11 +116,11 @@ In order to avoid emails being sent to spam, there are several DNS security feat
 - if using a commercial mail sending service they will provide this info
 - for heidelberg uni
   - we can look it up: https://mxtoolbox.com/SuperTool.aspx?action=spf%3auni-heidelberg.de&run=toolpage
-  - for the temporary namecheap sub-domain mondey.lkeegan.dev:
+  - for the temporary namecheap sub-domain mondey.de:
     - Type: `TXT Record`
     - Host: `mondey`
     - Value: `v=spf1 ip4:129.206.100.212 ip4:129.206.119.212 ip4:129.206.100.213 include:spf.protection.outlook.com mx -all`
-- check the changes worked with e.g. https://dmarcian.com/spf-survey/?domain=mondey.lkeegan.dev
+- check the changes worked with e.g. https://dmarcian.com/spf-survey/?domain=mondey.de
 
 **DKIM**
 
@@ -129,31 +129,31 @@ In order to avoid emails being sent to spam, there are several DNS security feat
 - if using a commercial mail sending service they will provide this info
 - for heidelberg uni
   - postfix docker image will generate DKIM keys if not already present with selector `mail`
-  - copy the generated dns entry from opendkim-keys/mondey.lkeegan.dev.txt
+  - copy the generated dns entry from opendkim-keys/mondey.de.txt
     - note remove any quotes and newlines and spaces after `p=`!
-  - for the temporary namecheap sub-domain mondey.lkeegan.dev:
+  - for the temporary namecheap sub-domain mondey.de:
     - Type: `TXT Record`
     - Host: `mail._domainkey.mondey`
     - Value: `v=DKIM1; h=sha256; k=rsa; s=email; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1s+IQlEUKtJ6Gt2/h5x7M949Vdmue7A5al2asflVXTvw7me8OCCsYx2FaWjLDPNpXHxEhUVYqJQKUTyvZnpjIxBXg86hSnBaO0YUQXsE2pz4jNt9BOEGhKACc47DkJEg3XOcJqf7JnrWkOELLnWS2RKzDUZ3e1/5cjolvtJuMEQFay1EITCamCJOUsA+gZ12XC4j10k3aT/MPxhOG9Wj8VhD7eLHI0QV1XRD7DrzO7EyA9R/Eve/l1FGx5CzuNIjKhmb1FVGiepqkPZgooDs9hxXCElQVqP6CQFyDRY64SiV1kTfVVSvL1N5PiU2BxP2IKKaXvn4/H55Zjz5j1+sQIDAQAB`
 - to check this entry is valid before using: e.g. https://dmarcian.com/dkim-validator/
-- check the changes worked with e.g.: e.g. https://dmarcian.com/dkim-inspector/?domain=mondey.lkeegan.dev&selector=mail
+- check the changes worked with e.g.: e.g. https://dmarcian.com/dkim-inspector/?domain=mondey.de&selector=mail
 
 **DMARC record**
 
 - DMARC policy indicates valid spf/dkim and what to do if not
 - if using a commercial mail sending service they will provide this info
-- for the temporary namecheap sub-domain mondey.lkeegan.dev:
+- for the temporary namecheap sub-domain mondey.de:
   - Type: `TXT Record`
   - Host: `_dmarc.mondey`
   - Value: `v=DMARC1; p=reject`
-- check the changes worked with e.g. https://dmarcian.com/dmarc-inspector/?domain=mondey.lkeegan.dev
+- check the changes worked with e.g. https://dmarcian.com/dmarc-inspector/?domain=mondey.de
 
 **Testing**
 
 Some resources to check if all this worked:
 
 - https://www.mail-tester.com/
-- https://easydmarc.com/tools/domain-scanner?domain=mondey.lkeegan.dev
+- https://easydmarc.com/tools/domain-scanner?domain=mondey.de
 - https://mxtoolbox.com/SuperTool.aspx
 - https://www.mail-tester.com/spf-dkim-check
 
