@@ -25,7 +25,7 @@ services:
       - COOKIE_SECURE=${COOKIE_SECURE:-true}
       - STATS_CRONTAB=${STATS_CRONTAB:-0 3 * * mon}
       - DEEPL_API_KEY=${DEEPL_API_KEY:-}
-      - MONDEY_HOST=${MONDEY_HOST:-mondey.lkeegan.dev}
+      - MONDEY_HOST=${MONDEY_HOST:-mondey.de}
     depends_on:
       - mondeydb
       - usersdb
@@ -87,13 +87,13 @@ services:
         max-file: 5
   email:
     image: "boky/postfix"
-    hostname: mail.mondey.lkeegan.dev
+    hostname: mail.mondey.de
     restart: always
     environment:
       - RELAYHOST=${RELAYHOST:-}
-      - POSTFIX_myhostname=mail.mondey.lkeegan.dev
-      - POSTFIX_mydomain=mondey.lkeegan.dev
-      - ALLOWED_SENDER_DOMAINS=mondey.lkeegan.dev
+      - POSTFIX_myhostname=mail.mondey.de
+      - POSTFIX_mydomain=mondey.de
+      - ALLOWED_SENDER_DOMAINS=mondey.de
       - DKIM_AUTOGENERATE=true
     volumes:
       - ./opendkim-keys:/etc/opendkim/keys
