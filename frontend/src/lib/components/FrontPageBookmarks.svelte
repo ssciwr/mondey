@@ -10,60 +10,42 @@ import PenOutline from "flowbite-svelte-icons/PenOutline.svelte";
 import RocketOutline from "flowbite-svelte-icons/RocketOutline.svelte";
 import UsersGroupOutline from "flowbite-svelte-icons/UsersGroupOutline.svelte";
 
-const styleTemplate = {
-	buttonClass:
-		"w-full text-left p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-primary-500 dark:hover:bg-gray-750 transition-all duration-200",
-	activeButtonClass:
-		"w-full text-left p-4 rounded-lg border dark:border-primary-700 border-primary-300 bg-primary-500 dark:bg-primary-900 transition-all duration-200",
-	contentClass:
-		"mt-2 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 text-left",
-	iconBgClass: "p-2 rounded-lg bg-gray-100 dark:bg-gray-700",
-	iconColor: "#6b7280", // gray-500
-};
-
 const bookmarks = [
 	{
 		titleKey: i18n.tr.frontpageBookmarks.headingMotor,
 		contentKey: i18n.tr.frontpageBookmarks.summaryMotor,
 		icon: RocketOutline,
 		emoji: "🏃",
-		...styleTemplate,
 	},
 	{
 		titleKey: i18n.tr.frontpageBookmarks.headingFineMotor,
 		contentKey: i18n.tr.frontpageBookmarks.summaryFineMotor,
 		icon: PenOutline,
-		...styleTemplate,
 	},
 	{
 		titleKey: i18n.tr.frontpageBookmarks.headingThinking,
 		contentKey: i18n.tr.frontpageBookmarks.summaryThinking,
 		icon: BrainOutline,
-		...styleTemplate,
 	},
 	{
 		titleKey: i18n.tr.frontpageBookmarks.headingLanguage,
 		contentKey: i18n.tr.frontpageBookmarks.summaryLanguage,
 		icon: LanguageOutline,
-		...styleTemplate,
 	},
 	{
 		titleKey: i18n.tr.frontpageBookmarks.headingSocialDevelopment,
 		contentKey: i18n.tr.frontpageBookmarks.summarySocialDevelopment,
 		icon: UsersGroupOutline,
-		...styleTemplate,
 	},
 	{
 		titleKey: i18n.tr.frontpageBookmarks.headingInnerStates,
 		contentKey: i18n.tr.frontpageBookmarks.summaryInnerStates,
 		icon: HeartOutline,
-		...styleTemplate,
 	},
 	{
 		titleKey: i18n.tr.frontpageBookmarks.headingSchool,
 		contentKey: i18n.tr.frontpageBookmarks.summarySchool,
 		icon: GraduationCapOutline,
-		...styleTemplate,
 	},
 ];
 
@@ -76,22 +58,25 @@ function selectTab(index: number) {
 
 <div class="w-full px-4 mx-auto">
     <div class="max-w-2xl mx-auto space-y-2">
-        {#each bookmarks as { titleKey, contentKey, icon, emoji, buttonClass, activeButtonClass, contentClass, iconBgClass, iconColor }, index}
+        {#each bookmarks as { titleKey, contentKey, icon, emoji }, index}
             <div class="w-full">
                 <button
-                        class={activeIndex === index ? activeButtonClass : buttonClass}
+                        class={activeIndex === index
+                            ? "w-full text-left p-4 rounded-lg border dark:border-primary-700 border-primary-300 bg-primary-500 dark:bg-primary-900 transition-all duration-200"
+                            : "w-full text-left p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-primary-500 hover:text-white dark:hover:bg-gray-750 transition-all duration-200"
+                        }
                         onclick={() => selectTab(index)}
                 >
                     <div class="flex items-center gap-3">
-                        <div class="flex-shrink-0 {iconBgClass}">
+                        <div class="flex-shrink-0 p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
                             {#if emoji}
                                 <span class="text-2xl emoji-solid-gray">{emoji}</span>
                             {:else}
-                                <svelte:component this={icon} size="md" color={iconColor} />
+                                <svelte:component this={icon} size="md" color="#6b7280" />
                             {/if}
                         </div>
                         <div class="flex-1">
-                            <h3 class="font-medium hover:text-white {activeIndex === index ? 'text-white' : 'text-gray-900 dark:text-white'}">
+                            <h3 class="font-medium hover:text-white {activeIndex === index ? 'text-white' : ' hover:text-white dark:text-white'}">
                                 {titleKey}
                             </h3>
                         </div>
@@ -103,7 +88,7 @@ function selectTab(index: number) {
                     </div>
                 </button>
                 {#if activeIndex === index}
-                    <div class={contentClass}>
+                    <div class="mt-2 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 text-left">
                         <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
                             {contentKey}
                         </p>
