@@ -197,6 +197,19 @@ def current_milestone_answer_session(
     return milestone_answer_session
 
 
+def latest_completed_milestone_answer_session(
+    session: SessionDep, current_active_user: User, child: Child
+) -> MilestoneAnswerSession | None:
+    milestone_answer_session = session.exec(
+        select(MilestoneAnswerSession)
+        .where(col(MilestoneAnswerSession.user_id) == current_active_user.id)
+        .where(col(MilestoneAnswerSession.child_id) == child.id)
+        .where(col(MilestoneAnswerSession.completed))
+        .order_by(col(MilestoneAnswerSession.created_at).desc())
+    ).first()
+    return milestone_answer_session
+
+
 def get_or_create_current_milestone_answer_session(
     session: SessionDep, current_active_user: User, child: Child
 ) -> MilestoneAnswerSession:
@@ -234,16 +247,30 @@ def get_or_create_current_milestone_answer_session(
                 >= child_age_months
             )
         ).all()
+        prev_answer_session = latest_completed_milestone_answer_session(
+            session, current_active_user, child
+        )
         for milestone in milestones:
-            logger.error(
-                f"Child age {child_age_months}: milestone {milestone.id} expected age {milestone.expected_age_months} +/- {milestone.expected_age_delta}"
-            )
+            answer = -1
+            if (
+                prev_answer_session is not None
+                and session.exec(
+                    select(MilestoneAnswer)
+                    .where(col(MilestoneAnswer.milestone_id) == milestone.id)
+                    .where(
+                        col(MilestoneAnswer.answer_session_id) == prev_answer_session.id
+                    )
+                    .where(col(MilestoneAnswer.answer) == 3)
+                ).first()
+                is not None
+            ):
+                answer = 3
             session.add(
                 MilestoneAnswer(
                     answer_session_id=milestone_answer_session.id,
                     milestone_id=milestone.id,
                     milestone_group_id=milestone.group_id,
-                    answer=-1,
+                    answer=answer,
                 )
             )
         session.commit()

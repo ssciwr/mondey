@@ -58,11 +58,12 @@ https://decoder.link/sslchecker/mondey.de/443
 To make an existing user with email `user@domain.com` into an admin, modify the users database, e.g.
 
 ```
-sqlite3 db/users.db
-sqlite> UPDATE user SET is_superuser = 1 WHERE email = 'user@domain.com';
-sqlite> .quit
+docker exec -it $(docker ps | grep usersdb-1 | awk '{print $1}') bash
+psql -U postgres -d users
+UPDATE "user" SET is_superuser = true WHERE email = 'user@domain.com';
 ```
-This only needs to be done for the first admin user in a new deployment, as they can then login and make other users admins from the admin interface.
+This only needs to be done for the first admin user in a new deployment,
+as they can then log in and give other users admin rights from the admin interface.
 
 ### Internationalization
 
@@ -156,6 +157,16 @@ Some resources to check if all this worked:
 - https://mxtoolbox.com/SuperTool.aspx
 - https://www.mail-tester.com/spf-dkim-check
 
+### Database
+
+#### Modifying the database
+
+To modify the database, you can connect to the running postgres database in the `mondeydb` container and then enter an SQL command:
+
+```
+docker exec -it $(docker ps | grep mondeydb-1 | awk '{print $1}') bash
+psql -U postgres -d mondey
+```
 
 #### sqlite to postgres migration
 

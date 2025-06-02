@@ -1,14 +1,16 @@
 <svelte:options runes={true}/>
 <script lang="ts">
 import { i18n } from "$lib/i18n.svelte";
-import { Search } from "flowbite-svelte";
+import { Checkbox, Search } from "flowbite-svelte";
 import { type Snippet } from "svelte";
 
 let {
 	searchTerm = $bindable(""),
+	showIncompleteOnly = $bindable(null),
 	children,
 }: {
-	searchTerm?: string;
+	searchTerm: string;
+	showIncompleteOnly?: null | boolean;
 	children?: Snippet;
 } = $props();
 </script>
@@ -20,6 +22,11 @@ let {
             placeholder={i18n.tr.search.namePlaceholder}
             size="lg"
     />
+    {#if showIncompleteOnly !== null}
+        <Checkbox bind:checked={showIncompleteOnly} class="my-2">
+            {i18n.tr.search.showIncompleteOnly}
+        </Checkbox>
+    {/if}
 </form>
 <div class="grid w-full grid-cols-1 justify-center p-2 gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
     {@render children?.()}
