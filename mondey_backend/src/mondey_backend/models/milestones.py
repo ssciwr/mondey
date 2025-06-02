@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 import enum
 
+import numpy as np
 from pydantic import BaseModel
 from sqlalchemy import Column
 from sqlalchemy import text
@@ -202,16 +203,18 @@ class SuspiciousState(str, enum.Enum):
     """Enum for tracking suspicious state of an answer session.
 
     States:
-    - admin_not_suspicious: Explicitly marked as not suspicious by admin, should not be overridden
-    - not_suspicious: Not marked as suspicious by system (yet), can possibly be marked as susp. next time stats update
-    - suspicious: Automatically marked as suspicious by system, may be overridden by admin
-    - admin_suspicious: Explicitly marked as suspicious by admin, should not be overridden
+    - admin_not_suspicious: Explicitly marked as not suspicious by admin, cannot be overridden by system
+    - not_suspicious: Marked as not suspicious by system, may be overridden by admin
+    - suspicious: Marked as suspicious by system, may be overridden by admin
+    - admin_suspicious: Explicitly marked as suspicious by admin, cannot be overridden by system
+    - unknown: Not yet analyzed, will be marked as suspicious or not_suspicious by system next time stats update
     """
 
     admin_not_suspicious = "admin_not_suspicious"
     not_suspicious = "not_suspicious"
     suspicious = "suspicious"
     admin_suspicious = "admin_suspicious"
+    unknown = "unknown"
 
 
 class MilestoneAnswerSession(SQLModel, table=True):
@@ -265,9 +268,33 @@ class MilestoneAgeScore(SQLModel, table=True):
     )
     age: int = Field(primary_key=True)
     collection: MilestoneAgeScoreCollection = back_populates("scores")
-    count: int
-    avg_score: float
-    stddev_score: float
+    c0: int
+    c1: int
+    c2: int
+    c3: int
+
+    @property
+    def count(self) -> int:
+        return self.c0 + self.c1 + self.c2 + self.c3
+
+    @property
+    def mean(self) -> float:
+        n = self.count
+        if n == 0:
+            return 0.0
+        return (self.c1 + 2 * self.c2 + 3 * self.c3) / self.count
+
+    @property
+    def stddev(self) -> float:
+        """Calculate the sample standard deviation of the scores.
+        where sample stddev = sqrt((E[x^2] - E[x]^2) * n/(n-1))
+        """
+        n = self.count
+        if n < 2:
+            return 0.0
+        m = self.mean
+        m2 = (self.c1 + 4 * self.c2 + 9 * self.c3) / n
+        return np.sqrt((m2 - m * m) * (n / (n - 1)))
 
 
 class MilestoneAgeScoreCollection(SQLModel, table=True):
@@ -301,8 +328,24 @@ class MilestoneGroupAgeScore(SQLModel, table=True):
     )
     collection: MilestoneGroupAgeScoreCollection = back_populates("scores")
     count: int
-    avg_score: float
-    stddev_score: float
+    sum_score: float
+    sum_squaredscore: float
+
+    @property
+    def mean(self) -> float:
+        return self.sum_score / self.count
+
+    @property
+    def stddev(self) -> float:
+        """Calculate the sample standard deviation of the scores.
+        where sample stddev = sqrt((E[x^2] - E[x]^2) * n/(n-1))
+        """
+        n = self.count
+        if n < 2:
+            return 0.0
+        m = self.mean
+        m2 = self.sum_squaredscore / self.count
+        return np.sqrt((m2 - m * m) * (n / (n - 1)))
 
 
 class MilestoneGroupAgeScoreCollection(SQLModel, table=True):

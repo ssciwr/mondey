@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import logging
 import pathlib
 from contextlib import asynccontextmanager
@@ -68,9 +67,7 @@ async def lifespan(app: FastAPI):
         await import_e2e_test_sql_files()
     scheduler = AsyncIOScheduler()
     scheduler.add_job(
-        lambda: asyncio.run(
-            scheduled_update_stats()
-        ),  # Review appreciated of this approach
+        scheduled_update_stats,
         CronTrigger.from_crontab(app_settings.STATS_CRONTAB),
     )
     scheduler.start()

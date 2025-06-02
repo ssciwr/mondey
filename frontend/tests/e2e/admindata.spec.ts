@@ -29,13 +29,6 @@ test("admin Data tab", async ({ page }) => {
 	await page.getByTestId("cancelButton").click();
 	await expect(page.getByTestId("cancelButton")).toBeHidden();
 
-	// do a partial statistics update
-	await page.getByTestId("incrementalStatsUpdate").click();
-	await expect(page.getByText("nur verdächtige anzeigen")).toBeVisible();
-	await page.getByTestId("closeUpdateStatsModal").isEnabled();
-	await page.getByTestId("closeUpdateStatsModal").click();
-	await expect(page.getByTestId("closeUpdateStatsModal")).toBeHidden();
-
 	// do a full statistics update
 	await page.getByTestId("fullStatsUpdate").click();
 	await expect(page.getByText("nur verdächtige anzeigen")).toBeVisible();
