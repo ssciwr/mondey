@@ -173,9 +173,9 @@ def session_remaining_seconds(
 ) -> float:
     session_lifetime_days = 14
     return (
-        datetime.datetime.now()
+        milestone_answer_session.created_at
         + datetime.timedelta(days=session_lifetime_days)
-        - milestone_answer_session.created_at
+        - datetime.datetime.now()
     ).total_seconds()
 
 

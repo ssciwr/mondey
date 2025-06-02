@@ -58,11 +58,12 @@ https://decoder.link/sslchecker/mondey.lkeegan.dev/443
 To make an existing user with email `user@domain.com` into an admin, modify the users database, e.g.
 
 ```
-sqlite3 db/users.db
-sqlite> UPDATE user SET is_superuser = 1 WHERE email = 'user@domain.com';
-sqlite> .quit
+docker exec -it $(docker ps | grep usersdb-1 | awk '{print $1}') bash
+psql -U postgres -d users
+UPDATE "user" SET is_superuser = true WHERE email = 'user@domain.com';
 ```
-This only needs to be done for the first admin user in a new deployment, as they can then login and make other users admins from the admin interface.
+This only needs to be done for the first admin user in a new deployment,
+as they can then log in and give other users admin rights from the admin interface.
 
 ### Internationalization
 
@@ -156,20 +157,7 @@ Some resources to check if all this worked:
 - https://mxtoolbox.com/SuperTool.aspx
 - https://www.mail-tester.com/spf-dkim-check
 
-
-#### sqlite to postgres migration
-
-Notes on the (one-off) process used to migrate the sqlite databases to postgres in production:
-
-- temporarily add `- ./db:/db` to the mondeydb and usersdb volumes in docker-compose.yml to mount the db folder
-- recreate the containers (this will also create the postgres databases and tables): `docker compose up -d --force-recreate`
-- ssh into the `mondeydb` docker container: `docker exec -it $(docker ps | grep mondeydb | awk '{print $1}') bash`
-- install pgloader: `apk update && apk add pgloader`
-- import the data from sqlite without modifying any tables: `pgloader --with "data only" sqlite:///db/mondey.db pgsql://postgres@127.0.0.1/mondey`
-- do the same for the usersdb container:
-  - `docker exec -it $(docker ps | grep usersdb | awk '{print $1}') bash`
-  - `apk update && apk add pgloader`
-  - `pgloader --with "data only" sqlite:///db/users.db pgsql://postgres@127.0.0.1/users`
+### Database
 
 #### Modifying the database
 
@@ -178,4 +166,36 @@ To modify the database, you can connect to the running postgres database in the 
 ```
 docker exec -it $(docker ps | grep mondeydb-1 | awk '{print $1}') bash
 psql -U postgres -d mondey
+```
+
+#### sqlite to postgres migration
+
+Notes on the (one-off) process used to migrate the sqlite databases to postgres in production:
+
+- temporarily add `- ./db:/db` to the mondeydb and usersdb volumes in docker-compose.yml to mount the db folder
+- recreate the containers (this will also create the postgres databases and tables): `docker compose up -d --force-recreate`
+- ssh into the `mondeydb` docker container: `docker exec -it $(docker ps | grep mondeydb-1 | awk '{print $1}') bash`
+- install pgloader: `apk update && apk add pgloader`
+- import the data from sqlite without modifying any tables: `pgloader --with "data only" sqlite:///db/mondey.db pgsql://postgres@127.0.0.1/mondey`
+- do the same for the usersdb container:
+  - `docker exec -it $(docker ps | grep usersdb-1 | awk '{print $1}') bash`
+  - `apk update && apk add pgloader`
+  - `pgloader --with "data only" sqlite:///db/users.db pgsql://postgres@127.0.0.1/users`
+
+#### postgres database backups
+
+The docker-compose.yml file includes [docker-postgres-backup-local](https://github.com/prodrigestivill/docker-postgres-backup-local)
+which is configured to make daily backups of the mondey and users databases in the `POSTGRES_DATA_PATH_MONDEY_BACKUPS` and `POSTGRES_DATA_PATH_USER_BACKUPS`
+directories, which by default are `db_backups/mondey` and `db_backups/users` if not set explicitly.
+Backups are kept for the last 7 days, one per week for the last 4 weeks, and one per month for the last 6 months, and are stored in folders named accordingly.
+To restore the most recent mondeydb backup:
+
+```
+zstdcat db_backups/mondey/last/mondey-latest.sql.gz | docker exec -i $(docker ps | grep mondeydb-1 | awk '{print $1}') psql --username=postgres --dbname=mondey
+```
+
+And similarly for the usersdb:
+
+```
+zstdcat db_backups/users/last/users-latest.sql.gz | docker exec -i $(docker ps | grep usersdb-1 | awk '{print $1}') psql --username=postgres --dbname=users
 ```

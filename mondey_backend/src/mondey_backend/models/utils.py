@@ -26,6 +26,16 @@ def back_populates(name: str, **kwargs):
     return Relationship(sa_relationship=relationship(back_populates=name, **kwargs))
 
 
+def list_relationship(name: str, **kwargs):
+    return Relationship(
+        sa_relationship=relationship(
+            back_populates=name,
+            cascade="all, delete-orphan",
+            **kwargs,
+        )
+    )
+
+
 def dict_relationship(key: str):
     return Relationship(
         sa_relationship=relationship(
