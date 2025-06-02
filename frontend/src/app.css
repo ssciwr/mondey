@@ -6,6 +6,13 @@
 	/* Sub classes, not for use in HTML */
 	body {
 		@apply dark:text-white;
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column; /* To force the footer to the bottom with flex grid */
+	}
+
+	.main-content {
+		flex: 1; /* This will grow to fill available space leaving the footer at the bottom */
 	}
 
 	.btn:hover {
