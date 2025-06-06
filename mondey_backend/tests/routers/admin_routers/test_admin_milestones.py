@@ -253,17 +253,20 @@ def test_get_milestone_age_scores(admin_client: TestClient):
     assert response.json()["expected_age"] == 8
     assert response.json()["expected_age_delta"] == 4
 
-    assert response.json()["scores"][7]["avg_score"] == pytest.approx(0.0)
-    assert response.json()["scores"][7]["stddev_score"] == pytest.approx(0.0)
-    assert response.json()["scores"][7]["count"] == 0
+    assert response.json()["scores"][7]["c0"] == 0
+    assert response.json()["scores"][7]["c1"] == 0
+    assert response.json()["scores"][7]["c2"] == 0
+    assert response.json()["scores"][7]["c3"] == 0
 
-    assert response.json()["scores"][8]["avg_score"] == pytest.approx(1.0)
-    assert response.json()["scores"][8]["stddev_score"] == pytest.approx(0.0)
-    assert response.json()["scores"][8]["count"] == 1
+    assert response.json()["scores"][8]["c0"] == 0
+    assert response.json()["scores"][8]["c1"] == 1
+    assert response.json()["scores"][8]["c2"] == 0
+    assert response.json()["scores"][8]["c3"] == 0
 
-    assert response.json()["scores"][9]["avg_score"] == pytest.approx(0.0)
-    assert response.json()["scores"][9]["stddev_score"] == pytest.approx(0.0)
-    assert response.json()["scores"][9]["count"] == 0
+    assert response.json()["scores"][9]["c0"] == 0
+    assert response.json()["scores"][9]["c1"] == 0
+    assert response.json()["scores"][9]["c2"] == 0
+    assert response.json()["scores"][9]["c3"] == 0
 
 
 def test_get_submitted_milestone_images(admin_client: TestClient):
@@ -420,15 +423,18 @@ def test_delete_milestone_groups_real(admin_client, session):
 
 def test_get_milestone_answer_sessions(admin_client: TestClient, session):
     # update the stats
-    assert admin_client.post("/admin/update-stats/true").status_code == 200
+    assert admin_client.post("/admin/update-stats/").status_code == 200
     response = admin_client.get("/admin/milestone-answer-sessions/")
     assert response.status_code == 200
     answer_sessions = response.json()
     # all 7 answer sessions should be returned
     assert len(answer_sessions) == 7
     for answer_session in answer_sessions:
-        # none of them are marked as suspicious
-        assert answer_session["suspicious_state"] == SuspiciousState.not_suspicious
+        # all answer sessions are aither not suspicious or unknown
+        assert answer_session["suspicious_state"] in (
+            SuspiciousState.not_suspicious,
+            SuspiciousState.unknown,
+        )
     # add a completed answer session with answers that should be flagged as suspicious
     today = datetime.datetime.today()
     last_month = today - relativedelta(months=1)
@@ -443,7 +449,7 @@ def test_get_milestone_answer_sessions(admin_client: TestClient, session):
             expired=True,
             completed=True,
             included_in_statistics=False,
-            suspicious_state=SuspiciousState.not_suspicious,
+            suspicious_state=SuspiciousState.unknown,
         )
     )
     session.add(
@@ -456,14 +462,14 @@ def test_get_milestone_answer_sessions(admin_client: TestClient, session):
             answer_session_id=666, milestone_id=2, milestone_group_id=1, answer=3
         )
     )
-    # the new answer session is initially not marked as suspicious and is not included in the statistics
+    # the new answer session is not yet included in the statistics
     new_answer_sessions = admin_client.get("/admin/milestone-answer-sessions/").json()
     assert len(new_answer_sessions) == 8
     assert new_answer_sessions[-1]["id"] == 666
-    assert new_answer_sessions[-1]["suspicious_state"] == SuspiciousState.not_suspicious
+    assert new_answer_sessions[-1]["suspicious_state"] == SuspiciousState.unknown
     assert not new_answer_sessions[-1]["included_in_statistics"]
-    # after running an incremental stats update, the new answer session should be marked as suspicious & remain not included in statistics
-    assert admin_client.post("/admin/update-stats/true").status_code == 200
+    # after running a stats update, the new answer session should be marked as suspicious & still not included in statistics
+    assert admin_client.post("/admin/update-stats/").status_code == 200
     new_answer_sessions = admin_client.get("/admin/milestone-answer-sessions/").json()
     assert len(new_answer_sessions) == 8
     assert new_answer_sessions[-1]["id"] == 666
@@ -550,7 +556,7 @@ def test_get_milestone_answer_session_analysis_no_stats(admin_client: TestClient
     assert analysis["rms"] == pytest.approx(0.0)
     assert 50 < analysis["child_age"] < 60
     # update stats
-    assert admin_client.post("/admin/update-stats/false").status_code == 200
+    assert admin_client.post("/admin/update-stats/").status_code == 200
     # now we get analysis for the milestones in this answer session
     response = admin_client.get("/admin/milestone-answer-session-analysis/3")
     assert response.status_code == 200

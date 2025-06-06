@@ -242,15 +242,13 @@ def create_router() -> APIRouter:
         return collection
 
     @router.post(
-        "/update-stats/{incremental_update}",
+        "/update-stats/",
         response_model=str,
     )
     async def admin_update_stats(
-        session: SessionDep, user_session: UserAsyncSessionDep, incremental_update: bool
+        session: SessionDep, user_session: UserAsyncSessionDep
     ):
-        return await async_update_stats(
-            session, user_session, incremental_update=incremental_update
-        )
+        return await async_update_stats(session, user_session)
 
     @router.get(
         "/milestone-answer-sessions/",

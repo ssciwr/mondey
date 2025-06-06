@@ -20,6 +20,14 @@ let {
 } = $props();
 let container: HTMLDivElement;
 
+function mean_score(d: MilestoneAgeScore): number {
+	const n = d.c0 + d.c1 + d.c2 + d.c3;
+	if (n === 0) {
+		return 0; // Return a default value to avoid division by zero
+	}
+	return (d.c1 + 2 * d.c2 + 3 * d.c3) / n;
+}
+
 onMount(() => {
 	if (scoreCollection) {
 		const chart = new XYContainer(
@@ -28,7 +36,7 @@ onMount(() => {
 				components: [
 					new StackedBar<MilestoneAgeScore>({
 						x: (d: MilestoneAgeScore) => d.age,
-						y: (d: MilestoneAgeScore) => d.avg_score,
+						y: (d: MilestoneAgeScore) => mean_score(d),
 						barMinHeight1Px: true,
 						barPadding: 0.0,
 						color: (d: MilestoneAgeScore) => {

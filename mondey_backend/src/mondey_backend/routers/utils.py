@@ -232,7 +232,7 @@ def get_or_create_current_milestone_answer_session(
             completed=False,
             expired=False,
             included_in_statistics=False,
-            suspicious_state=SuspiciousState.not_suspicious,
+            suspicious_state=SuspiciousState.unknown,
         )
         add(session, milestone_answer_session)
         child_age_months = get_child_age_in_months(child)
@@ -316,53 +316,57 @@ def get_answer_session_child_ages_in_months(
     }
 
 
-def get_expected_age_from_scores(scores: np.ndarray, count: np.ndarray) -> int:
+def _milestone_achieved(answers: np.ndarray) -> bool:
     """
-    Returns the expected age for a milestone based on the average scores for each child age.
-    :param scores: the average score for each age, where the index in the array is the age in months
-    :param count: the count of answers for each age, where the index in the array is the age in months
+    Check if a milestone is considered achieved based on the answers.
+    Milestone is considered achieved if:
+      - at least 80% of the answers are 2 or 3
+      - and at least 3 answers are provided.
+    """
+    # require at least `min_number_of_answers`
+    min_number_of_answers = 3
+    # required fraction of children that answered with 2 or 3 to consider the milestone achieved
+    min_fraction_achieved = 0.8
+    n = np.sum(answers)
+    sufficient_data = n >= min_number_of_answers
+    milestone_achieved = np.sum(answers[2:]) >= min_fraction_achieved * n
+    return sufficient_data and milestone_achieved
+
+
+def get_expected_age_from_scores(counts: np.ndarray) -> int:
+    """
+    Returns the expected age for a milestone based on the counts of each answer for each child age.
+    :param counts: the number of answers for each age and answer, where the index in the 2-d array is (age, answer)
     :return: the expected age in months for this milestone
     """
-    # require at least `min_number_of_answers` answers for each age
-    min_number_of_answers = 3
-    # expected age is the first age with an average score >= `min_avg_score`
-    min_avg_score = 2.1
-    valid_scores = scores.copy()
-    valid_scores[count < min_number_of_answers] = 0
-    successful_scores = valid_scores >= min_avg_score
-    # if no age has a score >= `min_avg_score`, return the maximum child age
-    if not np.any(successful_scores):
+    achieved = np.array([_milestone_achieved(count) for count in counts])
+    if not np.any(achieved):
         return app_settings.MAX_CHILD_AGE_MONTHS
-    return int(np.argmax(successful_scores))
+    return int(np.argmax(achieved))
 
 
-def get_expected_age_delta(
-    expected_age: int, scores: np.ndarray, count: np.ndarray
-) -> int:
+def get_expected_age_delta(expected_age: int, counts: np.ndarray) -> int:
     """
-    Returns the +/- range on the expected age for a milestone based on the average scores for each child age.
+    Returns the +/- range on the expected age for a milestone based on the counts of each answer for each child age.
     :param expected_age: the expected age in months for this milestone
-    :param scores: the average score for each age, where the index in the array is the age in months
-    :param count: the count of answers for each age, where the index in the array is the age in months
+    :param counts: the number of answers for each age and answer, where the index in the 2-d array is (age, answer)
     :return: the +/- range on the expected age in months for this milestone
     """
-    # require at least `min_number_of_answers` answers for each age
+    # require at least `min_number_of_answers`
     min_number_of_answers = 3
-    near_perfect_score = 2.95
-    near_zero_score = 0.05
+    # set max_age to only exclude ages with no 0 or 1 answers
     max_age = app_settings.MAX_CHILD_AGE_MONTHS
-    # set max_age to only exclude ages with near-perfect scores
     while (
-        scores[max_age] >= near_perfect_score
-        and count[max_age] >= min_number_of_answers
+        np.sum(counts[max_age][:2]) == 0
+        and np.sum(counts[max_age]) >= min_number_of_answers
         and max_age >= expected_age
     ):
         max_age -= 1
     min_age = 0
-    # set min_age to only exclude ages with near-zero scores
+    # set min_age to only exclude ages with no 3 or 4 answers
     while (
-        scores[min_age] <= near_zero_score
-        and count[min_age] >= min_number_of_answers
+        np.sum(counts[min_age][2:]) == 0
+        and np.sum(counts[min_age]) >= min_number_of_answers
         and min_age <= expected_age
     ):
         min_age += 1

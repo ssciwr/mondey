@@ -6,10 +6,7 @@ import {
 	getMilestoneAnswerSessions,
 	importCsvData,
 } from "$lib/client/sdk.gen";
-import type {
-	MilestoneAnswerSession,
-	SuspiciousState,
-} from "$lib/client/types.gen";
+import type { MilestoneAnswerSession } from "$lib/client/types.gen";
 import AnswerSessionAnalysisModal from "$lib/components/Admin/AnswerSessionAnalysisModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import {
@@ -61,14 +58,10 @@ let importResult = $state({
 let showImportResult = $state(false);
 let successfulImport = $state(false);
 
-async function doStatsUpdate(incremental: boolean) {
+async function doStatsUpdate() {
 	show_update_stats_modal = true;
 	update_stats_result = "";
-	const { data, error } = await adminUpdateStats({
-		path: {
-			incremental_update: incremental,
-		},
-	});
+	const { data, error } = await adminUpdateStats();
 	if (error || !data) {
 		console.log(error);
 		update_stats_result = i18n.tr.admin.error;
@@ -198,7 +191,7 @@ function boolToStr(bool: boolean): string {
 	return bool ? i18n.tr.admin.yes : i18n.tr.admin.no;
 }
 
-function isSuspicious(state: SuspiciousState): boolean {
+function isSuspicious(state: string): boolean {
 	return state === "suspicious" || state === "admin_suspicious";
 }
 
@@ -316,10 +309,7 @@ onMount(async () => {
     <Alert color="red">{i18n.tr.admin.statisticsNeedUpdating}</Alert>
 {/if}
 <div class="grid grid-cols-2 justify-items-stretch my-2">
-    <Button class="mr-2" onclick={() => {doStatsUpdate(true)}} data-testid="incrementalStatsUpdate">
-        <RefreshOutline class="me-2 h-5 w-5"/>{i18n.tr.admin.updateStatistics}
-    </Button>
-    <Button onclick={() => {doStatsUpdate(false)}} data-testid="fullStatsUpdate">
+    <Button onclick={() => {doStatsUpdate()}} data-testid="fullStatsUpdate">
         <RefreshOutline class="me-2 h-5 w-5"/>{i18n.tr.admin.recalculateAllStatistics}
     </Button>
 </div>
@@ -357,7 +347,7 @@ onMount(async () => {
                             {boolToStr(answer_session.included_in_statistics)}
                         </TableBodyCell>
                         <TableBodyCell>
-                            {boolToStr(isSuspicious(answer_session.suspicious_state))}
+                            {answer_session.suspicious_state}
                         </TableBodyCell>
                         <TableBodyCell>
                             <Button onclick={() => {if(answer_session.id) {current_answer_session_id=answer_session.id;

@@ -301,7 +301,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=True,
                 expired=True,
                 included_in_statistics=False,
-                suspicious_state=SuspiciousState.not_suspicious,
+                suspicious_state=SuspiciousState.unknown,
             )
         )
         # add two milestone answers
@@ -325,7 +325,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=True,
                 expired=True,
                 included_in_statistics=False,
-                suspicious_state=SuspiciousState.not_suspicious,
+                suspicious_state=SuspiciousState.unknown,
             )
         )
         session.add(
@@ -346,7 +346,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=False,
                 expired=False,
                 included_in_statistics=False,
-                suspicious_state=SuspiciousState.not_suspicious,
+                suspicious_state=SuspiciousState.unknown,
             )
         )
         session.add(
@@ -367,7 +367,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=True,
                 expired=True,
                 included_in_statistics=False,
-                suspicious_state=SuspiciousState.not_suspicious,
+                suspicious_state=SuspiciousState.unknown,
             )
         )
         session.add(
@@ -391,7 +391,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 completed=False,
                 expired=True,
                 included_in_statistics=False,
-                suspicious_state=SuspiciousState.not_suspicious,
+                suspicious_state=SuspiciousState.unknown,
             )
         )
         session.add(
@@ -436,11 +436,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 milestone_id=1,
                 expected_age=8,
                 expected_age_delta=4,
-                created_at=datetime.datetime(
-                    last_month.year,
-                    last_month.month,
-                    17,
-                ),
             )
         )
         for age in range(0, settings.app_settings.MAX_CHILD_AGE_MONTHS + 1):
@@ -448,9 +443,10 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 MilestoneAgeScore(
                     age=age,
                     milestone_id=1,
-                    count=1 if age == 8 else 0,
-                    avg_score=1.0 if age == 8 else 0,
-                    stddev_score=0.0,
+                    c0=0,
+                    c1=1 if age == 8 else 0,
+                    c2=0,
+                    c3=0,
                 )
             )
 
@@ -460,11 +456,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 milestone_id=2,
                 expected_age=8,
                 expected_age_delta=4,
-                created_at=datetime.datetime(
-                    last_month.year,
-                    last_month.month,
-                    17,
-                ),
             )
         )
         for age in range(0, settings.app_settings.MAX_CHILD_AGE_MONTHS + 1):
@@ -472,9 +463,10 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 MilestoneAgeScore(
                     age=age,
                     milestone_id=2,
-                    count=1 if age == 8 else 0,
-                    avg_score=0.0 if age == 8 else 0,
-                    stddev_score=0.0,
+                    c0=1 if age == 8 else 0,
+                    c1=0,
+                    c2=0,
+                    c3=0,
                 )
             )
 
@@ -482,11 +474,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         session.add(
             MilestoneGroupAgeScoreCollection(
                 milestone_group_id=1,
-                created_at=datetime.datetime(
-                    last_month.year,
-                    last_month.month,
-                    17,
-                ),
             )
         )
         age_8_milestone_group1_scores = (
@@ -494,18 +481,15 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             0,
             0,
         )  # answers for milestone 1,2,3 from answer session 1 (#3 is imputed)
+        avg_score = np.mean(age_8_milestone_group1_scores)
         for age in range(0, settings.app_settings.MAX_CHILD_AGE_MONTHS + 1):
             session.add(
                 MilestoneGroupAgeScore(
                     age=age,
                     milestone_group_id=1,
-                    count=3 if age == 8 else 0,
-                    avg_score=np.mean(age_8_milestone_group1_scores)
-                    if age == 8
-                    else 0.0,
-                    stddev_score=np.std(age_8_milestone_group1_scores)
-                    if age == 8
-                    else 0.0,
+                    count=1 if age == 8 else 0,
+                    sum_score=avg_score if age == 8 else 0.0,
+                    sum_squaredscore=avg_score * avg_score if age == 8 else 0.0,
                 )
             )
 

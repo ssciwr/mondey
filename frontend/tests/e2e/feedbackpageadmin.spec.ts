@@ -6,6 +6,7 @@ ratehr than use the UI to manually add the data etc.
  */
 
 import { expect, test } from "@playwright/test";
+import { DateTime } from "luxon";
 import { login } from "./utils";
 
 test("/userLand/children - The gallery of children includes feedback with the relevant milestone groups", async ({
@@ -16,10 +17,13 @@ test("/userLand/children - The gallery of children includes feedback with the re
 		page.getByText("Wählen sie ein Kind zur Beobachtung aus"),
 	).toBeVisible();
 
+	// Emma Johnson was born 3 months ago
+	const birthDate = DateTime.now().minus({ months: 3 });
+	await expect(
+		page.getByText(`${birthDate.month}/${birthDate.year}`),
+	).toBeVisible();
+
 	await page.locator('h5:has-text("Emma Johnson")').click();
-	await expect(page.getByText("2025", { exact: false }).first()).toBeVisible(); //  we don't test the month because it's variable in a
-	// complicated way in the SQL which inserts the children (importMIlestoneAnswer.sql) to keep them around 3 months
-	// old at time of test.
 
 	await page.locator('button:has-text("Feedback zur Entwicklung")').click();
 
@@ -35,6 +39,6 @@ test("/userLand/children - The gallery of children includes feedback with the re
 	).toBeAttached();
 
 	await expect(
-		page.locator("svg.shrink-0.w-8.h-8.text-feedback-0").first(),
-	).toBeAttached();
+		page.getByText("Noch nicht genügend Daten für Feedback"),
+	).toBeVisible();
 });
