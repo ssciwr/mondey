@@ -365,7 +365,7 @@ def get_expected_age_delta(expected_age: int, counts: np.ndarray) -> int:
     min_age = 0
     # set min_age to only exclude ages with no 3 or 4 answers
     while (
-        np.sum(counts[max_age][2:]) == 0
+        np.sum(counts[min_age][2:]) == 0
         and np.sum(counts[min_age]) >= min_number_of_answers
         and min_age <= expected_age
     ):
