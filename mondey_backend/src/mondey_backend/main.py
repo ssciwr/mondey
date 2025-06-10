@@ -76,13 +76,15 @@ async def lifespan(app: FastAPI):
     scheduler.start()
     yield
     scheduler.shutdown()
-    if not app_settings.DATABASE_PATH:
-        for engine in (mondey_engine, users_engine):
-            if engine.url.database:
-                db_path = pathlib.Path(engine.url.database)
-                logging.warning(f"Removing temporary database {db_path}")
-                db_path.unlink()
-                db_path.parent.rmdir()
+    for host, engine in (
+        (app_settings.DATABASE_HOST_MONDEYDB, mondey_engine),
+        (app_settings.DATABASE_HOST_USERSDB, users_engine),
+    ):
+        if not host and engine.url.database:
+            db_path = pathlib.Path(engine.url.database)
+            logging.warning(f"Removing temporary database {db_path}")
+            db_path.unlink()
+            db_path.parent.rmdir()
 
 
 def create_app() -> FastAPI:
@@ -128,6 +130,9 @@ def main():
         host=app_settings.HOST,
         port=app_settings.PORT,
         reload=app_settings.RELOAD,
+        reload_dirs=["mondey_backend/src/mondey_backend"]
+        if app_settings.RELOAD
+        else None,
         log_level=app_settings.LOG_LEVEL,
         forwarded_allow_ips="*",
         factory=True,

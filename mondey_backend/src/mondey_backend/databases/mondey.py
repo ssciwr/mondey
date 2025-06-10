@@ -11,7 +11,7 @@ from ..models.milestones import Language
 from ..settings import app_settings
 
 db_url = (
-    f"postgresql+psycopg://{app_settings.DATABASE_USER}:{app_settings.DATABASE_PASSWORD}@{app_settings.DATABASE_HOST_MONDEYDB}:{app_settings.DATABASE_PORT}/mondey"
+    f"postgresql+psycopg://{app_settings.DATABASE_USER}:{app_settings.DATABASE_PASSWORD}@{app_settings.DATABASE_HOST_MONDEYDB}:{app_settings.DATABASE_PORT_MONDEYDB}/mondey"
     if app_settings.DATABASE_HOST_MONDEYDB
     else f"sqlite:///{tempfile.mkdtemp()}/mondey.db"
 )

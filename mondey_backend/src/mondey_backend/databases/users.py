@@ -17,7 +17,7 @@ from ..models.users import User
 from ..settings import app_settings
 
 db_url = (
-    f"postgresql+psycopg://{app_settings.DATABASE_USER}:{app_settings.DATABASE_PASSWORD}@{app_settings.DATABASE_HOST_USERSDB}:{app_settings.DATABASE_PORT}/users"
+    f"postgresql+psycopg://{app_settings.DATABASE_USER}:{app_settings.DATABASE_PASSWORD}@{app_settings.DATABASE_HOST_USERSDB}:{app_settings.DATABASE_PORT_USERSDB}/users"
     if app_settings.DATABASE_HOST_USERSDB
     else f"sqlite+aiosqlite:///{tempfile.mkdtemp()}/users.db"
 )
