@@ -69,7 +69,7 @@ git clone https://github.com/ssciwr/mondey.git
 cd mondey
 ```
 
-2. run the postgres mondey and user databases locally:
+2. run the postgres mondey and user databases locally (this will start the postgres docker containers in detached mode and they will continue to run in the background):
 
 ```sh
 docker compose -f docker-compose.localdatabases.yml up -d
@@ -93,4 +93,5 @@ pnpm install
 pnpm run dev
 ```
 
-The website is then served at http://localhost:5173/.
+The website is then served at http://localhost:5173/, and any changes to the frontend or backend code
+will be reflected immediately in the browser.
