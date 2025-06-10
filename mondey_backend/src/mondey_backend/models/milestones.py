@@ -207,7 +207,7 @@ class SuspiciousState(str, enum.Enum):
     - not_suspicious: Marked as not suspicious by system, may be overridden by admin
     - suspicious: Marked as suspicious by system, may be overridden by admin
     - admin_suspicious: Explicitly marked as suspicious by admin, cannot be overridden by system
-    - unknown: Not yet analyzed, will be marked as suspicious or not_suspicious by system next time stats update
+    - unknown: Not yet analyzed default, will be marked as suspicious or not_suspicious by system next time stats update
     """
 
     admin_not_suspicious = "admin_not_suspicious"
