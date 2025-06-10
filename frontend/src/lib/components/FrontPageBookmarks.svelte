@@ -12,39 +12,32 @@ import UsersGroupOutline from "flowbite-svelte-icons/UsersGroupOutline.svelte";
 
 const bookmarks = [
 	{
-		titleKey: i18n.tr.frontpageBookmarks.headingMotor,
-		contentKey: i18n.tr.frontpageBookmarks.summaryMotor,
+		key: "Motor",
 		icon: RocketOutline,
 		emoji: "🏃",
 	},
 	{
-		titleKey: i18n.tr.frontpageBookmarks.headingFineMotor,
-		contentKey: i18n.tr.frontpageBookmarks.summaryFineMotor,
+		key: "FineMotor",
 		icon: PenOutline,
 	},
 	{
-		titleKey: i18n.tr.frontpageBookmarks.headingThinking,
-		contentKey: i18n.tr.frontpageBookmarks.summaryThinking,
+		key: "Thinking",
 		icon: BrainOutline,
 	},
 	{
-		titleKey: i18n.tr.frontpageBookmarks.headingLanguage,
-		contentKey: i18n.tr.frontpageBookmarks.summaryLanguage,
+		key: "Language",
 		icon: LanguageOutline,
 	},
 	{
-		titleKey: i18n.tr.frontpageBookmarks.headingSocialDevelopment,
-		contentKey: i18n.tr.frontpageBookmarks.summarySocialDevelopment,
+		key: "SocialDevelopment",
 		icon: UsersGroupOutline,
 	},
 	{
-		titleKey: i18n.tr.frontpageBookmarks.headingInnerStates,
-		contentKey: i18n.tr.frontpageBookmarks.summaryInnerStates,
+		key: "InnerStates",
 		icon: HeartOutline,
 	},
 	{
-		titleKey: i18n.tr.frontpageBookmarks.headingSchool,
-		contentKey: i18n.tr.frontpageBookmarks.summarySchool,
+		key: "School",
 		icon: GraduationCapOutline,
 	},
 ];
@@ -58,7 +51,7 @@ function selectTab(index: number) {
 
 <div class="w-full px-4 mx-auto">
     <div class="max-w-2xl mx-auto space-y-2">
-        {#each bookmarks as { titleKey, contentKey, icon, emoji }, index}
+        {#each bookmarks as { key, icon, emoji }, index}
             <div class="w-full">
                 <button
                         class={activeIndex === index
@@ -77,7 +70,7 @@ function selectTab(index: number) {
                         </div>
                         <div class="flex-1">
                             <h3 class="font-medium hover:text-white {activeIndex === index ? 'text-white' : ' hover:text-white dark:text-white'}">
-                                {titleKey}
+                                {i18n.tr.frontpageBookmarks?.[`heading${key}`]}
                             </h3>
                         </div>
                         <div class="flex-shrink-0 transform transition-transform duration-200 {activeIndex === index ? 'rotate-180' : ''}">
@@ -90,7 +83,7 @@ function selectTab(index: number) {
                 {#if activeIndex === index}
                     <div class="mt-2 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 text-left">
                         <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-                            {contentKey}
+                            {i18n.tr.frontpageBookmarks?.[`summary${key}`]}
                         </p>
                     </div>
                 {/if}
