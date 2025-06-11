@@ -169,9 +169,10 @@ export type MilestoneAdmin = {
 export type MilestoneAgeScore = {
     milestone_id?: number | null;
     age: number;
-    count: number;
-    avg_score: number;
-    stddev_score: number;
+    c0: number;
+    c1: number;
+    c2: number;
+    c3: number;
 };
 
 export type MilestoneAgeScoreCollectionPublic = {
@@ -1025,21 +1026,10 @@ export type GetMilestoneAgeScoresResponse = GetMilestoneAgeScoresResponses[keyof
 
 export type AdminUpdateStatsData = {
     body?: never;
-    path: {
-        incremental_update: boolean;
-    };
+    path?: never;
     query?: never;
-    url: '/admin/update-stats/{incremental_update}';
+    url: '/admin/update-stats/';
 };
-
-export type AdminUpdateStatsErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type AdminUpdateStatsError = AdminUpdateStatsErrors[keyof AdminUpdateStatsErrors];
 
 export type AdminUpdateStatsResponses = {
     /**

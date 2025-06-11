@@ -289,11 +289,11 @@ async function loadDetailedFeedbackFor(
 
 	let res = {} as Record<number, Record<number, number>>;
 
-	// filter out the milestones that are not ideal and only show those
+	// only show milestones with negative feedback
 	for (const [mid, milestones] of Object.entries(response.data)) {
 		res[Number(mid)] = {} as Record<number, number>;
 		for (const [ms_id, ms_score] of Object.entries(milestones)) {
-			if (ms_score <= 0) {
+			if (ms_score <= 0 && ms_score !== -2) {
 				res[Number(mid)][Number(ms_id)] = Number(ms_score);
 			}
 		}

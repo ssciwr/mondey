@@ -52,6 +52,8 @@ Whenever you make a change to the code you need to re-run the above command to s
 The default location for the postgres data is the `db` folder where you run the docker compose command.
 To make an existing user with email address `you@address.com` into an admin, run the following commands:
 
+Change the Docker database grep name to mondey-local-mondeydb-1 if you are running just docker DBs with local python.
+
 ```sh
 docker exec -it $(docker ps | grep mondeydb-1 | awk '{print $1}') bash
 psql -U postgres -d mondey
