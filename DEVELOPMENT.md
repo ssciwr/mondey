@@ -27,6 +27,15 @@ cd mondey
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes -subj '/CN=localhost'
 ```
 
+3. define settings in a .env file in the same folder as the `docker-compose.yml` file, eg:
+
+```
+SMTP_HOST=""
+SECRET="abc123"
+DATABASE_PASSWORD="abc123"
+LOG_LEVEL="debug"
+```
+
 3. build and run the website locally in docker containers on your computer:
 
 ```sh
@@ -40,20 +49,18 @@ Whenever you make a change to the code you need to re-run the above command to s
 
 ### Database
 
-The databases will by default be stored in a `db` folder
-in the folder where you run the docker compose command.
+The default location for the postgres data is the `db` folder where you run the docker compose command.
+To make an existing user with email address `you@address.com` into an admin, run the following commands:
 
-### Make yourself an admin user
-
-```
-sudo sqlite3 docker_volume/predicTCR.db
-sqlite> UPDATE user SET is_admin=true WHERE email='you@address.com';
-sqlite> .quit
+```sh
+docker exec -it $(docker ps | grep mondeydb-1 | awk '{print $1}') bash
+psql -U postgres -d mondey
+UPDATE user SET is_admin=true WHERE email='you@address.com';
 ```
 
 ## Run locally with Python and pnpm
 
-Requires Python and [pnpm](https://pnpm.io/installation#using-a-standalone-script)
+Requires docker compose, Python and [pnpm](https://pnpm.io/installation#using-a-standalone-script)
 
 1. clone the repo:
 
@@ -62,19 +69,22 @@ git clone https://github.com/ssciwr/mondey.git
 cd mondey
 ```
 
-2. install and run the backend development server:
+2. run the postgres mondey and user databases locally (this will start the postgres docker containers in detached mode and they will continue to run in the background):
+
+```sh
+docker compose -f docker-compose.localdatabases.yml up -d
+```
+
+3. install and run the backend development server:
 
 ```sh
 cd mondey_backend
-pip install -e .
+pip install -e .[tests]
 cd ..
 mondey-backend
 ```
-(run the last command above in the `mondey/mondey-backend` folder itself)
 
-
-
-3. install and run the frontend development server:
+4. install and run the frontend development server:
 
 3.1: Run the frontend
 ```sh
@@ -83,4 +93,5 @@ pnpm install
 pnpm run dev
 ```
 
-The website is then served at http://localhost:5173/.
+The website is then served at http://localhost:5173/, and any changes to the frontend or backend code
+will be reflected immediately in the browser.
