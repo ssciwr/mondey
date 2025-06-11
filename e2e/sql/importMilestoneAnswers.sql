@@ -5,52 +5,52 @@
 -- Child 1: 3 months old
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)
 VALUES (1001, 3, 'Emma Johnson',
-        EXTRACT(YEAR FROM (CURRENT_DATE - INTERVAL '3 months')),
-        EXTRACT(MONTH FROM (CURRENT_DATE - INTERVAL '3 months')),
+        CAST(strftime('%Y', date('now', '-3 months')) AS INTEGER),
+        CAST(strftime('%m', date('now', '-3 months')) AS INTEGER),
         false, '#ffcdd2');
 
 -- Child 2: 8 months old
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)
 VALUES (1002, 3, 'Liam Smith',
-        EXTRACT(YEAR FROM (CURRENT_DATE - INTERVAL '8 months')),
-        EXTRACT(MONTH FROM (CURRENT_DATE - INTERVAL '8 months')),
+        CAST(strftime('%Y', date('now', '-8 months')) AS INTEGER),
+        CAST(strftime('%m', date('now', '-8 months')) AS INTEGER),
         false, '#bbdefb');
 
 -- Child 3: 12 months old (1 year)
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)
 VALUES (1003, 3, 'Olivia Brown',
-        EXTRACT(YEAR FROM (CURRENT_DATE - INTERVAL '12 months')),
-        EXTRACT(MONTH FROM (CURRENT_DATE - INTERVAL '12 months')),
-        strftime('%m', 'now'),
+        CAST(strftime('%Y', date('now', '-12 months')) AS INTEGER),
+        CAST(strftime('%m', date('now', '-12 months')) AS INTEGER),
         false, '#c8e6c9');
 
 -- Child 4: 18 months old (1.5 years)
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)
 VALUES (1004, 4, 'Noah Davis',
-        EXTRACT(YEAR FROM (CURRENT_DATE - INTERVAL '18 months')),
-        EXTRACT(MONTH FROM (CURRENT_DATE - INTERVAL '18months')),
+        CAST(strftime('%Y', date('now', '-18 months')) AS INTEGER),
+        CAST(strftime('%m', date('now', '-18 months')) AS INTEGER),
         false, '#fff9c4');
 
 -- Child 5: 24 months old (2 years)
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)
 VALUES (1005, 4, 'Ava Wilson',
-        EXTRACT(YEAR FROM (CURRENT_DATE - INTERVAL '24 months')),
-        EXTRACT(MONTH FROM (CURRENT_DATE - INTERVAL '24 months')),,
+        CAST(strftime('%Y', date('now', '-24 months')) AS INTEGER),
+        CAST(strftime('%m', date('now', '-24 months')) AS INTEGER),
         false, '#e1bee7');
 
 -- Child 6: 30 months old (2.5 years)
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)
 VALUES (1006, 5, 'Ethan Miller',
-        EXTRACT(YEAR FROM (CURRENT_DATE - INTERVAL '30 months')),
-        EXTRACT(MONTH FROM (CURRENT_DATE - INTERVAL '30 months')),
+        CAST(strftime('%Y', date('now', '-30 months')) AS INTEGER),
+        CAST(strftime('%m', date('now', '-30 months')) AS INTEGER),
         false, '#b2dfdb');
 
 -- Child 7: 36 months old (3 years)
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)
 VALUES (1007, 5, 'Sophia Taylor',
-        EXTRACT(YEAR FROM (CURRENT_DATE - INTERVAL '36 months')),
-        EXTRACT(MONTH FROM (CURRENT_DATE - INTERVAL '36 months')),
+        CAST(strftime('%Y', date('now', '-36 months')) AS INTEGER),
+        CAST(strftime('%m', date('now', '-36 months')) AS INTEGER),
         false, '#ffccbc');
+
 
 -- Create milestone answer sessions for each child
 -- Each child will have 1-2 sessions
