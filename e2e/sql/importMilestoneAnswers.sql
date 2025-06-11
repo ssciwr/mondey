@@ -5,77 +5,51 @@
 -- Child 1: 3 months old
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)
 VALUES (1001, 3, 'Emma Johnson',
-        CASE
-            WHEN strftime('%m', 'now') <= '03' THEN strftime('%Y', 'now') - 1
-            ELSE strftime('%Y', 'now')
-        END,
-        CASE
-            WHEN strftime('%m', 'now') <= '03' THEN strftime('%m', 'now') + 9
-            ELSE strftime('%m', 'now') - 3
-        END,
+        EXTRACT(YEAR FROM (CURRENT_DATE - INTERVAL '3 months')),
+        EXTRACT(MONTH FROM (CURRENT_DATE - INTERVAL '3 months')),
         false, '#ffcdd2');
 
 -- Child 2: 8 months old
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)
 VALUES (1002, 3, 'Liam Smith',
-        CASE
-            WHEN strftime('%m', 'now') <= '08' THEN strftime('%Y', 'now') - 1
-            ELSE strftime('%Y', 'now')
-        END,
-        CASE
-            WHEN strftime('%m', 'now') <= '08' THEN strftime('%m', 'now') + 4
-            ELSE strftime('%m', 'now') - 8
-        END,
+        EXTRACT(YEAR FROM (CURRENT_DATE - INTERVAL '8 months')),
+        EXTRACT(MONTH FROM (CURRENT_DATE - INTERVAL '8 months')),
         false, '#bbdefb');
 
 -- Child 3: 12 months old (1 year)
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)
 VALUES (1003, 3, 'Olivia Brown',
-        CASE
-            WHEN strftime('%m', 'now') = '01' THEN strftime('%Y', 'now') - 2
-            ELSE strftime('%Y', 'now') - 1
-        END,
+        EXTRACT(YEAR FROM (CURRENT_DATE - INTERVAL '12 months')),
+        EXTRACT(MONTH FROM (CURRENT_DATE - INTERVAL '12 months')),
         strftime('%m', 'now'),
         false, '#c8e6c9');
 
 -- Child 4: 18 months old (1.5 years)
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)
 VALUES (1004, 4, 'Noah Davis',
-        CASE
-            WHEN strftime('%m', 'now') <= '06' THEN strftime('%Y', 'now') - 2
-            ELSE strftime('%Y', 'now') - 1
-        END,
-        CASE
-            WHEN strftime('%m', 'now') <= '06' THEN strftime('%m', 'now') + 6
-            ELSE strftime('%m', 'now') - 6
-        END,
+        EXTRACT(YEAR FROM (CURRENT_DATE - INTERVAL '18 months')),
+        EXTRACT(MONTH FROM (CURRENT_DATE - INTERVAL '18months')),
         false, '#fff9c4');
 
 -- Child 5: 24 months old (2 years)
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)
 VALUES (1005, 4, 'Ava Wilson',
-        strftime('%Y', 'now') - 2,
-        strftime('%m', 'now'),
+        EXTRACT(YEAR FROM (CURRENT_DATE - INTERVAL '24 months')),
+        EXTRACT(MONTH FROM (CURRENT_DATE - INTERVAL '24 months')),,
         false, '#e1bee7');
 
 -- Child 6: 30 months old (2.5 years)
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)
 VALUES (1006, 5, 'Ethan Miller',
-        CASE
-            WHEN strftime('%m', 'now') <= '06' THEN strftime('%Y', 'now') - 3
-            ELSE strftime('%Y', 'now') - 2
-        END,
-        CASE
-            WHEN strftime('%m', 'now') <= '06' THEN strftime('%m', 'now') + 6
-            ELSE strftime('%m', 'now') - 6
-        END,
+        EXTRACT(YEAR FROM (CURRENT_DATE - INTERVAL '30 months')),
+        EXTRACT(MONTH FROM (CURRENT_DATE - INTERVAL '30 months')),
         false, '#b2dfdb');
 
 -- Child 7: 36 months old (3 years)
 INSERT INTO child (id, user_id, name, birth_year, birth_month, has_image, color)
 VALUES (1007, 5, 'Sophia Taylor',
-        strftime('%Y', 'now') - 3,
-        strftime('%m', 'now'),
+        EXTRACT(YEAR FROM (CURRENT_DATE - INTERVAL '36 months')),
+        EXTRACT(MONTH FROM (CURRENT_DATE - INTERVAL '36 months')),
         false, '#ffccbc');
 
 -- Create milestone answer sessions for each child
