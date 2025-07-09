@@ -6,6 +6,14 @@ import FrontPageAccordion from "$lib/components/FrontPageAccordion.svelte";
 import FrontPageBookmarks from "$lib/components/FrontPageBookmarks.svelte";
 import FrontPageCard from "$lib/components/FrontPageCard.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { Modal } from "flowbite-svelte";
+import { onMount } from "svelte";
+
+let showDisclaimerModal = $state(false);
+
+onMount(() => {
+    showDisclaimerModal = true;
+});
 </script>
 
 <FrontPageCard/>
@@ -18,3 +26,11 @@ import { i18n } from "$lib/i18n.svelte";
 </div>
 
 <FrontPageAccordion/>
+
+<Modal bind:open={showDisclaimerModal} autoclose>
+    <div class="p-4 text-center">
+        <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+            {i18n.tr.frontpage.disclaimerPopup}
+        </h3>
+    </div>
+</Modal>

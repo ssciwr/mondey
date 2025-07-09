@@ -87,6 +87,11 @@ const breadcrumbdata: any[] = [
 {:then answerSession}
     <div class="mx-auto flex flex-col md:rounded-t-lg">
         <Breadcrumbs data={breadcrumbdata}/>
+        <div class="p-4 text-center md:hidden">
+            <p class="text-sm text-gray-700 dark:text-gray-400">
+                {i18n.tr.milestone.milestoneOverviewMobileHint}
+            </p>
+        </div>
         <GalleryDisplay bind:searchTerm={searchTerm} bind:showIncompleteOnly={showIncompleteOnly}>
             {#each contentStore.milestoneGroupData.milestones as milestone, idx}
                 {@const title = milestone?.text?.[i18n.locale]?.title ?? ""}
