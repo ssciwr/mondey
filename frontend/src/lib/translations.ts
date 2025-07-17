@@ -77,8 +77,10 @@ export const translationIds = {
 		date: "Datum",
 		reportTitle: "Entwicklungsbericht",
 		feedbackTitle: "Feedback zur Entwicklung des Kindes",
-		milestoneOverviewMobileHint: "Überblick über die Meilensteine für diesen Bereich / dieses Alter",
-		milestoneDescriptionMobileHint: "Erklärungen zu Ihren Antwortmöglichkeiten finden Sie weiter unten",
+		milestoneOverviewMobileHint:
+			"Überblick über die Meilensteine für diesen Bereich / dieses Alter",
+		milestoneDescriptionMobileHint:
+			"Erklärungen zu Ihren Antwortmöglichkeiten finden Sie weiter unten",
 	},
 	search: {
 		allLabel: "Alle",
