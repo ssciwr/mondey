@@ -263,6 +263,11 @@ const breadcrumbdata = $derived([
                     </Accordion>
                 </div>
                 <div class="md:w-1/5 m-1 mt-0 flex flex-col justify-items-stretch rounded-lg">
+                    <div class="p-2 text-center md:hidden">
+                        <p class="text-sm text-gray-700 dark:text-gray-400">
+                            {i18n.tr.milestone.milestoneDescriptionMobileHint}
+                        </p>
+                    </div>
                     {#each [0, 1, 2, 3, -1] as answerIndex}
                         <MilestoneButton
                                 index={answerIndex}

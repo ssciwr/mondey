@@ -77,6 +77,10 @@ export const translationIds = {
 		date: "Datum",
 		reportTitle: "Entwicklungsbericht",
 		feedbackTitle: "Feedback zur Entwicklung des Kindes",
+		milestoneOverviewMobileHint:
+			"Überblick über die Meilensteine für diesen Bereich / dieses Alter",
+		milestoneDescriptionMobileHint:
+			"Erklärungen zu Ihren Antwortmöglichkeiten finden Sie weiter unten",
 	},
 	search: {
 		allLabel: "Alle",
@@ -368,6 +372,7 @@ export const translationIds = {
 		buttonLabel: "Anmeldung",
 		toolTip: "Anmelden oder ein neues Konto erstellen",
 		toggleDarkmode: "Darkmode ein- oder ausschalten",
+		disclaimerPopup: "Achtung! Die Webseite befindet sich noch im Aufbau.",
 	},
 	frontpageAbout: {
 		heading: "Was ist MONDEY?",
