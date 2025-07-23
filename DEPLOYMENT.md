@@ -2,6 +2,8 @@
 
 Some information on how to deploy the website - currently it is deployed on a temporary heicloud VM.
 
+A FAQ section is included at the end.
+
 ## Production deployment
 
 Production docker container images are automatically built by CI.
@@ -199,3 +201,101 @@ And similarly for the usersdb:
 ```
 zstdcat db_backups/users/last/users-latest.sql.gz | docker exec -i $(docker ps | grep usersdb-1 | awk '{print $1}') psql --username=postgres --dbname=users
 ```
+
+
+# Frequently Asked Questions
+## Application
+
+**Is Mondey.de running in a heiCLOUD VM? Which are the current specs of it (type of VM, volumes types and sizes)?**
+
+Yes. The specs are: Linux VM with 2 CPUS, 4GB RAM, 30GB storage
+
+**What are the recommended CPU, RAM, and storage requirements to run mondey?**
+
+The storage usage should be regularly checked. Images are stored on the application, but in the main use cases not typically used at time of writing. Most other data is text or numerical.
+
+The main storage requirement is for the database and logs. Currently the databases use ~150mb (but this is mostly caching, the actual db is only a few mb), the logs are configured to use ~1.2gb max (but that can be set to any desired value), and the database backups are < 5mb.
+
+**Does it run as a single service or are there multiple components (e.g., web server + database)? (I have seen the docker compose file has several services configured)**
+
+Multiple docker services are ran via a coordinating Docker compose file.
+
+**Which operating system is currently used in production (e.g., Ubuntu 22.04, Debian, etc.)?**
+
+The operating system should not really matter as the Dockerfiles should each specify their needed base image and there are no specific extra requirements (e.g. no GPU/nvidia). Ubuntu 24.04 is currently used in production.
+
+**Is it running in a container (Docker/Podman) or directly on the OS?**
+
+The docker compose command should be launched directly from the VM, which starts a number of docker containers.
+
+**Are there any other services it integrates with (e.g., message brokers, cloud storage, mail, external databases)?**
+
+Yes, the email server. Currently it is connected to the university email relay. There is also the Deepl API for translations, which is detailed in ./DEPLOYMENT.md
+
+**How much load (CPU %, memory usage, disk I/O) does it normally use?**
+
+As a FastAPI and Svelte 5 project, usage should not be much, mostly peaking during things like big data changes.
+With current use the cpu load is minimal, 500mb ram
+
+**How is it backed up now?**
+
+There are two databases. They both back up onto the same machine via the Docker Compose arguments to their docker services (BACKUP_ON_START=TRUE etc). These can be configured to adjust the back up interval and keep period, and to back up to a different machine. Currently the backups are stored on the same VM that the website is running on.
+
+**How do admins access and modify the website to make little changes (like Igor is doing nowadays)?**
+
+The process is to create code change commits related to issues. When tests pass with those changes, a PR can be merged into the main branch. There, if the tests pass, the CI will rebuild the images that running production instances pull from (every night at 1AM UTC because of "watchtower"), updating them that way. Manual updates are also possible, detailed below in another answer.
+
+## Storage
+
+**How much disk space is currently used (application + data)?**
+
+Disk space used: a few hundred mb
+
+**How fast does the data grow (GB/day or per month)?**
+
+This is hard to predict until seeing regular usage. However, a thousand children of the type imported so far (without images) comes to meaningfully less than 500mb. So for up to 10,000 children, < 5000mb is likely necessary. For 100,000 children, < 50GB.
+
+**What kind of storage performance is required (HDD sufficient? SSD better?)?**
+
+Besides statistics calculations, there are not many database intensive uses or queries. SSD would be preferred, but not necessary. If using HDD, you may wish to consider adding more indexes.
+
+**Are there backups currently implemented?**
+
+Yes, back ups of the databases run via dedicated docker services, and are saved locally only at present. Backups are stored in the db_backups/mondey and db_backups/users directories
+
+**How should we back up the data?**
+
+This is up to you, you could set up a second location to back up to, or change the interval/keep duration of back ups.
+
+## Network
+
+**Which ports/services need to be open?**
+
+Port 80 and 443 should be open in both directions for the web interface, and whatever port the smtp server uses for sending should be open for egress (25 for the heidelberg relay host currently in use). You'll probably also need to open port 22 for ssh access to administer the VM.
+
+**Are there any firewall or security group requirements?**
+
+No. Extra ports except those specified in Docker compose should not be open.
+
+**Docker compose shows Postfix mail server, more information on how it works would be needed.**
+
+Postfix mail server details/requirements: it runs as part of the docker compose, you just need to set environment variables to tell it which smtp relay host / user / password to use, see https://github.com/ssciwr/mondey/blob/main/DEPLOYMENT.md#emails
+
+## Maintenance
+
+**Are there deployment scripts or documentation available?**
+
+Deployment scripts: in /. DEPLOYMENT.md covers deployment and setting the SSL keys and .env values. It also covers the email server and Deepl API (for translations).
+
+As for documentation on development/entities in the code: The DEVELOPMENT.md file contains information about development. The generated OpenAPI files (types/services) and the Python model files (these use an ORM) are the best ways to understand the data models and how they can be interacted with, without diving head into complicated parts of the code. For statistics, the best approach is to read issues(including closed issues) about how that has changed.
+
+**How are updates/patches currently handled?**
+
+The CI builds production images when tests pass. The watchtower service will automatically update the site at 1AM each night (UTC). However it can also be manually updated by running docker compose pull and rebuilding (e.g. pruning cache).
+
+As the Database data is mapped to volumes, this allows a new version without major downtime. When database migrations occur, a .sql file for that migration needs to be ran at the time of update. In that case, that .sql migration file will be included in a relevant commit for the update. So for any updates with SQL migration changes, it's best to handle that manually. (we have no plans for any updates like that at present).
+
+**Is monitoring/logging already in place?**
+
+Logs can be viewed on the VM with the command "docker compose logs"
+Basic uptime monitoring here: https://ssciwr.github.io/monitoring/history/mondey
