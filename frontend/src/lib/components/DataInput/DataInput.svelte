@@ -80,13 +80,15 @@ let derivedPlaceholder = $derived(
 </script>
 
 {#if label}
-	<Label for={id} class="font-semibold text-gray-700 dark:text-gray-400"
-		>{label}
-		{#if required && false === disabled}
-			&nbsp;*
-		{/if}
-	</Label
+	<Label
+			for={id}
+			class="font-semibold text-gray-700 dark:text-gray-400 {required && false === disabled ? 'border-l-2 border-additional-color-300 dark:border-additional-color-600 pl-2' : ''}"
 	>
+		{label}
+		{#if required && false === disabled}
+			&nbsp;* {i18n.tr.misc.selectPlaceholder}
+		{/if}
+	</Label>
 {/if}
 
 <div class="space-y-4">
