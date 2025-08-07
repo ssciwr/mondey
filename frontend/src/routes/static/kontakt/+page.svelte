@@ -1,5 +1,5 @@
 <script>
- import { List, DescriptionList, Heading, P } from "flowbite-svelte";
+import { DescriptionList, Heading, List, P } from "flowbite-svelte";
 </script>
 
 <Heading tag="h3" class="divide-y divide-gray-200 text-gray-900 dark:divide-gray-700 dark:text-white pt-12 pb-2 pl-12">Kontaktieren Sie uns!</Heading>
