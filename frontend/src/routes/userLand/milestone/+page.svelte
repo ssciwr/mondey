@@ -239,7 +239,7 @@ const breadcrumbdata = $derived([
                             </AccordionItem>
                         {/if}
 
-                        {#if currentMilestone.text[i18n.locale].help && currentMilestone.text[i18n.locale].help > 0}
+                        {#if currentMilestone.text[i18n.locale].help && currentMilestone.text[i18n.locale].help.length > 0}
                         <AccordionItem>
                             <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
                                 <QuestionCircleSolid class="mt-0.5" />
