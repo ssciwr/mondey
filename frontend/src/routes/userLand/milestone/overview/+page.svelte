@@ -52,7 +52,6 @@ async function setup(): Promise<MilestoneAnswerSessionPublic | null> {
 	return data;
 }
 
-let searchTerm = $state("");
 let showIncompleteOnly = $state(true);
 
 const promise = $state(setup());
@@ -92,11 +91,11 @@ const breadcrumbdata: any[] = [
                 {i18n.tr.milestone.milestoneOverviewMobileHint}
             </p>
         </div>
-        <GalleryDisplay bind:searchTerm={searchTerm} bind:showIncompleteOnly={showIncompleteOnly}>
+        <GalleryDisplay showIncompleteTranslation={i18n.tr.milestone.milestonesThatNeedToBeEditedHint} bind:showIncompleteOnly={showIncompleteOnly}>
             {#each contentStore.milestoneGroupData.milestones as milestone, idx}
                 {@const title = milestone?.text?.[i18n.locale]?.title ?? ""}
                 {@const complete = (answerSession?.answers?.[`${milestone.id}`]?.answer ?? -1) >= 0}
-                {#if title.toLowerCase().includes(searchTerm.toLowerCase()) && !(showIncompleteOnly && complete)}
+                {#if !(showIncompleteOnly && complete)}
                     <CardDisplay {title}
                                  cardClasses="dark:text-white text-white bg-milestone-300 dark:bg-milestone-300 hover:bg-milestone-500 dark:hover:bg-milestone-500"
                                  titleClasses="text-center"

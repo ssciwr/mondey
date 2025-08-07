@@ -128,7 +128,6 @@ const breadcrumbdata: any[] = [
 ];
 
 let promise = $state(setup());
-let searchTerm = $state("");
 let showIncompleteOnly = $state(true);
 </script>
 
@@ -139,9 +138,10 @@ let showIncompleteOnly = $state(true);
     {#if milestoneGroups}
         <div class="flex flex-col md:rounded-t-lg">
             <Breadcrumbs data={breadcrumbdata}/>
-            <GalleryDisplay bind:searchTerm={searchTerm} bind:showIncompleteOnly={showIncompleteOnly}>
+            <h3>{i18n.tr.milestone.milestoneGroupSelectionHint}</h3>
+            <GalleryDisplay showIncompleteTranslation={i18n.tr.milestone.milestonesThatNeedToBeEditedHint} bind:showIncompleteOnly={showIncompleteOnly}>
                 {#each milestoneGroups as milestoneGroup}
-                    {#if milestoneGroup.title.toLowerCase().includes(searchTerm.toLowerCase()) && !(showIncompleteOnly && (milestoneGroup.disabled || milestoneGroup.progress === 1.0))}
+                    {#if !(showIncompleteOnly && (milestoneGroup.disabled || milestoneGroup.progress === 1.0))}
                         <CardDisplay title={milestoneGroup.title}
                                      text={milestoneGroup.text}
                                      onclick={milestoneGroup.onclick}
