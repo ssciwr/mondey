@@ -85,7 +85,7 @@ const breadcrumbdata: any[] = [
     <p>{i18n.tr.userData.loadingMessage}</p>
 {:then answerSession}
     <div class="mx-auto flex flex-col md:rounded-t-lg">
-        <Breadcrumbs data={breadcrumbdata}/>
+        <Breadcrumbs data={breadcrumbdata} stayExpanded={true} />
         <div class="p-4 text-center md:hidden">
             <p class="text-sm text-gray-700 dark:text-gray-400">
                 {i18n.tr.milestone.milestoneOverviewMobileHint}

@@ -5,7 +5,7 @@ import { Checkbox, Search } from "flowbite-svelte";
 import { type Snippet } from "svelte";
 
 let {
-	searchTerm = $bindable(""),
+	searchTerm = $bindable(),
 	showIncompleteOnly = $bindable(null),
 	showIncompleteTranslation,
 	children,

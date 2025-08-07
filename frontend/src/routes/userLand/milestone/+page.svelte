@@ -21,6 +21,7 @@ import {
 	ArrowLeftOutline,
 	ArrowRightOutline,
 	EditOutline,
+	ExclamationCircleSolid,
 	GridOutline,
 	GridPlusSolid,
 	InfoCircleSolid,
@@ -195,32 +196,34 @@ const breadcrumbdata = $derived([
     <div class="mx-auto flex flex-col md:rounded-t-lg">
         {#if i18n.locale && contentStore.milestoneGroupData && contentStore.milestoneGroupData.text && contentStore.milestoneGroupData.milestones && currentMilestone && currentMilestone.text && currentMilestone.images}
 
-            <Breadcrumbs data={breadcrumbdata} />
+            <Breadcrumbs data={breadcrumbdata} stayExpanded={true} />
 
             <div class="flex w-full flex-col md:flex-row pt-3">
-                <div class="relative w-full h-48 md:w-1/5 md:h-48 lg:h-64 xl:h-80 2xl:h-96 overflow-hidden mt-1.5">
-                    {#each currentMilestone.images as image, imageIndex}
-                        <img
-                                class={` min-w-20 absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
-                                src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${image.id}.webp`}
-                                alt=""
-                                on:click={() => {
-                                    modalImagePreviewOpen = true;
-                                }}
-                        />
-                    {/each}
-                    <Modal bind:open={modalImagePreviewOpen} size="xl" autoclose outsideclose>
-                        <div class="p-2" on:click={()=>{modalImagePreviewOpen=false}}>
-                            {#if currentMilestone?.images && currentMilestone.images.length > 0}
-                                <img
-                                        class="w-full rounded-lg"
-                                        src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${currentMilestone.images[currentImageIndex].id}.webp`}
-                                        alt=""
-                                />
-                            {/if}
-                        </div>
-                    </Modal>
-                </div>
+                {#if currentMilestone.images.length > 0}
+                    <div class="relative w-full h-48 md:w-1/5 md:h-48 lg:h-64 xl:h-80 2xl:h-96 overflow-hidden mt-1.5">
+                        {#each currentMilestone.images as image, imageIndex}
+                            <img
+                                    class={` min-w-20 absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
+                                    src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${image.id}.webp`}
+                                    alt=""
+                                    on:click={() => {
+                                        modalImagePreviewOpen = true;
+                                    }}
+                            />
+                        {/each}
+                        <Modal bind:open={modalImagePreviewOpen} size="xl" autoclose outsideclose>
+                            <div class="p-2" on:click={()=>{modalImagePreviewOpen=false}}>
+                                {#if currentMilestone?.images && currentMilestone.images.length > 0}
+                                    <img
+                                            class="w-full rounded-lg"
+                                            src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${currentMilestone.images[currentImageIndex].id}.webp`}
+                                            alt=""
+                                    />
+                                {/if}
+                            </div>
+                        </Modal>
+                    </div>
+                {/if}
                 <div class="m-2 md:m-4 md:w-3/5">
                     <h2 class="mb-2 text-2xl font-bold text-gray-700 dark:text-gray-400">
                         {currentMilestone.text[i18n.locale].title}
@@ -247,6 +250,18 @@ const breadcrumbdata = $derived([
                             </span>
                                 <p class="whitespace-pre-line">
                                     {currentMilestone.text[i18n.locale].help}
+                                </p>
+                            </AccordionItem>
+                        {/if}
+
+                        {#if currentMilestone.text[i18n.locale].importanceOfMilestone && currentMilestone.text[i18n.locale].importanceOfMilestone.length > 0}
+                        <AccordionItem>
+                            <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
+                                <ExclamationCircleSolid class="mt-0.5" />
+                                <span>{i18n.tr.milestone.importanceOfMilestone}</span>
+                            </span>
+                                <p class="whitespace-pre-line">
+                                    {currentMilestone.text[i18n.locale].importanceOfMilestone}
                                 </p>
                             </AccordionItem>
                         {/if}

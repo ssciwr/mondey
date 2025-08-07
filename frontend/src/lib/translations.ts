@@ -82,9 +82,10 @@ export const translationIds = {
 			"Überblick über die Meilensteine für diesen Bereich / dieses Alter",
 		milestoneDescriptionMobileHint:
 			"Erklärungen zu Ihren Antwortmöglichkeiten finden Sie weiter unten",
-		milestoneGroupSelectionHint: "Klicken Sie auf den Bereich, den Sie gerne bearbeiten möchten",
-		milestonesThatNeedToBeEditedHint: "Meilensteine, die noch bearbeitet werden müssen",
-
+		milestoneGroupSelectionHint:
+			"Klicken Sie auf den Bereich, den Sie gerne bearbeiten möchten",
+		milestonesThatNeedToBeEditedHint:
+			"Meilensteine, die noch bearbeitet werden müssen",
 	},
 	search: {
 		allLabel: "Alle",
@@ -144,6 +145,7 @@ export const translationIds = {
 		desc: "Beschreibung",
 		obs: "Beobachtungshinweise",
 		help: "Förderhinweise",
+		importanceOfMilestone: "Warum ist dieser Meilenstein wichtig?",
 		image: "Bild",
 		images: "Bilder",
 		submittedImages: "Eingereichte Bilder",
@@ -395,7 +397,7 @@ export const translationIds = {
 		headingFineMotor: "Handmotorik",
 		headingThinking: "Wahrnehmung und Denken",
 		headingLanguage: "Sprache",
-		headingSocialDevelopment: "Soziale Entwicklung",
+		headingSocialDevelopment: "Soziale Beziehungen",
 		headingInnerStates: "Innere Zustände",
 		headingSchool: "Schulische Vorläuferfertigkeiten",
 		summaryMotor:

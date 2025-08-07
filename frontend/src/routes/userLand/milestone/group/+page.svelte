@@ -137,8 +137,10 @@ let showIncompleteOnly = $state(true);
 {:then milestoneGroups}
     {#if milestoneGroups}
         <div class="flex flex-col md:rounded-t-lg">
-            <Breadcrumbs data={breadcrumbdata}/>
-            <h3>{i18n.tr.milestone.milestoneGroupSelectionHint}</h3>
+            <Breadcrumbs data={breadcrumbdata} stayExpanded={true} />
+            <h3 class="mt-5 text-xl font-medium text-gray-900 dark:text-white">
+                {i18n.tr.milestone.milestoneGroupSelectionHint}
+            </h3>
             <GalleryDisplay showIncompleteTranslation={i18n.tr.milestone.milestonesThatNeedToBeEditedHint} bind:showIncompleteOnly={showIncompleteOnly}>
                 {#each milestoneGroups as milestoneGroup}
                     {#if !(showIncompleteOnly && (milestoneGroup.disabled || milestoneGroup.progress === 1.0))}

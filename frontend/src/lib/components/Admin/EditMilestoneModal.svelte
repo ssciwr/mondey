@@ -28,9 +28,13 @@ let currentMilestoneImageId: number | null = $state(null as number | null);
 let showDeleteMilestoneImageModal: boolean = $state(false);
 let showMilestoneExpectedAgeModal: boolean = $state(false);
 
-const textKeys = ["title", "desc", "obs", "help"] as Array<
-	keyof typeof i18n.tr.admin & keyof MilestoneText
->;
+const textKeys = [
+	"title",
+	"desc",
+	"obs",
+	"help",
+	"importanceOfMilestone",
+] as Array<keyof typeof i18n.tr.admin & keyof MilestoneText>;
 
 async function saveChanges() {
 	if (!milestone) {
@@ -84,7 +88,7 @@ async function deleteMilestoneImageAndUpdate() {
                     <div class="mb-1">
                         <InputAutoTranslate bind:value={milestone.text[lang_id][textKey]}
                                             locale={lang_id} de_text={milestone.text["de"][textKey]}
-                                            placeholder={title} multiline={["obs", "help"].indexOf(textKey) !== -1} />
+                                            placeholder={title} multiline={["obs", "help", "importanceOfMilestone"].indexOf(textKey) !== -1} />
                     </div>
                 {/each}
             </div>
