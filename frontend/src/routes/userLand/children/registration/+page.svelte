@@ -474,14 +474,28 @@ const yearOptions = Array.from(
                         <hr style="margin-bottom:10px" />
 
                         {#if currentChild.id !== null && disableEdit === true}
-                            <Button
-                                    class="btn-primary"
-                                    onclick={() => {
-                                        goto(`/userLand/children/feedback`)
-                                    }}>
-                                <ChartLineUpOutline size="md" />
-                                {i18n.tr.childData.feedbackButtonLabel}
-                            </Button>
+                            {#await import('$lib/adminSettings').then(({ getAdminSettings }) => getAdminSettings().catch(() => ({ hide_all_feedback: false })))}
+                            {:then adminSettings}
+                                {#if !adminSettings.hide_all_feedback}
+                                    <Button
+                                            class="btn-primary"
+                                            onclick={() => {
+                                                goto(`/userLand/children/feedback`)
+                                            }}>
+                                        <ChartLineUpOutline size="md" />
+                                        {i18n.tr.childData.feedbackButtonLabel}
+                                    </Button>
+                                {/if}
+                            {:catch}
+                                <Button
+                                        class="btn-primary"
+                                        onclick={() => {
+                                            goto(`/userLand/children/feedback`)
+                                        }}>
+                                    <ChartLineUpOutline size="md" />
+                                    {i18n.tr.childData.feedbackButtonLabel}
+                                </Button>
+                            {/await}
                             <Button
                                     class="btn-primary"
                                     onclick={() => {

@@ -25,6 +25,27 @@ class Language(SQLModel, table=True):
     id: str = fixed_length_string_field(max_length=2, index=True, primary_key=True)
 
 
+class AdminSettings(SQLModel, table=True):
+    """Admin settings for controlling application behavior. Single row table."""
+
+    id: int = Field(default=1, primary_key=True)  # Always 1 - single row table
+    hide_milestone_feedback: bool = Field(default=False)
+    hide_milestone_group_feedback: bool = Field(default=False)
+    hide_all_feedback: bool = Field(default=False)
+
+
+class AdminSettingsPublic(SQLModel):
+    hide_milestone_feedback: bool
+    hide_milestone_group_feedback: bool
+    hide_all_feedback: bool
+
+
+class AdminSettingsUpdate(SQLModel):
+    hide_milestone_feedback: bool | None = None
+    hide_milestone_group_feedback: bool | None = None
+    hide_all_feedback: bool | None = None
+
+
 ## MilestoneGroupText
 class MilestoneGroupTextBase(SQLModel):
     title: str = ""

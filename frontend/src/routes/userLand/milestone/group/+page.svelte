@@ -1,6 +1,7 @@
 <svelte:options runes={true}/>
 <script lang="ts">
 import { goto } from "$app/navigation";
+import { getAdminSettings } from "$lib/adminSettings";
 import {
 	type MilestoneAnswerSessionPublic,
 	type MilestonePublic,
@@ -49,13 +50,32 @@ type MilestoneGroupDisplayData = {
 	disabled: boolean;
 };
 
-async function setup(): Promise<MilestoneGroupDisplayData[] | null> {
+type SetupResult = {
+	milestoneGroupData: MilestoneGroupDisplayData[];
+	showProgress: boolean;
+};
+
+async function setup(): Promise<SetupResult | null> {
 	await currentChild.load_data();
 
 	if (currentChild.id === null || currentChild.id === undefined) {
 		console.log("Error when retrieving child data");
 		await goto("/userLand/children");
-		return;
+		return null;
+	}
+
+	// Check admin settings for showing progress indicators
+	let showProgress = true;
+	try {
+		const adminSettings = await getAdminSettings();
+		showProgress =
+			!adminSettings.hide_milestone_group_feedback &&
+			!adminSettings.hide_all_feedback;
+	} catch (e) {
+		console.log(
+			"Failed to load admin settings, showing progress indicators by default",
+			e,
+		);
 	}
 
 	const milestoneGroups = await getMilestoneGroups({
@@ -88,7 +108,7 @@ async function setup(): Promise<MilestoneGroupDisplayData[] | null> {
 		return null;
 	}
 
-	return milestoneGroups.data.map((item) => {
+	const milestoneGroupData = milestoneGroups.data.map((item) => {
 		return {
 			title: item?.text?.[i18n.locale]?.title ?? "",
 			text: item?.text?.[i18n.locale]?.desc ?? "",
@@ -101,6 +121,8 @@ async function setup(): Promise<MilestoneGroupDisplayData[] | null> {
 			},
 		};
 	});
+
+	return { milestoneGroupData, showProgress };
 }
 
 const breadcrumbdata: any[] = [
@@ -135,8 +157,10 @@ let showIncompleteOnly = $state(true);
 {#await promise}
     <Spinner/>
     <p>{i18n.tr.userData.loadingMessage}</p>
-{:then milestoneGroups}
-    {#if milestoneGroups}
+{:then result}
+    {#if result}
+        {@const milestoneGroups = result.milestoneGroupData}
+        {@const showProgress = result.showProgress}
         <div class="flex flex-col md:rounded-t-lg">
             <Breadcrumbs data={breadcrumbdata}/>
             <GalleryDisplay bind:searchTerm={searchTerm} bind:showIncompleteOnly={showIncompleteOnly}>
@@ -148,7 +172,9 @@ let showIncompleteOnly = $state(true);
                                      disabled={milestoneGroup.disabled}
                                      cardClasses={`dark:text-white text-white bg-milestone-700 dark:bg-milestone-900 ${milestoneGroup.disabled ? '' : 'hover:bg-milestone-800 dark:hover:bg-milestone-700'}`}
                         >
-                            <Progress progress={milestoneGroup.progress} color="#556499"/>
+                            {#if showProgress}
+                                <Progress progress={milestoneGroup.progress} color="#556499"/>
+                            {/if}
                         </CardDisplay>
                     {/if}
                 {/each}
