@@ -477,20 +477,21 @@ const yearOptions = Array.from(
                             <Button
                                     class="btn-primary"
                                     onclick={() => {
-                                        goto(`/userLand/children/feedback`)
-                                    }}>
-                                <ChartLineUpOutline size="md" />
-                                {i18n.tr.childData.feedbackButtonLabel}
-                            </Button>
-                            <Button
-                                    class="btn-primary"
-                                    onclick={() => {
                                         goto(`/userLand/milestone/group`)
                                     }}
                             >
                                 <FlagOutline size="md" />
                                 {i18n.tr.childData.nextButtonLabel}
                             </Button>
+                            <Button
+                                    class="btn-primary"
+                                    onclick={() => {
+                                        goto(`/userLand/children/feedback`)
+                                    }}>
+                                <ChartLineUpOutline size="md" />
+                                {i18n.tr.childData.feedbackButtonLabel}
+                            </Button>
+
 
                         {/if}
 
