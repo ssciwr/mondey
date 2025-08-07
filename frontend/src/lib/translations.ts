@@ -109,6 +109,7 @@ export const translationIds = {
 		visibility: "Angezeigt/Sichtbar",
 		required: "Pflichtig",
 		languages: "Sprachen",
+		feedbackConfiguration: "Feedback Sichtbarkeit",
 		milestone: "Meilenstein",
 		milestoneId: "Meilenstein-ID",
 		milestones: "Meilensteine",
