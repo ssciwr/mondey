@@ -11,6 +11,7 @@ import {
 import SubmitMilestoneImageModal from "$lib/components/DataInput/SubmitMilestoneImageModal.svelte";
 import MilestoneButton from "$lib/components/MilestoneButton.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
+import { displayChildImages } from "$lib/features";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
@@ -249,17 +250,19 @@ const breadcrumbdata = $derived([
                                 </p>
                             </AccordionItem>
                         {/if}
-                        <AccordionItem>
-						<span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
-							<UploadOutline class="mt-0.5"/>
-							<span>{i18n.tr.milestone.submitImage}</span>
-						</span>
-                            <p>
-                                {i18n.tr.milestone.submitImageText}
-                            </p>
-                            <Button class="m-2"
-                                    onclick={()=>{showSubmitMilestoneImageModal=true;}}>{i18n.tr.milestone.submitImage}</Button>
-                        </AccordionItem>
+                        {#if displayChildImages}
+                            <AccordionItem>
+                            <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
+                                <UploadOutline class="mt-0.5"/>
+                                <span>{i18n.tr.milestone.submitImage}</span>
+                            </span>
+                                <p>
+                                    {i18n.tr.milestone.submitImageText}
+                                </p>
+                                <Button class="m-2"
+                                        onclick={()=>{showSubmitMilestoneImageModal=true;}}>{i18n.tr.milestone.submitImage}</Button>
+                            </AccordionItem>
+                        {/if}
                     </Accordion>
                 </div>
                 <div class="md:w-1/5 m-1 mt-0 flex flex-col justify-items-stretch rounded-lg">
