@@ -62,7 +62,6 @@ let {
 // functionality
 let disableEdit: boolean = $state(false);
 let disableImageDelete: boolean = $state(false);
-let showChildQuestions: boolean = $state(false);
 let showDeleteModal: boolean = $state(false);
 let imageDeleted: boolean = $state(false);
 let childLabel = $derived(name ? name : i18n.tr.childData.newChildHeadingLong);
@@ -485,7 +484,7 @@ const yearOptions = Array.from(
 
                         {/if}
 
-                        {#if (!disableEdit || (disableEdit && showChildQuestions))}
+                        {#if (disableEdit === false)}
                             {#each questionnaire as element, i}
                                 <DataInput
                                         component={element?.component}
