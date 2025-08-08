@@ -373,7 +373,6 @@ export const translationIds = {
 		downloads: "Downloads",
 		contact: "Kontakt",
 		selectPlaceholder: "Option wählen",
-		selectRequiredPlaceholder: "Erforderlich",
 	},
 	frontpage: {
 		heading: "Möchten Sie die Entwicklung von Kindern begleiten und fördern?",
