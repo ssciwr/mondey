@@ -22,6 +22,7 @@ export const translationIds = {
 		milestones: "Meilensteine",
 		observation: "Beobachtungshinweise",
 		help: "Fördern",
+		importance: "Warum ist dieser Meilenstein wichtig?",
 		info: "Information",
 		next: "Weiter",
 		prev: "Zurück",
@@ -81,6 +82,10 @@ export const translationIds = {
 			"Überblick über die Meilensteine für diesen Bereich / dieses Alter",
 		milestoneDescriptionMobileHint:
 			"Erklärungen zu Ihren Antwortmöglichkeiten finden Sie weiter unten",
+		milestoneGroupSelectionHint:
+			"Klicken Sie auf den Bereich, den Sie gerne bearbeiten möchten",
+		milestonesThatNeedToBeEditedHint:
+			"Meilensteine, die noch bearbeitet werden müssen",
 	},
 	search: {
 		allLabel: "Alle",
@@ -147,7 +152,8 @@ export const translationIds = {
 		cancel: "Abbrechen",
 		desc: "Beschreibung",
 		obs: "Beobachtungshinweise",
-		help: "Förderhilfen",
+		help: "Förderhinweise",
+		importance: "Warum ist dieser Meilenstein wichtig?",
 		image: "Bild",
 		images: "Bilder",
 		submittedImages: "Eingereichte Bilder",
@@ -242,7 +248,7 @@ export const translationIds = {
 			"Ihre E-Mail-Adresse wurde bestätigt und Sie können sich jetzt anmelden.",
 		emailValidationError:
 			"Ungültiger oder abgelaufener E-Mail-Validierungslink",
-		goHome: "Zur Hauptseite",
+		goHome: "Zu Application",
 	},
 	login: {
 		heading: "Einloggen",
@@ -373,6 +379,7 @@ export const translationIds = {
 		downloads: "Downloads",
 		contact: "Kontakt",
 		selectPlaceholder: "Option wählen",
+		selectRequiredPlaceholder: "Erforderlich",
 	},
 	frontpage: {
 		heading: "Möchten Sie die Entwicklung von Kindern begleiten und fördern?",
@@ -399,7 +406,7 @@ export const translationIds = {
 		headingFineMotor: "Handmotorik",
 		headingThinking: "Wahrnehmung und Denken",
 		headingLanguage: "Sprache",
-		headingSocialDevelopment: "Soziale Entwicklung",
+		headingSocialDevelopment: "Soziale Beziehungen",
 		headingInnerStates: "Innere Zustände",
 		headingSchool: "Schulische Vorläuferfertigkeiten",
 		summaryMotor:

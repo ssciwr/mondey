@@ -2,7 +2,8 @@
 <script lang="ts">
 import { Breadcrumb, BreadcrumbItem } from "flowbite-svelte";
 import { PlayOutline } from "flowbite-svelte-icons";
-let { data }: { data: any[] } = $props();
+let { data, stayExpanded = false }: { data: any[]; stayExpanded?: boolean } =
+	$props();
 </script>
 
 <Breadcrumb
@@ -23,7 +24,7 @@ let { data }: { data: any[] } = $props();
 				{:else}
 				<PlayOutline size = "xl" />
 				{/if}
-				<span class="hidden md:inline">{item.label} </span>
+				<span class="{stayExpanded ? '' : 'hidden md:'}inline">{item.label} </span>
 			{:else}
 				<button
 					class="text-sm md:text-base ms-1 font-medium text-gray-500 hover:text-gray-700 md:ms-2 dark:text-gray-400  dark:hover:text-white"
@@ -35,7 +36,7 @@ let { data }: { data: any[] } = $props();
 						{:else}
 						<PlayOutline size = "xl" />
 						{/if}
-						<span class="hidden md:inline">{item.label}</span>
+						<span class="{stayExpanded ? '' : 'hidden md:'}inline">{item.label}</span>
 					</div>
 				</button>
 			{/if}
