@@ -277,6 +277,7 @@ export type MilestoneText = {
     desc?: string;
     obs?: string;
     help?: string;
+    importance?: string;
     milestone_id?: number | null;
     lang_id?: string | null;
 };
@@ -286,6 +287,7 @@ export type MilestoneTextPublic = {
     desc?: string;
     obs?: string;
     help?: string;
+    importance?: string;
 };
 
 export type QuestionTextPublic = {

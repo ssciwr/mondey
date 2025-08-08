@@ -75,18 +75,24 @@ let showTextField: boolean = $derived.by(
 let highlight = $derived(!valid && required === true);
 let derivedPlaceholder = $derived(
 	placeholder ??
-		(component === "select" ? i18n.tr.misc.selectPlaceholder : undefined),
+		(component === "select"
+			? required
+				? i18n.tr.misc.selectRequiredPlaceholder
+				: i18n.tr.misc.selectPlaceholder
+			: undefined),
 );
 </script>
 
 {#if label}
-	<Label for={id} class="font-semibold text-gray-700 dark:text-gray-400"
-		>{label}
-		{#if required && false === disabled}
-			&nbsp;*
-		{/if}
-	</Label
+	<Label
+			for={id}
+			class="font-semibold text-gray-700 dark:text-gray-400 {required && false === disabled ? 'border-l-2 border-additional-color-800 dark:border-additional-color-600 pl-2' : ''}"
 	>
+		{label}
+		{#if required && false === disabled}
+			&nbsp;* <small class="text-gray-500">{i18n.tr.misc.selectRequiredPlaceholder}</small>
+		{/if}
+	</Label>
 {/if}
 
 <div class="space-y-4">

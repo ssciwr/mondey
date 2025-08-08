@@ -1,4 +1,4 @@
-<svelte:options runes={true} />
+<svelte:options runes={true}/>
 
 <script lang="ts">
 import type { DeleteResponse } from "$lib/client";
@@ -61,21 +61,23 @@ $effect(async () => {
 <Modal bind:open size="xs" autoclose>
     <div class="text-center">
         {#if deleteDone}
-            <h3><CheckCircleOutline class="h-12 w-12" />{i18n.tr.admin.deletionComplete}</h3>
+            <h3>
+                <CheckCircleOutline class="h-12 w-12"/>{i18n.tr.admin.deletionComplete}</h3>
         {/if}
 
-        <ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-gray-400 dark:text-gray-200" />
+        <ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-gray-400 dark:text-gray-200"/>
         <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
             {i18n.tr.admin.deleteAreYouSure}
         </h3>
 
         {#if Object.keys(deletionWillAffectTotals).length === 0}
             <div class="mb-6">
-                <Spinner />
+                <Spinner/>
             </div>
         {:else}
             {i18n.tr.admin.deletionWillAffect}
-            <div class="text-black" style="background-color:rgb(255,220,220);border: 2px solid darkred;border-radius:10px;padding:10px">
+            <div class="text-black"
+                 style="background-color:rgb(255,220,220);border: 2px solid darkred;border-radius:10px;padding:10px">
                 <ul>
                     {#each Object.entries(deletionWillAffectTotals) as [translationKey, total]}
                         <li>{total} {i18n.tr.admin && translationKey in i18n.tr.admin
@@ -85,18 +87,21 @@ $effect(async () => {
             </div>
 
             <div class="mt-10 mb-5">
-            {i18n.tr.admin.deletionConfirm}: <code>{intendedConfirmCode}</code>
+                <p>{i18n.tr.admin.deletionConfirm}:</p>
+                <div class="mb-5 p-3 rounded-xl" style="background-color:rgba(127,127,127,0.3)">
+                    <b>{intendedConfirmCode}</b></div>
 
-            <Label
-                    for={"password"}
-                    class="font-semibold text-gray-700 dark:text-gray-400"
-            >{i18n.tr.admin.enterDeletionConfirmation}</Label>
+                <Label
+                        for={"password"}
+                        class="font-semibold text-gray-700 dark:text-gray-400"
+                >{i18n.tr.admin.enterDeletionConfirmation}</Label>
 
-            <Input id="confirm-delete"  bind:value={deleteConfirmCode}></Input>
+                <Input id="confirm-delete" bind:value={deleteConfirmCode}></Input>
             </div>
 
-            <Button color="red" class="me-2" disabled={intendedConfirmCode !== deleteConfirmCode} on:click={sendDeleteRequest}>
-            {i18n.tr.admin.yesSure}
+            <Button color="red" class="me-2" disabled={intendedConfirmCode !== deleteConfirmCode}
+                    on:click={sendDeleteRequest}>
+                {i18n.tr.admin.yesSure}
             </Button>
         {/if}
 
