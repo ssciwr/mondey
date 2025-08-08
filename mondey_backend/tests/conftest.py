@@ -216,7 +216,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                         desc=f"{lbl}_d",
                         obs=f"{lbl}_o",
                         help=f"{lbl}_h",
-                        importanceOfMilestone="",
                     )
                 )
 
@@ -250,7 +249,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                         desc=f"{lbl}_d",
                         obs=f"{lbl}_o",
                         help=f"{lbl}_h",
-                        importanceOfMilestone="",
                     )
                 )
         # add the milestone images and submitted milestone images that were created in the static directory
@@ -1248,21 +1246,18 @@ def milestone_group1():
                         "desc": "m3_de_d",
                         "obs": "m3_de_o",
                         "help": "m3_de_h",
-                        "importanceOfMilestone": "",
                     },
                     "en": {
                         "title": "m3_en_t",
                         "desc": "m3_en_d",
                         "obs": "m3_en_o",
                         "help": "m3_en_h",
-                        "importanceOfMilestone": "",
                     },
                     "fr": {
                         "title": "m3_fr_t",
                         "desc": "m3_fr_d",
                         "obs": "m3_fr_o",
                         "help": "m3_fr_h",
-                        "importanceOfMilestone": "",
                     },
                 },
                 "images": [],
@@ -1276,21 +1271,18 @@ def milestone_group1():
                         "desc": "m2_de_d",
                         "obs": "m2_de_o",
                         "help": "m2_de_h",
-                        "importanceOfMilestone": "",
                     },
                     "en": {
                         "title": "m2_en_t",
                         "desc": "m2_en_d",
                         "obs": "m2_en_o",
                         "help": "m2_en_h",
-                        "importanceOfMilestone": "",
                     },
                     "fr": {
                         "title": "m2_fr_t",
                         "desc": "m2_fr_d",
                         "obs": "m2_fr_o",
                         "help": "m2_fr_h",
-                        "importanceOfMilestone": "",
                     },
                 },
                 "images": [{"id": 3}],
@@ -1304,21 +1296,18 @@ def milestone_group1():
                         "desc": "m1_de_d",
                         "obs": "m1_de_o",
                         "help": "m1_de_h",
-                        "importanceOfMilestone": "",
                     },
                     "en": {
                         "title": "m1_en_t",
                         "desc": "m1_en_d",
                         "obs": "m1_en_o",
                         "help": "m1_en_h",
-                        "importanceOfMilestone": "",
                     },
                     "fr": {
                         "title": "m1_fr_t",
                         "desc": "m1_fr_d",
                         "obs": "m1_fr_o",
                         "help": "m1_fr_h",
-                        "importanceOfMilestone": "",
                     },
                 },
                 "images": [{"id": 1}, {"id": 2}],
@@ -1365,7 +1354,6 @@ def milestone_group_admin1():
                     "de": {
                         "obs": "m3_de_o",
                         "help": "m3_de_h",
-                        "importanceOfMilestone": "",
                         "title": "m3_de_t",
                         "desc": "m3_de_d",
                         "milestone_id": 3,
@@ -1375,7 +1363,6 @@ def milestone_group_admin1():
                     "en": {
                         "obs": "m3_en_o",
                         "help": "m3_en_h",
-                        "importanceOfMilestone": "",
                         "title": "m3_en_t",
                         "desc": "m3_en_d",
                         "milestone_id": 3,
@@ -1385,7 +1372,6 @@ def milestone_group_admin1():
                     "fr": {
                         "obs": "m3_fr_o",
                         "help": "m3_fr_h",
-                        "importanceOfMilestone": "",
                         "title": "m3_fr_t",
                         "desc": "m3_fr_d",
                         "milestone_id": 3,
@@ -1411,7 +1397,6 @@ def milestone_group_admin1():
                     "de": {
                         "obs": "m2_de_o",
                         "help": "m2_de_h",
-                        "importanceOfMilestone": "",
                         "title": "m2_de_t",
                         "desc": "m2_de_d",
                         "milestone_id": 2,
@@ -1421,7 +1406,6 @@ def milestone_group_admin1():
                     "en": {
                         "obs": "m2_en_o",
                         "help": "m2_en_h",
-                        "importanceOfMilestone": "",
                         "title": "m2_en_t",
                         "desc": "m2_en_d",
                         "milestone_id": 2,
@@ -1431,7 +1415,6 @@ def milestone_group_admin1():
                     "fr": {
                         "obs": "m2_fr_o",
                         "help": "m2_fr_h",
-                        "importanceOfMilestone": "",
                         "title": "m2_fr_t",
                         "desc": "m2_fr_d",
                         "milestone_id": 2,
@@ -1461,7 +1444,6 @@ def milestone_group_admin1():
                     "de": {
                         "obs": "m1_de_o",
                         "help": "m1_de_h",
-                        "importanceOfMilestone": "",
                         "title": "m1_de_t",
                         "desc": "m1_de_d",
                         "milestone_id": 1,
@@ -1471,7 +1453,6 @@ def milestone_group_admin1():
                     "en": {
                         "obs": "m1_en_o",
                         "help": "m1_en_h",
-                        "importanceOfMilestone": "",
                         "title": "m1_en_t",
                         "desc": "m1_en_d",
                         "milestone_id": 1,
@@ -1481,7 +1462,6 @@ def milestone_group_admin1():
                     "fr": {
                         "obs": "m1_fr_o",
                         "help": "m1_fr_h",
-                        "importanceOfMilestone": "",
                         "title": "m1_fr_t",
                         "desc": "m1_fr_d",
                         "milestone_id": 1,
@@ -1514,21 +1494,18 @@ def milestone_group2():
                         "title": "m4_de_t",
                         "obs": "m4_de_o",
                         "help": "m4_de_h",
-                        "importanceOfMilestone": "",
                     },
                     "en": {
                         "desc": "m4_en_d",
                         "title": "m4_en_t",
                         "obs": "m4_en_o",
                         "help": "m4_en_h",
-                        "importanceOfMilestone": "",
                     },
                     "fr": {
                         "desc": "m4_fr_d",
                         "title": "m4_fr_t",
                         "obs": "m4_fr_o",
                         "help": "m4_fr_h",
-                        "importanceOfMilestone": "",
                     },
                 },
             },
@@ -1542,21 +1519,18 @@ def milestone_group2():
                         "title": "m5_de_t",
                         "obs": "m5_de_o",
                         "help": "m5_de_h",
-                        "importanceOfMilestone": "",
                     },
                     "en": {
                         "desc": "m5_en_d",
                         "title": "m5_en_t",
                         "obs": "m5_en_o",
                         "help": "m5_en_h",
-                        "importanceOfMilestone": "",
                     },
                     "fr": {
                         "desc": "m5_fr_d",
                         "title": "m5_fr_t",
                         "obs": "m5_fr_o",
                         "help": "m5_fr_h",
-                        "importanceOfMilestone": "",
                     },
                 },
             },
@@ -1602,7 +1576,6 @@ def milestone_group_admin2():
                     "de": {
                         "obs": "m4_de_o",
                         "help": "m4_de_h",
-                        "importanceOfMilestone": "",
                         "title": "m4_de_t",
                         "desc": "m4_de_d",
                         "milestone_id": 4,
@@ -1612,7 +1585,6 @@ def milestone_group_admin2():
                     "en": {
                         "obs": "m4_en_o",
                         "help": "m4_en_h",
-                        "importanceOfMilestone": "",
                         "title": "m4_en_t",
                         "desc": "m4_en_d",
                         "milestone_id": 4,
@@ -1622,7 +1594,6 @@ def milestone_group_admin2():
                     "fr": {
                         "obs": "m4_fr_o",
                         "help": "m4_fr_h",
-                        "importanceOfMilestone": "",
                         "title": "m4_fr_t",
                         "desc": "m4_fr_d",
                         "milestone_id": 4,
@@ -1643,7 +1614,6 @@ def milestone_group_admin2():
                     "de": {
                         "obs": "m5_de_o",
                         "help": "m5_de_h",
-                        "importanceOfMilestone": "",
                         "title": "m5_de_t",
                         "desc": "m5_de_d",
                         "milestone_id": 5,
@@ -1653,7 +1623,6 @@ def milestone_group_admin2():
                     "en": {
                         "obs": "m5_en_o",
                         "help": "m5_en_h",
-                        "importanceOfMilestone": "",
                         "title": "m5_en_t",
                         "desc": "m5_en_d",
                         "milestone_id": 5,
@@ -1663,7 +1632,6 @@ def milestone_group_admin2():
                     "fr": {
                         "obs": "m5_fr_o",
                         "help": "m5_fr_h",
-                        "importanceOfMilestone": "",
                         "title": "m5_fr_t",
                         "desc": "m5_fr_d",
                         "milestone_id": 5,
