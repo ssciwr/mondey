@@ -254,14 +254,14 @@ const breadcrumbdata = $derived([
                             </AccordionItem>
                         {/if}
 
-                        {#if currentMilestone.text[i18n.locale].importanceOfMilestone && currentMilestone.text[i18n.locale].importanceOfMilestone.length > 0}
+                        {#if currentMilestone.text[i18n.locale].importance && currentMilestone.text[i18n.locale].importance.length > 0}
                         <AccordionItem>
                             <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
                                 <ExclamationCircleSolid class="mt-0.5" />
-                                <span>{i18n.tr.milestone.importanceOfMilestone}</span>
+                                <span>{i18n.tr.milestone.importance}</span>
                             </span>
                                 <p class="whitespace-pre-line">
-                                    {currentMilestone.text[i18n.locale].importanceOfMilestone}
+                                    {currentMilestone.text[i18n.locale].importance}
                                 </p>
                             </AccordionItem>
                         {/if}

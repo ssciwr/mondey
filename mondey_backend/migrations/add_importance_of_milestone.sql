@@ -1,2 +1,2 @@
 ALTER TABLE milestonetext
-ADD COLUMN importanceOfMilestone VARCHAR NOT NULL DEFAULT '';
+ADD COLUMN importance VARCHAR NOT NULL DEFAULT '';
