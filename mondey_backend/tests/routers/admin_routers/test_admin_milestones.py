@@ -130,7 +130,6 @@ def test_post_milestone(admin_client: TestClient):
                 "desc": "",
                 "obs": "",
                 "help": "",
-                "importanceOfMilestone": "",
             },
             "en": {
                 "milestone_id": 6,
@@ -139,7 +138,6 @@ def test_post_milestone(admin_client: TestClient):
                 "desc": "",
                 "obs": "",
                 "help": "",
-                "importanceOfMilestone": "",
             },
             "fr": {
                 "milestone_id": 6,
@@ -148,7 +146,6 @@ def test_post_milestone(admin_client: TestClient):
                 "desc": "",
                 "obs": "",
                 "help": "",
-                "importanceOfMilestone": "",
             },
         },
         "images": [],
