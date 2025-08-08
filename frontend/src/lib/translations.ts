@@ -110,6 +110,13 @@ export const translationIds = {
 		required: "Pflichtig",
 		languages: "Sprachen",
 		feedbackConfiguration: "Feedback Sichtbarkeit",
+		hideMilestoneFeedback:
+			"Meilenstein-Feedback ausblenden (individuelle Meilensteine)",
+		hideMilestoneGroupFeedback:
+			"Meilensteingruppen-Feedback ausblenden (Bereiche)",
+		hideAllFeedback:
+			"Alle Feedback ausblenden (Feedback-System vollständig deaktivieren)",
+		feedbackConfigurationNote: "Gespeichert",
 		milestone: "Meilenstein",
 		milestoneId: "Meilenstein-ID",
 		milestones: "Meilensteine",

@@ -26,7 +26,7 @@ class Language(SQLModel, table=True):
 
 
 class AdminSettings(SQLModel, table=True):
-    """Admin settings for controlling application behavior. Single row table."""
+    """Admin settings for controlling application behavior. Single row table. For now, all are for feedback visiblity"""
 
     id: int = Field(default=1, primary_key=True)  # Always 1 - single row table
     hide_milestone_feedback: bool = Field(default=False)

@@ -8,6 +8,7 @@ import {
 } from "$lib/adminSettings";
 import { i18n } from "$lib/i18n.svelte";
 import { Card, Toggle } from "flowbite-svelte";
+import { CheckCircleOutline } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 
 // State for admin settings
@@ -19,6 +20,8 @@ let adminSettings: AdminSettings = $state({
 
 let loading: boolean = $state(true);
 let error: string | null = $state(null);
+let showSuccessMessage: boolean = $state(false);
+let successTimeout: NodeJS.Timeout | null = $state(null);
 
 // Load admin settings on component mount
 onMount(async () => {
@@ -42,11 +45,25 @@ async function loadAdminSettings() {
 async function updateSettings(field: keyof AdminSettings, value: boolean) {
 	try {
 		error = null;
+		showSuccessMessage = false;
 
 		const updatedSettings = await updateAdminSettings({
 			[field]: value,
 		});
 		adminSettings = updatedSettings;
+
+		// Show success message
+		showSuccessMessage = true;
+
+		// Clear any existing timeout
+		if (successTimeout) {
+			clearTimeout(successTimeout);
+		}
+
+		// Hide success message after 3 seconds
+		successTimeout = setTimeout(() => {
+			showSuccessMessage = false;
+		}, 3000);
 	} catch (e) {
 		error = e instanceof Error ? e.message : "Failed to update admin settings";
 		console.error("Error updating admin settings:", e);
@@ -69,7 +86,7 @@ async function updateSettings(field: keyof AdminSettings, value: boolean) {
         <div class="space-y-4">
             <div class="flex items-center justify-between">
                 <label for="hide-milestone-feedback" class="text-sm font-medium text-gray-900 dark:text-white">
-                    Hide milestone feedback (individual milestones)
+                   {i18n.tr.admin.hideMilestoneFeedback}
                 </label>
                 <Toggle
                     id="hide-milestone-feedback"
@@ -80,7 +97,7 @@ async function updateSettings(field: keyof AdminSettings, value: boolean) {
 
             <div class="flex items-center justify-between">
                 <label for="hide-milestone-group-feedback" class="text-sm font-medium text-gray-900 dark:text-white">
-                    Hide milestone group feedback (Bereiche)
+                    {i18n.tr.admin.hideMilestoneGroupFeedback}
                 </label>
                 <Toggle
                     id="hide-milestone-group-feedback"
@@ -91,7 +108,7 @@ async function updateSettings(field: keyof AdminSettings, value: boolean) {
 
             <div class="flex items-center justify-between">
                 <label for="hide-all-feedback" class="text-sm font-medium text-gray-900 dark:text-white">
-                    Hide all feedback (completely disable feedback system)
+                    {i18n.tr.admin.hideAllFeedback}
                 </label>
                 <Toggle
                     id="hide-all-feedback"
@@ -100,5 +117,14 @@ async function updateSettings(field: keyof AdminSettings, value: boolean) {
                 />
             </div>
         </div>
+
+        {#if showSuccessMessage}
+            <div class="mt-4 p-3 text-green-800 bg-green-100 rounded-lg border border-green-200 dark:bg-green-900 dark:text-green-300 dark:border-green-800">
+                <div class="flex items-center">
+                    <CheckCircleOutline class="w-4 h-4 mr-2" />
+                    <span class="text-sm font-medium">{i18n.tr.admin.feedbackConfigurationNote}</span>
+                </div>
+            </div>
+        {/if}
     </Card>
 {/if}
