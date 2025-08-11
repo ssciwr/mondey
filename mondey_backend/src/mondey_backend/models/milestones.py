@@ -89,6 +89,7 @@ class MilestoneTextBase(SQLModel):
     desc: str = ""
     obs: str = ""
     help: str = ""
+    importance: str = ""
 
 
 class MilestoneText(MilestoneTextBase, table=True):

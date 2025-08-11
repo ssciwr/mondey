@@ -5,26 +5,30 @@ import { Checkbox, Search } from "flowbite-svelte";
 import { type Snippet } from "svelte";
 
 let {
-	searchTerm = $bindable(""),
+	searchTerm = $bindable(),
 	showIncompleteOnly = $bindable(null),
+	showIncompleteTranslation,
 	children,
 }: {
-	searchTerm: string;
+	searchTerm?: string;
 	showIncompleteOnly?: null | boolean;
+	showIncompleteTranslation?: string;
 	children?: Snippet;
 } = $props();
 </script>
 
 <form class="py-4 w-full rounded p-2">
-    <Search
-            bind:value={searchTerm}
-            class="rounded py-2.5 min-w-full"
-            placeholder={i18n.tr.search.namePlaceholder}
-            size="lg"
-    />
+    {#if searchTerm !== undefined}
+        <Search
+                bind:value={searchTerm}
+                class="rounded py-2.5 min-w-full"
+                placeholder={i18n.tr.search.namePlaceholder}
+                size="lg"
+        />
+    {/if}
     {#if showIncompleteOnly !== null}
         <Checkbox bind:checked={showIncompleteOnly} class="my-2">
-            {i18n.tr.search.showIncompleteOnly}
+            {showIncompleteTranslation || i18n.tr.search.showIncompleteOnly}
         </Checkbox>
     {/if}
 </form>

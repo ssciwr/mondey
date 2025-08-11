@@ -11,6 +11,7 @@ import {
 import SubmitMilestoneImageModal from "$lib/components/DataInput/SubmitMilestoneImageModal.svelte";
 import MilestoneButton from "$lib/components/MilestoneButton.svelte";
 import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
+import { displayChildImages } from "$lib/features";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
@@ -20,6 +21,7 @@ import {
 	ArrowLeftOutline,
 	ArrowRightOutline,
 	EditOutline,
+	ExclamationCircleSolid,
 	GridOutline,
 	GridPlusSolid,
 	InfoCircleSolid,
@@ -194,32 +196,34 @@ const breadcrumbdata = $derived([
     <div class="mx-auto flex flex-col md:rounded-t-lg">
         {#if i18n.locale && contentStore.milestoneGroupData && contentStore.milestoneGroupData.text && contentStore.milestoneGroupData.milestones && currentMilestone && currentMilestone.text && currentMilestone.images}
 
-            <Breadcrumbs data={breadcrumbdata} />
+            <Breadcrumbs data={breadcrumbdata} stayExpanded={true} />
 
             <div class="flex w-full flex-col md:flex-row pt-3">
-                <div class="relative w-full h-48 md:w-1/5 md:h-48 lg:h-64 xl:h-80 2xl:h-96 overflow-hidden mt-1.5">
-                    {#each currentMilestone.images as image, imageIndex}
-                        <img
-                                class={` min-w-20 absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
-                                src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${image.id}.webp`}
-                                alt=""
-                                on:click={() => {
-                                    modalImagePreviewOpen = true;
-                                }}
-                        />
-                    {/each}
-                    <Modal bind:open={modalImagePreviewOpen} size="xl" autoclose outsideclose>
-                        <div class="p-2" on:click={()=>{modalImagePreviewOpen=false}}>
-                            {#if currentMilestone?.images && currentMilestone.images.length > 0}
-                                <img
-                                        class="w-full rounded-lg"
-                                        src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${currentMilestone.images[currentImageIndex].id}.webp`}
-                                        alt=""
-                                />
-                            {/if}
-                        </div>
-                    </Modal>
-                </div>
+                {#if currentMilestone.images.length > 0}
+                    <div class="relative w-full h-48 md:w-1/5 md:h-48 lg:h-64 xl:h-80 2xl:h-96 overflow-hidden mt-1.5">
+                        {#each currentMilestone.images as image, imageIndex}
+                            <img
+                                    class={` min-w-20 absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
+                                    src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${image.id}.webp`}
+                                    alt=""
+                                    on:click={() => {
+                                        modalImagePreviewOpen = true;
+                                    }}
+                            />
+                        {/each}
+                        <Modal bind:open={modalImagePreviewOpen} size="xl" autoclose outsideclose>
+                            <div class="p-2" on:click={()=>{modalImagePreviewOpen=false}}>
+                                {#if currentMilestone?.images && currentMilestone.images.length > 0}
+                                    <img
+                                            class="w-full rounded-lg"
+                                            src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${currentMilestone.images[currentImageIndex].id}.webp`}
+                                            alt=""
+                                    />
+                                {/if}
+                            </div>
+                        </Modal>
+                    </div>
+                {/if}
                 <div class="m-2 md:m-4 md:w-3/5">
                     <h2 class="mb-2 text-2xl font-bold text-gray-700 dark:text-gray-400">
                         {currentMilestone.text[i18n.locale].title}
@@ -238,7 +242,7 @@ const breadcrumbdata = $derived([
                             </AccordionItem>
                         {/if}
 
-                        {#if currentMilestone.text[i18n.locale].help && currentMilestone.text[i18n.locale].help > 0}
+                        {#if currentMilestone.text[i18n.locale].help && currentMilestone.text[i18n.locale].help.length > 0}
                         <AccordionItem>
                             <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
                                 <QuestionCircleSolid class="mt-0.5" />
@@ -249,17 +253,31 @@ const breadcrumbdata = $derived([
                                 </p>
                             </AccordionItem>
                         {/if}
+
+                        {#if currentMilestone.text[i18n.locale].importance && currentMilestone.text[i18n.locale].importance.length > 0}
                         <AccordionItem>
-						<span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
-							<UploadOutline class="mt-0.5"/>
-							<span>{i18n.tr.milestone.submitImage}</span>
-						</span>
-                            <p>
-                                {i18n.tr.milestone.submitImageText}
-                            </p>
-                            <Button class="m-2"
-                                    onclick={()=>{showSubmitMilestoneImageModal=true;}}>{i18n.tr.milestone.submitImage}</Button>
-                        </AccordionItem>
+                            <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
+                                <ExclamationCircleSolid class="mt-0.5" />
+                                <span>{i18n.tr.milestone.importance}</span>
+                            </span>
+                                <p class="whitespace-pre-line">
+                                    {currentMilestone.text[i18n.locale].importance}
+                                </p>
+                            </AccordionItem>
+                        {/if}
+                        {#if displayChildImages}
+                            <AccordionItem>
+                            <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
+                                <UploadOutline class="mt-0.5"/>
+                                <span>{i18n.tr.milestone.submitImage}</span>
+                            </span>
+                                <p>
+                                    {i18n.tr.milestone.submitImageText}
+                                </p>
+                                <Button class="m-2"
+                                        onclick={()=>{showSubmitMilestoneImageModal=true;}}>{i18n.tr.milestone.submitImage}</Button>
+                            </AccordionItem>
+                        {/if}
                     </Accordion>
                 </div>
                 <div class="md:w-1/5 m-1 mt-0 flex flex-col justify-items-stretch rounded-lg">
