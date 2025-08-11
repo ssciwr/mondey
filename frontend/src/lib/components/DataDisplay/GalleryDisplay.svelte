@@ -7,12 +7,10 @@ import { type Snippet } from "svelte";
 let {
 	searchTerm = $bindable(),
 	showIncompleteOnly = $bindable(null),
-	showIncompleteTranslation,
 	children,
 }: {
 	searchTerm?: string;
 	showIncompleteOnly?: null | boolean;
-	showIncompleteTranslation?: string;
 	children?: Snippet;
 } = $props();
 </script>
@@ -28,7 +26,7 @@ let {
     {/if}
     {#if showIncompleteOnly !== null}
         <Checkbox bind:checked={showIncompleteOnly} class="my-2">
-            {showIncompleteTranslation || i18n.tr.search.showIncompleteOnly}
+            {i18n.tr.search.showIncompleteOnly}
         </Checkbox>
     {/if}
 </form>
