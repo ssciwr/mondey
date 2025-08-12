@@ -86,12 +86,15 @@ const breadcrumbdata: any[] = [
 {:then answerSession}
     <div class="mx-auto flex flex-col md:rounded-t-lg">
         <Breadcrumbs data={breadcrumbdata} stayExpanded={true} />
+        <h3 class="mt-5 text-xl font-medium text-gray-900 dark:text-white">
+            {i18n.tr.milestone.milestonesThatNeedToBeEditedHint}
+        </h3>
         <div class="p-4 text-center md:hidden">
             <p class="text-sm text-gray-700 dark:text-gray-400">
                 {i18n.tr.milestone.milestoneOverviewMobileHint}
             </p>
         </div>
-        <GalleryDisplay showIncompleteTranslation={i18n.tr.milestone.milestonesThatNeedToBeEditedHint} bind:showIncompleteOnly={showIncompleteOnly}>
+        <GalleryDisplay bind:showIncompleteOnly={showIncompleteOnly}>
             {#each contentStore.milestoneGroupData.milestones as milestone, idx}
                 {@const title = milestone?.text?.[i18n.locale]?.title ?? ""}
                 {@const complete = (answerSession?.answers?.[`${milestone.id}`]?.answer ?? -1) >= 0}
