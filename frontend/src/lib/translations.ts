@@ -248,6 +248,7 @@ export const translationIds = {
 			"Sie sind bereits angemeldet. Melden sie sich zuerst ab um den Account zu wechseln.",
 		alertMessageTitle: "Fehler",
 		badCredentials: "Ungültige E-Mail-Adresse oder ungültiges Passwort",
+		badData: "Die E-Mail/das Passwort konnte nicht verarbeitet werden",
 		badActiveUser: "Der Benutzer konnte nicht gefunden werden",
 		notLoggedIn: "Bitte melden sie sich erneut an",
 		unauthorized: "Zugang verweigert",
