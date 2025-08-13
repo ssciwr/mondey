@@ -18,6 +18,7 @@ from ..models.children import Child
 from ..models.children import ChildCreate
 from ..models.children import ChildPublic
 from ..models.children import ChildSummaryPublic
+from ..models.milestones import AdminSettings
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerResponse
 from ..models.milestones import MilestoneAnswerSession
@@ -43,6 +44,23 @@ from .utils import get_milestonegroups_for_answersession
 from .utils import get_or_create_current_milestone_answer_session
 from .utils import session_remaining_seconds
 from .utils import write_image_file
+
+
+def get_admin_settings(session: SessionDep) -> AdminSettings:
+    """Get admin settings, creating default if not found."""
+    settings = session.exec(select(AdminSettings)).first()
+    if not settings:
+        # Fallback: create default settings if not found
+        settings = AdminSettings(
+            id=1,
+            hide_milestone_feedback=False,
+            hide_milestone_group_feedback=False,
+            hide_all_feedback=False,
+        )
+        session.add(settings)
+        session.commit()
+        session.refresh(settings)
+    return settings
 
 
 def create_router() -> APIRouter:
@@ -353,6 +371,15 @@ def create_router() -> APIRouter:
         session: SessionDep,
         answersession_id: int,
     ) -> dict[int, int]:
+        admin_settings = get_admin_settings(session)
+
+        # Return empty feedback if milestone group feedback or all feedback is disabled
+        if (
+            admin_settings.hide_milestone_group_feedback
+            or admin_settings.hide_all_feedback
+        ):
+            return {}
+
         answersession = get(session, MilestoneAnswerSession, answersession_id)
         feedback = compute_milestonegroup_feedback_summary(session, answersession)
         return feedback
@@ -365,6 +392,12 @@ def create_router() -> APIRouter:
         session: SessionDep,
         answersession_id: int,
     ) -> dict[int, dict[int, int]]:
+        admin_settings = get_admin_settings(session)
+
+        # Return empty feedback if milestone feedback or all feedback is disabled
+        if admin_settings.hide_milestone_feedback or admin_settings.hide_all_feedback:
+            return {}
+
         answersession = get(session, MilestoneAnswerSession, answersession_id)
         feedback = compute_milestonegroup_feedback_detailed(session, answersession)
         return feedback
