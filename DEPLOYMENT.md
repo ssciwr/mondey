@@ -6,9 +6,15 @@ A FAQ section is included at the end.
 
 ## Production deployment
 
-Production docker container images are automatically built by CI.
-Before running them, the location of the data directory, SSL keys and secret key should be set
+Production docker container images are automatically built by CI (this happens when a pull request gets merged into main)
+Before running them, the location of the data directory, SSL keys, DEEPL_API_KEY, and "SECRET" key should be set
 either in env vars or in a file `.env` in the same location as the docker compose.yml.
+
+The "SECRET" env key should be a random string, for example 20 random characters. It is used for the Authentication part
+of the application. The "SECRET" value should never change for a given instance/authentication data.
+
+To clarify the DATABASE_PASSWORD for postgres databases will be used by the docker compose  both to set up the databases
+with those usernames/passwords, and then for other containers (e.g. backend) to connect to them.
 
 For example the current test deployment on heicloud looks like this:
 
@@ -16,12 +22,14 @@ For example the current test deployment on heicloud looks like this:
 MONDEY_SSL_CERT="/etc/letsencrypt/live/mondey.de/fullchain.pem"
 MONDEY_SSL_KEY="/etc/letsencrypt/live/mondey.de/privkey.pem"
 DEEPL_API_KEY=abc123
+DATABASE_PASSWORD=<RandomString>
+SECRET=<RandomString>
 ```
 
 ### docker compose
 
 To deploy the latest version on a virtual machine with docker compose installed,
-download [docker-compose.yml](https://raw.githubusercontent.com/ssciwr/mondey/main/docker-compose.yml), then do
+download [docker-compose.yml](https://raw.githubusercontent.com/ssciwr/mondey/main/docker-compose.yml), then do this after editing a .env file with the required values:
 
 ```
 sudo docker compose pull && sudo docker compose up -d && sudo docker system prune -af
@@ -54,6 +62,12 @@ To automatically renew once a week you can use cron, e.g. `sudo crontab -e`, the
 To check that the production website SSL certificates are configured correctly:
 
 https://decoder.link/sslchecker/mondey.de/443
+
+· Generating the SSL certificates needs to be done after the A record for your domain name points to the IP address
+AND that has propogated (this usually takes up to an hour, but sometimes days). Since the server that checks for the
+SSL validation request is not your computer, you may show the domain pointing to the IP successfully, but that change
+may not be visible for the SSL validation request yet. You cna Verify where your IP points using an A record look up
+tool before attempting the SSL certificate generation.
 
 ### Give users admin rights
 
@@ -201,6 +215,13 @@ And similarly for the usersdb:
 ```
 zstdcat db_backups/users/last/users-latest.sql.gz | docker exec -i $(docker ps | grep usersdb-1 | awk '{print $1}') psql --username=postgres --dbname=users
 ```
+
+#### database migrations
+As noted, when the SQL model changes, the data also needs to be migrated, usually by running a migration .sql file when
+updating the image.
+
+#### moving the database
+The database can be moved by exporting all of the data, for example to move or duplicate it to another VM.
 
 
 # Frequently Asked Questions
