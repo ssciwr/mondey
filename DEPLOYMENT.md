@@ -64,9 +64,9 @@ To check that the production website SSL certificates are configured correctly:
 https://decoder.link/sslchecker/mondey.de/443
 
 · Generating the SSL certificates needs to be done after the A record for your domain name points to the IP address
-AND that has propogated (this usually takes up to an hour, but sometimes days). Since the server that checks for the
+AND that has propagated (this usually takes up to an hour, but sometimes days). Since the server that checks for the
 SSL validation request is not your computer, you may show the domain pointing to the IP successfully, but that change
-may not be visible for the SSL validation request yet. You cna Verify where your IP points using an A record look up
+may not be visible for the SSL validation request yet. You can verify where your IP points using an A record lookup
 tool before attempting the SSL certificate generation.
 
 ### Give users admin rights
