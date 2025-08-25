@@ -217,8 +217,9 @@ zstdcat db_backups/users/last/users-latest.sql.gz | docker exec -i $(docker ps |
 ```
 
 #### database migrations
-As noted, when the SQL model changes, the data also needs to be migrated, usually by running a migration .sql file when
-updating the image.
+As noted in the README, whenever a new backend image with changed code expecting different models is updated (e.g. by
+you or watchtower) the database structure (and sometimes data) will need to be migrated, usually by running a migration .sql file.
+Otherwise the code might try to access new columns that don't exist in the now outdated database structure, etc.
 
 #### moving the database
 The database can be moved by exporting all of the data, for example to move or duplicate it to another VM.
