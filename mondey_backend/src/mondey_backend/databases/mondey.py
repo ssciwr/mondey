@@ -7,6 +7,7 @@ from sqlmodel import SQLModel
 from sqlmodel import create_engine
 from sqlmodel import select
 
+from ..models.milestones import AdminSettings
 from ..models.milestones import Language
 from ..settings import app_settings
 
@@ -30,4 +31,16 @@ def create_mondey_db_and_tables():
         if session.exec(select(Language)).first() is None:
             session.add(Language(id="de"))
             session.add(Language(id="en"))
+
+        # add default AdminSettings if no settings exist in the database:
+        if session.exec(select(AdminSettings)).first() is None:
+            session.add(
+                AdminSettings(
+                    id=1,
+                    hide_milestone_feedback=False,
+                    hide_milestone_group_feedback=False,
+                    hide_all_feedback=False,
+                )
+            )
+
         session.commit()

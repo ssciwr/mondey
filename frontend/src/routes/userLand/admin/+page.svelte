@@ -2,6 +2,7 @@
 
 <script lang="ts">
 import AnswerSessionData from "$lib/components/Admin/AnswerSessionData.svelte";
+import DeactivateFeedback from "$lib/components/Admin/DeactivateFeedback.svelte";
 import Languages from "$lib/components/Admin/Languages.svelte";
 import MilestoneExpectedAges from "$lib/components/Admin/MilestoneExpectedAges.svelte";
 import MilestoneGroups from "$lib/components/Admin/MilestoneGroups.svelte";
@@ -20,6 +21,7 @@ import {
 	DatabaseOutline,
 	FileImageOutline,
 	LanguageOutline,
+	PersonChalkboardOutline,
 	ScaleBalancedOutline,
 	UsersOutline,
 } from "flowbite-svelte-icons";
@@ -98,5 +100,12 @@ onMount(async () => {
             {i18n.tr.admin.languages}
         </div>
         <Languages/>
+    </TabItem>
+    <TabItem>
+        <div slot="title" class="flex items-center gap-2">
+            <PersonChalkboardOutline size="md"/>
+            {i18n.tr.admin.feedbackConfiguration}
+        </div>
+        <DeactivateFeedback/>
     </TabItem>
 </Tabs>
