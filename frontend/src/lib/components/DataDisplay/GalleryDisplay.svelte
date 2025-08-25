@@ -38,15 +38,25 @@ $effect(() => {
     {#if showIncompleteOnly !== null}
         {#if useRadioButtons}
             <div class="my-2 flex flex-row gap-3">
-                <div class="border border-gray-300 rounded-lg px-3 py-2 bg-milestone-300 hover:bg-milestone-400 transition-colors">
-                    <Radio bind:group={filterOption} value="incomplete" color="blue" class="text-white">
-                        {i18n.tr.milestone.nochBearbeiten}
-                    </Radio>
+                <div class="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer" onclick={() => filterOption = "incomplete"}>
+                    <div class="flex items-center">
+                        <div class={`w-4 h-4 rounded-full border-2 mr-2 flex items-center justify-center ${filterOption === "incomplete" ? "border-milestone-500 bg-milestone-500" : "border-gray-300"}`}>
+                            {#if filterOption === "incomplete"}
+                                <div class="w-2 h-2 rounded-full bg-white"></div>
+                            {/if}
+                        </div>
+                        <span>{i18n.tr.milestone.nochBearbeiten}</span>
+                    </div>
                 </div>
-                <div class="border border-gray-300 rounded-lg px-3 py-2 bg-milestone-300 hover:bg-milestone-400 transition-colors">
-                    <Radio bind:group={filterOption} value="complete" color="blue" class="text-white">
-                        {i18n.tr.milestone.schonBearbeitet}
-                    </Radio>
+                <div class="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer" onclick={() => filterOption = "complete"}>
+                    <div class="flex items-center">
+                        <div class={`w-4 h-4 rounded-full border-2 mr-2 flex items-center justify-center ${filterOption === "complete" ? "border-milestone-500 bg-milestone-500" : "border-gray-300"}`}>
+                            {#if filterOption === "complete"}
+                                <div class="w-2 h-2 rounded-full bg-white"></div>
+                            {/if}
+                        </div>
+                        <span>{i18n.tr.milestone.schonBearbeitet}</span>
+                    </div>
                 </div>
             </div>
         {:else}
