@@ -197,13 +197,15 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             )
         for milestone_id in [1, 2, 3]:
             # milestones have expected ages 6*id +/- 2*(id+1), so 6 +/- 4, 12 +/- 6, ...
+            expected_age_delta = (milestone_id + 1) * 2
             session.add(
                 Milestone(
                     name=f"m{milestone_id}",
                     order=14 - milestone_id,
                     group_id=1,
                     expected_age_months=milestone_id * 6,
-                    expected_age_delta=(milestone_id + 1) * 2,
+                    relevant_age_min=milestone_id * 6 - expected_age_delta,
+                    relevant_age_max=milestone_id * 6 + expected_age_delta,
                 )
             )
             for lang_id in lang_ids:
@@ -231,13 +233,15 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             )
 
         for milestone_id in [4, 5]:
+            expected_age_delta = (milestone_id + 1) * 2
             session.add(
                 Milestone(
                     name=f"m{milestone_id}",
                     order=milestone_id,
                     group_id=2,
                     expected_age_months=milestone_id * 6,
-                    expected_age_delta=(milestone_id + 1) * 2,
+                    relevant_age_min=milestone_id * 6 - expected_age_delta,
+                    relevant_age_max=milestone_id * 6 + expected_age_delta,
                 )
             )
             for lang_id in lang_ids:
@@ -437,7 +441,8 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             MilestoneAgeScoreCollection(
                 milestone_id=1,
                 expected_age=8,
-                expected_age_delta=4,
+                relevant_age_min=4,
+                relevant_age_max=12,
             )
         )
         for age in range(0, settings.app_settings.MAX_CHILD_AGE_MONTHS + 1):
@@ -457,7 +462,8 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             MilestoneAgeScoreCollection(
                 milestone_id=2,
                 expected_age=8,
-                expected_age_delta=4,
+                relevant_age_min=4,
+                relevant_age_max=12,
             )
         )
         for age in range(0, settings.app_settings.MAX_CHILD_AGE_MONTHS + 1):
@@ -1359,7 +1365,8 @@ def milestone_group_admin1():
                 "id": 3,
                 "name": "m3",
                 "expected_age_months": 18,
-                "expected_age_delta": 8,
+                "relevant_age_min": 10,
+                "relevant_age_max": 26,
                 "images": [],
                 "text": {
                     "de": {
@@ -1397,7 +1404,8 @@ def milestone_group_admin1():
                 "id": 2,
                 "name": "m2",
                 "expected_age_months": 12,
-                "expected_age_delta": 6,
+                "relevant_age_min": 6,
+                "relevant_age_max": 18,
                 "images": [
                     {
                         "id": 3,
@@ -1440,7 +1448,8 @@ def milestone_group_admin1():
                 "id": 1,
                 "name": "m1",
                 "expected_age_months": 6,
-                "expected_age_delta": 4,
+                "relevant_age_min": 2,
+                "relevant_age_max": 10,
                 "images": [
                     {
                         "id": 1,
@@ -1587,7 +1596,8 @@ def milestone_group_admin2():
                 "id": 4,
                 "name": "m4",
                 "expected_age_months": 24,
-                "expected_age_delta": 10,
+                "relevant_age_min": 14,
+                "relevant_age_max": 34,
                 "images": [],
                 "text": {
                     "de": {
@@ -1625,7 +1635,8 @@ def milestone_group_admin2():
                 "id": 5,
                 "name": "m5",
                 "expected_age_months": 30,
-                "expected_age_delta": 12,
+                "relevant_age_min": 18,
+                "relevant_age_max": 42,
                 "images": [],
                 "text": {
                     "de": {

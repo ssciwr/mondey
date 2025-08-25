@@ -117,7 +117,8 @@ class Milestone(SQLModel, table=True):
     )
     order: int = 0
     expected_age_months: int = 12
-    expected_age_delta: int = 6
+    relevant_age_min: int = 6
+    relevant_age_max: int = 18
     group: MilestoneGroup = back_populates("milestones")
     text: Mapped[dict[str, MilestoneText]] = dict_relationship(key="lang_id")
     images: Mapped[list[MilestoneImage]] = list_relationship("milestone")
@@ -137,7 +138,8 @@ class MilestoneAdmin(SQLModel):
     group_id: int
     order: int
     expected_age_months: int
-    expected_age_delta: int
+    relevant_age_min: int
+    relevant_age_max: int
     text: dict[str, MilestoneText]
     images: list[MilestoneImage]
     name: str
@@ -303,7 +305,8 @@ class MilestoneAgeScoreCollection(SQLModel, table=True):
         default=None, primary_key=True, foreign_key="milestone.id", ondelete="CASCADE"
     )
     expected_age: int
-    expected_age_delta: int
+    relevant_age_min: int
+    relevant_age_max: int
     scores: Mapped[list[MilestoneAgeScore]] = list_relationship("collection")
     created_at: datetime.datetime = Field(
         sa_column_kwargs={
@@ -315,7 +318,8 @@ class MilestoneAgeScoreCollection(SQLModel, table=True):
 class MilestoneAgeScoreCollectionPublic(SQLModel):
     milestone_id: int
     expected_age: int
-    expected_age_delta: int
+    relevant_age_min: int
+    relevant_age_max: int
     scores: list[MilestoneAgeScore]
 
 

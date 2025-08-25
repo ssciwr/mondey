@@ -121,7 +121,8 @@ def test_post_milestone(admin_client: TestClient):
         "group_id": 2,
         "order": 0,
         "expected_age_months": 12,
-        "expected_age_delta": 6,
+        "relevant_age_min": 6,
+        "relevant_age_max": 18,
         "text": {
             "de": {
                 "milestone_id": 6,
@@ -173,7 +174,8 @@ def test_put_milestone(admin_client: TestClient, milestone_group_admin1: dict):
     milestone["name"] = "bob"
     milestone["order"] = 6
     milestone["expected_age_months"] = 11
-    milestone["expected_age_delta"] = 99
+    milestone["relevant_age_min"] = 0
+    milestone["relevant_age_max"] = 99
     milestone["text"]["de"]["title"] = "asdsd"
     milestone["text"]["de"]["desc"] = "12xzascdasdf"
     milestone["text"]["de"]["obs"] = "asdrgf"
@@ -254,7 +256,8 @@ def test_get_milestone_age_scores(admin_client: TestClient):
     assert response.status_code == 200
 
     assert response.json()["expected_age"] == 8
-    assert response.json()["expected_age_delta"] == 4
+    assert response.json()["relevant_age_min"] == 4
+    assert response.json()["relevant_age_max"] == 12
 
     assert response.json()["scores"][7]["c0"] == 0
     assert response.json()["scores"][7]["c1"] == 0

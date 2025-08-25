@@ -33,8 +33,8 @@ from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.users import User
 from mondey_backend.routers.utils import get_answer_session_child_ages_in_months
 from mondey_backend.routers.utils import get_child_age_in_months
-from mondey_backend.routers.utils import get_expected_age_delta
 from mondey_backend.routers.utils import get_expected_age_from_scores
+from mondey_backend.routers.utils import get_relevant_age_min_max
 from mondey_backend.settings import app_settings
 
 
@@ -256,9 +256,10 @@ async def async_update_stats(
                     m_counts[milestone.id][child_age][answer.answer] += 1
                 # whether or not there is an answer, we still need a value when calculating
                 # the average and std dev of answers for the milestone group.
-                # if the answer is missing, we assume a full score if the child is older than the expected age for the milestone,
-                # and a zero score if child is younger.
-                imputed_answer = 3 if milestone.expected_age_months < child_age else 0
+                # if the answer is missing, we assume a full score if the child is old enough to be asked about the milestone,
+                # (since once the child achieves a milestone it is no longer asked in future sessions),
+                # and a zero score if child is too young to be asked about this milestone.
+                imputed_answer = 3 if child_age >= milestone.relevant_age_min else 0
                 answer_value = answer.answer if answer is not None else imputed_answer
                 if answer is None:
                     logger.debug(
@@ -320,12 +321,13 @@ def save_milestone_statistics(
         collection = MilestoneAgeScoreCollection(
             milestone_id=milestone_id,
             expected_age=0,
-            expected_age_delta=0,
+            relevant_age_min=0,
+            relevant_age_max=0,
         )
         session.add(collection)
 
     collection.expected_age = get_expected_age_from_scores(counts)
-    collection.expected_age_delta = get_expected_age_delta(
+    collection.relevant_age_min, collection.relevant_age_max = get_relevant_age_min_max(
         collection.expected_age, counts
     )
 
