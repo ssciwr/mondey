@@ -46,7 +46,7 @@ async function submitData(): Promise<void> {
 		console.log("error: ", response.error);
 		let errorMessage = i18n.tr.forgotPw.sendError;
 		if (response.response?.status === 422) {
-			errorMessage = i18n.tr.login.badData;
+			errorMessage = i18n.tr.login.badCredentials;
 		}
 		alertStore.showAlert(
 			i18n.tr.forgotPw.alertTitle,

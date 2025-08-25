@@ -25,7 +25,7 @@ const registerTestUser = async () => {
 	if (result.error) {
 		alertMessage = `${i18n.tr.registration.alertMessageError}: ${result.error.detail}`;
 		if (result.response?.status === 422) {
-			alertMessage = i18n.tr.login.badData;
+			alertMessage = i18n.tr.login.badCredentials;
 		}
 		showAlert = true;
 	} else {
