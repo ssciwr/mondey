@@ -52,7 +52,7 @@ async function setup(): Promise<MilestoneAnswerSessionPublic | null> {
 	return data;
 }
 
-let showIncompleteOnly = $state(true);
+let showIncompleteOnly = $state(false);
 
 const promise = $state(setup());
 
@@ -94,7 +94,7 @@ const breadcrumbdata: any[] = [
                 {i18n.tr.milestone.milestoneOverviewMobileHint}
             </p>
         </div>
-        <GalleryDisplay bind:showIncompleteOnly={showIncompleteOnly}>
+        <GalleryDisplay bind:showIncompleteOnly={showIncompleteOnly} useRadioButtons={true}>
             {#each contentStore.milestoneGroupData.milestones as milestone, idx}
                 {@const title = milestone?.text?.[i18n.locale]?.title ?? ""}
                 {@const complete = (answerSession?.answers?.[`${milestone.id}`]?.answer ?? -1) >= 0}
