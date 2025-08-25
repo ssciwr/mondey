@@ -31,7 +31,7 @@ the domain-specific data)
 Additional containers take on admin roles:
 - The email server sends emails
 - Watchtower updates the running docker images
-- Back up services take Backups
+- Back up services take backups of the databases
 
 · Important note: Changes to database structure need to be coordinated with updates/updating the docker containers,
 to ensure the backend can still run with the changed data format (e.g. by running a migration .SQL file).
