@@ -236,43 +236,65 @@ def get_or_create_current_milestone_answer_session(
         )
         add(session, milestone_answer_session)
         child_age_months = get_child_age_in_months(child)
+        # get all age-relevant milestones for this child
         milestones = session.exec(
             select(Milestone)
-            .where(
-                col(Milestone.expected_age_months) - col(Milestone.expected_age_delta)
-                <= child_age_months
-            )
-            .where(
-                col(Milestone.expected_age_months) + col(Milestone.expected_age_delta)
-                >= child_age_months
-            )
+            .where(child_age_months >= col(Milestone.relevant_age_min))
+            .where(child_age_months <= col(Milestone.relevant_age_max))
         ).all()
         prev_answer_session = latest_completed_milestone_answer_session(
             session, current_active_user, child
         )
+        all_prev_answer_session_ids = session.exec(
+            select(MilestoneAnswerSession.id)
+            .where(col(MilestoneAnswerSession.child_id) == child.id)
+            .where(col(MilestoneAnswerSession.completed))
+        ).all()
         for milestone in milestones:
-            answer = -1
+            # only include milestones if they have not already been achieved by this child
             if (
-                prev_answer_session is not None
-                and session.exec(
+                prev_answer_session is None
+                or session.exec(
                     select(MilestoneAnswer)
                     .where(col(MilestoneAnswer.milestone_id) == milestone.id)
                     .where(
-                        col(MilestoneAnswer.answer_session_id) == prev_answer_session.id
+                        col(MilestoneAnswer.answer_session_id).in_(
+                            all_prev_answer_session_ids
+                        )
                     )
                     .where(col(MilestoneAnswer.answer) == 3)
                 ).first()
-                is not None
+                is None
             ):
-                answer = 3
-            session.add(
-                MilestoneAnswer(
-                    answer_session_id=milestone_answer_session.id,
-                    milestone_id=milestone.id,
-                    milestone_group_id=milestone.group_id,
-                    answer=answer,
+                session.add(
+                    MilestoneAnswer(
+                        answer_session_id=milestone_answer_session.id,
+                        milestone_id=milestone.id,
+                        milestone_group_id=milestone.group_id,
+                        answer=-1,
+                    )
                 )
-            )
+        # also include any unachieved milestones from the previous session
+        if prev_answer_session is not None:
+            relevant_milestone_ids = {m.id for m in milestones}
+            for (
+                prev_milestone_id,
+                milestone_answer,
+            ) in prev_answer_session.answers.items():
+                if (
+                    milestone_answer.answer < 3
+                    and prev_milestone_id not in relevant_milestone_ids
+                ):
+                    prev_milestone = session.get(Milestone, prev_milestone_id)
+                    if prev_milestone is not None:
+                        session.add(
+                            MilestoneAnswer(
+                                answer_session_id=milestone_answer_session.id,
+                                milestone_id=prev_milestone_id,
+                                milestone_group_id=prev_milestone.group_id,
+                                answer=-1,
+                            )
+                        )
         session.commit()
     return milestone_answer_session
 
@@ -345,12 +367,12 @@ def get_expected_age_from_scores(counts: np.ndarray) -> int:
     return int(np.argmax(achieved))
 
 
-def get_expected_age_delta(expected_age: int, counts: np.ndarray) -> int:
+def get_relevant_age_min_max(expected_age: int, counts: np.ndarray) -> tuple[int, int]:
     """
-    Returns the +/- range on the expected age for a milestone based on the counts of each answer for each child age.
+    Returns the min and max child age for which this milestone should be asked, based on the counts of each answer for each child age.
     :param expected_age: the expected age in months for this milestone
     :param counts: the number of answers for each age and answer, where the index in the 2-d array is (age, answer)
-    :return: the +/- range on the expected age in months for this milestone
+    :return: min, max relevant child age in months for this milestone
     """
     # require at least `min_number_of_answers`
     min_number_of_answers = 3
@@ -370,7 +392,7 @@ def get_expected_age_delta(expected_age: int, counts: np.ndarray) -> int:
         and min_age <= expected_age
     ):
         min_age += 1
-    return max(max_age - expected_age, expected_age - min_age)
+    return min_age, max_age
 
 
 def child_image_path(child_id: int | None) -> pathlib.Path:

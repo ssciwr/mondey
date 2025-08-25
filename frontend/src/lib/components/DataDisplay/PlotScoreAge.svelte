@@ -12,11 +12,13 @@ import { onMount } from "svelte";
 let {
 	scoreCollection,
 	expected_age_months,
-	expected_age_delta,
+	relevant_age_min,
+	relevant_age_max,
 }: {
 	scoreCollection: MilestoneAgeScoreCollectionPublic | null;
 	expected_age_months: number;
-	expected_age_delta: number;
+	relevant_age_min: number;
+	relevant_age_max: number;
 } = $props();
 let container: HTMLDivElement;
 
@@ -40,7 +42,7 @@ onMount(() => {
 						barMinHeight1Px: true,
 						barPadding: 0.0,
 						color: (d: MilestoneAgeScore) => {
-							if (Math.abs(d.age - expected_age_months) >= expected_age_delta) {
+							if (d.age > relevant_age_max || d.age < relevant_age_min) {
 								return "#aaaaaa";
 							}
 							if (d.age === expected_age_months) {

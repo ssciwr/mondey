@@ -9,10 +9,11 @@ import type {
 import CancelButton from "$lib/components/Admin/CancelButton.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import PlotScoreAge from "$lib/components/DataDisplay/PlotScoreAge.svelte";
+import IntegerInput from "$lib/components/DataInput/IntegerInput.svelte";
 import { i18n } from "$lib/i18n.svelte";
+import { isValidAge } from "$lib/util";
 import { Label, Modal } from "flowbite-svelte";
 import { onMount } from "svelte";
-import { RangeSlider } from "svelte-range-slider-pips";
 
 let {
 	open = $bindable(false),
@@ -21,7 +22,13 @@ let {
 
 let scoreCollection = $state(null as MilestoneAgeScoreCollectionPublic | null);
 let expected_age_months = $state(0);
-let expected_age_delta = $state(0);
+let relevant_age_min = $state(0);
+let relevant_age_max = $state(0);
+let valid = $derived(
+	isValidAge(expected_age_months) &&
+		isValidAge(relevant_age_min) &&
+		isValidAge(relevant_age_max),
+);
 
 async function getScores() {
 	if (!milestone?.id) {
@@ -40,7 +47,8 @@ async function getScores() {
 onMount(async () => {
 	if (milestone) {
 		expected_age_months = milestone.expected_age_months;
-		expected_age_delta = milestone.expected_age_delta;
+		relevant_age_min = milestone.relevant_age_min;
+		relevant_age_max = milestone.relevant_age_max;
 	}
 	await getScores();
 });
@@ -49,7 +57,8 @@ function applyChangesToMilestone() {
 	open = false;
 	if (milestone) {
 		milestone.expected_age_months = expected_age_months;
-		milestone.expected_age_delta = expected_age_delta;
+		milestone.relevant_age_min = relevant_age_min;
+		milestone.relevant_age_max = relevant_age_max;
 	}
 }
 </script>
@@ -57,21 +66,27 @@ function applyChangesToMilestone() {
 <Modal title={i18n.tr.admin.expectedAgeData} bind:open size="lg" outsideclose>
 	{#if scoreCollection}
 		<div class="py-1">
-			<Label>{`${i18n.tr.admin.expectedAge}: ${expected_age_months}m`}</Label>
-			<RangeSlider id="expectedAge-months" min={1} max={72} step={1} pips={true} bind:value={expected_age_months}/>
+			<Label>{i18n.tr.admin.expectedAge}</Label>
+            <IntegerInput bind:value={expected_age_months}/>
 		</div>
 		<div class="py-1">
-			<Label>{`${i18n.tr.admin.ageRange}: ± ${expected_age_delta}m`}</Label>
-			<RangeSlider id="expectedAgeDelta" min={0} max={72} step={1} pips={true} bind:value={expected_age_delta}/>
+			<Label>{i18n.tr.admin.minRelevantAge}</Label>
+            <IntegerInput bind:value={relevant_age_min}/>
 		</div>
+        <div class="py-1">
+            <Label>{i18n.tr.admin.maxRelevantAge}</Label>
+            <IntegerInput bind:value={relevant_age_max}/>
+        </div>
 		{#key expected_age_months}
-			{#key expected_age_delta}
-				<PlotScoreAge {scoreCollection} {expected_age_months} {expected_age_delta}/>
+			{#key relevant_age_min}
+                {#key relevant_age_max}
+    				<PlotScoreAge {scoreCollection} {expected_age_months} {relevant_age_min} {relevant_age_max}/>
+                {/key}
 			{/key}
 		{/key}
 	{/if}
 	<svelte:fragment slot="footer">
-		<SaveButton onclick={applyChangesToMilestone}/>
+		<SaveButton onclick={applyChangesToMilestone} disabled={!valid}/>
 		<CancelButton onclick={() => {open = false;}}/>
 	</svelte:fragment>
 </Modal>

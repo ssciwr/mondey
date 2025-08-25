@@ -158,7 +158,8 @@ export type MilestoneAdmin = {
     group_id: number;
     order: number;
     expected_age_months: number;
-    expected_age_delta: number;
+    relevant_age_min: number;
+    relevant_age_max: number;
     text: {
         [key: string]: MilestoneText;
     };
@@ -178,7 +179,8 @@ export type MilestoneAgeScore = {
 export type MilestoneAgeScoreCollectionPublic = {
     milestone_id: number;
     expected_age: number;
-    expected_age_delta: number;
+    relevant_age_min: number;
+    relevant_age_max: number;
     scores: Array<MilestoneAgeScore>;
 };
 

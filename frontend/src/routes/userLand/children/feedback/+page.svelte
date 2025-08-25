@@ -506,9 +506,11 @@ async function printReport(): Promise<void> {
 <!--element of the detailed evaluation which shows how the child fared in each milestonegroup-->
 {#snippet evaluationElement(symbol: any, milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, color: string, isMilestone: boolean = false)}
     <div class="flex flex-col items-center justify-center p-2 w-full">
+        {#if !isMilestone}
         <div class="flex justify-center w-full mb-2">
             <svelte:component this={symbol} size="xl" class={`${color}`} />
         </div>
+        {/if}
         {#if color !== "gray"}
 			<div class = {`font-bold ${isMilestone? "text-white dark:text-white": ""}`} >
 				{milestone_or_group?.text[i18n.locale].title}

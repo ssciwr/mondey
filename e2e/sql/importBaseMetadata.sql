@@ -20,28 +20,28 @@ INSERT INTO milestonegrouptext (group_id, lang_id, title, desc)
 VALUES (1001, 'fr', 'Compétences en danse', 'Compétences liées au mouvement et à la danse');
 
 -- Add milestones for Reading Text group
-INSERT INTO milestone (id, group_id, "order", expected_age_months, expected_age_delta, name)
-VALUES (1000, 1000, 1, 3, 6, 'Recognizing Shapes');
-INSERT INTO milestone (id, group_id, "order", expected_age_months, expected_age_delta, name)
-VALUES (1001, 1000, 2, 6, 6, 'Recognizing Colors');
-INSERT INTO milestone (id, group_id, "order", expected_age_months, expected_age_delta, name)
-VALUES (1002, 1000, 3, 9, 6, 'Recognizing Letters');
-INSERT INTO milestone (id, group_id, "order", expected_age_months, expected_age_delta, name)
-VALUES (1003, 1000, 4, 12, 6, 'Recognizing Digits');
-INSERT INTO milestone (id, group_id, "order", expected_age_months, expected_age_delta, name)
-VALUES (1004, 1000, 5, 18, 6, 'Recognizing Words');
+INSERT INTO milestone (id, group_id, "order", expected_age_months, relevant_age_min, relevant_age_max, name)
+VALUES (1000, 1000, 1, 3, 0, 9, 'Recognizing Shapes');
+INSERT INTO milestone (id, group_id, "order", expected_age_months, relevant_age_min, relevant_age_max, name)
+VALUES (1001, 1000, 2, 6, 0,12, 'Recognizing Colors');
+INSERT INTO milestone (id, group_id, "order", expected_age_months, relevant_age_min, relevant_age_max, name)
+VALUES (1002, 1000, 3, 9, 3,15, 'Recognizing Letters');
+INSERT INTO milestone (id, group_id, "order", expected_age_months, relevant_age_min, relevant_age_max, name)
+VALUES (1003, 1000, 4, 12, 6,18, 'Recognizing Digits');
+INSERT INTO milestone (id, group_id, "order", expected_age_months, relevant_age_min, relevant_age_max, name)
+VALUES (1004, 1000, 5, 18, 12,24, 'Recognizing Words');
 
 -- Add milestones for Dancing Skills group
-INSERT INTO milestone (id, group_id, "order", expected_age_months, expected_age_delta, name)
-VALUES (1005, 1001, 1, 3, 6, 'Moving to Music');
-INSERT INTO milestone (id, group_id, "order", expected_age_months, expected_age_delta, name)
-VALUES (1006, 1001, 2, 6, 6, 'Clapping Hands');
-INSERT INTO milestone (id, group_id, "order", expected_age_months, expected_age_delta, name)
-VALUES (1007, 1001, 3, 9, 6, 'Simple Dance Moves');
-INSERT INTO milestone (id, group_id, "order", expected_age_months, expected_age_delta, name)
-VALUES (1008, 1001, 4, 12, 6, 'Following Dance Instructions');
-INSERT INTO milestone (id, group_id, "order", expected_age_months, expected_age_delta, name)
-VALUES (1009, 1001, 5, 18, 6, 'Creating Dance Patterns');
+INSERT INTO milestone (id, group_id, "order", expected_age_months, relevant_age_min, relevant_age_max, name)
+VALUES (1005, 1001, 1, 3, 0,9, 'Moving to Music');
+INSERT INTO milestone (id, group_id, "order", expected_age_months, relevant_age_min, relevant_age_max, name)
+VALUES (1006, 1001, 2, 6, 0,12, 'Clapping Hands');
+INSERT INTO milestone (id, group_id, "order", expected_age_months, relevant_age_min, relevant_age_max, name)
+VALUES (1007, 1001, 3, 9, 3,15, 'Simple Dance Moves');
+INSERT INTO milestone (id, group_id, "order", expected_age_months, relevant_age_min, relevant_age_max, name)
+VALUES (1008, 1001, 4, 12, 6,18, 'Following Dance Instructions');
+INSERT INTO milestone (id, group_id, "order", expected_age_months, relevant_age_min, relevant_age_max, name)
+VALUES (1009, 1001, 5, 18, 12,24, 'Creating Dance Patterns');
 
 -- Add milestone texts for Reading Text group
 -- Recognizing Shapes

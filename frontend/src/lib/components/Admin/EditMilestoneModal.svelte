@@ -92,7 +92,7 @@ async function deleteMilestoneImageAndUpdate() {
         <div class="mb-5">
             <Label>{i18n.tr.admin.expectedAge}</Label>
             <div class="flex-row mt-2">
-                {`${milestone.expected_age_months}m ± ${milestone.expected_age_delta}m`}
+                {`${milestone.expected_age_months}m (${i18n.tr.admin.minRelevantAge} ${milestone.relevant_age_min}m, ${i18n.tr.admin.maxRelevantAge} ${milestone.relevant_age_max}m)`}
                 <Button class="mx-4" onclick={() => {showMilestoneExpectedAgeModal = true;}}>{i18n.tr.admin.edit}</Button>
             </div>
         </div>
