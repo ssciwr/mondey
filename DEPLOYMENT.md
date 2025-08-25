@@ -11,7 +11,7 @@ Before running them, the location of the data directory, SSL keys, DEEPL_API_KEY
 either in env vars or in a file `.env` in the same location as the docker compose.yml.
 
 The "SECRET" env key should be a random string, for example 20 random characters. It is used for the Authentication part
-of the application. The "SECRET" value should never change for a given instance/authentication data.
+of the application. If the "SECRET" value is changed any existing "forgot-my-password" and "verify-my-email-address" links will be invalidated.
 
 To clarify the DATABASE_PASSWORD for postgres databases will be used by the docker compose  both to set up the databases
 with those usernames/passwords, and then for other containers (e.g. backend) to connect to them.
