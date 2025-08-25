@@ -25,9 +25,13 @@ async function submitData(): Promise<void> {
 
 	if (result.error) {
 		console.log("error: ", result.response.status, result.error.detail);
+		let errorMessage = `${i18n.tr.registration.alertMessageError}: ${result.error.detail} ${i18n.tr.registration.infoTitle}`;
+		if (result.response?.status === 422) {
+			errorMessage = i18n.tr.login.badCredentials;
+		}
 		alertStore.showAlert(
 			i18n.tr.registration.alertMessageTitle,
-			`${i18n.tr.registration.alertMessageError}: ${result.error.detail} ${i18n.tr.registration.infoTitle}`,
+			errorMessage,
 			true,
 			false,
 		);
