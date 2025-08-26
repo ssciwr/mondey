@@ -39,8 +39,7 @@ async function loadAdminSettings() {
 		}
 		adminSettings = response.data;
 	} catch (e) {
-		error = e instanceof Error ? e.message : "Failed to load admin settings";
-		console.error("Error loading admin settings:", e);
+		error = e instanceof Error ? e.message : "Failed to load admin settings"; // catches the error above if data missing
 	} finally {
 		loading = false;
 	}
@@ -63,22 +62,16 @@ async function updateSettings(
 		const updatedSettings = response.data;
 		adminSettings = updatedSettings;
 
-		// Show success message
 		showSuccessMessage = true;
 
-		// Clear any existing timeout
 		if (successTimeout) {
 			clearTimeout(successTimeout);
 		}
-
-		// Hide success message after 3 seconds
 		successTimeout = setTimeout(() => {
 			showSuccessMessage = false;
 		}, 3000);
 	} catch (e) {
 		error = e instanceof Error ? e.message : "Failed to update admin settings";
-		console.error("Error updating admin settings:", e);
-		// Revert the change on error
 		adminSettings[field] = !value;
 	}
 }
