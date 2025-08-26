@@ -44,6 +44,42 @@ def test_research_data_deleted_child(admin_client: TestClient):
     assert len(admin_client.get("/research/data/").json()) == 3
 
 
+def test_research_data_admin_suspicious_excluded(admin_client: TestClient):
+    # admin client has 1 child, sees all 4 completed answer sessions:
+    assert len(admin_client.get("/users/children/").json()) == 1
+    assert len(admin_client.get("/research/data/").json()) == 4
+    # if an answer session is marked as suspicious by an admin, it is excluded from research data:
+    assert (
+        admin_client.post(
+            "/admin/milestone-answer-sessions/1?suspicious=true"
+        ).status_code
+        == 200
+    )
+    assert len(admin_client.get("/research/data/").json()) == 3
+    assert (
+        admin_client.post(
+            "/admin/milestone-answer-sessions/2?suspicious=true"
+        ).status_code
+        == 200
+    )
+    assert len(admin_client.get("/research/data/").json()) == 2
+    # if the suspicious flag is removed, the answer session is included again:
+    assert (
+        admin_client.post(
+            "/admin/milestone-answer-sessions/1?suspicious=false"
+        ).status_code
+        == 200
+    )
+    assert len(admin_client.get("/research/data/").json()) == 3
+    assert (
+        admin_client.post(
+            "/admin/milestone-answer-sessions/2?suspicious=false"
+        ).status_code
+        == 200
+    )
+    assert len(admin_client.get("/research/data/").json()) == 4
+
+
 def test_research_names(research_client: TestClient):
     response = research_client.get("/research/names/")
     assert response.status_code == 200
