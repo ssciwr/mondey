@@ -11,6 +11,7 @@ import {
 	createChild,
 	deleteChild,
 	deleteChildImage,
+	getAdminSettings,
 	getChild,
 	getChildImage,
 	getChildQuestions,
@@ -38,11 +39,13 @@ import {
 	GridPlusSolid,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
+import { onMount } from "svelte";
 // questions and answers about child that are not part of the child object
 let questionnaire: GetChildQuestionsResponse = $state(
 	[] as GetChildQuestionsResponse,
 );
 let answers: { [k: number]: ChildAnswerPublic } = $state({});
+let adminSettings = $state({ hide_all_feedback: false });
 
 // data for the child object
 let {
@@ -80,6 +83,11 @@ let breadcrumbdata = $derived([
 ]);
 
 let promise = $state(setup());
+
+onMount(async () => {
+	const response = await getAdminSettings();
+	adminSettings = response.data || { hide_all_feedback: false };
+});
 
 async function setup(): Promise<{
 	questionnaire: GetChildQuestionsResponse;
@@ -463,9 +471,7 @@ const yearOptions = Array.from(
                         <hr style="margin-bottom:10px" />
 
                         {#if currentChild.id !== null && disableEdit === true}
-                            {#await import('$lib/adminSettings').then(({ getAdminSettings }) => getAdminSettings().catch(() => ({ hide_all_feedback: false })))}
-                            {:then adminSettings}
-                                {#if !adminSettings.hide_all_feedback}
+                            {#if !adminSettings.hide_all_feedback}
                                     <Button
                                             class="btn-primary"
                                             onclick={() => {
@@ -474,17 +480,7 @@ const yearOptions = Array.from(
                                         <ChartLineUpOutline size="md" />
                                         {i18n.tr.childData.feedbackButtonLabel}
                                     </Button>
-                                {/if}
-                            {:catch}
-                                <Button
-                                        class="btn-primary"
-                                        onclick={() => {
-                                            goto(`/userLand/children/feedback`)
-                                        }}>
-                                    <ChartLineUpOutline size="md" />
-                                    {i18n.tr.childData.feedbackButtonLabel}
-                                </Button>
-                            {/await}
+                            {/if}
                             <Button
                                     class="btn-primary"
                                     onclick={() => {

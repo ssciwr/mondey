@@ -1,7 +1,7 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import { goto } from "$app/navigation";
-import { type AdminSettings, getAdminSettings } from "$lib/adminSettings";
+import { type AdminSettingsPublic, getAdminSettings } from "$lib/client";
 import {
 	type GetSummaryFeedbackForAnswersessionResponse,
 	type MilestoneAnswerSessionPublic,
@@ -55,7 +55,7 @@ let adminSettings = $state({
 	hide_milestone_feedback: false,
 	hide_milestone_group_feedback: false,
 	hide_all_feedback: false,
-} as AdminSettings);
+} as AdminSettingsPublic);
 
 // helpers
 const breakpoints = {
@@ -182,7 +182,10 @@ const breadcrumbdata: any[] = [
  */
 async function loadAdminSettings(): Promise<void> {
 	try {
-		adminSettings = await getAdminSettings();
+		const response = await getAdminSettings();
+		if (response.data) {
+			adminSettings = response.data;
+		}
 	} catch (error) {
 		console.error("Failed to load admin settings:", error);
 	}

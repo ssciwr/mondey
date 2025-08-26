@@ -1,7 +1,7 @@
 <svelte:options runes={true}/>
 <script lang="ts">
 import { goto } from "$app/navigation";
-import { getAdminSettings } from "$lib/adminSettings";
+import { getAdminSettings } from "$lib/client";
 import {
 	type MilestoneAnswerSessionPublic,
 	getCurrentMilestoneAnswerSession,
@@ -43,10 +43,12 @@ async function setup(): Promise<{
 
 	let showCompletion = true;
 	try {
-		const adminSettings = await getAdminSettings();
-		showCompletion =
-			!adminSettings.hide_milestone_feedback &&
-			!adminSettings.hide_all_feedback;
+		const response = await getAdminSettings();
+		if (response.data) {
+			showCompletion =
+				!response.data.hide_milestone_feedback &&
+				!response.data.hide_all_feedback;
+		}
 	} catch (e) {
 		console.log(
 			"Failed to load admin settings, showing completion indicators by default",

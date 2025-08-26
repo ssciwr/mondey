@@ -2,17 +2,17 @@
 
 <script lang="ts">
 import {
-	type AdminSettings,
+	type AdminSettingsPublic,
 	getAdminSettings,
 	updateAdminSettings,
-} from "$lib/adminSettings";
+} from "$lib/client";
 import { i18n } from "$lib/i18n.svelte";
 import { Card, Toggle } from "flowbite-svelte";
 import { CheckCircleOutline } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 
 // State for admin settings
-let adminSettings: AdminSettings = $state({
+let adminSettings: AdminSettingsPublic = $state({
 	hide_milestone_feedback: false,
 	hide_milestone_group_feedback: false,
 	hide_all_feedback: false,
@@ -33,7 +33,11 @@ async function loadAdminSettings() {
 		loading = true;
 		error = null;
 
-		adminSettings = await getAdminSettings();
+		const response = await getAdminSettings();
+		if (!response.data) {
+			throw new Error("No data received from API");
+		}
+		adminSettings = response.data;
 	} catch (e) {
 		error = e instanceof Error ? e.message : "Failed to load admin settings";
 		console.error("Error loading admin settings:", e);
@@ -42,14 +46,21 @@ async function loadAdminSettings() {
 	}
 }
 
-async function updateSettings(field: keyof AdminSettings, value: boolean) {
+async function updateSettings(
+	field: keyof AdminSettingsPublic,
+	value: boolean,
+) {
 	try {
 		error = null;
 		showSuccessMessage = false;
 
-		const updatedSettings = await updateAdminSettings({
-			[field]: value,
+		const response = await updateAdminSettings({
+			body: { [field]: value },
 		});
+		if (!response.data) {
+			throw new Error("No data received from API");
+		}
+		const updatedSettings = response.data;
 		adminSettings = updatedSettings;
 
 		// Show success message
@@ -90,7 +101,8 @@ async function updateSettings(field: keyof AdminSettings, value: boolean) {
                 </label>
                 <Toggle
                     id="hide-milestone-feedback"
-                    bind:checked={adminSettings.hide_milestone_feedback}
+                    checked={adminSettings.hide_all_feedback || adminSettings.hide_milestone_feedback}
+                    disabled={adminSettings.hide_all_feedback}
                     on:change={(e) => updateSettings('hide_milestone_feedback', e.target.checked)}
                 />
             </div>
@@ -101,7 +113,8 @@ async function updateSettings(field: keyof AdminSettings, value: boolean) {
                 </label>
                 <Toggle
                     id="hide-milestone-group-feedback"
-                    bind:checked={adminSettings.hide_milestone_group_feedback}
+                    checked={adminSettings.hide_all_feedback || adminSettings.hide_milestone_group_feedback}
+                    disabled={adminSettings.hide_all_feedback}
                     on:change={(e) => updateSettings('hide_milestone_group_feedback', e.target.checked)}
                 />
             </div>

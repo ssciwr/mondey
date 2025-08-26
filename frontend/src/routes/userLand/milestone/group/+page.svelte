@@ -1,7 +1,7 @@
 <svelte:options runes={true}/>
 <script lang="ts">
 import { goto } from "$app/navigation";
-import { getAdminSettings } from "$lib/adminSettings";
+import { getAdminSettings } from "$lib/client";
 import {
 	type MilestoneAnswerSessionPublic,
 	type MilestonePublic,
@@ -67,10 +67,12 @@ async function setup(): Promise<SetupResult | null> {
 	// Check admin settings for showing progress indicators
 	let showProgress = true;
 	try {
-		const adminSettings = await getAdminSettings();
-		showProgress =
-			!adminSettings.hide_milestone_group_feedback &&
-			!adminSettings.hide_all_feedback;
+		const response = await getAdminSettings();
+		if (response.data) {
+			showProgress =
+				!response.data.hide_milestone_group_feedback &&
+				!response.data.hide_all_feedback;
+		}
 	} catch (e) {
 		console.log(
 			"Failed to load admin settings, showing progress indicators by default",
