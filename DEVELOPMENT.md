@@ -77,6 +77,9 @@ cd mondey
 docker compose -f docker-compose.localdatabases.yml up -d
 ```
 
+Make sure that port `5432` && `5433` are available and check they set up to use those ports by running `docker ps -a`
+They should be "Running" and show those port numbers.
+
 3. install and run the backend development server:
 
 ```sh
@@ -85,6 +88,10 @@ pip install -e .[tests]
 cd ..
 mondey-backend
 ```
+
+Alternative option If you would like databases populated with fake research data and users, useful for testing the research database,
+ run `mondey-backend` from the `/e2e` directory (that causes the databases to be populated with data). Proceed with step 4 in either case.
+You need to carry out step 2 first either way. Step 2 sets up the database that the `mondey-backend` command will access.
 
 4. install and run the frontend development server:
 
