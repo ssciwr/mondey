@@ -556,6 +556,10 @@ async def extract_research_data(
         select(MilestoneAnswerSession)
         .where(col(MilestoneAnswerSession.completed))
         .where(col(MilestoneAnswerSession.user_id).not_in(test_user_ids_to_exclude))
+        .where(
+            col(MilestoneAnswerSession.suspicious_state)
+            != SuspiciousState.admin_suspicious
+        )
     )
     if research_group_id is not None:
         user_ids = await get_user_ids(user_session, research_group_id)
