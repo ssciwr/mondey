@@ -56,7 +56,7 @@ The certificates needs renewing every three months, which can be done manually u
 To automatically renew once a week you can use cron, e.g. `sudo crontab -e`, then add the following line:
 
 ```
-0 0 * * 0 docker run -it --rm -v/etc/letsencrypt:/etc/letsencrypt -v/var/www/certbot:/var/www/certbot certbot/certbot certonly --webroot --webroot-path /var/www/certbot/ -n -d mondey.de
+0 0 * * 0 docker run --rm -v/etc/letsencrypt:/etc/letsencrypt -v/var/www/certbot:/var/www/certbot certbot/certbot certonly --webroot --webroot-path /var/www/certbot/ -n -d mondey.de
 ```
 
 To check that the production website SSL certificates are configured correctly:
