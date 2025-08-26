@@ -85,8 +85,8 @@ export const translationIds = {
 		milestoneGroupSelectionHint:
 			"Klicken Sie auf den Bereich, den Sie gerne bearbeiten möchten",
 		milestonesThatNeedToBeEditedHint: "Meilensteine dieses Bereiches prüfen",
-		nochBearbeiten: "noch bearbeiten",
-		schonBearbeitet: "schon bearbeitet",
+		showAll: "schon bearbeitet",
+		showIncompleteOnly: "noch bearbeiten",
 	},
 	search: {
 		allLabel: "Alle",
@@ -105,8 +105,6 @@ export const translationIds = {
 		milestonePlaceholder: "Nach enthaltenem Meilenstein durchsuchen",
 		complete: "fertig",
 		incomplete: "unfertig",
-		showAll: "alle anzeigen",
-		showIncompleteOnly: "nur unvollständige anzeigen",
 	},
 	admin: {
 		close: "Schließen",
