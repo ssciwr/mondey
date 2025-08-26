@@ -4,6 +4,7 @@ import pathlib
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
+from sqlmodel import Session
 from sqlmodel import col
 
 from mondey_backend.models.milestones import Milestone
@@ -386,7 +387,7 @@ def test_get_milestone_answers_child1_no_current_answer_session(
 
 
 def test_update_milestone_answer_no_current_answer_session(
-    user_client: TestClient, session
+    user_client: TestClient, session: Session
 ):
     current_answer_session = user_client.get("/users/milestone-answers/2").json()
     assert current_answer_session["child_id"] == 2
@@ -447,6 +448,7 @@ def test_update_milestone_answer_no_current_answer_session(
     assert response.json()["session_completed"] is True
     # modify milestone 3 relevant ages so that it is no longer relevant for a 20 month old child
     milestone3 = session.get(Milestone, 3)
+    assert milestone3 is not None
     milestone3.relevant_age_min = 21
     milestone3.relevant_age_max = 25
     session.add(milestone3)
