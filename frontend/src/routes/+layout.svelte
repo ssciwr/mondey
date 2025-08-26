@@ -2,7 +2,9 @@
 <script lang="ts">
 import { base } from "$app/paths";
 import logo_dark from "$lib/assets/mondey_dark.svg";
+import logo_dark_mobile from "$lib/assets/mondey_dark_mobile.svg";
 import logo_light from "$lib/assets/mondey_light.svg";
+import logo_light_mobile from "$lib/assets/mondey_light_mobile.svg";
 import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import Footer from "$lib/components/Navigation/Footer.svelte";
@@ -73,8 +75,12 @@ function toggleDrawer() {
 <div style="position:fixed;padding-top:1.1rem;padding-bottom:1rem;left:0px;right:0px;border-bottom:1px solid lightgray"
 	 class="bg-white z-1000 dark:bg-gray-800 md:hidden w-full text-center flex justify-center items-center shadow-lg">
 	<a href="/#">
-		<img src={logo_light} class="block h-10 dark:hidden" alt="MONDEY Logo" />
-		<img src={logo_dark} class="hidden h-10 dark:block" alt="MONDEY Logo" />
+		<!-- Desktop logos -->
+		<img src={logo_light} class="hidden sm:block dark:hidden h-10" alt="MONDEY Logo" />
+		<img src={logo_dark} class="hidden sm:dark:block h-10" alt="MONDEY Logo" />
+		<!-- Mobile logos -->
+		<img src={logo_light_mobile} class="block sm:hidden dark:hidden h-10" alt="MONDEY Logo" />
+		<img src={logo_dark_mobile} class="hidden dark:block sm:dark:hidden h-10" alt="MONDEY Logo" />
 	</a>
 </div>
 <!-- Desktop Navigation -->
