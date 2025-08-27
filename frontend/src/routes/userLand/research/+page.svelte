@@ -188,7 +188,7 @@ let headers = $derived.by(() => {
 
     <div class="flex flex-col items-stretch m-2">
         <h4>{i18n.tr.researcher.researchData}</h4>
-        <Button class="mt-9 mb-3" disabled={is_downloading} onclick={handleDownloadAll} data-testid="downloadAllResearchData">{i18n.tr.researcher.downloadAll}</Button>
+        <Button class="mt-9 mb-3" disabled={!columns || columns.length === 0 || is_downloading} onclick={handleDownloadAll} data-testid="downloadAllResearchData">{i18n.tr.researcher.downloadAll}</Button>
         {#if is_downloading}
             <div class="text-center">
                 <Spinner class="mt-5" /> <span class="tertiary">{i18n.tr.researcher.downloadingAllResearchData}</span>
@@ -211,7 +211,7 @@ let headers = $derived.by(() => {
                 <MultiSelect bind:value={selected_columns} class="mt-2" items={columns} placeholder={i18n.tr.researcher.groupbyOptional} data-testid="selectGroupby"/>
             </Label>
         </div>
-        <Button class="mt-9 mb-3" onclick={downloadCSV} data-testid="researchDownloadCSV">{i18n.tr.researcher.downloadAsCsv}</Button>
+        <Button class="mt-9 mb-3" onclick={downloadCSV} data-testid="researchDownloadCSV" disabled={!json_data || json_data.length === 0}>{i18n.tr.researcher.downloadAsCsv}</Button>
     </div>
     <!-- Loading indicator -->
     {#if show_spinner}
