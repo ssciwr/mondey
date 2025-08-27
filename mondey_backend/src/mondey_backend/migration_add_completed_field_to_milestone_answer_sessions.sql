@@ -1,1 +1,0 @@
-ALTER TABLE milestoneanswersession ADD COLUMN completed BOOLEAN NOT NULL DEFAULT TRUE;

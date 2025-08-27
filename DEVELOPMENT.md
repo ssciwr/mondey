@@ -60,6 +60,8 @@ psql -U postgres -d mondey
 UPDATE user SET is_admin=true WHERE email='you@address.com';
 ```
 
+Database migrations are done using Alembic, see [./mondey_backend/alembic/README.md](./mondey_backend/alembic/README.md) for more information.
+
 ## Run locally with Python and pnpm
 
 Requires docker compose, Python and [pnpm](https://pnpm.io/installation#using-a-standalone-script)

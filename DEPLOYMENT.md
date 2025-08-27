@@ -216,11 +216,6 @@ And similarly for the usersdb:
 zstdcat db_backups/users/last/users-latest.sql.gz | docker exec -i $(docker ps | grep usersdb-1 | awk '{print $1}') psql --username=postgres --dbname=users
 ```
 
-#### database migrations
-As noted in the README, whenever a new backend image with changed code expecting different models is updated (e.g. by
-you or watchtower) the database structure (and sometimes data) will need to be migrated, usually by running a migration .sql file.
-Otherwise the code might try to access new columns that don't exist in the now outdated database structure, etc.
-
 #### moving the database
 The database can be moved by exporting all of the data, for example to move or duplicate it to another VM.
 
@@ -315,7 +310,7 @@ As for documentation on development/entities in the code: The DEVELOPMENT.md fil
 
 The CI builds production images when tests pass. The watchtower service will automatically update the site at 1AM each night (UTC). However it can also be manually updated by running docker compose pull and rebuilding (e.g. pruning cache).
 
-As the Database data is mapped to volumes, this allows a new version without major downtime. When database migrations occur, a .sql file for that migration needs to be ran at the time of update. In that case, that .sql migration file will be included in a relevant commit for the update. So for any updates with SQL migration changes, it's best to handle that manually. (we have no plans for any updates like that at present).
+As the Database data is mapped to volumes, this allows a new version without major downtime. Database migrations are performed automatically using alembic, see [./mondey_backend/alembic/README.md](./mondey_backend/alembic/README.md) for details.
 
 **Is monitoring/logging already in place?**
 
