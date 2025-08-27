@@ -27,7 +27,9 @@ let relevant_age_max = $state(0);
 let valid = $derived(
 	isValidAge(expected_age_months) &&
 		isValidAge(relevant_age_min) &&
-		isValidAge(relevant_age_max),
+		isValidAge(relevant_age_max) &&
+		relevant_age_min <= expected_age_months &&
+		relevant_age_max >= expected_age_months,
 );
 
 async function getScores() {
@@ -71,11 +73,11 @@ function applyChangesToMilestone() {
 		</div>
 		<div class="py-1">
 			<Label>{i18n.tr.admin.minRelevantAge}</Label>
-            <IntegerInput bind:value={relevant_age_min}/>
+            <IntegerInput bind:value={relevant_age_min} max={Math.min(relevant_age_max, expected_age_months)}/>
 		</div>
         <div class="py-1">
             <Label>{i18n.tr.admin.maxRelevantAge}</Label>
-            <IntegerInput bind:value={relevant_age_max}/>
+            <IntegerInput bind:value={relevant_age_max} min={Math.max(relevant_age_min, expected_age_months)}/>
         </div>
 		{#key expected_age_months}
 			{#key relevant_age_min}

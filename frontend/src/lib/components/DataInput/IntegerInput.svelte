@@ -14,7 +14,7 @@ let {
 	max?: number;
 } = $props();
 
-let valid = $derived(isValidAge(value));
+let valid = $derived(isValidAge(value) && value >= min && value <= max);
 </script>
 
 <Input type="number" {min} {max} bind:value={value} color={valid ? 'base' : 'red'}/>
