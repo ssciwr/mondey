@@ -4,8 +4,10 @@ import pathlib
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
+from sqlmodel import Session
 from sqlmodel import col
 
+from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import SuspiciousState
@@ -385,7 +387,7 @@ def test_get_milestone_answers_child1_no_current_answer_session(
 
 
 def test_update_milestone_answer_no_current_answer_session(
-    user_client: TestClient,
+    user_client: TestClient, session: Session
 ):
     current_answer_session = user_client.get("/users/milestone-answers/2").json()
     assert current_answer_session["child_id"] == 2
@@ -444,14 +446,24 @@ def test_update_milestone_answer_no_current_answer_session(
     assert response.status_code == 200
     assert response.json()["answer"] == new_answer_3
     assert response.json()["session_completed"] is True
+    # modify milestone 3 relevant ages so that it is no longer relevant for a 20 month old child
+    milestone3 = session.get(Milestone, 3)
+    assert milestone3 is not None
+    milestone3.relevant_age_min = 21
+    milestone3.relevant_age_max = 25
+    session.add(milestone3)
+    session.commit()
     # check that we get a new answer session
     new_answer_session = user_client.get("/users/milestone-answers/2").json()
     assert new_answer_session["id"] == 101
     # answers are initially set to -1
+    # milestone 3 is still included because it was previously asked and not achieved, even though it is no longer relevant for the child's age
+    assert "3" in new_answer_session["answers"]
     assert new_answer_session["answers"]["3"]["answer"] == -1
+    assert "4" in new_answer_session["answers"]
     assert new_answer_session["answers"]["4"]["answer"] == -1
-    # except if that milestone was previously answered with a 3, in which case it is set to 3:
-    assert new_answer_session["answers"]["5"]["answer"] == 3
+    # milestone 5 would be age relevant but was already achieved in the previous session, so is not included
+    assert "5" not in new_answer_session["answers"]
 
 
 def test_update_milestone_answer_update_existing_answer(user_client: TestClient):
@@ -612,7 +624,7 @@ def test_update_current_child_answers_no_prexisting(
     assert response.status_code == 404
 
 
-def test_get_summary_feedback_for_session(user_client: TestClient, session):
+def test_get_summary_feedback_for_session(user_client: TestClient):
     response = user_client.get("/users/feedback/answersession=1/summary")
     assert response.status_code == 200
     # not enough samples to provide milestone group feedback
@@ -624,7 +636,7 @@ def test_get_summary_feedback_for_session_invalid(user_client: TestClient):
     assert response.status_code == 404
 
 
-def test_get_detailed_feedback_for_session(user_client: TestClient, session):
+def test_get_detailed_feedback_for_session(user_client: TestClient):
     response = user_client.get("/users/feedback/answersession=1/detailed")
     assert response.status_code == 200
     assert response.json() == {"1": {"1": 0, "2": 1}}
@@ -635,7 +647,7 @@ def test_get_detailed_feedback_for_session_invalid(user_client: TestClient):
     assert response.status_code == 404
 
 
-def test_get_milestone_answer_sessions_for_statistics(user_client: TestClient, session):
+def test_get_milestone_answer_sessions_for_statistics(user_client: TestClient):
     response = user_client.get("/users/milestone-answers-sessions/2")
     assert response.status_code == 200
     # child 2 has no answer sessions
