@@ -68,8 +68,10 @@ async function saveNewExpectedAges() {
 		if (group.milestones) {
 			for (const milestone of group.milestones) {
 				milestone.expected_age_months = expectedAges[milestone.id].expected_age;
-				milestone.expected_age_delta =
-					expectedAges[milestone.id].expected_age_delta;
+				milestone.relevant_age_min =
+					expectedAges[milestone.id].relevant_age_min;
+				milestone.relevant_age_max =
+					expectedAges[milestone.id].relevant_age_max;
 				const { data, error } = await updateMilestone({ body: milestone });
 				if (error) {
 					console.log(error);
@@ -81,7 +83,6 @@ async function saveNewExpectedAges() {
 	}
 	saveProgress = 100;
 	await milestoneGroups.refresh();
-	console.log(saveProgress);
 }
 </script>
 
@@ -117,13 +118,14 @@ async function saveNewExpectedAges() {
                 {#each milestoneGroup.milestones as milestone (milestone.id)}
                     {@const milestoneTitle = `${groupTitle} / ${milestone.text[i18n.locale].title}`}
                     {@const newExpectedAge = expectedAges?.[milestone.id]?.expected_age ?? '-'}
-                    {@const newExpectedAgeDelta = expectedAges?.[milestone.id]?.expected_age_delta ?? '-'}
+                    {@const newRelevantAgeMin = expectedAges?.[milestone.id]?.relevant_age_min ?? '-'}
+                    {@const newRelevantAgeMax = expectedAges?.[milestone.id]?.relevant_age_max ?? '-'}
                     <TableBodyRow>
                         <TableBodyCell>{milestoneTitle}</TableBodyCell>
-                        <TableBodyCell>{milestone.expected_age_months} ± {milestone.expected_age_delta}</TableBodyCell>
-                        <TableBodyCell>{newExpectedAge} ± {newExpectedAgeDelta}</TableBodyCell>
+                        <TableBodyCell>{milestone.expected_age_months} [{milestone.relevant_age_min}-{milestone.relevant_age_max}]</TableBodyCell>
+                        <TableBodyCell>{newExpectedAge} [{newRelevantAgeMin}-{newRelevantAgeMax}]</TableBodyCell>
                         <Button class="m-2" disabled={!expectedAges?.[milestone.id]}
-                                onclick={() => {currentMilestone = milestone; currentTitle = `${milestoneTitle} ${i18n.tr.admin.newExpectedAge}: ${newExpectedAge}m ± ${newExpectedAgeDelta}m`; showMilestoneExpectedAgeModal = true;}}>{i18n.tr.admin.data}</Button>
+                                onclick={() => {currentMilestone = milestone; currentTitle = `${milestoneTitle} ${i18n.tr.admin.newExpectedAge}: ${newExpectedAge}m [${newRelevantAgeMin}m-${newRelevantAgeMax}m]`; showMilestoneExpectedAgeModal = true;}}>{i18n.tr.admin.data}</Button>
                     </TableBodyRow>
                 {/each}
             {/each}
@@ -134,7 +136,7 @@ async function saveNewExpectedAges() {
 {#key currentMilestone}
     <Modal title={currentTitle} bind:open={showMilestoneExpectedAgeModal} size="lg" outsideclose>
         {#if currentMilestone}
-            <PlotScoreAge scoreCollection={expectedAges?.[currentMilestone.id]} expected_age_months={expectedAges?.[currentMilestone.id]?.expected_age} expected_age_delta={expectedAges?.[currentMilestone.id]?.expected_age_delta}/>
+            <PlotScoreAge scoreCollection={expectedAges?.[currentMilestone.id]} expected_age_months={expectedAges?.[currentMilestone.id]?.expected_age} relevant_age_min={expectedAges?.[currentMilestone.id]?.relevant_age_min} relevant_age_max={expectedAges?.[currentMilestone.id]?.relevant_age_max}/>
         {/if}
     </Modal>
 {/key}

@@ -47,14 +47,16 @@ async def test_calculate_milestone_statistics_by_age(session, user_session):
     # existing stats (only answer session 1)
     assert m1.milestone_id == 1
     assert m1.expected_age == 8
-    assert m1.expected_age_delta == 4
+    assert m1.relevant_age_min == 4
+    assert m1.relevant_age_max == 12
     assert m1.scores[8].count == 1
     assert np.isclose(m1.scores[8].mean, 1.0)
     assert np.isclose(m1.scores[8].stddev, 0.0)
 
     assert m2.milestone_id == 2
     assert m2.expected_age == 8
-    assert m2.expected_age_delta == 4
+    assert m2.relevant_age_min == 4
+    assert m2.relevant_age_max == 12
     assert m2.scores[8].count == 1
     assert np.isclose(m2.scores[8].mean, 0.0)
     assert np.isclose(m2.scores[8].stddev, 0.0)
@@ -67,7 +69,8 @@ async def test_calculate_milestone_statistics_by_age(session, user_session):
     assert m1.milestone_id == 1
     # not enough stats to calculate expected age so get max age as a default
     assert m1.expected_age == 72
-    assert m1.expected_age_delta == 72
+    assert m1.relevant_age_min == 0
+    assert m1.relevant_age_max == 72
     assert m1.scores[8].count == 3
     m1_scores = [1, 1, 2]
     assert m1.scores[8].mean == pytest.approx(np.mean(m1_scores))
@@ -75,7 +78,8 @@ async def test_calculate_milestone_statistics_by_age(session, user_session):
 
     assert m2.milestone_id == 2
     assert m2.expected_age == 72
-    assert m2.expected_age_delta == 72
+    assert m2.relevant_age_min == 0
+    assert m2.relevant_age_max == 72
     assert m2.scores[8].count == 3
     m2_scores = [0, 1, 0]
     assert m2.scores[8].mean == pytest.approx(np.mean(m2_scores))
