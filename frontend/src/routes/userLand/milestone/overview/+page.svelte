@@ -1,6 +1,7 @@
 <svelte:options runes={true}/>
 <script lang="ts">
 import { goto } from "$app/navigation";
+import { getAdminSettings } from "$lib/client";
 import {
 	type MilestoneAnswerSessionPublic,
 	getCurrentMilestoneAnswerSession,
@@ -19,10 +20,13 @@ import {
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 
-async function setup(): Promise<MilestoneAnswerSessionPublic | null> {
+async function setup(): Promise<{
+	answerSession: MilestoneAnswerSessionPublic | null;
+	showCompletion: boolean;
+}> {
 	if (!currentChild?.id) {
 		await goto("/userLand/children");
-		return null;
+		return { answerSession: null, showCompletion: true };
 	}
 	if (
 		!contentStore.milestoneGroupData?.milestones ||
@@ -33,9 +37,24 @@ async function setup(): Promise<MilestoneAnswerSessionPublic | null> {
 			contentStore.milestoneGroupData,
 		);
 		await goto("/userLand/children");
-		return null;
+		return { answerSession: null, showCompletion: true };
 	}
 	await currentChild.load_data();
+
+	let showCompletion = true;
+	try {
+		const response = await getAdminSettings();
+		if (response.data) {
+			showCompletion =
+				!response.data.hide_milestone_feedback &&
+				!response.data.hide_all_feedback;
+		}
+	} catch (e) {
+		console.log(
+			"Failed to load admin settings, showing completion indicators by default",
+			e,
+		);
+	}
 	const { data, error } = await getCurrentMilestoneAnswerSession({
 		path: { child_id: currentChild.id },
 	});
@@ -47,9 +66,9 @@ async function setup(): Promise<MilestoneAnswerSessionPublic | null> {
 			true,
 			true,
 		);
-		return null;
+		return { answerSession: null, showCompletion: true };
 	}
-	return data;
+	return { answerSession: data, showCompletion };
 }
 
 let showIncompleteOnly = $state(false);
@@ -83,7 +102,9 @@ const breadcrumbdata: any[] = [
 
 {#await promise}
     <p>{i18n.tr.userData.loadingMessage}</p>
-{:then answerSession}
+{:then result}
+    {@const answerSession = result?.answerSession}
+    {@const showCompletion = result?.showCompletion ?? true}
     <div class="mx-auto flex flex-col md:rounded-t-lg">
         <Breadcrumbs data={breadcrumbdata} stayExpanded={true} />
         <h3 class="mt-5 text-xl font-medium text-gray-900 dark:text-white">
@@ -109,9 +130,11 @@ const breadcrumbdata: any[] = [
                                     goto("/userLand/milestone");
                                  }}
                     >
-                        <div class="mb-4 flex w-full justify-center">
-                            <WhiteCircle solid={complete}/>
-                        </div>
+                        {#if showCompletion}
+                            <div class="mb-4 flex w-full justify-center">
+                                <WhiteCircle solid={complete}/>
+                            </div>
+                        {/if}
                     </CardDisplay>
                 {/if}
             {/each}
