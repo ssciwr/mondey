@@ -1,6 +1,7 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import { goto } from "$app/navigation";
+import { type AdminSettingsPublic, getAdminSettings } from "$lib/client";
 import {
 	type GetSummaryFeedbackForAnswersessionResponse,
 	type MilestoneAnswerSessionPublic,
@@ -50,6 +51,11 @@ let milestoneGroups = $state(
 let detailed = $state({}) as Record<number, any>; // detailed feedback for each milestone
 let summary = $state({}) as Record<number, any>; // summary feedback for each milestonegroup
 let answerSessions = $state({}) as Record<number, MilestoneAnswerSessionPublic>;
+let adminSettings = $state({
+	hide_milestone_feedback: false,
+	hide_milestone_group_feedback: false,
+	hide_all_feedback: false,
+} as AdminSettingsPublic);
 
 // helpers
 const breakpoints = {
@@ -116,6 +122,7 @@ let showHelp = $state(false);
 
 // promises to load the data and steer page loading
 let sessionPromise = $state(loadAnswersessions());
+let adminSettingsPromise = $state(loadAdminSettings());
 
 // data defining the legend for the feedback
 let milestonePresentation = [
@@ -169,6 +176,21 @@ const breadcrumbdata: any[] = [
 
 // functions needed for making decisions about page rendering and for doing some
 // data preprocessing:
+/**
+ * Load admin settings from the API
+ * @return {Promise<void>} nothing
+ */
+async function loadAdminSettings(): Promise<void> {
+	try {
+		const response = await getAdminSettings();
+		if (response.data) {
+			adminSettings = response.data;
+		}
+	} catch (error) {
+		console.error("Failed to load admin settings:", error);
+	}
+}
+
 /**
  * Get the answersessions for the child we are concerned with from the database.
  * @summary Get the answersessions for the child we are concerned with from the database, set the sessionkeys as a sorted and reversed list of keys that we get from the response, and set the relevant_sessionkeys to be the interval of sessionkeys that we want to show.
@@ -540,31 +562,42 @@ async function printReport(): Promise<void> {
 
 <!-- Individual element in the main tabs component of the page: Accordion display of milestone group feedback with detailed feedback for suboptimal milestones available on click -->
 {#snippet milestoneGroupsEval(aid: number)}
-    <Accordion class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-4">
-        {#each Object.entries(summary[aid]) as [mid, score]}
-            <div class="flex flex-col">
-                <AccordionItem
-                        activeClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-milestone-700 dark:bg-milestone-700 hover:bg-milestone-600 dark:hover:bg-milestone-600 items-center justify-between w-full font-medium text-left p-1"
-                        inactiveClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-milestone-800 dark:bg-milestone-800 hover:bg-milestone-700 dark:hover:bg-milestone-700 items-center justify-between w-full font-medium text-left p-1"
-                >
-					<span slot="header" class="items-center flex justify-center py-1">
-						{@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
-					</span>
-                    {#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
-                        {@render evaluation(
-                            milestoneGroups[aid][Number(mid)].milestones.find((element: any) =>
-                            {
-                                return element.id === Number(ms_id);
-                            }),
-                            Number(ms_score),
-                            true
-                        )}
-                        <Hr classHr="w-full my-1"/>
-                    {/each}
-                </AccordionItem>
-            </div>
-        {/each}
-    </Accordion>
+    {#if !adminSettings.hide_milestone_group_feedback}
+        <Accordion class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-4">
+            {#each Object.entries(summary[aid]) as [mid, score]}
+                <div class="flex flex-col">
+                    {#if adminSettings.hide_milestone_feedback}
+                        <div class="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-milestone-800 dark:bg-milestone-800 hover:bg-milestone-700 dark:hover:bg-milestone-700 items-center justify-between w-full font-medium text-left p-1">
+                            <div class="items-center flex justify-center py-1">
+                                {@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
+                            </div>
+                        </div>
+                    {:else}
+                        <!-- Show full accordion with milestone details -->
+                        <AccordionItem
+                                activeClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-milestone-700 dark:bg-milestone-700 hover:bg-milestone-600 dark:hover:bg-milestone-600 items-center justify-between w-full font-medium text-left p-1"
+                                inactiveClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-milestone-800 dark:bg-milestone-800 hover:bg-milestone-700 dark:hover:bg-milestone-700 items-center justify-between w-full font-medium text-left p-1"
+                        >
+                            <span slot="header" class="items-center flex justify-center py-1">
+                                {@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
+                            </span>
+                            {#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
+                                {@render evaluation(
+                                    milestoneGroups[aid][Number(mid)].milestones.find((element: any) =>
+                                    {
+                                        return element.id === Number(ms_id);
+                                    }),
+                                    Number(ms_score),
+                                    true
+                                )}
+                                <Hr classHr="w-full my-1"/>
+                            {/each}
+                        </AccordionItem>
+                    {/if}
+                </div>
+            {/each}
+        </Accordion>
+    {/if}
 {/snippet}
 
 <!-- Legend: a grid view with symbol | shorthand(bold) | explanation  on larger screens and | symbol | shorthand on smaller screens -->
@@ -613,7 +646,7 @@ async function printReport(): Promise<void> {
 <!--topmost navigation element that lets us go back to children overview and child data-->
 <Breadcrumbs data={breadcrumbdata} />
 
-{#await sessionPromise}
+{#await Promise.all([sessionPromise, adminSettingsPromise])}
     <!-- show a loading symbol if the data is not yet available-->
     <div class = "flex justify-center items-center space-x-2">
         <Spinner /> <p>{i18n.tr.childData.loadingMessage}</p>
