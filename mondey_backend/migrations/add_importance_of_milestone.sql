@@ -1,2 +1,0 @@
-ALTER TABLE milestonetext
-ADD COLUMN importance VARCHAR NOT NULL DEFAULT '';

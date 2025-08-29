@@ -9,4 +9,4 @@ COPY . .
 
 RUN pip install .
 
-CMD ["mondey-backend"]
+CMD ["/bin/sh", "-c", "alembic upgrade head && mondey-backend"]
