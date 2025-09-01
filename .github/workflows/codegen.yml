@@ -11,13 +11,13 @@ jobs:
       run:
         working-directory: ./frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: github.event.pull_request.head.repo.full_name == github.repository
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.MONDEY_FORMAT_BOT_PAT }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: github.event.pull_request.head.repo.full_name != github.repository
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
