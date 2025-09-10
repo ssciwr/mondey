@@ -219,6 +219,30 @@ zstdcat db_backups/users/last/users-latest.sql.gz | docker exec -i $(docker ps |
 #### moving the database
 The database can be moved by exporting all of the data, for example to move or duplicate it to another VM.
 
+### Heicloud openstack CLI
+
+To create a snapshot of a running instance, in the heicloud instances page click on "Create Snapshot" next to the instance. To download this image you'll need to use the CLI.
+
+To use the openstack CLI with heicloud, install an older version of the cli (it is not compatible with more recent versions):
+
+```
+pip install python-openstackclient==5.2.1 python-cinderclient==5.0.2 'osc-lib<=3.2.0'
+```
+
+Then log into the heicloud website -> Access & Security -> API Access -> Download OpenStack RC File v3
+Sourcing this file will ask for your heicloud password, then you can use the openstack cli.
+
+For example, to list the available images with their IDs:
+
+```
+openstack image list
+```
+
+And to download an image by ID:
+
+```
+openstack image save --file mondey-heicloud-image <ID>
+```
 
 # Frequently Asked Questions
 ## Application
