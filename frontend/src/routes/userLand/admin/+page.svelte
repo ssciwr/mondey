@@ -2,6 +2,7 @@
 
 <script lang="ts">
 import AnswerSessionData from "$lib/components/Admin/AnswerSessionData.svelte";
+import CalendarEvents from "$lib/components/Admin/CalendarEvents.svelte";
 import DeactivateFeedback from "$lib/components/Admin/DeactivateFeedback.svelte";
 import Languages from "$lib/components/Admin/Languages.svelte";
 import MilestoneExpectedAges from "$lib/components/Admin/MilestoneExpectedAges.svelte";
@@ -17,6 +18,7 @@ import { user } from "$lib/stores/userStore.svelte";
 import { TabItem, Tabs } from "flowbite-svelte";
 import {
 	BadgeCheckOutline,
+	CalendarOutline,
 	ClipboardListOutline,
 	DatabaseOutline,
 	FileImageOutline,
@@ -65,6 +67,13 @@ onMount(async () => {
             {i18n.tr.admin.users}
         </div>
         <Users/>
+    </TabItem>
+    <TabItem>
+        <div slot="title" class="flex items-center gap-2">
+            <CalendarOutline size="md"/>
+            Calendar Events
+        </div>
+        <CalendarEvents/>
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">
