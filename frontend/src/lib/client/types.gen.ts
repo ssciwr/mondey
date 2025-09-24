@@ -65,6 +65,28 @@ export type BodyVerifyVerifyAuthVerifyPost = {
     token: string;
 };
 
+export type CalendarEventCreate = {
+    title?: string;
+    description?: string;
+    external_link?: string;
+    event_date: string;
+};
+
+export type CalendarEventRead = {
+    title?: string;
+    description?: string;
+    external_link?: string;
+    event_date: string;
+    id: number;
+};
+
+export type CalendarEventUpdate = {
+    title?: string | null;
+    description?: string | null;
+    external_link?: string | null;
+    event_date?: string | null;
+};
+
 export type ChildAnswerPublic = {
     answer: string;
     additional_answer: string | null;
@@ -400,6 +422,22 @@ export type ValidationError = {
     type: string;
 };
 
+export type GetEventsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/events/';
+};
+
+export type GetEventsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Array<CalendarEventRead>;
+};
+
+export type GetEventsResponse = GetEventsResponses[keyof GetEventsResponses];
+
 export type GetLanguagesData = {
     body?: never;
     path?: never;
@@ -542,6 +580,83 @@ export type GetChildQuestionsResponses = {
 };
 
 export type GetChildQuestionsResponse = GetChildQuestionsResponses[keyof GetChildQuestionsResponses];
+
+export type CreateEventData = {
+    body: CalendarEventCreate;
+    path?: never;
+    query?: never;
+    url: '/admin/calendarevents/';
+};
+
+export type CreateEventErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateEventError = CreateEventErrors[keyof CreateEventErrors];
+
+export type CreateEventResponses = {
+    /**
+     * Successful Response
+     */
+    200: CalendarEventRead;
+};
+
+export type CreateEventResponse = CreateEventResponses[keyof CreateEventResponses];
+
+export type DeleteEventData = {
+    body?: never;
+    path: {
+        event_id: number;
+    };
+    query?: never;
+    url: '/admin/calendarevents/{event_id}';
+};
+
+export type DeleteEventErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteEventError = DeleteEventErrors[keyof DeleteEventErrors];
+
+export type DeleteEventResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type UpdateEventData = {
+    body: CalendarEventUpdate;
+    path: {
+        event_id: number;
+    };
+    query?: never;
+    url: '/admin/calendarevents/{event_id}';
+};
+
+export type UpdateEventErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateEventError = UpdateEventErrors[keyof UpdateEventErrors];
+
+export type UpdateEventResponses = {
+    /**
+     * Successful Response
+     */
+    200: CalendarEventRead;
+};
+
+export type UpdateEventResponse = UpdateEventResponses[keyof UpdateEventResponses];
 
 export type CreateLanguageData = {
     body: Language;
