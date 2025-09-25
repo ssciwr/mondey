@@ -18,7 +18,7 @@ import { user } from "$lib/stores/userStore.svelte";
 import { TabItem, Tabs } from "flowbite-svelte";
 import {
 	BadgeCheckOutline,
-	CalendarOutline,
+	CalendarMonthSolid,
 	ClipboardListOutline,
 	DatabaseOutline,
 	FileImageOutline,
@@ -70,7 +70,7 @@ onMount(async () => {
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">
-            <CalendarOutline size="md"/>
+            <CalendarMonthSolid class="shrink-0 h-6 w-6"/>
             Calendar Events
         </div>
         <CalendarEvents/>
