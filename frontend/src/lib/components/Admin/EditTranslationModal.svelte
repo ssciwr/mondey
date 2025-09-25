@@ -43,7 +43,7 @@ let successMessage = $state(null as string | null);
     {/if}
     <svelte:fragment slot="footer">
         <SaveButton onclick={async () => {
-            await onsave(); 
+            await onsave();
             successMessage = i18n.tr.admin.saveChanges + " ✓";
             setTimeout(() => {
                 successMessage = null;

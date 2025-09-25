@@ -15,8 +15,8 @@ import type {
 import AddButton from "$lib/components/Admin/AddButton.svelte";
 import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
 import EditButton from "$lib/components/Admin/EditButton.svelte";
-import DangerousDeleteModal from "$lib/components/DangerousDeleteModal.svelte";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
+import DangerousDeleteModal from "$lib/components/DangerousDeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import {
@@ -100,19 +100,24 @@ async function saveCalendarEvent() {
 				external_link: editForm.external_link || null,
 				event_date: editForm.event_date || null,
 			};
-			
+
 			const { error: apiError } = await updateEvent({
 				path: { event_id: currentCalendarEvent.id },
 				body: updateData,
 			});
-			
+
 			if (apiError) {
-				alertStore.showAlert(`${i18n.tr.admin.calendarEventUpdateError}: ${apiError}`, "", true, true);
+				alertStore.showAlert(
+					`${i18n.tr.admin.calendarEventUpdateError}: ${apiError}`,
+					"",
+					true,
+					true,
+				);
 				return;
 			}
-			
+
 			successMessage = i18n.tr.admin.calendarEventUpdatedSuccess;
-			setTimeout(() => successMessage = null, 5000);
+			setTimeout(() => (successMessage = null), 5000);
 		} else {
 			const createData: CalendarEventCreate = {
 				title: editForm.title,
@@ -120,18 +125,23 @@ async function saveCalendarEvent() {
 				external_link: editForm.external_link,
 				event_date: editForm.event_date,
 			};
-			
+
 			const { error: apiError } = await createEvent({
 				body: createData,
 			});
-			
+
 			if (apiError) {
-				alertStore.showAlert(`${i18n.tr.admin.calendarEventCreateError}: ${apiError}`, "", true, true);
+				alertStore.showAlert(
+					`${i18n.tr.admin.calendarEventCreateError}: ${apiError}`,
+					"",
+					true,
+					true,
+				);
 				return;
 			}
-			
+
 			successMessage = i18n.tr.admin.calendarEventCreatedSuccess;
-			setTimeout(() => successMessage = null, 5000);
+			setTimeout(() => (successMessage = null), 5000);
 		}
 
 		showEditModal = false;
@@ -141,26 +151,31 @@ async function saveCalendarEvent() {
 			`${i18n.tr.admin.calendarEventCreateError}: ${e instanceof Error ? e.message : String(e)}`,
 			"",
 			true,
-			true
+			true,
 		);
 	}
 }
 
 async function confirmDeleteCalendarEvent() {
 	if (!currentCalendarEvent) return;
-	
+
 	try {
 		const { error: apiError } = await deleteEvent({
 			path: { event_id: currentCalendarEvent.id },
 		});
-		
+
 		if (apiError) {
-			alertStore.showAlert(`${i18n.tr.admin.calendarEventDeleteError}: ${apiError}`, "", true, true);
+			alertStore.showAlert(
+				`${i18n.tr.admin.calendarEventDeleteError}: ${apiError}`,
+				"",
+				true,
+				true,
+			);
 			return;
 		}
-		
+
 		successMessage = i18n.tr.admin.calendarEventDeletedSuccess;
-		setTimeout(() => successMessage = null, 5000);
+		setTimeout(() => (successMessage = null), 5000);
 		showDeleteModal = false;
 		await loadCalendarEvents();
 	} catch (e) {
@@ -168,15 +183,15 @@ async function confirmDeleteCalendarEvent() {
 			`${i18n.tr.admin.calendarEventDeleteError}: ${e instanceof Error ? e.message : String(e)}`,
 			"",
 			true,
-			true
+			true,
 		);
 	}
 }
 
 function formatDateGerman(dateString: string): string {
 	const date = new Date(dateString);
-	const day = String(date.getDate()).padStart(2, '0');
-	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const day = String(date.getDate()).padStart(2, "0");
+	const month = String(date.getMonth() + 1).padStart(2, "0");
 	const year = date.getFullYear();
 	return `${day}.${month}.${year}`;
 }
@@ -219,8 +234,8 @@ onMount(() => {
 						<TableBodyCell>{calendarEvent.title || "—"}</TableBodyCell>
 						<TableBodyCell>{formatDateGerman(calendarEvent.event_date)}</TableBodyCell>
 						<TableBodyCell>
-							{calendarEvent.description 
-								? calendarEvent.description.length > 50 
+							{calendarEvent.description
+								? calendarEvent.description.length > 50
 									? calendarEvent.description.substring(0, 50) + "..."
 									: calendarEvent.description
 								: "—"}
@@ -258,7 +273,7 @@ onMount(() => {
 		<h3 class="text-xl font-semibold mb-4">
 			{currentCalendarEvent ? i18n.tr.admin.editCalendarEvent : i18n.tr.admin.addCalendarEvent}
 		</h3>
-		
+
 		<div class="space-y-4">
 			<div>
 				<Label for="title" class="mb-2">{i18n.tr.admin.title}</Label>

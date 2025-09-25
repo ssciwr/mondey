@@ -66,7 +66,7 @@ const calendarEventsPromise = loadCalendarEvents();
 			{#each Object.entries(eventsByYear).sort(([a], [b]) => Number(a) - Number(b)) as [year, yearEvents]}
 				<div class="space-y-4">
 					<h3 class="text-3xl font-bold text-gray-800 pb-4">{year}</h3>
-					
+
 					{#each yearEvents as calendarEvent (calendarEvent.id)}
 						<div class="flex gap-4 sm:gap-6 p-4 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
 							<div class="flex flex-col items-center justify-start min-w-[50px] sm:min-w-[60px]">
@@ -97,7 +97,7 @@ const calendarEventsPromise = loadCalendarEvents();
 									</div>
 
 									{#if calendarEvent.external_link}
-										<a 
+										<a
 											href={calendarEvent.external_link}
 											target="_blank"
 											rel="noopener noreferrer"
