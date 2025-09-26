@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 
+from pydantic import field_serializer
 from pydantic import field_validator
 from sqlmodel import Field
 from sqlmodel import SQLModel
@@ -31,6 +32,10 @@ class CalendarEventCreate(CalendarEventBase):
 
 class CalendarEventRead(CalendarEventBase):
     id: int
+
+    @field_serializer("event_date")
+    def serialize_event_date(self, value: datetime.date) -> str:
+        return value.strftime("%d.%m.%Y")
 
 
 class CalendarEventUpdate(SQLModel):
