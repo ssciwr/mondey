@@ -16,7 +16,7 @@ import AddButton from "$lib/components/Admin/AddButton.svelte";
 import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
 import EditButton from "$lib/components/Admin/EditButton.svelte";
 import AlertMessage from "$lib/components/AlertMessage.svelte";
-import DangerousDeleteModal from "$lib/components/DangerousDeleteModal.svelte";
+import DeleteModal from "$lib/components/DeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import {
@@ -195,6 +195,9 @@ async function confirmDeleteCalendarEvent() {
 }
 
 function formatDateGerman(dateString: string): string {
+	if (dateString.includes(".")) {
+		return dateString;
+	}
 	const date = new Date(dateString);
 	const day = String(date.getDate()).padStart(2, "0");
 	const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -257,8 +260,8 @@ onMount(() => {
 						</TableBodyCell>
 						<TableBodyCell>
 							<div class="flex space-x-2">
-								<EditButton on:click={() => openEditModal(calendarEvent)} />
-								<DeleteButton on:click={() => openDeleteModal(calendarEvent)} />
+								<EditButton onclick={() => openEditModal(calendarEvent)} />
+								<DeleteButton onclick={() => openDeleteModal(calendarEvent)} />
 							</div>
 						</TableBodyCell>
 					</TableBodyRow>
@@ -330,8 +333,7 @@ onMount(() => {
 	</form>
 </Modal>
 
-<DangerousDeleteModal
+<DeleteModal
 	bind:open={showDeleteModal}
-	itemName={currentCalendarEvent?.title || "this calendar event"}
-	on:confirm={confirmDeleteCalendarEvent}
+	onclick={confirmDeleteCalendarEvent}
 />
