@@ -151,7 +151,7 @@ export const translationIds = {
 		saveChanges: "Änderungen speichern",
 		cancel: "Abbrechen",
 		desc: "Beschreibung",
-		dateEntryFormat: "05.05.2030",
+		dateEntryFormat: "25.05.2030",
 		obs: "Beobachtungshinweise",
 		help: "Förderhinweise",
 		importance: "Warum ist dieser Meilenstein wichtig?",

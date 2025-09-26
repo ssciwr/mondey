@@ -117,7 +117,9 @@ async function saveCalendarEvent() {
 			}
 
 			successMessage = i18n.tr.admin.calendarEventUpdatedSuccess;
-			setTimeout(() => (successMessage = null), 5000);
+			setTimeout(() => {
+				successMessage = null;
+			}, 5000);
 		} else {
 			const createData: CalendarEventCreate = {
 				title: editForm.title,
@@ -141,7 +143,9 @@ async function saveCalendarEvent() {
 			}
 
 			successMessage = i18n.tr.admin.calendarEventCreatedSuccess;
-			setTimeout(() => (successMessage = null), 5000);
+			setTimeout(() => {
+				successMessage = null;
+			}, 5000);
 		}
 
 		showEditModal = false;
@@ -175,7 +179,9 @@ async function confirmDeleteCalendarEvent() {
 		}
 
 		successMessage = i18n.tr.admin.calendarEventDeletedSuccess;
-		setTimeout(() => (successMessage = null), 5000);
+		setTimeout(() => {
+			successMessage = null;
+		}, 5000);
 		showDeleteModal = false;
 		await loadCalendarEvents();
 	} catch (e) {
