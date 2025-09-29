@@ -19,15 +19,13 @@ let {
 	missing_translations: Array<string>;
 	onsave: () => Promise<void>;
 } = $props();
-
-let idx = $state(0);
 </script>
 
 <Modal title={i18n.tr.admin.missingTranslations} bind:open outsideclose size="lg">
     {#if missing_translations.length > 0}
-        {@const section_key = missing_translations[idx].split(".")[0]}
-        {@const item_key = missing_translations[idx].split(".")[1]}
-            <Label class="mb-2">{missing_translations[idx]}</Label>
+        {@const section_key = missing_translations[0].split(".")[0]}
+        {@const item_key = missing_translations[0].split(".")[1]}
+            <Label class="mb-2">{missing_translations[0]}</Label>
             {#each i18n.locales as lang}
                 <div class="mb-1">
                     <InputAutoTranslate bind:value={translations[lang][section_key][item_key]} locale={lang} de_text={translations["de"][section_key][item_key]}/>
@@ -35,7 +33,7 @@ let idx = $state(0);
             {/each}
     {/if}
     <svelte:fragment slot="footer">
-        <SaveButton onclick={async () => {await onsave(); if(idx+1<missing_translations.length){++idx;} else {open = false;}}}/>
+        <SaveButton onclick={async () => {await onsave(); open = missing_translations.length > 0;}}/>
         <CancelButton onclick={() => {open = false;}}/>
     </svelte:fragment>
 </Modal>
