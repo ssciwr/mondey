@@ -407,6 +407,7 @@ export const translationIds = {
 		upcomingEvents: "Kommende Veranstaltungen",
 		noEventsFound: "Keine kommenden Veranstaltungen gefunden",
 		viewDetails: "Details anzeigen",
+		openLink: "Link öffnen",
 		loadingEvents: "Veranstaltungen werden geladen...",
 		eventsLoadError: "Fehler beim Laden der Veranstaltungen",
 	},

@@ -78,7 +78,7 @@ function openEditModal(calendarEvent: CalendarEventRead | null = null) {
 		editForm.title = calendarEvent.title || "";
 		editForm.description = calendarEvent.description || "";
 		editForm.external_link = calendarEvent.external_link || "";
-		editForm.event_date = parseGermanDateToDate(calendarEvent.event_date);
+		editForm.event_date = parseISODateToDate(calendarEvent.event_date);
 	} else {
 		editForm.title = "";
 		editForm.description = "";
@@ -101,7 +101,7 @@ async function saveCalendarEvent() {
 				description: editForm.description || null,
 				external_link: editForm.external_link || null,
 				event_date: editForm.event_date
-					? formatDateToGermanString(editForm.event_date)
+					? formatDateToISOString(editForm.event_date)
 					: null,
 			};
 
@@ -130,7 +130,7 @@ async function saveCalendarEvent() {
 				description: editForm.description,
 				external_link: editForm.external_link,
 				event_date: editForm.event_date
-					? formatDateToGermanString(editForm.event_date)
+					? formatDateToISOString(editForm.event_date)
 					: "",
 			};
 
@@ -200,24 +200,16 @@ async function confirmDeleteCalendarEvent() {
 	}
 }
 
-function formatDateGerman(dateString: string): string {
-	if (dateString.includes(".")) {
-		return dateString;
-	}
-	return DateTime.fromISO(dateString).setLocale("de").toFormat("dd.MM.yyyy");
+function formatDateGerman(isoDateString: string): string {
+	return DateTime.fromISO(isoDateString).setLocale("de").toFormat("dd.MM.yyyy");
 }
 
-function parseGermanDateToDate(germanDateString: string): Date {
-	const [day, month, year] = germanDateString.split(".");
-	return new Date(
-		Number.parseInt(year),
-		Number.parseInt(month) - 1,
-		Number.parseInt(day),
-	);
+function parseISODateToDate(isoDateString: string): Date {
+	return DateTime.fromISO(isoDateString).toJSDate();
 }
 
-function formatDateToGermanString(date: Date): string {
-	return DateTime.fromJSDate(date).setLocale("de").toFormat("dd.MM.yyyy");
+function formatDateToISOString(date: Date): string {
+	return DateTime.fromJSDate(date).toFormat("yyyy-MM-dd");
 }
 
 onMount(() => {
@@ -267,7 +259,7 @@ onMount(() => {
 						<TableBodyCell>
 							{#if calendarEvent.external_link}
 								<a href={calendarEvent.external_link} target="_blank" class="text-blue-600 hover:underline">
-									Link
+									{i18n.tr.frontpage.openLink}
 								</a>
 							{:else}
 								—
@@ -301,7 +293,7 @@ onMount(() => {
 		<div class="space-y-4">
 			<div>
 				<Label for="title" class="mb-2">{i18n.tr.admin.title}</Label>
-				<Input id="title" bind:value={editForm.title} placeholder="Event title" />
+				<Input id="title" bind:value={editForm.title} placeholder={i18n.tr.admin.title} />
 			</div>
 
 			<div>
@@ -311,7 +303,6 @@ onMount(() => {
 					availableFrom={new Date()}
 					locale="de-DE"
 					translationLocale="de-DE"
-					placeholder="Datum auswählen"
 					required
 				/>
 			</div>
@@ -321,7 +312,7 @@ onMount(() => {
 				<Textarea
 					id="description"
 					bind:value={editForm.description}
-					placeholder="Event description"
+					placeholder={i18n.tr.admin.desc}
 					rows="3"
 				/>
 			</div>

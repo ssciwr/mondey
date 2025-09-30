@@ -12,7 +12,7 @@ def test_create_get_update_calendar_event(admin_client: TestClient):
         "title": "Digitale Medien und Kinderpsychologie",
         "description": "Ein Expertenpanel diskutiert die Auswirkungen von Bildschirmzeit und sozialen Medien auf die kindliche Entwicklung.",
         "external_link": "https://example.com/event",
-        "event_date": "15.11.3025",
+        "event_date": "3025-11-15",
     }
 
     response = admin_client.post("/admin/calendarevents/", json=event_data)
@@ -21,7 +21,7 @@ def test_create_get_update_calendar_event(admin_client: TestClient):
     assert created_event["title"] == event_data["title"]
     assert created_event["description"] == event_data["description"]
     assert created_event["external_link"] == event_data["external_link"]
-    assert created_event["event_date"] == event_data["event_date"]
+    assert created_event["event_date"] == "3025-11-15T00:00:00"
     assert "id" in created_event
     event_id = created_event["id"]
 
@@ -32,19 +32,19 @@ def test_create_get_update_calendar_event(admin_client: TestClient):
     assert events[0]["id"] == event_id
     assert events[0]["title"] == event_data["title"]
 
-    update_data = {"event_date": "20.12.3025"}
+    update_data = {"event_date": "3025-12-20"}
     response = admin_client.put(f"/admin/calendarevents/{event_id}", json=update_data)
     assert response.status_code == 200
     updated_event = response.json()
     assert updated_event["id"] == event_id
-    assert updated_event["event_date"] == "20.12.3025"
+    assert updated_event["event_date"] == "3025-12-20T00:00:00"
     assert updated_event["title"] == event_data["title"]
 
     response = admin_client.get("/events/")
     assert response.status_code == 200
     events = response.json()
     assert len(events) == 1
-    assert events[0]["event_date"] == "20.12.3025"
+    assert events[0]["event_date"] == "3025-12-20T00:00:00"
 
 
 def test_delete_calendar_event(admin_client: TestClient):
@@ -52,7 +52,7 @@ def test_delete_calendar_event(admin_client: TestClient):
         "title": "Test Event",
         "description": "Test Description",
         "external_link": "https://test.com",
-        "event_date": "01.01.3025",
+        "event_date": "3025-01-01",
     }
     response = admin_client.post("/admin/calendarevents/", json=event_data)
     assert response.status_code == 200
@@ -76,7 +76,7 @@ def test_calendar_events_non_admin_cannot_modify(user_client: TestClient):
         "title": "Test Event",
         "description": "Test Description",
         "external_link": "https://test.com",
-        "event_date": "01.01.3025",
+        "event_date": "3025-01-01",
     }
 
     response = user_client.post("/admin/calendarevents/", json=event_data)

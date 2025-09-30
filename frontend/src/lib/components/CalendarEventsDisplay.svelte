@@ -20,14 +20,14 @@ async function loadCalendarEvents(): Promise<
 	}
 
 	const sortedEvents = data.sort((a, b) => {
-		const dateA = DateTime.fromFormat(a.event_date, "dd.MM.yyyy");
-		const dateB = DateTime.fromFormat(b.event_date, "dd.MM.yyyy");
+		const dateA = DateTime.fromISO(a.event_date);
+		const dateB = DateTime.fromISO(b.event_date);
 		return dateA.toMillis() - dateB.toMillis();
 	});
 
 	const eventsByYear: Record<number, CalendarEventRead[]> = {};
 	sortedEvents.forEach((event) => {
-		const year = DateTime.fromFormat(event.event_date, "dd.MM.yyyy").year;
+		const year = DateTime.fromISO(event.event_date).year;
 		if (!eventsByYear[year]) {
 			eventsByYear[year] = [];
 		}
@@ -37,14 +37,12 @@ async function loadCalendarEvents(): Promise<
 	return eventsByYear;
 }
 
-function formatDay(dateString: string): string {
-	return DateTime.fromFormat(dateString, "dd.MM.yyyy").toFormat("d");
+function formatDay(isoDateString: string): string {
+	return DateTime.fromISO(isoDateString).toFormat("d");
 }
 
-function formatMonth(dateString: string): string {
-	return DateTime.fromFormat(dateString, "dd.MM.yyyy")
-		.setLocale("de")
-		.toFormat("MMM");
+function formatMonth(isoDateString: string): string {
+	return DateTime.fromISO(isoDateString).setLocale("de").toFormat("MMM");
 }
 
 const calendarEventsPromise = loadCalendarEvents();
@@ -104,7 +102,7 @@ const calendarEventsPromise = loadCalendarEvents();
 											target="_blank"
 											rel="noopener noreferrer"
 											class="text-gray-400 hover:text-primary-600 transition-colors flex-shrink-0"
-											aria-label="External link"
+											aria-label={i18n.tr.frontpage.openLink}
 										>
 											<LinkOutline size="sm" />
 										</a>
@@ -120,7 +118,7 @@ const calendarEventsPromise = loadCalendarEvents();
 											class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 transition-colors text-sm font-medium"
 										>
 											<LinkOutline size="xs" />
-											Learn more
+											{i18n.tr.frontpage.openLink}
 										</a>
 									</div>
 								{/if}
