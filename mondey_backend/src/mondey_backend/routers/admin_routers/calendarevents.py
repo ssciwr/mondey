@@ -18,6 +18,7 @@ def create_router() -> APIRouter:
     def create_event(session: SessionDep, event: CalendarEventCreate):
         db_event = CalendarEvent.model_validate(event)
         add(session, db_event)
+        session.refresh(db_event)
         return db_event
 
     @router.put("/calendarevents/{event_id}", response_model=CalendarEventRead)

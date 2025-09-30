@@ -7,6 +7,7 @@ import AlertMessage from "$lib/components/AlertMessage.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { Card } from "flowbite-svelte";
 import { LinkOutline } from "flowbite-svelte-icons";
+import { DateTime } from "luxon";
 
 async function loadCalendarEvents(): Promise<
 	Record<number, CalendarEventRead[]>
@@ -18,14 +19,15 @@ async function loadCalendarEvents(): Promise<
 		);
 	}
 
-	const sortedEvents = data.sort(
-		(a, b) =>
-			new Date(a.event_date).getTime() - new Date(b.event_date).getTime(),
-	);
+	const sortedEvents = data.sort((a, b) => {
+		const dateA = DateTime.fromFormat(a.event_date, "dd.MM.yyyy");
+		const dateB = DateTime.fromFormat(b.event_date, "dd.MM.yyyy");
+		return dateA.toMillis() - dateB.toMillis();
+	});
 
 	const eventsByYear: Record<number, CalendarEventRead[]> = {};
 	sortedEvents.forEach((event) => {
-		const year = new Date(event.event_date).getFullYear();
+		const year = DateTime.fromFormat(event.event_date, "dd.MM.yyyy").year;
 		if (!eventsByYear[year]) {
 			eventsByYear[year] = [];
 		}
@@ -36,13 +38,13 @@ async function loadCalendarEvents(): Promise<
 }
 
 function formatDay(dateString: string): string {
-	const date = new Date(dateString);
-	return String(date.getDate());
+	return DateTime.fromFormat(dateString, "dd.MM.yyyy").toFormat("d");
 }
 
 function formatMonth(dateString: string): string {
-	const date = new Date(dateString);
-	return date.toLocaleDateString(undefined, { month: "short" });
+	return DateTime.fromFormat(dateString, "dd.MM.yyyy")
+		.setLocale("de")
+		.toFormat("MMM");
 }
 
 const calendarEventsPromise = loadCalendarEvents();

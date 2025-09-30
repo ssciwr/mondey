@@ -21,6 +21,7 @@ import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import {
 	Button,
+	Datepicker,
 	Input,
 	Label,
 	Modal,
@@ -32,6 +33,7 @@ import {
 	TableHeadCell,
 	Textarea,
 } from "flowbite-svelte";
+import { DateTime } from "luxon";
 import { onMount } from "svelte";
 
 let calendarEvents = $state([] as CalendarEventRead[]);
@@ -47,7 +49,7 @@ let editForm = $state({
 	title: "",
 	description: "",
 	external_link: "",
-	event_date: "",
+	event_date: undefined as Date | undefined,
 });
 
 async function loadCalendarEvents() {
@@ -76,12 +78,12 @@ function openEditModal(calendarEvent: CalendarEventRead | null = null) {
 		editForm.title = calendarEvent.title || "";
 		editForm.description = calendarEvent.description || "";
 		editForm.external_link = calendarEvent.external_link || "";
-		editForm.event_date = calendarEvent.event_date;
+		editForm.event_date = parseGermanDateToDate(calendarEvent.event_date);
 	} else {
 		editForm.title = "";
 		editForm.description = "";
 		editForm.external_link = "";
-		editForm.event_date = "";
+		editForm.event_date = undefined;
 	}
 	showEditModal = true;
 }
@@ -98,7 +100,9 @@ async function saveCalendarEvent() {
 				title: editForm.title || null,
 				description: editForm.description || null,
 				external_link: editForm.external_link || null,
-				event_date: editForm.event_date || null,
+				event_date: editForm.event_date
+					? formatDateToGermanString(editForm.event_date)
+					: null,
 			};
 
 			const { error: apiError } = await updateEvent({
@@ -125,7 +129,9 @@ async function saveCalendarEvent() {
 				title: editForm.title,
 				description: editForm.description,
 				external_link: editForm.external_link,
-				event_date: editForm.event_date,
+				event_date: editForm.event_date
+					? formatDateToGermanString(editForm.event_date)
+					: "",
 			};
 
 			const { error: apiError } = await createEvent({
@@ -198,11 +204,20 @@ function formatDateGerman(dateString: string): string {
 	if (dateString.includes(".")) {
 		return dateString;
 	}
-	const date = new Date(dateString);
-	const day = String(date.getDate()).padStart(2, "0");
-	const month = String(date.getMonth() + 1).padStart(2, "0");
-	const year = date.getFullYear();
-	return `${day}.${month}.${year}`;
+	return DateTime.fromISO(dateString).setLocale("de").toFormat("dd.MM.yyyy");
+}
+
+function parseGermanDateToDate(germanDateString: string): Date {
+	const [day, month, year] = germanDateString.split(".");
+	return new Date(
+		Number.parseInt(year),
+		Number.parseInt(month) - 1,
+		Number.parseInt(day),
+	);
+}
+
+function formatDateToGermanString(date: Date): string {
+	return DateTime.fromJSDate(date).setLocale("de").toFormat("dd.MM.yyyy");
 }
 
 onMount(() => {
@@ -219,7 +234,7 @@ onMount(() => {
 {:else}
 	<div class="space-y-4">
 		<div class="flex justify-between items-center">
-			<h3 class="text-lg font-semibold">{i18n.tr.admin.calendarEvents}</h3>
+			<h3 h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">{i18n.tr.admin.calendarEvents}</h3>
 			<AddButton onclick={() => openEditModal()} />
 		</div>
 
@@ -291,12 +306,12 @@ onMount(() => {
 
 			<div>
 				<Label for="event_date" class="mb-2">{i18n.tr.admin.calendarEventDate} *</Label>
-				<Input
-					id="event_date"
-					type="text"
+				<Datepicker
 					bind:value={editForm.event_date}
-					placeholder={i18n.tr.admin.dateEntryFormat}
-					pattern={"\\d{2}\\.\\d{2}\\.\\d{4}"}
+					availableFrom={new Date()}
+					locale="de-DE"
+					translationLocale="de-DE"
+					placeholder="Datum auswählen"
 					required
 				/>
 			</div>

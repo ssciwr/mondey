@@ -71,7 +71,7 @@ onMount(async () => {
     <TabItem>
         <div slot="title" class="flex items-center gap-2">
             <CalendarMonthSolid class="shrink-0 h-6 w-6"/>
-            Calendar Events
+            {i18n.tr.admin.calendarEvents}
         </div>
         <CalendarEvents/>
     </TabItem>
