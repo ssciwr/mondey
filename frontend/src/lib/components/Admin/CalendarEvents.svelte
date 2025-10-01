@@ -266,10 +266,10 @@ onMount(() => {
 							{/if}
 						</TableBodyCell>
 						<TableBodyCell>
-							<div class="flex space-x-2">
+							<span>
 								<EditButton onclick={() => openEditModal(calendarEvent)} />
 								<DeleteButton onclick={() => openDeleteModal(calendarEvent)} />
-							</div>
+							</span>
 						</TableBodyCell>
 					</TableBodyRow>
 				{:else}
