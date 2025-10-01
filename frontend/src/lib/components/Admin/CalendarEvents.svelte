@@ -83,7 +83,7 @@ function openEditModal(calendarEvent: CalendarEventRead | null = null) {
 		editForm.title = "";
 		editForm.description = "";
 		editForm.external_link = "";
-		editForm.event_date = undefined;
+		editForm.event_date = "";
 	}
 	showEditModal = true;
 }
@@ -97,9 +97,9 @@ async function saveCalendarEvent() {
 	try {
 		if (currentCalendarEvent) {
 			const updateData: CalendarEventUpdate = {
-				title: editForm.title || null,
-				description: editForm.description || null,
-				external_link: editForm.external_link || null,
+				title: editForm.title,
+				description: editForm.description,
+				external_link: editForm.external_link || "",
 				event_date: editForm.event_date
 					? formatDateToISOString(editForm.event_date)
 					: null,
