@@ -19,11 +19,11 @@ let {
 	missing_translations: Array<string>;
 	onsave: () => Promise<void>;
 } = $props();
-  
+
 $effect(() => {
-  if (open) {
-      successMessage = null;
-  }
+	if (open) {
+		successMessage = null;
+	}
 });
 
 let successMessage = $state(null as string | null);
