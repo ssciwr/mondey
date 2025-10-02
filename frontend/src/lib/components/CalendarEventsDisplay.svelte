@@ -49,8 +49,9 @@ const calendarEventsPromise = loadCalendarEvents();
 </script>
 
 <div class="space-y-6">
-	<div class="border-b-4 border-primary-600 pb-4">
+	<div class="border-b-4 border-primary-600 pb-4 mb-12 text-center">
 		<h2 class="text-2xl font-bold text-gray-900">{i18n.tr.frontpage.upcomingEvents}</h2>
+		<p class="max-w-[700px] mx-auto py-4 text-lg font-normal text-gray-700 dark:text-gray-400">{i18n.tr.frontpage.eventsDescription}</p>
 	</div>
 
 	{#await calendarEventsPromise}

@@ -406,6 +406,8 @@ export const translationIds = {
 		disclaimerPopup: "Achtung! Die Webseite befindet sich noch im Aufbau.",
 		upcomingEvents: "Kommende Veranstaltungen",
 		noEventsFound: "Keine kommenden Veranstaltungen gefunden",
+		eventsDescription:
+			"Hier finden Sie eine Übersicht über kommende Fachvorträge, Konferenzen und Workshops. Entdecken Sie wertvolle Einblicke und innovative Ansätze, um die psychische Entwicklung ihres Kindes zu fördern.",
 		viewDetails: "Details anzeigen",
 		openLink: "Link öffnen",
 		loadingEvents: "Veranstaltungen werden geladen...",
