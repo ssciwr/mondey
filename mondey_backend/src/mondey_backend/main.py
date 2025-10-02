@@ -21,6 +21,7 @@ from .databases.users import engine as users_engine
 from .logging import logger
 from .routers import admin
 from .routers import auth
+from .routers import calendarevents
 from .routers import milestones
 from .routers import questions
 from .routers import research
@@ -88,6 +89,7 @@ def create_app() -> FastAPI:
     # ensure static files directory exists
     pathlib.Path(app_settings.STATIC_FILES_PATH).mkdir(parents=True, exist_ok=True)
     app = FastAPI(lifespan=lifespan, title="MONDEY API", root_path="/api")
+    app.include_router(calendarevents.create_router())
     app.include_router(milestones.create_router())
     app.include_router(questions.create_router())
     app.include_router(admin.create_router())

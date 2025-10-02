@@ -95,7 +95,7 @@ function toggleDrawer() {
 		{#if false === isUserLand}
 			<NavHamburger />
 			<NavUl ulClass="flex flex-col md:flex-row md:space-x-6 md:justify-right items-center">
-				<NavLi class="hover:cursor-pointer" href="/static/aktuelles">{i18n.tr.misc.latest}</NavLi>
+				<NavLi class="hover:cursor-pointer" href="/aktuelles">{i18n.tr.misc.latest}</NavLi>
 				<NavLi class="hover:cursor-pointer" href="/static/downloads">{i18n.tr.misc.downloads}</NavLi>
 				<NavLi class="hover:cursor-pointer" href="/static/kontakt">{i18n.tr.misc.contact}</NavLi>
 
@@ -147,7 +147,7 @@ function toggleDrawer() {
 				<SidebarWrapper>
 					<SidebarGroup class="mt-10">
 						<!-- Navigation Items -->
-						<SidebarItem label={i18n.tr.misc.latest} href="/static/aktuelles">
+						<SidebarItem label={i18n.tr.misc.latest} href="/aktuelles">
 							<svelte:fragment slot="icon">
 								<BarsOutline size="lg" />
 							</svelte:fragment>

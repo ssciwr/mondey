@@ -83,7 +83,7 @@ async function addQuestion() {
 	}
 }
 
-async function doDeleteQuestion(dry_run = true) {
+function doDeleteQuestion(dry_run = true) {
 	if (!currentQuestionId) {
 		return;
 	}
