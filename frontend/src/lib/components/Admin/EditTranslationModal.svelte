@@ -19,9 +19,23 @@ let {
 	missing_translations: Array<string>;
 	onsave: () => Promise<void>;
 } = $props();
+  
+$effect(() => {
+  if (open) {
+      successMessage = null;
+  }
+});
+
+let successMessage = $state(null as string | null);
 </script>
 
 <Modal title={i18n.tr.admin.missingTranslations} bind:open outsideclose size="lg">
+    {#if successMessage}
+        <div class="mb-4 px-4 py-2 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+            {successMessage}
+        </div>
+    {/if}
+
     {#if missing_translations.length > 0}
         {@const section_key = missing_translations[0].split(".")[0]}
         {@const item_key = missing_translations[0].split(".")[1]}
@@ -33,7 +47,20 @@ let {
             {/each}
     {/if}
     <svelte:fragment slot="footer">
-        <SaveButton onclick={async () => {await onsave(); open = missing_translations.length > 0;}}/>
+        <SaveButton onclick={async () => {
+  try {
+    await onsave();
+    successMessage = i18n.tr.admin.saveChanges + " ✓";
+    open = missing_translations.length > 0;
+  } catch (error) {
+    alertStore.showAlert(
+      i18n.tr.admin.unableToSave,
+      i18n.tr.login.error,
+      true,
+      false,
+    );
+  }
+}}/>
         <CancelButton onclick={() => {open = false;}}/>
     </svelte:fragment>
 </Modal>
