@@ -158,6 +158,7 @@ export const translationIds = {
 		image: "Bild",
 		images: "Bilder",
 		submittedImages: "Eingereichte Bilder",
+		unableToSave: "Fehler beim Speichern",
 		calendarEvents: "Kalenderereignisse",
 		addCalendarEvent: "Kalenderereignis hinzufügen",
 		editCalendarEvent: "Kalenderereignis bearbeiten",

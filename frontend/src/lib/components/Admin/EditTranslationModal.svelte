@@ -20,7 +20,12 @@ let {
 	onsave: () => Promise<void>;
 } = $props();
 
-let idx = $state(0);
+$effect(() => {
+	if (open) {
+		successMessage = null;
+	}
+});
+
 let successMessage = $state(null as string | null);
 </script>
 
@@ -32,9 +37,9 @@ let successMessage = $state(null as string | null);
     {/if}
 
     {#if missing_translations.length > 0}
-        {@const section_key = missing_translations[idx].split(".")[0]}
-        {@const item_key = missing_translations[idx].split(".")[1]}
-            <Label class="mb-2">{missing_translations[idx]}</Label>
+        {@const section_key = missing_translations[0].split(".")[0]}
+        {@const item_key = missing_translations[0].split(".")[1]}
+            <Label class="mb-2">{missing_translations[0]}</Label>
             {#each i18n.locales as lang}
                 <div class="mb-1">
                     <InputAutoTranslate bind:value={translations[lang][section_key][item_key]} locale={lang} de_text={translations["de"][section_key][item_key]}/>
@@ -43,17 +48,19 @@ let successMessage = $state(null as string | null);
     {/if}
     <svelte:fragment slot="footer">
         <SaveButton onclick={async () => {
-            await onsave();
-            successMessage = i18n.tr.admin.saveChanges + " ✓";
-            setTimeout(() => {
-                successMessage = null;
-                if(idx+1<missing_translations.length) {
-                    ++idx;
-                } else {
-                    open = false;
-                }
-            }, 2000);
-        }}/>
+  try {
+    await onsave();
+    successMessage = i18n.tr.admin.saveChanges + " ✓";
+    open = missing_translations.length > 0;
+  } catch (error) {
+    alertStore.showAlert(
+      i18n.tr.admin.unableToSave,
+      i18n.tr.login.error,
+      true,
+      false,
+    );
+  }
+}}/>
         <CancelButton onclick={() => {open = false;}}/>
     </svelte:fragment>
 </Modal>
