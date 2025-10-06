@@ -66,7 +66,7 @@ git clone https://github.com/ssciwr/mondey.git
 cd mondey
 ```
 
-2. run the postgres mondey and user databases locally (this will start the postgres docker containers in detached mode and they will continue to run in the background):
+2. from /mondey_backend, run the postgres mondey and user databases locally (this will start the postgres docker containers in detached mode and they will continue to run in the background):
 
 ```sh
 docker compose -f docker-compose.localdatabases.yml up -d
