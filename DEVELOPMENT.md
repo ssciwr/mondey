@@ -90,7 +90,9 @@ You need to carry out step 2 first either way. Step 2 sets up the database that 
 
 4. install and run the frontend development server:
 
-3.1: Run the frontend
+4.1: Copy /frontend/.env.sample to /frontend/.env - you most likely will not need to change it.
+
+4.2: Run the frontend
 ```sh
 cd frontend
 pnpm install
