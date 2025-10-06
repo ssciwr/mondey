@@ -6,7 +6,9 @@ from pydantic_settings import SettingsConfigDict
 
 class AppSettings(BaseSettings):
     # this will load settings from environment variables or an .env file if present
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file="../.env", env_file_encoding="utf-8", extra="ignore"
+    )
     # these defaults are for local development and are used if the environment variables are not set
     SECRET: str = "abc123"
     DATABASE_HOST_MONDEYDB: str = "localhost"

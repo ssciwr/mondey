@@ -27,14 +27,7 @@ cd mondey
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes -subj '/CN=localhost'
 ```
 
-3. define settings in a .env file in the same folder as the `docker-compose.yml` file, eg:
-
-```
-SMTP_HOST=""
-SECRET="abc123"
-DATABASE_PASSWORD="abc123"
-LOG_LEVEL="debug"
-```
+3. define settings in a .env file in the same folder as the `docker-compose.yml` file. A sample .env.sample file is included in the root directory, which can be copied to .env, with the relevant VALUEs filled in(SECRETS/API keys)
 
 3. build and run the website locally in docker containers on your computer:
 

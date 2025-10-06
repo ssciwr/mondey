@@ -3,6 +3,10 @@ import { svelteTesting } from "@testing-library/svelte/vite";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig(({ mode }) => {
+	const host = process.env.VITE_HOST || "localhost";
+	const port = Number.parseInt(process.env.VITE_PORT || "5173", 10);
+	const apiUrl = process.env.VITE_API_PROXY_URL || "http://localhost:8000";
+
 	return {
 		plugins: [sveltekit(), svelteTesting()],
 		test: {
@@ -10,20 +14,20 @@ export default defineConfig(({ mode }) => {
 			environment: "jsdom",
 		},
 		server: {
-			host: "localhost",
+			host,
 			strictPort: true,
 			proxy: {
-				"/api": "http://localhost:8000",
+				"/api": apiUrl,
 			},
-			port: 5173,
+			port,
 		},
 		preview: {
-			host: "localhost",
+			host,
 			strictPort: true,
 			proxy: {
-				"/api": "http://localhost:8000",
+				"/api": apiUrl,
 			},
-			port: 5173,
+			port,
 		},
 	};
 });
