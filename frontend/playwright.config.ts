@@ -38,7 +38,7 @@ export default defineConfig({
 	],
 	webServer: {
 		command: process.env.CI
-			? `pnpm exec ws --port 5173 --directory build --spa index.html --rewrite '/api/(.*) -> ${env.VITE_API_PROXY_URL || "http://localhost:8000"}/$1'`
+			? `pnpm exec ws --port 5173 --directory build --spa index.html --rewrite '/api/(.*) -> http://localhost:8000/$1'`
 			: "pnpm exec vite dev --port 5173",
 		port: 5173,
 		reuseExistingServer: !process.env.CI,
