@@ -1,0 +1,13 @@
+services:
+  local-mondeydb:
+    extends:
+      file: ../docker-compose.yml
+      service: mondeydb
+    ports:
+      - "${DATABASE_PORT_MONDEYDB:-5432}:5432"
+  local-usersdb:
+    extends:
+      file: ../docker-compose.yml
+      service: usersdb
+    ports:
+      - "${DATABASE_PORT_USERSDB:-5433}:5432"
