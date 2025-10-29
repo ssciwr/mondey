@@ -67,6 +67,26 @@ def write_image_file(file: UploadFile, filename: pathlib.Path | str):
         file.file.close()
 
 
+def write_pdf_file(file: UploadFile, filename: pathlib.Path | str):
+    max_file_size = 10 * 1024 * 1024  # 10MB
+    try:
+        pathlib.Path(filename).parent.mkdir(parents=True, exist_ok=True)
+        content = file.file.read()
+        if len(content) > max_file_size:
+            raise HTTPException(status_code=413, detail="File too large")
+        if not content.startswith(b"%PDF"):
+            raise HTTPException(status_code=400, detail="File must be a PDF")
+        with open(filename, "wb") as f:
+            f.write(content)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(status_code=404, detail="Error saving uploaded file") from e
+    finally:
+        file.file.close()
+
+
 Entity = TypeVar("Entity")
 
 
@@ -407,6 +427,10 @@ def milestone_group_image_path(milestone_group_id: int) -> pathlib.Path:
     return pathlib.Path(
         f"{app_settings.STATIC_FILES_PATH}/mg/{milestone_group_id}.webp"
     )
+
+
+def document_path(document_id: int) -> pathlib.Path:
+    return pathlib.Path(f"{app_settings.STATIC_FILES_PATH}/documents/{document_id}.pdf")
 
 
 def submitted_milestone_image_path(

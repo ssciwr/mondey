@@ -1,6 +1,7 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
+import AdminDocuments from "$lib/components/Admin/AdminDocuments.svelte";
 import AnswerSessionData from "$lib/components/Admin/AnswerSessionData.svelte";
 import CalendarEvents from "$lib/components/Admin/CalendarEvents.svelte";
 import DeactivateFeedback from "$lib/components/Admin/DeactivateFeedback.svelte";
@@ -22,6 +23,7 @@ import {
 	ClipboardListOutline,
 	DatabaseOutline,
 	FileImageOutline,
+	FileOutline,
 	LanguageOutline,
 	PersonChalkboardOutline,
 	ScaleBalancedOutline,
@@ -60,6 +62,13 @@ onMount(async () => {
             {i18n.tr.admin.submittedImages}
         </div>
         <SubmittedMilestoneImages/>
+    </TabItem>
+    <TabItem>
+        <div slot="title" class="flex items-center gap-2">
+            <FileOutline size="md" />
+            {i18n.tr.admin.adminDocuments}
+        </div>
+        <AdminDocuments/>
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">

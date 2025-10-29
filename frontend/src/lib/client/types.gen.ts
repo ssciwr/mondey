@@ -21,6 +21,12 @@ export type BodyAuthCookieLoginAuthLoginPost = {
     client_secret?: string | null;
 };
 
+export type BodyCreateDocumentAdminAdminDocumentsPost = {
+    title: string;
+    description: string;
+    file: Blob | File;
+};
+
 export type BodyImportCsvDataAdminResearchImportCsvPost = {
     /**
      * Additional data CSV file
@@ -166,6 +172,30 @@ export type DeleteResponse = {
      * Error message when present
      */
     error?: string | null;
+};
+
+export type DocumentAdmin = {
+    title?: string;
+    description?: string;
+    filename?: string;
+    id: number;
+    created_at: string;
+    uploaded_by_user_id: number;
+};
+
+export type DocumentCreate = {
+    title?: string;
+    description?: string;
+    filename?: string;
+};
+
+export type DocumentPublic = {
+    title?: string;
+    description?: string;
+    filename?: string;
+    id: number;
+    created_at: string;
+    uploaded_by_user_id: number;
 };
 
 export type ErrorModel = {
@@ -438,6 +468,47 @@ export type GetEventsResponses = {
 
 export type GetEventsResponse = GetEventsResponses[keyof GetEventsResponses];
 
+export type GetPublicDocumentsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/documents/';
+};
+
+export type GetPublicDocumentsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Array<DocumentPublic>;
+};
+
+export type GetPublicDocumentsResponse = GetPublicDocumentsResponses[keyof GetPublicDocumentsResponses];
+
+export type DownloadDocumentData = {
+    body?: never;
+    path: {
+        document_id: number;
+    };
+    query?: never;
+    url: '/documents/{document_id}/download';
+};
+
+export type DownloadDocumentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DownloadDocumentError = DownloadDocumentErrors[keyof DownloadDocumentErrors];
+
+export type DownloadDocumentResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
 export type GetLanguagesData = {
     body?: never;
     path?: never;
@@ -657,6 +728,99 @@ export type UpdateEventResponses = {
 };
 
 export type UpdateEventResponse = UpdateEventResponses[keyof UpdateEventResponses];
+
+export type GetDocumentsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/admin/documents/';
+};
+
+export type GetDocumentsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Array<DocumentAdmin>;
+};
+
+export type GetDocumentsResponse = GetDocumentsResponses[keyof GetDocumentsResponses];
+
+export type CreateDocumentData = {
+    body: BodyCreateDocumentAdminAdminDocumentsPost;
+    path?: never;
+    query?: never;
+    url: '/admin/admin/documents/';
+};
+
+export type CreateDocumentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateDocumentError = CreateDocumentErrors[keyof CreateDocumentErrors];
+
+export type CreateDocumentResponses = {
+    /**
+     * Successful Response
+     */
+    200: DocumentAdmin;
+};
+
+export type CreateDocumentResponse = CreateDocumentResponses[keyof CreateDocumentResponses];
+
+export type DeleteDocumentData = {
+    body?: never;
+    path: {
+        document_id: number;
+    };
+    query?: never;
+    url: '/admin/admin/documents/{document_id}';
+};
+
+export type DeleteDocumentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteDocumentError = DeleteDocumentErrors[keyof DeleteDocumentErrors];
+
+export type DeleteDocumentResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type UpdateDocumentData = {
+    body: DocumentCreate;
+    path: {
+        document_id: number;
+    };
+    query?: never;
+    url: '/admin/admin/documents/{document_id}';
+};
+
+export type UpdateDocumentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateDocumentError = UpdateDocumentErrors[keyof UpdateDocumentErrors];
+
+export type UpdateDocumentResponses = {
+    /**
+     * Successful Response
+     */
+    200: DocumentAdmin;
+};
+
+export type UpdateDocumentResponse = UpdateDocumentResponses[keyof UpdateDocumentResponses];
 
 export type CreateLanguageData = {
     body: Language;
