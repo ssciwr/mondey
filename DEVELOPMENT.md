@@ -27,7 +27,7 @@ cd mondey
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes -subj '/CN=localhost'
 ```
 
-3. define settings in a .env file in the mondey/mondey_backend folder. A sample .env.sample file is included in the root directory, which can be copied to the same directory to work as the .env for local development. You need to set values with these placeholders as described in that .env.sample file: (SECRETVALUE/APIVALUE). Note there are other env variables set with the defaults defined in settings.py, unless later overwritten in your mondey/mondey_backend/.env file, and a separate frontend .env file in mondey/frontend.
+3. define settings in a .env file in the mondey/mondey_backend folder. A sample .env.developmentsample file is included in the root directory, which can be copied to the same directory to work as the .env for local development. You need to set values with these placeholders as described in that .env.developmentsample file: (SECRETVALUE/APIVALUE). Note there are other env variables set with the defaults defined in settings.py, unless later overwritten in your mondey/mondey_backend/.env file, and a separate frontend .env file in mondey/frontend.
 
 4. build and run the website locally in docker containers on your computer:
 
@@ -90,7 +90,7 @@ You need to carry out step 2 first either way. Step 2 sets up the database that 
 
 4. install and run the frontend development server:
 
-4.1: Copy /frontend/.env.sample to /frontend/.env - you most likely will not need to change it.
+4.1: Copy /frontend/.env.developmentsample to /frontend/.env - you most likely will not need to change it.
 
 4.2: Run the frontend
 ```sh
