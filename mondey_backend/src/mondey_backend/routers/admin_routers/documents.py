@@ -9,6 +9,7 @@ from fastapi import HTTPException
 from fastapi import UploadFile
 from sqlmodel import select
 
+from ...dependencies import CurrentActiveUserDep
 from ...dependencies import SessionDep
 from ...models.documents import Document
 from ...models.documents import DocumentAdmin
@@ -30,6 +31,7 @@ def create_router() -> APIRouter:
     @router.post("/", response_model=DocumentAdmin)
     def create_document(
         session: SessionDep,
+        current_user: CurrentActiveUserDep,
         title: Annotated[str, Form()],
         description: Annotated[str, Form()],
         file: Annotated[UploadFile, File()],
@@ -41,7 +43,7 @@ def create_router() -> APIRouter:
             title=title,
             description=description,
             filename=file.filename,
-            uploaded_by_user_id=None,
+            uploaded_by_user_id=current_user.id,
         )
         add(session, db_document)
         if db_document.id is None:
