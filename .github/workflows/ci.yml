@@ -116,6 +116,8 @@ jobs:
         run: pnpm install
       - name: Build frontend
         working-directory: ./frontend
+        env:
+          VITE_MONDEY_API_URL: http://localhost:5173/api
         run: pnpm build
       - name: Install Playwright
         working-directory: ./frontend

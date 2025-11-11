@@ -11,11 +11,12 @@ from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi_injectable.decorator import injectable
 from sqlalchemy import text
+from sqlmodel import Session
 
 from .databases.mondey import create_mondey_db_and_tables
 from .databases.mondey import engine as mondey_engine
+from .databases.users import async_session_maker
 from .databases.users import create_user_db_and_tables
 from .databases.users import engine as users_engine
 from .logging import logger
@@ -31,8 +32,9 @@ from .statistics import async_update_stats
 
 
 async def scheduled_update_stats():
-    update_stats_func = injectable(async_update_stats)
-    await update_stats_func()
+    async with async_session_maker() as user_session:
+        with Session(mondey_engine) as session:
+            await async_update_stats(session=session, user_session=user_session)
 
 
 async def import_e2e_test_sql_files():

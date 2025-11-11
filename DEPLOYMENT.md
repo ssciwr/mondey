@@ -29,7 +29,7 @@ SECRET=<RandomString>
 ### docker compose
 
 To deploy the latest version on a virtual machine with docker compose installed,
-download [docker-compose.yml](https://raw.githubusercontent.com/ssciwr/mondey/main/docker-compose.yml), then do this after editing a .env file with the required values:
+download [docker-compose.yml](https://raw.githubusercontent.com/ssciwr/mondey/main/docker-compose.yml), then do this after editing a .env file(sample in .env.prod.sample) in mondey/mondey_backend with the required values:
 
 ```
 sudo docker compose pull && sudo docker compose up -d && sudo docker system prune -af
