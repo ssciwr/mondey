@@ -17,7 +17,7 @@ test("admin settings document upload", async ({ page }) => {
 	await page.getByRole("button", { name: "Hinzufügen" }).click();
 	await expect(page.getByText("Dokument hochladen")).toBeVisible();
 
-	const testTitle = "Test Doc 1";
+	const testTitle = `Test Doc ${crypto.randomUUID().substring(0, 8)}`;
 	await page.fill("#title", testTitle);
 	await page.fill(
 		"#description",
