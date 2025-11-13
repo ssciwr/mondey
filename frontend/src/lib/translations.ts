@@ -158,6 +158,22 @@ export const translationIds = {
 		image: "Bild",
 		images: "Bilder",
 		submittedImages: "Eingereichte Bilder",
+		documents: "Mondey-Publikationen",
+		documentsDescription:
+			"Hier finden Sie eine Übersicht der Veröffentlichungen des Instituts — Fachartikel, Studien und Berichte aus Forschung und Praxis.",
+		adminDocuments: "Admin Dokumente",
+		documentFilename: "Dateiname",
+		documentCreated: "Erstellt",
+		uploadDocument: "Dokument hochladen",
+		editDocument: "Dokument bearbeiten",
+		deleteDocument: "Dokument löschen",
+		pdfFile: "PDF Datei",
+		upload: "Hochladen",
+		update: "Aktualisieren",
+		download: "Herunterladen",
+		noDocumentsFound: "Keine Dokumente verfügbar",
+		deleteDocumentConfirmation:
+			"Sind Sie sicher, dass Sie dieses Dokument löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
 		unableToSave: "Fehler beim Speichern",
 		calendarEvents: "Kalenderereignisse",
 		addCalendarEvent: "Kalenderereignis hinzufügen",
@@ -230,6 +246,8 @@ export const translationIds = {
 		needToUploadBothFiles:
 			"Sie müssen beide die Daten CSV und Labels CSV hochladen.",
 		importSuccessfulChildren: "Kinder importiert",
+		documentUploadError: "Fehler beim Hochladen des Dokuments",
+		documentError: "Fehler beim Verarbeiten des Dokuments",
 	},
 	researcher: {
 		label: "Wissenschaft",
@@ -397,6 +415,13 @@ export const translationIds = {
 		contact: "Kontakt",
 		selectPlaceholder: "Option wählen",
 		selectRequiredPlaceholder: "Erforderlich",
+	},
+	downloads: {
+		pageTitle: "Mondey-Publikationen",
+		pageDescription:
+			"Hier finden Sie eine Übersicht der Veröffentlichungen des Instituts — Fachartikel, Studien und Berichte aus Forschung und Praxis.",
+		downloadButton: "Herunterladen",
+		noDocumentsAvailable: "Keine Dokumente verfügbar",
 	},
 	frontpage: {
 		heading: "Möchten Sie die Entwicklung von Kindern begleiten und fördern?",

@@ -28,6 +28,9 @@ let deleteDone: boolean = $state(false);
 let sendDeleteRequest = async () => {
 	if (deleteConfirmCode === intendedConfirmCode) {
 		const resp = await deleteDryRunnableRequest(false);
+		if (Object.keys(resp.data).indexOf("dry_run") === -1) {
+			resp.data.dry_run = false; // for deletion like Admin Documents that have no dry_run data.
+		}
 		const { ok, dry_run, children, error } = resp.data;
 
 		if (ok && dry_run === false) {

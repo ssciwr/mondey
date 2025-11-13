@@ -23,6 +23,7 @@ from .logging import logger
 from .routers import admin
 from .routers import auth
 from .routers import calendarevents
+from .routers import documents
 from .routers import milestones
 from .routers import questions
 from .routers import research
@@ -92,6 +93,7 @@ def create_app() -> FastAPI:
     pathlib.Path(app_settings.STATIC_FILES_PATH).mkdir(parents=True, exist_ok=True)
     app = FastAPI(lifespan=lifespan, title="MONDEY API", root_path="/api")
     app.include_router(calendarevents.create_router())
+    app.include_router(documents.create_router())
     app.include_router(milestones.create_router())
     app.include_router(questions.create_router())
     app.include_router(admin.create_router())
