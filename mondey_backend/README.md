@@ -36,7 +36,7 @@ sqlite> .quit
 ## Configuration
 
 The backend can be configured using environment variables,
-which can be set in a `.env` file in the working directory where you start the backend.
+which can be set in a `.env` file in this `mondey/mondey_backend` working directory where you start the backend. There is a sample for both development and production there to copy and edit.
 
 ## Tests
 

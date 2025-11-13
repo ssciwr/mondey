@@ -27,16 +27,9 @@ cd mondey
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes -subj '/CN=localhost'
 ```
 
-3. define settings in a .env file in the same folder as the `docker-compose.yml` file, eg:
+3. define settings in a .env file in the mondey/mondey_backend folder. A sample .env.dev.sample file is included in the root directory, which can be copied to the same directory to work as the .env for local development. You need to set values with these placeholders as described in that .env.dev.sample file: (SECRETVALUE/APIVALUE). Note there are other env variables set with the defaults defined in settings.py, unless later overwritten in your mondey/mondey_backend/.env file, and a separate frontend .env file in mondey/frontend.
 
-```
-SMTP_HOST=""
-SECRET="abc123"
-DATABASE_PASSWORD="abc123"
-LOG_LEVEL="debug"
-```
-
-3. build and run the website locally in docker containers on your computer:
+4. build and run the website locally in docker containers on your computer:
 
 ```sh
 docker compose up --build -d
@@ -73,7 +66,7 @@ git clone https://github.com/ssciwr/mondey.git
 cd mondey
 ```
 
-2. run the postgres mondey and user databases locally (this will start the postgres docker containers in detached mode and they will continue to run in the background):
+2. from /mondey_backend, run the postgres mondey and user databases locally (this will start the postgres docker containers in detached mode and they will continue to run in the background):
 
 ```sh
 docker compose -f docker-compose.localdatabases.yml up -d
@@ -97,7 +90,9 @@ You need to carry out step 2 first either way. Step 2 sets up the database that 
 
 4. install and run the frontend development server:
 
-3.1: Run the frontend
+4.1: Copy /frontend/.env.dev.sample to /frontend/.env - you most likely will not need to change it.
+
+4.2: Run the frontend
 ```sh
 cd frontend
 pnpm install

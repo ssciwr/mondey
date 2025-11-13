@@ -11,7 +11,8 @@ Thumbs.db
 # Env
 .env
 .env.*
-!.env.example
+!.env.dev.sample
+!.env.prod.sample
 !.env.test
 */.svelte-kit
 */.venv
