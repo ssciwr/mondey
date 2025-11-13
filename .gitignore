@@ -41,6 +41,8 @@ build/
 develop-eggs/
 dist/
 downloads/
+!frontend/src/routes/downloads/
+!frontend/src/routes/downloads/**
 eggs/
 .eggs/
 lib64/

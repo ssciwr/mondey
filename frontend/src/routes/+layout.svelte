@@ -96,7 +96,7 @@ function toggleDrawer() {
 			<NavHamburger />
 			<NavUl ulClass="flex flex-col md:flex-row md:space-x-6 md:justify-right items-center">
 				<NavLi class="hover:cursor-pointer" href="/aktuelles">{i18n.tr.misc.latest}</NavLi>
-				<NavLi class="hover:cursor-pointer" href="/static/downloads">{i18n.tr.misc.downloads}</NavLi>
+				<NavLi class="hover:cursor-pointer" href="/downloads">{i18n.tr.misc.downloads}</NavLi>
 				<NavLi class="hover:cursor-pointer" href="/static/kontakt">{i18n.tr.misc.contact}</NavLi>
 
 				<DarkModeChooser />
@@ -152,7 +152,7 @@ function toggleDrawer() {
 								<BarsOutline size="lg" />
 							</svelte:fragment>
 						</SidebarItem>
-						<SidebarItem label={i18n.tr.misc.downloads} href="/static/downloads">
+						<SidebarItem label={i18n.tr.misc.downloads} href="/downloads">
 							<svelte:fragment slot="icon">
 								<BarsOutline size="lg" />
 							</svelte:fragment>
