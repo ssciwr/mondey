@@ -17,10 +17,10 @@ import { DescriptionList, Heading, List, P } from "flowbite-svelte";
    </div>
        <div class="flex flex-col pb-5">
        <DescriptionList tag="dt" class="mb-1">Unsere E-Mail</DescriptionList>
-       <DescriptionList tag="dd" class="text-md">support@psychologie.uni-heidelberg.de</DescriptionList>
+       <DescriptionList tag="dd" class="text-md">mondey@psychologie.uni-heidelberg.de</DescriptionList>
    </div>
    <div class="flex flex-col pb-5">
        <DescriptionList tag="dt" class="mb-1">Unsere Telefonnummer</DescriptionList>
-       <DescriptionList tag="dd" class="text-md">+49 6221 547346</DescriptionList>
+       <DescriptionList tag="dd" class="text-md">+49 6221 547369</DescriptionList>
    </div>
 </List>
