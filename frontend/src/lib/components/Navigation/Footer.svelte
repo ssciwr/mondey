@@ -50,7 +50,7 @@ import {
     {i18n.tr.footer.contact}
   </h2>
 
-  <ul> 
+  <ul>
     <li class="mb-2 text-sm max-sm:text-xs text-zinc-400">
       <a href="tel:+496221547369" class="text-inherit hover:text-white">
         +49 6221 547369
