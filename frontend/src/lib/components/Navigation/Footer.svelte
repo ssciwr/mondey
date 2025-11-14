@@ -45,14 +45,31 @@ import {
             <FooterLink liClass="mb-2 text-sm max-sm:text-xs text-zinc-400" href="/">{i18n.tr.footer.privacy}</FooterLink>
           </FooterLinkGroup>
         </div>
-        <div>
-          <h2 class="mb-6 mt-4 text-sm font-semibold uppercase text-white dark:text-white">{i18n.tr.footer.contact}</h2>
-          <FooterLinkGroup>
-            <FooterLink liClass="mb-2 text-sm max-sm:text-xs text-zinc-400" href="/">+49 6221 547346</FooterLink>
-            <FooterLink liClass="mb-2 text-sm max-sm:text-xs text-zinc-400" href="/">Hauptstraße 47-51, 69117 Heidelberg</FooterLink>
-            <FooterLink liClass="mb-2 text-sm max-sm:text-xs text-zinc-400 break-words" href="/">E-Mail: support@psychologie.uni-heidelberg.de</FooterLink>
-          </FooterLinkGroup>
-        </div>
+<div>
+  <h2 class="mb-6 mt-4 text-sm font-semibold uppercase text-white dark:text-white">
+    {i18n.tr.footer.contact}
+  </h2>
+
+  <ul> 
+    <li class="mb-2 text-sm max-sm:text-xs text-zinc-400">
+      <a href="tel:+496221547369" class="text-inherit hover:text-white">
+        +49 6221 547369
+      </a>
+    </li>
+
+    <li class="mb-2 text-sm max-sm:text-xs text-zinc-400">
+      <a href="https://maps.google.com/?q=PsychologischesInstitutderUniversitaetHeidelberg" class="text-inherit hover:text-white" target="_blank" rel="noopener noreferrer">
+        Hauptstraße 47-51, 69117 Heidelberg
+      </a>
+    </li>
+
+    <li class="mb-2 text-sm max-sm:text-xs text-zinc-400 break-words">
+      <a href="mailto:mondey@psychologie.uni-heidelberg.de" class="text-inherit hover:text-white">
+        E-Mail: mondey@psychologie.uni-heidelberg.de
+      </a>
+    </li>
+  </ul>
+</div>
       </div>
     </div>
     <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
