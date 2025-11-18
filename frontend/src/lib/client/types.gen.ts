@@ -21,7 +21,7 @@ export type BodyAuthCookieLoginAuthLoginPost = {
     client_secret?: string | null;
 };
 
-export type BodyCreateDocumentAdminAdminDocumentsPost = {
+export type BodyCreateDocumentAdminDocumentsPost = {
     title: string;
     description: string;
     file: Blob | File;
@@ -484,31 +484,6 @@ export type GetPublicDocumentsResponses = {
 
 export type GetPublicDocumentsResponse = GetPublicDocumentsResponses[keyof GetPublicDocumentsResponses];
 
-export type DownloadDocumentData = {
-    body?: never;
-    path: {
-        document_id: number;
-    };
-    query?: never;
-    url: '/documents/{document_id}/download';
-};
-
-export type DownloadDocumentErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type DownloadDocumentError = DownloadDocumentErrors[keyof DownloadDocumentErrors];
-
-export type DownloadDocumentResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
-
 export type GetLanguagesData = {
     body?: never;
     path?: never;
@@ -733,7 +708,7 @@ export type GetDocumentsData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/admin/admin/documents/';
+    url: '/admin/documents/';
 };
 
 export type GetDocumentsResponses = {
@@ -746,10 +721,10 @@ export type GetDocumentsResponses = {
 export type GetDocumentsResponse = GetDocumentsResponses[keyof GetDocumentsResponses];
 
 export type CreateDocumentData = {
-    body: BodyCreateDocumentAdminAdminDocumentsPost;
+    body: BodyCreateDocumentAdminDocumentsPost;
     path?: never;
     query?: never;
-    url: '/admin/admin/documents/';
+    url: '/admin/documents/';
 };
 
 export type CreateDocumentErrors = {
@@ -776,7 +751,7 @@ export type DeleteDocumentData = {
         document_id: number;
     };
     query?: never;
-    url: '/admin/admin/documents/{document_id}';
+    url: '/admin/documents/{document_id}';
 };
 
 export type DeleteDocumentErrors = {
@@ -801,7 +776,7 @@ export type UpdateDocumentData = {
         document_id: number;
     };
     query?: never;
-    url: '/admin/admin/documents/{document_id}';
+    url: '/admin/documents/{document_id}';
 };
 
 export type UpdateDocumentErrors = {
