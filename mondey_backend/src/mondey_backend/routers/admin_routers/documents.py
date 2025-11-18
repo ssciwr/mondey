@@ -21,7 +21,7 @@ from ..utils import write_pdf_file
 
 
 def create_router() -> APIRouter:
-    router = APIRouter(prefix="/admin/documents", tags=["admin", "documents"])
+    router = APIRouter(prefix="/documents", tags=["admin", "documents"])
 
     @router.get("/", response_model=list[DocumentAdmin])
     def get_documents(session: SessionDep):
