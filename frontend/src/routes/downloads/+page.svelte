@@ -9,40 +9,16 @@ import { Button, Card } from "flowbite-svelte";
 import DownloadOutline from "flowbite-svelte-icons/DownloadOutline.svelte";
 import { onMount } from "svelte";
 
-const CENTRAL_API_BASE = "https://mondey.de/api";
-
 let documents = $state([] as DocumentPublic[]);
-let documentSource = $state<"central" | "local">("local");
 const downloadsText = $derived(i18n.tr.downloads ?? translationIds.downloads);
 
 async function loadDocuments() {
-	let centralDocuments: DocumentPublic[] | null = null;
-
-	try {
-		const response = await fetch(`${CENTRAL_API_BASE}/documents/`);
-		if (response.ok) {
-			const data = await response.json();
-			if (Array.isArray(data) && data.length > 0) {
-				centralDocuments = data;
-			}
-		}
-	} catch (error) {
-		console.log("Central server unavailable, falling back to local");
-	}
-
-	if (centralDocuments) {
-		documents = centralDocuments;
-		documentSource = "central";
-		return;
-	}
-
 	const { data, error } = await getPublicDocuments();
 	if (error || !data) {
 		console.error("Failed to load documents:", error);
 		return;
 	}
 	documents = data;
-	documentSource = "local";
 }
 
 onMount(() => {
@@ -64,7 +40,7 @@ onMount(() => {
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {#each documents as document}
-            <Card class="h-full flex flex-col">
+            <Card class="h-full flex flex-col" data-testid={document.title}>
                 <div class="flex-1">
                     <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
                         <b>{document.title}</b>
@@ -75,7 +51,8 @@ onMount(() => {
                 </div>
                 <div class="mt-auto">
                     <Button
-                            href={documentSource === "central" ? `${CENTRAL_API_BASE}/documents/${document.id}/download` : `/api/documents/${document.id}/download`}
+                            href={`${import.meta.env.VITE_MONDEY_API_URL}/static/documents/${document.id}.pdf`}
+                            download={`${document.filename}`}
                             target="_blank"
                             class="w-full"
                             color="blue"

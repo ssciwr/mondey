@@ -161,7 +161,7 @@ export const translationIds = {
 		documents: "Mondey-Publikationen",
 		documentsDescription:
 			"Hier finden Sie eine Übersicht der Veröffentlichungen des Instituts — Fachartikel, Studien und Berichte aus Forschung und Praxis.",
-		adminDocuments: "Admin Dokumente",
+		adminDocuments: "Dokumente",
 		documentFilename: "Dateiname",
 		documentCreated: "Erstellt",
 		uploadDocument: "Dokument hochladen",

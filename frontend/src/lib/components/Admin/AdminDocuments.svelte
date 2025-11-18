@@ -156,7 +156,8 @@ onMount(() => {
 					<TableBodyCell>{document.title} - <Button
 							size="xs"
 							color="blue"
-							href="/api/documents/{document.id}/download"
+							href={`${import.meta.env.VITE_MONDEY_API_URL}/static/documents/${document.id}.pdf`}
+							download={`${document.filename}`}
 							target="_blank"
 							title={i18n.tr.admin.download}
 							class="ml-2"
@@ -173,7 +174,7 @@ onMount(() => {
 				</TableBodyRow>
 			{:else}
 				<TableBodyRow>
-					<TableBodyCell colspan="5" class="text-center text-gray-500">
+					<TableBodyCell colspan={5} class="text-center text-gray-500">
 						{i18n.tr.admin.noDocumentsFound}
 					</TableBodyCell>
 				</TableBodyRow>
