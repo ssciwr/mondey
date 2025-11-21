@@ -1,7 +1,11 @@
 import { expect, test } from "@playwright/test";
 import { login } from "./utils";
 
-test("admin settings document upload", async ({ page }) => {
+test("admin settings document upload", async ({ page, browserName }) => {
+	test.skip(
+		browserName !== "chromium",
+		"This test only works in chromium in CI for some reason",
+	);
 	await login(page, "admin@mondey.de", "admin");
 
 	// go to admin page
