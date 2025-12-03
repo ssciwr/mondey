@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     name: "Docker"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: docker compose build
       - uses: docker/login-action@v3
         with:
