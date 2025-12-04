@@ -71,13 +71,18 @@ let { children } = $props();
     {/if}
 
 {#if user.isTestAccount}
-    <div class="fixed bottom-0 left-0 right-0 m-4 rounded-xl bg-white dark:bg-gray-700 border-solid border-2 shadow-xl p-8 border-gray-400 dark:border-gray-600 dark:text-white">
+    <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-[94vw] max-w-3xl m-2 md:m-4 rounded-xl bg-white dark:bg-gray-700 border-solid border-2 shadow-xl p-4 md:p-8 border-gray-400 dark:border-gray-600 dark:text-white text-[0.8rem] md:text-base">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-            <h2 class="text-lg mb-4 md:mb-0">
+            <h2 class="text-sm md:text-lg mb-3 md:mb-0">
                 <strong>{i18n.tr.login.demoAccountNotification}</strong>
             </h2>
-            <div class="flex justify-center md:justify-end">
-                <Button on:click={() => goto("/signup")} class="text-bold text-md  w-full bg-primary-700 text-white dark:bg-white dark:text-gray-700  hover:opacity-80  hover:text-white">{i18n.tr.frontpage.buttonLabel}</Button>
+            <div class="flex items-center justify-center md:justify-end gap-3">
+                <a href="/signup" class="md:hidden text-sm underline text-primary-700 dark:text-primary-400">
+                    {i18n.tr.frontpage.buttonLabel}
+                </a>
+                <Button on:click={() => goto("/signup")} class="hidden md:inline-flex text-bold text-md bg-primary-700 text-white dark:bg-white dark:text-gray-700 hover:opacity-80 hover:text-white">
+                    {i18n.tr.frontpage.buttonLabel}
+                </Button>
             </div>
         </div>
     </div>
