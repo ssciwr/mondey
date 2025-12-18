@@ -16,15 +16,14 @@ function sanitizeHtml(html) {
 </script>
 
 <Accordion class="min-w-full px-4 mt-10">
-<!-- Hide FAQ -->
-    <!-- <AccordionItem>
+    <AccordionItem>
         <span slot="header">{i18n.tr.frontpageAccordion.heading1}</span>
         <div class="mb-4 mt-4 px-4 lg:px-12 text-gray-700 dark:text-gray-400 restore-default-list-elements-behavior">
             {@html sanitizeHtml(i18n.tr.frontpageAccordion.summary1)}
         </div>
-    </AccordionItem> -->
+    </AccordionItem>
 
-    <!-- <AccordionItem>
+    <!-- Hide FAQ section <AccordionItem>
         <span slot="header">{i18n.tr.frontpageAccordion.heading2}</span>
         <div class="mb-4 mt-4 px-4 text-gray-700 dark:text-gray-400 restore-default-list-elements-behavior">
             {@html sanitizeHtml(i18n.tr.frontpageAccordion.summary2)}
