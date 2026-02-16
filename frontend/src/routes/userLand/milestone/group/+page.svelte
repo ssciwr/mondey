@@ -152,7 +152,6 @@ const breadcrumbdata: any[] = [
 ];
 
 let promise = $state(setup());
-let showIncompleteOnly = $state(false);
 </script>
 
 {#await promise}
@@ -167,9 +166,9 @@ let showIncompleteOnly = $state(false);
             <h3 class="mt-5 text-xl font-medium text-gray-900 dark:text-white">
                 {i18n.tr.milestone.milestoneGroupSelectionHint}
             </h3>
-            <GalleryDisplay bind:showIncompleteOnly={showIncompleteOnly} useRadioButtons={true}>
+            <GalleryDisplay>
                 {#each milestoneGroups as milestoneGroup}
-                    {#if !(showIncompleteOnly && (milestoneGroup.disabled || milestoneGroup.progress === 1.0))}
+                    {#if !milestoneGroup.disabled}
                         <CardDisplay title={milestoneGroup.title}
                                      text={milestoneGroup.text}
                                      onclick={milestoneGroup.onclick}

@@ -12,8 +12,8 @@ import { ExclamationCircleOutline } from "flowbite-svelte-icons";
 
 <Banner id="default-banner" position="fixed" class="bottom-0 left-0 z-50 flex justify-between w-full p-4 border-t border-gray-200 bg-red-500 dark:bg-red-800 dark:border-gray-600 text-white">
     <div class="flex items-center mx-auto">
-        <p class="flex items-center text-xl font-bold text-white dark:text-white">
-            <ExclamationCircleOutline class="me-3 w-4 h-4 text-white dark:text-white" />
+        <p class="flex items-center text-xl font-bold text-gray-500 dark:text-gray-400">
+            <ExclamationCircleOutline  class="me-3 w-10 h-10 text-gray-500 dark:text-gray-400" />
             <span>{i18n.tr.frontpage.disclaimerPopup}</span>
         </p>
     </div>
