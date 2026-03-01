@@ -24,18 +24,18 @@ export type BodyAuthCookieLoginAuthLoginPost = {
 export type BodyCreateDocumentAdminDocumentsPost = {
     title: string;
     description: string;
-    file: Blob | File;
+    file: string;
 };
 
 export type BodyImportCsvDataAdminResearchImportCsvPost = {
     /**
      * Additional data CSV file
      */
-    additional_data_file: Blob | File;
+    additional_data_file: string;
     /**
      * Labels CSV file
      */
-    labels_file?: Blob | File;
+    labels_file?: string;
 };
 
 export type BodyResetForgotPasswordAuthForgotPasswordPost = {
@@ -48,19 +48,19 @@ export type BodyResetResetPasswordAuthResetPasswordPost = {
 };
 
 export type BodySubmitMilestoneImageSubmittedMilestoneImagesMilestoneIdPost = {
-    file: Blob | File;
+    file: string;
 };
 
 export type BodyUploadChildImageUsersChildrenImagesChildIdPut = {
-    file: Blob | File;
+    file: string;
 };
 
 export type BodyUploadMilestoneGroupImageAdminMilestoneGroupImagesMilestoneGroupIdPut = {
-    file: Blob | File;
+    file: string;
 };
 
 export type BodyUploadMilestoneImageAdminMilestoneImagesMilestoneIdPost = {
-    file: Blob | File;
+    file: string;
 };
 
 export type BodyVerifyRequestTokenAuthRequestVerifyTokenPost = {
@@ -450,6 +450,10 @@ export type ValidationError = {
     loc: Array<string | number>;
     msg: string;
     type: string;
+    input?: unknown;
+    ctx?: {
+        [key: string]: unknown;
+    };
 };
 
 export type GetEventsData = {
