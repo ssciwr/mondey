@@ -1186,11 +1186,11 @@ def research_client_full_data_access(
     app: FastAPI,
     active_research_user_full_data_access: UserRead,
 ):
-    app.dependency_overrides[current_active_user] = (
-        lambda: active_research_user_full_data_access
+    app.dependency_overrides[current_active_user] = lambda: (
+        active_research_user_full_data_access
     )
-    app.dependency_overrides[current_active_researcher] = (
-        lambda: active_research_user_full_data_access
+    app.dependency_overrides[current_active_researcher] = lambda: (
+        active_research_user_full_data_access
     )
     client = TestClient(app)
     yield client
