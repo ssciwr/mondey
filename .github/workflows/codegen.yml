@@ -41,7 +41,7 @@ jobs:
       - run: pnpm install
       - name: "Generate frontend fetch API client code"
         run: pnpm openapi-ts
-      - uses: EndBug/add-and-commit@v9
+      - uses: EndBug/add-and-commit@v10
         with:
           add: "*"
           author_name: "github-actions[bot]"
