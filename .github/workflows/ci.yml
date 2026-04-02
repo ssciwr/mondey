@@ -27,7 +27,7 @@ jobs:
       - run: pnpm install
       - run: pnpm build
       - run: pnpm run test:unit || exit 1
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@v6
         with:
           files: ./frontend/coverage/coverage-final.json
           name: frontend
@@ -47,7 +47,7 @@ jobs:
           python-version: "3.13"
       - run: pip install -e .[tests]
       - run: python -m pytest --cov=mondey_backend --cov-report=xml -svvv --log-level=debug
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@v6
         with:
           files: ./mondey_backend/coverage.xml
           name: backend
