@@ -7,13 +7,9 @@ ARG MONDEY_API_URL
 
 WORKDIR /app
 
-COPY package.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-COPY pnpm-lock.yaml ./
-
-COPY pnpm-lock.yaml ./
-
-RUN npm install -g pnpm && pnpm install
+RUN corepack enable && pnpm install --frozen-lockfile
 
 COPY . .
 

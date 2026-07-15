@@ -10,6 +10,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlmodel import Session
@@ -88,10 +89,19 @@ async def lifespan(app: FastAPI):
             db_path.parent.rmdir()
 
 
+def generate_unique_id(route: APIRoute) -> str:
+    return route.name
+
+
 def create_app() -> FastAPI:
     # ensure static files directory exists
     pathlib.Path(app_settings.STATIC_FILES_PATH).mkdir(parents=True, exist_ok=True)
-    app = FastAPI(lifespan=lifespan, title="MONDEY API", root_path="/api")
+    app = FastAPI(
+        lifespan=lifespan,
+        title="MONDEY API",
+        root_path="/api",
+        generate_unique_id_function=generate_unique_id,
+    )
     app.include_router(calendarevents.create_router())
     app.include_router(documents.create_router())
     app.include_router(milestones.create_router())

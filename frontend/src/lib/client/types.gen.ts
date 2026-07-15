@@ -12,22 +12,13 @@ export type AdminSettingsUpdate = {
     hide_all_feedback?: boolean | null;
 };
 
-export type BodyAuthCookieLoginAuthLoginPost = {
-    grant_type?: string | null;
-    username: string;
-    password: string;
-    scope?: string;
-    client_id?: string | null;
-    client_secret?: string | null;
-};
-
-export type BodyCreateDocumentAdminDocumentsPost = {
+export type BodyCreateDocument = {
     title: string;
     description: string;
     file: string;
 };
 
-export type BodyImportCsvDataAdminResearchImportCsvPost = {
+export type BodyImportCsvData = {
     /**
      * Additional data CSV file
      */
@@ -38,36 +29,36 @@ export type BodyImportCsvDataAdminResearchImportCsvPost = {
     labels_file?: string;
 };
 
-export type BodyResetForgotPasswordAuthForgotPasswordPost = {
+export type BodyResetForgotPassword = {
     email: string;
 };
 
-export type BodyResetResetPasswordAuthResetPasswordPost = {
+export type BodyResetResetPassword = {
     token: string;
     password: string;
 };
 
-export type BodySubmitMilestoneImageSubmittedMilestoneImagesMilestoneIdPost = {
+export type BodySubmitMilestoneImage = {
     file: string;
 };
 
-export type BodyUploadChildImageUsersChildrenImagesChildIdPut = {
+export type BodyUploadChildImage = {
     file: string;
 };
 
-export type BodyUploadMilestoneGroupImageAdminMilestoneGroupImagesMilestoneGroupIdPut = {
+export type BodyUploadMilestoneGroupImage = {
     file: string;
 };
 
-export type BodyUploadMilestoneImageAdminMilestoneImagesMilestoneIdPost = {
+export type BodyUploadMilestoneImage = {
     file: string;
 };
 
-export type BodyVerifyRequestTokenAuthRequestVerifyTokenPost = {
+export type BodyVerifyRequestToken = {
     email: string;
 };
 
-export type BodyVerifyVerifyAuthVerifyPost = {
+export type BodyVerifyVerify = {
     token: string;
 };
 
@@ -456,6 +447,15 @@ export type ValidationError = {
     };
 };
 
+export type Login = {
+    grant_type?: string | null;
+    username: string;
+    password: string;
+    scope?: string;
+    client_id?: string | null;
+    client_secret?: string | null;
+};
+
 export type GetEventsData = {
     body?: never;
     path?: never;
@@ -575,7 +575,7 @@ export type GetMilestoneGroupsResponses = {
 export type GetMilestoneGroupsResponse = GetMilestoneGroupsResponses[keyof GetMilestoneGroupsResponses];
 
 export type SubmitMilestoneImageData = {
-    body: BodySubmitMilestoneImageSubmittedMilestoneImagesMilestoneIdPost;
+    body: BodySubmitMilestoneImage;
     path: {
         milestone_id: number;
     };
@@ -725,7 +725,7 @@ export type GetDocumentsResponses = {
 export type GetDocumentsResponse = GetDocumentsResponses[keyof GetDocumentsResponses];
 
 export type CreateDocumentData = {
-    body: BodyCreateDocumentAdminDocumentsPost;
+    body: BodyCreateDocument;
     path?: never;
     query?: never;
     url: '/admin/documents/';
@@ -1022,7 +1022,7 @@ export type OrderMilestoneGroupsAdminResponses = {
 };
 
 export type UploadMilestoneGroupImageData = {
-    body: BodyUploadMilestoneGroupImageAdminMilestoneGroupImagesMilestoneGroupIdPut;
+    body: BodyUploadMilestoneGroupImage;
     path: {
         milestone_group_id: number;
     };
@@ -1154,7 +1154,7 @@ export type OrderMilestonesAdminResponses = {
 };
 
 export type UploadMilestoneImageData = {
-    body: BodyUploadMilestoneImageAdminMilestoneImagesMilestoneIdPost;
+    body: BodyUploadMilestoneImage;
     path: {
         milestone_id: number;
     };
@@ -1734,7 +1734,7 @@ export type DeleteResearchGroupResponses = {
 };
 
 export type ImportCsvDataData = {
-    body: BodyImportCsvDataAdminResearchImportCsvPost;
+    body: BodyImportCsvData;
     path?: never;
     query?: never;
     url: '/admin/research/import-csv/';
@@ -2109,7 +2109,7 @@ export type GetChildImageResponses = {
 };
 
 export type UploadChildImageData = {
-    body: BodyUploadChildImageUsersChildrenImagesChildIdPut;
+    body: BodyUploadChildImage;
     path: {
         child_id: number;
     };
@@ -2403,7 +2403,7 @@ export type GetDetailedFeedbackForAnswersessionResponses = {
 export type GetDetailedFeedbackForAnswersessionResponse = GetDetailedFeedbackForAnswersessionResponses[keyof GetDetailedFeedbackForAnswersessionResponses];
 
 export type AuthCookieLoginData = {
-    body: BodyAuthCookieLoginAuthLoginPost;
+    body: Login;
     path?: never;
     query?: never;
     url: '/auth/login';
@@ -2492,7 +2492,7 @@ export type RegisterRegisterResponses = {
 export type RegisterRegisterResponse = RegisterRegisterResponses[keyof RegisterRegisterResponses];
 
 export type ResetForgotPasswordData = {
-    body: BodyResetForgotPasswordAuthForgotPasswordPost;
+    body: BodyResetForgotPassword;
     path?: never;
     query?: never;
     url: '/auth/forgot-password';
@@ -2515,7 +2515,7 @@ export type ResetForgotPasswordResponses = {
 };
 
 export type ResetResetPasswordData = {
-    body: BodyResetResetPasswordAuthResetPasswordPost;
+    body: BodyResetResetPassword;
     path?: never;
     query?: never;
     url: '/auth/reset-password';
@@ -2542,7 +2542,7 @@ export type ResetResetPasswordResponses = {
 };
 
 export type VerifyRequestTokenData = {
-    body: BodyVerifyRequestTokenAuthRequestVerifyTokenPost;
+    body: BodyVerifyRequestToken;
     path?: never;
     query?: never;
     url: '/auth/request-verify-token';
@@ -2565,7 +2565,7 @@ export type VerifyRequestTokenResponses = {
 };
 
 export type VerifyVerifyData = {
-    body: BodyVerifyVerifyAuthVerifyPost;
+    body: BodyVerifyVerify;
     path?: never;
     query?: never;
     url: '/auth/verify';

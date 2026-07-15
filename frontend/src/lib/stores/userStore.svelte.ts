@@ -1,4 +1,4 @@
-import type { BodyAuthCookieLoginAuthLoginPost, UserRead } from "$lib/client";
+import type { AuthCookieLoginData, UserRead } from "$lib/client";
 import {
 	authCookieLogin,
 	authCookieLogout,
@@ -9,9 +9,7 @@ function createUser() {
 	let currentUser = $state(null as null | UserRead);
 
 	return {
-		login: async (
-			loginData: BodyAuthCookieLoginAuthLoginPost,
-		): Promise<any> => {
+		login: async (loginData: AuthCookieLoginData["body"]): Promise<any> => {
 			return await authCookieLogin({ body: loginData });
 		},
 		logout: async (): Promise<any> => {

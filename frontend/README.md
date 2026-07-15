@@ -6,7 +6,7 @@ The svelte frontend for the MONDEY project.
 
 Initial setup to edit the frontend locally:
 
-- install [pnpm](https://pnpm.io/installation), e.g. `curl -fsSL https://get.pnpm.io/install.sh | sh -`
+- install Node.js 22 and enable its bundled Corepack, e.g. `corepack enable`; Corepack uses the pnpm version pinned in `package.json`
 - clone the repo, e.g. `git clone https://github.com/ssciwr/mondey.git`
 - go to the frontend folder of the repository, e.g. `cd mondey/frontend`
 - install the node dependencies, e.g. `pnpm install`

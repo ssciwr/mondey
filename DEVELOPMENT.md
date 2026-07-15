@@ -57,7 +57,7 @@ Database migrations are done using Alembic, see [./mondey_backend/alembic/README
 
 ## Run locally with Python and pnpm
 
-Requires docker compose, Python and [pnpm](https://pnpm.io/installation#using-a-standalone-script)
+Requires docker compose, Python, and Node.js 22 with Corepack.
 
 1. clone the repo:
 
@@ -95,6 +95,7 @@ You need to carry out step 2 first either way. Step 2 sets up the database that 
 4.2: Run the frontend
 ```sh
 cd frontend
+corepack enable
 pnpm install
 pnpm run dev
 ```
