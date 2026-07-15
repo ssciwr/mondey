@@ -60,12 +60,5 @@
 		"svelte-dnd-action": "^0.9.60",
 		"wcag-contrast-utils": "^1.0.1"
 	},
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"@sveltejs/kit",
-			"core-js",
-			"esbuild",
-			"maplibre-gl"
-		]
-	}
+	"packageManager": "pnpm@11.8.0"
 }

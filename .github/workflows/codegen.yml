@@ -11,13 +11,13 @@ jobs:
       run:
         working-directory: ./frontend
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         if: github.event.pull_request.head.repo.full_name == github.repository || startsWith(github.event.pull_request.head.ref, 'dependabot/')
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.MONDEY_FORMAT_BOT_PAT }}
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         if: github.event.pull_request.head.repo.full_name != github.repository && !startsWith(github.event.pull_request.head.ref, 'dependabot/')
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
@@ -27,7 +27,7 @@ jobs:
           python-version: "3.13"
       - uses: pnpm/action-setup@v6
         with:
-          version: 9
+          package_json_file: frontend/package.json
       - uses: actions/setup-node@v6
         with:
           node-version: 22
