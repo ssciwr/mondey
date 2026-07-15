@@ -283,6 +283,14 @@ class MilestoneAnswerSessionAnalysis(BaseModel):
     answers: list[MilestoneAnswerAnalysis]
 
 
+class StatisticsUpdateResult(BaseModel):
+    """Result of a statistics recalculation, used to build a localized summary in the UI."""
+
+    answer_sessions: int
+    answers: int
+    runtime_seconds: float
+
+
 class MilestoneAgeScore(SQLModel, table=True):
     milestone_id: int | None = Field(
         default=None,

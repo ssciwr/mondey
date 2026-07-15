@@ -5,6 +5,7 @@ from collections.abc import Sequence
 from fastapi import APIRouter
 from fastapi import Query
 from fastapi import UploadFile
+from sqlalchemy import update
 from sqlmodel import col
 from sqlmodel import select
 
@@ -15,6 +16,7 @@ from ...models.milestones import Milestone
 from ...models.milestones import MilestoneAdmin
 from ...models.milestones import MilestoneAgeScoreCollection
 from ...models.milestones import MilestoneAgeScoreCollectionPublic
+from ...models.milestones import MilestoneAnswer
 from ...models.milestones import MilestoneAnswerSession
 from ...models.milestones import MilestoneAnswerSessionAnalysis
 from ...models.milestones import MilestoneGroup
@@ -22,6 +24,7 @@ from ...models.milestones import MilestoneGroupAdmin
 from ...models.milestones import MilestoneGroupText
 from ...models.milestones import MilestoneImage
 from ...models.milestones import MilestoneText
+from ...models.milestones import StatisticsUpdateResult
 from ...models.milestones import SubmittedMilestoneImage
 from ...models.milestones import SubmittedMilestoneImagePublic
 from ...models.milestones import SuspiciousState
@@ -144,7 +147,17 @@ def create_router() -> APIRouter:
         milestone: MilestoneAdmin,
     ):
         db_milestone = get(session, Milestone, milestone.id)
+        group_changed = milestone.group_id != db_milestone.group_id
         db_milestone.sqlmodel_update(milestone.model_dump(exclude={"text", "images"}))
+        if group_changed:
+            # place the milestone at the end of its new group's ordering
+            db_milestone.order = 999
+            # update milestone_group_id on existing answers to the new group
+            session.execute(
+                update(MilestoneAnswer)
+                .where(col(MilestoneAnswer.milestone_id) == milestone.id)
+                .values(milestone_group_id=milestone.group_id)
+            )
         update_milestone_text(session, milestone)
         add(session, db_milestone)
         return db_milestone
@@ -243,7 +256,7 @@ def create_router() -> APIRouter:
 
     @router.post(
         "/update-stats/",
-        response_model=str,
+        response_model=StatisticsUpdateResult,
     )
     async def admin_update_stats(
         session: SessionDep, user_session: UserAsyncSessionDep

@@ -16,31 +16,72 @@ import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";
 import DeleteModal from "$lib/components/DeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { milestoneGroups } from "$lib/stores/adminStore.svelte";
-import { Button, Input, Label, Modal } from "flowbite-svelte";
+import { Button, Input, Label, Modal, Select } from "flowbite-svelte";
 
 let {
 	open = $bindable(false),
 	milestone = $bindable(null),
-}: { open: boolean; milestone: MilestoneAdmin | null } = $props();
+	// called after saving when the milestone was moved to a different group, so the parent
+	// can offer to recalculate statistics (this modal is torn down on save, so it cannot own
+	// the recalculation modal itself)
+	onGroupChanged = undefined,
+}: {
+	open: boolean;
+	milestone: MilestoneAdmin | null;
+	onGroupChanged?: () => void;
+} = $props();
 let files: FileList | undefined = $state(undefined);
 let images: Array<string> = $state([]);
 let currentMilestoneImageId: number | null = $state(null as number | null);
 let showDeleteMilestoneImageModal: boolean = $state(false);
 let showMilestoneExpectedAgeModal: boolean = $state(false);
 
+// Keep the selected group local until save. `milestone` belongs to the shared store, so binding
+// the select directly to it would make a canceled edit persist in frontend state.
+let initialGroupId: number | null = null;
+let selectedGroupId: number | null = $state(null);
+let wasOpen = false;
+$effect(() => {
+	if (open && !wasOpen && milestone) {
+		initialGroupId = milestone.group_id;
+		selectedGroupId = milestone.group_id;
+	}
+	wasOpen = open;
+});
+
+const groupItems = $derived(
+	milestoneGroups.data.map((group) => ({
+		value: group.id,
+		name: group.text[i18n.locale]?.title || group.text.de?.title || "",
+	})),
+);
+
 const textKeys = ["title", "desc", "obs", "help", "importance"] as Array<
 	keyof typeof i18n.tr.admin & keyof MilestoneText
 >;
 
 async function saveChanges(): Promise<boolean> {
-	if (!milestone) {
+	if (!milestone || selectedGroupId === null) {
 		return false;
 	}
-	const { error } = await updateMilestone({ body: milestone });
+	const groupChanged =
+		initialGroupId !== null && selectedGroupId !== initialGroupId;
+	const { error } = await updateMilestone({
+		body: { ...milestone, group_id: selectedGroupId },
+	});
 	if (error) {
 		console.log(error);
 		return false;
 	}
+
+	// The milestone update is already committed. Synchronize the store and report a move before
+	// attempting image uploads, whose failure must not hide the persisted group change.
+	initialGroupId = selectedGroupId;
+	await milestoneGroups.refresh();
+	if (groupChanged) {
+		onGroupChanged?.();
+	}
+
 	if (files && files.length > 0) {
 		for (const file of files) {
 			const { error: uploadError } = await uploadMilestoneImage({
@@ -52,8 +93,8 @@ async function saveChanges(): Promise<boolean> {
 				return false;
 			}
 		}
+		await milestoneGroups.refresh();
 	}
-	await milestoneGroups.refresh();
 	return true;
 }
 
@@ -80,6 +121,16 @@ async function deleteMilestoneImageAndUpdate() {
         <div class="mb-5">
             <Label class="mb-2">{i18n.tr.admin.name}</Label>
             <Input bind:value={milestone.name} placeholder={i18n.tr.admin.name}/>
+        </div>
+        <div class="mb-5">
+            <Label class="mb-2">{i18n.tr.admin.milestoneGroup}</Label>
+            <Select
+				data-testid="milestoneGroupSelect"
+				class="mt-2"
+				items={groupItems}
+				bind:value={selectedGroupId}
+				placeholder=""
+            />
         </div>
         {#each textKeys as textKey}
             {@const title = i18n.tr.admin[textKey]}

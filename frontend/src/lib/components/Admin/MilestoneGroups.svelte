@@ -19,6 +19,7 @@ import EditButton from "$lib/components/Admin/EditButton.svelte";
 import EditMilestoneGroupModal from "$lib/components/Admin/EditMilestoneGroupModal.svelte";
 import EditMilestoneModal from "$lib/components/Admin/EditMilestoneModal.svelte";
 import OrderItemsModal from "$lib/components/Admin/OrderItemsModal.svelte";
+import RecalculateStatsModal from "$lib/components/Admin/RecalculateStatsModal.svelte";
 import ReorderButton from "$lib/components/Admin/ReorderButton.svelte";
 import DangerousDeleteModal from "$lib/components/DangerousDeleteModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
@@ -46,6 +47,7 @@ let showDeleteMilestoneGroupModal = $state(false);
 let currentMilestone = $state(null as MilestoneAdmin | null);
 let showEditMilestoneModal = $state(false);
 let showDeleteMilestoneModal = $state(false);
+let showRecalculateStatsModal = $state(false);
 
 let currentOrderEndpoint = $state(orderMilestonesAdmin);
 let currentOrderItems = $state([] as Array<{ id: number; text: string }>);
@@ -165,6 +167,7 @@ async function addMilestone(milestoneGroupId: number) {
 											<TableBodyCell>{milestoneTitle}</TableBodyCell>
 											<TableBodyCell>
 												<EditButton
+													dataTestid={`edit-milestone-${milestone.id}`}
 													onclick={(event: Event) => {
 														event.stopPropagation();
 														currentMilestone = milestone;
@@ -239,8 +242,11 @@ async function addMilestone(milestoneGroupId: number) {
 
 {#key showEditMilestoneModal}
 	<EditMilestoneModal bind:open={showEditMilestoneModal} bind:milestone={currentMilestone}
+		onGroupChanged={() => { showRecalculateStatsModal = true; }}
 	></EditMilestoneModal>
 {/key}
+<RecalculateStatsModal bind:open={showRecalculateStatsModal}
+	prompt={i18n.tr.admin.milestoneGroupChangedRecalculatePrompt} />
 <DangerousDeleteModal bind:open={showDeleteMilestoneModal} intendedConfirmCode={i18n.tr.admin.milestone} deleteDryRunnableRequest={(dry_run) =>
  deleteMilestone({
 		path: {

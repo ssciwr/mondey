@@ -25,6 +25,7 @@ from mondey_backend.models.milestones import MilestoneAnswerSessionAnalysis
 from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.models.milestones import MilestoneGroupAgeScore
 from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
+from mondey_backend.models.milestones import StatisticsUpdateResult
 from mondey_backend.models.milestones import SuspiciousState
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
@@ -163,7 +164,7 @@ def flag_suspicious_answer_sessions(
 async def async_update_stats(
     session: SessionDep,
     user_session: UserAsyncSessionDep,
-):
+) -> StatisticsUpdateResult:
     """Update the recorded statistics of the milestonegroups and milestones.
     It only uses completed milestoneanswersesssions, excluding those from test users or those that are marked as suspicious.
     Args:
@@ -171,7 +172,7 @@ async def async_update_stats(
         user_session (UserAsyncSessionDep): user session
 
     Returns:
-        str: Message string indicating successful statistics update
+        StatisticsUpdateResult: number of answer sessions and answers used, and the runtime in seconds.
     """
     start_time = time.monotonic()
     logger.info("Starting statistics update")
@@ -221,7 +222,11 @@ async def async_update_stats(
     max_milestone_id = session.exec(select(func.max(col(Milestone.id)))).one_or_none()
     if max_milestone_id is None:
         logger.info("No milestones found, skipping statistics update")
-        return "No milestones found, skipping statistics update"
+        return StatisticsUpdateResult(
+            answer_sessions=0,
+            answers=0,
+            runtime_seconds=time.monotonic() - start_time,
+        )
     m_counts = np.zeros(
         (max_milestone_id + 1, app_settings.MAX_CHILD_AGE_MONTHS + 1, 4),
         dtype=np.uint64,
@@ -232,7 +237,11 @@ async def async_update_stats(
     ).one_or_none()
     if max_milestone_group_id is None:
         logger.info("No milestone groups found, skipping statistics update")
-        return "No milestone groups found, skipping statistics update"
+        return StatisticsUpdateResult(
+            answer_sessions=0,
+            answers=0,
+            runtime_seconds=time.monotonic() - start_time,
+        )
     mg_shape = (max_milestone_group_id + 1, app_settings.MAX_CHILD_AGE_MONTHS + 1)
     mg_counts = np.zeros(mg_shape, dtype=np.uint64)
     mg_sum_scores = np.zeros(mg_shape, dtype=np.float64)
@@ -241,6 +250,8 @@ async def async_update_stats(
     milestones = session.exec(select(Milestone)).all()
     milestone_group_ids = session.exec(select(MilestoneGroup.id)).all()
 
+    num_answer_sessions = 0
+    num_answers = 0
     for milestone_answer_session in milestone_answer_sessions:
         child_age = child_ages[milestone_answer_session.id]  # type: ignore
         if 0 <= child_age <= app_settings.MAX_CHILD_AGE_MONTHS:
@@ -268,6 +279,10 @@ async def async_update_stats(
                 mg_local_count[milestone.group_id] += 1
                 mg_local_sum[milestone.group_id] += answer_value
             for milestone_group_id in milestone_group_ids:
+                # skip groups with no milestones: there is no score to record and
+                # dividing by a zero count would produce nan
+                if mg_local_count[milestone_group_id] == 0:
+                    continue
                 mg_avg_score = (
                     mg_local_sum[milestone_group_id]
                     / mg_local_count[milestone_group_id]
@@ -281,6 +296,8 @@ async def async_update_stats(
                     mg_avg_score, 2
                 )
             milestone_answer_session.included_in_statistics = True
+            num_answer_sessions += 1
+            num_answers += len(milestone_answer_session.answers)
 
     # save statistics
     logger.info("  - saving milestone statistics")
@@ -298,7 +315,11 @@ async def async_update_stats(
 
     session.commit()
     logger.info("  - done")
-    return f"Statistics re-calculated using {len(milestone_answer_sessions)} answer sessions in {time.monotonic() - start_time:.1f}s."
+    return StatisticsUpdateResult(
+        answer_sessions=num_answer_sessions,
+        answers=num_answers,
+        runtime_seconds=time.monotonic() - start_time,
+    )
 
 
 def save_milestone_statistics(

@@ -5,6 +5,8 @@ import pytest
 from dateutil.relativedelta import relativedelta
 from fastapi.testclient import TestClient
 from PIL import Image
+from sqlmodel import col
+from sqlmodel import select
 
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
@@ -190,6 +192,45 @@ def test_put_milestone(admin_client: TestClient, milestone_group_admin1: dict):
     response = admin_client.get(f"/milestone-groups/{new_child_id}")
     milestone_ids = [m["id"] for group in response.json() for m in group["milestones"]]
     assert 3 in milestone_ids
+
+
+def test_put_milestone_change_group(
+    admin_client: TestClient, session, milestone_group_admin1: dict
+):
+    # milestone 1 is in group 1 in the fixtures, with existing answers referencing group 1
+    milestone = next(m for m in milestone_group_admin1["milestones"] if m["id"] == 1)
+    assert milestone["group_id"] == 1
+    existing_answers = session.exec(
+        select(MilestoneAnswer).where(col(MilestoneAnswer.milestone_id) == 1)
+    ).all()
+    assert len(existing_answers) > 0
+    assert all(answer.milestone_group_id == 1 for answer in existing_answers)
+
+    # move milestone 1 to group 2
+    milestone["group_id"] = 2
+    response = admin_client.put("/admin/milestones", json=milestone)
+    assert response.status_code == 200
+    assert response.json()["group_id"] == 2
+
+    # the milestone-groups endpoint returns each group's milestones sorted by order,
+    # so the moved milestone should now be last in the destination group
+    groups = admin_client.get("/admin/milestone-groups/").json()
+    group2 = next(group for group in groups if group["id"] == 2)
+    assert group2["milestones"][-1]["id"] == 1
+
+    # the denormalized group id on existing answers is updated to the new group
+    session.expire_all()
+    moved_answers = session.exec(
+        select(MilestoneAnswer).where(col(MilestoneAnswer.milestone_id) == 1)
+    ).all()
+    assert len(moved_answers) == len(existing_answers)
+    assert all(answer.milestone_group_id == 2 for answer in moved_answers)
+
+    # answers for other milestones are untouched
+    other_answers = session.exec(
+        select(MilestoneAnswer).where(col(MilestoneAnswer.milestone_id) == 2)
+    ).all()
+    assert all(answer.milestone_group_id == 1 for answer in other_answers)
 
 
 def test_delete_milestone(admin_client: TestClient):
