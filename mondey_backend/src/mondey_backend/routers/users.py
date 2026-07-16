@@ -23,7 +23,6 @@ from ..models.children import Child
 from ..models.children import ChildCreate
 from ..models.children import ChildPublic
 from ..models.children import ChildSummaryPublic
-from ..models.milestones import AdminSettings
 from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerResponse
 from ..models.milestones import MilestoneAnswerSession
@@ -49,6 +48,7 @@ from .utils import count_users_mondey_data
 from .utils import current_milestone_answer_session
 from .utils import delete_users_mondey_data
 from .utils import get
+from .utils import get_admin_settings
 from .utils import get_childs_answering_sessions
 from .utils import get_db_child
 from .utils import get_db_milestone_answer_session
@@ -56,23 +56,6 @@ from .utils import get_milestonegroups_for_answersession
 from .utils import get_or_create_current_milestone_answer_session
 from .utils import session_remaining_seconds
 from .utils import write_image_file
-
-
-def get_admin_settings(session: SessionDep) -> AdminSettings:
-    """Get admin settings, creating default if not found."""
-    settings = session.exec(select(AdminSettings)).first()
-    if not settings:
-        # Fallback: create default settings if not found
-        settings = AdminSettings(
-            id=1,
-            hide_milestone_feedback=False,
-            hide_milestone_group_feedback=False,
-            hide_all_feedback=False,
-        )
-        session.add(settings)
-        session.commit()
-        session.refresh(settings)
-    return settings
 
 
 def create_router() -> APIRouter:

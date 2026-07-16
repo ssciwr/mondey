@@ -57,6 +57,24 @@ def test_compute_feedback_milestone_group(n: int):
     assert compute_feedback_milestone_group(dummy_scores, mean - 3.01 * stddev) == -1
 
 
+@pytest.mark.parametrize("score", [1.5, 1.0, 2.0])
+def test_compute_feedback_milestone_group_no_variation(score: float):
+    # every session had the same score, e.g. because the only milestone in this group
+    # with a fitted curve was imputed for all of them. There is no spread to compare
+    # against, so there is no feedback to give - and no division by zero either.
+    n = 20
+    avg_score = 1.5
+    dummy_scores = MilestoneGroupAgeScore(
+        milestone_group_id=1,
+        age=8,
+        count=n,
+        sum_score=n * avg_score,
+        sum_squaredscore=n * avg_score * avg_score,
+    )
+    assert dummy_scores.stddev == 0.0
+    assert compute_feedback_milestone_group(dummy_scores, score) == -2
+
+
 def test_compute_feedback_milestone_group_no_stats():
     assert compute_feedback_milestone_group(None, 1.0) == -2
 
@@ -103,24 +121,15 @@ async def test_compute_summary_milestonegroup_feedback_for_answersession_with_re
     assert feedback[1] == TrafficLight.invalid.value
     assert len(feedback) == 1
 
-    # update stats to include answer sessions 2 and 4
+    # update stats to include answer sessions 2 and 4.
+    # The test answer sessions only contain a handful of answers, all at a single child
+    # age, so no milestone age curve can be fitted and the milestone group statistics
+    # are left empty (see test_calculate_milestonegroup_statistics).
     await async_update_stats(session, user_session)
-    updated_age_8_milestone_group1_scores = (
-        existing_age_8_milestone_group1_scores.copy()
-    )
-    updated_age_8_milestone_group1_scores.extend(
-        [np.mean([1, 1, 0])]
-    )  # answer session 2
-    updated_age_8_milestone_group1_scores.extend(
-        [np.mean([2, 0, 0])]
-    )  # answer session 4
     statistics = session.get(MilestoneGroupAgeScoreCollection, 1)
-    assert statistics.scores[child_age].mean == pytest.approx(
-        np.mean(updated_age_8_milestone_group1_scores)
-    )
-    assert statistics.scores[child_age].stddev == pytest.approx(
-        np.std(updated_age_8_milestone_group1_scores, ddof=1)
-    )
+    assert statistics.scores[child_age].count == 0
+    assert statistics.scores[child_age].mean == 0
+    assert statistics.scores[child_age].stddev == 0
 
     # still not enough stats to give feedback
     feedback = compute_milestonegroup_feedback_summary(

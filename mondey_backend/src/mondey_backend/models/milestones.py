@@ -5,7 +5,9 @@ import enum
 
 import numpy as np
 from pydantic import BaseModel
+from pydantic import model_validator
 from sqlalchemy import Column
+from sqlalchemy import Index
 from sqlalchemy import text
 from sqlalchemy.orm import Mapped
 from sqlmodel import Enum
@@ -25,19 +27,92 @@ class Language(SQLModel, table=True):
     id: str = fixed_length_string_field(max_length=2, index=True, primary_key=True)
 
 
+# The mean answer at which a milestone is considered achieved. The answers are on a
+# 0-3 scale, so 2.4 is 80% of the maximum.
+DEFAULT_MEAN_ANSWER_ACHIEVED = 2.4
+# The mean answers delimiting the age range over which a milestone is worth asking:
+# from when a few children can do it until nearly all of them can.
+DEFAULT_MEAN_ANSWER_RELEVANT_MIN = 0.3
+DEFAULT_MEAN_ANSWER_RELEVANT_MAX = 2.7
+# The smallest margin either side of the expected age that the relevant age range must
+# cover. A steep curve crosses the two relevant thresholds within a couple of months,
+# which would leave too narrow a window for a child to be asked about the milestone.
+DEFAULT_MIN_RELEVANT_AGE_MARGIN_MONTHS = 2
+
+
+class MilestoneAgeCurveParams(SQLModel):
+    """
+    How a milestone's expected age and relevant age range are derived from its fitted
+    age curve, see `get_milestone_ages_from_curve`. The three thresholds are mean
+    answers on the same 0-3 scale as the curve itself; each is converted to the age at
+    which the curve reaches it. The margin only widens the relevant age range at the
+    end, and does not affect the expected age.
+    """
+
+    # the thresholds have to stay strictly inside (0, 3): the curve only approaches 0
+    # and 3 asymptotically, so the age at either of them is infinite
+    mean_answer_achieved: float = Field(
+        default=DEFAULT_MEAN_ANSWER_ACHIEVED, gt=0.0, lt=3.0
+    )
+    mean_answer_relevant_min: float = Field(
+        default=DEFAULT_MEAN_ANSWER_RELEVANT_MIN, gt=0.0, lt=3.0
+    )
+    mean_answer_relevant_max: float = Field(
+        default=DEFAULT_MEAN_ANSWER_RELEVANT_MAX, gt=0.0, lt=3.0
+    )
+    min_relevant_age_margin_months: int = Field(
+        default=DEFAULT_MIN_RELEVANT_AGE_MARGIN_MONTHS, ge=0
+    )
+
+    @model_validator(mode="after")
+    def achieved_threshold_inside_relevant_range(self) -> MilestoneAgeCurveParams:
+        # the milestone is only asked about within its relevant age range, so the age at
+        # which it is expected to be achieved has to lie inside that range
+        if not (
+            self.mean_answer_relevant_min
+            <= self.mean_answer_achieved
+            <= self.mean_answer_relevant_max
+        ):
+            raise ValueError(
+                "mean_answer_achieved must lie between mean_answer_relevant_min "
+                "and mean_answer_relevant_max"
+            )
+        return self
+
+
 class AdminSettings(SQLModel, table=True):
-    """Admin settings for controlling application behavior. Single row table. For now, all are for feedback visiblity"""
+    """Admin settings for controlling application behavior. Single row table."""
 
     id: int = Field(default=1, primary_key=True)  # Always 1 - single row table
     hide_milestone_feedback: bool = Field(default=False)
     hide_milestone_group_feedback: bool = Field(default=False)
     hide_all_feedback: bool = Field(default=False)
+    # how the milestone ages are derived from the fitted age curves, see
+    # MilestoneAgeCurveParams
+    mean_answer_achieved: float = Field(default=DEFAULT_MEAN_ANSWER_ACHIEVED)
+    mean_answer_relevant_min: float = Field(default=DEFAULT_MEAN_ANSWER_RELEVANT_MIN)
+    mean_answer_relevant_max: float = Field(default=DEFAULT_MEAN_ANSWER_RELEVANT_MAX)
+    min_relevant_age_margin_months: int = Field(
+        default=DEFAULT_MIN_RELEVANT_AGE_MARGIN_MONTHS
+    )
+
+    def milestone_age_curve_params(self) -> MilestoneAgeCurveParams:
+        return MilestoneAgeCurveParams(
+            mean_answer_achieved=self.mean_answer_achieved,
+            mean_answer_relevant_min=self.mean_answer_relevant_min,
+            mean_answer_relevant_max=self.mean_answer_relevant_max,
+            min_relevant_age_margin_months=self.min_relevant_age_margin_months,
+        )
 
 
 class AdminSettingsPublic(SQLModel):
     hide_milestone_feedback: bool
     hide_milestone_group_feedback: bool
     hide_all_feedback: bool
+    mean_answer_achieved: float
+    mean_answer_relevant_min: float
+    mean_answer_relevant_max: float
+    min_relevant_age_margin_months: int
 
 
 class AdminSettingsUpdate(SQLModel):
@@ -228,6 +303,16 @@ class SuspiciousState(str, enum.Enum):
 
 
 class MilestoneAnswerSession(SQLModel, table=True):
+    __table_args__ = (
+        Index(
+            "ix_milestoneanswersession_completed_child_created_id",
+            "completed",
+            "child_id",
+            "created_at",
+            "id",
+        ),
+    )
+
     id: int | None = Field(default=None, primary_key=True)
     child_id: int = Field(foreign_key="child.id", ondelete="CASCADE")
     user_id: int
@@ -332,9 +417,11 @@ class MilestoneAgeScoreCollection(SQLModel, table=True):
     milestone_id: int = Field(
         default=None, primary_key=True, foreign_key="milestone.id", ondelete="CASCADE"
     )
-    expected_age: int
-    relevant_age_min: int
-    relevant_age_max: int
+    # The fitted age curve for this milestone is defined by the midpoint and the steepness
+    curve_midpoint: float = 0.0
+    curve_steepness: float = 0.0
+    curve_fit_ok: bool = False
+    curve_n_answers: int = 0
     scores: Mapped[list[MilestoneAgeScore]] = list_relationship("collection")
     created_at: datetime.datetime = Field(
         sa_column_kwargs={
@@ -345,9 +432,14 @@ class MilestoneAgeScoreCollection(SQLModel, table=True):
 
 class MilestoneAgeScoreCollectionPublic(SQLModel):
     milestone_id: int
-    expected_age: int
-    relevant_age_min: int
-    relevant_age_max: int
+    # these three ages are derived from the curve if curve_fit_ok, otherwise None
+    expected_age: int | None
+    relevant_age_min: int | None
+    relevant_age_max: int | None
+    curve_midpoint: float
+    curve_steepness: float
+    curve_fit_ok: bool
+    curve_n_answers: int
     scores: list[MilestoneAgeScore]
 
 
@@ -366,6 +458,9 @@ class MilestoneGroupAgeScore(SQLModel, table=True):
 
     @property
     def mean(self) -> float:
+        if self.count == 0:
+            # no answer session contributed a score for this milestone group and age
+            return 0.0
         return self.sum_score / self.count
 
     @property
@@ -378,7 +473,10 @@ class MilestoneGroupAgeScore(SQLModel, table=True):
             return 0.0
         m = self.mean
         m2 = self.sum_squaredscore / self.count
-        return np.sqrt((m2 - m * m) * (n / (n - 1)))
+        # rounding can make this expression slightly negative when the scores are all
+        # (almost) identical, which would give a nan
+        variance = max(m2 - m * m, 0.0)
+        return float(np.sqrt(variance * (n / (n - 1))))
 
 
 class MilestoneGroupAgeScoreCollection(SQLModel, table=True):

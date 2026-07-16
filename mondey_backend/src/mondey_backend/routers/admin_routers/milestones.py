@@ -14,6 +14,7 @@ from ...dependencies import UserAsyncSessionDep
 from ...models.milestones import Language
 from ...models.milestones import Milestone
 from ...models.milestones import MilestoneAdmin
+from ...models.milestones import MilestoneAgeCurveParams
 from ...models.milestones import MilestoneAgeScoreCollection
 from ...models.milestones import MilestoneAgeScoreCollectionPublic
 from ...models.milestones import MilestoneAnswer
@@ -33,6 +34,9 @@ from ...statistics import async_update_stats
 from ..utils import add
 from ..utils import count_milestone_answers_for_milestone
 from ..utils import get
+from ..utils import get_admin_settings
+from ..utils import get_milestone_age_curve_params
+from ..utils import milestone_age_score_collection_public
 from ..utils import milestone_group_image_path
 from ..utils import milestone_image_path
 from ..utils import update_item_orders
@@ -202,15 +206,29 @@ def create_router() -> APIRouter:
         session.commit()
         return {"ok": True}
 
-    @router.get(
-        "/milestone-age-scores/{milestone_id}",
-        response_model=MilestoneAgeScoreCollectionPublic,
-    )
+    @router.get("/milestone-age-scores/{milestone_id}")
     def get_milestone_age_scores(
         session: SessionDep, milestone_id: int
-    ) -> MilestoneAgeScoreCollection:
+    ) -> MilestoneAgeScoreCollectionPublic:
         collection = get(session, MilestoneAgeScoreCollection, milestone_id)
-        return collection
+        return milestone_age_score_collection_public(
+            collection, get_milestone_age_curve_params(session)
+        )
+
+    @router.post("/milestone-age-scores/")
+    def recalculate_milestone_age_scores(
+        session: SessionDep, params: MilestoneAgeCurveParams
+    ) -> Sequence[MilestoneAgeScoreCollectionPublic]:
+        settings = get_admin_settings(session)
+        for field, value in params.model_dump().items():
+            setattr(settings, field, value)
+        session.add(settings)
+        session.commit()
+
+        return [
+            milestone_age_score_collection_public(collection, params)
+            for collection in session.exec(select(MilestoneAgeScoreCollection)).all()
+        ]
 
     @router.post(
         "/update-stats/",
