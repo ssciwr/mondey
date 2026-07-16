@@ -6,6 +6,7 @@ import enum
 import numpy as np
 from pydantic import BaseModel
 from sqlalchemy import Column
+from sqlalchemy import Index
 from sqlalchemy import text
 from sqlalchemy.orm import Mapped
 from sqlmodel import Enum
@@ -242,6 +243,16 @@ class SuspiciousState(str, enum.Enum):
 
 
 class MilestoneAnswerSession(SQLModel, table=True):
+    __table_args__ = (
+        Index(
+            "ix_milestoneanswersession_completed_child_created_id",
+            "completed",
+            "child_id",
+            "created_at",
+            "id",
+        ),
+    )
+
     id: int | None = Field(default=None, primary_key=True)
     child_id: int = Field(foreign_key="child.id", ondelete="CASCADE")
     user_id: int
@@ -328,6 +339,15 @@ class MilestoneAgeScoreCollection(SQLModel, table=True):
     expected_age: int
     relevant_age_min: int
     relevant_age_max: int
+    # The fitted age curve for this milestone, see fit_milestone_age_curve. The midpoint
+    # and steepness define the curve exactly; expected_age and the relevant ages above
+    # are derived from it and rounded to whole months for display. If curve_fit_ok is
+    # False the fit was rejected, those ages fall back to the previous heuristics, and no
+    # answer may be imputed for this milestone.
+    curve_midpoint: float = 0.0
+    curve_steepness: float = 0.0
+    curve_fit_ok: bool = False
+    curve_n_answers: int = 0
     scores: Mapped[list[MilestoneAgeScore]] = list_relationship("collection")
     created_at: datetime.datetime = Field(
         sa_column_kwargs={
@@ -341,6 +361,10 @@ class MilestoneAgeScoreCollectionPublic(SQLModel):
     expected_age: int
     relevant_age_min: int
     relevant_age_max: int
+    curve_midpoint: float
+    curve_steepness: float
+    curve_fit_ok: bool
+    curve_n_answers: int
     scores: list[MilestoneAgeScore]
 
 
@@ -359,6 +383,9 @@ class MilestoneGroupAgeScore(SQLModel, table=True):
 
     @property
     def mean(self) -> float:
+        if self.count == 0:
+            # no answer session contributed a score for this milestone group and age
+            return 0.0
         return self.sum_score / self.count
 
     @property

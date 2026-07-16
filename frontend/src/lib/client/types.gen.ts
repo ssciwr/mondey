@@ -15,18 +15,18 @@ export type AdminSettingsUpdate = {
 export type BodyCreateDocument = {
     title: string;
     description: string;
-    file: string;
+    file: Blob | File;
 };
 
 export type BodyImportCsvData = {
     /**
      * Additional data CSV file
      */
-    additional_data_file: string;
+    additional_data_file: Blob | File;
     /**
      * Labels CSV file
      */
-    labels_file?: string;
+    labels_file?: Blob | File;
     /**
      * Researcher code applied to all imported users
      */
@@ -43,19 +43,19 @@ export type BodyResetResetPassword = {
 };
 
 export type BodySubmitMilestoneImage = {
-    file: string;
+    file: Blob | File;
 };
 
 export type BodyUploadChildImage = {
-    file: string;
+    file: Blob | File;
 };
 
 export type BodyUploadMilestoneGroupImage = {
-    file: string;
+    file: Blob | File;
 };
 
 export type BodyUploadMilestoneImage = {
-    file: string;
+    file: Blob | File;
 };
 
 export type BodyVerifyRequestToken = {
@@ -240,6 +240,10 @@ export type MilestoneAgeScoreCollectionPublic = {
     expected_age: number;
     relevant_age_min: number;
     relevant_age_max: number;
+    curve_midpoint: number;
+    curve_steepness: number;
+    curve_fit_ok: boolean;
+    curve_n_answers: number;
     scores: Array<MilestoneAgeScore>;
 };
 
@@ -449,10 +453,6 @@ export type ValidationError = {
     loc: Array<string | number>;
     msg: string;
     type: string;
-    input?: unknown;
-    ctx?: {
-        [key: string]: unknown;
-    };
 };
 
 export type Login = {

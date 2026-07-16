@@ -12,6 +12,8 @@ from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneGroupAgeScore
 from .utils import get_answer_session_child_age_in_months
+from .utils import get_milestone_curves
+from .utils import get_previously_achieved_milestone_ids
 
 
 class TrafficLight(Enum):
@@ -81,9 +83,9 @@ def compute_feedback_milestone_group(
     -------
     int
         -2 if there is insufficient data to provide feedback (trafficlight: invalid)
-        -1 if score <= avg - 2 * stddev (trafficlight: red)
-        0 if avg - 2 * stddev < score <= avg - stddev (trafficlight: yellow)
-        1 if score > avg - stddev (trafficlight: green)
+        -1 if score < avg - 2 * stddev (trafficlight: red)
+        0 if avg - 2 * stddev <= score < avg - stddev (trafficlight: yellow)
+        1 if score >= avg - stddev (trafficlight: green)
     """
 
     min_num_samples = 5
@@ -108,12 +110,17 @@ def compute_milestonegroup_feedback_summary(
 ) -> dict[int, int]:
     """
     Compute the summary milestonegroup feedback for each milestonegroup.
-    This is done by first calculating the mean score over all milestones that belong to the milestonegroup.
-    If a milestone from the group is not included in the answer session then a score is inferred:
-      * 0 if the child is younger than the expected age of the milestone
-      * 3 if the child is older than the expected age of the milestone
-    The mean is then compared against the mean and standard deviation of scores for this milestone group over the
-    known population of children for the child's age.
+    This is done by first calculating the mean score over the milestones that belong to the
+    milestonegroup and have a fitted age curve (see `fit_milestone_age_curve`). If such a
+    milestone is not included in the answer session then a score is inferred for it:
+      * 3 if the child already achieved it in an earlier answer session, which is why it is
+        no longer being asked about
+      * otherwise the mean answer of children of this age for that milestone, from its
+        fitted age curve
+    This has to match how the milestone group statistics are calculated in
+    `async_update_stats`, since the mean is then compared against the mean and standard
+    deviation of scores for this milestone group over the known population of children for
+    the child's age.
     See `compute_feedback_milestone_group` for the feedback logic.
 
     Parameters
@@ -138,19 +145,33 @@ def compute_milestonegroup_feedback_summary(
 
     # get answers for each MilestoneGroup
     milestones = session.exec(select(Milestone)).all()
-    milestone_group_answers: dict[int, list[int]] = defaultdict(list)
+    milestone_group_answers: dict[int, list[float]] = defaultdict(list)
     milestone_group_ids = set()
+    achieved_milestone_ids = get_previously_achieved_milestone_ids(
+        session, answersession.child_id, answersession.created_at
+    )
+    milestone_curves = get_milestone_curves(session)
     for milestone in milestones:
         answer = answersession.answers.get(milestone.id)  # type: ignore
         if answer is not None:
-            answer_value = answer.answer
             # only provide feedback for a milestone group if the answer session contains at least one milestone in the group
             milestone_group_ids.add(answer.milestone_group_id)
+        # this score is compared against the milestone group statistics, so it has to be
+        # calculated over the same milestones that those are calculated over: the ones
+        # with a fitted age curve.
+        curve = milestone_curves.get(milestone.id)  # type: ignore
+        if curve is None:
+            continue
+        if answer is not None:
+            answer_value = float(answer.answer)
+        elif milestone.id in achieved_milestone_ids:
+            # the child achieved this milestone in an earlier session, which is why it is
+            # not in this one - we know the answer, so we do not impute it
+            answer_value = 3.0
         else:
-            # if a milestone is not included in the answer session,
-            # assume full score if child is older than the expected age for the milestone,
-            # and assume zero score if child is younger than the expected age
-            answer_value = 3 if milestone.expected_age_months < child_age else 0
+            # the child was not asked about this milestone, so impute the mean answer of
+            # children of this age for it
+            answer_value = float(curve.mean_answer(child_age))
         milestone_group_answers[milestone.group_id].append(answer_value)  # type: ignore
 
     feedback: dict[int, int] = {}
@@ -158,6 +179,11 @@ def compute_milestonegroup_feedback_summary(
         logger.debug(f"  milestone_group_id: {milestone_group_id}")
         answers = milestone_group_answers[milestone_group_id]
         logger.debug(f"  answers: {answers}")
+        if not answers:
+            # no milestone in this group has a usable age curve, so there is no score to
+            # compare against the statistics for this group
+            feedback[milestone_group_id] = TrafficLight.invalid.value
+            continue
         avg_score = float(np.mean(answers))
         logger.debug(f"  mean: {avg_score}")
         milestone_group_age_score = session.get(

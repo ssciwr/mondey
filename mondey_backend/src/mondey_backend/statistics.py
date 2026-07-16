@@ -31,10 +31,15 @@ from mondey_backend.models.questions import ChildQuestion
 from mondey_backend.models.questions import UserAnswer
 from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.users import User
+from mondey_backend.routers.utils import MilestoneAgeCurve
+from mondey_backend.routers.utils import fit_milestone_age_curve
 from mondey_backend.routers.utils import get_answer_session_child_ages_in_months
 from mondey_backend.routers.utils import get_child_age_in_months
-from mondey_backend.routers.utils import get_expected_age_from_scores
-from mondey_backend.routers.utils import get_relevant_age_min_max
+from mondey_backend.routers.utils import get_milestone_ages_from_curve
+from mondey_backend.routers.utils import get_milestone_curves
+from mondey_backend.routers.utils import (
+    iter_sessions_with_previously_achieved_milestone_ids,
+)
 from mondey_backend.settings import app_settings
 
 
@@ -49,8 +54,25 @@ async def get_test_account_user_ids(user_session: UserAsyncSessionDep) -> list[i
 
 
 def analyse_answer_session(
-    session: SessionDep, milestone_answer_session: MilestoneAnswerSession
+    session: SessionDep,
+    milestone_answer_session: MilestoneAnswerSession,
+    milestone_curves: dict[int, MilestoneAgeCurve | None] | None = None,
 ) -> MilestoneAnswerSessionAnalysis:
+    """
+    Compare the answers in a session against the answers expected for the child's age.
+
+    The expected answer for a milestone is taken from its fitted age curve, which is
+    defined at every age. Where a milestone has no usable curve we fall back to the mean
+    answer observed at exactly this age, and if no child of this age has answered this
+    milestone there is no expectation to compare against, so it is left out: counting it
+    as an expected answer of 0 would make any child who has achieved the milestone look
+    suspicious purely because they are the first of their age to be asked about it.
+
+    :param session: the database session
+    :param milestone_answer_session: the answer session to analyse
+    :param milestone_curves: the milestone age curves, loaded if not supplied
+    :return: the analysis, including the rms difference from the expected answers
+    """
     analysis = MilestoneAnswerSessionAnalysis(rms=0, child_age=0, answers=[])
     child = session.get(Child, milestone_answer_session.child_id)
     if child is None:
@@ -62,6 +84,8 @@ def analyse_answer_session(
             f"Child {child.id} has age {child_age} which is older than {app_settings.MAX_CHILD_AGE_MONTHS} months, skipping analysis"
         )
         return analysis
+    if milestone_curves is None:
+        milestone_curves = get_milestone_curves(session)
     analysis.child_age = child_age
     logger.debug(
         f"  - checking answer session {milestone_answer_session.id}, child age {child_age}"
@@ -77,20 +101,25 @@ def analyse_answer_session(
         score = session.get(
             MilestoneAgeScore, {"age": child_age, "milestone_id": milestone_id}
         )
-        if score is None:
-            logger.warning(
-                f"    - no statistics available for milestone {milestone_id} - skipping"
+        curve = milestone_curves.get(milestone_id)
+        if curve is not None:
+            expected_answer = float(curve.mean_answer(child_age))
+        elif score is not None and score.count > 0:
+            expected_answer = score.mean
+        else:
+            logger.debug(
+                f"    - no expected answer available for milestone {milestone_id} - skipping"
             )
             continue
         analysis.answers.append(
             MilestoneAnswerAnalysis(
                 milestone_id=milestone_id,
                 answer=answer.answer,
-                avg_answer=score.mean,
-                stddev_answer=score.stddev,
+                avg_answer=expected_answer,
+                stddev_answer=score.stddev if score is not None else 0.0,
             )
         )
-        diff += np.power(score.mean - answer.answer, 2)
+        diff += np.power(expected_answer - answer.answer, 2)
         count += 1
     if count == 0:
         analysis.rms = 0
@@ -132,7 +161,11 @@ def flag_suspicious_answer_sessions(
     """
     Flag any new answer sessions with rms difference to average answers for that age greater than `threshold` as suspicious.
     Only updates sessions that with unknown SuspiciousState (i.e. that haven't been analysed or manually tagged by an admin).
+    The answers are compared against the milestone age curves fitted by the previous
+    statistics update, since which sessions are suspicious determines which of them the
+    curves in this update are fitted from.
     """
+    milestone_curves = get_milestone_curves(session)
     milestone_answer_sessions = session.exec(
         select(MilestoneAnswerSession)
         .where(col(MilestoneAnswerSession.completed))
@@ -146,7 +179,9 @@ def flag_suspicious_answer_sessions(
     )
     for milestone_answer_session in milestone_answer_sessions:
         try:
-            analysis = analyse_answer_session(session, milestone_answer_session)
+            analysis = analyse_answer_session(
+                session, milestone_answer_session, milestone_curves
+            )
             state = (
                 SuspiciousState.suspicious
                 if analysis.rms > threshold
@@ -241,7 +276,53 @@ async def async_update_stats(
     milestones = session.exec(select(Milestone)).all()
     milestone_group_ids = session.exec(select(MilestoneGroup.id)).all()
 
+    # First pass: count the answers for each milestone and child age. Only answers that
+    # were actually given are counted, so these counts are not affected by imputation.
+    logger.info("  - collecting milestone answers")
     for milestone_answer_session in milestone_answer_sessions:
+        child_age = child_ages[milestone_answer_session.id]  # type: ignore
+        if 0 <= child_age <= app_settings.MAX_CHILD_AGE_MONTHS:
+            for milestone in milestones:
+                answer = milestone_answer_session.answers.get(milestone.id)  # type: ignore
+                if answer is not None:
+                    m_counts[milestone.id][child_age][answer.answer] += 1
+
+    # Fit an age curve to each milestone from those counts. The curve gives the mean
+    # answer as a function of child age, which is what we impute below for a milestone
+    # that an answer session does not contain.
+    logger.info("  - fitting milestone age curves")
+    milestone_curves = {
+        milestone.id: fit_milestone_age_curve(m_counts[milestone.id])  # type: ignore
+        for milestone in milestones
+    }
+    # A milestone whose curve could not be fitted (typically one that is too new to have
+    # many answers) is left out of its group's average entirely, for every answer session,
+    # rather than having a value imputed for it. Imputing from a curve fitted to a handful
+    # of answers would just be interpolating noise, and imputing a fixed value would bias
+    # the group statistics, since no existing answer session contains the new milestone.
+    # Leaving it out for every session keeps the group averages comparable between children.
+    milestones_in_group_statistics = [
+        milestone
+        for milestone in milestones
+        if milestone_curves[milestone.id].fit_ok  # type: ignore
+    ]
+    for milestone in milestones:
+        if not milestone_curves[milestone.id].fit_ok:  # type: ignore
+            logger.info(
+                f"    - milestone {milestone.id} has no usable age curve "
+                f"({milestone_curves[milestone.id].n_answers} answers), "  # type: ignore
+                f"excluding it from milestone group statistics"
+            )
+
+    # Second pass: average over the milestones in each group to get a score per answer
+    # session, inferring a value for any milestone without an answer.
+    logger.info("  - calculating milestone group statistics")
+    for (
+        milestone_answer_session,
+        achieved_milestone_ids,
+    ) in iter_sessions_with_previously_achieved_milestone_ids(
+        session, milestone_answer_sessions
+    ):
         child_age = child_ages[milestone_answer_session.id]  # type: ignore
         if 0 <= child_age <= app_settings.MAX_CHILD_AGE_MONTHS:
             logger.debug(
@@ -249,25 +330,31 @@ async def async_update_stats(
             )
             mg_local_count = np.zeros(max_milestone_group_id + 1)
             mg_local_sum = np.zeros(max_milestone_group_id + 1)
-            for milestone in milestones:
+            for milestone in milestones_in_group_statistics:
                 answer = milestone_answer_session.answers.get(milestone.id)  # type: ignore
-                # if there is an answer for this milestone, include it in the statistics
                 if answer is not None:
-                    m_counts[milestone.id][child_age][answer.answer] += 1
-                # whether or not there is an answer, we still need a value when calculating
-                # the average and std dev of answers for the milestone group.
-                # if the answer is missing, we assume a full score if the child is old enough to be asked about the milestone,
-                # (since once the child achieves a milestone it is no longer asked in future sessions),
-                # and a zero score if child is too young to be asked about this milestone.
-                imputed_answer = 3 if child_age >= milestone.relevant_age_min else 0
-                answer_value = answer.answer if answer is not None else imputed_answer
-                if answer is None:
+                    answer_value = float(answer.answer)
+                elif milestone.id in achieved_milestone_ids:
+                    # the child achieved this milestone in an earlier session, which is why
+                    # it is not in this one - we know the answer, so we do not impute it
+                    answer_value = 3.0
+                else:
+                    # the child was not asked about this milestone, because they are too
+                    # young for it or it did not exist yet, so a missing answer is
+                    # informative: the fitted curve gives the mean answer of children of
+                    # this age for this milestone.
+                    answer_value = float(
+                        milestone_curves[milestone.id].mean_answer(child_age)  # type: ignore
+                    )
                     logger.debug(
                         f"    - milestone_group_id={milestone.group_id} milestone_id={milestone.id} imputed_answer={answer_value}"
                     )
                 mg_local_count[milestone.group_id] += 1
                 mg_local_sum[milestone.group_id] += answer_value
             for milestone_group_id in milestone_group_ids:
+                if mg_local_count[milestone_group_id] == 0:
+                    # no milestone in this group has a usable age curve yet
+                    continue
                 mg_avg_score = (
                     mg_local_sum[milestone_group_id]
                     / mg_local_count[milestone_group_id]
@@ -285,7 +372,12 @@ async def async_update_stats(
     # save statistics
     logger.info("  - saving milestone statistics")
     for milestone in milestones:
-        save_milestone_statistics(session, milestone.id, m_counts[milestone.id])  # type: ignore
+        save_milestone_statistics(
+            session,
+            milestone.id,  # type: ignore
+            m_counts[milestone.id],  # type: ignore
+            milestone_curves[milestone.id],  # type: ignore
+        )
     logger.info("  - saving milestone group statistics")
     for milestone_group_id in session.exec(select(MilestoneGroup.id)).all():
         save_milestone_group_statistics(
@@ -302,7 +394,10 @@ async def async_update_stats(
 
 
 def save_milestone_statistics(
-    session: SessionDep, milestone_id: int, counts: np.ndarray
+    session: SessionDep,
+    milestone_id: int,
+    counts: np.ndarray,
+    curve: MilestoneAgeCurve,
 ) -> None:
     """
     Construct a MilestoneAgeScoreCollection of MilestoneAgeScores for a milestone using the supplied statistics.
@@ -315,6 +410,8 @@ def save_milestone_statistics(
         id of the milestone to calculate the statistics for
     counts: np.ndarray
         the counts of each answer per age in months, where the index corresponds to the age in months, then the answer
+    curve: MilestoneAgeCurve
+        the age curve fitted to `counts` for this milestone
     """
     collection = session.get(MilestoneAgeScoreCollection, milestone_id)
     if collection is None:
@@ -326,10 +423,15 @@ def save_milestone_statistics(
         )
         session.add(collection)
 
-    collection.expected_age = get_expected_age_from_scores(counts)
-    collection.relevant_age_min, collection.relevant_age_max = get_relevant_age_min_max(
-        collection.expected_age, counts
-    )
+    (
+        collection.expected_age,
+        collection.relevant_age_min,
+        collection.relevant_age_max,
+    ) = get_milestone_ages_from_curve(curve, counts)
+    collection.curve_midpoint = curve.midpoint if curve.fit_ok else 0.0
+    collection.curve_steepness = curve.steepness
+    collection.curve_fit_ok = curve.fit_ok
+    collection.curve_n_answers = curve.n_answers
 
     # ensure that we have a MilestoneAgeScore for this milestone for each child age up to the maximum child age
     if (

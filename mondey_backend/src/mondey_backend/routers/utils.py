@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import datetime
 import pathlib
 from collections.abc import Iterable
@@ -12,6 +13,7 @@ from fastapi import HTTPException
 from fastapi import UploadFile
 from PIL import Image
 from PIL import ImageOps
+from scipy.optimize import least_squares
 from sqlalchemy import func
 from sqlmodel import SQLModel
 from sqlmodel import col
@@ -23,6 +25,7 @@ from ..logging import logger
 from ..models.children import Child
 from ..models.milestones import Milestone
 from ..models.milestones import MilestoneAdmin
+from ..models.milestones import MilestoneAgeScoreCollection
 from ..models.milestones import MilestoneAnswer
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneGroup
@@ -319,6 +322,111 @@ def get_or_create_current_milestone_answer_session(
     return milestone_answer_session
 
 
+def get_previously_achieved_milestone_ids(
+    session: SessionDep, child_id: int | None, before: datetime.datetime
+) -> set[int]:
+    """
+    The milestones that this child had already achieved before the given time, i.e. that
+    they answered 3 for in an earlier completed answer session.
+
+    Once a child answers 3 for a milestone it is no longer included in their later answer
+    sessions (see `get_or_create_current_milestone_answer_session`), so it is absent from
+    them. Such a milestone must be scored as 3 rather than having a value imputed for it:
+    we know the child achieved it, and imputing the mean answer of children of their age
+    would understate it, the more so the earlier they achieved it.
+
+    :param session: the database session
+    :param child_id: the child to look up
+    :param before: only consider answer sessions created before this time
+    :return: the ids of the milestones already achieved
+    """
+    milestone_ids = session.exec(
+        select(col(MilestoneAnswer.milestone_id))
+        .join(
+            MilestoneAnswerSession,
+            col(MilestoneAnswer.answer_session_id) == col(MilestoneAnswerSession.id),
+        )
+        .where(col(MilestoneAnswerSession.child_id) == child_id)
+        .where(col(MilestoneAnswerSession.completed))
+        .where(col(MilestoneAnswerSession.created_at) < before)
+        .where(col(MilestoneAnswer.answer) == 3)
+    ).all()
+    return {milestone_id for milestone_id in milestone_ids if milestone_id is not None}
+
+
+def iter_sessions_with_previously_achieved_milestone_ids(
+    session: SessionDep,
+    answer_sessions: Sequence[MilestoneAnswerSession],
+) -> Iterable[tuple[MilestoneAnswerSession, set[int]]]:
+    """Yield sessions chronologically with milestones achieved before each one.
+
+    Achievement events for all completed sessions belonging to the relevant children
+    are read in one ordered stream. This includes sessions excluded from statistics,
+    because an answer of 3 in one of those sessions still explains why the milestone is
+    absent from a later questionnaire.
+
+    The yielded set is reused as iteration advances and must be consumed immediately.
+    Sessions sharing a timestamp see the same prior state, matching the strict
+    ``created_at < before`` behavior of :func:`get_previously_achieved_milestone_ids`.
+    """
+    ordered_sessions = sorted(
+        answer_sessions,
+        key=lambda answer_session: (
+            answer_session.child_id,
+            answer_session.created_at,
+            answer_session.id or 0,
+        ),
+    )
+    if not ordered_sessions:
+        return
+
+    child_ids = {answer_session.child_id for answer_session in ordered_sessions}
+    achievement_query = (
+        select(
+            col(MilestoneAnswerSession.child_id),
+            col(MilestoneAnswerSession.created_at),
+            col(MilestoneAnswer.milestone_id),
+        )
+        .join(
+            MilestoneAnswer,
+            col(MilestoneAnswerSession.id) == col(MilestoneAnswer.answer_session_id),
+        )
+        .where(col(MilestoneAnswerSession.child_id).in_(child_ids))
+        .where(col(MilestoneAnswerSession.completed))
+        .where(col(MilestoneAnswer.answer) == 3)
+        .order_by(
+            col(MilestoneAnswerSession.child_id),
+            col(MilestoneAnswerSession.created_at),
+            col(MilestoneAnswerSession.id),
+        )
+        .execution_options(yield_per=1000)
+    )
+    achievement_events = iter(session.exec(achievement_query))
+    next_event = next(achievement_events, None)
+    current_child_id: int | None = None
+    achieved_milestone_ids: set[int] = set()
+
+    for answer_session in ordered_sessions:
+        child_id = answer_session.child_id
+        if child_id != current_child_id:
+            current_child_id = child_id
+            achieved_milestone_ids.clear()
+            while next_event is not None and next_event[0] < child_id:
+                next_event = next(achievement_events, None)
+
+        while (
+            next_event is not None
+            and next_event[0] == child_id
+            and next_event[1] < answer_session.created_at
+        ):
+            milestone_id = next_event[2]
+            if milestone_id is not None:
+                achieved_milestone_ids.add(milestone_id)
+            next_event = next(achievement_events, None)
+
+        yield answer_session, achieved_milestone_ids
+
+
 def get_child_age_in_months(child: Child, date: datetime.date | None = None) -> int:
     if date is None:
         date = datetime.date.today()
@@ -375,11 +483,12 @@ def _milestone_achieved(answers: np.ndarray) -> bool:
     return sufficient_data and milestone_achieved
 
 
-def get_expected_age_from_scores(counts: np.ndarray) -> int:
+def _get_expected_age_from_scores_heuristic(counts: np.ndarray) -> int:
     """
-    Returns the expected age for a milestone based on the counts of each answer for each child age.
-    :param counts: the number of answers for each age and answer, where the index in the 2-d array is (age, answer)
-    :return: the expected age in months for this milestone
+    The expected age for a milestone, as it was determined before the age curve was
+    fitted: the youngest age at which the milestone is considered achieved. Only used by
+    `get_milestone_ages_from_curve` as a fallback when no curve can be fitted, since a
+    single child at a young age is enough to set the result.
     """
     achieved = np.array([_milestone_achieved(count) for count in counts])
     if not np.any(achieved):
@@ -387,12 +496,13 @@ def get_expected_age_from_scores(counts: np.ndarray) -> int:
     return int(np.argmax(achieved))
 
 
-def get_relevant_age_min_max(expected_age: int, counts: np.ndarray) -> tuple[int, int]:
+def _get_relevant_age_min_max_heuristic(
+    expected_age: int, counts: np.ndarray
+) -> tuple[int, int]:
     """
-    Returns the min and max child age for which this milestone should be asked, based on the counts of each answer for each child age.
-    :param expected_age: the expected age in months for this milestone
-    :param counts: the number of answers for each age and answer, where the index in the 2-d array is (age, answer)
-    :return: min, max relevant child age in months for this milestone
+    The relevant age range for a milestone, as it was determined before the age curve was
+    fitted. Only used by `get_milestone_ages_from_curve` as a fallback when no curve can
+    be fitted.
     """
     # require at least `min_number_of_answers`
     min_number_of_answers = 3
@@ -413,6 +523,243 @@ def get_relevant_age_min_max(expected_age: int, counts: np.ndarray) -> tuple[int
     ):
         min_age += 1
     return min_age, max_age
+
+
+# The mean answer at which a milestone is considered achieved. The answers are on a
+# 0-3 scale, so 2.4 is 80% of the maximum, matching `_milestone_achieved` above.
+MEAN_ANSWER_ACHIEVED = 2.4
+# The mean answers delimiting the age range over which a milestone is worth asking:
+# from when a few children can do it until nearly all of them can.
+MEAN_ANSWER_RELEVANT_MIN = 0.3
+MEAN_ANSWER_RELEVANT_MAX = 2.7
+# The mean answer halfway between not achieved and achieved. The data has to contain
+# answers from below and above this for the transition to be located at all.
+MEAN_ANSWER_MIDPOINT = 1.5
+# Bounds on the fitted steepness. A milestone whose fitted steepness sits on either
+# bound has a transition that the data cannot resolve, so the fit is rejected.
+MIN_STEEPNESS = 0.01
+MAX_STEEPNESS = 2.0
+
+
+def _mean_answer_to_logit(mean_answer: float) -> float:
+    """Inverse of the logistic, mapping a mean answer in (0, 3) to a logit."""
+    return float(np.log(mean_answer / (3.0 - mean_answer)))
+
+
+@dataclasses.dataclass
+class MilestoneAgeCurve:
+    """
+    A logistic fit of the mean answer for a milestone as a function of child age:
+
+        mean_answer(age) = 3 / (1 + exp(-steepness * (age - midpoint)))
+
+    The curve is parametrised by `expected_age` rather than by `midpoint`, so that
+    the quantity we report and store is itself a fitted parameter. `expected_age` is
+    the age at which the curve crosses `MEAN_ANSWER_ACHIEVED`, i.e. the age at which
+    the milestone is typically achieved.
+
+    `fit_ok` is False if there were too few answers, or if the fit did not converge
+    to an identifiable transition, in which case the parameters must not be used.
+    """
+
+    expected_age: float
+    steepness: float
+    n_answers: int
+    fit_ok: bool
+
+    @classmethod
+    def from_midpoint(
+        cls, midpoint: float, steepness: float, n_answers: int
+    ) -> MilestoneAgeCurve:
+        """Reconstruct a curve from the midpoint and steepness that define it."""
+        return cls(
+            expected_age=midpoint
+            + _mean_answer_to_logit(MEAN_ANSWER_ACHIEVED) / steepness,
+            steepness=steepness,
+            n_answers=n_answers,
+            fit_ok=True,
+        )
+
+    @property
+    def midpoint(self) -> float:
+        """The age at which the mean answer is halfway between 0 and 3."""
+        return self.expected_age - _mean_answer_to_logit(MEAN_ANSWER_ACHIEVED) / (
+            self.steepness
+        )
+
+    def mean_answer(self, age: float | np.ndarray) -> float | np.ndarray:
+        """The fitted mean answer for a child of this age in months."""
+        return 3.0 / (1.0 + np.exp(-self.steepness * (age - self.midpoint)))
+
+    def age_at_mean_answer(self, mean_answer: float) -> float:
+        """The age in months at which the fitted curve reaches this mean answer."""
+        return self.midpoint + _mean_answer_to_logit(mean_answer) / self.steepness
+
+
+def fit_milestone_age_curve(counts: np.ndarray) -> MilestoneAgeCurve:
+    """
+    Fit a logistic curve of mean answer vs child age to the answers for a milestone.
+
+    This is the single source of truth for a milestone's age curve: the expected age,
+    the relevant age range, and the value imputed for a missing answer are all derived
+    from it, so that they cannot drift apart.
+
+    The fit is weighted by the number of answers at each age, so that ages with only a
+    handful of answers cannot drag the curve, and uses a robust loss so that a noisy
+    age does not dominate. Ages with no answers simply carry no weight, which is what
+    lets the curve interpolate and extrapolate over gaps in the data.
+
+    :param counts: the number of answers for each age and answer, where the index in the 2-d array is (age, answer)
+    :return: the fitted MilestoneAgeCurve
+    """
+    ages = np.arange(counts.shape[0], dtype=float)
+    n_per_age = counts.sum(axis=1)
+    n_answers = int(n_per_age.sum())
+    has_data = n_per_age > 0
+
+    curve_failed = MilestoneAgeCurve(
+        expected_age=float(app_settings.MAX_CHILD_AGE_MONTHS),
+        steepness=MIN_STEEPNESS,
+        n_answers=n_answers,
+        fit_ok=False,
+    )
+
+    if n_answers < app_settings.MILESTONE_MIN_ANSWERS_FOR_CURVE_FIT:
+        return curve_failed
+    # we need answers at more than one age to resolve a transition at all
+    if np.count_nonzero(has_data) < 2:
+        return curve_failed
+
+    age = ages[has_data]
+    n = n_per_age[has_data].astype(float)
+    mean_answer = (counts[has_data] @ np.arange(4)) / n
+
+    # The data has to bracket the transition for the curve to be identifiable: if every
+    # child who was asked had already achieved the milestone (or none of them had), then
+    # any number of curves fit the data equally well and the fitted parameters would be
+    # arbitrary.
+    if (
+        mean_answer.min() > MEAN_ANSWER_MIDPOINT
+        or mean_answer.max() < MEAN_ANSWER_MIDPOINT
+    ):
+        return curve_failed
+
+    max_age = float(app_settings.MAX_CHILD_AGE_MONTHS)
+
+    def residuals(params: np.ndarray) -> np.ndarray:
+        expected_age, steepness = params
+        midpoint = (
+            expected_age - _mean_answer_to_logit(MEAN_ANSWER_ACHIEVED) / steepness
+        )
+        predicted = 3.0 / (1.0 + np.exp(-steepness * (age - midpoint)))
+        # weight by sqrt(n) so each residual counts once per answer
+        return np.sqrt(n) * (predicted - mean_answer)
+
+    # initial guess: the youngest age whose mean answer is at or above the achieved
+    # threshold, which is roughly what the old heuristic returned
+    achieved_ages = age[mean_answer >= MEAN_ANSWER_ACHIEVED]
+    expected_age_guess = (
+        float(achieved_ages[0]) if achieved_ages.size else max_age / 2.0
+    )
+    try:
+        fit = least_squares(
+            residuals,
+            x0=[np.clip(expected_age_guess, 0.0, max_age), 0.3],
+            bounds=([0.0, MIN_STEEPNESS], [max_age, MAX_STEEPNESS]),
+            loss="soft_l1",
+            f_scale=0.5,
+        )
+    except (ValueError, RuntimeError) as e:
+        logger.warning(f"Milestone age curve fit failed: {e}")
+        return curve_failed
+
+    if not fit.success:
+        return curve_failed
+
+    expected_age, steepness = float(fit.x[0]), float(fit.x[1])
+    # A parameter on one of its bounds means the data does not resolve the transition.
+    # In particular, an expected age on the upper bound means the answers cross the
+    # midpoint but do not reach the achieved threshold within the supported age range.
+    # Either way the fitted parameters are not meaningful, so reject the fit and fall
+    # back to the heuristic.
+    expected_age_on_bound = np.isclose(expected_age, 0.0) or np.isclose(
+        expected_age, max_age
+    )
+    steepness_on_bound = (
+        steepness <= MIN_STEEPNESS * 1.01 or steepness >= MAX_STEEPNESS * 0.99
+    )
+    if expected_age_on_bound or steepness_on_bound:
+        return curve_failed
+
+    return MilestoneAgeCurve(
+        expected_age=expected_age,
+        steepness=steepness,
+        n_answers=n_answers,
+        fit_ok=True,
+    )
+
+
+def milestone_age_curve_from_collection(
+    collection: MilestoneAgeScoreCollection | None,
+) -> MilestoneAgeCurve | None:
+    """
+    Reconstructs the fitted age curve for a milestone from its stored statistics.
+
+    :param collection: the stored statistics for a milestone
+    :return: the fitted age curve, or None if there is no usable curve for this milestone
+    """
+    if collection is None or not collection.curve_fit_ok:
+        return None
+    # reconstruct from the stored midpoint rather than from the stored expected_age,
+    # which is rounded to whole months for display
+    return MilestoneAgeCurve.from_midpoint(
+        midpoint=collection.curve_midpoint,
+        steepness=collection.curve_steepness,
+        n_answers=collection.curve_n_answers,
+    )
+
+
+def get_milestone_curves(session: SessionDep) -> dict[int, MilestoneAgeCurve | None]:
+    """
+    The stored age curve for each milestone, as fitted by the last statistics update.
+
+    :param session: the database session
+    :return: milestone id -> its age curve, or None if it has no usable curve
+    """
+    return {
+        collection.milestone_id: milestone_age_curve_from_collection(collection)
+        for collection in session.exec(select(MilestoneAgeScoreCollection)).all()
+    }
+
+
+def get_milestone_ages_from_curve(
+    curve: MilestoneAgeCurve, counts: np.ndarray
+) -> tuple[int, int, int]:
+    """
+    Returns the expected age and the relevant age range for a milestone from its fitted
+    age curve, falling back to the previous heuristics if the curve could not be fitted.
+
+    :param curve: the fitted age curve for this milestone
+    :param counts: the number of answers for each age and answer, where the index in the 2-d array is (age, answer)
+    :return: expected age, min relevant age, max relevant age, in months
+    """
+    max_age = app_settings.MAX_CHILD_AGE_MONTHS
+    if not curve.fit_ok:
+        expected_age = _get_expected_age_from_scores_heuristic(counts)
+        relevant_age_min, relevant_age_max = _get_relevant_age_min_max_heuristic(
+            expected_age, counts
+        )
+        return expected_age, relevant_age_min, relevant_age_max
+
+    def clamped_age(mean_answer: float) -> int:
+        age = curve.age_at_mean_answer(mean_answer)
+        return int(np.clip(round(age), 0, max_age))
+
+    return (
+        clamped_age(MEAN_ANSWER_ACHIEVED),
+        clamped_age(MEAN_ANSWER_RELEVANT_MIN),
+        clamped_age(MEAN_ANSWER_RELEVANT_MAX),
+    )
 
 
 def child_image_path(child_id: int | None) -> pathlib.Path:
