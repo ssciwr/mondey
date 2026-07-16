@@ -16,6 +16,7 @@ def test_research_data(research_client: TestClient):
     # i.e. answer sessions with ids 1, 2 & 4, which contain answers for milestones 1 & 2
     assert len(data) == 3
     for item in data:
+        assert item["research_group_id"] == 123451
         assert item["user_question_1"] == "lorem ipsum"
         # for user question 2, the answer is "other" which is the additional_option for this question,
         # so we get the additional_answer here instead of the answer:
@@ -32,6 +33,8 @@ def test_research_data_full_data_access(research_client_full_data_access: TestCl
     data = response.json()
     # all completed answer sessions (excluding those from test users) are included
     assert len(data) == 4
+    assert [item["research_group_id"] for item in data].count(123451) == 3
+    assert [item["research_group_id"] for item in data].count(0) == 1
 
 
 def test_research_data_deleted_child(admin_client: TestClient):

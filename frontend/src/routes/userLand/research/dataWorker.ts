@@ -2,13 +2,9 @@ import type { GetResearchNamesResponse } from "$lib/client";
 import { client } from "$lib/client/client.gen";
 import { getResearchData, getResearchNames } from "$lib/client/sdk.gen";
 import type { PlotData } from "$lib/util";
-import {
-	DataFrame,
-	concat,
-	toCSV,
-	toJSON,
-} from "danfojs/dist/danfojs-browser/src";
+import { DataFrame, concat, toJSON } from "danfojs/dist/danfojs-browser/src";
 import type { SelectOptionType } from "flowbite-svelte";
+import { serializeCsv } from "./csv";
 import {
 	type WorkerFullData,
 	type WorkerFullDataRequest,
@@ -193,14 +189,7 @@ function retrieve_all_data() {
 		return;
 	}
 	const df = get_raw_data();
-	// using \t as separator causes issues - some answers have columns. This protects against it
-	// since danfojs version supports sep but not quoting args. And sep = \t will be ignored by users device, even if
-	// we hint it with delimiter=tab in the file type, in my case at least it still used "," as a separator too,
-	const csvVersionOfData = toCSV(
-		df.applyMap((val: any) =>
-			val !== null && val !== undefined ? `"${val}"` : val,
-		),
-	) as string;
+	const csvVersionOfData = serializeCsv(df.columns, df.values as unknown[][]);
 
 	const message: WorkerFullData = {
 		type: WorkerTypes.FULL_DATA,

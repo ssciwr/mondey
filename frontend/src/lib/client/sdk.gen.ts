@@ -1006,6 +1006,7 @@ export const deleteResearchGroup = <ThrowOnError extends boolean = false>(option
  * Args:
  * additional_data_file: The main data CSV file (required)
  * labels_file: Optional labels CSV file
+ * research_group_id: Optional researcher code for all imported users
  *
  * Returns:
  * dict: Message and count of imported children

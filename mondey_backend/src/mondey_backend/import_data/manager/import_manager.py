@@ -39,10 +39,15 @@ class ImportManager:
     """
 
     def __init__(
-        self, session: Session, user_session: AsyncSession, debug: bool = False
+        self,
+        session: Session,
+        user_session: AsyncSession,
+        debug: bool = False,
+        research_group_id: int | None = None,
     ):
         # Initialize DataManager
         self.data_manager: DataManager = DataManager(session, user_session, debug=debug)
+        self.research_group_id = research_group_id or 0
 
         # Mappings
         self.child_parent_map: dict[str, int] = {}
@@ -151,6 +156,7 @@ class ImportManager:
 
         self.relevant_user_variables = [
             *self.eltern_question_variables,
+            "FE01",
             "FE08",
             "FE07",
             "FE06",
@@ -181,6 +187,7 @@ class ImportManager:
             "FK03": 3,  # Related to questions 21 & 22
             "FK04_01": 4,  # Related to questions 21 & 22
             # User Questions mapped to numeric IDs
+            "FE01": 2,
             "FP01": 13,  # Eltern giant question
             "FP02": 13,  # Eltern giant question
             "FP03": 13,  # Eltern giant question
@@ -284,7 +291,7 @@ class ImportManager:
             password="$$$$testUser$$$$432hjdfioj3409lk",
             is_researcher=False,
             full_data_access=False,
-            research_group_id=0,
+            research_group_id=self.research_group_id,
         )
 
         # Hash the password
@@ -298,7 +305,7 @@ class ImportManager:
             is_verified=False,
             is_researcher=False,
             full_data_access=False,
-            research_group_id=0,
+            research_group_id=self.research_group_id,
         )
 
         self.data_manager.user_session.add(user)
@@ -466,10 +473,14 @@ class ImportManager:
         question_label: str,
         answer: str,
         variable: str,
-        child_id: int,
+        case_id: int,
+        db_child_id: int,
     ) -> bool:
         """
         Process special answers that need custom handling.
+
+        ``case_id`` identifies the imported case and ``db_child_id`` identifies
+        the corresponding child row in the database.
 
         Returns:
             bool: True if the answer was processed, False otherwise
@@ -498,7 +509,7 @@ class ImportManager:
             if answer is not None and len(answer) > 0:
                 # Save parent answer for this question, only if it was actually filled out
                 self.create_answer(
-                    user_or_child_id=self.get_childs_parent_id(child_id),
+                    user_or_child_id=self.get_childs_parent_id(case_id),
                     question_id=eltern_question_special_id,
                     answer_text=answer,
                     set_only_additional_answer=False,
@@ -515,26 +526,31 @@ class ImportManager:
             pregnanacy_duration_answer = 41  # 41 weeks assumed if Termingeboren
             incubator_weeks = 0
 
-            # First bit is Fruhgeboren specific weeks part
+            # For premature births, FK03 only indicates that the child was born
+            # prematurely. FK04_01 contains the actual pregnancy duration, so
+            # wait for that variable instead of saving the term-born defaults.
+            if variable == "FK03" and answer != "Termingeboren":
+                return True
+
             if variable == "FK04_01" and answer is not None and len(answer):
                 # Parse weeks from the answer
                 pregnanacy_duration_answer, incubator_weeks = parse_weeks(answer)
 
             # Create answers for pregnancy duration and incubator weeks
             self.create_answer(
-                user_or_child_id=child_id,
+                user_or_child_id=db_child_id,
                 question_id=pregnancy_duration_question_id,
                 answer_text=str(pregnanacy_duration_answer),
                 set_only_additional_answer=False,
-                is_child_question=False,
+                is_child_question=True,
             )
 
             self.create_answer(
-                user_or_child_id=child_id,
+                user_or_child_id=db_child_id,
                 question_id=incubator_weeks_question_id,
                 answer_text=str(incubator_weeks),
                 set_only_additional_answer=False,
-                is_child_question=False,
+                is_child_question=True,
             )
 
             return True
@@ -549,7 +565,7 @@ class ImportManager:
             logger.debug(f"Setting special case younger siblings to: {answer}")
 
             self.create_answer(
-                user_or_child_id=child_id,
+                user_or_child_id=db_child_id,
                 question_id=relevant_question_id,
                 answer_text=answer
                 if answer is not None and len(str(answer)) > 0
@@ -734,7 +750,10 @@ class ImportManager:
                     continue
 
                 # Skip variables not in hardcoded_id_map for additional data
-                if variable not in self.hardcoded_id_map:
+                if (
+                    variable not in self.hardcoded_id_map
+                    and variable not in self.hardcoded_other_answers
+                ):
                     continue
 
                 response = child_row.get(variable)
@@ -744,31 +763,43 @@ class ImportManager:
                     continue
 
                 # Check if this is a special case that needs custom processing
-                if self.should_be_saved(variable):
-                    response_label = labels_df[
-                        (labels_df["Variable"] == variable)
-                        & (labels_df["Response Code"] == response)
-                    ]
+                if self.should_be_saved(variable) and (
+                    variable_type != "TEXT" or variable == "FK04_01"
+                ):
+                    if variable == "FK04_01":
+                        # This free-text field is only applicable to premature
+                        # births. It has no response-code entry in labels_df, so
+                        # pass its raw value to parse_weeks.
+                        term_response = child_row.get("FK03")
+                        if str(term_response).strip() not in {"2", "2.0"}:
+                            continue
+                        answer = str(response)
+                    else:
+                        response_label = labels_df[
+                            (labels_df["Variable"] == variable)
+                            & (labels_df["Response Code"] == response)
+                        ]
 
-                    if response_label.empty:
-                        continue  # No data entered
+                        if response_label.empty:
+                            continue  # No data entered
 
-                    answer = (
-                        response_label.iloc[0]["Response Label"]
-                        if (
-                            variable_type == "NOMINAL"
-                            or variable_type == "ORDINAL"
-                            or variable_type == "DICHOTOMOUS"
+                        answer = (
+                            response_label.iloc[0]["Response Label"]
+                            if (
+                                variable_type == "NOMINAL"
+                                or variable_type == "ORDINAL"
+                                or variable_type == "DICHOTOMOUS"
+                            )
+                            else response_label
                         )
-                        else response_label
-                    )
 
                     # Process special answers (Eltern, Fruhgeboren, etc.)
                     have_acted_upon_question = self.process_special_answer(
-                        variable_label,
-                        answer,
-                        variable,
-                        child_row.get("CASE"),
+                        question_label=variable_label,
+                        answer=answer,
+                        variable=variable,
+                        case_id=child_row.get("CASE"),
+                        db_child_id=db_child_id,
                     )
 
                     if have_acted_upon_question:
@@ -829,7 +860,7 @@ class ImportManager:
                         if self.get_question_filled_in_to_parent(variable):
                             # Create user answer
                             parent_id = self.get_childs_parent_id(child_row.get("CASE"))
-                            _, answer = self.create_answer(
+                            _, saved_answer = self.create_answer(
                                 user_or_child_id=parent_id,
                                 question_id=question.id,
                                 answer_text=answer_text,
@@ -838,7 +869,7 @@ class ImportManager:
                             )
                         else:
                             # Create child answer
-                            _, answer = self.create_answer(
+                            _, saved_answer = self.create_answer(
                                 user_or_child_id=db_child_id,
                                 question_id=question.id,
                                 answer_text=answer_text,
@@ -847,7 +878,7 @@ class ImportManager:
                             )
 
                         total_answers += 1
-                        self.data_manager.session.add(answer)
+                        self.data_manager.session.add(saved_answer)
 
                 # Handle Text
                 elif variable_type == "TEXT":
@@ -872,7 +903,7 @@ class ImportManager:
                     if self.get_question_filled_in_to_parent(variable):
                         # Create user answer
                         parent_id = self.get_childs_parent_id(child_row.get("CASE"))
-                        _, answer = self.create_answer(
+                        _, saved_answer = self.create_answer(
                             user_or_child_id=parent_id,
                             question_id=question.id,
                             answer_text=answer_text,
@@ -881,7 +912,7 @@ class ImportManager:
                         )
                     else:
                         # Create child answer
-                        _, answer = self.create_answer(
+                        _, saved_answer = self.create_answer(
                             user_or_child_id=db_child_id,
                             question_id=question.id,
                             answer_text=answer_text,
@@ -890,7 +921,7 @@ class ImportManager:
                         )
 
                     total_answers += 1
-                    self.data_manager.session.add(answer)
+                    self.data_manager.session.add(saved_answer)
 
                 else:
                     logger.warning(
