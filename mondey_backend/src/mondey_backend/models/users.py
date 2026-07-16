@@ -1,11 +1,17 @@
 from __future__ import annotations
 
+import datetime
+
 from fastapi_users import schemas
 from fastapi_users.db import SQLAlchemyBaseUserTable
 from fastapi_users_db_sqlalchemy.access_token import SQLAlchemyBaseAccessTokenTable
+from pydantic import BaseModel
+from pydantic import SecretStr
 from sqlalchemy import Boolean
+from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
+from sqlalchemy import func
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import declared_attr
@@ -44,8 +50,25 @@ class UserUpdate(schemas.BaseUserUpdate):
 
 
 class AccessToken(SQLAlchemyBaseAccessTokenTable[int], Base):
+    last_seen_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.datetime.now(datetime.UTC),
+        server_default=func.now(),
+        nullable=False,
+    )
+
     @declared_attr
     def user_id(cls) -> Mapped[int]:
         return mapped_column(
             Integer, ForeignKey("user.id", ondelete="cascade"), nullable=False
         )
+
+
+class SessionInfo(BaseModel):
+    idle_expires_at: datetime.datetime
+    absolute_expires_at: datetime.datetime
+    warning_seconds: int
+
+
+class SessionReauthentication(BaseModel):
+    password: SecretStr

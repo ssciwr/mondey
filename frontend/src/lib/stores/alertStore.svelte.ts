@@ -1,4 +1,7 @@
 type AlertCallback = () => void;
+type AlertOptions = {
+	priority?: number;
+};
 
 /**
  * Creates a centralized alert store with proper typing
@@ -25,6 +28,8 @@ function createAlertStore() {
 	let alertIsError = $state<boolean>(false);
 	let alertIsAwaitError = $state<boolean>(false);
 	let alertCallback = $state<AlertCallback | null>(null);
+	let alertButtonText = $state<string | null>(null);
+	let alertPriority = $state(0);
 
 	return {
 		// Getters for alert state
@@ -46,6 +51,9 @@ function createAlertStore() {
 		get callback() {
 			return alertCallback;
 		},
+		get buttonText() {
+			return alertButtonText;
+		},
 		set isAlertShown(value: boolean) {
 			showAlert = value;
 		},
@@ -57,13 +65,21 @@ function createAlertStore() {
 			isError: boolean | undefined = false,
 			isAwaitError: boolean | undefined = false,
 			onClick: AlertCallback | null = null,
+			buttonText: string | null = null,
+			options: AlertOptions = {},
 		) {
+			const priority = options.priority ?? 0;
+			if (showAlert && priority < alertPriority) {
+				return;
+			}
 			showAlert = true;
 			alertTitle = title;
 			alertMessage = message;
 			alertIsError = isError;
 			alertIsAwaitError = isAwaitError;
 			alertCallback = onClick;
+			alertButtonText = buttonText;
+			alertPriority = priority;
 		},
 
 		// Method to hide alert and reset state so that they do not reappear as stale alerts.
@@ -74,6 +90,8 @@ function createAlertStore() {
 			alertIsError = false;
 			alertIsAwaitError = false;
 			alertCallback = null;
+			alertButtonText = null;
+			alertPriority = 0;
 		},
 	};
 }

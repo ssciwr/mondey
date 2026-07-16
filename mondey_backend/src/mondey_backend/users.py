@@ -1,14 +1,17 @@
 from __future__ import annotations
 
+import datetime
 import smtplib
 from email.message import EmailMessage
 from typing import Annotated
 
 from fastapi import Depends
 from fastapi import Request
+from fastapi import Response
 from fastapi_users import BaseUserManager
 from fastapi_users import FastAPIUsers
 from fastapi_users import IntegerIDMixin
+from fastapi_users import exceptions
 from fastapi_users.authentication import AuthenticationBackend
 from fastapi_users.authentication import CookieTransport
 from fastapi_users.authentication.strategy.db import AccessTokenDatabase
@@ -24,6 +27,7 @@ from .databases.users import get_access_token_db
 from .databases.users import get_user_db
 from .logging import logger
 from .models.research import ResearchGroup
+from .models.users import SessionInfo
 from .settings import app_settings
 
 
@@ -120,17 +124,138 @@ async def get_user_manager(
     yield UserManager(user_db)
 
 
+SESSION_IDLE_EXPIRES_HEADER = "X-Session-Idle-Expires-At"
+SESSION_ABSOLUTE_EXPIRES_HEADER = "X-Session-Absolute-Expires-At"
+SESSION_WARNING_SECONDS_HEADER = "X-Session-Warning-Seconds"
+
+
+def _as_utc(value: datetime.datetime) -> datetime.datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=datetime.UTC)
+    return value.astimezone(datetime.UTC)
+
+
+class SessionDatabaseStrategy(DatabaseStrategy[User, int, AccessToken]):
+    def __init__(
+        self,
+        database: AccessTokenDatabase[AccessToken],
+        response: Response | None = None,
+    ):
+        super().__init__(database)
+        self.response = response
+
+    @property
+    def touch_interval_seconds(self) -> int:
+        return min(
+            app_settings.SESSION_TOUCH_INTERVAL_SECONDS,
+            max(1, app_settings.SESSION_IDLE_TIMEOUT_SECONDS // 2),
+        )
+
+    @property
+    def warning_seconds(self) -> int:
+        return min(
+            app_settings.SESSION_WARNING_SECONDS,
+            max(1, app_settings.SESSION_IDLE_TIMEOUT_SECONDS // 2),
+        )
+
+    def session_info(self, access_token: AccessToken) -> SessionInfo:
+        created_at = _as_utc(access_token.created_at)
+        last_seen_at = _as_utc(access_token.last_seen_at)
+        return SessionInfo(
+            idle_expires_at=last_seen_at
+            + datetime.timedelta(seconds=app_settings.SESSION_IDLE_TIMEOUT_SECONDS),
+            absolute_expires_at=created_at
+            + datetime.timedelta(seconds=app_settings.SESSION_ABSOLUTE_TIMEOUT_SECONDS),
+            warning_seconds=self.warning_seconds,
+        )
+
+    def set_session_headers(
+        self, session_info: SessionInfo, response: Response | None = None
+    ) -> None:
+        target_response = response if response is not None else self.response
+        if target_response is None:
+            return
+        target_response.headers[SESSION_IDLE_EXPIRES_HEADER] = (
+            session_info.idle_expires_at.isoformat()
+        )
+        target_response.headers[SESSION_ABSOLUTE_EXPIRES_HEADER] = (
+            session_info.absolute_expires_at.isoformat()
+        )
+        target_response.headers[SESSION_WARNING_SECONDS_HEADER] = str(
+            session_info.warning_seconds
+        )
+
+    async def get_valid_access_token(
+        self, token: str | None, *, touch: bool = True
+    ) -> AccessToken | None:
+        if token is None:
+            return None
+        access_token = await self.database.get_by_token(token)
+        if access_token is None:
+            return None
+
+        now = datetime.datetime.now(datetime.UTC)
+        created_at = _as_utc(access_token.created_at)
+        last_seen_at = _as_utc(access_token.last_seen_at)
+        absolute_expired = now >= created_at + datetime.timedelta(
+            seconds=app_settings.SESSION_ABSOLUTE_TIMEOUT_SECONDS
+        )
+        idle_expired = now >= last_seen_at + datetime.timedelta(
+            seconds=app_settings.SESSION_IDLE_TIMEOUT_SECONDS
+        )
+        if absolute_expired or idle_expired:
+            await self.database.delete(access_token)
+            return None
+
+        if touch and now >= last_seen_at + datetime.timedelta(
+            seconds=self.touch_interval_seconds
+        ):
+            access_token = await self.database.update(
+                access_token, {"last_seen_at": now}
+            )
+
+        self.set_session_headers(self.session_info(access_token))
+        return access_token
+
+    async def read_token(
+        self, token: str | None, user_manager: BaseUserManager[User, int]
+    ) -> User | None:
+        access_token = await self.get_valid_access_token(token)
+        if access_token is None:
+            return None
+        try:
+            parsed_id = user_manager.parse_id(access_token.user_id)
+            return await user_manager.get(parsed_id)
+        except (exceptions.UserNotExists, exceptions.InvalidID):
+            return None
+
+    async def rotate_session(
+        self, token: str | None, user: User
+    ) -> tuple[str, SessionInfo] | None:
+        old_access_token = await self.get_valid_access_token(token, touch=False)
+        if old_access_token is None:
+            return None
+
+        new_access_token = await self.database.create(
+            self._create_access_token_dict(user)
+        )
+        await self.database.delete(old_access_token)
+        return new_access_token.token, self.session_info(new_access_token)
+
+
 cookie_transport = CookieTransport(
-    cookie_max_age=3600, cookie_secure=app_settings.COOKIE_SECURE
+    cookie_max_age=app_settings.SESSION_ABSOLUTE_TIMEOUT_SECONDS,
+    cookie_secure=app_settings.COOKIE_SECURE,
 )
 
 
 def get_database_strategy(
+    response: Response,
     access_token_db: Annotated[
         AccessTokenDatabase[AccessToken], Depends(get_access_token_db)
     ],
-) -> DatabaseStrategy:
-    return DatabaseStrategy(access_token_db, lifetime_seconds=3600)
+) -> SessionDatabaseStrategy:
+    return SessionDatabaseStrategy(access_token_db, response)
 
 
 auth_backend = AuthenticationBackend(

@@ -4,6 +4,7 @@ import {
 	authCookieLogout,
 	usersCurrentUser,
 } from "$lib/client/sdk.gen";
+import { sessionStore } from "$lib/stores/sessionStore.svelte";
 
 function createUser() {
 	let currentUser = $state(null as null | UserRead);
@@ -22,6 +23,7 @@ function createUser() {
 				);
 			} else {
 				currentUser = null;
+				sessionStore.clear();
 			}
 			return response;
 		},
@@ -29,6 +31,7 @@ function createUser() {
 			const { data, error } = await usersCurrentUser();
 			if (error || data === undefined) {
 				currentUser = null;
+				sessionStore.clear();
 			} else {
 				currentUser = data as UserRead;
 			}
