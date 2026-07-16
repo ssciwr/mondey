@@ -27,6 +27,10 @@ export type BodyImportCsvData = {
      * Labels CSV file
      */
     labels_file?: string;
+    /**
+     * Researcher code applied to all imported users
+     */
+    research_group_id?: number | null;
 };
 
 export type BodyResetForgotPassword = {

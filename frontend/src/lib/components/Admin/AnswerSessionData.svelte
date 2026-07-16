@@ -4,6 +4,8 @@
 import {
 	adminUpdateStats,
 	getMilestoneAnswerSessions,
+	getResearchGroups,
+	getUsers,
 	importCsvData,
 } from "$lib/client/sdk.gen";
 import type { MilestoneAnswerSession } from "$lib/client/types.gen";
@@ -14,7 +16,10 @@ import {
 	Button,
 	Card,
 	Checkbox,
+	Label,
 	Modal,
+	Select,
+	type SelectOptionType,
 	Spinner,
 	Table,
 	TableBody,
@@ -45,10 +50,12 @@ let stats_out_of_date = $state(false);
 // CSV Import related states
 let dataFile = $state(null as File | null);
 let labelsFile = $state(null as File | null);
-let dataFileInputRef = $state(null);
-let labelsFileInputRef = $state(null);
+let useResearchCode = $state(false);
+let researchCode = $state("");
+let researchCodeOptions = $state([] as SelectOptionType<string>[]);
+let dataFileInputRef = $state(null as HTMLInputElement | null);
+let labelsFileInputRef = $state(null as HTMLInputElement | null);
 let isUploading = $state(false);
-let showConfirmImportModal = $state(false);
 let importResult = $state({
 	status: "",
 	message: "",
@@ -57,6 +64,12 @@ let importResult = $state({
 });
 let showImportResult = $state(false);
 let successfulImport = $state(false);
+let canImport = $derived(
+	isCsvFile(dataFile) &&
+		isCsvFile(labelsFile) &&
+		(!useResearchCode || Boolean(researchCode)) &&
+		!isUploading,
+);
 
 async function doStatsUpdate() {
 	show_update_stats_modal = true;
@@ -81,51 +94,74 @@ async function refreshMilestoneAnswerSessions() {
 	}
 }
 
+async function refreshResearchGroups() {
+	const [researchGroupsResponse, usersResponse] = await Promise.all([
+		getResearchGroups(),
+		getUsers(),
+	]);
+	if (
+		researchGroupsResponse.error ||
+		!researchGroupsResponse.data ||
+		usersResponse.error ||
+		!usersResponse.data
+	) {
+		console.log(researchGroupsResponse.error || usersResponse.error);
+		return;
+	}
+	const researcherEmails = new Map(
+		usersResponse.data
+			.filter((user) => user.is_researcher && user.research_group_id > 0)
+			.map((user) => [user.research_group_id, user.email]),
+	);
+	researchCodeOptions = researchGroupsResponse.data.map(({ id }) => {
+		const email = researcherEmails.get(id);
+		return {
+			value: String(id),
+			name: email ? `${id} (${email})` : String(id),
+		};
+	});
+}
+
 async function answerSessionAnalysisModalCallback() {
 	stats_out_of_date = true;
 	await refreshMilestoneAnswerSessions();
 }
 
-function handleDataFileChange(event) {
-	const target = event.target;
-	const files = target.files;
-	if (files && files.length > 0) {
-		dataFile = files[0];
-		checkIfBothFilesUploaded();
-	}
+function isCsvFile(file: File | null): file is File {
+	return file?.name.toLowerCase().endsWith(".csv") ?? false;
 }
 
-function handleLabelsFileChange(event) {
-	const target = event.target;
-	const files = target.files;
-	if (files && files.length > 0) {
-		labelsFile = files[0];
-		checkIfBothFilesUploaded();
+function selectedCsvFile(event: Event): File | null {
+	const input = event.currentTarget as HTMLInputElement;
+	const file = input.files?.[0] ?? null;
+	if (!isCsvFile(file)) {
+		input.value = "";
+		return null;
 	}
+	return file;
 }
 
-function checkIfBothFilesUploaded() {
-	if (dataFile && labelsFile) {
-		showConfirmImportModal = true;
-	}
+function handleDataFileChange(event: Event) {
+	dataFile = selectedCsvFile(event);
 }
 
-async function handleImportConfirm() {
-	if (!dataFile || !labelsFile) return;
+function handleLabelsFileChange(event: Event) {
+	labelsFile = selectedCsvFile(event);
+}
 
-	showConfirmImportModal = false;
+async function handleImport() {
+	if (!canImport || !dataFile || !labelsFile) return;
+
 	isUploading = true;
 	showImportResult = false;
-
-	const formData = new FormData();
-	formData.append("additional_data_file", dataFile);
-	formData.append("labels_file", labelsFile);
 
 	try {
 		const { data, error } = await importCsvData({
 			body: {
 				additional_data_file: dataFile,
 				labels_file: labelsFile,
+				research_group_id:
+					useResearchCode && researchCode ? Number(researchCode) : undefined,
 			},
 		});
 
@@ -158,6 +194,8 @@ async function handleImportConfirm() {
 			if (labelsFileInputRef) labelsFileInputRef.value = "";
 			dataFile = null;
 			labelsFile = null;
+			useResearchCode = false;
+			researchCode = "";
 			successfulImport = true;
 			// Refresh data as it might have changed
 			stats_out_of_date = true;
@@ -180,11 +218,12 @@ async function handleImportConfirm() {
 }
 
 function cancelImport() {
-	showConfirmImportModal = false;
 	if (dataFileInputRef) dataFileInputRef.value = "";
 	if (labelsFileInputRef) labelsFileInputRef.value = "";
 	dataFile = null;
 	labelsFile = null;
+	useResearchCode = false;
+	researchCode = "";
 }
 
 function boolToStr(bool: boolean): string {
@@ -196,7 +235,10 @@ function isSuspicious(state: string): boolean {
 }
 
 onMount(async () => {
-	await refreshMilestoneAnswerSessions();
+	await Promise.all([
+		refreshMilestoneAnswerSessions(),
+		refreshResearchGroups(),
+	]);
 });
 </script>
 
@@ -226,7 +268,7 @@ onMount(async () => {
                     <div class="flex items-center space-x-2">
                         <Button
                                 class="btn btn-primary"
-                                disabled={isUploading || dataFile !== null}
+                                disabled={isUploading}
                                 onclick={() => dataFileInputRef?.click()}
                         >
                             <FileImportSolid />
@@ -236,8 +278,8 @@ onMount(async () => {
                                 type="file"
                                 accept=".csv"
                                 bind:this={dataFileInputRef}
-                                on:change={handleDataFileChange}
-                                disabled={isUploading || dataFile !== null}
+                                onchange={handleDataFileChange}
+                                disabled={isUploading}
                                 data-testid="data-csv-file-input"
                                 style="display: none;"
                         />
@@ -255,7 +297,7 @@ onMount(async () => {
                     <div class="flex items-center space-x-2">
                         <Button
                                 class="btn btn-primary"
-                                disabled={isUploading || labelsFile !== null}
+                                disabled={isUploading}
                                 onclick={() => labelsFileInputRef?.click()}
                         >
                             <FileImportSolid />
@@ -265,8 +307,8 @@ onMount(async () => {
                                 type="file"
                                 accept=".csv"
                                 bind:this={labelsFileInputRef}
-                                on:change={handleLabelsFileChange}
-                                disabled={isUploading || labelsFile !== null}
+                                onchange={handleLabelsFileChange}
+                                disabled={isUploading}
                                 data-testid="labels-csv-file-input"
                                 style="display: none;"
                         />
@@ -275,6 +317,35 @@ onMount(async () => {
                         {/if}
                     </div>
                 </div>
+
+                <div>
+                    <Checkbox
+                        bind:checked={useResearchCode}
+                        disabled={researchCodeOptions.length === 0}
+                        onchange={() => { if (!useResearchCode) researchCode = ''; }}
+                    >
+                        {i18n.tr.registration.researchCode}
+                    </Checkbox>
+                    <Label class="mt-2 block">
+                        <Select
+                            items={researchCodeOptions}
+                            bind:value={researchCode}
+                            disabled={!useResearchCode}
+                            placeholder={i18n.tr.registration.selectPlaceholder}
+                            data-testid="import-research-code-select"
+                        />
+                    </Label>
+                </div>
+
+                <Button
+                    class="btn btn-primary"
+                    onclick={handleImport}
+                    disabled={!canImport}
+                    data-testid="import-data-button"
+                >
+                    <FileImportSolid class="me-2 h-5 w-5" />
+                    {i18n.tr.admin.importData}
+                </Button>
 
                 {#if (dataFile && !labelsFile) || (!dataFile && labelsFile)}
                     <Alert color="yellow">
@@ -379,22 +450,4 @@ onMount(async () => {
             <CloseOutline class="me-2 h-5 w-5" data-testid="closeUpdateStatsModal"/> {i18n.tr.admin.close}
         </Button>
     </svelte:fragment>
-</Modal>
-
-<!-- Confirmation Modal for CSV Import -->
-<Modal bind:open={showConfirmImportModal} size="xs" autoclose>
-    <div class="text-center">
-        <ExclamationCircleOutline class="mx-auto mb-4 h-12 w-12 text-gray-400 dark:text-gray-200" />
-        <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-            {i18n.tr.admin.confirmImport}
-            <br />
-            Data: {dataFile?.name || 'No file'}
-            <br />
-            Labels: {labelsFile?.name || 'No file'}
-        </h3>
-        <Button color="blue" class="me-2" onclick={handleImportConfirm} data-testid="confirm-import">
-            {i18n.tr.admin.yes}
-        </Button>
-        <Button color="alternative" onclick={cancelImport}>{i18n.tr.admin.noCancel}</Button>
-    </div>
 </Modal>

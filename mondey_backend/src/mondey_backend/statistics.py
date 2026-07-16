@@ -455,12 +455,22 @@ async def get_user_ids(
     return [user.id for user in users.scalars().all()]
 
 
+async def get_user_research_group_ids(
+    user_session: UserAsyncSessionDep, user_ids: set[int]
+) -> dict[int, int]:
+    if not user_ids:
+        return {}
+    users = await user_session.execute(select(User).where(col(User.id).in_(user_ids)))
+    return {user.id: user.research_group_id for user in users.scalars().all()}
+
+
 def make_datatable(
     milestone_answer_sessions: Sequence[MilestoneAnswerSession],
     milestone_answers: pd.DataFrame,
     user_answers: pd.DataFrame,
     child_answers: pd.DataFrame,
     child_ages: dict[int, int],
+    user_research_group_ids: dict[int, int],
 ) -> pd.DataFrame:
     datatable: list[dict[str, str | int | float]] = []
     for milestone_answer_session in milestone_answer_sessions:
@@ -469,6 +479,9 @@ def make_datatable(
             row = {
                 "child_age": child_age,
                 "answer_session_id": milestone_answer_session.id,
+                "research_group_id": user_research_group_ids.get(
+                    milestone_answer_session.user_id, 0
+                ),
                 "user_id": milestone_answer_session.user_id,
                 "child_id": milestone_answer_session.child_id,
             }
@@ -582,12 +595,18 @@ async def extract_research_data(
     logger.info(f"  - collected {len(user_answers)} user answers")
     child_answers = get_answers(session, "child")
     logger.info(f"  - collected {len(child_answers)} child answers")
+    user_research_group_ids = await get_user_research_group_ids(
+        user_session,
+        {answer_session.user_id for answer_session in milestone_answer_sessions},
+    )
+    logger.info(f"  - collected {len(user_research_group_ids)} researcher codes")
     datatable = make_datatable(
         milestone_answer_sessions,
         milestone_answers,
         user_answers,
         child_answers,
         child_ages,
+        user_research_group_ids,
     )
     logger.info("...done")
     return datatable

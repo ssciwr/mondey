@@ -4,6 +4,7 @@ import pytest
 
 from mondey_backend.models.milestones import MilestoneAgeScore
 from mondey_backend.models.milestones import MilestoneAgeScoreCollection
+from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
 from mondey_backend.statistics import async_update_stats
 from mondey_backend.statistics import make_datatable
@@ -110,5 +111,29 @@ async def test_calculate_milestonegroup_statistics(session, user_session):
 
 
 def test_make_datatable_no_data():
-    df = make_datatable([], pd.DataFrame([]), pd.DataFrame([]), pd.DataFrame([]), {})
+    df = make_datatable(
+        [], pd.DataFrame([]), pd.DataFrame([]), pd.DataFrame([]), {}, {}
+    )
     assert df.shape == (0, 0)
+
+
+def test_make_datatable_includes_research_group_id():
+    answer_session = MilestoneAnswerSession(
+        id=42,
+        child_id=2,
+        user_id=3,
+        expired=False,
+        completed=True,
+        included_in_statistics=True,
+    )
+
+    df = make_datatable(
+        [answer_session],
+        pd.DataFrame([]),
+        pd.DataFrame([]),
+        pd.DataFrame([]),
+        {42: 12},
+        {3: 123451},
+    )
+
+    assert df.loc[42, "research_group_id"] == 123451

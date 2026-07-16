@@ -7,6 +7,7 @@ from typing import Annotated
 import pandas as pd
 from fastapi import APIRouter
 from fastapi import File
+from fastapi import Form
 from fastapi import HTTPException
 from fastapi import UploadFile
 from fastapi import status
@@ -14,6 +15,7 @@ from fastapi import status
 from ...dependencies import SessionDep
 from ...dependencies import UserAsyncSessionDep
 from ...import_data.manager.import_manager import ImportManager
+from ...models.research import ResearchGroup
 
 
 def create_router() -> APIRouter:
@@ -27,6 +29,10 @@ def create_router() -> APIRouter:
             UploadFile, File(description="Additional data CSV file")
         ],
         labels_file: Annotated[UploadFile, File(description="Labels CSV file")] = None,
+        research_group_id: Annotated[
+            int | None,
+            Form(description="Researcher code applied to all imported users"),
+        ] = None,
     ):
         """
         Import CSV data with optional labels file.
@@ -34,10 +40,17 @@ def create_router() -> APIRouter:
         Args:
             additional_data_file: The main data CSV file (required)
             labels_file: Optional labels CSV file
+            research_group_id: Optional researcher code for all imported users
 
         Returns:
             dict: Message and count of imported children
         """
+
+        if research_group_id and session.get(ResearchGroup, research_group_id) is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid researcher code",
+            )
 
         try:
             # Read and validate the additional data CSV
@@ -50,7 +63,10 @@ def create_router() -> APIRouter:
             )
 
             manager = ImportManager(
-                session=session, user_session=user_session, debug=True
+                session=session,
+                user_session=user_session,
+                debug=True,
+                research_group_id=research_group_id,
             )
             manager.data_manager.validate_additional_import_csv(additional_csv_data)
 
