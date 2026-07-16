@@ -5,9 +5,11 @@ import logo_dark from "$lib/assets/mondey_dark.svg";
 import logo_dark_mobile from "$lib/assets/mondey_dark_mobile.svg";
 import logo_light from "$lib/assets/mondey_light.svg";
 import logo_light_mobile from "$lib/assets/mondey_light_mobile.svg";
+import { installSessionExpiryHandler } from "$lib/auth/sessionExpiry";
 import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import Footer from "$lib/components/Navigation/Footer.svelte";
+import SessionReauthenticationModal from "$lib/components/SessionReauthenticationModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
@@ -57,9 +59,13 @@ afterNavigate(() => {
 let { children } = $props();
 let hideDrawer = $state(true);
 
-onMount(async () => {
-	await user.load();
-	await i18n.load();
+onMount(() => {
+	const uninstallSessionExpiryHandler = installSessionExpiryHandler();
+	void (async () => {
+		await user.load();
+		await i18n.load();
+	})();
+	return uninstallSessionExpiryHandler;
 });
 function toggleDrawer() {
 	hideDrawer = !hideDrawer;
@@ -211,9 +217,11 @@ function toggleDrawer() {
 				alertStore.callback();
 			}
 			alertStore.hideAlert();
-		}}>{i18n.tr.misc.understood}</button>
+		}}>{alertStore.buttonText ?? i18n.tr.misc.understood}</button>
 	</svelte:fragment>
 </Modal>
+
+<SessionReauthenticationModal />
 
 
 <Footer/>

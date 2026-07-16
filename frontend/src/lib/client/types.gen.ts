@@ -357,6 +357,10 @@ export type ResearchGroup = {
     id: number;
 };
 
+export type SessionReauthenticationWritable = {
+    password: string;
+};
+
 export type SubmittedMilestoneImagePublic = {
     id: number;
     milestone_id: number;
@@ -2592,6 +2596,31 @@ export type VerifyVerifyResponses = {
 };
 
 export type VerifyVerifyResponse = VerifyVerifyResponses[keyof VerifyVerifyResponses];
+
+export type ReauthenticateSessionData = {
+    body: SessionReauthenticationWritable;
+    path?: never;
+    query?: never;
+    url: '/auth/session/reauthenticate';
+};
+
+export type ReauthenticateSessionErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReauthenticateSessionError = ReauthenticateSessionErrors[keyof ReauthenticateSessionErrors];
+
+export type ReauthenticateSessionResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type ReauthenticateSessionResponse = ReauthenticateSessionResponses[keyof ReauthenticateSessionResponses];
 
 export type GetResearchDataData = {
     body?: never;

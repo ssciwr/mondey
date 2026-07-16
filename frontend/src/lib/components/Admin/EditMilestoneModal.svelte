@@ -32,24 +32,29 @@ const textKeys = ["title", "desc", "obs", "help", "importance"] as Array<
 	keyof typeof i18n.tr.admin & keyof MilestoneText
 >;
 
-async function saveChanges() {
+async function saveChanges(): Promise<boolean> {
 	if (!milestone) {
-		return;
+		return false;
 	}
-	const { data, error } = await updateMilestone({ body: milestone });
+	const { error } = await updateMilestone({ body: milestone });
 	if (error) {
 		console.log(error);
-	} else {
-		if (files && files.length > 0) {
-			for (const file of files) {
-				await uploadMilestoneImage({
-					body: { file: file },
-					path: { milestone_id: milestone.id },
-				});
+		return false;
+	}
+	if (files && files.length > 0) {
+		for (const file of files) {
+			const { error: uploadError } = await uploadMilestoneImage({
+				body: { file: file },
+				path: { milestone_id: milestone.id },
+			});
+			if (uploadError) {
+				console.log(uploadError);
+				return false;
 			}
 		}
-		await milestoneGroups.refresh();
 	}
+	await milestoneGroups.refresh();
+	return true;
 }
 
 async function deleteMilestoneImageAndUpdate() {
@@ -116,7 +121,11 @@ async function deleteMilestoneImageAndUpdate() {
         </div>
     {/if}
     <svelte:fragment slot="footer">
-        <SaveButton onclick={() => {open = false; saveChanges()}}/>
+		<SaveButton onclick={async () => {
+			if (await saveChanges()) {
+				open = false;
+			}
+		}}/>
         <CancelButton onclick={() => {open = false;}}/>
     </svelte:fragment>
 </Modal>

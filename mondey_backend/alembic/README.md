@@ -1,6 +1,6 @@
 # Database migrations
 
-This directory contains the [Alembic](https://alembic.sqlalchemy.org/en/latest/) migrations for the Mondey database.
+This directory contains the [Alembic](https://alembic.sqlalchemy.org/en/latest/) migrations for both the Mondey and users databases. Each revision contains separate `upgrade_mondey` and `upgrade_users` operations, and `alembic upgrade head` applies the revision to both databases.
 Below are instructions for applying migrations manually, and for creating a new migration after making changes to the database models.
 
 ## Production
@@ -36,10 +36,4 @@ You can then apply the migration locally using the `alembic upgrade head` comman
 
 Note: If you add a new model you will also need to add an import statement for it in the [env.py](env.py) file to ensure Alembic is aware of the new model when autogenerating migrations.
 
-### Reverting a migration
-
-To revert the last applied migration in your database, you can use the following command:
-
-```
-alembic downgrade -1
-```
+Migrations in this project are forward-only; downgrade operations are not generated or supported.

@@ -287,6 +287,19 @@ export const translationIds = {
 	},
 	login: {
 		heading: "Einloggen",
+		sessionExpiredTitle: "Sitzung abgelaufen",
+		sessionExpiredMessage:
+			"Ihre Sitzung ist abgelaufen. Ihre letzten Änderungen wurden nicht gespeichert. Bitte melden Sie sich erneut an.",
+		sessionExpiringTitle: "Sitzung läuft bald ab",
+		sessionExpiringMessage:
+			"Ihre Sitzung läuft bald wegen Inaktivität ab. Möchten Sie angemeldet bleiben?",
+		sessionAbsoluteExpiringMessage:
+			"Ihre Sitzung läuft bald ab. Bitte geben Sie Ihr Passwort erneut ein, um angemeldet zu bleiben.",
+		reauthenticate: "Sitzung verlängern",
+		reauthenticationError:
+			"Die Sitzung konnte nicht verlängert werden. Bitte versuchen Sie es erneut.",
+		incorrectPassword: "Das eingegebene Passwort ist nicht korrekt.",
+		staySignedIn: "Angemeldet bleiben",
 		alreadyLoggedInMessage:
 			"Sie sind bereits angemeldet. Melden sie sich zuerst ab um den Account zu wechseln.",
 		alertMessageTitle: "Fehler",
