@@ -5,13 +5,17 @@ import pytest
 from dateutil.relativedelta import relativedelta
 from fastapi.testclient import TestClient
 from PIL import Image
+from sqlmodel import Session
 from sqlmodel import col
 from sqlmodel import select
 
+from mondey_backend.models.milestones import Milestone
+from mondey_backend.models.milestones import MilestoneAgeScoreCollection
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import SuspiciousState
 from mondey_backend.models.questions import ChildAnswer
+from mondey_backend.routers.utils import MilestoneAgeCurve
 from mondey_backend.routers.utils import count_milestone_answers_for_milestone
 
 
@@ -297,9 +301,11 @@ def test_get_milestone_age_scores(admin_client: TestClient):
     response = admin_client.get("/admin/milestone-age-scores/1")
     assert response.status_code == 200
 
-    assert response.json()["expected_age"] == 8
-    assert response.json()["relevant_age_min"] == 4
-    assert response.json()["relevant_age_max"] == 12
+    # this milestone has no fitted age curve, so it has no automatic age estimate
+    assert response.json()["curve_fit_ok"] is False
+    assert response.json()["expected_age"] is None
+    assert response.json()["relevant_age_min"] is None
+    assert response.json()["relevant_age_max"] is None
 
     assert response.json()["scores"][7]["c0"] == 0
     assert response.json()["scores"][7]["c1"] == 0
@@ -629,3 +635,80 @@ def test_get_milestone_answer_session_analysis_no_answer_session(
         admin_client.get("/admin/milestone-answer-session-analysis/348").status_code
         == 404
     )
+
+
+def test_recalculate_milestone_age_scores(admin_client: TestClient, session: Session):
+    # milestone 1 has a fitted age curve, milestone 2 does not
+    collection = session.get(MilestoneAgeScoreCollection, 1)
+    assert collection is not None
+    curve = MilestoneAgeCurve(midpoint=20.0, steepness=0.3, n_answers=500, fit_ok=True)
+    collection.curve_midpoint = curve.midpoint
+    collection.curve_steepness = curve.steepness
+    collection.curve_fit_ok = True
+    collection.curve_n_answers = curve.n_answers
+    session.add(collection)
+    session.commit()
+
+    params = {
+        "mean_answer_achieved": 2.4,
+        "mean_answer_relevant_min": 0.3,
+        "mean_answer_relevant_max": 2.7,
+        # the margin only widens the range, and is covered by the unit tests
+        "min_relevant_age_margin_months": 0,
+    }
+    response = admin_client.post("/admin/milestone-age-scores/", json=params)
+    assert response.status_code == 200
+    collections = {c["milestone_id"]: c for c in response.json()}
+
+    # the ages of the fitted milestone are the ages at the requested mean answers
+    assert collections[1]["expected_age"] == round(curve.age_at_mean_answer(2.4))
+    assert collections[1]["relevant_age_min"] == round(curve.age_at_mean_answer(0.3))
+    assert collections[1]["relevant_age_max"] == round(curve.age_at_mean_answer(2.7))
+    # the milestone without a curve has no automatic estimate
+    assert collections[2]["expected_age"] is None
+    assert collections[2]["relevant_age_min"] is None
+    assert collections[2]["relevant_age_max"] is None
+
+    # the parameters are saved, and the same ages are derived on a subsequent read
+    settings = admin_client.get("/admin/settings/").json()
+    assert settings["mean_answer_achieved"] == 2.4
+    assert settings["min_relevant_age_margin_months"] == 0
+    stored = admin_client.get("/admin/milestone-age-scores/1").json()
+    assert stored["expected_age"] == collections[1]["expected_age"]
+    assert stored["relevant_age_min"] == collections[1]["relevant_age_min"]
+    assert stored["relevant_age_max"] == collections[1]["relevant_age_max"]
+
+    # the ages of the milestones themselves are left alone: applying them is a separate
+    # step, so recalculating is only a preview
+    milestone = session.get(Milestone, 1)
+    assert milestone is not None
+    assert milestone.expected_age_months == 6
+    assert milestone.relevant_age_min == 2
+    assert milestone.relevant_age_max == 10
+
+    # raising the achieved threshold raises the expected age of the fitted milestone
+    params["mean_answer_achieved"] = 2.6
+    response = admin_client.post("/admin/milestone-age-scores/", json=params)
+    assert response.status_code == 200
+    collections = {c["milestone_id"]: c for c in response.json()}
+    assert collections[1]["expected_age"] == round(curve.age_at_mean_answer(2.6))
+    assert admin_client.get("/admin/settings/").json()["mean_answer_achieved"] == 2.6
+
+
+def test_recalculate_milestone_age_scores_rejects_invalid_params(
+    admin_client: TestClient,
+):
+    # the achieved threshold has to lie inside the relevant range, so that the expected
+    # age lies inside the age range the milestone is asked about in
+    params = {
+        "mean_answer_achieved": 2.9,
+        "mean_answer_relevant_min": 0.3,
+        "mean_answer_relevant_max": 2.7,
+        "min_relevant_age_margin_months": 4,
+    }
+    response = admin_client.post("/admin/milestone-age-scores/", json=params)
+    assert response.status_code == 422
+    # the thresholds are mean answers, which have to stay inside (0, 3)
+    for invalid in ({"mean_answer_achieved": 3.0}, {"mean_answer_relevant_min": 0.0}):
+        response = admin_client.post("/admin/milestone-age-scores/", json=invalid)
+        assert response.status_code == 422

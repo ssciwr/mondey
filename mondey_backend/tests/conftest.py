@@ -426,14 +426,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         )
 
         # add MilestoneAgeScoreCollection for milestone 1
-        session.add(
-            MilestoneAgeScoreCollection(
-                milestone_id=1,
-                expected_age=8,
-                relevant_age_min=4,
-                relevant_age_max=12,
-            )
-        )
+        session.add(MilestoneAgeScoreCollection(milestone_id=1))
         for age in range(0, settings.app_settings.MAX_CHILD_AGE_MONTHS + 1):
             session.add(
                 MilestoneAgeScore(
@@ -447,14 +440,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             )
 
         # add MilestoneAgeScoreCollection for milestone 2
-        session.add(
-            MilestoneAgeScoreCollection(
-                milestone_id=2,
-                expected_age=8,
-                relevant_age_min=4,
-                relevant_age_max=12,
-            )
-        )
+        session.add(MilestoneAgeScoreCollection(milestone_id=2))
         for age in range(0, settings.app_settings.MAX_CHILD_AGE_MONTHS + 1):
             session.add(
                 MilestoneAgeScore(

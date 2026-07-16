@@ -36,6 +36,7 @@ class AppSettings(BaseSettings):
     # How long an account activation link stays valid. Long enough that a user
     # who doesn't read their email straight away can still use it.
     VERIFICATION_TOKEN_LIFETIME_SECONDS: int = 24 * 3600
+    MILESTONE_MIN_ANSWERS_FOR_CURVE_FIT: int = 100
     SESSION_IDLE_TIMEOUT_SECONDS: int = 3600
     SESSION_ABSOLUTE_TIMEOUT_SECONDS: int = 8 * 3600
     SESSION_TOUCH_INTERVAL_SECONDS: int = 300

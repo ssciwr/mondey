@@ -13,6 +13,7 @@ dependencies = [
     "fastapi[standard]",
     "fastapi-users[sqlalchemy]",
     "numpy",
+    "scipy",
     "uvicorn",
     "sqlmodel",
     "aiosqlite",

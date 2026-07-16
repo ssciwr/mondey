@@ -221,6 +221,30 @@ export const translationIds = {
 		monthsForChildrenAged: "Monate für Kinder im Alter",
 		recalculateExpectedAge: "Voraussichtliches Alter neu berechnen",
 		newExpectedAge: "Neues Voraussichtliches Alter",
+		ageCurveParams: "Ableitung der Altersangaben aus der Kurve",
+		ageCurveParamsPlot: "Bedeutung der Parameter (Beispiel)",
+		ageCurveParamsPlotDescription:
+			"Beispielhafte logistische Kurve mit den Schwellenwerten für „Erreicht“, Unter- und Obergrenze sowie dem daraus abgeleiteten relevanten Altersbereich",
+		ageCurveParamsPlotUnavailable:
+			"Die Darstellung erscheint, sobald die Parameter gültig sind",
+		sampleAgeCurve: "Beispielkurve",
+		relevantAgeRange: "Relevanter Altersbereich",
+		marginExtension: "Durch Mindestabstand erweitert",
+		meanAnswerAchieved: "Erreicht (Ø Antwort)",
+		meanAnswerRelevantMin: "Untergrenze (Ø Antwort)",
+		meanAnswerRelevantMax: "Obergrenze (Ø Antwort)",
+		meanAnswerShort: "Ø",
+		minRelevantAgeMargin: "Mindestabstand zum Erwartungsalter (Monate)",
+		noCurveFit: "Kein Fit",
+		answersCount: "Antworten",
+		invalidMeanAnswer:
+			"Die Ø Antworten müssen größer als 0 und kleiner als 3 sein",
+		invalidRelevantOrder:
+			"Die Ø Antwort für die Untergrenze muss kleiner als die für die Obergrenze sein",
+		invalidAgeCurveParams:
+			"Die Ø Antwort für „Erreicht“ muss zwischen der Unter- und der Obergrenze liegen",
+		invalidAgeMargin:
+			"Der Mindestabstand muss eine ganze Zahl zwischen 0 und 72 Monaten sein",
 		editUserQuestionTitle: "Frage an Benutzer editieren",
 		expectedAgeData: "Voraussichtliches Alter Daten",
 		maxFileSizeIs: "Die maximale Dateigröße für ein Bild beträgt",

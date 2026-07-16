@@ -11,8 +11,16 @@ import { Card, Toggle } from "flowbite-svelte";
 import { CheckCircleOutline } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 
+// the admin settings this component controls: the rest are edited elsewhere
+type FeedbackSettings = Pick<
+	AdminSettingsPublic,
+	| "hide_milestone_feedback"
+	| "hide_milestone_group_feedback"
+	| "hide_all_feedback"
+>;
+
 // State for admin settings
-let adminSettings: AdminSettingsPublic = $state({
+let adminSettings: FeedbackSettings = $state({
 	hide_milestone_feedback: false,
 	hide_milestone_group_feedback: false,
 	hide_all_feedback: false,
@@ -45,10 +53,7 @@ async function loadAdminSettings() {
 	}
 }
 
-async function updateSettings(
-	field: keyof AdminSettingsPublic,
-	value: boolean,
-) {
+async function updateSettings(field: keyof FeedbackSettings, value: boolean) {
 	try {
 		error = null;
 		showSuccessMessage = false;

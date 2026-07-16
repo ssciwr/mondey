@@ -30,6 +30,22 @@ export type AdminSettingsPublic = {
      * Hide All Feedback
      */
     hide_all_feedback: boolean;
+    /**
+     * Mean Answer Achieved
+     */
+    mean_answer_achieved: number;
+    /**
+     * Mean Answer Relevant Min
+     */
+    mean_answer_relevant_min: number;
+    /**
+     * Mean Answer Relevant Max
+     */
+    mean_answer_relevant_max: number;
+    /**
+     * Min Relevant Age Margin Months
+     */
+    min_relevant_age_margin_months: number;
 };
 
 /**
@@ -707,6 +723,34 @@ export type MilestoneAdmin = {
 };
 
 /**
+ * MilestoneAgeCurveParams
+ *
+ * How a milestone's expected age and relevant age range are derived from its fitted
+ * age curve, see `get_milestone_ages_from_curve`. The three thresholds are mean
+ * answers on the same 0-3 scale as the curve itself; each is converted to the age at
+ * which the curve reaches it. The margin only widens the relevant age range at the
+ * end, and does not affect the expected age.
+ */
+export type MilestoneAgeCurveParams = {
+    /**
+     * Mean Answer Achieved
+     */
+    mean_answer_achieved?: number;
+    /**
+     * Mean Answer Relevant Min
+     */
+    mean_answer_relevant_min?: number;
+    /**
+     * Mean Answer Relevant Max
+     */
+    mean_answer_relevant_max?: number;
+    /**
+     * Min Relevant Age Margin Months
+     */
+    min_relevant_age_margin_months?: number;
+};
+
+/**
  * MilestoneAgeScore
  */
 export type MilestoneAgeScore = {
@@ -747,15 +791,31 @@ export type MilestoneAgeScoreCollectionPublic = {
     /**
      * Expected Age
      */
-    expected_age: number;
+    expected_age: number | null;
     /**
      * Relevant Age Min
      */
-    relevant_age_min: number;
+    relevant_age_min: number | null;
     /**
      * Relevant Age Max
      */
-    relevant_age_max: number;
+    relevant_age_max: number | null;
+    /**
+     * Curve Midpoint
+     */
+    curve_midpoint: number;
+    /**
+     * Curve Steepness
+     */
+    curve_steepness: number;
+    /**
+     * Curve Fit Ok
+     */
+    curve_fit_ok: boolean;
+    /**
+     * Curve N Answers
+     */
+    curve_n_answers: number;
     /**
      * Scores
      */
@@ -2308,6 +2368,33 @@ export type GetMilestoneAgeScoresResponses = {
 };
 
 export type GetMilestoneAgeScoresResponse = GetMilestoneAgeScoresResponses[keyof GetMilestoneAgeScoresResponses];
+
+export type RecalculateMilestoneAgeScoresData = {
+    body: MilestoneAgeCurveParams;
+    path?: never;
+    query?: never;
+    url: '/admin/milestone-age-scores/';
+};
+
+export type RecalculateMilestoneAgeScoresErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RecalculateMilestoneAgeScoresError = RecalculateMilestoneAgeScoresErrors[keyof RecalculateMilestoneAgeScoresErrors];
+
+export type RecalculateMilestoneAgeScoresResponses = {
+    /**
+     * Response Recalculate Milestone Age Scores
+     *
+     * Successful Response
+     */
+    200: Array<MilestoneAgeScoreCollectionPublic>;
+};
+
+export type RecalculateMilestoneAgeScoresResponse = RecalculateMilestoneAgeScoresResponses[keyof RecalculateMilestoneAgeScoresResponses];
 
 export type AdminUpdateStatsData = {
     body?: never;
