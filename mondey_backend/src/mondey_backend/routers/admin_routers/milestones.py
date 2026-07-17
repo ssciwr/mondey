@@ -297,6 +297,11 @@ def create_router() -> APIRouter:
         milestone_answer_session = get(
             session, MilestoneAnswerSession, answer_session_id
         )
-        return analyse_answer_session(session, milestone_answer_session)
+        return analyse_answer_session(
+            session,
+            milestone_answer_session,
+            include_child_answer_flags=True,
+            include_display_metadata=True,
+        )
 
     return router

@@ -272,15 +272,28 @@ class MilestoneAnswerSessionPublic(SQLModel):
 
 class MilestoneAnswerAnalysis(BaseModel):
     milestone_id: int
+    milestone_title: dict[str, str]
+    milestone_order: int
+    milestone_group_id: int
+    milestone_group_name: dict[str, str]
+    milestone_group_order: int
     answer: int
     avg_answer: float
     stddev_answer: float
+
+
+class ChildAnswerAnalysisFlag(BaseModel):
+    question_id: int
+    question: dict[str, str]
+    answer: str
+    additional_answer: str | None
 
 
 class MilestoneAnswerSessionAnalysis(BaseModel):
     child_age: int
     rms: float
     answers: list[MilestoneAnswerAnalysis]
+    child_answer_flags: list[ChildAnswerAnalysisFlag]
 
 
 class StatisticsUpdateResult(BaseModel):

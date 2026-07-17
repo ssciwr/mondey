@@ -26,6 +26,10 @@ let {
 
 let analysis = $state(null as null | MilestoneAnswerSessionAnalysis);
 
+function childQuestionText(question: Record<string, string>): string {
+	return question[i18n.locale];
+}
+
 async function set_suspicious(suspicious: boolean) {
 	if (!answer_session_id) {
 		return;
@@ -78,6 +82,21 @@ onMount(async () => {
                 </div>
             </div>
         </Alert>
+		{#if analysis.child_answer_flags.length > 0}
+			<Alert color="red">
+				<strong>{i18n.tr.admin.relevantChildInformation}</strong>
+				<ul class="mt-2 list-disc space-y-1 ps-5">
+					{#each analysis.child_answer_flags as flag (flag.question_id)}
+						<li>
+							<strong>{childQuestionText(flag.question)}</strong>: {flag.answer}
+							{#if flag.additional_answer?.trim()}
+								– {flag.additional_answer}
+							{/if}
+						</li>
+					{/each}
+				</ul>
+			</Alert>
+		{/if}
         <PlotSessionAnalysis data={analysis.answers}/>
     {/if}
     <svelte:fragment slot="footer">
