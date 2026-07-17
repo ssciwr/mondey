@@ -150,7 +150,7 @@ services:
         - BACKUP_KEEP_MONTHS=6
         - HEALTHCHECK_PORT=8080
   watchtower:
-    image: containrrr/watchtower
+    image: nickfedor/watchtower
     restart: always
     command:
       - --cleanup=true
