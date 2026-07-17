@@ -365,6 +365,15 @@ export type SessionReauthenticationWritable = {
     password: string;
 };
 
+/**
+ * Result of a statistics recalculation, used to build a localized summary in the UI.
+ */
+export type StatisticsUpdateResult = {
+    answer_sessions: number;
+    answers: number;
+    runtime_seconds: number;
+};
+
 export type SubmittedMilestoneImagePublic = {
     id: number;
     milestone_id: number;
@@ -1317,7 +1326,7 @@ export type AdminUpdateStatsResponses = {
     /**
      * Successful Response
      */
-    200: string;
+    200: StatisticsUpdateResult;
 };
 
 export type AdminUpdateStatsResponse = AdminUpdateStatsResponses[keyof AdminUpdateStatsResponses];

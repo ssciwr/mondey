@@ -2,7 +2,6 @@
 
 <script lang="ts">
 import {
-	adminUpdateStats,
 	getMilestoneAnswerSessions,
 	getResearchGroups,
 	getUsers,
@@ -10,6 +9,7 @@ import {
 } from "$lib/client/sdk.gen";
 import type { MilestoneAnswerSession } from "$lib/client/types.gen";
 import AnswerSessionAnalysisModal from "$lib/components/Admin/AnswerSessionAnalysisModal.svelte";
+import RecalculateStatsModal from "$lib/components/Admin/RecalculateStatsModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import {
 	Alert,
@@ -31,7 +31,6 @@ import {
 import {
 	ChartPieOutline,
 	CheckCircleOutline,
-	CloseOutline,
 	ExclamationCircleOutline,
 	FileImportSolid,
 	RefreshOutline,
@@ -44,7 +43,6 @@ let show_analysis_modal = $state(false);
 let show_suspicious_only = $state(true);
 let show_completed_only = $state(true);
 let show_update_stats_modal = $state(false);
-let update_stats_result = $state("");
 let stats_out_of_date = $state(false);
 
 // CSV Import related states
@@ -71,18 +69,9 @@ let canImport = $derived(
 		!isUploading,
 );
 
-async function doStatsUpdate() {
-	show_update_stats_modal = true;
-	update_stats_result = "";
-	const { data, error } = await adminUpdateStats();
-	if (error || !data) {
-		console.log(error);
-		update_stats_result = i18n.tr.admin.error;
-	} else {
-		update_stats_result = data;
-		stats_out_of_date = false;
-		await refreshMilestoneAnswerSessions();
-	}
+async function onStatsRecalculated() {
+	stats_out_of_date = false;
+	await refreshMilestoneAnswerSessions();
 }
 
 async function refreshMilestoneAnswerSessions() {
@@ -380,7 +369,7 @@ onMount(async () => {
     <Alert color="red">{i18n.tr.admin.statisticsNeedUpdating}</Alert>
 {/if}
 <div class="grid grid-cols-2 justify-items-stretch my-2">
-    <Button onclick={() => {doStatsUpdate()}} data-testid="fullStatsUpdate">
+    <Button onclick={() => {show_update_stats_modal = true;}} data-testid="fullStatsUpdate">
         <RefreshOutline class="me-2 h-5 w-5"/>{i18n.tr.admin.recalculateAllStatistics}
     </Button>
 </div>
@@ -439,15 +428,4 @@ onMount(async () => {
                                 callback={answerSessionAnalysisModalCallback}/>
 {/key}
 
-<Modal bind:open={show_update_stats_modal} size="md" title={i18n.tr.admin.updateStatistics}>
-    {#if !update_stats_result}
-        <Spinner class="me-2 h-5 w-5"/>{i18n.tr.admin.statisticsAreBeingUpdated}
-    {:else}
-        {update_stats_result}
-    {/if}
-    <svelte:fragment slot="footer">
-        <Button color="alternative" onclick={()=>{show_update_stats_modal=false}} disabled={!update_stats_result}>
-            <CloseOutline class="me-2 h-5 w-5" data-testid="closeUpdateStatsModal"/> {i18n.tr.admin.close}
-        </Button>
-    </svelte:fragment>
-</Modal>
+<RecalculateStatsModal bind:open={show_update_stats_modal} oncompleted={onStatsRecalculated}/>

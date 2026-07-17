@@ -5,6 +5,7 @@ import pytest
 from mondey_backend.models.milestones import MilestoneAgeScore
 from mondey_backend.models.milestones import MilestoneAgeScoreCollection
 from mondey_backend.models.milestones import MilestoneAnswerSession
+from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
 from mondey_backend.statistics import async_update_stats
 from mondey_backend.statistics import make_datatable
@@ -108,6 +109,27 @@ async def test_calculate_milestonegroup_statistics(session, user_session):
     assert mg.scores[8].count == len(updated_answers)
     assert np.isclose(mg.scores[8].mean, np.mean(updated_answers))
     assert mg.scores[8].stddev == pytest.approx(np.std(updated_answers, ddof=1))
+
+
+@pytest.mark.asyncio
+async def test_calculate_statistics_with_empty_milestone_group(session, user_session):
+    # a milestone group with no milestones must not break the statistics update:
+    # previously the group's average score was computed as 0/0 = nan, which then
+    # failed to be written to the database
+    session.add(MilestoneGroup(id=99, order=99))
+    session.commit()
+
+    result = await async_update_stats(session, user_session)
+    assert result.answer_sessions > 0
+
+    mg = session.get(MilestoneGroupAgeScoreCollection, 99)
+    assert mg is not None
+    for score in mg.scores:
+        assert score.count == 0
+        assert not np.isnan(score.sum_score)
+        assert not np.isnan(score.sum_squaredscore)
+        assert score.sum_score == 0.0
+        assert score.sum_squaredscore == 0.0
 
 
 def test_make_datatable_no_data():

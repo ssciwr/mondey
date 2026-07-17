@@ -125,7 +125,13 @@ export const translationIds = {
 		milestone: "Meilenstein",
 		milestoneId: "Meilenstein-ID",
 		milestones: "Meilensteine",
+		answers: "Antworten",
+		milestoneGroup: "Meilensteingruppe",
 		milestoneGroups: "Meilensteingruppen",
+		milestoneGroupChangedRecalculatePrompt:
+			"Der Meilenstein wurde in eine andere Gruppe verschoben. Die Statistiken sollten neu berechnet werden, damit die Gruppenstatistiken die neue Zuordnung widerspiegeln. Jetzt neu berechnen?",
+		recalculateNow: "Jetzt neu berechnen",
+		recalculateLater: "Später",
 		translations: "Übersetzungen",
 		missingTranslations: "Fehlende Übersetzungen!",
 		users: "Benutzer",
@@ -197,6 +203,8 @@ export const translationIds = {
 			"Effektivwert-Differenz zum Durchschnittspunktzahl",
 		analyze: "analysieren",
 		milestoneAnswerSession: "Meilenstein-Antwortsitzung",
+		milestoneAnswerSessions: "Meilenstein-Antwortsitzungen",
+		seconds: "Sekunden",
 		expectedAge: "Voraussichtliches Alter",
 		minRelevantAge: "Mindestalter",
 		maxRelevantAge: "Höchstalter",
@@ -228,6 +236,7 @@ export const translationIds = {
 		updateStatistics: "Statistiken aktualisieren",
 		recalculateAllStatistics: "alle Statistiken neu berechnen",
 		statisticsAreBeingUpdated: "Statistiken werden aktualisiert...",
+		statisticsRecalculated: "Statistiken neu berechnet.",
 		statisticsNeedUpdating:
 			"Statistiken müssen aktualisiert werden. Klicken Sie dazu auf „alle Statistiken neu berechnen“.",
 		suspiciousSessionNote:
