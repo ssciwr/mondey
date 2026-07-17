@@ -1,14 +1,39 @@
 import numpy as np
 import pandas as pd
 import pytest
+from sqlalchemy import event
 
 from mondey_backend.models.milestones import MilestoneAgeScore
 from mondey_backend.models.milestones import MilestoneAgeScoreCollection
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
+from mondey_backend.statistics import analyse_answer_session
 from mondey_backend.statistics import async_update_stats
 from mondey_backend.statistics import make_datatable
+
+
+def test_rms_analysis_does_not_load_display_metadata(session):
+    answer_session = session.get(MilestoneAnswerSession, 2)
+    assert answer_session is not None
+    session.expire_all()
+    statements: list[str] = []
+
+    def record_statement(_conn, _cursor, statement, _parameters, _context, _many):
+        statements.append(statement.lower())
+
+    engine = session.get_bind()
+    event.listen(engine, "before_cursor_execute", record_statement)
+    try:
+        analysis = analyse_answer_session(session, answer_session)
+    finally:
+        event.remove(engine, "before_cursor_execute", record_statement)
+
+    assert analysis.rms == pytest.approx(np.sqrt(0.5))
+    assert analysis.answers == []
+    assert not any("from milestone " in statement for statement in statements)
+    assert not any("from milestonegroup" in statement for statement in statements)
+    assert not any("from milestonetext" in statement for statement in statements)
 
 
 @pytest.mark.parametrize("n", [2, 3, 10, 100, 1000, 99999])

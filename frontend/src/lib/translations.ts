@@ -141,6 +141,7 @@ export const translationIds = {
 		questions: "Fragen",
 		data: "Daten",
 		childAgeMonths: "Alter des Kindes (Monate)",
+		relevantChildInformation: "Relevante Informationen zum Kind:",
 		selectOptions: "Optionen",
 		actions: "Aktionen",
 		selectPlaceholder: "Erstens,Zweitens,Drittens;",

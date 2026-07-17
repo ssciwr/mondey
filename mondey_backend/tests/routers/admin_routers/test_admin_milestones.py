@@ -11,6 +11,7 @@ from sqlmodel import select
 from mondey_backend.models.milestones import MilestoneAnswer
 from mondey_backend.models.milestones import MilestoneAnswerSession
 from mondey_backend.models.milestones import SuspiciousState
+from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.routers.utils import count_milestone_answers_for_milestone
 
 
@@ -584,6 +585,11 @@ def test_get_milestone_answer_session_analysis(admin_client: TestClient):
     analysis = response.json()
     assert len(analysis["answers"]) == 2
     assert analysis["answers"][0]["milestone_id"] == 1
+    assert analysis["answers"][0]["milestone_title"]["de"] == "m1_de_t"
+    assert analysis["answers"][0]["milestone_order"] == 13
+    assert analysis["answers"][0]["milestone_group_id"] == 1
+    assert analysis["answers"][0]["milestone_group_name"]["de"] == "g1_de_t"
+    assert analysis["answers"][0]["milestone_group_order"] == 2
     assert analysis["answers"][0]["answer"] == 1
     assert analysis["answers"][0]["avg_answer"] == pytest.approx(1.0)
     assert analysis["answers"][1]["milestone_id"] == 2
@@ -592,6 +598,31 @@ def test_get_milestone_answer_session_analysis(admin_client: TestClient):
     # rms = sqrt(((1-1)^2 + (0-0)^2) / 2) = 0
     assert analysis["rms"] == pytest.approx(0.0)
     assert analysis["child_age"] == 8
+    assert analysis["child_answer_flags"] == []
+
+
+def test_get_milestone_answer_session_analysis_includes_affirmative_child_answers(
+    session, admin_client: TestClient
+):
+    child_answer = session.get(ChildAnswer, (1, 1))
+    assert child_answer is not None
+    child_answer.answer = "Ja"
+    child_answer.additional_answer = "Benutzt einen Rollstuhl"
+    session.add(child_answer)
+    session.commit()
+
+    response = admin_client.get("/admin/milestone-answer-session-analysis/1")
+
+    assert response.status_code == 200
+    flags = response.json()["child_answer_flags"]
+    assert flags == [
+        {
+            "question_id": 1,
+            "question": {"de": "was?", "en": "what?", "fr": "french..."},
+            "answer": "Ja",
+            "additional_answer": "Benutzt einen Rollstuhl",
+        }
+    ]
 
 
 def test_get_milestone_answer_session_analysis_no_stats(admin_client: TestClient):
@@ -610,6 +641,9 @@ def test_get_milestone_answer_session_analysis_no_stats(admin_client: TestClient
     analysis = response.json()
     assert len(analysis["answers"]) == 1
     assert analysis["answers"][0]["milestone_id"] == 5
+    assert analysis["answers"][0]["milestone_title"]["fr"] == "m5_fr_t"
+    assert analysis["answers"][0]["milestone_group_id"] == 2
+    assert analysis["answers"][0]["milestone_group_name"]["en"] == "g1_en_t"
     assert analysis["answers"][0]["answer"] == 2
     assert analysis["answers"][0]["avg_answer"] == pytest.approx(2.0)
     assert analysis["rms"] == pytest.approx(0.0)

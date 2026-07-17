@@ -15,6 +15,7 @@ from mondey_backend.dependencies import SessionDep
 from mondey_backend.dependencies import UserAsyncSessionDep
 from mondey_backend.logging import logger
 from mondey_backend.models.children import Child
+from mondey_backend.models.milestones import ChildAnswerAnalysisFlag
 from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneAgeScore
 from mondey_backend.models.milestones import MilestoneAgeScoreCollection
@@ -50,13 +51,39 @@ async def get_test_account_user_ids(user_session: UserAsyncSessionDep) -> list[i
 
 
 def analyse_answer_session(
-    session: SessionDep, milestone_answer_session: MilestoneAnswerSession
+    session: SessionDep,
+    milestone_answer_session: MilestoneAnswerSession,
+    include_child_answer_flags: bool = False,
+    include_display_metadata: bool = False,
 ) -> MilestoneAnswerSessionAnalysis:
-    analysis = MilestoneAnswerSessionAnalysis(rms=0, child_age=0, answers=[])
+    analysis = MilestoneAnswerSessionAnalysis(
+        rms=0, child_age=0, answers=[], child_answer_flags=[]
+    )
     child = session.get(Child, milestone_answer_session.child_id)
     if child is None:
         logger.error(f"Child {milestone_answer_session.child_id} does not exist")
         return analysis
+    if include_child_answer_flags:
+        affirmative_child_answers = session.exec(
+            select(ChildAnswer)
+            .where(col(ChildAnswer.child_id) == milestone_answer_session.child_id)
+            .where(col(ChildAnswer.answer) == "Ja")
+            .order_by(col(ChildAnswer.question_id))
+        ).all()
+        for child_answer in affirmative_child_answers:
+            question = child_answer.question
+            analysis.child_answer_flags.append(
+                ChildAnswerAnalysisFlag(
+                    question_id=child_answer.question_id,
+                    question={
+                        lang_id: question_text.question
+                        for lang_id, question_text in question.text.items()
+                    },
+                    answer=child_answer.answer,
+                    additional_answer=child_answer.additional_answer,
+                )
+            )
+
     child_age = get_child_age_in_months(child, milestone_answer_session.created_at)
     if child_age > app_settings.MAX_CHILD_AGE_MONTHS:
         logger.warning(
@@ -83,14 +110,38 @@ def analyse_answer_session(
                 f"    - no statistics available for milestone {milestone_id} - skipping"
             )
             continue
-        analysis.answers.append(
-            MilestoneAnswerAnalysis(
-                milestone_id=milestone_id,
-                answer=answer.answer,
-                avg_answer=score.mean,
-                stddev_answer=score.stddev,
+        if include_display_metadata:
+            milestone = session.get(Milestone, milestone_id)
+            if milestone is None:
+                logger.warning(
+                    f"    - milestone {milestone_id} or its group does not exist - skipping"
+                )
+                continue
+            milestone_group = milestone.group
+            if milestone_group is None or milestone_group.id is None:
+                logger.warning(
+                    f"    - milestone {milestone_id} or its group does not exist - skipping"
+                )
+                continue
+            analysis.answers.append(
+                MilestoneAnswerAnalysis(
+                    milestone_id=milestone_id,
+                    milestone_title={
+                        lang_id: milestone_text.title
+                        for lang_id, milestone_text in milestone.text.items()
+                    },
+                    milestone_order=milestone.order,
+                    milestone_group_id=milestone_group.id,
+                    milestone_group_name={
+                        lang_id: group_text.title
+                        for lang_id, group_text in milestone_group.text.items()
+                    },
+                    milestone_group_order=milestone_group.order,
+                    answer=answer.answer,
+                    avg_answer=score.mean,
+                    stddev_answer=score.stddev,
+                )
             )
-        )
         diff += np.power(score.mean - answer.answer, 2)
         count += 1
     if count == 0:

@@ -88,6 +88,15 @@ export type CalendarEventUpdate = {
     event_date?: string | null;
 };
 
+export type ChildAnswerAnalysisFlag = {
+    question_id: number;
+    question: {
+        [key: string]: string;
+    };
+    answer: string;
+    additional_answer: string | null;
+};
+
 export type ChildAnswerPublic = {
     answer: string;
     additional_answer: string | null;
@@ -245,6 +254,15 @@ export type MilestoneAgeScoreCollectionPublic = {
 
 export type MilestoneAnswerAnalysis = {
     milestone_id: number;
+    milestone_title: {
+        [key: string]: string;
+    };
+    milestone_order: number;
+    milestone_group_id: number;
+    milestone_group_name: {
+        [key: string]: string;
+    };
+    milestone_group_order: number;
     answer: number;
     avg_answer: number;
     stddev_answer: number;
@@ -275,6 +293,7 @@ export type MilestoneAnswerSessionAnalysis = {
     child_age: number;
     rms: number;
     answers: Array<MilestoneAnswerAnalysis>;
+    child_answer_flags: Array<ChildAnswerAnalysisFlag>;
 };
 
 export type MilestoneAnswerSessionPublic = {
