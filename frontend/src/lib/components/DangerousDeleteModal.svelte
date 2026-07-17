@@ -7,7 +7,16 @@ import { alertStore } from "$lib/stores/alertStore.svelte";
 import { Button, Input, Label, Modal, Spinner } from "flowbite-svelte";
 import { CheckCircleOutline } from "flowbite-svelte-icons";
 import ExclamationCircleOutline from "flowbite-svelte-icons/ExclamationCircleOutline.svelte";
-import { onMount } from "svelte";
+
+// Callers hand us an SDK delete call, which resolves to the client's
+// `{ data, error }` envelope rather than a bare DeleteResponse. Endpoints that
+// declare no response schema (e.g. documents) resolve `data` as `unknown`, and
+// Questions' callback returns undefined when nothing is selected, so both are
+// narrowed below.
+type DeleteRequestResult = {
+	data?: unknown;
+	error?: unknown;
+};
 
 let {
 	open = $bindable(false),
@@ -16,48 +25,67 @@ let {
 	intendedConfirmCode,
 }: {
 	open: boolean;
-	deleteDryRunnableRequest: (dryRun: boolean) => Promise<DeleteResponse>;
+	deleteDryRunnableRequest: (
+		dryRun: boolean,
+	) => Promise<DeleteRequestResult> | undefined;
 	afterDelete: () => void;
 	intendedConfirmCode: string;
 } = $props();
 
 let deletionWillAffectTotals = $state<DeleteResponse["children"]>({});
+
+// The affected-totals keys come from the API, so index the admin section through
+// the dynamic view rather than naming each key.
+let adminText = $derived(i18n.tr.admin as Record<string, string> | undefined);
 let deleteConfirmCode: string = $state("");
 let deleteDone: boolean = $state(false);
 
 let sendDeleteRequest = async () => {
-	if (deleteConfirmCode === intendedConfirmCode) {
-		const resp = await deleteDryRunnableRequest(false);
-		if (Object.keys(resp.data).indexOf("dry_run") === -1) {
-			resp.data.dry_run = false; // for deletion like Admin Documents that have no dry_run data.
-		}
-		const { ok, dry_run, children, error } = resp.data;
+	if (deleteConfirmCode !== intendedConfirmCode) {
+		return;
+	}
+	const resp = await deleteDryRunnableRequest(false);
+	const data = (resp?.data ?? {}) as Partial<DeleteResponse>;
+	// Deletions like Admin Documents report no dry_run field, so treat a missing
+	// one as a real deletion.
+	const dry_run = data.dry_run ?? false;
 
-		if (ok && dry_run === false) {
-			deleteDone = true;
-			afterDelete(); // refresh the list items this is in etc.
-		} else {
-			alertStore.showAlert(i18n.tr.admin.deleteError, error, true, false);
-			console.error(error);
-		}
+	if (resp && !resp.error && data.ok && dry_run === false) {
+		deleteDone = true;
+		afterDelete(); // refresh the list items this is in etc.
+	} else {
+		alertStore.showAlert(i18n.tr.admin.deleteError, "", true, false);
+		console.error(resp?.error);
 	}
 };
 
-$effect(async () => {
-	if (open) {
-		const resp = await deleteDryRunnableRequest(true);
-		const { children, error } = resp.data;
-		if (error) {
-			alertStore.showAlert(i18n.tr.admin.deleteError, "", true, false);
-		}
-		if (children) {
-			deletionWillAffectTotals = children;
-		}
-	} else {
+$effect(() => {
+	if (!open) {
 		deletionWillAffectTotals = {};
 		deleteDone = false;
 		deleteConfirmCode = "";
+		return;
 	}
+	// The dry run is async, so guard against a stale response arriving after the
+	// modal has closed or been reopened for a different item.
+	let cancelled = false;
+	void (async () => {
+		const resp = await deleteDryRunnableRequest(true);
+		if (cancelled) {
+			return;
+		}
+		if (!resp || resp.error) {
+			alertStore.showAlert(i18n.tr.admin.deleteError, "", true, false);
+			return;
+		}
+		const { children } = (resp.data ?? {}) as Partial<DeleteResponse>;
+		if (children) {
+			deletionWillAffectTotals = children;
+		}
+	})();
+	return () => {
+		cancelled = true;
+	};
 });
 </script>
 
@@ -83,8 +111,7 @@ $effect(async () => {
                  style="background-color:rgb(255,220,220);border: 2px solid darkred;border-radius:10px;padding:10px">
                 <ul>
                     {#each Object.entries(deletionWillAffectTotals) as [translationKey, total]}
-                        <li>{total} {i18n.tr.admin && translationKey in i18n.tr.admin
-                            ? i18n.tr.admin[translationKey] : i18n.tr.admin.affectedAnswers}</li>
+                        <li>{total} {adminText?.[translationKey] ?? i18n.tr.admin.affectedAnswers}</li>
                     {/each}
                 </ul>
             </div>

@@ -75,13 +75,18 @@ const inputTypes: Array<SelectOptionType<string>> = [
 ];
 
 function updateOptionsJson() {
-	if (!question || !question.options) {
+	if (!question || !question.options || !question.text) {
 		return;
 	}
 	const values = question.options.split(";");
 	for (const lang_id of i18n.locales) {
-		const items = question.text[lang_id].options.split(";");
-		question.text[lang_id].options_json = JSON.stringify(
+		// Both the per-locale entry and its options are optional in the API.
+		const text = question.text[lang_id];
+		if (!text?.options) {
+			continue;
+		}
+		const items = text.options.split(";");
+		text.options_json = JSON.stringify(
 			values.map((value, index) => ({
 				value: value,
 				name: items[index],
@@ -121,7 +126,7 @@ async function saveChanges() {
 </style>
 
 <Modal title="Edit user question" class="modal-scrollable" bind:open autoclose >
-	{#if question}
+	{#if question && question.text}
 		<div>
 			<div class="flex flex-row items-center">
 				<div class="mr-5 grow">

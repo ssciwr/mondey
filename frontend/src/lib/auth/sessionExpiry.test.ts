@@ -1,4 +1,4 @@
-import type { RequestOptions } from "@hey-api/client-fetch";
+import type { RequestOptions } from "$lib/client/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 type ResponseHandler = (

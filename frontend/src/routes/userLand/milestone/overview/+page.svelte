@@ -115,7 +115,7 @@ const breadcrumbdata: any[] = [
                 {i18n.tr.milestone.milestoneOverviewMobileHint}
             </p>
         </div>
-        <GalleryDisplay bind:showIncompleteOnly={showIncompleteOnly} useRadioButtons={true}>
+        <GalleryDisplay bind:showIncompleteOnly={showIncompleteOnly}>
             {#each contentStore.milestoneGroupData.milestones as milestone, idx}
                 {@const title = milestone?.text?.[i18n.locale]?.title ?? ""}
                 {@const complete = (answerSession?.answers?.[`${milestone.id}`]?.answer ?? -1) >= 0}

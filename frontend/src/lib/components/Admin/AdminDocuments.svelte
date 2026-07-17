@@ -120,8 +120,8 @@ async function updateSelectedDocument() {
 function openEditModal(document: DocumentAdmin) {
 	selectedDocument = document;
 	editDocument = {
-		title: document.title,
-		description: document.description,
+		title: document.title ?? "",
+		description: document.description ?? "",
 	};
 	showEditModal = true;
 }
@@ -152,6 +152,7 @@ onMount(() => {
 		</TableHead>
 		<TableBody>
 			{#each documents as document}
+				{@const description = document.description ?? ''}
 				<TableBodyRow>
 					<TableBodyCell>{document.title} - <Button
 							size="xs"
@@ -165,7 +166,7 @@ onMount(() => {
 						<DownloadOutline class="w-4 h-4 mr-1" />
 						{i18n.tr.admin.download}
 					</Button></TableBodyCell>
-					<TableBodyCell>{document.description.length > 15 ? document.description.substring(0, 15) + '...' : document.description}</TableBodyCell>
+					<TableBodyCell>{description.length > 15 ? description.substring(0, 15) + '...' : description}</TableBodyCell>
 					<TableBodyCell>{new Date(document.created_at).toLocaleDateString()}</TableBodyCell>
 					<TableBodyCell>
 						<EditButton onclick={() => openEditModal(document)} />
@@ -199,7 +200,7 @@ onMount(() => {
 			<Fileupload
 				id="file"
 				accept=".pdf"
-				onchange={(e) => uploadFile = e.target.files?.[0] || null}
+				onchange={(e) => uploadFile = (e.target as HTMLInputElement).files?.[0] || null}
 			/>
 		</div>
 	</div>

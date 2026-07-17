@@ -26,6 +26,11 @@ jobs:
           cache-dependency-path: frontend/pnpm-lock.yaml
       - run: pnpm install
       - run: pnpm build
+      # Non-blocking for now: svelte-check still reports pre-existing errors.
+      # Remove continue-on-error once the count reaches zero to keep it there.
+      - name: Type check
+        run: pnpm run check
+        continue-on-error: true
       - run: pnpm run test:unit || exit 1
       - uses: codecov/codecov-action@v7
         with:

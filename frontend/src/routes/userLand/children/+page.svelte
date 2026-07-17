@@ -2,7 +2,6 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { getChildImage, getChildren } from "$lib/client/sdk.gen";
-import type { ChildSummaryPublic } from "$lib/client/types.gen";
 import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
 import ChildCardDisplay from "$lib/components/DataDisplay/ChildCardDisplay.svelte";
 import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
@@ -10,11 +9,12 @@ import { displayChildImages } from "$lib/features";
 import { i18n } from "$lib/i18n.svelte.js";
 import { alertStore } from "$lib/stores/alertStore.svelte.js";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
+import type { ChildSummaryWithImage } from "$lib/util";
 import { Heading, Spinner } from "flowbite-svelte";
 
 let searchTerm = $state("");
 
-async function setup(): Promise<ChildSummaryPublic[]> {
+async function setup(): Promise<ChildSummaryWithImage[]> {
 	const { data, error } = await getChildren();
 	if (error || !data) {
 		console.log("Error when retrieving child data");
@@ -26,8 +26,9 @@ async function setup(): Promise<ChildSummaryPublic[]> {
 		);
 		return [];
 	}
+	const children: ChildSummaryWithImage[] = data;
 	if (displayChildImages) {
-		for (const child of data) {
+		for (const child of children) {
 			const { data, error } = await getChildImage({
 				path: { child_id: child.id },
 			});
@@ -36,7 +37,7 @@ async function setup(): Promise<ChildSummaryPublic[]> {
 			}
 		}
 	}
-	return data;
+	return children;
 }
 
 const promise = $state(setup());

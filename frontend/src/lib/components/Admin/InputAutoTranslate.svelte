@@ -15,13 +15,14 @@ import { WandMagicSparklesOutline } from "flowbite-svelte-icons";
 let {
 	value = $bindable(""),
 	locale,
-	de_text,
+	de_text = "",
 	placeholder = "",
 	multiline = false,
 }: {
-	value: string;
+	// These bind to translation fields that the API marks optional.
+	value?: string;
 	locale: string;
-	de_text: string;
+	de_text?: string;
 	placeholder?: string;
 	multiline?: boolean;
 } = $props();

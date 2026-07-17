@@ -10,7 +10,7 @@ const sanitizeConfig = {
 	ALLOWED_ATTR: [], // explicitly none
 };
 
-function sanitizeHtml(html) {
+function sanitizeHtml(html: string) {
 	return DOMPurify.sanitize(html, sanitizeConfig);
 }
 </script>

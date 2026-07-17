@@ -10,14 +10,18 @@ import {
 	type SelectOptionType,
 	Textarea,
 } from "flowbite-svelte";
-export type Component = "input" | "textarea" | "select" | "fileupload";
-
 const componentTable = {
 	input: Input,
 	textarea: Textarea,
 	select: Select,
 	fileupload: Fileupload,
 };
+
+type Component = keyof typeof componentTable;
+
+function isComponent(value: string): value is Component {
+	return value in componentTable;
+}
 
 // variables
 let {
@@ -36,7 +40,9 @@ let {
 	kwargs = {},
 	testid = undefined,
 }: {
-	component?: Component;
+	// The API declares this as an unconstrained string, so anything outside
+	// componentTable falls back to the default input below.
+	component?: string;
 	value?: any;
 	additionalRequired?: boolean;
 	label?: string | null;
@@ -51,6 +57,10 @@ let {
 	kwargs?: any;
 	testid?: string;
 } = $props();
+
+let resolvedComponent = $derived(
+	isComponent(component) ? componentTable[component] : componentTable.input,
+);
 
 let valid: boolean = $state(false);
 let showTextField: boolean = $derived.by(
@@ -97,7 +107,7 @@ let derivedPlaceholder = $derived(
 
 <div class="space-y-4">
 	<svelte:component
-		this={componentTable[component]}
+		this={resolvedComponent}
 		class={highlight
 			? "rounded border-2 border-primary-600 dark:border-primary-600 " +
 				componentClass

@@ -214,7 +214,7 @@ async function loadAnswersessions(): Promise<void> {
 	if (responseAnswerSessions.error) {
 		alertStore.showAlert(
 			i18n.tr.childData.alertMessageTitle,
-			responseAnswerSessions.error.detail,
+			i18n.tr.childData.alertMessageRetrieving,
 			true,
 			false,
 		);
@@ -250,7 +250,7 @@ async function loadSummaryFeedbackFor(
 	if (milestoneGroupResponse.error) {
 		alertStore.showAlert(
 			i18n.tr.childData.alertMessageTitle,
-			milestoneGroupResponse.error.detail,
+			i18n.tr.childData.alertMessageRetrieving,
 			true,
 			false,
 		);
@@ -271,7 +271,7 @@ async function loadSummaryFeedbackFor(
 	if (responseFeedback.error) {
 		alertStore.showAlert(
 			i18n.tr.childData.alertMessageTitle,
-			responseFeedback.error.detail,
+			i18n.tr.childData.alertMessageRetrieving,
 			true,
 			false,
 		);
@@ -302,7 +302,7 @@ async function loadDetailedFeedbackFor(
 	if (response.error) {
 		alertStore.showAlert(
 			i18n.tr.childData.alertMessageTitle,
-			response.error.detail,
+			i18n.tr.childData.alertMessageRetrieving,
 			true,
 			false,
 		);
@@ -393,7 +393,7 @@ async function generateReport(): Promise<string | null> {
 	});
 
 	if (responseAnswerSessions.error) {
-		alertMessage = responseAnswerSessions.error.detail;
+		alertMessage = i18n.tr.childData.alertMessageRetrieving;
 		alertStore.showAlert(
 			i18n.tr.childData.alertMessageTitle,
 			alertMessage,

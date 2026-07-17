@@ -26,7 +26,7 @@ import {
 	Tooltip,
 } from "flowbite-svelte";
 
-let { setHideDrawer } = $props();
+let { setHideDrawer }: { setHideDrawer: (to: boolean) => void } = $props();
 </script>
 
 <Sidebar>

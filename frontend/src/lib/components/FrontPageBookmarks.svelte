@@ -42,6 +42,12 @@ const bookmarks = [
 	},
 ];
 
+// Headings and summaries are looked up by bookmark key, so index this section
+// through the dynamic view rather than naming each key.
+let bookmarkText = $derived(
+	i18n.tr.frontpageBookmarks as Record<string, string> | undefined,
+);
+
 let activeIndex = $state(0);
 
 function selectTab(index: number) {
@@ -70,7 +76,7 @@ function selectTab(index: number) {
                         </div>
                         <div class="flex-1">
                             <h3 class="font-medium hover:text-white {activeIndex === index ? 'text-white' : ' hover:text-white dark:text-white'}">
-                                {i18n.tr.frontpageBookmarks?.[`heading${key}`]}
+                                {bookmarkText?.[`heading${key}`]}
                             </h3>
                         </div>
                         <div class="flex-shrink-0 transform transition-transform duration-200 {activeIndex === index ? 'rotate-180' : ''}">
@@ -83,7 +89,7 @@ function selectTab(index: number) {
                 {#if activeIndex === index}
                     <div class="mt-2 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 text-left">
                         <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-                            {i18n.tr.frontpageBookmarks?.[`summary${key}`]}
+                            {bookmarkText?.[`summary${key}`]}
                         </p>
                     </div>
                 {/if}

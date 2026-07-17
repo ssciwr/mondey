@@ -167,7 +167,7 @@ let showIncompleteOnly = $state(false);
             <h3 class="mt-5 text-xl font-medium text-gray-900 dark:text-white">
                 {i18n.tr.milestone.milestoneGroupSelectionHint}
             </h3>
-            <GalleryDisplay bind:showIncompleteOnly={showIncompleteOnly} useRadioButtons={true}>
+            <GalleryDisplay bind:showIncompleteOnly={showIncompleteOnly}>
                 {#each milestoneGroups as milestoneGroup}
                     {#if !(showIncompleteOnly && (milestoneGroup.disabled || milestoneGroup.progress === 1.0))}
                         <CardDisplay title={milestoneGroup.title}

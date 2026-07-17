@@ -14,6 +14,8 @@ let {
 	files: undefined | FileList;
 	images?: Array<string>;
 	image?: string;
+	// Forwarded to the underlying Fileupload input.
+	multiple?: boolean;
 } = $props();
 let showWarningModal: boolean = $state(false);
 

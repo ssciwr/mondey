@@ -5,7 +5,8 @@ import CancelButton from "$lib/components/Admin/CancelButton.svelte";
 import InputAutoTranslate from "$lib/components/Admin/InputAutoTranslate.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import type { Translation } from "$lib/i18n.svelte";
+import type { TranslationSections } from "$lib/i18n.svelte";
+import { alertStore } from "$lib/stores/alertStore.svelte";
 import { Label, Modal } from "flowbite-svelte";
 
 let {
@@ -15,7 +16,7 @@ let {
 	onsave,
 }: {
 	open: boolean;
-	translations: Record<string, Translation>;
+	translations: Record<string, TranslationSections>;
 	missing_translations: Array<string>;
 	onsave: () => Promise<void>;
 } = $props();
@@ -53,12 +54,7 @@ let successMessage = $state(null as string | null);
     successMessage = i18n.tr.admin.saveChanges + " ✓";
     open = missing_translations.length > 0;
   } catch (error) {
-    alertStore.showAlert(
-      i18n.tr.admin.unableToSave,
-      i18n.tr.login.error,
-      true,
-      false,
-    );
+    alertStore.showAlert(i18n.tr.admin.unableToSave, "", true, false);
   }
 }}/>
         <CancelButton onclick={() => {open = false;}}/>

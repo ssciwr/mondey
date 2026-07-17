@@ -39,6 +39,10 @@ onMount(() => {
 	}
 });
 
+// `as const` keeps the indices literal, so the `answer${i}Text` / `answer${i}Desc`
+// translation keys below resolve to real entries rather than `answer${number}`.
+const answerIndices = [0, 1, 2, 3, -1] as const;
+
 const imageInterval = 5000;
 setInterval(() => {
 	if (currentMilestone?.images && currentMilestone.images.length > 0) {
@@ -230,7 +234,7 @@ const breadcrumbdata = $derived([
                     </h2>
                     <p class="mb-2 text-base">{currentMilestone.text[i18n.locale].desc}</p>
                     <Accordion flush>
-                        {#if currentMilestone.text[i18n.locale].obs && currentMilestone.text[i18n.locale].obs.length > 0}
+                        {#if currentMilestone.text[i18n.locale].obs?.length}
                             <AccordionItem>
                             <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
                                 <InfoCircleSolid class="mt-0.5" />
@@ -242,7 +246,7 @@ const breadcrumbdata = $derived([
                             </AccordionItem>
                         {/if}
 
-                        {#if currentMilestone.text[i18n.locale].help && currentMilestone.text[i18n.locale].help.length > 0}
+                        {#if currentMilestone.text[i18n.locale].help?.length}
                         <AccordionItem>
                             <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
                                 <QuestionCircleSolid class="mt-0.5" />
@@ -254,7 +258,7 @@ const breadcrumbdata = $derived([
                             </AccordionItem>
                         {/if}
 
-                        {#if currentMilestone.text[i18n.locale].importance && currentMilestone.text[i18n.locale].importance.length > 0}
+                        {#if currentMilestone.text[i18n.locale].importance?.length}
                         <AccordionItem>
                             <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
                                 <ExclamationCircleSolid class="mt-0.5" />
@@ -286,7 +290,7 @@ const breadcrumbdata = $derived([
                             {i18n.tr.milestone.milestoneDescriptionMobileHint}
                         </p>
                     </div>
-                    {#each [0, 1, 2, 3, -1] as answerIndex}
+                    {#each answerIndices as answerIndex}
                         <MilestoneButton
                                 index={answerIndex}
                                 selected={selectedAnswer === answerIndex}
@@ -300,7 +304,7 @@ const breadcrumbdata = $derived([
                     {/each}
                     <div class="md:hidden px-2 py-1 text-sm text-left rounded-md border-gray-200 border-2 mt-4 p-2 pt-4">
                         <h4>{i18n.tr.milestone.adviceOnAnswerLevel}</h4>
-                        {#each [0, 1, 2, 3, -1] as answerIndex}
+                        {#each answerIndices as answerIndex}
                             <div class="mb-2 mt-3">
                                 <div><b>
                                     <span class={`circle bg-milestone-answer-${answerIndex}`}></span>

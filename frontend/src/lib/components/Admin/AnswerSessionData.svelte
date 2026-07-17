@@ -158,7 +158,7 @@ async function handleImport() {
 			console.error(error);
 			importResult = {
 				status: "error",
-				message: error.message || i18n.tr.admin.importFailed,
+				message: i18n.tr.admin.importFailed,
 				error: true,
 				childrenImported: 0,
 			};
@@ -194,7 +194,8 @@ async function handleImport() {
 		console.error(e);
 		importResult = {
 			status: "error",
-			message: e.message || i18n.tr.admin.importFailed,
+			message:
+				(e instanceof Error ? e.message : "") || i18n.tr.admin.importFailed,
 			error: true,
 			childrenImported: 0,
 		};
@@ -219,7 +220,7 @@ function boolToStr(bool: boolean): string {
 	return bool ? i18n.tr.admin.yes : i18n.tr.admin.no;
 }
 
-function isSuspicious(state: string): boolean {
+function isSuspicious(state: string | undefined): boolean {
 	return state === "suspicious" || state === "admin_suspicious";
 }
 

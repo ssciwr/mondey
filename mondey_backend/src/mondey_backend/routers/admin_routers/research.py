@@ -15,13 +15,14 @@ from fastapi import status
 from ...dependencies import SessionDep
 from ...dependencies import UserAsyncSessionDep
 from ...import_data.manager.import_manager import ImportManager
+from ...models.research import ImportCsvResponse
 from ...models.research import ResearchGroup
 
 
 def create_router() -> APIRouter:
     router = APIRouter(prefix="/research", tags=["research-admin"])
 
-    @router.post("/import-csv/")
+    @router.post("/import-csv/", response_model=ImportCsvResponse)
     async def import_csv_data(
         session: SessionDep,
         user_session: UserAsyncSessionDep,

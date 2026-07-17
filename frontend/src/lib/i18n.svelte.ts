@@ -2,7 +2,13 @@ import { getLanguages } from "$lib/client";
 import { user } from "$lib/stores/userStore.svelte";
 import { translationIds } from "$lib/translations";
 
+// Concrete view of the translations, giving `i18n.tr.<section>.<item>` real keys.
 export type Translation = typeof translationIds;
+
+// Dynamically-indexable view of the same data, for code that walks sections and
+// items generically (the admin editor) rather than naming keys up front. This
+// mirrors the wire format the API accepts and returns.
+export type TranslationSections = Record<string, Record<string, string>>;
 
 function createI18n() {
 	const translations: Record<string, Translation> = $state({
@@ -58,14 +64,17 @@ function createI18n() {
 				if (user?.data?.is_superuser) {
 					// add ids to locales for admin users
 					locales.push(idLocale);
-					translations[idLocale] = {};
-					for (const [section_key, section] of Object.entries(translationIds)) {
-						translations[idLocale][section_key] = {};
-						for (const item_key of Object.keys(section)) {
-							translations[idLocale][section_key][item_key] =
-								`[${section_key}.${item_key}]`;
-						}
-					}
+					translations[idLocale] = Object.fromEntries(
+						Object.entries(translationIds).map(([section_key, section]) => [
+							section_key,
+							Object.fromEntries(
+								Object.keys(section).map((item_key) => [
+									item_key,
+									`[${section_key}.${item_key}]`,
+								]),
+							),
+						]),
+					) as Translation;
 				}
 			}
 		},

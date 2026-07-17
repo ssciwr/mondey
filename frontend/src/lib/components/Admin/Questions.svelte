@@ -47,16 +47,6 @@ let showOrderItemsModal = $state(false);
 
 let create: typeof createUserQuestion | typeof createChildQuestion =
 	$state(createUserQuestion);
-let doDelete: typeof deleteUserQuestion | typeof deleteChildQuestion =
-	$state(deleteUserQuestion);
-let build = $derived.by(() => {
-	return (dry_run = true) => {
-		return {
-			path: { [`${kind}_question_id`]: currentQuestionId },
-			query: { dry_run: dry_run },
-		};
-	};
-});
 let order: typeof orderUserQuestionsAdmin | typeof orderChildQuestionsAdmin =
 	$state(orderUserQuestionsAdmin);
 let questions: typeof userQuestions | typeof childQuestions =
@@ -64,7 +54,6 @@ let questions: typeof userQuestions | typeof childQuestions =
 
 if (kind === "child") {
 	create = createChildQuestion;
-	doDelete = deleteChildQuestion;
 	order = orderChildQuestionsAdmin;
 	questions = childQuestions;
 } else if (kind !== "user") {
@@ -87,7 +76,18 @@ function doDeleteQuestion(dry_run = true) {
 	if (!currentQuestionId) {
 		return;
 	}
-	return doDelete(build(dry_run));
+	const query = { dry_run: dry_run };
+	// Each endpoint names its own path parameter, so branch rather than building
+	// the key from `kind`.
+	return kind === "child"
+		? deleteChildQuestion({
+				path: { child_question_id: currentQuestionId },
+				query,
+			})
+		: deleteUserQuestion({
+				path: { user_question_id: currentQuestionId },
+				query,
+			});
 }
 
 onMount(async () => {

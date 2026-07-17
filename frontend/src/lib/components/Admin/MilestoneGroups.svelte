@@ -94,7 +94,7 @@ async function addMilestone(milestoneGroupId: number) {
 {#if milestoneGroups.data}
 	<Table>
 		<TableHead>
-			<TableHeadCell colSpan="4">{i18n.tr.admin.milestoneGroups}</TableHeadCell>
+			<TableHeadCell colspan={4}>{i18n.tr.admin.milestoneGroups}</TableHeadCell>
 		</TableHead>
 		<TableBody>
 			{#each milestoneGroups.data as milestoneGroup, groupIndex (milestoneGroup.id)}
@@ -144,10 +144,10 @@ async function addMilestone(milestoneGroupId: number) {
 				{#if openMilestoneGroupIndex === groupIndex}
 					<TableBodyRow class="bg-blue-100">
 						<TableBodyCell></TableBodyCell>
-						<TableBodyCell colSpan="3">
+						<TableBodyCell colspan={3}>
 							<Table>
 								<TableHead>
-									<TableHeadCell colspan="4">{i18n.tr.admin.milestones}</TableHeadCell>
+									<TableHeadCell colspan={4}>{i18n.tr.admin.milestones}</TableHeadCell>
 								</TableHead>
 								<TableBody>
 									{#each milestoneGroup.milestones as milestone (milestone.id)}
@@ -230,7 +230,7 @@ async function addMilestone(milestoneGroupId: number) {
 	></EditMilestoneGroupModal>
 {/key}
 <DangerousDeleteModal bind:open={showDeleteMilestoneGroupModal} intendedConfirmCode={i18n.tr.admin.milestones}
-  deleteDryRunnableRequest={(dry_run) => deleteMilestoneGroupAdmin({
+  deleteDryRunnableRequest={(dry_run) => currentMilestoneGroup === null ? undefined : deleteMilestoneGroupAdmin({
 		path: {
 			milestone_group_id: currentMilestoneGroup.id
 		},
@@ -248,7 +248,7 @@ async function addMilestone(milestoneGroupId: number) {
 <RecalculateStatsModal bind:open={showRecalculateStatsModal}
 	prompt={i18n.tr.admin.milestoneGroupChangedRecalculatePrompt} />
 <DangerousDeleteModal bind:open={showDeleteMilestoneModal} intendedConfirmCode={i18n.tr.admin.milestone} deleteDryRunnableRequest={(dry_run) =>
- deleteMilestone({
+ currentMilestone === null ? undefined : deleteMilestone({
 		path: {
 			milestone_id: currentMilestone.id,
 		},

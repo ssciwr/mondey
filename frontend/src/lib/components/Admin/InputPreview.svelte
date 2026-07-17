@@ -20,7 +20,10 @@ $effect(() => {
 
 function parse_options_json() {
 	try {
-		const options_json = data.text[lang].options_json;
+		const options_json = data.text?.[lang]?.options_json;
+		if (options_json === undefined) {
+			return [];
+		}
 		return JSON.parse(options_json);
 	} catch (e) {
 		console.log("Couldn't parse options_json");
@@ -31,7 +34,7 @@ function parse_options_json() {
 </script>
 
 <div class="mb-5">
-	<Label class="font-semibold text-gray-700 dark:text-gray-400">{data.text[lang].question}</Label>
+	<Label class="font-semibold text-gray-700 dark:text-gray-400">{data.text?.[lang]?.question}</Label>
 </div>
 <div class="mb-5">
 	{#if data.component === 'select'}

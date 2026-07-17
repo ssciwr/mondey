@@ -354,7 +354,7 @@ const yearOptions = Array.from(
                                     afterDelete={() => goto("/userLand/children")}
                                     intendedConfirmCode={i18n.tr.admin.delete}
                                     deleteDryRunnableRequest={(dryRun) =>
-                                    deleteChild({
+                                    currentChild.id === null ? undefined : deleteChild({
                                         path: {
                                             child_id: currentChild.id,
                                         },
