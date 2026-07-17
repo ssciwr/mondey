@@ -18,7 +18,7 @@ let {
 	title?: string;
 	text?: string;
 	image?: string;
-	color?: string;
+	color?: string | null;
 	onclick: () => void;
 	cardClasses?: string;
 	titleClasses?: string;

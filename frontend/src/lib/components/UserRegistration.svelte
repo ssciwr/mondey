@@ -24,7 +24,7 @@ async function submitData(): Promise<void> {
 	const result = await registerRegister({ body: userData });
 
 	if (result.error) {
-		console.log("error: ", result.response.status, result.error.detail);
+		console.log("error: ", result.response?.status, result.error.detail);
 		let errorMessage = `${i18n.tr.registration.alertMessageError}: ${result.error.detail} ${i18n.tr.registration.infoTitle}`;
 		if (result.response?.status === 422) {
 			errorMessage = i18n.tr.login.badCredentials;
@@ -36,7 +36,7 @@ async function submitData(): Promise<void> {
 			false,
 		);
 	} else {
-		console.log("successful transmission: ", result.response.status);
+		console.log("successful transmission: ", result.response?.status);
 		success = true;
 	}
 }

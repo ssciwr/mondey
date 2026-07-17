@@ -18,8 +18,8 @@ function createUser() {
 			if (response.error) {
 				console.log(
 					"Error during logout: ",
-					response.response.status,
-					response.error.detail,
+					response.response?.status,
+					response.error,
 				);
 			} else {
 				currentUser = null;

@@ -17,9 +17,9 @@ async function reauthenticate() {
 		const result = await reauthenticateSession({ body: { password } });
 
 		if (result.error) {
-			if (result.response.status === 400) {
+			if (result.response?.status === 400) {
 				errorMessage = i18n.tr.login.incorrectPassword;
-			} else if (result.response.status !== 401) {
+			} else if (result.response?.status !== 401) {
 				errorMessage = i18n.tr.login.reauthenticationError;
 			}
 			return;
@@ -27,7 +27,9 @@ async function reauthenticate() {
 
 		// The response interceptor also processes these headers. Updating here keeps
 		// this component correct if it is used without the root interceptor.
-		sessionStore.updateFromResponse(result.response);
+		if (result.response) {
+			sessionStore.updateFromResponse(result.response);
+		}
 		sessionStore.isReauthenticationShown = false;
 	} catch {
 		if (sessionStore.isReauthenticationShown) {

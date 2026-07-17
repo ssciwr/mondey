@@ -1,9 +1,13 @@
+import type { ChildSummaryPublic } from "$lib/client/types.gen";
+
 export function preventDefault(fn: (event: Event) => void) {
-	return function (event: Event) {
+	return function (this: unknown, event: Event) {
 		event.preventDefault();
 		fn.call(this, event);
 	};
 }
+
+export type ChildSummaryWithImage = ChildSummaryPublic & { image?: string };
 
 export type PlotDatum = {
 	age: number;

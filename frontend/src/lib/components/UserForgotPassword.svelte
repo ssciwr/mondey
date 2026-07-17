@@ -2,7 +2,7 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { base } from "$app/paths";
-import { type ResetForgotPasswordData, resetForgotPassword } from "$lib/client";
+import { resetForgotPassword } from "$lib/client";
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
@@ -35,12 +35,11 @@ async function submitData(): Promise<void> {
 		return;
 	}
 
-	const data: ResetForgotPasswordData = {
+	const response = await resetForgotPassword({
 		body: {
 			email: userEmail,
 		},
-	};
-	const response = await resetForgotPassword(data);
+	});
 
 	if (response.error) {
 		console.log("error: ", response.error);

@@ -1,5 +1,5 @@
 import { goto } from "$app/navigation";
-import type { RequestOptions } from "@hey-api/client-fetch";
+import type { RequestOptions } from "$lib/client/client";
 
 import { client } from "$lib/client/client.gen";
 import { i18n } from "$lib/i18n.svelte";

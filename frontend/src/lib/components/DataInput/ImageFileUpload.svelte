@@ -14,6 +14,7 @@ let {
 	files: undefined | FileList;
 	images?: Array<string>;
 	image?: string;
+	multiple?: boolean;
 } = $props();
 let showWarningModal: boolean = $state(false);
 

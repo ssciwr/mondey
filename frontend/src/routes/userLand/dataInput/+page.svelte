@@ -42,10 +42,7 @@ async function setup() {
 
 	// get questions
 	if (userQuestions.error || userQuestions.data === undefined) {
-		console.log(
-			"Error when getting userquestions: ",
-			userQuestions.error?.detail,
-		);
+		console.log("Error when getting userquestions: ", userQuestions.error);
 		alertStore.showAlert(
 			i18n.tr.userData.alertMessageTitle,
 			i18n.tr.userData.alertMessageError,
@@ -60,7 +57,7 @@ async function setup() {
 	if (currentAnswers?.error || currentAnswers.data === undefined) {
 		console.log(
 			"Error when getting current answers for users: ",
-			currentAnswers?.error?.detail,
+			currentAnswers?.error,
 		);
 
 		alertStore.showAlert(

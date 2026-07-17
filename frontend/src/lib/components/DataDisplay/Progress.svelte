@@ -1,8 +1,10 @@
 <svelte:options runes={true}/>
 <script lang="ts">
 import { Progressbar } from "flowbite-svelte";
-let { progress = 0.0, color = "red" }: { progress: number; color?: string } =
-	$props();
+let {
+	progress = 0.0,
+	color = "red",
+}: { progress: number; color?: string | null } = $props();
 
 let displayProgress = $derived(progress < 0.01 ? 1 : 100 * progress);
 
