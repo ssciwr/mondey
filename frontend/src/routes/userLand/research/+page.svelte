@@ -24,6 +24,7 @@ import {
 	type WorkerFullData,
 	type WorkerFullDataRequest,
 	type WorkerInit,
+	type WorkerInitializeRequest,
 	type WorkerProcessDataRequest,
 	WorkerRequestTypes,
 	WorkerTypes,
@@ -101,6 +102,12 @@ function createWorker(): Worker {
 		}
 	};
 
+	const message: WorkerInitializeRequest = {
+		requestType: WorkerRequestTypes.INITIALIZE,
+		locale: i18n.locale,
+	};
+	worker.postMessage(message);
+
 	return worker;
 }
 
@@ -144,6 +151,8 @@ function stop_spinner() {
 
 // Ask worker to update the data when selected milestone or group-by columns change
 $effect(() => {
+	if (!worker) return;
+
 	const message: WorkerProcessDataRequest = {
 		requestType: WorkerRequestTypes.PROCESS_DATA,
 		selected_milestones: $state.snapshot(selected_milestones),

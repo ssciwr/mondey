@@ -43,15 +43,22 @@ async function mock_research_data_route(
 
 // Mock the /research/names route
 async function mock_research_names_route(page: Page, n_milestones: number) {
-	await page.route("**/research/names/", async (route) => {
+	await page.route("**/research/names/**", async (route) => {
 		const json: Record<string, Record<number, string>> = {
 			milestone: {},
 			user_question: { "1": "Parent income" },
 			child_question: { "1": "Number of Siblings", "2": "Early birth" },
 		};
 		for (let milestone_id = 1; milestone_id <= n_milestones; ++milestone_id) {
-			json.milestone[`${milestone_id}`] = `MS${milestone_id}`;
+			json.milestone[`${milestone_id}`] =
+				`MS${n_milestones - milestone_id + 1}`;
 		}
+		json.milestone_label = Object.fromEntries(
+			Object.entries(json.milestone).map(([id, name]) => [
+				id,
+				`${name} :: Group ${name.slice(2)} :: Milestone ${name.slice(2)}`,
+			]),
+		);
 		await route.fulfill({ json });
 	});
 }
@@ -108,12 +115,24 @@ test("Research page: valid data", async ({ page }) => {
 	await mock_research_names_route(page, 5);
 	await page.goto("/userLand/research", { waitUntil: "networkidle" });
 
+	const milestoneOptionLabels = await page
+		.getByTestId("selectMilestone")
+		.locator("option")
+		.allTextContents();
+	expect(milestoneOptionLabels).toEqual(
+		Array.from(
+			{ length: 5 },
+			(_, index) =>
+				`MS${index + 1} :: Group ${index + 1} :: Milestone ${index + 1}`,
+		),
+	);
+
 	// select first milestone
 	const selectMilestone = new Multiselect(
 		page,
 		translationIds.researcher.milestones,
 	);
-	await selectMilestone.select("MS1");
+	await selectMilestone.select("MS1 :: Group 1 :: Milestone 1");
 	// plot and table of data for first milestone should be displayed
 	const plot = page.getByTestId("researchPlotLines");
 	await expect(plot).toContainText("punktzahl");

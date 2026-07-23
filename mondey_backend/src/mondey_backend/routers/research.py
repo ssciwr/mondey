@@ -35,9 +35,25 @@ def create_router() -> APIRouter:
         return Response(df.to_json(orient="records"), media_type="application/json")
 
     @router.get("/names/", response_model=dict[str, dict[int, str]])
-    async def get_research_names(session: SessionDep):
+    async def get_research_names(session: SessionDep, lang_id: str = "de"):
+        milestones = session.exec(select(Milestone)).all()
+
+        def milestone_label(milestone: Milestone) -> str:
+            group_text = milestone.group.text.get(lang_id)
+            milestone_text = milestone.text.get(lang_id)
+            return " :: ".join(
+                part
+                for part in (
+                    milestone.name,
+                    group_text.title if group_text else "",
+                    milestone_text.title if milestone_text else "",
+                )
+                if part
+            )
+
         return {
-            "milestone": {m.id: m.name for m in session.exec(select(Milestone)).all()},
+            "milestone": {m.id: m.name for m in milestones},
+            "milestone_label": {m.id: milestone_label(m) for m in milestones},
             "user_question": {
                 q.id: q.name for q in session.exec(select(UserQuestion)).all()
             },

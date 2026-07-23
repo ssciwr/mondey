@@ -9,6 +9,7 @@ import {
 	type WorkerFullData,
 	type WorkerFullDataRequest,
 	type WorkerInit,
+	type WorkerInitializeRequest,
 	type WorkerProcessDataRequest,
 	WorkerRequestTypes,
 	WorkerTypes,
@@ -22,7 +23,7 @@ let columns = [] as SelectOptionType<string>[];
 let names = {} as GetResearchNamesResponse;
 
 // get research data and construct initial state
-async function init() {
+async function init(locale: string) {
 	client.setConfig({
 		baseUrl: import.meta.env.VITE_MONDEY_API_URL,
 	});
@@ -32,7 +33,9 @@ async function init() {
 		return;
 	}
 	df_in = new DataFrame(res.data);
-	const res_names = await getResearchNames();
+	const res_names = await getResearchNames({
+		query: { lang_id: locale },
+	});
 	if (res_names.error || !res_names.data) {
 		console.error(res_names.error);
 		return;
@@ -56,9 +59,13 @@ async function init() {
 		})
 		.map((column: string) => {
 			const milestone_id = column.split("_").pop();
-			const name = milestone_id ? names?.milestone?.[milestone_id] : column;
+			const name = milestone_id
+				? (names?.milestone_label?.[milestone_id] ??
+					names?.milestone?.[milestone_id])
+				: column;
 			return { value: column, name: name };
-		});
+		})
+		.sort((a, b) => a.name.localeCompare(b.name, locale));
 	const message: WorkerInit = {
 		type: WorkerTypes.INIT,
 		milestone_ids: milestone_ids,
@@ -199,9 +206,13 @@ function retrieve_all_data() {
 }
 
 self.onmessage = (
-	event: MessageEvent<WorkerProcessDataRequest | WorkerFullDataRequest>,
+	event: MessageEvent<
+		WorkerInitializeRequest | WorkerProcessDataRequest | WorkerFullDataRequest
+	>,
 ) => {
-	if (event.data.requestType === WorkerRequestTypes.PROCESS_DATA) {
+	if (event.data.requestType === WorkerRequestTypes.INITIALIZE) {
+		init(event.data.locale);
+	} else if (event.data.requestType === WorkerRequestTypes.PROCESS_DATA) {
 		const { selected_milestones, selected_columns } = event.data;
 		update_data(selected_milestones, selected_columns);
 	} else if (event.data.requestType === WorkerRequestTypes.FULL_DATA) {
@@ -210,6 +221,3 @@ self.onmessage = (
 		console.warn("Request Type not matched for dataWorker message.");
 	}
 };
-
-// download research data and construct initial state on creation of web worker
-init();
