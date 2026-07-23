@@ -4,6 +4,7 @@ import type { SelectOptionType } from "flowbite-svelte";
 // Here to avoid circular import / SSR importing client / webworker code (appears as "self" error)
 
 export enum WorkerRequestTypes {
+	INITIALIZE = "requestInitialize",
 	PROCESS_DATA = "requestProcessData",
 	FULL_DATA = "requestFullData",
 }
@@ -15,6 +16,11 @@ export enum WorkerTypes {
 }
 
 // Message types for worker communication
+export type WorkerInitializeRequest = {
+	requestType: WorkerRequestTypes.INITIALIZE;
+	locale: string;
+};
+
 export type WorkerProcessDataRequest = {
 	requestType: WorkerRequestTypes.PROCESS_DATA;
 	selected_milestones: string[];

@@ -2671,9 +2671,20 @@ export type GetResearchDataResponses = {
 export type GetResearchNamesData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        lang_id?: string;
+    };
     url: '/research/names/';
 };
+
+export type GetResearchNamesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetResearchNamesError = GetResearchNamesErrors[keyof GetResearchNamesErrors];
 
 export type GetResearchNamesResponses = {
     /**

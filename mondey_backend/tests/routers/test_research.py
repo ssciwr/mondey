@@ -87,16 +87,25 @@ def test_research_names(research_client: TestClient):
     response = research_client.get("/research/names/")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 3
+    assert len(data) == 4
     assert "milestone" in data
+    assert "milestone_label" in data
     assert "user_question" in data
     assert "child_question" in data
     assert len(data["milestone"]) == 5
     assert data["milestone"]["1"] == "m1"
     assert data["milestone"]["5"] == "m5"
+    assert data["milestone_label"]["1"] == "m1 :: g1_de_t :: m1_de_t"
+    assert data["milestone_label"]["5"] == "m5 :: g1_de_t :: m5_de_t"
     assert len(data["user_question"]) == 3
     assert data["user_question"]["1"] == "User Question 1"
     assert data["user_question"]["2"] == "User Question 2"
     assert len(data["child_question"]) == 3
     assert data["child_question"]["1"] == "Child Question 1"
     assert data["child_question"]["2"] == "Child Question 2"
+
+
+def test_research_names_language(research_client: TestClient):
+    response = research_client.get("/research/names/?lang_id=en")
+    assert response.status_code == 200
+    assert response.json()["milestone_label"]["1"] == "m1 :: g1_en_t :: m1_en_t"
