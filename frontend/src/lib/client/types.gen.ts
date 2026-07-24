@@ -367,6 +367,14 @@ export type ChildQuestionAdmin = {
      */
     visibility?: boolean;
     /**
+     * Depends On Question Id
+     */
+    depends_on_question_id?: number | null;
+    /**
+     * Show If Answer
+     */
+    show_if_answer?: string;
+    /**
      * Id
      */
     id: number;
@@ -412,6 +420,14 @@ export type ChildQuestionPublic = {
      * Name
      */
     name?: string;
+    /**
+     * Depends On Question Id
+     */
+    depends_on_question_id?: number | null;
+    /**
+     * Show If Answer
+     */
+    show_if_answer?: string;
 };
 
 /**
@@ -1232,6 +1248,14 @@ export type UserQuestionAdmin = {
      */
     visibility?: boolean;
     /**
+     * Depends On Question Id
+     */
+    depends_on_question_id?: number | null;
+    /**
+     * Show If Answer
+     */
+    show_if_answer?: string;
+    /**
      * Id
      */
     id: number;
@@ -1277,6 +1301,14 @@ export type UserQuestionPublic = {
      * Name
      */
     name?: string;
+    /**
+     * Depends On Question Id
+     */
+    depends_on_question_id?: number | null;
+    /**
+     * Show If Answer
+     */
+    show_if_answer?: string;
 };
 
 /**
@@ -1397,16 +1429,6 @@ export type ValidationError = {
      * Error Type
      */
     type: string;
-    /**
-     * Input
-     */
-    input?: unknown;
-    /**
-     * Context
-     */
-    ctx?: {
-        [key: string]: unknown;
-    };
 };
 
 /**

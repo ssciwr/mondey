@@ -29,7 +29,11 @@ import { displayChildImages } from "$lib/features";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { preventDefault } from "$lib/util";
+import {
+	clearHiddenAnswers,
+	isQuestionVisible,
+	preventDefault,
+} from "$lib/util";
 import { Button, Card, Heading, Spinner, Tooltip } from "flowbite-svelte";
 import {
 	ChartLineUpOutline,
@@ -83,6 +87,12 @@ let breadcrumbdata = $derived([
 ]);
 
 let promise = $state(setup());
+
+// clear answers to any dependent questions that are currently hidden, so that
+// stale/contradictory answers are not submitted
+$effect(() => {
+	clearHiddenAnswers(questionnaire, answers);
+});
 
 onMount(async () => {
 	const response = await getAdminSettings();
@@ -496,22 +506,24 @@ const yearOptions = Array.from(
 
                         {#if (disableEdit === false)}
                             {#each questionnaire as element, i}
-                                <DataInput
-                                        component={element?.component}
-                                        bind:value={answers[element.id].answer}
-                                        bind:additionalValue={answers[element.id].additional_answer}
-                                        label={element?.text?.[i18n.locale].question}
-                                        textTrigger={element.additional_option}
-                                        required={element.required}
-                                        additionalRequired={true}
-                                        id={"input_" + String(i)}
-                                        items={element?.text?.[i18n.locale].options_json === ""
-                                          ? undefined
-                                          : JSON.parse(
-                                              element?.text?.[i18n.locale].options_json ?? '',
-                                          )}
-                                        disabled={disableEdit}
-                                />
+                                {#if isQuestionVisible(element, answers)}
+                                    <DataInput
+                                            component={element?.component}
+                                            bind:value={answers[element.id].answer}
+                                            bind:additionalValue={answers[element.id].additional_answer}
+                                            label={element?.text?.[i18n.locale].question}
+                                            textTrigger={element.additional_option}
+                                            required={element.required}
+                                            additionalRequired={true}
+                                            id={"input_" + String(i)}
+                                            items={element?.text?.[i18n.locale].options_json === ""
+                                              ? undefined
+                                              : JSON.parse(
+                                                  element?.text?.[i18n.locale].options_json ?? '',
+                                              )}
+                                            disabled={disableEdit}
+                                    />
+                                {/if}
                             {/each}
                         {/if}
                         {#if disableEdit === false}

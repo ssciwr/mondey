@@ -26,6 +26,12 @@ class Question(SQLModel):
     required: bool = False
     name: str = ""
     visibility: bool = False
+    # id of another question (of the same kind) that this question depends on,
+    # or None if it is always shown
+    depends_on_question_id: int | None = None
+    # ";"-separated list of answer values to depends_on_question_id for which
+    # this question is shown (matching the ";"-separated `options` convention)
+    show_if_answer: str = ""
 
 
 class QuestionAdmin(Question):
@@ -44,6 +50,8 @@ class QuestionPublic(SQLModel):
     additional_option: str = ""
     required: bool = False
     name: str = ""
+    depends_on_question_id: int | None = None
+    show_if_answer: str = ""
 
 
 class UserQuestionText(QuestionTextBase, table=True):
