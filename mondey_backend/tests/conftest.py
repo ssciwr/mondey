@@ -743,6 +743,8 @@ visible_user_questions = [
         "options": "[a,b,c,other]",
         "additional_option": "other",
         "required": False,
+        "depends_on_question_id": None,
+        "show_if_answer": "",
         "visibility": True,
         "type": "text",
         "text": {
@@ -777,6 +779,8 @@ visible_user_questions = [
         "options": "[a2,b2,c2,other]",
         "additional_option": "other",
         "required": False,
+        "depends_on_question_id": None,
+        "show_if_answer": "",
         "visibility": True,
         "type": "text",
         "text": {
@@ -823,6 +827,8 @@ def user_questions_with_invisible_question():
             "options": "[a,b,c,other]",
             "additional_option": "other",
             "required": False,
+            "depends_on_question_id": None,
+            "show_if_answer": "",
             "visibility": False,
             "type": "text",
             "text": {
@@ -861,6 +867,8 @@ visible_child_questions = [
         "options": "[a,b,c,other]",
         "additional_option": "other",
         "required": False,
+        "depends_on_question_id": None,
+        "show_if_answer": "",
         "visibility": True,
         "type": "text",
         "text": {
@@ -895,6 +903,8 @@ visible_child_questions = [
         "options": "[a2,b2,c2,other]",
         "additional_option": "other",
         "required": False,
+        "depends_on_question_id": None,
+        "show_if_answer": "",
         "visibility": True,
         "type": "text",
         "text": {
@@ -941,6 +951,8 @@ def child_questions_with_invisible_question():
             "options": "[a,b,c,other]",
             "additional_option": "other",
             "required": False,
+            "depends_on_question_id": None,
+            "show_if_answer": "",
             "visibility": False,
             "type": "text",
             "text": {
@@ -1027,6 +1039,8 @@ def default_user_question_admin():
         "additional_option": "nothing",
         "required": False,
         "visibility": False,
+        "depends_on_question_id": None,
+        "show_if_answer": "",
     }
 
 

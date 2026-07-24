@@ -68,6 +68,15 @@ def create_router() -> APIRouter:
         question = get(session, UserQuestion, user_question_id)
         affected_answers = len(question.answers)
         if not dry_run:
+            dependent_questions = session.exec(
+                select(UserQuestion).where(
+                    UserQuestion.depends_on_question_id == user_question_id
+                )
+            ).all()
+            for dependent_question in dependent_questions:
+                dependent_question.depends_on_question_id = None
+                dependent_question.show_if_answer = ""
+                session.add(dependent_question)
             session.delete(question)
             session.commit()
 
@@ -131,6 +140,15 @@ def create_router() -> APIRouter:
         question = get(session, ChildQuestion, child_question_id)
         affected_answers = len(question.answers)
         if not dry_run:
+            dependent_questions = session.exec(
+                select(ChildQuestion).where(
+                    ChildQuestion.depends_on_question_id == child_question_id
+                )
+            ).all()
+            for dependent_question in dependent_questions:
+                dependent_question.depends_on_question_id = None
+                dependent_question.show_if_answer = ""
+                session.add(dependent_question)
             session.delete(question)
             session.commit()
         return {

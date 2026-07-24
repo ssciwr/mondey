@@ -55,13 +55,17 @@ let options = $derived.by(() => {
 });
 let update: any;
 let refresh: any;
+let questionsStore: typeof userQuestions | typeof childQuestions =
+	$state(userQuestions);
 
 if (kind === "user") {
 	update = updateUserQuestion;
 	refresh = userQuestions.refresh;
+	questionsStore = userQuestions;
 } else if (kind === "child") {
 	update = updateChildQuestion;
 	refresh = childQuestions.refresh;
+	questionsStore = childQuestions;
 } else {
 	console.log(
 		"Error, kind must be either 'user' or 'child', currently is: ",
@@ -73,6 +77,58 @@ const inputTypes: Array<SelectOptionType<string>> = [
 	{ value: "textarea", name: "Text" },
 	{ value: "select", name: "Multiple Choice" },
 ];
+
+// candidate parent questions: other multiple-choice questions of the same
+// kind (a question can only depend on the answer to a select question)
+let parentQuestions = $derived(
+	questionsStore.data.filter(
+		(q) => q.id !== question?.id && q.component === "select",
+	),
+);
+let parentQuestionOptions = $derived([
+	{ value: null, name: i18n.tr.admin.questionDependencyNone },
+	...parentQuestions.map((q) => ({
+		value: q.id,
+		name: q?.text?.[preview_lang]?.question || q.name || `Question ${q.id}`,
+	})),
+]);
+let selectedParent = $derived(
+	question?.depends_on_question_id == null
+		? undefined
+		: parentQuestions.find(
+				(q) => q.id === Number(question?.depends_on_question_id),
+			),
+);
+// the option values of the selected parent question that can trigger showing
+// this question
+let parentAnswerOptions = $derived(
+	(selectedParent?.options ?? "")
+		.replace(/;$/, "")
+		.split(";")
+		.filter((value) => value !== ""),
+);
+let showIfAnswerValues = $derived(
+	(question?.show_if_answer ?? "").split(";").filter((value) => value !== ""),
+);
+
+function toggleShowIfAnswer(value: string, checked: boolean) {
+	if (!question) {
+		return;
+	}
+	const values = new Set(showIfAnswerValues);
+	if (checked) {
+		values.add(value);
+	} else {
+		values.delete(value);
+	}
+	question.show_if_answer = [...values].join(";");
+}
+
+function clearShowIfAnswer() {
+	if (question) {
+		question.show_if_answer = "";
+	}
+}
 
 function updateOptionsJson() {
 	if (!question || !question.options || !question.text) {
@@ -97,6 +153,11 @@ function updateOptionsJson() {
 async function saveChanges() {
 	if (!question) {
 		return;
+	}
+	// keep dependency fields consistent: no parent => no trigger values
+	if (question.depends_on_question_id == null) {
+		question.depends_on_question_id = null;
+		question.show_if_answer = "";
 	}
 	const { data, error } = await update({
 		body: question,
@@ -208,6 +269,40 @@ async function saveChanges() {
 							<Checkbox data-testid="visibility-checkbox" bind:checked={question.visibility}></Checkbox>
 						</ButtonGroup>
 					</div>
+					<div class="mb-5 mt-5">
+						<Label class="mb-2">{i18n.tr.admin.questionDependency}</Label>
+						<Select
+							data-testid="dependsOnSelect"
+							class="mt-2"
+							items={parentQuestionOptions}
+							bind:value={question.depends_on_question_id}
+							onchange={clearShowIfAnswer}
+							placeholder=""
+						/>
+					</div>
+					{#if question.depends_on_question_id != null}
+						<div class="mb-5">
+							<Label class="mb-2">{i18n.tr.admin.questionDependencyAnswer}</Label>
+							{#if parentAnswerOptions.length === 0}
+								<p class="text-sm text-gray-500">
+									{i18n.tr.admin.questionDependencyNoAnswerOptions}
+								</p>
+							{:else}
+								{#each parentAnswerOptions as value}
+									<div class="mb-1">
+										<Checkbox
+											checked={showIfAnswerValues.includes(value)}
+											on:change={(e) =>
+												toggleShowIfAnswer(
+													value,
+													(e.target as HTMLInputElement).checked,
+												)}
+										>{value}</Checkbox>
+									</div>
+								{/each}
+							{/if}
+						</div>
+					{/if}
 				</div>
 				<div>
 					<Card>

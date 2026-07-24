@@ -142,6 +142,12 @@ export const translationIds = {
 		childQuestions: "Fragen über Kind",
 		question: "Frage",
 		questions: "Fragen",
+		questionDependency: "Nur anzeigen, wenn",
+		questionDependencyNone: "Keine Bedingung (immer anzeigen)",
+		questionDependencyAnswer:
+			"die Antwort einer der folgenden Optionen entspricht:",
+		questionDependencyNoAnswerOptions:
+			"Die ausgewählte Frage hat keine Antwortoptionen.",
 		data: "Daten",
 		childAgeMonths: "Alter des Kindes (Monate)",
 		relevantChildInformation: "Relevante Informationen zum Kind:",

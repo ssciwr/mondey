@@ -13,7 +13,11 @@ import {
 import DataInput from "$lib/components/DataInput/DataInput.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
-import { preventDefault } from "$lib/util";
+import {
+	clearHiddenAnswers,
+	isQuestionVisible,
+	preventDefault,
+} from "$lib/util";
 import { Button, Card, Heading } from "flowbite-svelte";
 
 async function submitData() {
@@ -99,6 +103,12 @@ let answers: { [k: string]: UserAnswerPublic } = $state({});
 let disableEdit: boolean = $state(false);
 let promise = $state(setup());
 
+// clear answers to any dependent questions that are currently hidden, so that
+// stale/contradictory answers are not submitted
+$effect(() => {
+	clearHiddenAnswers(questionnaire, answers);
+});
+
 function safeParseJsonList(str: string | null | undefined): any[] {
 	if (!str || str === "") {
 		return [];
@@ -129,7 +139,7 @@ function safeParseJsonList(str: string | null | undefined): any[] {
                     onsubmit={preventDefault(submitData)}
             >
                 {#each questionnaire as element, i}
-                    {#if element.text && element.component}
+                    {#if element.text && element.component && isQuestionVisible(element, answers)}
                         <DataInput
                                 component={element.component}
                                 bind:value={answers[element.id].answer}

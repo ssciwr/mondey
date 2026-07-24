@@ -76,6 +76,8 @@ def test_create_user_question_works(admin_client: TestClient):
         "additional_option": "",
         "required": False,
         "visibility": False,
+        "depends_on_question_id": None,
+        "show_if_answer": "",
     }
 
 
@@ -89,6 +91,29 @@ def test_update_user_question_works(
     assert response.status_code == 200
 
     assert response.json() == default_user_question_admin
+
+
+def test_update_user_question_dependency_fields(
+    admin_client: TestClient, default_user_question_admin
+):
+    # make question 1 depend on the answer to question 2
+    user_question_admin = {
+        **default_user_question_admin,
+        "visibility": True,
+        "depends_on_question_id": 2,
+        "show_if_answer": "a;b",
+    }
+    response = admin_client.put("/admin/user-questions/", json=user_question_admin)
+    assert response.status_code == 200
+    assert response.json()["depends_on_question_id"] == 2
+    assert response.json()["show_if_answer"] == "a;b"
+
+    # the dependency fields are also exposed via the public endpoint
+    public_response = admin_client.get("/user-questions/")
+    assert public_response.status_code == 200
+    question_1 = next(q for q in public_response.json() if q["id"] == 1)
+    assert question_1["depends_on_question_id"] == 2
+    assert question_1["show_if_answer"] == "a;b"
 
 
 def test_update_user_question_id_not_there(admin_client: TestClient):
@@ -140,6 +165,24 @@ def test_delete_user_question_deletes(session, admin_client: TestClient):
     user_questions = session.exec(select(UserQuestion)).all()
     assert len(user_questions) == 2
     assert user_questions[0].id == 2
+
+
+def test_delete_user_question_clears_dependent_questions(
+    session, admin_client: TestClient
+):
+    dependent_question = session.get(UserQuestion, 2)
+    assert dependent_question is not None
+    dependent_question.depends_on_question_id = 1
+    dependent_question.show_if_answer = "yes"
+    session.add(dependent_question)
+    session.commit()
+
+    response = admin_client.delete("/admin/user-questions/1?dry_run=false")
+
+    assert response.status_code == 200
+    session.refresh(dependent_question)
+    assert dependent_question.depends_on_question_id is None
+    assert dependent_question.show_if_answer == ""
 
 
 def test_delete_user_question_works(session, admin_client: TestClient):
@@ -242,6 +285,8 @@ def test_create_child_question_works(admin_client: TestClient):
         "additional_option": "",
         "required": False,
         "visibility": False,
+        "depends_on_question_id": None,
+        "show_if_answer": "",
     }
 
 
@@ -351,6 +396,24 @@ def test_delete_child_question_works(session, admin_client: TestClient):
     assert len(child_answers) == 1
     for child_answer in child_answers:
         assert child_answer.question_id != 1  # because they don't have answer IDs.
+
+
+def test_delete_child_question_clears_dependent_questions(
+    session, admin_client: TestClient
+):
+    dependent_question = session.get(ChildQuestion, 2)
+    assert dependent_question is not None
+    dependent_question.depends_on_question_id = 1
+    dependent_question.show_if_answer = "yes"
+    session.add(dependent_question)
+    session.commit()
+
+    response = admin_client.delete("/admin/child-questions/1?dry_run=false")
+
+    assert response.status_code == 200
+    session.refresh(dependent_question)
+    assert dependent_question.depends_on_question_id is None
+    assert dependent_question.show_if_answer == ""
 
 
 def test_delete_child_question_id_not_there(admin_client: TestClient):
