@@ -1408,6 +1408,13 @@ export const getCompletedMilestoneAnswerSessions = <ThrowOnError extends boolean
  */
 export const getMilestonegroupsForSession = <ThrowOnError extends boolean = false>(options: Options<GetMilestonegroupsForSessionData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<GetMilestonegroupsForSessionResponse, GetMilestonegroupsForSessionError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'fastapiusersauth',
+                type: 'apiKey'
+            }
+        ],
         url: '/users/feedback/answersession={answersession_id}',
         ...options
     });
@@ -1418,6 +1425,13 @@ export const getMilestonegroupsForSession = <ThrowOnError extends boolean = fals
  */
 export const getSummaryFeedbackForAnswersession = <ThrowOnError extends boolean = false>(options: Options<GetSummaryFeedbackForAnswersessionData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<GetSummaryFeedbackForAnswersessionResponse, GetSummaryFeedbackForAnswersessionError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'fastapiusersauth',
+                type: 'apiKey'
+            }
+        ],
         url: '/users/feedback/answersession={answersession_id}/summary',
         ...options
     });
@@ -1428,6 +1442,13 @@ export const getSummaryFeedbackForAnswersession = <ThrowOnError extends boolean 
  */
 export const getDetailedFeedbackForAnswersession = <ThrowOnError extends boolean = false>(options: Options<GetDetailedFeedbackForAnswersessionData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<GetDetailedFeedbackForAnswersessionResponse, GetDetailedFeedbackForAnswersessionError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'fastapiusersauth',
+                type: 'apiKey'
+            }
+        ],
         url: '/users/feedback/answersession={answersession_id}/detailed',
         ...options
     });

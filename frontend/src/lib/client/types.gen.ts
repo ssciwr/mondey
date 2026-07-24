@@ -411,8 +411,6 @@ export type UserCreate = {
     is_active?: boolean | null;
     is_superuser?: boolean | null;
     is_verified?: boolean | null;
-    is_researcher?: boolean | null;
-    full_data_access?: boolean | null;
     research_group_id?: number | null;
 };
 

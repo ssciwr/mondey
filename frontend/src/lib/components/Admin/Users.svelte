@@ -83,13 +83,13 @@ onMount(async () => {
 <div class="overflow-x-scroll overflow-y-scroll">
 	<Table class="w-max max-h-[600px]">
 		<TableHead>
-			<TableHeadCell>Email</TableHeadCell>
-			<TableHeadCell>Active</TableHeadCell>
-			<TableHeadCell>Verified</TableHeadCell>
-			<TableHeadCell>Researcher</TableHeadCell>
-			<TableHeadCell>Full data access</TableHeadCell>
-			<TableHeadCell>Research Code</TableHeadCell>
-			<TableHeadCell>Admin</TableHeadCell>
+			<TableHeadCell>{i18n.tr.admin.userEmail}</TableHeadCell>
+			<TableHeadCell>{i18n.tr.admin.userActive}</TableHeadCell>
+			<TableHeadCell>{i18n.tr.admin.userVerified}</TableHeadCell>
+			<TableHeadCell>{i18n.tr.admin.userResearcher}</TableHeadCell>
+			<TableHeadCell>{i18n.tr.admin.userFullDataAccess}</TableHeadCell>
+			<TableHeadCell>{i18n.tr.admin.userResearchCode}</TableHeadCell>
+			<TableHeadCell>{i18n.tr.admin.userAdmin}</TableHeadCell>
 			<TableHeadCell>{i18n.tr.admin.actions}</TableHeadCell>
 		</TableHead>
 		<TableBody>
@@ -116,7 +116,7 @@ onMount(async () => {
 							{user.research_group_id}
 						</Alert>
 							{:else if user.is_researcher}
-							<Button onclick={() => {addResearchGroup(user)}}>Add research code</Button>
+							<Button onclick={() => {addResearchGroup(user)}}>{i18n.tr.admin.addResearchCode}</Button>
 						{/if}
 					</TableBodyCell>
 					<TableBodyCell>
