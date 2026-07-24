@@ -36,7 +36,12 @@ onMount(async () => {
 		await user.load();
 		await milestoneGroups.refresh();
 	} catch (error) {
-		alertStore.showAlert(error.message, "", true, true);
+		alertStore.showAlert(
+			error instanceof Error ? error.message : String(error),
+			"",
+			true,
+			true,
+		);
 	}
 });
 </script>

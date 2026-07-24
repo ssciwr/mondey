@@ -6,14 +6,12 @@ import EditTranslationModal from "$lib/components/Admin/EditTranslationModal.sve
 import InputAutoTranslate from "$lib/components/Admin/InputAutoTranslate.svelte";
 import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import { i18n } from "$lib/i18n.svelte";
-import type { Translation } from "$lib/i18n.svelte";
+import type { TranslationSections } from "$lib/i18n.svelte";
 import { translationIds } from "$lib/translations";
 import { Accordion, AccordionItem, Label } from "flowbite-svelte";
 import { onMount } from "svelte";
 
-let translations: Record<string, Translation> = $state(
-	{} as Record<string, Translation>,
-);
+let translations: Record<string, TranslationSections> = $state({});
 
 let missing_translations: Array<string> = $state([] as Array<string>);
 let open_edit_translation_modal = $state(false);
@@ -27,7 +25,7 @@ async function getTranslations() {
 				`${import.meta.env.VITE_MONDEY_API_URL}/static/i18n/${locale}.json`,
 				{ cache: "no-cache" },
 			);
-			let data = {} as Translation;
+			let data: TranslationSections = {};
 			if (!res.ok) {
 				console.log(
 					`Failed to fetch locale ${locale} with status ${res.status}`,

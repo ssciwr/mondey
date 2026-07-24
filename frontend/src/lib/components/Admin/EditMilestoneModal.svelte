@@ -159,7 +159,7 @@ async function deleteMilestoneImageAndUpdate() {
                     <EditImage
                             filename={`m/${milestoneImage.id}.webp`}
                             ondelete={() => {
-						currentMilestoneImageId = milestoneImage.id;
+						currentMilestoneImageId = milestoneImage.id ?? null;
 						showDeleteMilestoneImageModal = true;
 				}}
                     />

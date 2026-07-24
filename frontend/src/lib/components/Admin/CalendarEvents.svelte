@@ -83,7 +83,7 @@ function openEditModal(calendarEvent: CalendarEventRead | null = null) {
 		editForm.title = "";
 		editForm.description = "";
 		editForm.external_link = "";
-		editForm.event_date = "";
+		editForm.event_date = undefined;
 	}
 	showEditModal = true;
 }
@@ -274,7 +274,7 @@ onMount(() => {
 					</TableBodyRow>
 				{:else}
 					<TableBodyRow>
-						<TableBodyCell colspan="5" class="text-center text-gray-500">
+						<TableBodyCell colspan={5} class="text-center text-gray-500">
 							{i18n.tr.admin.calendarEventsNotFound}
 						</TableBodyCell>
 					</TableBodyRow>
@@ -313,7 +313,7 @@ onMount(() => {
 					id="description"
 					bind:value={editForm.description}
 					placeholder={i18n.tr.admin.desc}
-					rows="3"
+					rows={3}
 				/>
 			</div>
 
