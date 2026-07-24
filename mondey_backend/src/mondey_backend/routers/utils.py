@@ -337,6 +337,26 @@ def get_db_child(
     return child
 
 
+def get_db_milestone_answer_session(
+    session: SessionDep,
+    current_active_user: User,
+    answer_session_id: int,
+) -> MilestoneAnswerSession:
+    answer_session = get(session, MilestoneAnswerSession, answer_session_id)
+    if (
+        answer_session.user_id != current_active_user.id
+        and not current_active_user.is_superuser
+    ):
+        raise HTTPException(
+            404,
+            detail=(
+                "User does not have access to MilestoneAnswerSession "
+                f"with id {answer_session_id}"
+            ),
+        )
+    return answer_session
+
+
 def get_answer_session_child_age_in_months(
     session: SessionDep, answer_session: MilestoneAnswerSession
 ) -> int:

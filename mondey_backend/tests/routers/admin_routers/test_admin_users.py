@@ -1,5 +1,11 @@
+import pytest
 from checkdigit import verhoeff
 from fastapi.testclient import TestClient
+from fastapi_users.db import SQLAlchemyUserDatabase
+
+from mondey_backend.models.users import User
+from mondey_backend.models.users import UserUpdate
+from mondey_backend.users import UserManager
 
 
 def test_users(admin_client: TestClient):
@@ -41,7 +47,12 @@ def test_delete_research_group(admin_client: TestClient):
 def test_create_research_group(admin_client: TestClient):
     research_group = {"id": 123451}
     assert admin_client.get("/admin/research-groups/").json() == [research_group]
-    response = admin_client.post("/admin/research-groups/2")
+    users = admin_client.get("/admin/users/").json()
+    ordinary_user = next(user for user in users if user["id"] == 4)
+    assert not ordinary_user["is_researcher"]
+    assert ordinary_user["research_group_id"] == 0
+
+    response = admin_client.post("/admin/research-groups/4")
     assert response.status_code == 200
     new_research_group = response.json()
     assert verhoeff.validate(str(new_research_group["id"]))
@@ -49,3 +60,55 @@ def test_create_research_group(admin_client: TestClient):
     assert len(new_groups) == 2
     assert research_group in new_groups
     assert new_research_group in new_groups
+
+    users = admin_client.get("/admin/users/").json()
+    updated_user = next(user for user in users if user["id"] == 4)
+    assert updated_user["is_researcher"]
+    assert updated_user["research_group_id"] == new_research_group["id"]
+
+
+@pytest.mark.asyncio
+async def test_admin_update_persists_research_permissions(user_session):
+    user = await user_session.get(User, 4)
+    assert user is not None
+    assert not user.is_researcher
+    assert not user.full_data_access
+    assert user.research_group_id == 0
+
+    user_manager = UserManager(SQLAlchemyUserDatabase(user_session, User))
+    await user_manager.update(
+        UserUpdate(
+            is_researcher=True,
+            full_data_access=True,
+            research_group_id=123451,
+        ),
+        user,
+        safe=False,
+    )
+
+    await user_session.refresh(user)
+    assert user.is_researcher
+    assert user.full_data_access
+    assert user.research_group_id == 123451
+
+
+@pytest.mark.asyncio
+async def test_self_update_cannot_persist_research_permissions(user_session):
+    user = await user_session.get(User, 4)
+    assert user is not None
+
+    user_manager = UserManager(SQLAlchemyUserDatabase(user_session, User))
+    await user_manager.update(
+        UserUpdate(
+            is_researcher=True,
+            full_data_access=True,
+            research_group_id=123451,
+        ),
+        user,
+        safe=True,
+    )
+
+    await user_session.refresh(user)
+    assert not user.is_researcher
+    assert not user.full_data_access
+    assert user.research_group_id == 0
