@@ -115,11 +115,9 @@ test("Research page: valid data", async ({ page }) => {
 	await mock_research_names_route(page, 5);
 	await page.goto("/userLand/research", { waitUntil: "networkidle" });
 
-	const milestoneOptionLabels = await page
-		.getByTestId("selectMilestone")
-		.locator("option")
-		.allTextContents();
-	expect(milestoneOptionLabels).toEqual(
+	await expect(
+		page.getByTestId("selectMilestone").locator("option"),
+	).toHaveText(
 		Array.from(
 			{ length: 5 },
 			(_, index) =>
