@@ -110,6 +110,33 @@ def test_register_new_user_valid_research_code(
     assert new_user["research_group_id"] == 123451
 
 
+@pytest.mark.asyncio
+async def test_register_cannot_assign_research_privileges(
+    public_client: TestClient,
+    smtp_mock: SMTPMock,
+    user_session: UserAsyncSessionDep,
+):
+    email = "unprivileged@example.com"
+    response = public_client.post(
+        "/auth/register",
+        json={
+            "email": email,
+            "password": "p1",
+            "research_group_id": 123451,
+            "is_researcher": True,
+            "full_data_access": True,
+        },
+    )
+    assert response.status_code == 201
+
+    user_query = select(User).where(User.email == email)
+    result = await user_session.execute(user_query)
+    user = result.scalars().one()
+    assert user.is_researcher is False
+    assert user.full_data_access is False
+    assert user.research_group_id == 123451
+
+
 def test_user_reset_password(user_client: TestClient, smtp_mock: SMTPMock):
     assert smtp_mock.last_message is None
     email = "user@mondey.de"

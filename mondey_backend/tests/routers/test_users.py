@@ -631,6 +631,37 @@ def test_get_summary_feedback_for_session(user_client: TestClient):
     assert response.json() == {"1": -2}
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/users/feedback/answersession=1",
+        "/users/feedback/answersession=1/summary",
+        "/users/feedback/answersession=1/detailed",
+    ],
+)
+def test_feedback_requires_authentication(public_client: TestClient, path: str):
+    response = public_client.get(path)
+    assert response.status_code == 401
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/users/feedback/answersession=1",
+        "/users/feedback/answersession=1/summary",
+        "/users/feedback/answersession=1/detailed",
+    ],
+)
+def test_feedback_rejects_non_owner(research_client: TestClient, path: str):
+    response = research_client.get(path)
+    assert response.status_code == 404
+
+
+def test_get_summary_feedback_allows_admin(admin_client: TestClient):
+    response = admin_client.get("/users/feedback/answersession=1/summary")
+    assert response.status_code == 200
+
+
 def test_get_summary_feedback_for_session_invalid(user_client: TestClient):
     response = user_client.get("/users/feedback/answersession=12/summary")
     assert response.status_code == 404

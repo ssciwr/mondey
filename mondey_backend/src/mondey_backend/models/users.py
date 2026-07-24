@@ -38,8 +38,6 @@ class UserRead(schemas.BaseUser[int]):
 
 
 class UserCreate(schemas.BaseUserCreate):
-    is_researcher: bool | None = False
-    full_data_access: bool | None = False
     research_group_id: int | None = 0
 
 
@@ -47,6 +45,13 @@ class UserUpdate(schemas.BaseUserUpdate):
     is_researcher: bool | None = None
     full_data_access: bool | None = None
     research_group_id: int | None = None
+
+    def create_update_dict(self):
+        """Exclude admin-managed fields from self-service user updates."""
+        update_dict = super().create_update_dict()
+        for field in ("is_researcher", "full_data_access", "research_group_id"):
+            update_dict.pop(field, None)
+        return update_dict
 
 
 class AccessToken(SQLAlchemyBaseAccessTokenTable[int], Base):
