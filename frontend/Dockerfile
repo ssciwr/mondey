@@ -1,4 +1,4 @@
-FROM node:22-slim AS builder
+FROM node:24-slim AS builder
 
 LABEL org.opencontainers.image.source=https://github.com/ssciwr/mondey
 LABEL org.opencontainers.image.description="MONDEY frontend production image"
@@ -15,7 +15,7 @@ COPY . .
 
 RUN echo "VITE_MONDEY_API_URL=${MONDEY_API_URL}" > .env && pnpm run build
 
-FROM nginx:1.27.5-alpine-slim
+FROM nginx:1.30.4-alpine-slim
 
 COPY --from=builder /app/build /usr/share/nginx/html
 

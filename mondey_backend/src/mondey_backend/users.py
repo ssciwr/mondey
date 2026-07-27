@@ -73,7 +73,7 @@ def is_test_account_user(user: User) -> bool:
         raise TypeError("Pass in the User object, not their email directly")
     if not hasattr(user, "email"):
         return False
-    return "tester@testaccount.com" in user.email
+    return user.email.endswith("tester@testaccount.com")
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):

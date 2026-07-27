@@ -19,6 +19,7 @@ import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
+import DOMPurify from "dompurify";
 import {
 	Accordion,
 	AccordionItem,
@@ -479,7 +480,11 @@ async function printReport(): Promise<void> {
 	if (printWindow === null) {
 		return;
 	}
-	printWindow.document.write(`<pre>${report}</pre>`);
+	const sanitizedReport = DOMPurify.sanitize(`<pre>${report}</pre>`, {
+		ALLOWED_TAGS: ["pre", "h1", "h2", "h3", "strong", "br"],
+		ALLOWED_ATTR: [],
+	});
+	printWindow.document.write(sanitizedReport);
 	printWindow.document.close();
 	printWindow.print();
 }

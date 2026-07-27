@@ -20,7 +20,7 @@ def get_session():
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
-current_active_user = fastapi_users.current_user(active=True)
+current_active_user = fastapi_users.current_user(active=True, verified=True)
 
 CurrentActiveUserDep = Annotated[User, Depends(current_active_user)]
 
@@ -39,6 +39,8 @@ ResearchDep = Depends(current_active_researcher)
 
 CurrentActiveResearchDep = Annotated[User, Depends(current_active_user)]
 
-current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
+current_active_superuser = fastapi_users.current_user(
+    active=True, verified=True, superuser=True
+)
 
 AdminDep = Depends(current_active_superuser)

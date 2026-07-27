@@ -66,7 +66,9 @@ def get_admin_settings(session: SessionDep) -> AdminSettings:
 
 def create_router() -> APIRouter:
     router = APIRouter(prefix="/users", tags=["users"])
-    router.include_router(fastapi_users.get_users_router(UserRead, UserUpdate))
+    router.include_router(
+        fastapi_users.get_users_router(UserRead, UserUpdate, requires_verification=True)
+    )
 
     # children endpoints
     @router.get("/children/", response_model=list[ChildSummaryPublic])

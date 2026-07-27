@@ -9,7 +9,7 @@ class AppSettings(BaseSettings):
     # this will load settings from environment variables or an .env file if present
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
     # these defaults are for local development and are used if the environment variables are not set
-    SECRET: str = "abc123"
+    SECRET: str = "dev-only-insecure-secret-change-me"
     DATABASE_HOST_MONDEYDB: str = "localhost"
     DATABASE_HOST_USERSDB: str = "localhost"
     DATABASE_USER: str = "postgres"
@@ -36,6 +36,16 @@ class AppSettings(BaseSettings):
     SESSION_ABSOLUTE_TIMEOUT_SECONDS: int = 8 * 3600
     SESSION_TOUCH_INTERVAL_SECONDS: int = 300
     SESSION_WARNING_SECONDS: int = 300
+
+    @model_validator(mode="after")
+    def validate_secret(self):
+        min_secret_length = 20
+        if len(self.SECRET) < min_secret_length:
+            raise ValueError(
+                f"SECRET must be at least {min_secret_length} characters long. "
+                "Set it to a long random string (see DEPLOYMENT.md)."
+            )
+        return self
 
     @model_validator(mode="after")
     def validate_session_timeouts(self):
