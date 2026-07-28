@@ -77,3 +77,7 @@ class SessionInfo(BaseModel):
 
 class SessionReauthentication(BaseModel):
     password: SecretStr
+
+
+class AccountDeletion(BaseModel):
+    password: SecretStr

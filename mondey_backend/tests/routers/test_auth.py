@@ -7,6 +7,7 @@ from sqlmodel import select
 
 from mondey_backend.dependencies import UserAsyncSessionDep
 from mondey_backend.models.users import User
+from mondey_backend.settings import app_settings
 
 
 class SMTPMock:
@@ -42,7 +43,7 @@ def test_register_new_user(public_client: TestClient, smtp_mock: SMTPMock):
     assert smtp_mock.last_message is None
     email = "u1@asdgdasf.com"
     response = public_client.post(
-        "/auth/register", json={"email": email, "password": "p1"}
+        "/auth/register", json={"email": email, "password": "valid-test-password"}
     )
     assert response.status_code == 201
     msg = smtp_mock.last_message
@@ -59,6 +60,65 @@ def test_register_new_user(public_client: TestClient, smtp_mock: SMTPMock):
     assert response.status_code == 200
 
 
+def test_register_rejects_password_shorter_than_minimum(
+    public_client: TestClient, smtp_mock: SMTPMock
+):
+    too_short = "x" * (app_settings.MIN_PASSWORD_LENGTH - 1)
+    response = public_client.post(
+        "/auth/register", json={"email": "short@example.com", "password": too_short}
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"]["code"] == "REGISTER_INVALID_PASSWORD"
+    assert smtp_mock.last_message is None
+
+
+def test_register_rejects_password_containing_email(
+    public_client: TestClient, smtp_mock: SMTPMock
+):
+    email = "parent@example.com"
+    response = public_client.post(
+        "/auth/register", json={"email": email, "password": f"abc-{email}-123"}
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"]["code"] == "REGISTER_INVALID_PASSWORD"
+    assert smtp_mock.last_message is None
+
+
+def test_reset_password_rejects_password_shorter_than_minimum(
+    public_client: TestClient, smtp_mock: SMTPMock
+):
+    email = "resetme@example.com"
+    assert (
+        public_client.post(
+            "/auth/register", json={"email": email, "password": "valid-test-password"}
+        ).status_code
+        == 201
+    )
+    verify_msg = smtp_mock.last_message
+    assert verify_msg is not None
+    verify_token = verify_msg.get_content().split("\n\n")[1].rsplit("/")[-1]
+    assert (
+        public_client.post("/auth/verify", json={"token": verify_token}).status_code
+        == 200
+    )
+    assert (
+        public_client.post("/auth/forgot-password", json={"email": email}).status_code
+        == 202
+    )
+    reset_msg = smtp_mock.last_message
+    assert reset_msg is not None
+    reset_token = reset_msg.get_content().split("\n\n")[1].rsplit("/")[-1]
+    response = public_client.post(
+        "/auth/reset-password",
+        json={
+            "token": reset_token,
+            "password": "x" * (app_settings.MIN_PASSWORD_LENGTH - 1),
+        },
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"]["code"] == "RESET_PASSWORD_INVALID_PASSWORD"
+
+
 @pytest.mark.asyncio
 async def test_register_test_account(
     public_client: TestClient, smtp_mock: SMTPMock, user_session: UserAsyncSessionDep
@@ -66,7 +126,7 @@ async def test_register_test_account(
     assert smtp_mock.last_message is None
     email = "2349812.12234987tester@testaccount.com"
     response = public_client.post(
-        "/auth/register", json={"email": email, "password": "p1"}
+        "/auth/register", json={"email": email, "password": "valid-test-password"}
     )
     assert response.status_code == 201
     msg = smtp_mock.last_message
@@ -88,7 +148,11 @@ def test_register_new_user_invalid_research_code_ignored(
     email = "a@b.com"
     response = admin_client.post(
         "/auth/register",
-        json={"email": email, "password": "p1", "research_group_id": 703207},
+        json={
+            "email": email,
+            "password": "valid-test-password",
+            "research_group_id": 703207,
+        },
     )
     assert response.status_code == 201
     new_user = admin_client.get("/admin/users/").json()[-1]
@@ -102,7 +166,11 @@ def test_register_new_user_valid_research_code(
     email = "a@b.com"
     response = admin_client.post(
         "/auth/register",
-        json={"email": email, "password": "p1", "research_group_id": 123451},
+        json={
+            "email": email,
+            "password": "valid-test-password",
+            "research_group_id": 123451,
+        },
     )
     assert response.status_code == 201
     new_user = admin_client.get("/admin/users/").json()[-1]
@@ -121,7 +189,7 @@ async def test_register_cannot_assign_research_privileges(
         "/auth/register",
         json={
             "email": email,
-            "password": "p1",
+            "password": "valid-test-password",
             "research_group_id": 123451,
             "is_researcher": True,
             "full_data_access": True,

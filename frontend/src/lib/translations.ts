@@ -33,11 +33,6 @@ export const translationIds = {
 		noRelevantMilestones:
 			"Es gibt keine Meilensteine, die für das Alter des Kindes +/- 6 Monate relevant sind",
 		alertMessageError: "Ein Fehler ist aufgetreten",
-		submitImage: "Bild einreichen",
-		submitImageText:
-			"Haben Sie ein Bild von Ihrem Kind bei diesem Meilenstein, das Sie gerne beisteuern und veröffentlichen möchten? Wenn ja, können Sie es hier einreichen.",
-		submitImageConditions:
-			"Ich bin damit einverstanden, dass dieses Bild veröffentlicht und den Benutzern als eines der Meilensteinbilder auf dieser Website angezeigt wird, sofern es von den Site-Administratoren genehmigt wird.",
 		recommendOk:
 			"Das Kind hat für sämtliche Meilensteine altersgemäße Bewertungen erhalten.",
 		recommendOkShort: "Alles im grünen Bereich!",
@@ -172,7 +167,6 @@ export const translationIds = {
 		importance: "Warum ist dieser Meilenstein wichtig?",
 		image: "Bild",
 		images: "Bilder",
-		submittedImages: "Eingereichte Bilder",
 		documents: "Mondey-Publikationen",
 		documentsDescription:
 			"Hier finden Sie eine Übersicht der Veröffentlichungen des Instituts — Fachartikel, Studien und Berichte aus Forschung und Praxis.",
@@ -302,6 +296,16 @@ export const translationIds = {
 		emailValidationError:
 			"Ungültiger oder abgelaufener E-Mail-Validierungslink",
 		goHome: "Zu Application",
+		passwordRequirement:
+			"Das Passwort muss mindestens {minLength} Zeichen lang sein.",
+		consentLabel: "Ich habe die",
+		consentPrivacyLinkLabel: "Datenschutzerklärung",
+		consentLabelSuffix:
+			" gelesen und willige in die dort beschriebene Verarbeitung meiner Daten und der Daten meines Kindes ein.",
+	},
+	privacy: {
+		pageTitle: "Datenschutzerklärung",
+		text: "Der Text der Datenschutzerklärung wurde noch nicht hinterlegt.",
 	},
 	login: {
 		heading: "Einloggen",
@@ -322,6 +326,14 @@ export const translationIds = {
 			"Sie sind bereits angemeldet. Melden sie sich zuerst ab um den Account zu wechseln.",
 		alertMessageTitle: "Fehler",
 		badCredentials: "Ungültige E-Mail-Adresse oder ungültiges Passwort",
+		notVerifiedTitle: "Ihr Konto ist noch nicht aktiviert",
+		notVerifiedMessage:
+			"Bitte klicken Sie auf den Aktivierungslink in der E-Mail, die wir Ihnen bei der Registrierung geschickt haben. Falls der Link abgelaufen ist oder Sie die E-Mail nicht finden können, senden wir Ihnen einen neuen Link.",
+		resendActivation: "Neuen Aktivierungslink senden",
+		resendActivationSent:
+			"Wir haben Ihnen einen neuen Aktivierungslink geschickt. Bitte prüfen Sie Ihr E-Mail-Postfach (auch den Spam-Ordner).",
+		resendActivationError:
+			"Der Aktivierungslink konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.",
 		badActiveUser: "Der Benutzer konnte nicht gefunden werden",
 		notLoggedIn: "Bitte melden sie sich erneut an",
 		unauthorized: "Zugang verweigert",
@@ -377,6 +389,25 @@ export const translationIds = {
 		defaultAlertMessage: "Ein Fehler ist aufgetreten",
 		alertTitle: "Fehler",
 		placeholder: "Bitte ausfüllen",
+		passwordRequirement:
+			"Das Passwort muss mindestens {minLength} Zeichen lang sein.",
+		passwordTooShortError:
+			"Das Passwort muss mindestens {minLength} Zeichen lang sein",
+		deleteAccount: "Konto löschen",
+		deleteAccountDescription:
+			"Sie können Ihr Konto und alle dazugehörigen Daten dauerhaft löschen.",
+		deleteAccountAreYouSure:
+			"Sind Sie sicher, dass Sie Ihr Konto löschen möchten?",
+		deleteAccountWillAffect: "Dabei werden gelöscht:",
+		deleteAccountIrreversible:
+			"Diese Daten können danach nicht wiederhergestellt werden.",
+		deleteAccountEnterPassword:
+			"Bitte geben Sie zur Bestätigung Ihr Passwort ein",
+		deleteAccountConfirm: "Ja, Konto endgültig löschen",
+		deleteAccountCancel: "Abbrechen",
+		deleteAccountError: "Das Konto konnte nicht gelöscht werden",
+		affectedChildren: "registrierte Kinder",
+		affectedAnswers: "gespeicherte Antworten",
 	},
 	childData: {
 		newChildHeading: "+ Neu",

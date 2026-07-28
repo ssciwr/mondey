@@ -175,10 +175,16 @@ mondey_backend/static/*.jpg
 # ssl keys
 *.pem
 
-# project specific
-private
-static
-db
+# runtime data directories created by the backend, tests and docker-compose
+/private
+/static
+/db
+/mondey_backend/private
+/mondey_backend/static
+/mondey_backend/db
+/e2e/private
+/e2e/static
+/e2e/db
 
 # playwright
 /frontend/node_modules/

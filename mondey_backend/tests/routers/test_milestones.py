@@ -102,28 +102,12 @@ def test_order_milestones_and_milestone_groups_child1(
     assert milestone_groups[0]["milestones"][1]["id"] == 2
 
 
-def test_submit_milestone_image_invalid_milestone(
+def test_submit_milestone_image_endpoint_removed(
     user_client: TestClient, image_file_jpg_1600_1200: pathlib.Path
 ):
-    with open(image_file_jpg_1600_1200, "rb") as f:
-        response = user_client.post(
-            "/submitted-milestone-images/99",
-            files={"file": ("img.jpg", f, "image/jpeg")},
-        )
-    assert response.status_code == 404
-
-
-def test_submit_milestone_image_valid(
-    user_client: TestClient,
-    image_file_jpg_1600_1200: pathlib.Path,
-    static_dir: pathlib.Path,
-):
-    submitted_image_file = static_dir / "ms" / "3.webp"
-    assert not submitted_image_file.is_file()
     with open(image_file_jpg_1600_1200, "rb") as f:
         response = user_client.post(
             "/submitted-milestone-images/1",
             files={"file": ("img.jpg", f, "image/jpeg")},
         )
-    assert response.status_code == 200
-    assert submitted_image_file.is_file()
+    assert response.status_code == 404

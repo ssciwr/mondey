@@ -32,6 +32,10 @@ class AppSettings(BaseSettings):
     E2E_TEST_USER_SQL_FILES: str = ""
     E2E_TEST_MONDEY_SQL_FILES: str = ""
     MAX_CHILD_AGE_MONTHS: int = 72
+    MIN_PASSWORD_LENGTH: int = 12
+    # How long an account activation link stays valid. Long enough that a user
+    # who doesn't read their email straight away can still use it.
+    VERIFICATION_TOKEN_LIFETIME_SECONDS: int = 24 * 3600
     SESSION_IDLE_TIMEOUT_SECONDS: int = 3600
     SESSION_ABSOLUTE_TIMEOUT_SECONDS: int = 8 * 3600
     SESSION_TOUCH_INTERVAL_SECONDS: int = 300
@@ -44,6 +48,15 @@ class AppSettings(BaseSettings):
             raise ValueError(
                 f"SECRET must be at least {min_secret_length} characters long. "
                 "Set it to a long random string (see DEPLOYMENT.md)."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def validate_min_password_length(self):
+        lowest_allowed_min_password_length = 8
+        if lowest_allowed_min_password_length > self.MIN_PASSWORD_LENGTH:
+            raise ValueError(
+                f"MIN_PASSWORD_LENGTH must be at least {lowest_allowed_min_password_length}"
             )
         return self
 

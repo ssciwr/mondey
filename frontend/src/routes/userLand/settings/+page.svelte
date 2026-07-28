@@ -1,21 +1,38 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
+import { goto } from "$app/navigation";
 import {
 	authCookieLogin,
+	deleteCurrentUserAccount,
 	usersCurrentUser,
 	usersPatchCurrentUser,
 } from "$lib/client/sdk.gen";
+import DeleteAccountModal from "$lib/components/DeleteAccountModal.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
-import { preventDefault } from "$lib/util";
-import { Button, Heading, Input, Label, Modal } from "flowbite-svelte";
+import { user } from "$lib/stores/userStore.svelte";
+import { isValidPassword, minPasswordLength, preventDefault } from "$lib/util";
+import { Button, Heading, Helper, Input, Label, Modal } from "flowbite-svelte";
 
 let newPassword = $state(null) as string | null;
 let newPasswordRepeat = $state(null) as string | null;
 let currentPassword = $state(null) as string | null;
 let currentPasswordValid = $state(false);
 let passwordChangeSuccess = $state(false);
+let showDeleteAccountModal = $state(false);
+
+async function deleteAccount(dryRun: boolean, password: string) {
+	return await deleteCurrentUserAccount({
+		body: { password: password },
+		query: { dry_run: dryRun },
+	});
+}
+
+async function afterAccountDeleted() {
+	user.data = null;
+	await goto("/");
+}
 
 async function submitNewPassword() {
 	currentPasswordValid = false;
@@ -35,6 +52,19 @@ async function submitNewPassword() {
 		alertStore.showAlert(
 			i18n.tr.settings.alertTitle,
 			i18n.tr.settings.emptyPasswordError,
+			true,
+			false,
+		);
+		return;
+	}
+
+	if (!isValidPassword(newPassword)) {
+		alertStore.showAlert(
+			i18n.tr.settings.alertTitle,
+			i18n.tr.settings.passwordTooShortError.replace(
+				"{minLength}",
+				String(minPasswordLength),
+			),
 			true,
 			false,
 		);
@@ -148,8 +178,12 @@ async function submitNewPassword() {
                 id="newPassword"
                 autocomplete="new-password"
                 required
+                minlength={minPasswordLength}
                 placeholder={i18n.tr.settings.placeholder}
         />
+        <Helper id="newPasswordRequirement" class="text-sm">
+            {i18n.tr.settings.passwordRequirement.replace("{minLength}", String(minPasswordLength))}
+        </Helper>
 
         <Label
                 class="font-semibold text-gray-700 dark:text-gray-400"
@@ -192,4 +226,28 @@ async function submitNewPassword() {
 			}}>{i18n.tr.settings.closeWindow}</Button
         >
     </Modal>
+
+    <hr class="my-8 border-gray-200 dark:border-gray-700"/>
+
+    <Heading
+            tag="h4"
+            class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
+            id="deleteAccountHeading">{i18n.tr.settings.deleteAccount}</Heading
+    >
+    <p class="m-2 text-center">{i18n.tr.settings.deleteAccountDescription}</p>
+    <div class="m-2 flex justify-center">
+        <Button
+                id="deleteAccountButton"
+                color="red"
+                size="lg"
+                on:click={() => {showDeleteAccountModal = true;}}
+        >{i18n.tr.settings.deleteAccount}</Button
+        >
+    </div>
 </div>
+
+<DeleteAccountModal
+        bind:open={showDeleteAccountModal}
+        deleteRequest={deleteAccount}
+        afterDelete={afterAccountDeleted}
+/>

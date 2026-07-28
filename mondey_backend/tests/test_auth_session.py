@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from mondey_backend.models.users import AccessToken
 from mondey_backend.models.users import User
+from mondey_backend.settings import app_settings
 from mondey_backend.users import SESSION_ABSOLUTE_EXPIRES_HEADER
 from mondey_backend.users import SESSION_IDLE_EXPIRES_HEADER
 from mondey_backend.users import cookie_transport
@@ -58,3 +59,40 @@ async def test_reauthentication_verifies_password_and_rotates_session(
 
     tokens = (await user_session.execute(select(AccessToken))).scalars().all()
     assert [token.token for token in tokens] == [new_token]
+
+
+@pytest.mark.asyncio
+async def test_existing_short_password_still_works_for_login(
+    app: FastAPI,
+    user_session: AsyncSession,
+):
+    """The password policy applies when setting a password, not when using one.
+
+    Accounts that were created before the policy existed must not be locked out.
+    """
+    short_password = "short"
+    assert len(short_password) < app_settings.MIN_PASSWORD_LENGTH
+    user = await user_session.get(User, 3)
+    assert user is not None
+    user.hashed_password = PasswordHelper().hash(short_password)
+    await user_session.commit()
+
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app),
+        base_url="https://testserver",
+    ) as client:
+        login_response = await client.post(
+            "/auth/login",
+            data={"username": user.email, "password": short_password},
+        )
+        assert login_response.status_code == 204
+        assert client.cookies.get(cookie_transport.cookie_name) is not None
+
+        # ...but changing it to another short password is rejected
+        change_response = await client.patch(
+            "/users/me", json={"password": "alsoshort"}
+        )
+        assert change_response.status_code == 400
+        assert (
+            change_response.json()["detail"]["code"] == "UPDATE_USER_INVALID_PASSWORD"
+        )

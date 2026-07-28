@@ -22,3 +22,11 @@ export type PlotData = {
 export function isValidAge(value: number) {
 	return Math.floor(value) === value && value >= 0 && value <= 72;
 }
+
+// Keep in sync with MIN_PASSWORD_LENGTH in the backend settings, which is what
+// actually enforces this - the check here is only to give immediate feedback.
+export const minPasswordLength = 12;
+
+export function isValidPassword(password: string | null): boolean {
+	return password !== null && password.length >= minPasswordLength;
+}

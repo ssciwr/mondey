@@ -5,6 +5,16 @@ export type ClientOptions = {
 };
 
 /**
+ * AccountDeletion
+ */
+export type AccountDeletion = {
+    /**
+     * Password
+     */
+    password: string;
+};
+
+/**
  * AdminSettingsPublic
  */
 export type AdminSettingsPublic = {
@@ -104,16 +114,6 @@ export type BodyResetResetPassword = {
      * Password
      */
     password: string;
-};
-
-/**
- * Body_submit_milestone_image
- */
-export type BodySubmitMilestoneImage = {
-    /**
-     * File
-     */
-    file: Blob | File;
 };
 
 /**
@@ -1148,24 +1148,6 @@ export type StatisticsUpdateResult = {
 };
 
 /**
- * SubmittedMilestoneImagePublic
- */
-export type SubmittedMilestoneImagePublic = {
-    /**
-     * Id
-     */
-    id: number;
-    /**
-     * Milestone Id
-     */
-    milestone_id: number;
-    /**
-     * User Id
-     */
-    user_id: number;
-};
-
-/**
  * UserAnswerPublic
  */
 export type UserAnswerPublic = {
@@ -1590,34 +1572,6 @@ export type GetMilestoneGroupsResponses = {
 };
 
 export type GetMilestoneGroupsResponse = GetMilestoneGroupsResponses[keyof GetMilestoneGroupsResponses];
-
-export type SubmitMilestoneImageData = {
-    body: BodySubmitMilestoneImage;
-    path: {
-        /**
-         * Milestone Id
-         */
-        milestone_id: number;
-    };
-    query?: never;
-    url: '/submitted-milestone-images/{milestone_id}';
-};
-
-export type SubmitMilestoneImageErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type SubmitMilestoneImageError = SubmitMilestoneImageErrors[keyof SubmitMilestoneImageErrors];
-
-export type SubmitMilestoneImageResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
 
 export type GetUserQuestionsData = {
     body?: never;
@@ -2287,80 +2241,6 @@ export type DeleteMilestoneImageErrors = {
 export type DeleteMilestoneImageError = DeleteMilestoneImageErrors[keyof DeleteMilestoneImageErrors];
 
 export type DeleteMilestoneImageResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
-
-export type GetSubmittedMilestoneImagesData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/admin/submitted-milestone-images/';
-};
-
-export type GetSubmittedMilestoneImagesResponses = {
-    /**
-     * Response Get Submitted Milestone Images
-     *
-     * Successful Response
-     */
-    200: Array<SubmittedMilestoneImagePublic>;
-};
-
-export type GetSubmittedMilestoneImagesResponse = GetSubmittedMilestoneImagesResponses[keyof GetSubmittedMilestoneImagesResponses];
-
-export type ApproveSubmittedMilestoneImageData = {
-    body?: never;
-    path: {
-        /**
-         * Submitted Milestone Image Id
-         */
-        submitted_milestone_image_id: number;
-    };
-    query?: never;
-    url: '/admin/submitted-milestone-images/approve/{submitted_milestone_image_id}';
-};
-
-export type ApproveSubmittedMilestoneImageErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ApproveSubmittedMilestoneImageError = ApproveSubmittedMilestoneImageErrors[keyof ApproveSubmittedMilestoneImageErrors];
-
-export type ApproveSubmittedMilestoneImageResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
-
-export type DeleteSubmittedMilestoneImageData = {
-    body?: never;
-    path: {
-        /**
-         * Submitted Milestone Image Id
-         */
-        submitted_milestone_image_id: number;
-    };
-    query?: never;
-    url: '/admin/submitted-milestone-images/{submitted_milestone_image_id}';
-};
-
-export type DeleteSubmittedMilestoneImageErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type DeleteSubmittedMilestoneImageError = DeleteSubmittedMilestoneImageErrors[keyof DeleteSubmittedMilestoneImageErrors];
-
-export type DeleteSubmittedMilestoneImageResponses = {
     /**
      * Successful Response
      */
@@ -3083,6 +2963,38 @@ export type UsersPatchUserResponses = {
 };
 
 export type UsersPatchUserResponse = UsersPatchUserResponses[keyof UsersPatchUserResponses];
+
+export type DeleteCurrentUserAccountData = {
+    body: AccountDeletion;
+    path?: never;
+    query?: {
+        /**
+         * Dry Run
+         *
+         * When true, shows what would be deleted without actually deleting
+         */
+        dry_run?: boolean;
+    };
+    url: '/users/me/account';
+};
+
+export type DeleteCurrentUserAccountErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteCurrentUserAccountError = DeleteCurrentUserAccountErrors[keyof DeleteCurrentUserAccountErrors];
+
+export type DeleteCurrentUserAccountResponses = {
+    /**
+     * Successful Response
+     */
+    200: DeleteResponse;
+};
+
+export type DeleteCurrentUserAccountResponse = DeleteCurrentUserAccountResponses[keyof DeleteCurrentUserAccountResponses];
 
 export type GetChildrenData = {
     body?: never;
