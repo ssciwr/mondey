@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { AdminUpdateStatsData, AdminUpdateStatsResponses, ApproveSubmittedMilestoneImageData, ApproveSubmittedMilestoneImageErrors, ApproveSubmittedMilestoneImageResponses, AuthCookieLoginData, AuthCookieLoginErrors, AuthCookieLoginResponses, AuthCookieLogoutData, AuthCookieLogoutErrors, AuthCookieLogoutResponses, CreateChildData, CreateChildErrors, CreateChildQuestionData, CreateChildQuestionResponses, CreateChildResponses, CreateDocumentData, CreateDocumentErrors, CreateDocumentResponses, CreateEventData, CreateEventErrors, CreateEventResponses, CreateLanguageData, CreateLanguageErrors, CreateLanguageResponses, CreateMilestoneData, CreateMilestoneErrors, CreateMilestoneGroupAdminData, CreateMilestoneGroupAdminResponses, CreateMilestoneResponses, CreateResearchGroupData, CreateResearchGroupErrors, CreateResearchGroupResponses, CreateUserQuestionData, CreateUserQuestionResponses, DeleteChildData, DeleteChildErrors, DeleteChildImageData, DeleteChildImageErrors, DeleteChildImageResponses, DeleteChildQuestionData, DeleteChildQuestionErrors, DeleteChildQuestionResponses, DeleteChildResponses, DeleteDocumentData, DeleteDocumentErrors, DeleteDocumentResponses, DeleteEventData, DeleteEventErrors, DeleteEventResponses, DeleteLanguageData, DeleteLanguageErrors, DeleteLanguageResponses, DeleteMilestoneData, DeleteMilestoneErrors, DeleteMilestoneGroupAdminData, DeleteMilestoneGroupAdminErrors, DeleteMilestoneGroupAdminResponses, DeleteMilestoneImageData, DeleteMilestoneImageErrors, DeleteMilestoneImageResponses, DeleteMilestoneResponses, DeleteResearchGroupData, DeleteResearchGroupErrors, DeleteResearchGroupResponses, DeleteSubmittedMilestoneImageData, DeleteSubmittedMilestoneImageErrors, DeleteSubmittedMilestoneImageResponses, DeleteUserQuestionData, DeleteUserQuestionErrors, DeleteUserQuestionResponses, GetAdminSettingsData, GetAdminSettingsResponses, GetChildData, GetChildErrors, GetChildImageData, GetChildImageErrors, GetChildImageResponses, GetChildQuestionsAdminData, GetChildQuestionsAdminResponses, GetChildQuestionsData, GetChildQuestionsResponses, GetChildrenData, GetChildrenResponses, GetChildResponses, GetCompletedMilestoneAnswerSessionsData, GetCompletedMilestoneAnswerSessionsErrors, GetCompletedMilestoneAnswerSessionsResponses, GetCurrentChildAnswersData, GetCurrentChildAnswersErrors, GetCurrentChildAnswersResponses, GetCurrentMilestoneAnswerSessionData, GetCurrentMilestoneAnswerSessionErrors, GetCurrentMilestoneAnswerSessionResponses, GetCurrentUserAnswersData, GetCurrentUserAnswersResponses, GetDetailedFeedbackForAnswersessionData, GetDetailedFeedbackForAnswersessionErrors, GetDetailedFeedbackForAnswersessionResponses, GetDocumentsData, GetDocumentsResponses, GetEventsData, GetEventsResponses, GetLanguagesData, GetLanguagesResponses, GetMilestoneAgeScoresData, GetMilestoneAgeScoresErrors, GetMilestoneAgeScoresResponses, GetMilestoneAnswerSessionAnalysisData, GetMilestoneAnswerSessionAnalysisErrors, GetMilestoneAnswerSessionAnalysisResponses, GetMilestoneAnswerSessionsData, GetMilestoneAnswerSessionsResponses, GetMilestoneData, GetMilestoneErrors, GetMilestoneGroupsAdminData, GetMilestoneGroupsAdminResponses, GetMilestoneGroupsData, GetMilestoneGroupsErrors, GetMilestonegroupsForSessionData, GetMilestonegroupsForSessionErrors, GetMilestonegroupsForSessionResponses, GetMilestoneGroupsResponses, GetMilestoneResponses, GetMilestonesData, GetMilestonesResponses, GetPublicDocumentsData, GetPublicDocumentsResponses, GetResearchDataData, GetResearchDataResponses, GetResearchGroupsData, GetResearchGroupsResponses, GetResearchNamesData, GetResearchNamesErrors, GetResearchNamesResponses, GetSubmittedMilestoneImagesData, GetSubmittedMilestoneImagesResponses, GetSummaryFeedbackForAnswersessionData, GetSummaryFeedbackForAnswersessionErrors, GetSummaryFeedbackForAnswersessionResponses, GetUserQuestionsAdminData, GetUserQuestionsAdminResponses, GetUserQuestionsData, GetUserQuestionsResponses, GetUsersData, GetUsersResponses, ImportCsvDataData, ImportCsvDataErrors, ImportCsvDataResponses, ModifyMilestoneAnswerSessionData, ModifyMilestoneAnswerSessionErrors, ModifyMilestoneAnswerSessionResponses, OrderChildQuestionsAdminData, OrderChildQuestionsAdminErrors, OrderChildQuestionsAdminResponses, OrderMilestoneGroupsAdminData, OrderMilestoneGroupsAdminErrors, OrderMilestoneGroupsAdminResponses, OrderMilestonesAdminData, OrderMilestonesAdminErrors, OrderMilestonesAdminResponses, OrderUserQuestionsAdminData, OrderUserQuestionsAdminErrors, OrderUserQuestionsAdminResponses, ReauthenticateSessionData, ReauthenticateSessionErrors, ReauthenticateSessionResponses, RegisterRegisterData, RegisterRegisterErrors, RegisterRegisterResponses, ResetForgotPasswordData, ResetForgotPasswordErrors, ResetForgotPasswordResponses, ResetResetPasswordData, ResetResetPasswordErrors, ResetResetPasswordResponses, SubmitMilestoneImageData, SubmitMilestoneImageErrors, SubmitMilestoneImageResponses, TranslateData, TranslateErrors, TranslateResponses, UpdateAdminSettingsData, UpdateAdminSettingsErrors, UpdateAdminSettingsResponses, UpdateChildData, UpdateChildErrors, UpdateChildQuestionData, UpdateChildQuestionErrors, UpdateChildQuestionResponses, UpdateChildResponses, UpdateCurrentChildAnswersData, UpdateCurrentChildAnswersErrors, UpdateCurrentChildAnswersResponses, UpdateCurrentUserAnswersData, UpdateCurrentUserAnswersErrors, UpdateCurrentUserAnswersResponses, UpdateDocumentData, UpdateDocumentErrors, UpdateDocumentResponses, UpdateEventData, UpdateEventErrors, UpdateEventResponses, UpdateI18nData, UpdateI18nErrors, UpdateI18nResponses, UpdateMilestoneAnswerData, UpdateMilestoneAnswerErrors, UpdateMilestoneAnswerResponses, UpdateMilestoneData, UpdateMilestoneErrors, UpdateMilestoneGroupAdminData, UpdateMilestoneGroupAdminErrors, UpdateMilestoneGroupAdminResponses, UpdateMilestoneResponses, UpdateUserQuestionData, UpdateUserQuestionErrors, UpdateUserQuestionResponses, UploadChildImageData, UploadChildImageErrors, UploadChildImageResponses, UploadMilestoneGroupImageData, UploadMilestoneGroupImageErrors, UploadMilestoneGroupImageResponses, UploadMilestoneImageData, UploadMilestoneImageErrors, UploadMilestoneImageResponses, UsersCurrentUserData, UsersCurrentUserErrors, UsersCurrentUserResponses, UsersDeleteUserData, UsersDeleteUserErrors, UsersDeleteUserResponses, UsersPatchCurrentUserData, UsersPatchCurrentUserErrors, UsersPatchCurrentUserResponses, UsersPatchUserData, UsersPatchUserErrors, UsersPatchUserResponses, UsersUserData, UsersUserErrors, UsersUserResponses, VerifyRequestTokenData, VerifyRequestTokenErrors, VerifyRequestTokenResponses, VerifyVerifyData, VerifyVerifyErrors, VerifyVerifyResponses } from './types.gen';
+import type { AdminUpdateStatsData, AdminUpdateStatsResponses, AuthCookieLoginData, AuthCookieLoginErrors, AuthCookieLoginResponses, AuthCookieLogoutData, AuthCookieLogoutErrors, AuthCookieLogoutResponses, CreateChildData, CreateChildErrors, CreateChildQuestionData, CreateChildQuestionResponses, CreateChildResponses, CreateDocumentData, CreateDocumentErrors, CreateDocumentResponses, CreateEventData, CreateEventErrors, CreateEventResponses, CreateLanguageData, CreateLanguageErrors, CreateLanguageResponses, CreateMilestoneData, CreateMilestoneErrors, CreateMilestoneGroupAdminData, CreateMilestoneGroupAdminResponses, CreateMilestoneResponses, CreateResearchGroupData, CreateResearchGroupErrors, CreateResearchGroupResponses, CreateUserQuestionData, CreateUserQuestionResponses, DeleteChildData, DeleteChildErrors, DeleteChildImageData, DeleteChildImageErrors, DeleteChildImageResponses, DeleteChildQuestionData, DeleteChildQuestionErrors, DeleteChildQuestionResponses, DeleteChildResponses, DeleteCurrentUserAccountData, DeleteCurrentUserAccountErrors, DeleteCurrentUserAccountResponses, DeleteDocumentData, DeleteDocumentErrors, DeleteDocumentResponses, DeleteEventData, DeleteEventErrors, DeleteEventResponses, DeleteLanguageData, DeleteLanguageErrors, DeleteLanguageResponses, DeleteMilestoneData, DeleteMilestoneErrors, DeleteMilestoneGroupAdminData, DeleteMilestoneGroupAdminErrors, DeleteMilestoneGroupAdminResponses, DeleteMilestoneImageData, DeleteMilestoneImageErrors, DeleteMilestoneImageResponses, DeleteMilestoneResponses, DeleteResearchGroupData, DeleteResearchGroupErrors, DeleteResearchGroupResponses, DeleteUserQuestionData, DeleteUserQuestionErrors, DeleteUserQuestionResponses, GetAdminSettingsData, GetAdminSettingsResponses, GetChildData, GetChildErrors, GetChildImageData, GetChildImageErrors, GetChildImageResponses, GetChildQuestionsAdminData, GetChildQuestionsAdminResponses, GetChildQuestionsData, GetChildQuestionsResponses, GetChildrenData, GetChildrenResponses, GetChildResponses, GetCompletedMilestoneAnswerSessionsData, GetCompletedMilestoneAnswerSessionsErrors, GetCompletedMilestoneAnswerSessionsResponses, GetCurrentChildAnswersData, GetCurrentChildAnswersErrors, GetCurrentChildAnswersResponses, GetCurrentMilestoneAnswerSessionData, GetCurrentMilestoneAnswerSessionErrors, GetCurrentMilestoneAnswerSessionResponses, GetCurrentUserAnswersData, GetCurrentUserAnswersResponses, GetDetailedFeedbackForAnswersessionData, GetDetailedFeedbackForAnswersessionErrors, GetDetailedFeedbackForAnswersessionResponses, GetDocumentsData, GetDocumentsResponses, GetEventsData, GetEventsResponses, GetLanguagesData, GetLanguagesResponses, GetMilestoneAgeScoresData, GetMilestoneAgeScoresErrors, GetMilestoneAgeScoresResponses, GetMilestoneAnswerSessionAnalysisData, GetMilestoneAnswerSessionAnalysisErrors, GetMilestoneAnswerSessionAnalysisResponses, GetMilestoneAnswerSessionsData, GetMilestoneAnswerSessionsResponses, GetMilestoneData, GetMilestoneErrors, GetMilestoneGroupsAdminData, GetMilestoneGroupsAdminResponses, GetMilestoneGroupsData, GetMilestoneGroupsErrors, GetMilestonegroupsForSessionData, GetMilestonegroupsForSessionErrors, GetMilestonegroupsForSessionResponses, GetMilestoneGroupsResponses, GetMilestoneResponses, GetMilestonesData, GetMilestonesResponses, GetPublicDocumentsData, GetPublicDocumentsResponses, GetResearchDataData, GetResearchDataResponses, GetResearchGroupsData, GetResearchGroupsResponses, GetResearchNamesData, GetResearchNamesErrors, GetResearchNamesResponses, GetSummaryFeedbackForAnswersessionData, GetSummaryFeedbackForAnswersessionErrors, GetSummaryFeedbackForAnswersessionResponses, GetUserQuestionsAdminData, GetUserQuestionsAdminResponses, GetUserQuestionsData, GetUserQuestionsResponses, GetUsersData, GetUsersResponses, ImportCsvDataData, ImportCsvDataErrors, ImportCsvDataResponses, ModifyMilestoneAnswerSessionData, ModifyMilestoneAnswerSessionErrors, ModifyMilestoneAnswerSessionResponses, OrderChildQuestionsAdminData, OrderChildQuestionsAdminErrors, OrderChildQuestionsAdminResponses, OrderMilestoneGroupsAdminData, OrderMilestoneGroupsAdminErrors, OrderMilestoneGroupsAdminResponses, OrderMilestonesAdminData, OrderMilestonesAdminErrors, OrderMilestonesAdminResponses, OrderUserQuestionsAdminData, OrderUserQuestionsAdminErrors, OrderUserQuestionsAdminResponses, ReauthenticateSessionData, ReauthenticateSessionErrors, ReauthenticateSessionResponses, RegisterRegisterData, RegisterRegisterErrors, RegisterRegisterResponses, ResetForgotPasswordData, ResetForgotPasswordErrors, ResetForgotPasswordResponses, ResetResetPasswordData, ResetResetPasswordErrors, ResetResetPasswordResponses, TranslateData, TranslateErrors, TranslateResponses, UpdateAdminSettingsData, UpdateAdminSettingsErrors, UpdateAdminSettingsResponses, UpdateChildData, UpdateChildErrors, UpdateChildQuestionData, UpdateChildQuestionErrors, UpdateChildQuestionResponses, UpdateChildResponses, UpdateCurrentChildAnswersData, UpdateCurrentChildAnswersErrors, UpdateCurrentChildAnswersResponses, UpdateCurrentUserAnswersData, UpdateCurrentUserAnswersErrors, UpdateCurrentUserAnswersResponses, UpdateDocumentData, UpdateDocumentErrors, UpdateDocumentResponses, UpdateEventData, UpdateEventErrors, UpdateEventResponses, UpdateI18nData, UpdateI18nErrors, UpdateI18nResponses, UpdateMilestoneAnswerData, UpdateMilestoneAnswerErrors, UpdateMilestoneAnswerResponses, UpdateMilestoneData, UpdateMilestoneErrors, UpdateMilestoneGroupAdminData, UpdateMilestoneGroupAdminErrors, UpdateMilestoneGroupAdminResponses, UpdateMilestoneResponses, UpdateUserQuestionData, UpdateUserQuestionErrors, UpdateUserQuestionResponses, UploadChildImageData, UploadChildImageErrors, UploadChildImageResponses, UploadMilestoneGroupImageData, UploadMilestoneGroupImageErrors, UploadMilestoneGroupImageResponses, UploadMilestoneImageData, UploadMilestoneImageErrors, UploadMilestoneImageResponses, UsersCurrentUserData, UsersCurrentUserErrors, UsersCurrentUserResponses, UsersDeleteUserData, UsersDeleteUserErrors, UsersDeleteUserResponses, UsersPatchCurrentUserData, UsersPatchCurrentUserErrors, UsersPatchCurrentUserResponses, UsersPatchUserData, UsersPatchUserErrors, UsersPatchUserResponses, UsersUserData, UsersUserErrors, UsersUserResponses, VerifyRequestTokenData, VerifyRequestTokenErrors, VerifyRequestTokenResponses, VerifyVerifyData, VerifyVerifyErrors, VerifyVerifyResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -54,24 +54,6 @@ export const getMilestoneGroups = <ThrowOnError extends boolean = false>(options
         }],
     url: '/milestone-groups/{child_id}',
     ...options
-});
-
-/**
- * Submit Milestone Image
- */
-export const submitMilestoneImage = <ThrowOnError extends boolean = false>(options: Options<SubmitMilestoneImageData, ThrowOnError>): RequestResult<SubmitMilestoneImageResponses, SubmitMilestoneImageErrors, ThrowOnError> => (options.client ?? client).post<SubmitMilestoneImageResponses, SubmitMilestoneImageErrors, ThrowOnError>({
-    ...formDataBodySerializer,
-    security: [{
-            in: 'cookie',
-            name: 'fastapiusersauth',
-            type: 'apiKey'
-        }],
-    url: '/submitted-milestone-images/{milestone_id}',
-    ...options,
-    headers: {
-        'Content-Type': null,
-        ...options.headers
-    }
 });
 
 /**
@@ -431,45 +413,6 @@ export const deleteMilestoneImage = <ThrowOnError extends boolean = false>(optio
             type: 'apiKey'
         }],
     url: '/admin/milestone-images/{milestone_image_id}',
-    ...options
-});
-
-/**
- * Get Submitted Milestone Images
- */
-export const getSubmittedMilestoneImages = <ThrowOnError extends boolean = false>(options?: Options<GetSubmittedMilestoneImagesData, ThrowOnError>): RequestResult<GetSubmittedMilestoneImagesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetSubmittedMilestoneImagesResponses, unknown, ThrowOnError>({
-    security: [{
-            in: 'cookie',
-            name: 'fastapiusersauth',
-            type: 'apiKey'
-        }],
-    url: '/admin/submitted-milestone-images/',
-    ...options
-});
-
-/**
- * Approve Submitted Milestone Image
- */
-export const approveSubmittedMilestoneImage = <ThrowOnError extends boolean = false>(options: Options<ApproveSubmittedMilestoneImageData, ThrowOnError>): RequestResult<ApproveSubmittedMilestoneImageResponses, ApproveSubmittedMilestoneImageErrors, ThrowOnError> => (options.client ?? client).post<ApproveSubmittedMilestoneImageResponses, ApproveSubmittedMilestoneImageErrors, ThrowOnError>({
-    security: [{
-            in: 'cookie',
-            name: 'fastapiusersauth',
-            type: 'apiKey'
-        }],
-    url: '/admin/submitted-milestone-images/approve/{submitted_milestone_image_id}',
-    ...options
-});
-
-/**
- * Delete Submitted Milestone Image
- */
-export const deleteSubmittedMilestoneImage = <ThrowOnError extends boolean = false>(options: Options<DeleteSubmittedMilestoneImageData, ThrowOnError>): RequestResult<DeleteSubmittedMilestoneImageResponses, DeleteSubmittedMilestoneImageErrors, ThrowOnError> => (options.client ?? client).delete<DeleteSubmittedMilestoneImageResponses, DeleteSubmittedMilestoneImageErrors, ThrowOnError>({
-    security: [{
-            in: 'cookie',
-            name: 'fastapiusersauth',
-            type: 'apiKey'
-        }],
-    url: '/admin/submitted-milestone-images/{submitted_milestone_image_id}',
     ...options
 });
 
@@ -864,6 +807,25 @@ export const usersPatchUser = <ThrowOnError extends boolean = false>(options: Op
             type: 'apiKey'
         }],
     url: '/users/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete Current User Account
+ *
+ * Delete the current user's account and all of the data belonging to it.
+ */
+export const deleteCurrentUserAccount = <ThrowOnError extends boolean = false>(options: Options<DeleteCurrentUserAccountData, ThrowOnError>): RequestResult<DeleteCurrentUserAccountResponses, DeleteCurrentUserAccountErrors, ThrowOnError> => (options.client ?? client).delete<DeleteCurrentUserAccountResponses, DeleteCurrentUserAccountErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'fastapiusersauth',
+            type: 'apiKey'
+        }],
+    url: '/users/me/account',
     ...options,
     headers: {
         'Content-Type': 'application/json',

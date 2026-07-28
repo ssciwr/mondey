@@ -28,6 +28,7 @@ from .databases.users import get_user_db
 from .logging import logger
 from .models.research import ResearchGroup
 from .models.users import SessionInfo
+from .models.users import UserCreate
 from .settings import app_settings
 
 
@@ -79,12 +80,29 @@ def is_test_account_user(user: User) -> bool:
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     reset_password_token_secret = app_settings.SECRET
     verification_token_secret = app_settings.SECRET
+    # NB: the fastapi-users default is one hour, which is short enough that users
+    # who don't act on the email immediately are locked out of their account.
+    verification_token_lifetime_seconds = (
+        app_settings.VERIFICATION_TOKEN_LIFETIME_SECONDS
+    )
+
+    async def validate_password(self, password: str, user: UserCreate | User) -> None:
+        """Enforce the password policy on registration, password change and password reset."""
+        if len(password) < app_settings.MIN_PASSWORD_LENGTH:
+            raise exceptions.InvalidPasswordException(
+                reason=f"Password must be at least {app_settings.MIN_PASSWORD_LENGTH} characters long"
+            )
+        email = getattr(user, "email", None)
+        if email and email.casefold() in password.casefold():
+            raise exceptions.InvalidPasswordException(
+                reason="Password must not contain your email address"
+            )
 
     async def on_after_register(self, user: User, request: Request | None = None):
-        logger.info(f"User {user.email} registered.")
+        logger.info(f"User {user.id} registered.")
         if is_test_account_user(user):
             async with async_session_maker() as user_session:
-                logger.warning(f"Updating test user to verified {user.email}")
+                logger.warning(f"Updating test user {user.id} to verified")
                 user_db = await user_session.get(User, user.id)
                 if user_db is not None:
                     user_db.is_verified = True
@@ -92,7 +110,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
         with Session(mondey_engine) as mondey_session:
             if mondey_session.get(ResearchGroup, user.research_group_id) is None:
                 logger.warning(
-                    f"Invalid research code {user.research_group_id} used by User {user.email} - ignoring."
+                    f"Invalid research code {user.research_group_id} used by User {user.id} - ignoring."
                 )
                 async with async_session_maker() as user_session:
                     user_db = await user_session.get(User, user.id)
@@ -104,7 +122,8 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     async def on_after_forgot_password(
         self, user: User, token: str, request: Request | None = None
     ):
-        logger.info(f"User {user.id} has forgot their password. Reset token: {token}")
+        # NB: never log the token itself - it grants a password reset for this account
+        logger.info(f"User {user.id} has forgot their password, sending reset link.")
         send_reset_password_link(user.email, token)
 
     async def on_after_request_verify(
@@ -112,9 +131,8 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     ):
         if is_test_account_user(user):
             return
-        logger.info(
-            f"Verification requested for user {user.id}. Verification token: {token}"
-        )
+        # NB: never log the token itself - it verifies this account
+        logger.info(f"Verification requested for user {user.id}, sending verify link.")
         send_email_validation_link(user.email, token)
 
 

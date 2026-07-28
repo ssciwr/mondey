@@ -6,8 +6,16 @@ import UserVerify from "$lib/components/UserVerify.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
-import { preventDefault } from "$lib/util";
-import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
+import { isValidPassword, minPasswordLength, preventDefault } from "$lib/util";
+import {
+	Button,
+	Card,
+	Checkbox,
+	Heading,
+	Helper,
+	Input,
+	Label,
+} from "flowbite-svelte";
 
 async function submitData(): Promise<void> {
 	if (user.data) {
@@ -46,7 +54,11 @@ let password = $state("");
 let passwordConfirm = $state("");
 let success = $state(false);
 let researchCodeValid = $state(false);
-let passwordValid = $derived(password !== "" && password === passwordConfirm);
+let consentGiven = $state(false);
+let passwordLongEnough = $derived(isValidPassword(password));
+let passwordValid = $derived(
+	passwordLongEnough && password === passwordConfirm,
+);
 
 let { researchCode = "" }: { researchCode?: string } = $props();
 </script>
@@ -93,8 +105,16 @@ let { researchCode = "" }: { researchCode?: string } = $props();
 					type="password"
 					id="password"
 					autocomplete="new-password"
+					minlength={minPasswordLength}
 					placeholder={i18n.tr.registration.passwordLabel}
+					color={password === "" || passwordLongEnough ? 'base' : 'red'}
 				/>
+				<Helper id="passwordRequirement" class="text-sm">
+					{i18n.tr.registration.passwordRequirement.replace(
+						"{minLength}",
+						String(minPasswordLength),
+					)}
+				</Helper>
 			</div>
 
 			<Label
@@ -117,9 +137,22 @@ let { researchCode = "" }: { researchCode?: string } = $props();
 			<Label class="font-semibold text-gray-700 dark:text-gray-400">{i18n.tr.registration.researchCode}</Label>
 			<ResearchCodeInput bind:value={researchCode} bind:valid={researchCodeValid}></ResearchCodeInput>
 
+			<Checkbox bind:checked={consentGiven} id="consent" required>
+				<span class="ml-2">
+					{i18n.tr.registration.consentLabel}
+					<a
+						href="/datenschutz"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="underline hover:text-primary-700"
+						>{i18n.tr.registration.consentPrivacyLinkLabel}</a
+					>{i18n.tr.registration.consentLabelSuffix}
+				</span>
+			</Checkbox>
+
 			<Button
 				type="submit"
-				disabled={!(researchCodeValid && passwordValid)}
+				disabled={!(researchCodeValid && passwordValid && consentGiven)}
 				class="dark:bg-primary-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
 				>{i18n.tr.registration.submitButtonLabel}</Button
 			>

@@ -179,20 +179,6 @@ class MilestoneImagePublic(SQLModel):
     id: int
 
 
-class SubmittedMilestoneImage(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    milestone_id: int | None = Field(
-        default=None, foreign_key="milestone.id", ondelete="CASCADE"
-    )
-    user_id: int
-
-
-class SubmittedMilestoneImagePublic(SQLModel):
-    id: int
-    milestone_id: int
-    user_id: int
-
-
 ## MilestoneAnswer
 
 

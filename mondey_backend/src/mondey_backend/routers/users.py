@@ -1,19 +1,24 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Annotated
 
 import numpy as np
 from fastapi import APIRouter
+from fastapi import Depends
 from fastapi import HTTPException
 from fastapi import Query
 from fastapi import UploadFile
 from fastapi.responses import FileResponse
+from sqlalchemy import delete as sqlalchemy_delete
 from sqlmodel import col
 from sqlmodel import delete
 from sqlmodel import select
 
 from ..dependencies import CurrentActiveUserDep
 from ..dependencies import SessionDep
+from ..dependencies import UserAsyncSessionDep
+from ..logging import logger
 from ..models.children import Child
 from ..models.children import ChildCreate
 from ..models.children import ChildPublic
@@ -28,15 +33,21 @@ from ..models.questions import ChildAnswer
 from ..models.questions import ChildAnswerPublic
 from ..models.questions import UserAnswer
 from ..models.questions import UserAnswerPublic
+from ..models.users import AccessToken
+from ..models.users import AccountDeletion
 from ..models.users import UserRead
 from ..models.users import UserUpdate
 from ..models.utils import DeleteResponse
+from ..users import UserManager
 from ..users import fastapi_users
+from ..users import get_user_manager
 from .scores import compute_milestonegroup_feedback_detailed
 from .scores import compute_milestonegroup_feedback_summary
 from .utils import add
 from .utils import child_image_path
+from .utils import count_users_mondey_data
 from .utils import current_milestone_answer_session
+from .utils import delete_users_mondey_data
 from .utils import get
 from .utils import get_childs_answering_sessions
 from .utils import get_db_child
@@ -69,6 +80,46 @@ def create_router() -> APIRouter:
     router.include_router(
         fastapi_users.get_users_router(UserRead, UserUpdate, requires_verification=True)
     )
+
+    # account endpoints
+    # NB: a sub-path of /users/me, so that it cannot be shadowed by the
+    # superuser-only `DELETE /users/{id}` route of the fastapi-users router above.
+    @router.delete("/me/account", response_model=DeleteResponse)
+    async def delete_current_user_account(
+        session: SessionDep,
+        user_session: UserAsyncSessionDep,
+        current_active_user: CurrentActiveUserDep,
+        user_manager: Annotated[UserManager, Depends(get_user_manager)],
+        body: AccountDeletion,
+        dry_run: bool = Query(
+            True,
+            description="When true, shows what would be deleted without actually deleting",
+        ),
+    ):
+        """Delete the current user's account and all of the data belonging to it."""
+        affected = count_users_mondey_data(session, current_active_user.id)
+        if dry_run:
+            return {"ok": True, "dry_run": dry_run, "children": affected}
+
+        user = await user_manager.get(current_active_user.id)
+        verified, _ = user_manager.password_helper.verify_and_update(
+            body.password.get_secret_value(), user.hashed_password
+        )
+        if not verified:
+            logger.warning(
+                f"Failed password check when deleting account of user {user.id}"
+            )
+            raise HTTPException(400, "LOGIN_BAD_CREDENTIALS")
+
+        delete_users_mondey_data(session, current_active_user.id)
+        await user_session.execute(
+            sqlalchemy_delete(AccessToken).where(AccessToken.user_id == user.id)
+        )
+        await user_session.commit()
+        await user_manager.delete(user)
+        logger.info(f"Deleted account and all data of user {current_active_user.id}")
+
+        return {"ok": True, "dry_run": dry_run, "children": affected}
 
     # children endpoints
     @router.get("/children/", response_model=list[ChildSummaryPublic])

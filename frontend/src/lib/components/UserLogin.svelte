@@ -5,26 +5,35 @@ import { base } from "$app/paths";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 
 import { goto } from "$app/navigation";
+import { verifyRequestToken } from "$lib/client/sdk.gen";
 import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";
 import { preventDefault } from "$lib/util";
-import { Button, Card, Heading, Input, Label } from "flowbite-svelte";
+import { Alert, Button, Card, Heading, Input, Label } from "flowbite-svelte";
 
 import { page } from "$app/state";
 
 // functionality
 async function submitData(): Promise<void> {
+	notVerified = false;
+	activationEmailSent = false;
 	const authReturn = await user.login({
 		username: username,
 		password: password,
 	});
 	if (authReturn.error) {
-		alertStore.showAlert(
-			i18n.tr.login.alertMessageTitle,
-			i18n.tr.login.badCredentials,
-			true,
-			false,
-		);
+		// The account exists and the password is correct, but the email address was
+		// never activated. Say so, rather than claiming the credentials are wrong.
+		if (authReturn.error.detail === "LOGIN_USER_NOT_VERIFIED") {
+			notVerified = true;
+		} else {
+			alertStore.showAlert(
+				i18n.tr.login.alertMessageTitle,
+				i18n.tr.login.badCredentials,
+				true,
+				false,
+			);
+		}
 		console.log("error during login ", authReturn.error.detail);
 	} else {
 		await user.load();
@@ -48,10 +57,30 @@ async function submitData(): Promise<void> {
 	}
 }
 
+async function resendActivationEmail(): Promise<void> {
+	sendingActivationEmail = true;
+	const { error } = await verifyRequestToken({ body: { email: username } });
+	sendingActivationEmail = false;
+	if (error) {
+		console.log("error requesting activation email ", error);
+		alertStore.showAlert(
+			i18n.tr.login.alertMessageTitle,
+			i18n.tr.login.resendActivationError,
+			true,
+			false,
+		);
+		return;
+	}
+	activationEmailSent = true;
+}
+
 // form data and variables
 
 let username = $state("");
 let password = $state("");
+let notVerified = $state(false);
+let sendingActivationEmail = $state(false);
+let activationEmailSent = $state(false);
 </script>
 
 
@@ -105,6 +134,27 @@ let password = $state("");
 				type="submit">{i18n.tr.login.submitButtonLabel}</Button
 			>
 		</form>
+
+		{#if notVerified}
+			<Alert color="yellow" class="m-2" id="notVerifiedAlert">
+				<span class="font-semibold">{i18n.tr.login.notVerifiedTitle}</span>
+				<p class="mt-1">{i18n.tr.login.notVerifiedMessage}</p>
+				{#if activationEmailSent}
+					<p class="mt-3 font-semibold" id="activationEmailSent">
+						{i18n.tr.login.resendActivationSent}
+					</p>
+				{:else}
+					<Button
+						id="resendActivationButton"
+						class="mt-3"
+						size="sm"
+						disabled={sendingActivationEmail}
+						on:click={resendActivationEmail}
+						>{i18n.tr.login.resendActivation}</Button
+					>
+				{/if}
+			</Alert>
+		{/if}
 	</Card>
 
 	<span class="container mx-auto w-full text-gray-700 dark:text-gray-400"

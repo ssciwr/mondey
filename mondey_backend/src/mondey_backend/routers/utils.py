@@ -15,6 +15,7 @@ from PIL import ImageOps
 from sqlalchemy import func
 from sqlmodel import SQLModel
 from sqlmodel import col
+from sqlmodel import delete
 from sqlmodel import select
 from webp import WebPPreset
 
@@ -30,9 +31,11 @@ from ..models.milestones import MilestoneGroupAdmin
 from ..models.milestones import MilestoneGroupText
 from ..models.milestones import MilestoneText
 from ..models.milestones import SuspiciousState
+from ..models.questions import ChildAnswer
 from ..models.questions import ChildQuestion
 from ..models.questions import ChildQuestionAdmin
 from ..models.questions import ChildQuestionText
+from ..models.questions import UserAnswer
 from ..models.questions import UserQuestion
 from ..models.questions import UserQuestionAdmin
 from ..models.questions import UserQuestionText
@@ -453,14 +456,6 @@ def document_path(document_id: int) -> pathlib.Path:
     return pathlib.Path(f"{app_settings.STATIC_FILES_PATH}/documents/{document_id}.pdf")
 
 
-def submitted_milestone_image_path(
-    submitted_milestone_image_id: int | None,
-) -> pathlib.Path:
-    return pathlib.Path(
-        f"{app_settings.STATIC_FILES_PATH}/ms/{submitted_milestone_image_id}.webp"
-    )
-
-
 def i18n_language_path(language_id: str) -> pathlib.Path:
     return pathlib.Path(f"{app_settings.STATIC_FILES_PATH}/i18n/{language_id}.json")
 
@@ -499,3 +494,55 @@ def get_childs_answering_sessions(
         col(MilestoneAnswerSession.child_id) == child_id
     )
     return list(session.exec(select_answering_sessions).all())
+
+
+def count_users_mondey_data(session: SessionDep, user_id: int) -> dict[str, int]:
+    """Count the data a user has in the mondey database, for the deletion dry run."""
+    child_ids = session.exec(
+        select(Child.id).where(col(Child.user_id) == user_id)
+    ).all()
+    affected_answers = session.exec(
+        select(func.count())
+        .select_from(MilestoneAnswer)
+        .join(MilestoneAnswerSession)
+        .where(col(MilestoneAnswerSession.user_id) == user_id)
+    ).one()
+    affected_answers += session.exec(
+        select(func.count())
+        .select_from(ChildAnswer)
+        .where(col(ChildAnswer.child_id).in_(child_ids))
+    ).one()
+    affected_answers += session.exec(
+        select(func.count())
+        .select_from(UserAnswer)
+        .where(col(UserAnswer.user_id) == user_id)
+    ).one()
+    return {
+        "affectedChildren": len(child_ids),
+        "affectedAnswers": affected_answers,
+    }
+
+
+def delete_users_mondey_data(session: SessionDep, user_id: int) -> None:
+    """Delete all of a user's data in the mondey database.
+
+    The user account itself lives in the separate users database and is deleted by
+    the caller: there is no foreign key between the two databases, so nothing here
+    happens automatically when the account is removed.
+    """
+    child_ids = session.exec(
+        select(Child.id).where(col(Child.user_id) == user_id)
+    ).all()
+    for child_id in child_ids:
+        child_image_path(child_id).unlink(missing_ok=True)
+    # milestone answers are removed by the cascade from their answer session
+    session.execute(
+        delete(MilestoneAnswerSession).where(
+            (col(MilestoneAnswerSession.user_id) == user_id)
+            | (col(MilestoneAnswerSession.child_id).in_(child_ids))
+        )
+    )
+    session.execute(delete(ChildAnswer).where(col(ChildAnswer.child_id).in_(child_ids)))
+    session.execute(delete(UserAnswer).where(col(UserAnswer.user_id) == user_id))
+    session.execute(delete(Child).where(col(Child.user_id) == user_id))
+    session.commit()

@@ -48,7 +48,7 @@ def test_public_registration_schema_does_not_accept_research_privileges():
     user_create = UserCreate.model_validate(
         {
             "email": "attacker@example.com",
-            "password": "password",
+            "password": "valid-test-password",
             "research_group_id": 123451,
             "is_researcher": True,
             "full_data_access": True,
@@ -59,7 +59,7 @@ def test_public_registration_schema_does_not_accept_research_privileges():
     assert not hasattr(user_create, "full_data_access")
     assert user_create.create_update_dict() == {
         "email": "attacker@example.com",
-        "password": "password",
+        "password": "valid-test-password",
         "research_group_id": 123451,
     }
 

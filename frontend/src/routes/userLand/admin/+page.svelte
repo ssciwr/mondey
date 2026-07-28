@@ -9,7 +9,6 @@ import Languages from "$lib/components/Admin/Languages.svelte";
 import MilestoneExpectedAges from "$lib/components/Admin/MilestoneExpectedAges.svelte";
 import MilestoneGroups from "$lib/components/Admin/MilestoneGroups.svelte";
 import Questions from "$lib/components/Admin/Questions.svelte";
-import SubmittedMilestoneImages from "$lib/components/Admin/SubmittedMilestoneImages.svelte";
 import Translations from "$lib/components/Admin/Translations.svelte";
 import Users from "$lib/components/Admin/Users.svelte";
 import { i18n } from "$lib/i18n.svelte";
@@ -22,7 +21,6 @@ import {
 	CalendarMonthSolid,
 	ClipboardListOutline,
 	DatabaseOutline,
-	FileImageOutline,
 	FileOutline,
 	LanguageOutline,
 	PersonChalkboardOutline,
@@ -60,13 +58,6 @@ onMount(async () => {
             {i18n.tr.admin.expectedAge}
         </div>
         <MilestoneExpectedAges/>
-    </TabItem>
-    <TabItem>
-        <div slot="title" class="flex items-center gap-2">
-            <FileImageOutline size="md"/>
-            {i18n.tr.admin.submittedImages}
-        </div>
-        <SubmittedMilestoneImages/>
     </TabItem>
     <TabItem>
         <div slot="title" class="flex items-center gap-2">

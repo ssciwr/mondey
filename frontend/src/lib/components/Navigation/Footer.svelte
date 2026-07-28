@@ -42,7 +42,7 @@ import {
           <FooterLinkGroup>
             <FooterLink liClass="mb-2 text-sm max-sm:text-xs text-zinc-400" href="/">{i18n.tr.footer.research}</FooterLink>
             <FooterLink liClass="mb-2 text-sm max-sm:text-xs text-zinc-400" href="/">{i18n.tr.footer.imprint}</FooterLink>
-            <FooterLink liClass="mb-2 text-sm max-sm:text-xs text-zinc-400" href="/">{i18n.tr.footer.privacy}</FooterLink>
+            <FooterLink liClass="mb-2 text-sm max-sm:text-xs text-zinc-400" href="/datenschutz">{i18n.tr.footer.privacy}</FooterLink>
           </FooterLinkGroup>
         </div>
 <div>

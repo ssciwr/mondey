@@ -38,7 +38,6 @@ from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
 from mondey_backend.models.milestones import MilestoneGroupText
 from mondey_backend.models.milestones import MilestoneImage
 from mondey_backend.models.milestones import MilestoneText
-from mondey_backend.models.milestones import SubmittedMilestoneImage
 from mondey_backend.models.milestones import SuspiciousState
 from mondey_backend.models.questions import ChildAnswer
 from mondey_backend.models.questions import ChildQuestion
@@ -61,14 +60,6 @@ def static_dir(tmp_path_factory: pytest.TempPathFactory):
     for milestone_image_id in [1, 2, 3]:
         img = Image.new("RGB", (201, 414))
         img.save(milestone_images_dir / f"{milestone_image_id}.webp")
-    # add user submitted milestone image files
-    submitted_milestone_images_dir = static_dir / "ms"
-    submitted_milestone_images_dir.mkdir()
-    for submitted_milestone_image_id in [1, 2]:
-        img = Image.new("RGB", (281, 311))
-        img.save(
-            submitted_milestone_images_dir / f"{submitted_milestone_image_id}.webp"
-        )
     # add some i18n json files
     i18n_dir = static_dir / "i18n"
     i18n_dir.mkdir()
@@ -257,12 +248,10 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                         importance="",
                     )
                 )
-        # add the milestone images and submitted milestone images that were created in the static directory
+        # add the milestone images that were created in the static directory
         session.add(MilestoneImage(milestone_id=1, filename="m1.jpg", approved=True))
         session.add(MilestoneImage(milestone_id=1, filename="m2.jpg", approved=True))
         session.add(MilestoneImage(milestone_id=2, filename="m3.jpg", approved=True))
-        session.add(SubmittedMilestoneImage(milestone_id=1, user_id=1))
-        session.add(SubmittedMilestoneImage(milestone_id=2, user_id=2))
         session.commit()
         for child, user_id in zip(children, [3, 3, 1, 5], strict=False):
             session.add(Child.model_validate(child, update={"user_id": user_id}))
