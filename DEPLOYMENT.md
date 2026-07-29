@@ -1,35 +1,56 @@
 # Deployment
 
-Some information on how to deploy the website - currently it is deployed on a temporary heicloud VM.
+Some information on how to deploy the website. The production deployment is [mondey.de](https://mondey.de),
+which runs on a heicloud VM.
 
 A FAQ section is included at the end.
 
 ## Production deployment
 
-Production docker container images are automatically built by CI (this happens when a pull request gets merged into main)
-Before running them, the location of the data directory, SSL keys, DEEPL_API_KEY, and "SECRET" key should be set
-either in env vars or in a file `.env` in the same location as the docker compose.yml.
+Production docker container images are automatically built by CI (this happens when a pull request gets merged into main).
 
-The "SECRET" env key should be a random string, for example 20 random characters. It is used for the Authentication part
-of the application. If the "SECRET" value is changed any existing "forgot-my-password" and "verify-my-email-address" links will be invalidated.
+### Configuration
 
-To clarify the DATABASE_PASSWORD for postgres databases will be used by the docker compose  both to set up the databases
-with those usernames/passwords, and then for other containers (e.g. backend) to connect to them.
+The deployment is configured with a `.env` file **in the same directory as the docker-compose.yml**
+(these can also be set as environment variables instead).
+A sample to copy and edit is provided in [.env.prod.sample](mondey_backend/.env.prod.sample).
 
-For example the current test deployment on heicloud looks like this:
+The settings that must be set for a production deployment:
 
-```
-MONDEY_SSL_CERT="/etc/letsencrypt/live/mondey.de/fullchain.pem"
-MONDEY_SSL_KEY="/etc/letsencrypt/live/mondey.de/privkey.pem"
-DEEPL_API_KEY=abc123
-DATABASE_PASSWORD=<RandomString>
-SECRET=<RandomString>
-```
+| Setting | Description |
+| --- | --- |
+| `SECRET` | random string, at least 20 characters, used to sign authentication tokens. The backend refuses to start if it is shorter. Changing it invalidates all existing "forgot-my-password" and "verify-my-email-address" links and logs out all users |
+| `DATABASE_PASSWORD` | random string. Used by docker compose both to create the postgres databases and by the backend and backup containers to connect to them |
+| `MONDEY_SSL_CERT` / `MONDEY_SSL_KEY` | paths to the SSL certificate and key, see [SSL certificates](#ssl-certificates) |
+| `MONDEY_HOST` | the public hostname, used in the links in emails sent by the website |
+| `DEEPL_API_KEY` | needed for the automatic translation buttons in the admin interface, see [DeepL API key](#deepl-api-key) |
+| `RELAYHOST` | needed if the network blocks outgoing port 25, see [Emails](#emails) |
+
+Settings with defaults that are usually fine, but which can be overridden:
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| `STATIC_FILES_PATH` | `./static` | publicly served uploaded files (milestone images, documents, translations) |
+| `PRIVATE_FILES_PATH` | `./private` | files that are not publicly served (children's images, data imports) |
+| `POSTGRES_DATA_PATH_MONDEY` / `POSTGRES_DATA_PATH_USER` | `./db/mondey`, `./db/users` | postgres data directories |
+| `POSTGRES_DATA_PATH_MONDEY_BACKUPS` / `POSTGRES_DATA_PATH_USER_BACKUPS` | `./db_backups/mondey`, `./db_backups/users` | database backup directories |
+| `SESSION_IDLE_TIMEOUT_SECONDS` | 3600 | how long a session survives without activity |
+| `SESSION_ABSOLUTE_TIMEOUT_SECONDS` | 28800 | maximum session lifetime regardless of activity |
+| `SESSION_WARNING_SECONDS` | 300 | how long before a session expires the user is warned |
+| `STATS_CRONTAB` | `0 3 * * mon` | when the milestone statistics are recomputed |
+| `MIN_PASSWORD_LENGTH` | 12 | minimum length of user passwords (must be at least 8) |
+| `MAX_CHILD_AGE_MONTHS` | 72 | children older than this can no longer be added |
+| `VERIFICATION_TOKEN_LIFETIME_SECONDS` | 86400 | how long an account activation link stays valid |
+| `LOG_LEVEL` | `info` | backend log level |
+
+The full list of settings and their defaults is in
+[settings.py](https://github.com/ssciwr/mondey/blob/main/mondey_backend/src/mondey_backend/settings.py).
 
 ### docker compose
 
 To deploy the latest version on a virtual machine with docker compose installed,
-download [docker-compose.yml](https://raw.githubusercontent.com/ssciwr/mondey/main/docker-compose.yml), then do this after editing a .env file(sample in .env.prod.sample) in mondey/mondey_backend with the required values:
+download [docker-compose.yml](https://raw.githubusercontent.com/ssciwr/mondey/main/docker-compose.yml),
+create the `.env` file next to it as described above, then:
 
 ```
 sudo docker compose pull && sudo docker compose up -d && sudo docker system prune -af
@@ -130,12 +151,9 @@ In order to avoid emails being sent to spam, there are several DNS security feat
 
 - adds the IP address of the mail server(s) allowed to send emails from this website to the DNS info
 - if using a commercial mail sending service they will provide this info
-- for heidelberg uni
-  - we can look it up: https://mxtoolbox.com/SuperTool.aspx?action=spf%3auni-heidelberg.de&run=toolpage
-  - for the temporary namecheap sub-domain mondey.de:
-    - Type: `TXT Record`
-    - Host: `mondey`
-    - Value: `v=spf1 ip4:129.206.100.212 ip4:129.206.119.212 ip4:129.206.100.213 include:spf.protection.outlook.com mx -all`
+- for heidelberg uni we can look it up: https://mxtoolbox.com/SuperTool.aspx?action=spf%3auni-heidelberg.de&run=toolpage
+- add it as a `TXT Record` on the `mondey.de` domain, e.g.
+  `v=spf1 ip4:129.206.100.212 ip4:129.206.119.212 ip4:129.206.100.213 include:spf.protection.outlook.com mx -all`
 - check the changes worked with e.g. https://dmarcian.com/spf-survey/?domain=mondey.de
 
 **DKIM**
@@ -143,14 +161,10 @@ In order to avoid emails being sent to spam, there are several DNS security feat
 - adds a public key to the DNS info
 - sent emails are signed with this key by the email server
 - if using a commercial mail sending service they will provide this info
-- for heidelberg uni
-  - postfix docker image will generate DKIM keys if not already present with selector `mail`
-  - copy the generated dns entry from opendkim-keys/mondey.de.txt
-    - note remove any quotes and newlines and spaces after `p=`!
-  - for the temporary namecheap sub-domain mondey.de:
-    - Type: `TXT Record`
-    - Host: `mail._domainkey.mondey`
-    - Value: `v=DKIM1; h=sha256; k=rsa; s=email; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1s+IQlEUKtJ6Gt2/h5x7M949Vdmue7A5al2asflVXTvw7me8OCCsYx2FaWjLDPNpXHxEhUVYqJQKUTyvZnpjIxBXg86hSnBaO0YUQXsE2pz4jNt9BOEGhKACc47DkJEg3XOcJqf7JnrWkOELLnWS2RKzDUZ3e1/5cjolvtJuMEQFay1EITCamCJOUsA+gZ12XC4j10k3aT/MPxhOG9Wj8VhD7eLHI0QV1XRD7DrzO7EyA9R/Eve/l1FGx5CzuNIjKhmb1FVGiepqkPZgooDs9hxXCElQVqP6CQFyDRY64SiV1kTfVVSvL1N5PiU2BxP2IKKaXvn4/H55Zjz5j1+sQIDAQAB`
+- the postfix docker image will generate DKIM keys if not already present, with selector `mail`
+- copy the generated dns entry from `opendkim-keys/mondey.de.txt` and add it as a `TXT Record` with
+  host `mail._domainkey` on the `mondey.de` domain
+  - note remove any quotes and newlines and spaces after `p=`!
 - to check this entry is valid before using: e.g. https://dmarcian.com/dkim-validator/
 - check the changes worked with e.g.: e.g. https://dmarcian.com/dkim-inspector/?domain=mondey.de&selector=mail
 
@@ -158,10 +172,7 @@ In order to avoid emails being sent to spam, there are several DNS security feat
 
 - DMARC policy indicates valid spf/dkim and what to do if not
 - if using a commercial mail sending service they will provide this info
-- for the temporary namecheap sub-domain mondey.de:
-  - Type: `TXT Record`
-  - Host: `_dmarc.mondey`
-  - Value: `v=DMARC1; p=reject`
+- add a `TXT Record` with host `_dmarc` on the `mondey.de` domain, value `v=DMARC1; p=reject`
 - check the changes worked with e.g. https://dmarcian.com/dmarc-inspector/?domain=mondey.de
 
 **Testing**
@@ -184,19 +195,11 @@ docker exec -it $(docker ps | grep mondeydb-1 | awk '{print $1}') bash
 psql -U postgres -d mondey
 ```
 
-#### sqlite to postgres migration
+#### Schema migrations
 
-Notes on the (one-off) process used to migrate the sqlite databases to postgres in production:
-
-- temporarily add `- ./db:/db` to the mondeydb and usersdb volumes in docker-compose.yml to mount the db folder
-- recreate the containers (this will also create the postgres databases and tables): `docker compose up -d --force-recreate`
-- ssh into the `mondeydb` docker container: `docker exec -it $(docker ps | grep mondeydb-1 | awk '{print $1}') bash`
-- install pgloader: `apk update && apk add pgloader`
-- import the data from sqlite without modifying any tables: `pgloader --with "data only" sqlite:///db/mondey.db pgsql://postgres@127.0.0.1/mondey`
-- do the same for the usersdb container:
-  - `docker exec -it $(docker ps | grep usersdb-1 | awk '{print $1}') bash`
-  - `apk update && apk add pgloader`
-  - `pgloader --with "data only" sqlite:///db/users.db pgsql://postgres@127.0.0.1/users`
+The database schema is managed with Alembic. The backend docker image runs `alembic upgrade head` on startup,
+so migrations are applied automatically when a new image is deployed and no manual step is needed.
+See [./mondey_backend/alembic/README.md](./mondey_backend/alembic/README.md) for how migrations are created.
 
 #### postgres database backups
 
@@ -217,7 +220,14 @@ zstdcat db_backups/users/last/users-latest.sql.gz | docker exec -i $(docker ps |
 ```
 
 #### moving the database
-The database can be moved by exporting all of the data, for example to move or duplicate it to another VM.
+
+To move or duplicate a deployment to another VM, set up the new VM as described above, then copy the most
+recent backup files from the old VM and restore them into the new one using the commands above.
+The `SECRET` and `DATABASE_PASSWORD` need to be copied across as well: a different `SECRET` would log out
+all users and invalidate any outstanding password reset and account verification links.
+
+The uploaded files in `STATIC_FILES_PATH` and `PRIVATE_FILES_PATH` are not in the database and need to be
+copied separately.
 
 ### Heicloud openstack CLI
 
