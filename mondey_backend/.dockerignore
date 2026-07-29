@@ -1,0 +1,26 @@
+# secrets - the image must never contain a local .env
+.env
+.env.*
+
+# local development only
+docker-compose.localdatabases.yml
+tests/
+
+# runtime data directories
+db/
+static/
+private/
+
+# caches and build artefacts
+**/__pycache__/
+**/*.py[cod]
+**/*.egg-info/
+build/
+dist/
+**/.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+.venv/
+venv/

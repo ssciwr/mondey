@@ -9,8 +9,10 @@ In production, migrations are automatically applied when the backend starts up i
 
 ## Development
 
-To apply and create migrations when developing, you need to have the mondey database running and accessible,
-as well as making sure the `DATABASE_PASSWORD` environment variable is defined, e.g. in a .env file in the mondey_backend directory.
+To apply and create migrations when developing, you need to have both the mondey and the users databases
+running and accessible (e.g. `docker compose -f docker-compose.localdatabases.yml up -d`),
+and the `DATABASE_PASSWORD` environment variable needs to be defined, e.g. in a .env file in the mondey_backend directory.
+Alembic reads this .env file from the directory you run it in, so run the commands below from the mondey_backend directory.
 
 ### Applying migrations
 
