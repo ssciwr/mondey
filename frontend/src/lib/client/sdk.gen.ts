@@ -431,19 +431,6 @@ export const getMilestoneAgeScores = <ThrowOnError extends boolean = false>(opti
 
 /**
  * Recalculate Milestone Age Scores
- *
- * Re-derive the expected age and relevant age range of every milestone from the
- * age curves that were fitted by the last statistics update, using the supplied
- * parameters, which are saved as the parameters to use from now on.
- *
- * This does not refit the curves, so it is cheap: the fits only change when the
- * statistics are updated. The derived ages are returned but not stored, and the
- * ages on the milestones themselves are not touched: applying them is a separate
- * step. A milestone whose curve could not be fitted has no automatic estimate at
- * all, and keeps whatever ages an admin has set by hand.
- *
- * The achieved threshold has to lie between the two relevant thresholds, so that
- * the expected age lies inside the range the milestone is asked about in.
  */
 export const recalculateMilestoneAgeScores = <ThrowOnError extends boolean = false>(options: Options<RecalculateMilestoneAgeScoresData, ThrowOnError>): RequestResult<RecalculateMilestoneAgeScoresResponses, RecalculateMilestoneAgeScoresErrors, ThrowOnError> => (options.client ?? client).post<RecalculateMilestoneAgeScoresResponses, RecalculateMilestoneAgeScoresErrors, ThrowOnError>({
     security: [{
