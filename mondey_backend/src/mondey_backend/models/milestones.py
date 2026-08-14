@@ -256,10 +256,22 @@ class MilestoneImagePublic(SQLModel):
 
 ## MilestoneAnswer
 
+MILESTONE_ANSWER_UNANSWERED = -1
+MILESTONE_ANSWER_MIN = 0
+MILESTONE_ANSWER_MAX = 3
+
 
 class MilestoneAnswerPublic(SQLModel):
     milestone_id: int
-    answer: int
+    answer: int = Field(
+        ge=MILESTONE_ANSWER_UNANSWERED,
+        le=MILESTONE_ANSWER_MAX,
+    )
+
+
+class MilestoneAnswerUpdate(SQLModel):
+    milestone_id: int
+    answer: int = Field(ge=MILESTONE_ANSWER_MIN, le=MILESTONE_ANSWER_MAX)
 
 
 class MilestoneAnswerResponse(BaseModel):
@@ -280,7 +292,8 @@ class MilestoneAnswer(SQLModel, table=True):
     milestone_group_id: int = Field(
         default=None, foreign_key="milestonegroup.id", ondelete="CASCADE"
     )
-    answer: int  # ranges from 0-3, where 0 is noch gar nichts and 3 is zuverlaessig, or -1 if not answered.
+    # 0 means "noch gar nichts", 3 means "zuverlässig", and -1 means unanswered.
+    answer: int
     milestone: Milestone = back_populates("answers")
 
 

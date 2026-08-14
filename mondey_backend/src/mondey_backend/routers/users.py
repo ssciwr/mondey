@@ -27,6 +27,7 @@ from ..models.milestones import MilestoneAnswerPublic
 from ..models.milestones import MilestoneAnswerResponse
 from ..models.milestones import MilestoneAnswerSession
 from ..models.milestones import MilestoneAnswerSessionPublic
+from ..models.milestones import MilestoneAnswerUpdate
 from ..models.milestones import MilestoneGroupPublic
 from ..models.questions import ChildAnswer
 from ..models.questions import ChildAnswerPublic
@@ -269,7 +270,7 @@ def create_router() -> APIRouter:
         session: SessionDep,
         current_active_user: CurrentActiveUserDep,
         milestone_answer_session_id: int,
-        answer: MilestoneAnswerPublic,
+        answer: MilestoneAnswerUpdate,
     ):
         milestone_answer_session = get(
             session, MilestoneAnswerSession, milestone_answer_session_id

@@ -978,6 +978,20 @@ export type MilestoneAnswerSessionPublic = {
 };
 
 /**
+ * MilestoneAnswerUpdate
+ */
+export type MilestoneAnswerUpdate = {
+    /**
+     * Milestone Id
+     */
+    milestone_id: number;
+    /**
+     * Answer
+     */
+    answer: number;
+};
+
+/**
  * MilestoneGroupAdmin
  */
 export type MilestoneGroupAdmin = {
@@ -3365,7 +3379,7 @@ export type GetCurrentMilestoneAnswerSessionResponses = {
 export type GetCurrentMilestoneAnswerSessionResponse = GetCurrentMilestoneAnswerSessionResponses[keyof GetCurrentMilestoneAnswerSessionResponses];
 
 export type UpdateMilestoneAnswerData = {
-    body: MilestoneAnswerPublic;
+    body: MilestoneAnswerUpdate;
     path: {
         /**
          * Milestone Answer Session Id

@@ -488,6 +488,23 @@ def test_update_milestone_answer_update_existing_answer(user_client: TestClient)
     )
 
 
+@pytest.mark.parametrize("invalid_answer", [-1, 4, 2**31])
+def test_update_milestone_answer_rejects_out_of_range_answer(
+    user_client: TestClient, invalid_answer: int
+):
+    current_answer_session = user_client.get("/users/milestone-answers/1").json()
+    response = user_client.put(
+        f"/users/milestone-answers/{current_answer_session['id']}",
+        json={"milestone_id": 1, "answer": invalid_answer},
+    )
+
+    assert response.status_code == 422
+    assert (
+        user_client.get("/users/milestone-answers/1").json()["answers"]["1"]["answer"]
+        == -1
+    )
+
+
 def test_update_milestone_answer_invalid_user(research_client: TestClient):
     response = research_client.put(
         "/users/milestone-answers/1", json={"milestone_id": 1, "answer": 2}
