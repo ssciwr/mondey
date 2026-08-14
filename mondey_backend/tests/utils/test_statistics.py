@@ -1,4 +1,5 @@
 import datetime
+from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
@@ -15,6 +16,7 @@ from mondey_backend.models.milestones import MilestoneGroup
 from mondey_backend.models.milestones import MilestoneGroupAgeScoreCollection
 from mondey_backend.models.milestones import SuspiciousState
 from mondey_backend.statistics import analyse_answer_session
+from mondey_backend.statistics import answer_sessions_with_valid_answers
 from mondey_backend.statistics import async_update_stats
 from mondey_backend.statistics import make_datatable
 
@@ -70,6 +72,21 @@ def test_milestone_age_score_one_sample():
     assert score.count == 1
     assert score.mean == 3.0
     assert score.stddev == 0.0
+
+
+def test_answer_sessions_with_valid_answers_excludes_corrupt_session():
+    valid_answer_session = SimpleNamespace(
+        id=1,
+        answers={1: SimpleNamespace(milestone_id=1, answer=3)},
+    )
+    invalid_answer_session = SimpleNamespace(
+        id=2,
+        answers={1: SimpleNamespace(milestone_id=1, answer=4)},
+    )
+
+    assert answer_sessions_with_valid_answers(
+        [valid_answer_session, invalid_answer_session]
+    ) == [valid_answer_session]
 
 
 @pytest.mark.asyncio

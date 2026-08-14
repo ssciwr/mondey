@@ -15,6 +15,8 @@ from mondey_backend.dependencies import SessionDep
 from mondey_backend.dependencies import UserAsyncSessionDep
 from mondey_backend.logging import logger
 from mondey_backend.models.children import Child
+from mondey_backend.models.milestones import MILESTONE_ANSWER_MAX
+from mondey_backend.models.milestones import MILESTONE_ANSWER_MIN
 from mondey_backend.models.milestones import ChildAnswerAnalysisFlag
 from mondey_backend.models.milestones import Milestone
 from mondey_backend.models.milestones import MilestoneAgeScore
@@ -52,6 +54,28 @@ async def get_test_account_user_ids(user_session: UserAsyncSessionDep) -> list[i
         select(User.id).where(col(User.email).like("%tester@testaccount.com"))
     )
     return list(res.scalars().all())
+
+
+def answer_sessions_with_valid_answers(
+    answer_sessions: Sequence[MilestoneAnswerSession],
+) -> list[MilestoneAnswerSession]:
+    """Exclude corrupt sessions before they can break or contaminate aggregates."""
+    valid_answer_sessions = []
+    for answer_session in answer_sessions:
+        invalid_milestone_ids = [
+            answer.milestone_id
+            for answer in answer_session.answers.values()
+            if not MILESTONE_ANSWER_MIN <= answer.answer <= MILESTONE_ANSWER_MAX
+        ]
+        if invalid_milestone_ids:
+            logger.error(
+                "Excluding answer session %s with out-of-range answers for milestones %s",
+                answer_session.id,
+                invalid_milestone_ids,
+            )
+            continue
+        valid_answer_sessions.append(answer_session)
+    return valid_answer_sessions
 
 
 def analyse_answer_session(
@@ -296,7 +320,9 @@ async def async_update_stats(
         )
     )
 
-    milestone_answer_sessions = session.exec(answer_session_filter).all()
+    milestone_answer_sessions = answer_sessions_with_valid_answers(
+        session.exec(answer_session_filter).all()
+    )
 
     child_ages = get_answer_session_child_ages_in_months(
         session, milestone_answer_sessions
@@ -745,7 +771,9 @@ async def extract_research_data(
         answer_session_filter = answer_session_filter.where(
             col(MilestoneAnswerSession.user_id).in_(user_ids)
         )
-    milestone_answer_sessions = session.exec(answer_session_filter).all()
+    milestone_answer_sessions = answer_sessions_with_valid_answers(
+        session.exec(answer_session_filter).all()
+    )
     logger.info(
         f"  - collected {len(milestone_answer_sessions)} milestone answer sessions"
     )
