@@ -43,7 +43,7 @@ jobs:
         run: pnpm exec svelte-kit sync
       - name: "Generate frontend fetch API client code"
         run: pnpm openapi-ts
-      - uses: EndBug/add-and-commit@v10
+      - uses: EndBug/add-and-commit@v11
         with:
           add: "*"
           author_name: "github-actions[bot]"
