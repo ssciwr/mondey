@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import datetime
 import tempfile
 from collections.abc import AsyncGenerator
 from typing import Annotated
+from typing import cast
 
 from fastapi import Depends
 from fastapi_users.db import SQLAlchemyUserDatabase
 from fastapi_users_db_sqlalchemy.access_token import SQLAlchemyAccessTokenDatabase
+from sqlalchemy import CursorResult
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -28,6 +32,20 @@ async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 async def create_user_db_and_tables():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+
+async def delete_expired_access_tokens(session: AsyncSession) -> int:
+    cutoff = datetime.datetime.now(datetime.UTC) - datetime.timedelta(
+        seconds=app_settings.SESSION_ABSOLUTE_TIMEOUT_SECONDS
+    )
+    result = cast(
+        CursorResult,
+        await session.execute(
+            delete(AccessToken).where(AccessToken.created_at <= cutoff)
+        ),
+    )
+    await session.commit()
+    return result.rowcount
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:

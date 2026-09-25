@@ -19,6 +19,7 @@ from .databases.mondey import create_mondey_db_and_tables
 from .databases.mondey import engine as mondey_engine
 from .databases.users import async_session_maker
 from .databases.users import create_user_db_and_tables
+from .databases.users import delete_expired_access_tokens
 from .databases.users import engine as users_engine
 from .logging import logger
 from .routers import admin
@@ -37,6 +38,12 @@ async def scheduled_update_stats():
     async with async_session_maker() as user_session:
         with Session(mondey_engine) as session:
             await async_update_stats(session=session, user_session=user_session)
+
+
+async def scheduled_delete_expired_access_tokens():
+    async with async_session_maker() as user_session:
+        n_deleted = await delete_expired_access_tokens(user_session)
+        logger.info(f"Deleted {n_deleted} expired access tokens")
 
 
 async def import_e2e_test_sql_files():
@@ -73,6 +80,10 @@ async def lifespan(app: FastAPI):
     scheduler = AsyncIOScheduler()
     scheduler.add_job(
         scheduled_update_stats,
+        CronTrigger.from_crontab(app_settings.STATS_CRONTAB),
+    )
+    scheduler.add_job(
+        scheduled_delete_expired_access_tokens,
         CronTrigger.from_crontab(app_settings.STATS_CRONTAB),
     )
     scheduler.start()
