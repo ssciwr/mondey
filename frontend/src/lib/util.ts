@@ -99,3 +99,11 @@ export function clearHiddenAnswers(
 	}
 	return changed;
 }
+
+export function answerSessionIdsNewestFirst(
+	answerSessions: Record<number, unknown>,
+): number[] {
+	return Object.keys(answerSessions)
+		.map((x) => Number(x))
+		.sort((a, b) => b - a);
+}

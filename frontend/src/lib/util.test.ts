@@ -1,4 +1,8 @@
-import { clearHiddenAnswers, isQuestionVisible } from "$lib/util";
+import {
+	answerSessionIdsNewestFirst,
+	clearHiddenAnswers,
+	isQuestionVisible,
+} from "$lib/util";
 import { describe, expect, it } from "vitest";
 
 describe("isQuestionVisible", () => {
@@ -111,5 +115,16 @@ describe("clearHiddenAnswers", () => {
 			2: { answer: "", additional_answer: "" },
 		};
 		expect(clearHiddenAnswers(questions, answers)).toBe(false);
+	});
+});
+
+describe("answerSessionIdsNewestFirst", () => {
+	it("sorts ids numerically, newest first", () => {
+		const sessions = { 9: {}, 98: {}, 102: {}, 1000: {} };
+		expect(answerSessionIdsNewestFirst(sessions)).toEqual([1000, 102, 98, 9]);
+	});
+
+	it("returns an empty list for no sessions", () => {
+		expect(answerSessionIdsNewestFirst({})).toEqual([]);
 	});
 });
