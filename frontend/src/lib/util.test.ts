@@ -2,6 +2,7 @@ import {
 	answerSessionIdsNewestFirst,
 	clearHiddenAnswers,
 	isQuestionVisible,
+	overallFeedback,
 } from "$lib/util";
 import { describe, expect, it } from "vitest";
 
@@ -126,5 +127,24 @@ describe("answerSessionIdsNewestFirst", () => {
 
 	it("returns an empty list for no sessions", () => {
 		expect(answerSessionIdsNewestFirst({})).toEqual([]);
+	});
+});
+
+describe("overallFeedback", () => {
+	it("is the lowest group feedback", () => {
+		expect(overallFeedback({ 1: 1, 2: 1 })).toBe(1);
+		expect(overallFeedback({ 1: 1, 2: 0 })).toBe(0);
+		expect(overallFeedback({ 1: 1, 2: 0, 3: -1 })).toBe(-1);
+	});
+
+	it("ignores groups with not enough data", () => {
+		expect(overallFeedback({ 1: -2, 2: -1, 3: 1 })).toBe(-1);
+		expect(overallFeedback({ 1: -2, 2: 0 })).toBe(0);
+		expect(overallFeedback({ 1: -2, 2: 1 })).toBe(1);
+	});
+
+	it("is not enough data if no group has enough data", () => {
+		expect(overallFeedback({ 1: -2, 2: -2 })).toBe(-2);
+		expect(overallFeedback({})).toBe(-2);
 	});
 });
