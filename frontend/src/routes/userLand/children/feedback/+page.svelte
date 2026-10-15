@@ -19,6 +19,7 @@ import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
+import { answerSessionIdsNewestFirst } from "$lib/util";
 import DOMPurify from "dompurify";
 import {
 	Accordion,
@@ -110,11 +111,7 @@ let relevant_sessionkeys = $derived.by(() => {
 		numShownAnswersessions,
 		Object.keys(answerSessions).length,
 	);
-	return Object.keys(answerSessions)
-		.sort()
-		.map((x) => Number(x))
-		.reverse()
-		.slice(0, upper_limit);
+	return answerSessionIdsNewestFirst(answerSessions).slice(0, upper_limit);
 }); // record the keys of the answersessions that are currently displayed
 
 // other helper state variables
@@ -409,10 +406,7 @@ async function generateReport(): Promise<string | null> {
 	const report = await Promise.all(
 		Object.keys(allAnswerSessions).map((aid) => loadData(Number(aid))),
 	).then(() => {
-		const allSessionkeys = Object.keys(allAnswerSessions)
-			.sort()
-			.map((x) => Number(x))
-			.reverse();
+		const allSessionkeys = answerSessionIdsNewestFirst(allAnswerSessions);
 
 		let report = "";
 		// add title
