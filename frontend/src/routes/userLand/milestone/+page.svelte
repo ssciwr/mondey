@@ -298,7 +298,7 @@ const breadcrumbdata = $derived([
                     {#each answerIndices as answerIndex}
                         <MilestoneButton
                                 index={answerIndex}
-                                selected={selectedAnswer === answerIndex}
+                                selected={answerIndex !== -1 && selectedAnswer === answerIndex}
                                 onClick={()=>{
 							        selectAnswer(answerIndex);}
                                 }
