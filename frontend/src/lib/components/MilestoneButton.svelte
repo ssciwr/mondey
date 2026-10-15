@@ -31,9 +31,10 @@ const text_color =
 	<button
 			type="button"
 			onclick={onClick}
+			aria-pressed={selected}
 			class={`${bg_color} ${text_color} ${selected ? 'opacity-100 outline-none ring-4 ring-blue-400' : 'opacity-75 hover:opacity-100'} border-1 m-1 rounded-lg border border-gray-200 px-5 py-3 text-center font-medium md:my- `}
 	>
-		{@render children?.()}
+		{#if selected}<span aria-hidden="true">✓ </span>{/if}{@render children?.()}
 	</button>
 
 	{#if tooltip}
