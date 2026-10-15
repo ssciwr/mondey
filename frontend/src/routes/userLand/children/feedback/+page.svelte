@@ -449,7 +449,7 @@ async function generateReport(): Promise<string | null> {
 
 		// delete the data again that is not necessary for displaying the page to save memory
 		for (let aid of Object.keys(answerSessions)) {
-			if (!(Number(aid) in relevant_sessionkeys)) {
+			if (!relevant_sessionkeys.includes(Number(aid))) {
 				delete summary[Number(aid)];
 				delete detailed[Number(aid)];
 				delete milestoneGroups[Number(aid)];
