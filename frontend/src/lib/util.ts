@@ -107,3 +107,8 @@ export function answerSessionIdsNewestFirst(
 		.map((x) => Number(x))
 		.sort((a, b) => b - a);
 }
+
+export function overallFeedback(groupFeedback: Record<number, number>): number {
+	const values = Object.values(groupFeedback).filter((value) => value !== -2);
+	return values.length === 0 ? -2 : Math.min(...values);
+}
