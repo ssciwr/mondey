@@ -19,7 +19,7 @@ import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
-import { answerSessionIdsNewestFirst } from "$lib/util";
+import { answerSessionIdsNewestFirst, overallFeedback } from "$lib/util";
 import DOMPurify from "dompurify";
 import {
 	Accordion,
@@ -420,7 +420,7 @@ async function generateReport(): Promise<string | null> {
 
 		// iterate over all answersessions with aid:key
 		for (let aid of allSessionkeys) {
-			const min = Math.min(...(Object.values(summary[aid]) as number[]));
+			const min = overallFeedback(summary[aid]);
 			report += `<h2>${i18n.tr.milestone.timeperiod}: ${formatDate(answerSessions[aid].created_at)}</h2> \n`;
 			report += `<strong>${i18n.tr.milestone.summaryScore}:</strong> ${min === 1 ? i18n.tr.milestone.recommendOk : min === 0 ? i18n.tr.milestone.recommendWatch : min === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
 
@@ -497,13 +497,14 @@ async function printReport(): Promise<void> {
 
 <!--Snippet that shows the evaluation for the whole answersession: uses the minimum of the milestonegroup currently-->
 {#snippet summaryEvaluation(aid: number)}
-    <!-- summary is set to the minimum reached evaluation to draw attention to them.-->
+    {@const overall = overallFeedback(summary[aid])}
+    <!-- summary is set to the minimum reached evaluation to draw attention to them, ignoring groups with not enough data.-->
     <div class="flex flex-col md:flex-row space-y-2 space-x-2 items-center justify-center w-full text-gray-700 dark:text-gray-200 m-2 p-2 mb-4 pb-4 text-sm md:text-base">
-        {#if Math.min(...(Object.values(summary[aid]) as number[])) === 1}
+        {#if overall === 1}
             {@render summaryEvaluationElement(CheckCircleSolid, "text-feedback-0", i18n.tr.milestone.recommendOk)}
-        {:else if Math.min(...(Object.values(summary[aid]) as number[])) === 0}
+        {:else if overall === 0}
             {@render summaryEvaluationElement(QuestionCircleSolid, "text-feedback-1", i18n.tr.milestone.recommendWatch)}
-        {:else if Math.min(...(Object.values(summary[aid]) as number[])) === -1}
+        {:else if overall === -1}
             {@render summaryEvaluationElement(ExclamationCircleSolid, "text-feedback-2", i18n.tr.milestone.recommendHelp)}
         {:else}
             {@render summaryEvaluationElement(CloseCircleSolid, "gray", i18n.tr.milestone.notEnoughDataYet)}
