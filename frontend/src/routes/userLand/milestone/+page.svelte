@@ -86,6 +86,16 @@ async function nextMilestone() {
 		goto("/userLand/children/feedback");
 		return;
 	}
+	goToNextMilestone();
+}
+
+function goToNextMilestone() {
+	if (
+		!contentStore.milestoneGroupData ||
+		!contentStore.milestoneGroupData.milestones
+	) {
+		return;
+	}
 	if (
 		currentMilestoneIndex + 1 ===
 		contentStore.milestoneGroupData.milestones.length
@@ -106,6 +116,10 @@ function selectAnswer(answer: number) {
 	}
 	if (!milestoneAnswerSession) {
 		console.log("selectAnswer: missing milestoneAnswerSession");
+		return;
+	}
+	if (answer === -1) {
+		goToNextMilestone();
 		return;
 	}
 	milestoneAnswerSession.answers[`${currentMilestone.id}`] = {
