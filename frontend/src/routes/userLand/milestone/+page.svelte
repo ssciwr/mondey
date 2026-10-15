@@ -249,9 +249,10 @@ const breadcrumbdata = $derived([
                         {currentMilestone.text[i18n.locale].title}
                     </h2>
                     <p class="mb-2 text-base">{currentMilestone.text[i18n.locale].desc}</p>
-                    <Accordion flush>
+                    {#key currentMilestone.id}
+                    <Accordion flush multiple>
                         {#if currentMilestone.text[i18n.locale].obs?.length}
-                            <AccordionItem>
+                            <AccordionItem open>
                             <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
                                 <InfoCircleSolid class="mt-0.5" />
                                 <span>{i18n.tr.milestone.observation}</span>
@@ -286,6 +287,7 @@ const breadcrumbdata = $derived([
                             </AccordionItem>
                         {/if}
                     </Accordion>
+                    {/key}
                 </div>
                 <div class="md:w-1/5 m-1 mt-0 flex flex-col justify-items-stretch rounded-lg">
                     <div class="p-2 text-center md:hidden">
