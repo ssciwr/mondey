@@ -63,6 +63,8 @@ export const translationIds = {
 			"Beim Laden der Zusammenfassung des Feedbacks ist ein Fehler aufgetreten.",
 		feedbackLoadingError: "Beim Laden das Feedback ist ein Fehler aufgetreten.",
 		current: "Aktuell",
+		noCurrentFeedback:
+			"Keine aktuellen Daten: Die letzte abgeschlossene Beobachtungsrunde ist mehr als drei Wochen her. Bewerten Sie die Meilensteine erneut, um aktuelles Feedback zu erhalten.",
 		toTheMilestone: "Zum Meilenstein",
 		older: "Weiter zurück",
 		newer: "Weiter vor",

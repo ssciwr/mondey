@@ -1,6 +1,7 @@
 import {
 	answerSessionIdsNewestFirst,
 	clearHiddenAnswers,
+	isCurrentAnswerSession,
 	isQuestionVisible,
 	overallFeedback,
 } from "$lib/util";
@@ -146,5 +147,20 @@ describe("overallFeedback", () => {
 	it("is not enough data if no group has enough data", () => {
 		expect(overallFeedback({ 1: -2, 2: -2 })).toBe(-2);
 		expect(overallFeedback({})).toBe(-2);
+	});
+});
+
+describe("isCurrentAnswerSession", () => {
+	// UTC times, so the test does not depend on daylight saving time in the local time zone
+	const now = new Date("2026-10-16T12:00:00Z");
+
+	it("is current if less than three weeks old", () => {
+		expect(isCurrentAnswerSession("2026-10-16T09:00:00Z", now)).toBe(true);
+		expect(isCurrentAnswerSession("2026-09-26T12:00:01Z", now)).toBe(true);
+	});
+
+	it("is not current if three weeks or older", () => {
+		expect(isCurrentAnswerSession("2026-09-25T12:00:00Z", now)).toBe(false);
+		expect(isCurrentAnswerSession("2025-05-14T12:00:00Z", now)).toBe(false);
 	});
 });

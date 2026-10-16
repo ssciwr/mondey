@@ -112,3 +112,15 @@ export function overallFeedback(groupFeedback: Record<number, number>): number {
 	const values = Object.values(groupFeedback).filter((value) => value !== -2);
 	return values.length === 0 ? -2 : Math.min(...values);
 }
+
+// feedback from an answer session older than this is no longer shown as current
+export const currentFeedbackMaxAgeDays = 21;
+
+export function isCurrentAnswerSession(
+	createdAt: string,
+	now: Date = new Date(),
+): boolean {
+	const ageInDays =
+		(now.getTime() - new Date(createdAt).getTime()) / (24 * 60 * 60 * 1000);
+	return ageInDays < currentFeedbackMaxAgeDays;
+}
