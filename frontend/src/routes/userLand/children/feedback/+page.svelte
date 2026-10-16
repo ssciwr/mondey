@@ -35,7 +35,7 @@ import {
 import {
 	ChartLineUpOutline,
 	CheckCircleSolid,
-	CloseCircleSolid,
+	CircleMinusSolid,
 	ExclamationCircleSolid,
 	GridPlusSolid,
 	QuestionCircleSolid,
@@ -507,7 +507,7 @@ async function printReport(): Promise<void> {
         {:else if overall === -1}
             {@render summaryEvaluationElement(ExclamationCircleSolid, "text-feedback-2", i18n.tr.milestone.recommendHelp)}
         {:else}
-            {@render summaryEvaluationElement(CloseCircleSolid, "gray", i18n.tr.milestone.notEnoughDataYet)}
+            {@render summaryEvaluationElement(CircleMinusSolid, "gray", i18n.tr.milestone.notEnoughDataYet)}
         {/if}
     </div>
     <Hr classHr="w-full my-1"/>
@@ -557,7 +557,7 @@ async function printReport(): Promise<void> {
                 {@render milestoneHelpButton(milestone_or_group as MilestonePublic)}
             {/if}
         {:else }
-            {@render evaluationElement(CloseCircleSolid, milestone_or_group, "text-white", isMilestone)}
+            {@render evaluationElement(CircleMinusSolid, milestone_or_group, "text-white", isMilestone)}
         {/if}
     </div>
 {/snippet}
