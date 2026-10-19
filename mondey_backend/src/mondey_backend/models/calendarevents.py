@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import datetime
-
+from pydantic import NaiveDatetime
 from sqlmodel import Field
 from sqlmodel import SQLModel
 
@@ -10,7 +9,9 @@ class CalendarEventBase(SQLModel):
     title: str = ""
     description: str = ""
     external_link: str = ""
-    event_date: datetime.datetime
+    # The calendar UI supplies a date, not an instant in time. Keep its local
+    # midnight representation so timezone conversion cannot change the day.
+    event_date: NaiveDatetime
 
 
 class CalendarEvent(CalendarEventBase, table=True):
@@ -29,4 +30,4 @@ class CalendarEventUpdate(SQLModel):
     title: str | None = None
     description: str | None = None
     external_link: str | None = None
-    event_date: datetime.datetime | None = None
+    event_date: NaiveDatetime | None = None

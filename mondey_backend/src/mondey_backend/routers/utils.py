@@ -204,7 +204,7 @@ def session_remaining_seconds(
     return (
         milestone_answer_session.created_at
         + datetime.timedelta(days=session_lifetime_days)
-        - datetime.datetime.now()
+        - datetime.datetime.now(datetime.UTC)
     ).total_seconds()
 
 

@@ -169,7 +169,7 @@ def test_put_milestone(admin_client: TestClient, milestone_group_admin1: dict):
     # create a new ~6 year child & check that they don't see the milestone 3 in their answer session
     create_child = {
         "name": "new child",
-        "birth_year": datetime.datetime.now().year - 6,
+        "birth_year": datetime.datetime.now(datetime.UTC).year - 6,
         "birth_month": 3,
         "color": "#000000",
     }
@@ -461,7 +461,7 @@ def test_get_milestone_answer_sessions(admin_client: TestClient, session):
             SuspiciousState.unknown,
         )
     # add a completed answer session with answers that should be flagged as suspicious
-    today = datetime.datetime.today()
+    today = datetime.datetime.now(datetime.UTC)
     last_month = today - relativedelta(months=1)
     session.add(
         MilestoneAnswerSession(
@@ -469,7 +469,7 @@ def test_get_milestone_answer_sessions(admin_client: TestClient, session):
             child_id=1,
             user_id=3,
             created_at=datetime.datetime(
-                last_month.year, last_month.month, last_month.day
+                last_month.year, last_month.month, last_month.day, tzinfo=datetime.UTC
             ),
             expired=True,
             completed=True,

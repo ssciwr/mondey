@@ -82,7 +82,7 @@ def private_dir(tmp_path_factory: pytest.TempPathFactory):
 
 @pytest.fixture
 def children():
-    today = datetime.datetime.today()
+    today = datetime.datetime.now(datetime.UTC)
 
     nine_months_ago = today - relativedelta(months=9)
     twenty_months_ago = today - relativedelta(months=20)
@@ -255,7 +255,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         session.commit()
         for child, user_id in zip(children, [3, 3, 1, 5], strict=False):
             session.add(Child.model_validate(child, update={"user_id": user_id}))
-        today = datetime.datetime.today()
+        today = datetime.datetime.now(datetime.UTC)
         last_month = today - relativedelta(months=1)
         # expired, completed, included in stats milestone answer session for child 1 / user (id 3) with 2 answers
         session.add(
@@ -263,7 +263,9 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 id=1,
                 child_id=1,
                 user_id=3,
-                created_at=datetime.datetime(last_month.year, last_month.month, 15),
+                created_at=datetime.datetime(
+                    last_month.year, last_month.month, 15, tzinfo=datetime.UTC
+                ),
                 expired=True,
                 completed=True,
                 included_in_statistics=True,
@@ -292,7 +294,9 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 id=2,
                 child_id=1,
                 user_id=3,
-                created_at=datetime.datetime(last_month.year, last_month.month, 20),
+                created_at=datetime.datetime(
+                    last_month.year, last_month.month, 20, tzinfo=datetime.UTC
+                ),
                 completed=True,
                 expired=True,
                 included_in_statistics=False,
@@ -316,7 +320,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 id=3,
                 child_id=3,
                 user_id=1,
-                created_at=datetime.datetime.today(),
+                created_at=datetime.datetime.now(datetime.UTC),
                 completed=True,
                 expired=True,
                 included_in_statistics=False,
@@ -337,7 +341,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 id=6,
                 child_id=3,
                 user_id=1,
-                created_at=datetime.datetime.today(),
+                created_at=datetime.datetime.now(datetime.UTC),
                 completed=False,
                 expired=False,
                 included_in_statistics=False,
@@ -358,7 +362,9 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 id=4,
                 child_id=1,
                 user_id=3,
-                created_at=datetime.datetime(last_month.year, last_month.month, 20),
+                created_at=datetime.datetime(
+                    last_month.year, last_month.month, 20, tzinfo=datetime.UTC
+                ),
                 completed=True,
                 expired=True,
                 included_in_statistics=False,
@@ -382,7 +388,9 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 id=5,
                 child_id=3,
                 user_id=1,
-                created_at=datetime.datetime(today.year - 1, today.month, 10),
+                created_at=datetime.datetime(
+                    today.year - 1, today.month, 10, tzinfo=datetime.UTC
+                ),
                 completed=False,
                 expired=True,
                 included_in_statistics=False,
@@ -401,7 +409,9 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                 id=99,
                 child_id=4,
                 user_id=5,
-                created_at=datetime.datetime(last_month.year, last_month.month, 15),
+                created_at=datetime.datetime(
+                    last_month.year, last_month.month, 15, tzinfo=datetime.UTC
+                ),
                 completed=True,
                 expired=True,
                 included_in_statistics=True,

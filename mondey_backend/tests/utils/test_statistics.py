@@ -161,9 +161,9 @@ def test_analyse_answer_session_ignores_ages_with_no_answers(session):
     # the test statistics only have an answer for milestone 1 at age 8, so at age 3 there
     # is nothing to compare against
     child = session.get(Child, 1)
-    created_at = datetime.datetime(child.birth_year, child.birth_month, 1) + (
-        relativedelta(months=3)
-    )
+    created_at = datetime.datetime(
+        child.birth_year, child.birth_month, 1, tzinfo=datetime.UTC
+    ) + (relativedelta(months=3))
     session.add(
         MilestoneAnswerSession(
             id=777,

@@ -26,7 +26,7 @@ def make_session(
             id=session_id,
             child_id=child_id,
             user_id=3,
-            created_at=datetime.datetime(2025, 1, day),
+            created_at=datetime.datetime(2025, 1, day, tzinfo=datetime.UTC),
             expired=True,
             completed=completed,
             included_in_statistics=False,
@@ -67,7 +67,7 @@ def test_achieved_milestones_are_those_answered_3_earlier(session):
     # milestone 1 achieved, milestone 2 not
     make_session(session, 101, 10, day=1, answers={1: 3, 2: 1})
     achieved = get_previously_achieved_milestone_ids(
-        session, 10, datetime.datetime(2025, 1, 15)
+        session, 10, datetime.datetime(2025, 1, 15, tzinfo=datetime.UTC)
     )
     assert achieved == {1}
 
@@ -82,13 +82,13 @@ def test_achieved_milestones_only_counts_earlier_sessions(session):
     # as of day 10, the child has not achieved anything yet
     assert (
         get_previously_achieved_milestone_ids(
-            session, 11, datetime.datetime(2025, 1, 10)
+            session, 11, datetime.datetime(2025, 1, 10, tzinfo=datetime.UTC)
         )
         == set()
     )
     # as of day 25 they have
     assert get_previously_achieved_milestone_ids(
-        session, 11, datetime.datetime(2025, 1, 25)
+        session, 11, datetime.datetime(2025, 1, 25, tzinfo=datetime.UTC)
     ) == {1}
 
 
@@ -96,7 +96,7 @@ def test_achieved_milestones_are_per_child(session):
     make_session(session, 103, 12, day=1, answers={1: 3})
     assert (
         get_previously_achieved_milestone_ids(
-            session, 13, datetime.datetime(2025, 1, 15)
+            session, 13, datetime.datetime(2025, 1, 15, tzinfo=datetime.UTC)
         )
         == set()
     )
@@ -109,7 +109,7 @@ def test_achieved_milestones_ignores_incomplete_sessions(session):
             id=104,
             child_id=14,
             user_id=3,
-            created_at=datetime.datetime(2025, 1, 1),
+            created_at=datetime.datetime(2025, 1, 1, tzinfo=datetime.UTC),
             expired=False,
             completed=False,
             included_in_statistics=False,
@@ -124,7 +124,7 @@ def test_achieved_milestones_ignores_incomplete_sessions(session):
     session.commit()
     assert (
         get_previously_achieved_milestone_ids(
-            session, 14, datetime.datetime(2025, 1, 15)
+            session, 14, datetime.datetime(2025, 1, 15, tzinfo=datetime.UTC)
         )
         == set()
     )
