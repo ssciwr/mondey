@@ -57,7 +57,7 @@ VALUES (1007, 5, 'Sophia Taylor',
 
 -- Child 1 (Emma) - Session 1 (recent)
 INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious_state, completed)
-VALUES (1002, 1001, 3, '2025-02-04 11:42:49', true, false, 'not_suspicious', true);
+VALUES (1002, 1001, 3, datetime('now', '-1 day'), true, false, 'not_suspicious', true);
 
 -- Child 2 (Liam) - Session 1 (recent)
 INSERT INTO milestoneanswersession (id, child_id, user_id, created_at, expired, included_in_statistics, suspicious_state, completed)
