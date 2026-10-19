@@ -14,6 +14,7 @@ import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { contentStore } from "$lib/stores/contentStore.svelte";
+import { translationIds } from "$lib/translations";
 import { Accordion, AccordionItem, Button, Modal } from "flowbite-svelte";
 import {
 	ArrowLeftOutline,
@@ -199,18 +200,25 @@ const breadcrumbdata = $derived([
             <div class="flex w-full flex-col md:flex-row pt-3">
                 {#if currentMilestone.images.length > 0}
                     <div class="relative w-full h-48 md:w-1/5 md:h-48 lg:h-64 xl:h-80 2xl:h-96 overflow-hidden mt-1.5">
-                        {#each currentMilestone.images as image, imageIndex}
-                            <img
-                                    class={` min-w-20 absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
-                                    src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${image.id}.webp`}
-                                    alt=""
-                                    on:click={() => {
-                                        modalImagePreviewOpen = true;
-                                    }}
-                            />
-                        {/each}
+                        <button
+                                type="button"
+                                class="absolute inset-0 w-full h-full focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500"
+                                aria-label={i18n.tr.milestone.openImagePreview ?? translationIds.milestone.openImagePreview}
+                                aria-haspopup="dialog"
+                                onclick={() => { modalImagePreviewOpen = true; }}
+                        >
+                            {#each currentMilestone.images as image, imageIndex}
+                                <img
+                                        class={` min-w-20 absolute top-0 left-0 w-full h-full object-cover transition duration-1000 ease-in-out ${imageIndex === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
+                                        src={`${import.meta.env.VITE_MONDEY_API_URL}/static/m/${image.id}.webp`}
+                                        alt=""
+                                />
+                            {/each}
+                        </button>
                         <Modal bind:open={modalImagePreviewOpen} size="xl" autoclose outsideclose>
-                            <div class="p-2" on:click={()=>{modalImagePreviewOpen=false}}>
+                            <button type="button" class="block w-full p-2"
+                                    aria-label={i18n.tr.milestone.closeImagePreview ?? translationIds.milestone.closeImagePreview}
+                                    onclick={()=>{modalImagePreviewOpen=false}}>
                                 {#if currentMilestone?.images && currentMilestone.images.length > 0}
                                     <img
                                             class="w-full rounded-lg"
@@ -218,7 +226,7 @@ const breadcrumbdata = $derived([
                                             alt=""
                                     />
                                 {/if}
-                            </div>
+                            </button>
                         </Modal>
                     </div>
                 {/if}

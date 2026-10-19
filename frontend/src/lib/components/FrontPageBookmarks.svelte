@@ -55,7 +55,7 @@ function selectTab(index: number) {
 
 <div class="w-full px-4 mx-auto">
     <div class="max-w-2xl mx-auto space-y-2">
-        {#each bookmarks as { key, icon, emoji }, index}
+        {#each bookmarks as { key, icon: Icon, emoji }, index}
             <div class="w-full">
                 <button
                         class={activeIndex === index
@@ -69,7 +69,7 @@ function selectTab(index: number) {
                             {#if emoji}
                                 <span class="text-2xl emoji-solid-gray">{emoji}</span>
                             {:else}
-                                <svelte:component this={icon} size="md" color="#6b7280" />
+                                <Icon size="md" color="#6b7280" />
                             {/if}
                         </div>
                         <div class="flex-1">

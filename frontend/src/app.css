@@ -2,6 +2,24 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+.apply-icon-style {
+	@apply rounded-lg p-2 text-xl text-gray-500;
+}
+
+.apply-icon-style:hover,
+.apply-icon-style.group-hover {
+	@apply text-primary-800;
+}
+
+.apply-icon-style.dark {
+	@apply text-gray-400;
+}
+
+.apply-icon-style.dark:hover,
+.apply-icon-style.dark.group-hover {
+	@apply text-primary-500;
+}
+
 @layer components {
 	/* Sub classes, not for use in HTML */
 	body {

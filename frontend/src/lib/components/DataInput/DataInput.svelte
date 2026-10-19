@@ -56,7 +56,7 @@ let {
 	testid?: string;
 } = $props();
 
-let resolvedComponent = $derived(
+let ResolvedComponent = $derived(
 	isComponent(component) ? componentTable[component] : componentTable.input,
 );
 
@@ -104,8 +104,7 @@ let derivedPlaceholder = $derived(
 {/if}
 
 <div class="space-y-4">
-	<svelte:component
-		this={resolvedComponent}
+	<ResolvedComponent
 		class={highlight
 			? "rounded border-2 border-primary-600 dark:border-primary-600 " +
 				componentClass

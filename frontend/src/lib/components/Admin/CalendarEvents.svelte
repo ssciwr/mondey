@@ -285,7 +285,10 @@ onMount(() => {
 {/if}
 
 <Modal bind:open={showEditModal} size="lg">
-	<form on:submit|preventDefault={saveCalendarEvent}>
+	<form onsubmit={(event) => {
+		event.preventDefault();
+		saveCalendarEvent();
+	}}>
 		<h3 class="text-xl font-semibold mb-4">
 			{currentCalendarEvent ? i18n.tr.admin.editCalendarEvent : i18n.tr.admin.addCalendarEvent}
 		</h3>
