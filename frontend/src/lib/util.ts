@@ -101,11 +101,13 @@ export function clearHiddenAnswers(
 }
 
 export function answerSessionIdsNewestFirst(
-	answerSessions: Record<number, unknown>,
+	answerSessions: Record<number, { created_at: string }>,
 ): number[] {
+	const createdAt = (id: number) =>
+		new Date(answerSessions[id].created_at).getTime();
 	return Object.keys(answerSessions)
 		.map((x) => Number(x))
-		.sort((a, b) => b - a);
+		.sort((a, b) => createdAt(b) - createdAt(a) || b - a);
 }
 
 export function overallFeedback(groupFeedback: Record<number, number>): number {
