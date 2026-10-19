@@ -912,7 +912,7 @@ export type MilestoneAnswerSession = {
     /**
      * Created At
      */
-    created_at: string;
+    created_at?: string;
     /**
      * Expired
      */

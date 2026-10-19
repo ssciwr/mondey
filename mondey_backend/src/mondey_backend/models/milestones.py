@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from pydantic import model_validator
 from sqlalchemy import Column
 from sqlalchemy import Index
-from sqlalchemy import text
+from sqlalchemy import func
 from sqlalchemy.orm import Mapped
 from sqlmodel import Enum
 from sqlmodel import Field
@@ -330,9 +330,10 @@ class MilestoneAnswerSession(SQLModel, table=True):
     child_id: int = Field(foreign_key="child.id", ondelete="CASCADE")
     user_id: int
     created_at: datetime.datetime = Field(
+        default_factory=lambda: datetime.datetime.now(datetime.UTC),
         sa_column_kwargs={
-            "server_default": text("CURRENT_TIMESTAMP"),
-        }
+            "server_default": func.now(),
+        },
     )
     expired: bool
     completed: bool
@@ -437,9 +438,10 @@ class MilestoneAgeScoreCollection(SQLModel, table=True):
     curve_n_answers: int = 0
     scores: Mapped[list[MilestoneAgeScore]] = list_relationship("collection")
     created_at: datetime.datetime = Field(
+        default_factory=lambda: datetime.datetime.now(datetime.UTC),
         sa_column_kwargs={
-            "server_default": text("CURRENT_TIMESTAMP"),
-        }
+            "server_default": func.now(),
+        },
     )
 
 

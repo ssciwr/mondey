@@ -21,7 +21,7 @@ repos:
     rev: v2.3.1
     hooks:
       - id: mypy
-        additional_dependencies: ["sqlmodel", "types-python-dateutil"]
+        additional_dependencies: ["sqlmodel<0.0.45", "types-python-dateutil"]
         args:
           [
             --ignore-missing-imports,

@@ -242,6 +242,8 @@ def latest_completed_milestone_answer_session(
 def get_or_create_current_milestone_answer_session(
     session: SessionDep, current_active_user: User, child: Child
 ) -> MilestoneAnswerSession:
+    if child.id is None:
+        raise ValueError("Child must have an ID before creating an answer session")
     milestone_answer_session = current_milestone_answer_session(
         session, current_active_user, child
     )
@@ -257,7 +259,6 @@ def get_or_create_current_milestone_answer_session(
         milestone_answer_session = MilestoneAnswerSession(
             child_id=child.id,
             user_id=current_active_user.id,
-            created_at=datetime.datetime.now(),
             completed=False,
             expired=False,
             included_in_statistics=False,
@@ -295,6 +296,8 @@ def get_or_create_current_milestone_answer_session(
                 ).first()
                 is None
             ):
+                if milestone.group_id is None:
+                    raise ValueError(f"Milestone {milestone.id} has no group ID")
                 session.add(
                     MilestoneAnswer(
                         answer_session_id=milestone_answer_session.id,
@@ -316,6 +319,10 @@ def get_or_create_current_milestone_answer_session(
                 ):
                     prev_milestone = session.get(Milestone, prev_milestone_id)
                     if prev_milestone is not None:
+                        if prev_milestone.group_id is None:
+                            raise ValueError(
+                                f"Milestone {prev_milestone_id} has no group ID"
+                            )
                         session.add(
                             MilestoneAnswer(
                                 answer_session_id=milestone_answer_session.id,
