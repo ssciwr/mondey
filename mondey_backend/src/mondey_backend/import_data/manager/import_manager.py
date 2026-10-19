@@ -26,6 +26,7 @@ from mondey_backend.models.questions import UserAnswer
 from mondey_backend.models.questions import UserQuestion
 from mondey_backend.models.users import User
 from mondey_backend.models.users import UserCreate
+from mondey_backend.timezones import german_time_to_utc
 
 from ...logging import logger
 
@@ -657,7 +658,9 @@ class ImportManager:
                     expired=True,
                     included_in_statistics=False,
                     completed=True,
-                    created_at=datetime.strptime(row["STARTED"], "%Y-%m-%d %H:%M:%S"),
+                    created_at=german_time_to_utc(
+                        datetime.strptime(row["STARTED"], "%Y-%m-%d %H:%M:%S")
+                    ),
                     suspicious_state=SuspiciousState.not_suspicious,
                 )
                 self.data_manager.session.add(answer_session)

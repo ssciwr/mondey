@@ -14,7 +14,9 @@ class DocumentBase(SQLModel):
 
 class Document(DocumentBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
+    created_at: datetime.datetime = Field(
+        default_factory=lambda: datetime.datetime.now(datetime.UTC)
+    )
     uploaded_by_user_id: int
 
 

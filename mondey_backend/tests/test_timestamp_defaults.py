@@ -47,8 +47,8 @@ def test_creation_timestamp_defaults_and_overrides(model, values, explicit_times
         session.add(record)
         session.commit()
         session.refresh(record)
-        # SQLite's existing datetime storage drops the timezone on reads.
-        assert record.created_at.replace(tzinfo=datetime.UTC) == created_at
+        assert record.created_at.utcoffset() == datetime.timedelta()
+        assert record.created_at == created_at
     engine.dispose()
 
 
@@ -71,8 +71,8 @@ def test_creation_timestamp_database_fallback(model, values):
         )
         session.commit()
         record = session.exec(select(model)).one()
-        assert abs(
-            datetime.datetime.now(datetime.UTC)
-            - record.created_at.replace(tzinfo=datetime.UTC)
-        ) < (datetime.timedelta(seconds=5))
+        assert record.created_at.utcoffset() == datetime.timedelta()
+        assert abs(datetime.datetime.now(datetime.UTC) - record.created_at) < (
+            datetime.timedelta(seconds=5)
+        )
     engine.dispose()

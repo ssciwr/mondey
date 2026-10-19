@@ -16,7 +16,8 @@ from mondey_backend.models.questions import ChildAnswer
 
 def _is_approx_now(iso_date_string: str, delta=datetime.timedelta(hours=1)) -> bool:
     return (
-        datetime.datetime.now() - datetime.datetime.fromisoformat(iso_date_string)
+        datetime.datetime.now(datetime.UTC)
+        - datetime.datetime.fromisoformat(iso_date_string)
         < delta
     )
 
