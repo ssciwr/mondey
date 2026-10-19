@@ -427,7 +427,7 @@ async function generateReport(): Promise<string | null> {
 		// iterate over all answersessions with aid:key
 		for (let aid of allSessionkeys) {
 			const min = overallFeedback(summary[aid]);
-			report += `<h2>${i18n.tr.milestone.timeperiod}: ${formatDate(answerSessions[aid].created_at)}</h2> \n`;
+			report += `<h2>${i18n.tr.milestone.timeperiod}: ${formatDate(allAnswerSessions[aid].created_at)}</h2> \n`;
 			report += `<strong>${i18n.tr.milestone.summaryScore}:</strong> ${min === 1 ? i18n.tr.milestone.recommendOk : min === 0 ? i18n.tr.milestone.recommendWatch : min === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
 
 			for (let [mid, score] of Object.entries(summary[aid])) {
@@ -454,7 +454,7 @@ async function generateReport(): Promise<string | null> {
 		}
 
 		// delete the data again that is not necessary for displaying the page to save memory
-		for (let aid of Object.keys(answerSessions)) {
+		for (let aid of Object.keys(allAnswerSessions)) {
 			if (!relevant_sessionkeys.includes(Number(aid))) {
 				delete summary[Number(aid)];
 				delete detailed[Number(aid)];
