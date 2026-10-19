@@ -262,7 +262,7 @@ async function loadSummaryFeedbackFor(
 		},
 	});
 
-	if (milestoneGroupResponse.error) {
+	if (milestoneGroupResponse.error || !milestoneGroupResponse.data) {
 		alertStore.showAlert(
 			i18n.tr.childData.alertMessageTitle,
 			i18n.tr.childData.alertMessageRetrieving,
@@ -283,7 +283,7 @@ async function loadSummaryFeedbackFor(
 		},
 	});
 
-	if (responseFeedback.error) {
+	if (responseFeedback.error || !responseFeedback.data) {
 		alertStore.showAlert(
 			i18n.tr.childData.alertMessageTitle,
 			i18n.tr.childData.alertMessageRetrieving,
@@ -314,7 +314,7 @@ async function loadDetailedFeedbackFor(
 		},
 	});
 
-	if (response.error) {
+	if (response.error || !response.data) {
 		alertStore.showAlert(
 			i18n.tr.childData.alertMessageTitle,
 			i18n.tr.childData.alertMessageRetrieving,
@@ -341,11 +341,11 @@ async function loadDetailedFeedbackFor(
 
 /**
  * Load the data and get everything ready to render the page
- * @return { Promise<void>} nothing
+ * @return Whether feedback was loaded successfully.
  */
-async function loadData(aid: number | null): Promise<void> {
+async function loadData(aid: number | null): Promise<boolean> {
 	if (aid === null) {
-		return;
+		return false;
 	}
 
 	const summary_ = await loadSummaryFeedbackFor(aid);
@@ -356,7 +356,7 @@ async function loadData(aid: number | null): Promise<void> {
 			alertMessage,
 			true,
 		);
-		return;
+		return false;
 	}
 	summary[aid] = summary_;
 
@@ -368,8 +368,10 @@ async function loadData(aid: number | null): Promise<void> {
 			alertMessage,
 			true,
 		);
+		return false;
 	}
 	detailed[aid] = detailed_;
+	return true;
 }
 
 /**
@@ -396,7 +398,7 @@ async function generateReport(): Promise<string | null> {
 		path: { child_id: currentChild.id as number },
 	});
 
-	if (responseAnswerSessions.error) {
+	if (responseAnswerSessions.error || !responseAnswerSessions.data) {
 		alertMessage = i18n.tr.childData.alertMessageRetrieving;
 		alertStore.showAlert(
 			i18n.tr.childData.alertMessageTitle,
@@ -411,7 +413,10 @@ async function generateReport(): Promise<string | null> {
 	// await everything being loaded, then generate the report
 	const report = await Promise.all(
 		Object.keys(allAnswerSessions).map((aid) => loadData(Number(aid))),
-	).then(() => {
+	).then((loaded) => {
+		if (loaded.some((success) => !success)) {
+			return null;
+		}
 		const allSessionkeys = answerSessionIdsNewestFirst(allAnswerSessions);
 
 		let report = "";
@@ -436,7 +441,7 @@ async function generateReport(): Promise<string | null> {
 				report += `    ${score === 1 ? i18n.tr.milestone.recommendOk : score === 0 ? i18n.tr.milestone.recommendWatch : score === -1 ? i18n.tr.milestone.recommendHelp : i18n.tr.milestone.notEnoughDataYet} \n\n`;
 
 				for (let [ms_id, ms_score] of Object.entries(
-					detailed[Number(aid)][mid],
+					detailed[Number(aid)][mid] ?? {},
 				)) {
 					// ms_id : ms_score
 					report += `    <strong>${
@@ -471,22 +476,33 @@ async function generateReport(): Promise<string | null> {
  * @return {Promise<void>} Nothing
  */
 async function printReport(): Promise<void> {
-	const report = await generateReport();
-	if (report === null) {
-		return;
-	}
-
+	// Open during the click so asynchronous data loading does not trigger popup blocking.
 	const printWindow = window.open("", "", "height=600,width=800");
 	if (printWindow === null) {
 		return;
 	}
-	const sanitizedReport = DOMPurify.sanitize(`<pre>${report}</pre>`, {
-		ALLOWED_TAGS: ["pre", "h1", "h2", "h3", "strong", "br"],
-		ALLOWED_ATTR: [],
-	});
-	printWindow.document.write(sanitizedReport);
-	printWindow.document.close();
-	printWindow.print();
+	try {
+		const report = await generateReport();
+		if (report === null) {
+			printWindow.close();
+			return;
+		}
+		const sanitizedReport = DOMPurify.sanitize(`<pre>${report}</pre>`, {
+			ALLOWED_TAGS: ["pre", "h1", "h2", "h3", "strong", "br"],
+			ALLOWED_ATTR: [],
+		});
+		printWindow.document.write(sanitizedReport);
+		printWindow.document.close();
+		printWindow.print();
+	} catch (error) {
+		printWindow.close();
+		console.error("Failed to print feedback report:", error);
+		alertStore.showAlert(
+			i18n.tr.childData.alertMessageTitle,
+			i18n.tr.milestone.feedbackLoadingError,
+			true,
+		);
+	}
 }
 </script>
 
@@ -589,7 +605,7 @@ async function printReport(): Promise<void> {
                             <span slot="header" class="items-center flex justify-center py-1">
                                 {@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
                             </span>
-                            {#each Object.entries(detailed[aid][mid]) as [ms_id, ms_score]}
+                            {#each Object.entries(detailed[aid][mid] ?? {}) as [ms_id, ms_score]}
                                 {@render evaluation(
                                     milestoneGroups[aid][Number(mid)].milestones.find((element: any) =>
                                     {
@@ -703,10 +719,12 @@ async function printReport(): Promise<void> {
                         <div class = "flex justify-center items-center space-x-2">
                             <Spinner /> <p>{i18n.tr.childData.loadingMessage}</p>
                         </div>
-                    {:then _}
+                    {:then loaded}
                         <!-- render feedback only once the promise has been resolved-->
-                        {@render summaryEvaluation(aid)}
-                        {@render milestoneGroupsEval(aid)}
+                        {#if loaded}
+                            {@render summaryEvaluation(aid)}
+                            {@render milestoneGroupsEval(aid)}
+                        {/if}
                     {/await}
                 </TabItem>
             {/each}
@@ -714,9 +732,11 @@ async function printReport(): Promise<void> {
     </Tabs>
 
     <!--Button to print the report out into pdf or physical copy-->
-    <div class="flex items-center justify-center w-full m-2 p-2 mb-4 pb-4">
-        <Button class="btn-secondary" onclick={async () => {await printReport();}}>{i18n.tr.milestone.printReport}</Button>
-    </div>
+    {#if !adminSettings.hide_all_feedback && Object.keys(answerSessions).length > 0}
+        <div class="flex items-center justify-center w-full m-2 p-2 mb-4 pb-4">
+            <Button class="btn-secondary" onclick={async () => {await printReport();}}>{i18n.tr.milestone.printReport}</Button>
+        </div>
+    {/if}
 {:catch error}
     {alertStore.showAlert(
         i18n.tr.childData.alertMessageTitle,
