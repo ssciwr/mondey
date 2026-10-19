@@ -403,7 +403,7 @@ onMount(async () => {
                             {answer_session.id}
                         </TableBodyCell>
                         <TableBodyCell>
-                            {new Date(answer_session.created_at).toLocaleDateString(i18n.locale)}
+                            {answer_session.created_at ? new Date(answer_session.created_at).toLocaleDateString(i18n.locale) : '—'}
                         </TableBodyCell>
                         <TableBodyCell>
                             {boolToStr(answer_session.completed)}

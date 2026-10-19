@@ -226,7 +226,7 @@ onMount(() => {
 {:else}
 	<div class="space-y-4">
 		<div class="flex justify-between items-center">
-			<h3 h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">{i18n.tr.admin.calendarEvents}</h3>
+			<h3 class="mb-3 text-xl font-medium text-gray-900 dark:text-white">{i18n.tr.admin.calendarEvents}</h3>
 			<AddButton onclick={() => openEditModal()} />
 		</div>
 
