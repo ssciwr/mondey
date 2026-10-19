@@ -246,7 +246,10 @@ def test_delete_child_removes_answering_sessions(session, user_client: TestClien
     session.flush()
 
     child_question_answer = ChildAnswer(
-        child_id=new_child_id, question_id=1, answer="FakeAnswer"
+        child_id=new_child_id,
+        question_id=1,
+        answer="FakeAnswer",
+        additional_answer=None,
     )
 
     session.add(child_question_answer)

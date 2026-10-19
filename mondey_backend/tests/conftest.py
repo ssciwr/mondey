@@ -249,9 +249,9 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
                     )
                 )
         # add the milestone images that were created in the static directory
-        session.add(MilestoneImage(milestone_id=1, filename="m1.jpg", approved=True))
-        session.add(MilestoneImage(milestone_id=1, filename="m2.jpg", approved=True))
-        session.add(MilestoneImage(milestone_id=2, filename="m3.jpg", approved=True))
+        session.add(MilestoneImage(milestone_id=1))
+        session.add(MilestoneImage(milestone_id=1))
+        session.add(MilestoneImage(milestone_id=2))
         session.commit()
         for child, user_id in zip(children, [3, 3, 1, 5], strict=False):
             session.add(Child.model_validate(child, update={"user_id": user_id}))
@@ -477,7 +477,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
             )
 
         # add a research group (that user with id 3 is part of, and researcher with id 2 has access to)
-        session.add(ResearchGroup(id="123451"))
+        session.add(ResearchGroup(id=123451))
         # add user questions for admin
         user_questions = [
             UserQuestion(
@@ -678,7 +678,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         # add user answers for user (id 3)
         session.add(
             UserAnswer(
-                id=1,
                 question_id=1,
                 user_id=3,
                 answer="lorem ipsum",
@@ -687,7 +686,6 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         )
         session.add(
             UserAnswer(
-                id=2,
                 question_id=2,
                 user_id=3,
                 answer="other",
@@ -698,9 +696,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         # add child answers for user (id 3)
         session.add(
             ChildAnswer(
-                id=1,
                 question_id=1,
-                user_id=3,
                 child_id=1,
                 answer="a",
                 additional_answer=None,
@@ -708,9 +704,7 @@ def session(children: list[dict], monkeypatch: pytest.MonkeyPatch):
         )
         session.add(
             ChildAnswer(
-                id=2,
                 question_id=2,
-                user_id=3,
                 child_id=1,
                 answer="other",
                 additional_answer="apple",

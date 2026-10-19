@@ -447,12 +447,14 @@ class ImportManager:
                     child_id=user_or_child_id,
                     question_id=question_id,
                     answer=answer_text,
+                    additional_answer=None,
                 )
             else:
                 new_answer = UserAnswer(
                     user_id=user_or_child_id,
                     question_id=question_id,
                     answer=answer_text,
+                    additional_answer=None,
                 )
 
             self.data_manager.session.add(new_answer)
@@ -598,9 +600,13 @@ class ImportManager:
         self.milestone_group_mapping = {}
 
         for milestone in milestones:
-            if milestone.name:  # type: ignore
-                self.milestone_mapping[milestone.name] = milestone.id  # type: ignore
-                self.milestone_group_mapping[milestone.id] = milestone.group_id  # type: ignore
+            if milestone.name:
+                if milestone.id is None or milestone.group_id is None:
+                    raise ValueError(
+                        f"Milestone {milestone.name} must have an ID and group ID"
+                    )
+                self.milestone_mapping[milestone.name] = milestone.id
+                self.milestone_group_mapping[milestone.id] = milestone.group_id
 
         # Generate parents for children
         child_ids = [row["CASE"] for _, row in data_df.iterrows()]
@@ -640,6 +646,8 @@ class ImportManager:
                 )
                 self.data_manager.session.add(child)
                 self.data_manager.session.flush()
+                if child.id is None:
+                    raise ValueError("Imported child has no ID after flushing")
                 logger.info(f"Created child with ID: {child.id}")
 
                 # Create milestone answer session
@@ -679,9 +687,9 @@ class ImportManager:
                                 milestone_answer = MilestoneAnswer(
                                     answer_session_id=answer_session.id,
                                     milestone_id=milestone_id,
-                                    milestone_group_id=self.milestone_group_mapping.get(
+                                    milestone_group_id=self.milestone_group_mapping[
                                         milestone_id
-                                    ),
+                                    ],
                                     answer=adjusted_answer,
                                 )
                                 self.data_manager.session.add(milestone_answer)
