@@ -418,7 +418,7 @@ async function generateReport(): Promise<string | null> {
 		// add title
 		report += `<h1>${i18n.tr.milestone.reportTitle}</h1>\n\n`;
 		// add today's date
-		report += `${i18n.tr.milestone.date}: ${formatDate(new Date().toLocaleDateString())} \n\n`;
+		report += `${i18n.tr.milestone.date}: ${formatDate(new Date().toISOString())} \n\n`;
 
 		// add name and age of child in the beginning
 		report += `${i18n.tr.milestone.child}: ${currentChild.name}\n`;
