@@ -252,7 +252,7 @@ onMount(async () => {
 
                 <!-- Data File Upload -->
                 <div>
-                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                    <label id="data-csv-label" for="data-csv-file-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
                         Data CSV File
                     </label>
                     <div class="flex items-center space-x-2">
@@ -260,6 +260,7 @@ onMount(async () => {
                                 class="btn btn-primary"
                                 disabled={isUploading}
                                 onclick={() => dataFileInputRef?.click()}
+                                aria-describedby="data-csv-label"
                         >
                             <FileImportSolid />
                             {dataFile ? dataFile.name : 'Choose Data File'}
@@ -268,6 +269,7 @@ onMount(async () => {
                                 type="file"
                                 accept=".csv"
                                 bind:this={dataFileInputRef}
+                                id="data-csv-file-input"
                                 onchange={handleDataFileChange}
                                 disabled={isUploading}
                                 data-testid="data-csv-file-input"
@@ -281,7 +283,7 @@ onMount(async () => {
 
                 <!-- Labels File Upload -->
                 <div>
-                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                    <label id="labels-csv-label" for="labels-csv-file-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
                         Labels CSV File
                     </label>
                     <div class="flex items-center space-x-2">
@@ -289,6 +291,7 @@ onMount(async () => {
                                 class="btn btn-primary"
                                 disabled={isUploading}
                                 onclick={() => labelsFileInputRef?.click()}
+                                aria-describedby="labels-csv-label"
                         >
                             <FileImportSolid />
                             {labelsFile ? labelsFile.name : 'Choose Labels File'}
@@ -297,6 +300,7 @@ onMount(async () => {
                                 type="file"
                                 accept=".csv"
                                 bind:this={labelsFileInputRef}
+                                id="labels-csv-file-input"
                                 onchange={handleLabelsFileChange}
                                 disabled={isUploading}
                                 data-testid="labels-csv-file-input"

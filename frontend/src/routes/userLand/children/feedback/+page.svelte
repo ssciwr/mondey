@@ -495,8 +495,8 @@ async function printReport(): Promise<void> {
 <!----------------------------------------------------------------------------->
 
 <!--Snippet defining how to display the summary evaluation depending on the value retrieved-->
-{#snippet summaryEvaluationElement(symbol: any, color: string, text: string)}
-    <svelte:component this={symbol} size="xl" class={`transform scale-150 ${color}`} />
+{#snippet summaryEvaluationElement(Symbol: any, color: string, text: string)}
+    <Symbol size="xl" class={`transform scale-150 ${color}`} />
     <span class="font-bold p-2 items-center justify-center">{i18n.tr.milestone.summaryScore}</span>
     <span class="font-normal p-2 items-center justify-center">{text}</span>
 {/snippet}
@@ -531,11 +531,11 @@ async function printReport(): Promise<void> {
 {/snippet}
 
 <!--element of the detailed evaluation which shows how the child fared in each milestonegroup-->
-{#snippet evaluationElement(symbol: any, milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, color: string, isMilestone: boolean = false)}
+{#snippet evaluationElement(Symbol: any, milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, color: string, isMilestone: boolean = false)}
     <div class="flex flex-col items-center justify-center p-2 w-full">
         {#if !isMilestone}
         <div class="flex justify-center w-full mb-2">
-            <svelte:component this={symbol} size="xl" class={`${color}`} />
+            <Symbol size="xl" class={`${color}`} />
         </div>
         {/if}
         {#if color !== "gray"}
@@ -614,7 +614,7 @@ async function printReport(): Promise<void> {
         <div class ="grid grid-cols-[auto_1fr_2fr] gap-4">
             {#each milestonePresentation as milestone}
                 <div class="flex justify-center">
-                    <svelte:component this={milestone.icon} size="xl" class={milestone.class} />
+                    <milestone.icon size="xl" class={milestone.class} />
                 </div>
                 <span class="font-bold text-sm md:text-base">{milestone.short}</span>
                 <span class="hidden sm:block text-sm md:text-base">{milestone.text}</span>

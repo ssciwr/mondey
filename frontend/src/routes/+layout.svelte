@@ -13,6 +13,7 @@ import SessionReauthenticationModal from "$lib/components/SessionReauthenticatio
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
+import { translationIds } from "$lib/translations";
 
 import {
 	Button,
@@ -142,9 +143,16 @@ function toggleDrawer() {
 		</div>
 		<!-- Mobile Navigation -->
 		<div class="z-1000 fixed" style="top:0.8rem;right:1rem;">
-			<div class="btn-primary btn-icon" onclick={toggleDrawer} >
+			<button
+				type="button"
+				class="btn-primary btn-icon"
+				onclick={toggleDrawer}
+				aria-label={i18n.tr.misc.menu ?? translationIds.misc.menu}
+				aria-expanded={!hideDrawer}
+				aria-controls="sidebar"
+			>
 				<BarsOutline class="cursor-pointer" />
-			</div>
+			</button>
 		</div>
 
 		<!-- Mobile Drawer -->

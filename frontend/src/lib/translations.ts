@@ -4,6 +4,8 @@
 
 export const translationIds = {
 	milestone: {
+		openImagePreview: "Bild vergrößern",
+		closeImagePreview: "Bildvorschau schließen",
 		answer0Text: "Noch gar nicht",
 		answer0Desc:
 			"Das Kind macht noch keine Anstalten bzw. ist noch nicht in der Lage, das Verhalten auszuführen.",
@@ -501,6 +503,7 @@ export const translationIds = {
 		inputlabelPwConfirm: "Neues Passwort bestätigen",
 	},
 	misc: {
+		menu: "Menü",
 		understood: "Verstanden",
 		latest: "Aktuelles",
 		downloads: "Downloads",
