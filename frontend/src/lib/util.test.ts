@@ -121,8 +121,23 @@ describe("clearHiddenAnswers", () => {
 });
 
 describe("answerSessionIdsNewestFirst", () => {
-	it("sorts ids numerically, newest first", () => {
-		const sessions = { 9: {}, 98: {}, 102: {}, 1000: {} };
+	it("sorts by creation date, newest first", () => {
+		const sessions = {
+			1000: { created_at: "2026-03-01T10:00:00" },
+			9: { created_at: "2026-10-01T10:00:00" },
+			102: { created_at: "2026-05-01T10:00:00" },
+		};
+		expect(answerSessionIdsNewestFirst(sessions)).toEqual([9, 102, 1000]);
+	});
+
+	it("sorts ids numerically, newest first, if creation dates are equal", () => {
+		const created_at = "2026-10-01T10:00:00";
+		const sessions = {
+			9: { created_at },
+			98: { created_at },
+			102: { created_at },
+			1000: { created_at },
+		};
 		expect(answerSessionIdsNewestFirst(sessions)).toEqual([1000, 102, 98, 9]);
 	});
 
