@@ -130,6 +130,8 @@ export const translationIds = {
 		recalculateNow: "Jetzt neu berechnen",
 		recalculateLater: "Später",
 		translations: "Übersetzungen",
+		editTranslations: "Übersetzungen bearbeiten",
+		whichTranslation: "Welche Übersetzung möchten Sie bearbeiten?",
 		missingTranslations: "Fehlende Übersetzungen!",
 		users: "Benutzer",
 		userEmail: "E-Mail",
