@@ -11,8 +11,8 @@ import { Button, Card, Heading, Input } from "flowbite-svelte";
 
 const maildata = {
 	component: "input",
-	type: "email",
 	props: {
+		type: "email",
 		placeholder: i18n.tr.forgotPw.placeholder,
 		id: "email",
 		required: true,
@@ -93,7 +93,7 @@ async function submitData(): Promise<void> {
 				class="dark:bg-primay-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
 				size="md"
 				type="button"
-				on:click={(event) => {
+				onclick={() => {
 					goto(`/${base}`);
 				}}>{i18n.tr.forgotPw.success}</Button
 			>

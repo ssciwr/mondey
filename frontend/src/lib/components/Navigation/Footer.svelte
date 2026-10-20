@@ -36,13 +36,13 @@ import {
       <div class="mb-2 mr-5 lg:ml-11 md:ml-10 max-sm:mr-3 max-sm:ml-1">
         <FooterBrand imgClass="me-3 h-16 hidden lg:block" class="flex" href="/" src={logo_dark} alt="MONDEY logo"/>
       </div>
-      <div class="grid grid-cols-2 gap-9 sm:grid-cols-2 min-md:mr-20 lg:mr-20 ml-3">
+      <div class="grid grid-cols-2 gap-9 sm:grid-cols-2 lg:mr-20 ml-3">
         <div>
           <h2 class="mb-6 mt-4 text-sm font-semibold text-white uppercase dark:text-white">{i18n.tr.footer.information}</h2>
           <FooterLinkGroup>
-            <FooterLink liClass="mb-2 text-sm max-sm:text-xs text-zinc-400" href="/">{i18n.tr.footer.research}</FooterLink>
-            <FooterLink liClass="mb-2 text-sm max-sm:text-xs text-zinc-400" href="/">{i18n.tr.footer.imprint}</FooterLink>
-            <FooterLink liClass="mb-2 text-sm max-sm:text-xs text-zinc-400" href="/datenschutz">{i18n.tr.footer.privacy}</FooterLink>
+            <FooterLink class="mb-2 text-sm max-sm:text-xs text-zinc-400" href="/">{i18n.tr.footer.research}</FooterLink>
+            <FooterLink class="mb-2 text-sm max-sm:text-xs text-zinc-400" href="/">{i18n.tr.footer.imprint}</FooterLink>
+            <FooterLink class="mb-2 text-sm max-sm:text-xs text-zinc-400" href="/datenschutz">{i18n.tr.footer.privacy}</FooterLink>
           </FooterLinkGroup>
         </div>
 <div>
@@ -63,7 +63,7 @@ import {
       </a>
     </li>
 
-    <li class="mb-2 text-sm max-sm:text-xs text-zinc-400 break-words">
+    <li class="mb-2 text-sm max-sm:text-xs text-zinc-400 wrap-break-word">
       <a href="mailto:mondey@psychologie.uni-heidelberg.de" class="text-inherit hover:text-white">
         E-Mail: mondey@psychologie.uni-heidelberg.de
       </a>

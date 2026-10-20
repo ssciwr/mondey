@@ -107,7 +107,7 @@ let { researchCode = "" }: { researchCode?: string } = $props();
 					autocomplete="new-password"
 					minlength={minPasswordLength}
 					placeholder={i18n.tr.registration.passwordLabel}
-					color={password === "" || passwordLongEnough ? 'base' : 'red'}
+					color={password === "" || passwordLongEnough ? 'default' : 'red'}
 				/>
 				<Helper id="passwordRequirement" class="text-sm">
 					{i18n.tr.registration.passwordRequirement.replace(
@@ -130,7 +130,7 @@ let { researchCode = "" }: { researchCode?: string } = $props();
 					id="passwordConfirm"
 					autocomplete="new-password"
 					placeholder={i18n.tr.registration.passwordConfirmLabel}
-					color={passwordConfirm === password ? 'base' : 'red'}
+					color={passwordConfirm === password ? 'default' : 'red'}
 				/>
 			</div>
 

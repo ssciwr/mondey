@@ -171,21 +171,7 @@ async function saveChanges() {
 }
 </script>
 
-<style>
-	:global(.modal-scrollable) {
-		display: flex !important;
-		align-items: flex-start !important;
-		padding-top: 2rem;
-		margin-bottom:10rem!important;
-	}
-
-	:global(.modal-scrollable > div) {
-		max-height: calc(100vh - 4rem);
-		overflow-y: auto;
-	}
-</style>
-
-<Modal title="Edit user question" class="modal-scrollable" bind:open autoclose >
+<Modal title="Edit user question" bind:open autoclose outsideclose={false}>
 	{#if question && question.text}
 		<div>
 			<div class="flex flex-row items-center">
@@ -227,7 +213,7 @@ async function saveChanges() {
 									<InputAddon>Option values (separate with ";" - like "Option A;Option B")</InputAddon>
 									<Textarea
 										bind:value={question.options}
-										on:input={updateOptionsJson}
+										oninput={updateOptionsJson}
 										placeholder="Option values"
 									/>
 								</ButtonGroup>
@@ -238,7 +224,7 @@ async function saveChanges() {
 										<InputAddon>{text.lang_id}</InputAddon>
 										<Textarea
 											bind:value={text.options}
-											on:input={updateOptionsJson}
+											oninput={updateOptionsJson}
 											placeholder="Displayed options"
 										/>
 									</ButtonGroup>
@@ -257,17 +243,13 @@ async function saveChanges() {
 					{/if}
 					<Label class="mb-2">{i18n.tr.admin.required}</Label>
 					<div class="mb-1">
-						<ButtonGroup class="w-full">
-							<Checkbox
-									bind:checked={question.required}
-							/>
-						</ButtonGroup>
+						<Checkbox
+								bind:checked={question.required}
+						/>
 					</div>
 					<Label class="mb-2">{i18n.tr.admin.visibility}</Label>
 					<div class="mb-1">
-						<ButtonGroup class="w-full">
-							<Checkbox data-testid="visibility-checkbox" bind:checked={question.visibility}></Checkbox>
-						</ButtonGroup>
+						<Checkbox data-testid="visibility-checkbox" bind:checked={question.visibility}></Checkbox>
 					</div>
 					<div class="mb-5 mt-5">
 						<Label class="mb-2">{i18n.tr.admin.questionDependency}</Label>
@@ -292,7 +274,7 @@ async function saveChanges() {
 									<div class="mb-1">
 										<Checkbox
 											checked={showIfAnswerValues.includes(value)}
-											on:change={(e) =>
+											onchange={(e) =>
 												toggleShowIfAnswer(
 													value,
 													(e.target as HTMLInputElement).checked,
@@ -313,7 +295,7 @@ async function saveChanges() {
 									{#each i18n.locales as lang_id}
 										<Button
 											checked={preview_lang === lang_id}
-											on:click={(e) => {
+											onclick={(e: MouseEvent) => {
 												e.stopPropagation();
 												preview_lang = lang_id;
 											}}>{lang_id}</Button
@@ -325,7 +307,7 @@ async function saveChanges() {
 								<InputPreview data={question} lang={preview_lang} bind:answer={preview_answer}/>
 							</Card>
 							<Label class="mb-2">Generated answer:</Label>
-							<Badge large border color="dark">{preview_answer}</Badge
+							<Badge large border color="gray">{preview_answer}</Badge
 							>
 						</div>
 					</Card>
@@ -333,8 +315,8 @@ async function saveChanges() {
 			</div>
 		</div>
 	{/if}
-	<svelte:fragment slot="footer">
+	{#snippet footer()}
 		<SaveButton onclick={saveChanges} />
 		<CancelButton />
-	</svelte:fragment>
+	{/snippet}
 </Modal>

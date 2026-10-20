@@ -28,5 +28,5 @@ onMount(() => {
 </script>
 
 <div class="flex flex-row items-center">
-	<Input type="text" bind:value class="mr-2" {oninput} color={valid ? 'base' : 'red'} data-testid="researchCodeInput"/>
+	<Input type="text" bind:value class="mr-2" {oninput} color={valid ? 'default' : 'red'} data-testid="researchCodeInput"/>
 </div>

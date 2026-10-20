@@ -69,7 +69,7 @@ const calendarEventsPromise = loadCalendarEvents();
 					<h3 class="text-3xl font-bold text-gray-800 pb-4">{year}</h3>
 
 					{#each yearEvents as calendarEvent (calendarEvent.id)}
-						<div class="flex gap-4 sm:gap-6 p-4 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
+						<div class="flex gap-4 sm:gap-6 p-4 bg-white border border-gray-200 rounded-lg hover:shadow-xs transition-shadow">
 							<div class="flex flex-col items-center justify-start min-w-[50px] sm:min-w-[60px]">
 								<div class="text-2xl sm:text-3xl font-bold text-gray-900">
 									{formatDay(calendarEvent.event_date)}
@@ -102,7 +102,7 @@ const calendarEventsPromise = loadCalendarEvents();
 											href={calendarEvent.external_link}
 											target="_blank"
 											rel="noopener noreferrer"
-											class="text-gray-400 hover:text-primary-600 transition-colors flex-shrink-0"
+											class="text-gray-400 hover:text-primary-600 transition-colors shrink-0"
 											aria-label={i18n.tr.frontpage.openLink}
 										>
 											<LinkOutline size="sm" />

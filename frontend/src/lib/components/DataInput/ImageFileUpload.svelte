@@ -43,9 +43,9 @@ function updateImagesToUpload(event: Event) {
 
 <Fileupload
 		bind:files
-		on:change={updateImagesToUpload}
+		onchange={updateImagesToUpload}
 		accept=".jpg, .jpeg, .png"
-		class="mb-2 flex-grow-0"
+		class="mb-2 grow-0"
 		{...rest}
 />
 <WarningModal bind:open={showWarningModal}

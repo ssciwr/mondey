@@ -64,7 +64,7 @@ $effect(() => {
 });
 </script>
 
-<Modal bind:open size="md" title={i18n.tr.admin.updateStatistics} dismissable={!running}>
+<Modal bind:open size="md" title={i18n.tr.admin.updateStatistics} permanent={running} outsideclose={false}>
     {#if running}
         <div class="flex items-center">
             <Spinner class="me-2 h-5 w-5"/>{i18n.tr.admin.statisticsAreBeingUpdated}
@@ -74,7 +74,7 @@ $effect(() => {
     {:else if prompt}
         {prompt}
     {/if}
-    <svelte:fragment slot="footer">
+    {#snippet footer()}
         {#if prompt && !running && !finished}
             <Button data-testid="recalculateStatsButton" onclick={recalculate}>
                 {i18n.tr.admin.recalculateNow}
@@ -87,5 +87,5 @@ $effect(() => {
                 <CloseOutline class="me-2 h-5 w-5" data-testid="closeUpdateStatsModal"/> {i18n.tr.admin.close}
             </Button>
         {/if}
-    </svelte:fragment>
+    {/snippet}
 </Modal>

@@ -15,11 +15,11 @@ let {
 } = $props();
 </script>
 
-<form class="py-4 w-full rounded p-2">
+<form class="py-4 w-full rounded-sm p-2">
     {#if searchTerm !== undefined}
         <Search
                 bind:value={searchTerm}
-                class="rounded py-2.5 min-w-full"
+                class="rounded-sm py-2.5 min-w-full"
                 placeholder={i18n.tr.search.namePlaceholder}
                 size="lg"
         />

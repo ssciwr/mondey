@@ -78,7 +78,7 @@ $effect(() => {
 });
 </script>
 
-<Modal bind:open size="xs" autoclose>
+<Modal bind:open size="xs" autoclose outsideclose={false}>
     <div class="text-center">
         {#if deleteDone}
             <h3>
@@ -119,7 +119,7 @@ $effect(() => {
             </div>
 
             <Button color="red" class="me-2" disabled={intendedConfirmCode !== deleteConfirmCode}
-                    on:click={sendDeleteRequest}>
+                    onclick={sendDeleteRequest}>
                 {i18n.tr.admin.yesSure}
             </Button>
         {/if}

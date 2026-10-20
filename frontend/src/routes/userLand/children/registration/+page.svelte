@@ -427,7 +427,7 @@ const yearOptions = Array.from(
                                     disabled={disableEdit}
                                     id="child_color"
                                     kwargs = {{type: "color"}}
-                                    componentClass="w-1/4 h-12 rounded"
+                                    componentClass="w-1/4! h-12 rounded-sm"
                             />
 
                             {#if displayChildImages}
@@ -478,7 +478,7 @@ const yearOptions = Array.from(
                         </span>
                         {/if}
 
-                        <hr style="margin-bottom:10px" />
+                        <hr class="border-gray-200" style="margin-bottom:10px" />
 
                         {#if currentChild.id !== null && disableEdit === true}
                             {#if !adminSettings.hide_all_feedback}

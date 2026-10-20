@@ -116,7 +116,7 @@ async function deleteMilestoneImageAndUpdate() {
 }
 </script>
 
-<Modal title={i18n.tr.admin.edit} bind:open size="xl" outsideclose>
+<Modal title={i18n.tr.admin.edit} bind:open size="xl">
     {#if milestone}
         <div class="mb-5">
             <Label class="mb-2">{i18n.tr.admin.name}</Label>
@@ -171,14 +171,14 @@ async function deleteMilestoneImageAndUpdate() {
             <ImageFileUpload bind:files bind:images multiple></ImageFileUpload>
         </div>
     {/if}
-    <svelte:fragment slot="footer">
+    {#snippet footer()}
 		<SaveButton onclick={async () => {
 			if (await saveChanges()) {
 				open = false;
 			}
 		}}/>
         <CancelButton onclick={() => {open = false;}}/>
-    </svelte:fragment>
+    {/snippet}
 </Modal>
 
 <DeleteModal bind:open={showDeleteMilestoneImageModal} onclick={deleteMilestoneImageAndUpdate}></DeleteModal>

@@ -10,7 +10,10 @@ import { Banner } from "flowbite-svelte";
 import { ExclamationCircleOutline } from "flowbite-svelte-icons";
 </script>
 
-<Banner id="default-banner" position="fixed" class="bottom-0 left-0 z-50 flex justify-between w-full p-4 border-t border-gray-200 bg-gray-100 dark:bg-gray-700 dark:border-gray-600 text-gray-700 dark:text-gray-200">
+<Banner
+    id="default-banner"
+    class="static bottom-0 left-0 z-50 flex justify-between w-full p-4 border-b-0 border-t border-gray-200 bg-gray-100 dark:bg-gray-700 dark:border-gray-600 text-gray-700 dark:text-gray-200"
+    classes={{ insideDiv: "flex-row items-center gap-0 md:items-center", dismissable: "static -mx-1.5 -my-1.5 text-inherit" }}>
     <div class="flex items-center mx-auto">
         <p class="flex items-center text-xl font-bold text-gray-700 dark:text-gray-200">
             <ExclamationCircleOutline class="me-3 w-4 h-4 text-gray-700 dark:text-gray-200" />

@@ -128,7 +128,7 @@ onMount(() => {
 <div class="w-full" bind:this={container_scores}>
 </div>
 </div>
-<hr />
+<hr class="border-gray-200" />
 <div class="text-center">
 <h4>{i18n.tr.admin.differenceFromAverageScore}</h4>
 <div class="w-full" bind:this={container_diff}>

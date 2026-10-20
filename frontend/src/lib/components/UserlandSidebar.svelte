@@ -17,72 +17,64 @@ import LocaleSidebarDropdown from "$lib/components/LocaleSidebarDropdown.svelte"
 import { alertStore } from "$lib/stores/alertStore.svelte";
 import { currentChild } from "$lib/stores/childrenStore.svelte";
 import { user } from "$lib/stores/userStore.svelte";
-import {
-	Sidebar,
-	SidebarDropdownWrapper,
-	SidebarGroup,
-	SidebarItem,
-	SidebarWrapper,
-	Tooltip,
-} from "flowbite-svelte";
+import { Sidebar, SidebarGroup, SidebarItem, Tooltip } from "flowbite-svelte";
 
 let { setHideDrawer }: { setHideDrawer: (to: boolean) => void } = $props();
 </script>
 
-<Sidebar>
-    <SidebarWrapper>
-        <SidebarGroup class="mt-10">
+<Sidebar disableBreakpoints position="static">
+        <SidebarGroup class="space-y-2 mt-10">
             <SidebarItem label  = {user.data?.email ?
               (user.data.email.length > 20 ?
                 user.data.email.substring(0, 20) + "..." :
                 user.data.email) :
-              ""}  class = "font-bold"/><Tooltip title={user.data?.email} placement="top">{user.data?.email}</Tooltip>
+              ""}  spanClass="ms-3 font-bold"/><Tooltip title={user.data?.email} placement="top">{user.data?.email}</Tooltip>
             <SidebarItem label = {i18n.tr.userData.label} href="/userLand/dataInput">
-                <svelte:fragment slot="icon">
+                {#snippet icon()}
                     <ProfileCardSolid size="lg" />
-                </svelte:fragment>
+                {/snippet}
             </SidebarItem>
 
             <SidebarItem label = {i18n.tr.childData.overviewLabel} href="/userLand/children">
-                <svelte:fragment slot="icon">
+                {#snippet icon()}
                     <GridPlusSolid size="lg" />
-                </svelte:fragment>
+                {/snippet}
             </SidebarItem>
 
             {#if user.data?.is_superuser}
                 <SidebarItem label = {i18n.tr.admin.label} href="/userLand/admin">
-                    <svelte:fragment slot="icon">
+                    {#snippet icon()}
                         <CogSolid size="lg" />
-                    </svelte:fragment>
+                    {/snippet}
                 </SidebarItem>
             {/if}
 
             {#if user.data?.is_researcher}
                 <SidebarItem label = {i18n.tr.researcher.label} href="/userLand/research">
-                    <svelte:fragment slot="icon">
+                    {#snippet icon()}
                         <AtomOutline size="lg" />
-                    </svelte:fragment>
+                    {/snippet}
                 </SidebarItem>
             {/if}
 
         </SidebarGroup>
-        <SidebarGroup border>
+        <SidebarGroup border borderClass="space-y-2 pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
             <SidebarItem label = {i18n.tr.userData.settingsLabel} href="/userLand/settings">
-                <svelte:fragment slot="icon">
+                {#snippet icon()}
                     <AdjustmentsVerticalOutline size="lg" />
-                </svelte:fragment>
+                {/snippet}
             </SidebarItem>
             <SidebarItem>
-                <svelte:fragment slot="icon">
+                {#snippet icon()}
                     <SunOutline />
-                </svelte:fragment>
-                <svelte:fragment slot="subtext">
+                {/snippet}
+                {#snippet subtext()}
                     <DarkModeChooser />
-                </svelte:fragment>
+                {/snippet}
             </SidebarItem>
 
 
-            <SidebarItem label = {i18n.tr.login.profileButtonLabelLogout} onclick = {async () => {
+            <SidebarItem label = {i18n.tr.login.profileButtonLabelLogout} aClass="cursor-pointer" onclick = {async () => {
                     const response = await user.logout();
                     if (response.error) {
                        alertStore.showAlert(
@@ -99,11 +91,10 @@ let { setHideDrawer }: { setHideDrawer: (to: boolean) => void } = $props();
                         goto(`/`);
                     }
                 }}>
-                <svelte:fragment slot="icon">
+                {#snippet icon()}
                     <ArrowRightToBracketOutline size="lg" />
-                </svelte:fragment>
+                {/snippet}
             </SidebarItem>
             <LocaleSidebarDropdown />
         </SidebarGroup>
-    </SidebarWrapper>
 </Sidebar>

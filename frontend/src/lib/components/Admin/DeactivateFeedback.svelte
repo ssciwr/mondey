@@ -101,7 +101,7 @@ async function updateSettings(field: keyof FeedbackSettings, value: boolean) {
                     id="hide-milestone-feedback"
                     checked={adminSettings.hide_all_feedback || adminSettings.hide_milestone_feedback}
                     disabled={adminSettings.hide_all_feedback}
-                    on:change={(e) => updateSettings('hide_milestone_feedback', (e.target as HTMLInputElement).checked)}
+                    onchange={(e) => updateSettings('hide_milestone_feedback', (e.target as HTMLInputElement).checked)}
                 />
             </div>
 
@@ -113,7 +113,7 @@ async function updateSettings(field: keyof FeedbackSettings, value: boolean) {
                     id="hide-milestone-group-feedback"
                     checked={adminSettings.hide_all_feedback || adminSettings.hide_milestone_group_feedback}
                     disabled={adminSettings.hide_all_feedback}
-                    on:change={(e) => updateSettings('hide_milestone_group_feedback', (e.target as HTMLInputElement).checked)}
+                    onchange={(e) => updateSettings('hide_milestone_group_feedback', (e.target as HTMLInputElement).checked)}
                 />
             </div>
 
@@ -124,7 +124,7 @@ async function updateSettings(field: keyof FeedbackSettings, value: boolean) {
                 <Toggle
                     id="hide-all-feedback"
                     bind:checked={adminSettings.hide_all_feedback}
-                    on:change={(e) => updateSettings('hide_all_feedback', (e.target as HTMLInputElement).checked)}
+                    onchange={(e) => updateSettings('hide_all_feedback', (e.target as HTMLInputElement).checked)}
                 />
             </div>
         </div>

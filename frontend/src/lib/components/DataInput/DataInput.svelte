@@ -81,6 +81,17 @@ let showTextField: boolean = $derived.by(
 	},
 );
 let highlight = $derived(!valid && required === true);
+let derivedClass = $derived(
+	highlight
+		? `rounded-sm border-2 border-primary-600 dark:border-primary-600 ${componentClass}`
+		: componentClass,
+);
+// flowbite-svelte Select applies the class prop to a wrapper div rather than the select element
+let componentClassProps = $derived(
+	component === "select"
+		? { classes: { select: derivedClass } }
+		: { class: derivedClass },
+);
 let derivedPlaceholder = $derived(
 	placeholder ??
 		(component === "select"
@@ -105,10 +116,7 @@ let derivedPlaceholder = $derived(
 
 <div class="space-y-4">
 	<ResolvedComponent
-		class={highlight
-			? "rounded border-2 border-primary-600 dark:border-primary-600 " +
-				componentClass
-			: componentClass}
+		{...componentClassProps}
 		bind:value = {value}
 		placeholder = {derivedPlaceholder}
 		{items}

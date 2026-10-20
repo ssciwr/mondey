@@ -67,11 +67,11 @@ onMount(async () => {
 });
 </script>
 
-<Modal bind:open outsideclose size="lg" title={`${i18n.tr.admin.milestoneAnswerSession} ${answer_session_id}`}>
+<Modal bind:open size="lg" title={`${i18n.tr.admin.milestoneAnswerSession} ${answer_session_id}`}>
     {#if !analysis}
         <Spinner/>
     {:else}
-        <Alert color="dark">
+        <Alert color="gray">
             <div class="flex flex-row justify-around">
                 <div>
                     {i18n.tr.admin.rmsDifferenceFromAverageScore}: <span
@@ -99,7 +99,7 @@ onMount(async () => {
 		{/if}
         <PlotSessionAnalysis data={analysis.answers}/>
     {/if}
-    <svelte:fragment slot="footer">
+    {#snippet footer()}
         <Button color="green" data-testid="markNotSuspicious" onclick={async () => {await set_suspicious(false)}}>
             <ThumbsUpOutline class="me-2 h-5 w-5"/>{i18n.tr.admin.notSuspicious}
         </Button>
@@ -107,5 +107,5 @@ onMount(async () => {
             <ThumbsDownOutline class="me-2 h-5 w-5"/>{i18n.tr.admin.suspicious}
         </Button>
         <CancelButton onclick={() => {open = false;}}/>
-    </svelte:fragment>
+    {/snippet}
 </Modal>

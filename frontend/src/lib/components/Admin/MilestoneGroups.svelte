@@ -100,7 +100,7 @@ async function addMilestone(milestoneGroupId: number) {
 			{#each milestoneGroups.data as milestoneGroup, groupIndex (milestoneGroup.id)}
 				{@const groupTitle = milestoneGroup.text[i18n.locale]?.title}
 				<TableBodyRow
-					on:click={() => {
+					onclick={() => {
 						toggleOpenGroupIndex(groupIndex);
 					}}
 					class={`${openMilestoneGroupIndex === null || openMilestoneGroupIndex === groupIndex ? 'opacity-100' : 'opacity-25'} ${openMilestoneGroupIndex === groupIndex ? 'bg-blue-100' : ''}`}

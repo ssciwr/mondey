@@ -204,21 +204,20 @@ let headers = $derived.by(() => {
             </div>
         {/if}
     </div>
-    <hr />
+    <hr class="border-gray-200" />
 
     <div class="flex flex-col items-stretch m-2">
         <h4>{i18n.tr.researcher.dataPlotsHeading}</h4>
         <div class="m-2 grow">
-            <Label> {i18n.tr.researcher.milestones}
-                <MultiSelect bind:value={selected_milestones} class="mt-2" items={milestone_ids}
-                             placeholder={i18n.tr.researcher.milestones}
-                             data-testid="selectMilestone"/>
-            </Label>
+            <Label id="selectMilestoneLabel">{i18n.tr.researcher.milestones}</Label>
+            <MultiSelect bind:value={selected_milestones} class="mt-2" items={milestone_ids}
+                         placeholder={i18n.tr.researcher.milestones}
+                         aria-labelledby="selectMilestoneLabel" data-testid="selectMilestone"/>
         </div>
         <div class="m-2 grow">
-            <Label> {i18n.tr.researcher.groupbyOptional}
-                <MultiSelect bind:value={selected_columns} class="mt-2" items={columns} placeholder={i18n.tr.researcher.groupbyOptional} data-testid="selectGroupby"/>
-            </Label>
+            <Label id="selectGroupbyLabel">{i18n.tr.researcher.groupbyOptional}</Label>
+            <MultiSelect bind:value={selected_columns} class="mt-2" items={columns} placeholder={i18n.tr.researcher.groupbyOptional}
+                         aria-labelledby="selectGroupbyLabel" data-testid="selectGroupby"/>
         </div>
         <Button class="mt-9 mb-3" onclick={downloadCSV} data-testid="researchDownloadCSV" disabled={!json_data || json_data.length === 0}>{i18n.tr.researcher.downloadAsCsv}</Button>
     </div>

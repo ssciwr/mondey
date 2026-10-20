@@ -229,7 +229,7 @@ const breadcrumbdata = $derived([
                                 />
                             {/each}
                         </button>
-                        <Modal bind:open={modalImagePreviewOpen} size="xl" autoclose outsideclose>
+                        <Modal bind:open={modalImagePreviewOpen} size="xl" autoclose>
                             <button type="button" class="block w-full p-2"
                                     aria-label={i18n.tr.milestone.closeImagePreview ?? translationIds.milestone.closeImagePreview}
                                     onclick={()=>{modalImagePreviewOpen=false}}>
@@ -253,10 +253,12 @@ const breadcrumbdata = $derived([
                     <Accordion flush multiple>
                         {#if currentMilestone.text[i18n.locale].obs?.length}
                             <AccordionItem open>
-                            <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
+                            {#snippet header()}
+                            <span class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
                                 <InfoCircleSolid class="mt-0.5" />
                                 <span>{i18n.tr.milestone.observation}</span>
                             </span>
+                            {/snippet}
                                 <p class="whitespace-pre-line">
                                     {currentMilestone.text[i18n.locale].obs}
                                 </p>
@@ -265,10 +267,12 @@ const breadcrumbdata = $derived([
 
                         {#if currentMilestone.text[i18n.locale].help?.length}
                         <AccordionItem>
-                            <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
+                            {#snippet header()}
+                            <span class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
                                 <QuestionCircleSolid class="mt-0.5" />
                                 <span>{i18n.tr.milestone.help}</span>
                             </span>
+                            {/snippet}
                                 <p class="whitespace-pre-line">
                                     {currentMilestone.text[i18n.locale].help}
                                 </p>
@@ -277,10 +281,12 @@ const breadcrumbdata = $derived([
 
                         {#if currentMilestone.text[i18n.locale].importance?.length}
                         <AccordionItem>
-                            <span slot="header" class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
+                            {#snippet header()}
+                            <span class="flex gap-2 text-base text-gray-700 dark:text-gray-400">
                                 <ExclamationCircleSolid class="mt-0.5" />
                                 <span>{i18n.tr.milestone.importance}</span>
                             </span>
+                            {/snippet}
                                 <p class="whitespace-pre-line">
                                     {currentMilestone.text[i18n.locale].importance}
                                 </p>
@@ -323,7 +329,7 @@ const breadcrumbdata = $derived([
                         <Button
                                 color="light"
                                 disabled={currentMilestoneIndex === 0}
-                                on:click={prevMilestone}
+                                onclick={prevMilestone}
                                 class="m-1 mt-4 text-gray-700 dark:text-gray-400"
                         >
                             <ArrowLeftOutline class="me-2 h-5 w-5 text-gray-700 dark:text-gray-400" />

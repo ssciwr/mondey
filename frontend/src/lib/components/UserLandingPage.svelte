@@ -4,18 +4,17 @@ import UserVerify from "$lib/components/UserVerify.svelte";
 import UserlandSidebar from "$lib/components/UserlandSidebar.svelte";
 import { i18n } from "$lib/i18n.svelte";
 import { user } from "$lib/stores/userStore.svelte";
-import { Button } from "flowbite-svelte";
-import { Drawer } from "flowbite-svelte";
+import { Button, Drawer } from "flowbite-svelte";
 import { BarsOutline } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
 
-let hideDrawer: boolean = $state(true);
+let drawerOpen: boolean = $state(false);
 
 // get user state
 onMount(user.load);
 
 afterNavigate(() => {
-	hideDrawer = true;
+	drawerOpen = false;
 });
 </script>
 
@@ -26,15 +25,17 @@ afterNavigate(() => {
 
 				<!-- desktop version: only sidebar-->
 				<div class = "max-md:hidden m-2 p-2 ">
-					<UserlandSidebar setHideDrawer={(to) => { hideDrawer = to }} />
+					<UserlandSidebar setHideDrawer={(to) => { drawerOpen = !to }} />
 				</div>
 
 				<!-- mobile version: drawer instead of fixed sidebar-->
-				<button id="drawerButton" class="z-1001 fixed right-6 top-7 bg-white text-gray-800 dark:bg-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded md:hidden"
-				onclick={()=>{hideDrawer = !hideDrawer}}> <BarsOutline size="lg" /></button>
+				<button id="drawerButton" class="z-1001 fixed right-6 top-7 bg-white text-gray-800 dark:bg-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded-sm md:hidden"
+				onclick={()=>{drawerOpen = !drawerOpen}}> <BarsOutline size="lg" /></button>
 
-				<Drawer transitionType="fly" placement="right" transitionParams={{duration: 200}} bind:hidden = {hideDrawer} id="menuDrawer">
-					<UserlandSidebar setHideDrawer={(to) => { hideDrawer = to }} />
+				<Drawer placement="right" transitionParams={{duration: 200}} bind:open={drawerOpen} id="menuDrawer">
+					<!-- receives the initial focus, otherwise the first button in the drawer is focused and shows its tooltip -->
+					<span data-autofocus tabindex="-1" class="absolute outline-hidden"></span>
+					<UserlandSidebar setHideDrawer={(to) => { drawerOpen = !to }} />
 				</Drawer>
 			</div>
 		{:else}

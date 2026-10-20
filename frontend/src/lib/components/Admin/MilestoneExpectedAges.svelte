@@ -261,7 +261,7 @@ async function saveNewExpectedAges() {
 {/if}
 
 {#key currentMilestone}
-    <Modal title={currentTitle} bind:open={showMilestoneExpectedAgeModal} size="lg" outsideclose>
+    <Modal title={currentTitle} bind:open={showMilestoneExpectedAgeModal} size="lg">
         {#if currentMilestone}
             {@const newAges = expectedAges?.[currentMilestone.id]}
             <PlotScoreAge scoreCollection={newAges} expected_age_months={newAges?.expected_age ?? null}

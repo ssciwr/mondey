@@ -49,7 +49,7 @@ const promise = $state(setup());
 {:then children}
     <div class="m-2 mx-auto w-full pb-4 md:rounded-t-lg">
 
-        <Heading tag="h1" class="m-2 mb-2" color="text-gray-700 dark:text-gray-400">
+        <Heading tag="h1" class="m-2 mb-2 text-gray-700 dark:text-gray-400">
             {i18n.tr.childData.overviewLabel}
         </Heading>
 

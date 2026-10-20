@@ -44,17 +44,17 @@ async function post() {
 }
 </script>
 
-<Modal title={i18n.tr.admin.reorder} bind:open autoclose outsideclose size="lg">
+<Modal title={i18n.tr.admin.reorder} bind:open autoclose size="lg">
     <section use:dndzone="{{items, flipDurationMs}}" onconsider={handleDnd} onfinalize={handleDnd}>
         {#each items as item(item.id)}
             <div animate:flip="{{duration: flipDurationMs}}"
-                 class="border border-1 m-2 p-2 px-4 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                 class="border border m-2 p-2 px-4 rounded-lg shadow-sm hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
                 {item.text}
             </div>
         {/each}
     </section>
-    <svelte:fragment slot="footer">
+    {#snippet footer()}
         <SaveButton onclick={post}/>
         <CancelButton/>
-    </svelte:fragment>
+    {/snippet}
 </Modal>

@@ -103,7 +103,8 @@ class Multiselect {
 		// open drop-down menu
 		await this.toggleDropdown();
 		// click on element with text in drop-down
-		await this.locater().getByText(text).click();
+		// (the hidden select element inside the listbox also contains options with the same text)
+		await this.locater().getByRole("presentation").getByText(text).click();
 		this.currentText = text;
 		// open drop-down menu
 		await this.toggleDropdown();

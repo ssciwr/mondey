@@ -29,23 +29,16 @@ let {
 let textColor = $derived(isDark(color) ? "text-white" : "text-black");
 </script>
 
-<Card
-        class={`${disabled ? 'opacity-30' : 'cursor-pointer hover:scale-105 hover:transition-color hover:cursor-pointer'} flex flex-col h-full mr-2 max-w-prose ${cardClasses}`}
-        style={color ? `background-color: ${color}` : ""}
-        horizontal={false}
-        img={image}
-        imgClass="max-md:hidden object-scale-down"
-        on:click={!disabled ? onclick : () => {}}
->
+{#snippet content()}
         {#if title}
             <div>
-                <h5 class={`break-words hyphens-auto mb-2 text-xl font-bold tracking-tight ${color ? textColor : ''} ${titleClasses}`}>
+                <h5 class={`wrap-break-word hyphens-auto mb-2 text-xl font-bold tracking-tight ${color ? textColor : ''} ${titleClasses}`}>
                     {title}
                 </h5>
             </div>
         {/if}
 
-        <div class="flex-grow mb-2">
+        <div class="grow mb-2">
             {#if text}
                 <p class={`font-normal leading-tight opacity-60 ${color ? textColor : ''}`}>
                     {text}
@@ -58,4 +51,22 @@ let textColor = $derived(isDark(color) ? "text-white" : "text-black");
                 {@render children?.()}
             {/if}
         </div>
+{/snippet}
+
+<Card
+        class={`${disabled ? 'opacity-30' : 'cursor-pointer hover:scale-105 hover:transition-color hover:cursor-pointer'} flex flex-col h-full mr-2 max-w-prose ${image ? 'p-0 sm:p-0' : ''} ${cardClasses}`}
+        style={color ? `background-color: ${color}` : ""}
+        horizontal={false}
+        img={image}
+        classes={{ image: "max-md:hidden object-scale-down" }}
+        onclick={!disabled ? onclick : () => {}}
+>
+        {#if image}
+            <!-- with an image the content is padded rather than the card -->
+            <div class="p-4 sm:p-6">
+                {@render content()}
+            </div>
+        {:else}
+            {@render content()}
+        {/if}
 </Card>

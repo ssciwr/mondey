@@ -46,80 +46,102 @@ onMount(async () => {
 
 <Tabs tabStyle="underline">
     <TabItem open>
-        <div slot="title" class="flex items-center gap-2">
+        {#snippet titleSlot()}
+        <div class="flex items-center gap-2">
             <BadgeCheckOutline size="md"/>
             {i18n.tr.admin.milestones}
         </div>
+        {/snippet}
         <MilestoneGroups/>
     </TabItem>
     <TabItem>
-        <div slot="title" class="flex items-center gap-2">
+        {#snippet titleSlot()}
+        <div class="flex items-center gap-2">
             <ScaleBalancedOutline size="md"/>
             {i18n.tr.admin.expectedAge}
         </div>
+        {/snippet}
         <MilestoneExpectedAges/>
     </TabItem>
     <TabItem>
-        <div slot="title" class="flex items-center gap-2">
+        {#snippet titleSlot()}
+        <div class="flex items-center gap-2">
             <FileOutline size="md" />
             {i18n.tr.admin.adminDocuments}
         </div>
+        {/snippet}
         <AdminDocuments/>
     </TabItem>
     <TabItem>
-        <div slot="title" class="flex items-center gap-2">
+        {#snippet titleSlot()}
+        <div class="flex items-center gap-2">
             <UsersOutline size="md"/>
             {i18n.tr.admin.users}
         </div>
+        {/snippet}
         <Users/>
     </TabItem>
     <TabItem>
-        <div slot="title" class="flex items-center gap-2">
+        {#snippet titleSlot()}
+        <div class="flex items-center gap-2">
             <CalendarMonthSolid class="shrink-0 h-6 w-6"/>
             {i18n.tr.admin.calendarEvents}
         </div>
+        {/snippet}
         <CalendarEvents/>
     </TabItem>
     <TabItem>
-        <div slot="title" class="flex items-center gap-2">
+        {#snippet titleSlot()}
+        <div class="flex items-center gap-2">
             <ClipboardListOutline size="md"/>
             {i18n.tr.admin.userQuestions}
         </div>
+        {/snippet}
         <Questions kind={"user"}/>
     </TabItem>
     <TabItem>
-        <div slot="title" class="flex items-center gap-2">
+        {#snippet titleSlot()}
+        <div class="flex items-center gap-2">
             <ClipboardListOutline size="md"/>
             {i18n.tr.admin.childQuestions}
         </div>
+        {/snippet}
         <Questions kind={"child"}/>
     </TabItem>
     <TabItem>
-        <div slot="title" class="flex items-center gap-2">
+        {#snippet titleSlot()}
+        <div class="flex items-center gap-2">
             <DatabaseOutline size="md"/>
             {i18n.tr.admin.data}
         </div>
+        {/snippet}
         <AnswerSessionData />
     </TabItem>
     <TabItem>
-        <div slot="title" class="flex items-center gap-2">
+        {#snippet titleSlot()}
+        <div class="flex items-center gap-2">
             <LanguageOutline size="md"/>
             {i18n.tr.admin.translations}
         </div>
+        {/snippet}
         <Translations/>
     </TabItem>
     <TabItem>
-        <div slot="title" class="flex items-center gap-2">
+        {#snippet titleSlot()}
+        <div class="flex items-center gap-2">
             <LanguageOutline size="md"/>
             {i18n.tr.admin.languages}
         </div>
+        {/snippet}
         <Languages/>
     </TabItem>
     <TabItem>
-        <div slot="title" class="flex items-center gap-2">
+        {#snippet titleSlot()}
+        <div class="flex items-center gap-2">
             <PersonChalkboardOutline size="md"/>
             {i18n.tr.admin.feedbackConfiguration}
         </div>
+        {/snippet}
         <DeactivateFeedback/>
     </TabItem>
 </Tabs>
