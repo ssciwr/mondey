@@ -22,9 +22,9 @@ let labelClass = $derived(
 <div class="rounded-lg bg-white p-2 pb-4 w-full" style={wrapperStyle}>
     <Progressbar
             animate={true}
-            divClass={`h-full rounded-full w-${displayProgress}`}
+            class={`rounded-full w-${displayProgress}`}
             labelInside={true}
-            labelInsideClass={labelClass}
+            classes={{ label: labelClass }}
             progress={`${displayProgress}`}
             size="h-4"
     />

@@ -284,7 +284,7 @@ onMount(() => {
 	</div>
 {/if}
 
-<Modal bind:open={showEditModal} size="lg">
+<Modal bind:open={showEditModal} size="lg" outsideclose={false}>
 	<form onsubmit={(event) => {
 		event.preventDefault();
 		saveCalendarEvent();
@@ -332,7 +332,7 @@ onMount(() => {
 		</div>
 
 		<div class="flex justify-end space-x-2 mt-6">
-			<Button color="alternative" on:click={() => (showEditModal = false)}>
+			<Button color="alternative" onclick={() => (showEditModal = false)}>
 				{i18n.tr.admin.cancel}
 			</Button>
 			<Button type="submit">

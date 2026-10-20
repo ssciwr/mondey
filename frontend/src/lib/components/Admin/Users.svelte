@@ -112,7 +112,7 @@ onMount(async () => {
 					</TableBodyCell>
 					<TableBodyCell>
 						{#if user.research_group_id > 0}
-						<Alert border={user.is_researcher} color="dark">
+						<Alert border={user.is_researcher} color="gray">
 							{user.research_group_id}
 						</Alert>
 							{:else if user.is_researcher}

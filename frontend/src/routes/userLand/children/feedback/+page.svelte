@@ -532,7 +532,7 @@ async function printReport(): Promise<void> {
             {@render summaryEvaluationElement(CircleMinusSolid, "text-gray-500 dark:text-gray-400", i18n.tr.milestone.notEnoughDataYet)}
         {/if}
     </div>
-    <Hr classHr="w-full my-1"/>
+    <Hr class="w-full my-1"/>
 {/snippet}
 
 <!--Snippet defining how to render detailed milestone feedback with help button-->
@@ -541,7 +541,7 @@ async function printReport(): Promise<void> {
 		<Button class = "btn-white btn-no-min-width" id="b1" onclick={()=>{
 			showHelp= true;
 		}}>{i18n.tr.milestone.help}</Button>
-		<Modal class = "m-2 p-2" title={i18n.tr.milestone.help} bind:open={showHelp} dismissable={true}>
+		<Modal class="p-2 max-w-164" title={i18n.tr.milestone.help} bind:open={showHelp}>
 			{milestone_or_group?.text[i18n.locale].help}
 		</Modal>
 	</span>
@@ -599,12 +599,16 @@ async function printReport(): Promise<void> {
                     {:else}
                         <!-- Show full accordion with milestone details -->
                         <AccordionItem
-                                activeClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-milestone-700 dark:bg-milestone-700 hover:bg-milestone-600 dark:hover:bg-milestone-600 items-center justify-between w-full font-medium text-left p-1"
-                                inactiveClass="hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-milestone-800 dark:bg-milestone-800 hover:bg-milestone-700 dark:hover:bg-milestone-700 items-center justify-between w-full font-medium text-left p-1"
+                                classes={{
+                                    active: "hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-milestone-700 dark:bg-milestone-700 hover:bg-milestone-600 dark:hover:bg-milestone-600 items-center justify-between w-full font-medium text-left p-1",
+                                    inactive: "hover:scale-105 md:hover:scale-1 flex flex-col rounded-lg text-white dark:text-white bg-milestone-800 dark:bg-milestone-800 hover:bg-milestone-700 dark:hover:bg-milestone-700 items-center justify-between w-full font-medium text-left p-1",
+                                }}
                         >
-                            <span slot="header" class="items-center flex justify-center py-1">
+                            {#snippet header()}
+                            <span class="items-center flex justify-center py-1">
                                 {@render evaluation(milestoneGroups[aid][Number(mid)], score as number, false)}
                             </span>
+                            {/snippet}
                             {#each Object.entries(detailed[aid][mid] ?? {}) as [ms_id, ms_score]}
                                 {@render evaluation(
                                     milestoneGroups[aid][Number(mid)].milestones.find((element: any) =>
@@ -614,7 +618,7 @@ async function printReport(): Promise<void> {
                                     Number(ms_score),
                                     true
                                 )}
-                                <Hr classHr="w-full my-1"/>
+                                <Hr class="w-full my-1"/>
                             {/each}
                         </AccordionItem>
                     {/if}
@@ -626,9 +630,8 @@ async function printReport(): Promise<void> {
 
 <!-- Tab shown in front of the answer sessions if there is no answer session or the latest one is too old to count as current -->
 {#snippet noCurrentFeedback(text: string)}
-    <TabItem defaultClass="font-bold m-1 p-0"
-             activeClasses="font-bold m-1 p-2 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600 border-1"
-             inactiveClasses="font-bold m-1 p-2 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 border-additional-color-600 dark:border-additional-color-600 border-1"
+    <TabItem              activeClass="font-bold m-1 p-2 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600"
+             inactiveClass="font-bold m-1 p-2 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 border-additional-color-600 dark:border-additional-color-600"
              title={i18n.tr.milestone.current}
              open={true}
     >
@@ -655,7 +658,7 @@ async function printReport(): Promise<void> {
                 <span class="font-bold text-sm md:text-base">{milestone.short}</span>
                 <span class="hidden sm:block text-sm md:text-base">{milestone.text}</span>
                 <div class="col-span-3">
-                    <Hr classHr="w-full my-1" />
+                    <Hr class="w-full my-1" />
                 </div>
             {/each}
         </div>
@@ -667,14 +670,14 @@ async function printReport(): Promise<void> {
     <div class=" flex flex-col md:flex-row items-center text-gray-700 dark:text-gray-200 justify-between m-2 mb-4 pb-4 space-y-2">
         <h5 class="flex flex-auto font-bold text-md md:text-xl m-2 p-2">{i18n.tr.milestone.selectFeedback}</h5>
 
-        <Button type="button" on:click={() => {
+        <Button type="button" onclick={() => {
 			showMoreInfo = true;
 		}}
         >{i18n.tr.milestone.moreInfoOnEval}</Button>
     </div>
 
     <!-- Modal that shows the explanation of the feedback when the above button is clicked -->
-    <Modal class = "m-2 p-2" classHeader="flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-200" title={i18n.tr.milestone.info} bind:open={showMoreInfo} dismissable={true}>
+    <Modal class="p-2 max-w-164" classes={{ header: "flex justify-between items-center p-4 md:p-5 rounded-t-lg text-gray-700 dark:text-gray-200" }} title={i18n.tr.milestone.info} bind:open={showMoreInfo}>
         <p class ="text-gray-700 dark:text-gray-200 font-medium text-sm md:text-base">{i18n.tr.milestone.feedbackExplanationDetailed}</p>
         <p class ="text-gray-700 dark:text-gray-200 font-medium text-sm md:text-base">{i18n.tr.milestone.feedbackDetailsMilestone}</p>
         <p class ="text-gray-700 dark:text-gray-200 font-medium text-sm md:text-base" >{i18n.tr.milestone.feedbackDetailsEval}</p>
@@ -702,15 +705,14 @@ async function printReport(): Promise<void> {
     {@render explanationModal()}
 
     <!--Main tabs component that displays the feedback for the milestones and milestonegroups -->
-    <Tabs tabStyle="full" defaultClass="justify-center flex rounded-lg divide-x rtl:divide-x-reverse divide-gray-200 shadow-sm dark:divide-gray-700">
+    <Tabs tabStyle="full" class="justify-center flex rounded-lg divide-x rtl:divide-x-reverse divide-gray-200 shadow-xs dark:divide-gray-700">
         <div class="flex flex-col md:flex-row justify-between text-sm md:text-base ">
             {#if !latestSessionIsCurrent}
                 {@render noCurrentFeedback(relevant_sessionkeys.length === 0 ? i18n.tr.milestone.noFeedback : i18n.tr.milestone.noCurrentFeedback)}
             {/if}
             {#each relevant_sessionkeys as aid}
-                <TabItem defaultClass="font-bold m-1 p-0"
-                         activeClasses="font-bold m-1 p-2 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600 border-1"
-                         inactiveClasses="font-bold m-1 p-2 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 border-additional-color-600 dark:border-additional-color-600 border-1"
+                <TabItem                          activeClass="font-bold m-1 p-2 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-600 dark:bg-additional-color-600"
+                         inactiveClass="font-bold m-1 p-2 w-full group-first:rounded-s-lg group-last:rounded-e-lg text-white dark:text-white bg-additional-color-500 dark:bg-additional-color-500 hover:bg-additional-color-400 dark:hover:bg-additional-color-600 border-additional-color-600 dark:border-additional-color-600"
                          title={aid === relevant_sessionkeys[0] && latestSessionIsCurrent ? i18n.tr.milestone.current : formatDate(answerSessions[aid].created_at)}
                          open={aid === relevant_sessionkeys[0] && latestSessionIsCurrent}
                 >

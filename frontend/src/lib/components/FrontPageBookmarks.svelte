@@ -65,7 +65,7 @@ function selectTab(index: number) {
                         onclick={() => selectTab(index)}
                 >
                     <div class="flex items-center gap-3">
-                        <div class="flex-shrink-0 p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
+                        <div class="shrink-0 p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
                             {#if emoji}
                                 <span class="text-2xl emoji-solid-gray">{emoji}</span>
                             {:else}
@@ -77,7 +77,7 @@ function selectTab(index: number) {
                                 {bookmarkText?.[`heading${key}`]}
                             </h3>
                         </div>
-                        <div class="flex-shrink-0 transform transition-transform duration-200 {activeIndex === index ? 'rotate-180' : ''}">
+                        <div class="shrink-0 transform transition-transform duration-200 {activeIndex === index ? 'rotate-180' : ''}">
                             <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>

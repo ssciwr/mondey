@@ -50,9 +50,8 @@ function submit(event: SubmitEvent) {
 <Modal
 	bind:open={sessionStore.isReauthenticationShown}
 	title={i18n.tr.login.sessionExpiringTitle}
-	dismissable={false}
-	size="sm"
->
+	permanent
+	size="sm" outsideclose={false}>
 	<form class="space-y-4" onsubmit={submit}>
 		<p class="text-gray-700 dark:text-gray-300">
 			{i18n.tr.login.sessionAbsoluteExpiringMessage}

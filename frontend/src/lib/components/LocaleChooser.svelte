@@ -20,7 +20,7 @@ let dropdownOpen = $state(false);
 
 	<button
 		id={buttonId}
-		class="z-10 inline-flex flex-shrink-0 items-center rounded-lg bg-gray-100 px-4 py-2.5 text-center text-sm font-medium text-gray-500 hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+		class="z-10 inline-flex shrink-0 items-center rounded-lg bg-gray-100 px-4 py-2.5 text-center text-sm font-medium text-gray-500 hover:bg-gray-200 focus:outline-hidden focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-700"
 		type="button"
 	>
 		{#if withIcon}
@@ -29,11 +29,11 @@ let dropdownOpen = $state(false);
 		{i18n.selectedLocale}
 		<ChevronDownOutline class="ms-2 h-6 w-6" />
 	</button>
-	<Dropdown triggeredBy={buttonId} bind:open={dropdownOpen}>
+	<Dropdown simple bind:isOpen={dropdownOpen} class="shadow-md">
 		{#each i18n.selectableLocales as locale}
 			<DropdownItem
-				class="flex items-center"
-				on:click={preventDefault(() => {
+				class="flex items-center font-medium text-sm"
+				onclick={preventDefault(() => {
 					i18n.locale = locale;
 					dropdownOpen = false;
 				})}

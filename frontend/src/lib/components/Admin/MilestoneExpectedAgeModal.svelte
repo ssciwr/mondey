@@ -65,7 +65,7 @@ function applyChangesToMilestone() {
 }
 </script>
 
-<Modal title={i18n.tr.admin.expectedAgeData} bind:open size="lg" outsideclose>
+<Modal title={i18n.tr.admin.expectedAgeData} bind:open size="lg">
 	{#if scoreCollection}
 		<div class="py-1">
 			<Label>{i18n.tr.admin.expectedAge}</Label>
@@ -87,8 +87,8 @@ function applyChangesToMilestone() {
 			{/key}
 		{/key}
 	{/if}
-	<svelte:fragment slot="footer">
+	{#snippet footer()}
 		<SaveButton onclick={applyChangesToMilestone} disabled={!valid}/>
 		<CancelButton onclick={() => {open = false;}}/>
-	</svelte:fragment>
+	{/snippet}
 </Modal>

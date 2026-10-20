@@ -17,14 +17,18 @@ function sanitizeHtml(html: string) {
 
 <Accordion class="min-w-full px-4 mt-10">
     <AccordionItem>
-        <span slot="header">{i18n.tr.frontpageAccordion.heading1}</span>
+        {#snippet header()}
+        <span>{i18n.tr.frontpageAccordion.heading1}</span>
+        {/snippet}
         <div class="mb-4 mt-4 px-4 lg:px-12 text-gray-700 dark:text-gray-400 restore-default-list-elements-behavior">
             {@html sanitizeHtml(i18n.tr.frontpageAccordion.summary1)}
         </div>
     </AccordionItem>
 
     <!-- Hide FAQ section <AccordionItem>
-        <span slot="header">{i18n.tr.frontpageAccordion.heading2}</span>
+        {#snippet header()}
+        <span>{i18n.tr.frontpageAccordion.heading2}</span>
+        {/snippet}
         <div class="mb-4 mt-4 px-4 text-gray-700 dark:text-gray-400 restore-default-list-elements-behavior">
             {@html sanitizeHtml(i18n.tr.frontpageAccordion.summary2)}
         </div>

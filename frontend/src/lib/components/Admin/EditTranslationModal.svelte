@@ -30,7 +30,7 @@ $effect(() => {
 let successMessage = $state(null as string | null);
 </script>
 
-<Modal title={i18n.tr.admin.missingTranslations} bind:open outsideclose size="lg">
+<Modal title={i18n.tr.admin.missingTranslations} bind:open size="lg">
     {#if successMessage}
         <div class="mb-4 px-4 py-2 bg-green-100 border border-green-400 text-green-700 rounded-lg">
             {successMessage}
@@ -47,7 +47,7 @@ let successMessage = $state(null as string | null);
                 </div>
             {/each}
     {/if}
-    <svelte:fragment slot="footer">
+    {#snippet footer()}
         <SaveButton onclick={async () => {
   try {
     await onsave();
@@ -58,5 +58,5 @@ let successMessage = $state(null as string | null);
   }
 }}/>
         <CancelButton onclick={() => {open = false;}}/>
-    </svelte:fragment>
+    {/snippet}
 </Modal>

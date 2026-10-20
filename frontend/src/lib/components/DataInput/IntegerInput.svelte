@@ -17,4 +17,4 @@ let {
 let valid = $derived(isValidAge(value) && value >= min && value <= max);
 </script>
 
-<Input type="number" {min} {max} bind:value={value} color={valid ? 'base' : 'red'}/>
+<Input type="number" {min} {max} bind:value={value} color={valid ? 'default' : 'red'}/>

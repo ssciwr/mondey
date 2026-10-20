@@ -5,7 +5,7 @@ import { Fileupload } from "flowbite-svelte";
 let {
 	value = $bindable(null),
 	accept = ".jpg, .jpeg, .png",
-	innerClass = "mb-2 flex-grow-0",
+	innerClass = "mb-2 grow-0",
 	required = false,
 	disabled = false,
 	clearable = false,
@@ -35,7 +35,7 @@ function updateImagesToUpload(event: Event) {
 <Fileupload
 	class = {innerClass}
 	bind:files
-	on:change={updateImagesToUpload}
+	onchange={updateImagesToUpload}
 	accept={accept}
 	id="img_upload"
 	required={required}

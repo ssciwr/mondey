@@ -5,17 +5,13 @@ import { SidebarDropdownWrapper, SidebarItem } from "flowbite-svelte";
 import { LanguageOutline } from "flowbite-svelte-icons";
 
 let isOpen = $state(false);
-
-function toggleIsOpen() {
-	isOpen = !isOpen;
-}
 </script>
 
-<SidebarDropdownWrapper {isOpen} label={i18n.locale} onclick={toggleIsOpen}>
-    <svelte:fragment slot="icon">
+<SidebarDropdownWrapper bind:isOpen label={i18n.locale}>
+    {#snippet icon()}
         <LanguageOutline size="lg"/>
-    </svelte:fragment>
+    {/snippet}
     {#each i18n.locales as locale}
-        <SidebarItem label={locale} onclick={() => {isOpen = false; i18n.locale = locale;}}/>
+        <SidebarItem label={locale} aClass="cursor-pointer" onclick={() => {isOpen = false; i18n.locale = locale;}}/>
     {/each}
 </SidebarDropdownWrapper>

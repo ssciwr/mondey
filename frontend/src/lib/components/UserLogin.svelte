@@ -149,7 +149,7 @@ let activationEmailSent = $state(false);
 						class="mt-3"
 						size="sm"
 						disabled={sendingActivationEmail}
-						on:click={resendActivationEmail}
+						onclick={resendActivationEmail}
 						>{i18n.tr.login.resendActivation}</Button
 					>
 				{/if}

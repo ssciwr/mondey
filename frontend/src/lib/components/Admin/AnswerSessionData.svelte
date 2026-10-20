@@ -379,10 +379,10 @@ onMount(async () => {
     </Button>
 </div>
 {i18n.tr.admin.suspiciousSessionNote}
-<Checkbox bind:checked={show_suspicious_only} class="my-2">
+<Checkbox bind:checked={show_suspicious_only}>
     {i18n.tr.admin.showSuspiciousOnly}
 </Checkbox>
-<Checkbox bind:checked={show_completed_only} class="my-2">
+<Checkbox bind:checked={show_completed_only}>
     {i18n.tr.admin.showCompletedOnly}
 </Checkbox>
 <div class="overflow-x-scroll overflow-y-scroll">

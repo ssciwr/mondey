@@ -15,9 +15,9 @@ import { user } from "$lib/stores/userStore.svelte";
 import { isValidPassword, minPasswordLength, preventDefault } from "$lib/util";
 import { Button, Heading, Helper, Input, Label, Modal } from "flowbite-svelte";
 
-let newPassword = $state(null) as string | null;
-let newPasswordRepeat = $state(null) as string | null;
-let currentPassword = $state(null) as string | null;
+let newPassword = $state(undefined) as string | undefined;
+let newPasswordRepeat = $state(undefined) as string | undefined;
+let currentPassword = $state(undefined) as string | undefined;
 let currentPasswordValid = $state(false);
 let passwordChangeSuccess = $state(false);
 let showDeleteAccountModal = $state(false);
@@ -38,7 +38,7 @@ async function submitNewPassword() {
 	currentPasswordValid = false;
 	passwordChangeSuccess = false;
 
-	if (currentPassword === null || currentPassword === "") {
+	if (currentPassword === undefined || currentPassword === "") {
 		alertStore.showAlert(
 			i18n.tr.settings.alertTitle,
 			i18n.tr.settings.emptyPasswordError,
@@ -48,7 +48,7 @@ async function submitNewPassword() {
 		return;
 	}
 
-	if (newPassword === null || newPassword === "") {
+	if (newPassword === undefined || newPassword === "") {
 		alertStore.showAlert(
 			i18n.tr.settings.alertTitle,
 			i18n.tr.settings.emptyPasswordError,
@@ -207,19 +207,18 @@ async function submitNewPassword() {
 
     <Modal
             id="passwordChangeSuccessModal"
-            classBody="flex flex-col pb-2 mb-2 items-center"
+            classes={{ body: "flex flex-col pb-2 mb-2 items-center" }}
             bind:open={passwordChangeSuccess}
-            dismissable={false}
-    >
+            permanent>
 		<span class="mb-2 pb-2"
         >{i18n.tr.settings.confirmPasswordChangeSuccess}</span
         >
         <Button
                 id="ModalCloseButton"
                 type="button"
-                on:click={() => {
-				newPassword = null;
-				newPasswordRepeat = null;
+                onclick={() => {
+				newPassword = undefined;
+				newPasswordRepeat = undefined;
 				currentPassword = "";
 				currentPasswordValid = false;
 				passwordChangeSuccess = false;
@@ -240,7 +239,7 @@ async function submitNewPassword() {
                 id="deleteAccountButton"
                 color="red"
                 size="lg"
-                on:click={() => {showDeleteAccountModal = true;}}
+                onclick={() => {showDeleteAccountModal = true;}}
         >{i18n.tr.settings.deleteAccount}</Button
         >
     </div>

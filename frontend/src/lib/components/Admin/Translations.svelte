@@ -90,9 +90,11 @@ onMount(() => getTranslations());
 <Accordion flush>
 	{#each Object.entries(translationIds) as [section_key, section]}
 		<AccordionItem>
-			<span slot="header" class="flex gap-2 text-base">
+			{#snippet header()}
+			<span class="flex gap-2 text-base">
 				{section_key}
 			</span>
+			{/snippet}
 			{#each Object.keys(section) as item_key}
 				<div class="m-2 mb-4 rounded-md border p-2">
 					<Label class="mb-2">{item_key}</Label>

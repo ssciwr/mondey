@@ -68,7 +68,7 @@ export async function saveChanges() {
 }
 </script>
 
-<Modal title={i18n.tr.admin.edit} bind:open outsideclose size="xl">
+<Modal title={i18n.tr.admin.edit} bind:open size="xl">
 	{#if milestoneGroup}
 		{#each textKeys as textKey}
 			{@const title = i18n.tr.admin[textKey]}
@@ -92,8 +92,8 @@ export async function saveChanges() {
 			</div>
 		</div>
 	{/if}
-	<svelte:fragment slot="footer">
+	{#snippet footer()}
 		<SaveButton onclick={() => {open = false; saveChanges()}}/>
 		<CancelButton onclick={() => {open = false;}}/>
-	</svelte:fragment>
+	{/snippet}
 </Modal>

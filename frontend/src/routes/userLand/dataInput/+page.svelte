@@ -159,7 +159,7 @@ function safeParseJsonList(str: string | null | undefined): any[] {
                     <Button
                             type="button"
                             class="dark:bg-primary-700 w-full bg-primary-700 text-center text-sm text-white hover:bg-primary-800 hover:text-white dark:hover:bg-primary-800"
-                            on:click={() => {
+                            onclick={() => {
 								disableEdit = false;
 							}}
                     >

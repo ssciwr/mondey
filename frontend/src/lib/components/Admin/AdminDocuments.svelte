@@ -185,7 +185,7 @@ onMount(() => {
 	</div>
 </div>
 
-<Modal bind:open={showAddModal} title={i18n.tr.admin.uploadDocument}>
+<Modal bind:open={showAddModal} title={i18n.tr.admin.uploadDocument} outsideclose={false}>
 	<div class="space-y-4">
 		<div>
 			<Label for="title">{i18n.tr.admin.title}</Label>
@@ -204,15 +204,15 @@ onMount(() => {
 			/>
 		</div>
 	</div>
-	<svelte:fragment slot="footer">
+	{#snippet footer()}
 		<Button color="green" disabled={!uploadFile || !newDocument.title} onclick={uploadDocument}>
 			{i18n.tr.admin.upload}
 		</Button>
 		<Button color="alternative" onclick={() => showAddModal = false}>{i18n.tr.admin.cancel}</Button>
-	</svelte:fragment>
+	{/snippet}
 </Modal>
 
-<Modal bind:open={showEditModal} title={i18n.tr.admin.editDocument}>
+<Modal bind:open={showEditModal} title={i18n.tr.admin.editDocument} outsideclose={false}>
 	<div class="space-y-4">
 		<div>
 			<Label for="edit-title">{i18n.tr.admin.title}</Label>
@@ -223,10 +223,10 @@ onMount(() => {
 			<Textarea id="edit-description" bind:value={editDocument.description} />
 		</div>
 	</div>
-	<svelte:fragment slot="footer">
+	{#snippet footer()}
 		<Button color="green" onclick={updateSelectedDocument}>{i18n.tr.admin.update}</Button>
 		<Button color="alternative" onclick={() => showEditModal = false}>{i18n.tr.admin.cancel}</Button>
-	</svelte:fragment>
+	{/snippet}
 </Modal>
 
 <DangerousDeleteModal
