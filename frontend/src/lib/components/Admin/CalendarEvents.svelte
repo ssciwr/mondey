@@ -93,7 +93,14 @@ function openDeleteModal(calendarEvent: CalendarEventRead) {
 	showDeleteModal = true;
 }
 
+// true while saving, to disable the save button so that a double click doesn't save twice
+let saving = $state(false);
+
 async function saveCalendarEvent() {
+	if (saving) {
+		return;
+	}
+	saving = true;
 	try {
 		if (currentCalendarEvent) {
 			const updateData: CalendarEventUpdate = {
@@ -163,6 +170,8 @@ async function saveCalendarEvent() {
 			true,
 			true,
 		);
+	} finally {
+		saving = false;
 	}
 }
 
@@ -335,7 +344,7 @@ onMount(() => {
 			<Button color="alternative" onclick={() => (showEditModal = false)}>
 				{i18n.tr.admin.cancel}
 			</Button>
-			<Button type="submit">
+			<Button type="submit" disabled={saving}>
 				{currentCalendarEvent ? i18n.tr.admin.saveChanges : i18n.tr.admin.add}
 			</Button>
 		</div>
