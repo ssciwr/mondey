@@ -1,6 +1,6 @@
-import { translationIds } from "$lib/translations";
 import type { Page } from "@playwright/test";
 import { test as base } from "@playwright/test";
+import { translationIds } from "#lib/translations.ts";
 
 // Mock the languages routes to only include de, using the built-in frontend translations
 async function mock_languages_routes(page: Page) {

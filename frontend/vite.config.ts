@@ -1,4 +1,6 @@
+import adapter from "@sveltejs/adapter-static";
 import { sveltekit } from "@sveltejs/kit/vite";
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 import tailwindcss from "@tailwindcss/vite";
 import { svelteTesting } from "@testing-library/svelte/vite";
 import { loadEnv } from "vite";
@@ -11,7 +13,25 @@ export default defineConfig(({ mode }) => {
 	const apiUrl = env.VITE_API_PROXY_URL || "http://localhost:8000";
 
 	return {
-		plugins: [tailwindcss(), sveltekit(), svelteTesting()],
+		plugins: [
+			tailwindcss(),
+			sveltekit({
+				preprocess: vitePreprocess(),
+				adapter: adapter({
+					pages: "build",
+					assets: "build",
+					fallback: "index.html",
+					precompress: false,
+					strict: true,
+				}),
+				paths: {
+					base: process.argv.includes("dev")
+						? ""
+						: (process.env.BASE_PATH as "" | `/${string}` | undefined),
+				},
+			}),
+			svelteTesting(),
+		],
 		test: {
 			include: ["src/**/*.{test,spec}.{js,ts}"],
 			environment: "jsdom",

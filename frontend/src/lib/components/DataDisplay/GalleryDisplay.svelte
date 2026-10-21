@@ -1,8 +1,8 @@
 <svelte:options runes={true}/>
 <script lang="ts">
-import { i18n } from "$lib/i18n.svelte";
 import { Checkbox, Radio, Search } from "flowbite-svelte";
 import { type Snippet } from "svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 let {
 	searchTerm = $bindable(),

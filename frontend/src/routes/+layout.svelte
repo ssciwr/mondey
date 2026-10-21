@@ -1,20 +1,20 @@
 <svelte:options runes={true} />
 <script lang="ts">
-import { base } from "$app/paths";
-import logo_dark from "$lib/assets/mondey_dark.svg";
-import logo_dark_mobile from "$lib/assets/mondey_dark_mobile.svg";
-import logo_light from "$lib/assets/mondey_light.svg";
-import logo_light_mobile from "$lib/assets/mondey_light_mobile.svg";
-import { installSessionExpiryHandler } from "$lib/auth/sessionExpiry";
-import { buttonClasses } from "$lib/buttonClasses";
-import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
-import LocaleChooser from "$lib/components/LocaleChooser.svelte";
-import Footer from "$lib/components/Navigation/Footer.svelte";
-import SessionReauthenticationModal from "$lib/components/SessionReauthenticationModal.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
-import { user } from "$lib/stores/userStore.svelte";
-import { translationIds } from "$lib/translations";
+import { resolve } from "$app/paths";
+import logo_dark from "#lib/assets/mondey_dark.svg";
+import logo_dark_mobile from "#lib/assets/mondey_dark_mobile.svg";
+import logo_light from "#lib/assets/mondey_light.svg";
+import logo_light_mobile from "#lib/assets/mondey_light_mobile.svg";
+import { installSessionExpiryHandler } from "#lib/auth/sessionExpiry.ts";
+import { buttonClasses } from "#lib/buttonClasses.ts";
+import DarkModeChooser from "#lib/components/DarkModeChooser.svelte";
+import LocaleChooser from "#lib/components/LocaleChooser.svelte";
+import Footer from "#lib/components/Navigation/Footer.svelte";
+import SessionReauthenticationModal from "#lib/components/SessionReauthenticationModal.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
+import { user } from "#lib/stores/userStore.svelte.ts";
+import { translationIds } from "#lib/translations.ts";
 
 import {
 	Button,
@@ -43,8 +43,8 @@ import "../app.css";
 
 import { afterNavigate } from "$app/navigation";
 import { page } from "$app/state";
-import LocaleSidebarDropdown from "$lib/components/LocaleSidebarDropdown.svelte";
-import { flowbiteTheme } from "$lib/flowbiteTheme";
+import LocaleSidebarDropdown from "#lib/components/LocaleSidebarDropdown.svelte";
+import { flowbiteTheme } from "#lib/flowbiteTheme.ts";
 
 /* So basically it's not ideal to detect user being in the userland this way, but the main menu for non-logged in users
 does make sense to be here.
@@ -126,14 +126,14 @@ let alertModalColor: "red" | "yellow" | undefined = $derived(
 						<Button
 								type="button"
 								class="my-2 w-full"
-								href="{base}/login"
+								href={resolve("/login")}
 								size="lg">{i18n.tr.login.profileButtonLabelDefault}</Button
 						>
 					{:else}
 						<Button
 								type="button"
 								class="my-2 w-full"
-								href="{base}/userLand/children"
+								href={resolve("/userLand/children")}
 								size="lg">{i18n.tr.registration.goHome}</Button
 						>
 					{/if}

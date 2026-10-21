@@ -1,4 +1,4 @@
-import { type ChildPublic, getChild } from "$lib/client";
+import { type ChildPublic, getChild } from "#lib/client/index.ts";
 
 function createCurrentChild() {
 	let currentChild: number | null = $state(null);

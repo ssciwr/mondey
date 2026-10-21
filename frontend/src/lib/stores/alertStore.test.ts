@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { alertStore } from "$lib/stores/alertStore.svelte";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
 
 describe("alert store priority", () => {
 	beforeEach(() => alertStore.hideAlert());

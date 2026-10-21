@@ -1,5 +1,5 @@
-import { translationIds } from "$lib/translations";
 import { expect, test } from "@playwright/test";
+import { translationIds } from "#lib/translations.ts";
 
 test("admin can make a user a researcher and assign a research code", async ({
 	page,

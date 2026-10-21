@@ -1,14 +1,14 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { type ItemOrder } from "$lib/client/types.gen";
-import CancelButton from "$lib/components/Admin/CancelButton.svelte";
-import SaveButton from "$lib/components/Admin/SaveButton.svelte";
-import { i18n } from "$lib/i18n.svelte";
 import { Modal } from "flowbite-svelte";
 import type { DndEvent } from "svelte-dnd-action";
 import { dndzone } from "svelte-dnd-action";
 import { flip } from "svelte/animate";
+import { type ItemOrder } from "#lib/client/types.gen.ts";
+import CancelButton from "#lib/components/Admin/CancelButton.svelte";
+import SaveButton from "#lib/components/Admin/SaveButton.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 const flipDurationMs = 100;
 

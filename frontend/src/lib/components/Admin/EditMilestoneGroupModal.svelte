@@ -1,25 +1,25 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
+import { Label, Modal } from "flowbite-svelte";
+import { onMount } from "svelte";
 import {
 	updateMilestoneGroupAdmin,
 	uploadMilestoneGroupImage,
-} from "$lib/client/sdk.gen";
+} from "#lib/client/sdk.gen.ts";
 import type {
 	MilestoneGroupAdmin,
 	MilestoneGroupText,
-} from "$lib/client/types.gen";
-import CancelButton from "$lib/components/Admin/CancelButton.svelte";
-import InputAutoTranslate from "$lib/components/Admin/InputAutoTranslate.svelte";
-import SaveButton from "$lib/components/Admin/SaveButton.svelte";
-import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";
-import { i18n } from "$lib/i18n.svelte";
+} from "#lib/client/types.gen.ts";
+import CancelButton from "#lib/components/Admin/CancelButton.svelte";
+import InputAutoTranslate from "#lib/components/Admin/InputAutoTranslate.svelte";
+import SaveButton from "#lib/components/Admin/SaveButton.svelte";
+import ImageFileUpload from "#lib/components/DataInput/ImageFileUpload.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
 import {
 	milestoneGroupImageUrl,
 	milestoneGroups,
-} from "$lib/stores/adminStore.svelte";
-import { Label, Modal } from "flowbite-svelte";
-import { onMount } from "svelte";
+} from "#lib/stores/adminStore.svelte.ts";
 
 let {
 	open = $bindable(false),

@@ -1,8 +1,6 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { i18n } from "$lib/i18n.svelte";
-import { type PlotData, type PlotDatum } from "$lib/util";
 import {
 	Axis,
 	BulletLegend,
@@ -13,6 +11,8 @@ import {
 	XYContainer,
 } from "@unovis/ts";
 import { onMount } from "svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { type PlotData, type PlotDatum } from "#lib/util.ts";
 
 let { plot_data = { keys: [], data: [] } }: { plot_data: PlotData } = $props();
 let legend_container: HTMLDivElement;

@@ -3,6 +3,8 @@ repos:
     rev: v6.0.0
     hooks:
       - id: check-yaml
+        # the pnpm lockfile contains multiple documents (the first one pins the pnpm version)
+        exclude: pnpm-lock.yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: mixed-line-ending

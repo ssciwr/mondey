@@ -1,10 +1,10 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { adminUpdateStats } from "$lib/client/sdk.gen";
-import { i18n } from "$lib/i18n.svelte";
 import { Button, Modal, Spinner } from "flowbite-svelte";
 import { CloseOutline } from "flowbite-svelte-icons";
+import { adminUpdateStats } from "#lib/client/sdk.gen.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 let {
 	open = $bindable(false),

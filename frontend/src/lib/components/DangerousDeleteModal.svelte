@@ -1,13 +1,13 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { buttonClasses } from "$lib/buttonClasses";
-import type { DeleteResponse } from "$lib/client";
-import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
 import { Button, Input, Label, Modal, Spinner } from "flowbite-svelte";
 import { CheckCircleOutline } from "flowbite-svelte-icons";
 import ExclamationCircleOutline from "flowbite-svelte-icons/ExclamationCircleOutline.svelte";
+import { buttonClasses } from "#lib/buttonClasses.ts";
+import type { DeleteResponse } from "#lib/client/index.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
 
 type DeleteRequestResult = {
 	data?: unknown;

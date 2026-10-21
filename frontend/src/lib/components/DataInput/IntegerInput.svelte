@@ -1,8 +1,8 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { isValidAge } from "$lib/util";
 import { Input } from "flowbite-svelte";
+import { isValidAge } from "#lib/util.ts";
 
 let {
 	value = $bindable(),

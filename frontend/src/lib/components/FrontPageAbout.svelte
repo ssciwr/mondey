@@ -1,13 +1,13 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
-import babyFlower from "$lib/assets/babyFlower.jpg";
-import { buttonClasses } from "$lib/buttonClasses";
-import type { UserCreate } from "$lib/client/index.js";
-import { registerRegister } from "$lib/client/sdk.gen";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { user } from "$lib/stores/userStore.svelte";
 import { Button, Card, Tooltip } from "flowbite-svelte";
+import babyFlower from "#lib/assets/babyFlower.jpg";
+import { buttonClasses } from "#lib/buttonClasses.ts";
+import type { UserCreate } from "#lib/client/index.ts";
+import { registerRegister } from "#lib/client/sdk.gen.ts";
+import AlertMessage from "#lib/components/AlertMessage.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { user } from "#lib/stores/userStore.svelte.ts";
 
 let showAlert = $state(false);
 let alertMessage = $state(i18n.tr.registration.alertMessageError);

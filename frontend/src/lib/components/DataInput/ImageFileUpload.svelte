@@ -1,9 +1,9 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import WarningModal from "$lib/components/WarningModal.svelte";
-import { i18n } from "$lib/i18n.svelte";
 import { Fileupload } from "flowbite-svelte";
+import WarningModal from "#lib/components/WarningModal.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 let {
 	files = $bindable(undefined),

@@ -1,19 +1,19 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { getMilestoneAgeScores } from "$lib/client/sdk.gen";
+import { Label, Modal } from "flowbite-svelte";
+import { onMount } from "svelte";
+import { getMilestoneAgeScores } from "#lib/client/sdk.gen.ts";
 import type {
 	MilestoneAdmin,
 	MilestoneAgeScoreCollectionPublic,
-} from "$lib/client/types.gen";
-import CancelButton from "$lib/components/Admin/CancelButton.svelte";
-import SaveButton from "$lib/components/Admin/SaveButton.svelte";
-import PlotScoreAge from "$lib/components/DataDisplay/PlotScoreAge.svelte";
-import IntegerInput from "$lib/components/DataInput/IntegerInput.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { isValidAge } from "$lib/util";
-import { Label, Modal } from "flowbite-svelte";
-import { onMount } from "svelte";
+} from "#lib/client/types.gen.ts";
+import CancelButton from "#lib/components/Admin/CancelButton.svelte";
+import SaveButton from "#lib/components/Admin/SaveButton.svelte";
+import PlotScoreAge from "#lib/components/DataDisplay/PlotScoreAge.svelte";
+import IntegerInput from "#lib/components/DataInput/IntegerInput.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { isValidAge } from "#lib/util.ts";
 
 let {
 	open = $bindable(false),

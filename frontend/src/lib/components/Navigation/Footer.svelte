@@ -1,8 +1,6 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import logo_dark from "$lib/assets/mondey_dark.svg";
-import { i18n } from "$lib/i18n.svelte";
 import {
 	Footer,
 	FooterBrand,
@@ -10,6 +8,8 @@ import {
 	FooterLink,
 	FooterLinkGroup,
 } from "flowbite-svelte";
+import logo_dark from "#lib/assets/mondey_dark.svg";
+import { i18n } from "#lib/i18n.svelte.ts";
 //import { FacebookSolid, InstagramSolid } from "flowbite-svelte-icons";
 // These can be uncommented to add back in the social media links if later desired (which an email somewhat implied)
 

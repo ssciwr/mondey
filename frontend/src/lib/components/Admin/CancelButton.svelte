@@ -1,9 +1,9 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { i18n } from "$lib/i18n.svelte";
 import CloseOutline from "flowbite-svelte-icons/CloseOutline.svelte";
 import Button from "flowbite-svelte/Button.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 let {
 	onclick = () => {

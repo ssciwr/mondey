@@ -2,24 +2,6 @@
 
 <script lang="ts">
 import {
-	createEvent,
-	deleteEvent,
-	getEvents,
-	updateEvent,
-} from "$lib/client/sdk.gen";
-import type {
-	CalendarEventCreate,
-	CalendarEventRead,
-	CalendarEventUpdate,
-} from "$lib/client/types.gen";
-import AddButton from "$lib/components/Admin/AddButton.svelte";
-import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
-import EditButton from "$lib/components/Admin/EditButton.svelte";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
-import DeleteModal from "$lib/components/DeleteModal.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
-import {
 	Button,
 	Datepicker,
 	Input,
@@ -35,6 +17,24 @@ import {
 } from "flowbite-svelte";
 import { DateTime } from "luxon";
 import { onMount } from "svelte";
+import {
+	createEvent,
+	deleteEvent,
+	getEvents,
+	updateEvent,
+} from "#lib/client/sdk.gen.ts";
+import type {
+	CalendarEventCreate,
+	CalendarEventRead,
+	CalendarEventUpdate,
+} from "#lib/client/types.gen.ts";
+import AddButton from "#lib/components/Admin/AddButton.svelte";
+import DeleteButton from "#lib/components/Admin/DeleteButton.svelte";
+import EditButton from "#lib/components/Admin/EditButton.svelte";
+import AlertMessage from "#lib/components/AlertMessage.svelte";
+import DeleteModal from "#lib/components/DeleteModal.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
 
 let calendarEvents = $state([] as CalendarEventRead[]);
 let isLoading = $state(false);

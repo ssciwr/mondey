@@ -1,18 +1,18 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import {
-	getMilestoneAnswerSessionAnalysis,
-	modifyMilestoneAnswerSession,
-} from "$lib/client/sdk.gen";
-import type { MilestoneAnswerSessionAnalysis } from "$lib/client/types.gen";
-import CancelButton from "$lib/components/Admin/CancelButton.svelte";
-import PlotSessionAnalysis from "$lib/components/DataDisplay/PlotSessionAnalysis.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
 import { Alert, Button, Modal, Spinner } from "flowbite-svelte";
 import { ThumbsDownOutline, ThumbsUpOutline } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
+import {
+	getMilestoneAnswerSessionAnalysis,
+	modifyMilestoneAnswerSession,
+} from "#lib/client/sdk.gen.ts";
+import type { MilestoneAnswerSessionAnalysis } from "#lib/client/types.gen.ts";
+import CancelButton from "#lib/components/Admin/CancelButton.svelte";
+import PlotSessionAnalysis from "#lib/components/DataDisplay/PlotSessionAnalysis.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
 
 let {
 	open = $bindable(false),

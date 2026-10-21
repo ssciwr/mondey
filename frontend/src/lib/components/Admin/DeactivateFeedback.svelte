@@ -1,15 +1,15 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
+import { Card, Toggle } from "flowbite-svelte";
+import { CheckCircleOutline } from "flowbite-svelte-icons";
+import { onMount } from "svelte";
 import {
 	type AdminSettingsPublic,
 	getAdminSettings,
 	updateAdminSettings,
-} from "$lib/client";
-import { i18n } from "$lib/i18n.svelte";
-import { Card, Toggle } from "flowbite-svelte";
-import { CheckCircleOutline } from "flowbite-svelte-icons";
-import { onMount } from "svelte";
+} from "#lib/client/index.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 // the admin settings this component controls: the rest are edited elsewhere
 type FeedbackSettings = Pick<

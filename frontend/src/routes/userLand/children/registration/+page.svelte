@@ -2,7 +2,17 @@
 
 <script lang="ts">
 import { goto } from "$app/navigation";
-import { buttonClasses } from "$lib/buttonClasses";
+import { Button, Card, Heading, Spinner, Tooltip } from "flowbite-svelte";
+import {
+	ChartLineUpOutline,
+	CheckCircleOutline,
+	ClipboardCheckOutline,
+	FlagOutline,
+	GridPlusSolid,
+	UserSettingsOutline,
+} from "flowbite-svelte-icons";
+import { onMount } from "svelte";
+import { buttonClasses } from "#lib/buttonClasses.ts";
 import {
 	type ChildAnswerPublic,
 	type ChildCreate,
@@ -20,31 +30,21 @@ import {
 	updateChild,
 	updateCurrentChildAnswers,
 	uploadChildImage,
-} from "$lib/client";
-import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
-import EditButton from "$lib/components/Admin/EditButton.svelte";
-import DangerousDeleteModal from "$lib/components/DangerousDeleteModal.svelte";
-import DataInput from "$lib/components/DataInput/DataInput.svelte";
-import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
-import { displayChildImages } from "$lib/features";
-import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
-import { currentChild } from "$lib/stores/childrenStore.svelte";
+} from "#lib/client/index.ts";
+import DeleteButton from "#lib/components/Admin/DeleteButton.svelte";
+import EditButton from "#lib/components/Admin/EditButton.svelte";
+import DangerousDeleteModal from "#lib/components/DangerousDeleteModal.svelte";
+import DataInput from "#lib/components/DataInput/DataInput.svelte";
+import Breadcrumbs from "#lib/components/Navigation/Breadcrumbs.svelte";
+import { displayChildImages } from "#lib/features.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
+import { currentChild } from "#lib/stores/childrenStore.svelte.ts";
 import {
 	clearHiddenAnswers,
 	isQuestionVisible,
 	preventDefault,
-} from "$lib/util";
-import { Button, Card, Heading, Spinner, Tooltip } from "flowbite-svelte";
-import {
-	ChartLineUpOutline,
-	CheckCircleOutline,
-	ClipboardCheckOutline,
-	FlagOutline,
-	GridPlusSolid,
-	UserSettingsOutline,
-} from "flowbite-svelte-icons";
-import { onMount } from "svelte";
+} from "#lib/util.ts";
 // questions and answers about child that are not part of the child object
 let questionnaire: GetChildQuestionsResponse = $state(
 	[] as GetChildQuestionsResponse,

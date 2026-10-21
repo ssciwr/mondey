@@ -1,8 +1,8 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { i18n } from "$lib/i18n.svelte";
 import { Heading, P } from "flowbite-svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
 </script>
 
 <svelte:head>

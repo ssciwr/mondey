@@ -13,10 +13,10 @@ const mocks = vi.hoisted(() => ({
 	reauthenticateSession: vi.fn(),
 }));
 
-vi.mock("$lib/client/sdk.gen", () => ({
+vi.mock("#lib/client/sdk.gen.ts", () => ({
 	reauthenticateSession: mocks.reauthenticateSession,
 }));
-vi.mock("$lib/i18n.svelte", () => ({
+vi.mock("#lib/i18n.svelte.ts", () => ({
 	i18n: {
 		tr: {
 			login: {
@@ -33,8 +33,8 @@ vi.mock("$lib/i18n.svelte", () => ({
 	},
 }));
 
-import SessionReauthenticationModal from "$lib/components/SessionReauthenticationModal.svelte";
-import { sessionStore } from "$lib/stores/sessionStore.svelte";
+import SessionReauthenticationModal from "#lib/components/SessionReauthenticationModal.svelte";
+import { sessionStore } from "#lib/stores/sessionStore.svelte.ts";
 
 function renewedSessionResponse() {
 	return new Response(null, {

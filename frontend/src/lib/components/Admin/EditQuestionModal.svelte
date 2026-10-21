@@ -1,17 +1,6 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { updateChildQuestion, updateUserQuestion } from "$lib/client/sdk.gen";
-import type {
-	ChildQuestionAdmin,
-	UserQuestionAdmin,
-} from "$lib/client/types.gen";
-import CancelButton from "$lib/components/Admin/CancelButton.svelte";
-import InputPreview from "$lib/components/Admin/InputPreview.svelte";
-import SaveButton from "$lib/components/Admin/SaveButton.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { childQuestions, userQuestions } from "$lib/stores/adminStore.svelte";
-import { user } from "$lib/stores/userStore.svelte";
 import {
 	Badge,
 	Button,
@@ -26,6 +15,23 @@ import {
 	type SelectOptionType,
 	Textarea,
 } from "flowbite-svelte";
+import {
+	updateChildQuestion,
+	updateUserQuestion,
+} from "#lib/client/sdk.gen.ts";
+import type {
+	ChildQuestionAdmin,
+	UserQuestionAdmin,
+} from "#lib/client/types.gen.ts";
+import CancelButton from "#lib/components/Admin/CancelButton.svelte";
+import InputPreview from "#lib/components/Admin/InputPreview.svelte";
+import SaveButton from "#lib/components/Admin/SaveButton.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import {
+	childQuestions,
+	userQuestions,
+} from "#lib/stores/adminStore.svelte.ts";
+import { user } from "#lib/stores/userStore.svelte.ts";
 
 let {
 	open = $bindable(false),

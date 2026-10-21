@@ -1,14 +1,14 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
+import { Axis, Line, Scale, StackedBar, XYContainer, colors } from "@unovis/ts";
+import { onMount } from "svelte";
 import type {
 	MilestoneAgeCurveParams,
 	MilestoneAgeScore,
 	MilestoneAgeScoreCollectionPublic,
-} from "$lib/client/types.gen";
-import { i18n } from "$lib/i18n.svelte";
-import { Axis, Line, Scale, StackedBar, XYContainer, colors } from "@unovis/ts";
-import { onMount } from "svelte";
+} from "#lib/client/types.gen.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 let {
 	scoreCollection,

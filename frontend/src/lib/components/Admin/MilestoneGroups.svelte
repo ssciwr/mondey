@@ -2,32 +2,6 @@
 
 <script lang="ts">
 import {
-	createMilestone,
-	createMilestoneGroupAdmin,
-	deleteMilestone,
-	deleteMilestoneGroupAdmin,
-	orderMilestoneGroupsAdmin,
-	orderMilestonesAdmin,
-} from "$lib/client/sdk.gen";
-import type {
-	MilestoneAdmin,
-	MilestoneGroupAdmin,
-} from "$lib/client/types.gen";
-import AddButton from "$lib/components/Admin/AddButton.svelte";
-import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
-import EditButton from "$lib/components/Admin/EditButton.svelte";
-import EditMilestoneGroupModal from "$lib/components/Admin/EditMilestoneGroupModal.svelte";
-import EditMilestoneModal from "$lib/components/Admin/EditMilestoneModal.svelte";
-import OrderItemsModal from "$lib/components/Admin/OrderItemsModal.svelte";
-import RecalculateStatsModal from "$lib/components/Admin/RecalculateStatsModal.svelte";
-import ReorderButton from "$lib/components/Admin/ReorderButton.svelte";
-import DangerousDeleteModal from "$lib/components/DangerousDeleteModal.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import {
-	milestoneGroupImageUrl,
-	milestoneGroups,
-} from "$lib/stores/adminStore.svelte";
-import {
 	Table,
 	TableBody,
 	TableBodyCell,
@@ -37,6 +11,32 @@ import {
 } from "flowbite-svelte";
 import ChevronDownOutline from "flowbite-svelte-icons/ChevronDownOutline.svelte";
 import ChevronUpOutline from "flowbite-svelte-icons/ChevronUpOutline.svelte";
+import {
+	createMilestone,
+	createMilestoneGroupAdmin,
+	deleteMilestone,
+	deleteMilestoneGroupAdmin,
+	orderMilestoneGroupsAdmin,
+	orderMilestonesAdmin,
+} from "#lib/client/sdk.gen.ts";
+import type {
+	MilestoneAdmin,
+	MilestoneGroupAdmin,
+} from "#lib/client/types.gen.ts";
+import AddButton from "#lib/components/Admin/AddButton.svelte";
+import DeleteButton from "#lib/components/Admin/DeleteButton.svelte";
+import EditButton from "#lib/components/Admin/EditButton.svelte";
+import EditMilestoneGroupModal from "#lib/components/Admin/EditMilestoneGroupModal.svelte";
+import EditMilestoneModal from "#lib/components/Admin/EditMilestoneModal.svelte";
+import OrderItemsModal from "#lib/components/Admin/OrderItemsModal.svelte";
+import RecalculateStatsModal from "#lib/components/Admin/RecalculateStatsModal.svelte";
+import ReorderButton from "#lib/components/Admin/ReorderButton.svelte";
+import DangerousDeleteModal from "#lib/components/DangerousDeleteModal.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import {
+	milestoneGroupImageUrl,
+	milestoneGroups,
+} from "#lib/stores/adminStore.svelte.ts";
 import AlertMessage from "../AlertMessage.svelte";
 
 let currentMilestoneGroup = $state(null as MilestoneGroupAdmin | null);

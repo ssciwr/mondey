@@ -10,6 +10,7 @@ import {
 	TableHeadCell,
 } from "flowbite-svelte";
 
+import { onMount } from "svelte";
 import {
 	createChild,
 	createChildQuestion,
@@ -18,21 +19,23 @@ import {
 	deleteUserQuestion,
 	orderChildQuestionsAdmin,
 	orderUserQuestionsAdmin,
-} from "$lib/client/sdk.gen";
+} from "#lib/client/sdk.gen.ts";
 import type {
 	ChildQuestionAdmin,
 	UserQuestionAdmin,
-} from "$lib/client/types.gen";
-import AddButton from "$lib/components/Admin/AddButton.svelte";
-import DeleteButton from "$lib/components/Admin/DeleteButton.svelte";
-import EditButton from "$lib/components/Admin/EditButton.svelte";
-import EditQuestionModal from "$lib/components/Admin/EditQuestionModal.svelte";
-import OrderItemsModal from "$lib/components/Admin/OrderItemsModal.svelte";
-import ReorderButton from "$lib/components/Admin/ReorderButton.svelte";
-import DangerousDeleteModal from "$lib/components/DangerousDeleteModal.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { childQuestions, userQuestions } from "$lib/stores/adminStore.svelte";
-import { onMount } from "svelte";
+} from "#lib/client/types.gen.ts";
+import AddButton from "#lib/components/Admin/AddButton.svelte";
+import DeleteButton from "#lib/components/Admin/DeleteButton.svelte";
+import EditButton from "#lib/components/Admin/EditButton.svelte";
+import EditQuestionModal from "#lib/components/Admin/EditQuestionModal.svelte";
+import OrderItemsModal from "#lib/components/Admin/OrderItemsModal.svelte";
+import ReorderButton from "#lib/components/Admin/ReorderButton.svelte";
+import DangerousDeleteModal from "#lib/components/DangerousDeleteModal.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import {
+	childQuestions,
+	userQuestions,
+} from "#lib/stores/adminStore.svelte.ts";
 import AlertMessage from "../AlertMessage.svelte";
 
 let currentQuestion = $state(

@@ -1,8 +1,8 @@
 <script lang='ts'>
 import { goto } from "$app/navigation";
-import { buttonClasses } from "$lib/buttonClasses";
-import { i18n } from "$lib/i18n.svelte";
 import { Button, Card, Tooltip } from "flowbite-svelte";
+import { buttonClasses } from "#lib/buttonClasses.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
 </script>
 
 <div class="flex justify-center px-4 mt-6">

@@ -47,7 +47,7 @@ export default defineConfig({
 			VITE_MONDEY_API_URL: "http://localhost:5173/api",
 			VITE_API_PROXY_URL: "http://localhost:8000",
 			VITE_HOST: "localhost", // these should be the defaults anyway...
-			VITE_PORT: 5173,
+			VITE_PORT: "5173",
 		},
 	},
 });

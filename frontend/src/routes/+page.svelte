@@ -1,13 +1,13 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import FrontPageAbout from "$lib/components/FrontPageAbout.svelte";
-import FrontPageAccordion from "$lib/components/FrontPageAccordion.svelte";
-import FrontPageBookmarks from "$lib/components/FrontPageBookmarks.svelte";
-import FrontPageCard from "$lib/components/FrontPageCard.svelte";
-import { i18n } from "$lib/i18n.svelte";
 import { Banner } from "flowbite-svelte";
 import { ExclamationCircleOutline } from "flowbite-svelte-icons";
+import FrontPageAbout from "#lib/components/FrontPageAbout.svelte";
+import FrontPageAccordion from "#lib/components/FrontPageAccordion.svelte";
+import FrontPageBookmarks from "#lib/components/FrontPageBookmarks.svelte";
+import FrontPageCard from "#lib/components/FrontPageCard.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
 </script>
 
 <Banner

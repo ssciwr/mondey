@@ -1,8 +1,6 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import Fileupload from "$lib/components/DataInput/Fileupload.svelte";
-import { i18n } from "$lib/i18n.svelte";
 import {
 	Input,
 	Label,
@@ -10,6 +8,8 @@ import {
 	type SelectOptionType,
 	Textarea,
 } from "flowbite-svelte";
+import Fileupload from "#lib/components/DataInput/Fileupload.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
 const componentTable = {
 	input: Input,
 	textarea: Textarea,

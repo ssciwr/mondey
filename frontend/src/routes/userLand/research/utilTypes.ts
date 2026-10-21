@@ -1,5 +1,5 @@
-import type { PlotData } from "$lib/util";
 import type { SelectOptionType } from "flowbite-svelte";
+import type { PlotData } from "#lib/util.ts";
 
 // Here to avoid circular import / SSR importing client / webworker code (appears as "self" error)
 

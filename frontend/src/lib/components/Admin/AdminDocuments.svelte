@@ -2,15 +2,6 @@
 
 <script lang="ts">
 import {
-	createDocument,
-	deleteDocument,
-	getDocuments,
-	updateDocument,
-} from "$lib/client/sdk.gen";
-import type { DocumentAdmin } from "$lib/client/types.gen";
-import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
-import {
 	Button,
 	Card,
 	Fileupload,
@@ -27,6 +18,15 @@ import {
 } from "flowbite-svelte";
 import DownloadOutline from "flowbite-svelte-icons/DownloadOutline.svelte";
 import { onMount } from "svelte";
+import {
+	createDocument,
+	deleteDocument,
+	getDocuments,
+	updateDocument,
+} from "#lib/client/sdk.gen.ts";
+import type { DocumentAdmin } from "#lib/client/types.gen.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
 import DangerousDeleteModal from "../DangerousDeleteModal.svelte";
 import AddButton from "./AddButton.svelte";
 import DeleteButton from "./DeleteButton.svelte";

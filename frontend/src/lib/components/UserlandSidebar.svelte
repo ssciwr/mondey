@@ -1,5 +1,4 @@
 <script lang="ts">
-import { i18n } from "$lib/i18n.svelte";
 import {
 	AdjustmentsVerticalOutline,
 	ArrowRightToBracketOutline,
@@ -10,14 +9,15 @@ import {
 	ProfileCardSolid,
 	SunOutline,
 } from "flowbite-svelte-icons";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 import { goto } from "$app/navigation";
-import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
-import LocaleSidebarDropdown from "$lib/components/LocaleSidebarDropdown.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
-import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { user } from "$lib/stores/userStore.svelte";
 import { Sidebar, SidebarGroup, SidebarItem, Tooltip } from "flowbite-svelte";
+import DarkModeChooser from "#lib/components/DarkModeChooser.svelte";
+import LocaleSidebarDropdown from "#lib/components/LocaleSidebarDropdown.svelte";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
+import { currentChild } from "#lib/stores/childrenStore.svelte.ts";
+import { user } from "#lib/stores/userStore.svelte.ts";
 
 let { setHideDrawer }: { setHideDrawer: (to: boolean) => void } = $props();
 </script>

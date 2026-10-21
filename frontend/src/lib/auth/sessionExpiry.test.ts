@@ -1,5 +1,5 @@
-import type { RequestOptions } from "$lib/client/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { RequestOptions } from "#lib/client/client/index.ts";
 
 type ResponseHandler = (
 	response: Response,
@@ -21,14 +21,14 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("$app/navigation", () => ({ goto: mocks.goto }));
-vi.mock("$lib/client/client.gen", () => ({
+vi.mock("#lib/client/client.gen.ts", () => ({
 	client: {
 		interceptors: {
 			response: { eject: mocks.eject, use: mocks.responseUse },
 		},
 	},
 }));
-vi.mock("$lib/i18n.svelte", () => ({
+vi.mock("#lib/i18n.svelte.ts", () => ({
 	i18n: {
 		tr: {
 			login: {
@@ -38,19 +38,19 @@ vi.mock("$lib/i18n.svelte", () => ({
 		},
 	},
 }));
-vi.mock("$lib/stores/alertStore.svelte", () => ({
+vi.mock("#lib/stores/alertStore.svelte.ts", () => ({
 	alertStore: { hideAlert: mocks.hideAlert, showAlert: mocks.showAlert },
 }));
-vi.mock("$lib/stores/sessionStore.svelte", () => ({
+vi.mock("#lib/stores/sessionStore.svelte.ts", () => ({
 	sessionStore: {
 		clear: mocks.sessionClear,
 		onExpiration: mocks.onExpiration,
 		updateFromResponse: mocks.sessionUpdate,
 	},
 }));
-vi.mock("$lib/stores/userStore.svelte", () => ({ user: mocks.user }));
+vi.mock("#lib/stores/userStore.svelte.ts", () => ({ user: mocks.user }));
 
-import { installSessionExpiryHandler } from "$lib/auth/sessionExpiry";
+import { installSessionExpiryHandler } from "#lib/auth/sessionExpiry.ts";
 
 function installAndGetHandler(): ResponseHandler {
 	installSessionExpiryHandler();

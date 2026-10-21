@@ -1,9 +1,9 @@
-import type { GetResearchNamesResponse } from "$lib/client";
-import { client } from "$lib/client/client.gen";
-import { getResearchData, getResearchNames } from "$lib/client/sdk.gen";
-import type { PlotData } from "$lib/util";
 import { DataFrame, concat, toJSON } from "danfojs/dist/danfojs-browser/src";
 import type { SelectOptionType } from "flowbite-svelte";
+import { client } from "#lib/client/client.gen.ts";
+import type { GetResearchNamesResponse } from "#lib/client/index.ts";
+import { getResearchData, getResearchNames } from "#lib/client/sdk.gen.ts";
+import type { PlotData } from "#lib/util.ts";
 import { serializeCsv } from "./csv";
 import {
 	type WorkerFullData,

@@ -1,7 +1,6 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { translate } from "$lib/client";
 import {
 	Button,
 	ButtonGroup,
@@ -11,6 +10,7 @@ import {
 	Textarea,
 } from "flowbite-svelte";
 import { WandMagicSparklesOutline } from "flowbite-svelte-icons";
+import { translate } from "#lib/client/index.ts";
 
 let {
 	value = $bindable(""),

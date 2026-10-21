@@ -23,9 +23,9 @@ const mocks = vi.hoisted(() => ({
 	getSummaryFeedbackForAnswersession: vi.fn(),
 }));
 
-vi.mock("$lib/client", () => mocks);
+vi.mock("#lib/client/index.ts", () => mocks);
 vi.mock("$app/navigation", () => ({ goto: vi.fn() }));
-vi.mock("$lib/stores/childrenStore.svelte", () => ({
+vi.mock("#lib/stores/childrenStore.svelte.ts", () => ({
 	currentChild: {
 		id: 1,
 		name: "Emma",
@@ -34,12 +34,12 @@ vi.mock("$lib/stores/childrenStore.svelte", () => ({
 		load_data: vi.fn(),
 	},
 }));
-vi.mock("$lib/stores/userStore.svelte", () => ({
+vi.mock("#lib/stores/userStore.svelte.ts", () => ({
 	user: { id: 1, data: { id: 1 } },
 }));
 
-import { alertStore } from "$lib/stores/alertStore.svelte";
-import { translationIds as tr } from "$lib/translations";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
+import { translationIds as tr } from "#lib/translations.ts";
 import FeedbackPage from "./+page.svelte";
 
 const sessions = {

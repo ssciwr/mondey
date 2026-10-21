@@ -1,12 +1,12 @@
 <script lang="ts">
 import { afterNavigate, goto } from "$app/navigation";
-import UserVerify from "$lib/components/UserVerify.svelte";
-import UserlandSidebar from "$lib/components/UserlandSidebar.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { user } from "$lib/stores/userStore.svelte";
 import { Button, Drawer } from "flowbite-svelte";
 import { BarsOutline } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
+import UserVerify from "#lib/components/UserVerify.svelte";
+import UserlandSidebar from "#lib/components/UserlandSidebar.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { user } from "#lib/stores/userStore.svelte.ts";
 
 let drawerOpen: boolean = $state(false);
 

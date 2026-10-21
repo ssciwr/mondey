@@ -1,8 +1,8 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import type { UserQuestionAdmin } from "$lib/client/types.gen";
 import { Input, Label, Select, type SelectOptionType } from "flowbite-svelte";
+import type { UserQuestionAdmin } from "#lib/client/types.gen.ts";
 let {
 	data,
 	lang,

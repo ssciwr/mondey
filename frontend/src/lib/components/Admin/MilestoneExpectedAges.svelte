@@ -1,23 +1,6 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { buttonClasses } from "$lib/buttonClasses";
-import {
-	getAdminSettings,
-	recalculateMilestoneAgeScores,
-	updateMilestone,
-} from "$lib/client/sdk.gen";
-import type {
-	MilestoneAdmin,
-	MilestoneAgeCurveParams,
-	MilestoneAgeScoreCollectionPublic,
-} from "$lib/client/types.gen";
-import MilestoneAgeCurveParamsPlot from "$lib/components/Admin/MilestoneAgeCurveParamsPlot.svelte";
-import SaveButton from "$lib/components/Admin/SaveButton.svelte";
-import PlotScoreAge from "$lib/components/DataDisplay/PlotScoreAge.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { milestoneGroups } from "$lib/stores/adminStore.svelte";
-import { isValidAge } from "$lib/util";
 import {
 	Button,
 	Input,
@@ -33,6 +16,23 @@ import {
 } from "flowbite-svelte";
 import { RefreshOutline } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
+import { buttonClasses } from "#lib/buttonClasses.ts";
+import {
+	getAdminSettings,
+	recalculateMilestoneAgeScores,
+	updateMilestone,
+} from "#lib/client/sdk.gen.ts";
+import type {
+	MilestoneAdmin,
+	MilestoneAgeCurveParams,
+	MilestoneAgeScoreCollectionPublic,
+} from "#lib/client/types.gen.ts";
+import MilestoneAgeCurveParamsPlot from "#lib/components/Admin/MilestoneAgeCurveParamsPlot.svelte";
+import SaveButton from "#lib/components/Admin/SaveButton.svelte";
+import PlotScoreAge from "#lib/components/DataDisplay/PlotScoreAge.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { milestoneGroups } from "#lib/stores/adminStore.svelte.ts";
+import { isValidAge } from "#lib/util.ts";
 
 let currentMilestone = $state(null as MilestoneAdmin | null);
 let showMilestoneExpectedAgeModal = $state(false);

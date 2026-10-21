@@ -1,17 +1,17 @@
 <script lang="ts">
 import { page } from "$app/state";
-import { verifyVerify } from "$lib/client/sdk.gen";
-import UserLogin from "$lib/components/UserLogin.svelte";
-import { i18n } from "$lib/i18n.svelte";
 import {
 	CheckCircleOutline,
 	ExclamationCircleOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
+import { verifyVerify } from "#lib/client/sdk.gen.ts";
+import UserLogin from "#lib/components/UserLogin.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 onMount(async () => {
 	const { data, error } = await verifyVerify({
-		body: { token: page.params.code },
+		body: { token: page.params.code ?? "" },
 	});
 	if ((!error && data) || error?.detail === "VERIFY_USER_ALREADY_VERIFIED") {
 		success = true;

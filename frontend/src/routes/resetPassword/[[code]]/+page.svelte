@@ -1,14 +1,14 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import { page } from "$app/state";
-import { resetResetPassword } from "$lib/client/sdk.gen";
-import DataInput from "$lib/components/DataInput/DataInput.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
-import { preventDefault } from "$lib/util";
 import { Button, Card, Heading } from "flowbite-svelte";
 import { CheckCircleOutline } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
+import { resetResetPassword } from "#lib/client/sdk.gen.ts";
+import DataInput from "#lib/components/DataInput/DataInput.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
+import { preventDefault } from "#lib/util.ts";
 
 let pw = $state("");
 let confirmPw = $state("");
@@ -40,7 +40,7 @@ async function submitData(): Promise<void> {
 
 	try {
 		const { data, error } = await resetResetPassword({
-			body: { token: page.params.code, password: pw },
+			body: { token: page.params.code ?? "", password: pw },
 		});
 
 		if ((!error && data) || error?.detail === "VERIFY_USER_ALREADY_VERIFIED") {

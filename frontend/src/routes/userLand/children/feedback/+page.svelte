@@ -1,30 +1,6 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import { goto } from "$app/navigation";
-import { buttonClasses } from "$lib/buttonClasses";
-import { type AdminSettingsPublic, getAdminSettings } from "$lib/client";
-import {
-	type GetSummaryFeedbackForAnswersessionResponse,
-	type MilestoneAnswerSessionPublic,
-	type MilestoneGroupPublic,
-	type MilestonePublic,
-	type ValidationError,
-	getCompletedMilestoneAnswerSessions,
-	getDetailedFeedbackForAnswersession,
-	getMilestonegroupsForSession,
-	getSummaryFeedbackForAnswersession,
-} from "$lib/client";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
-import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
-import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { user } from "$lib/stores/userStore.svelte";
-import {
-	answerSessionIdsNewestFirst,
-	isCurrentAnswerSession,
-	overallFeedback,
-} from "$lib/util";
 import DOMPurify from "dompurify";
 import {
 	Accordion,
@@ -48,6 +24,33 @@ import {
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
+import { buttonClasses } from "#lib/buttonClasses.ts";
+import {
+	type AdminSettingsPublic,
+	getAdminSettings,
+} from "#lib/client/index.ts";
+import {
+	type GetSummaryFeedbackForAnswersessionResponse,
+	type MilestoneAnswerSessionPublic,
+	type MilestoneGroupPublic,
+	type MilestonePublic,
+	type ValidationError,
+	getCompletedMilestoneAnswerSessions,
+	getDetailedFeedbackForAnswersession,
+	getMilestonegroupsForSession,
+	getSummaryFeedbackForAnswersession,
+} from "#lib/client/index.ts";
+import AlertMessage from "#lib/components/AlertMessage.svelte";
+import Breadcrumbs from "#lib/components/Navigation/Breadcrumbs.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
+import { currentChild } from "#lib/stores/childrenStore.svelte.ts";
+import { user } from "#lib/stores/userStore.svelte.ts";
+import {
+	answerSessionIdsNewestFirst,
+	isCurrentAnswerSession,
+	overallFeedback,
+} from "#lib/util.ts";
 
 // data needed for displaying the page's content
 let alertMessage = $state(

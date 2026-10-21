@@ -1,7 +1,6 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { i18n } from "$lib/i18n.svelte.js";
 import BrainOutline from "flowbite-svelte-icons/BrainOutline.svelte";
 import GraduationCapOutline from "flowbite-svelte-icons/GraduationCapOutline.svelte";
 import HeartOutline from "flowbite-svelte-icons/HeartOutline.svelte";
@@ -9,6 +8,7 @@ import LanguageOutline from "flowbite-svelte-icons/LanguageOutline.svelte";
 import PenOutline from "flowbite-svelte-icons/PenOutline.svelte";
 import RocketOutline from "flowbite-svelte-icons/RocketOutline.svelte";
 import UsersGroupOutline from "flowbite-svelte-icons/UsersGroupOutline.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 const bookmarks = [
 	{

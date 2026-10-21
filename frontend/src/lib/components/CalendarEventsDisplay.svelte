@@ -1,13 +1,13 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { getEvents } from "$lib/client/sdk.gen";
-import type { CalendarEventRead } from "$lib/client/types.gen";
-import AlertMessage from "$lib/components/AlertMessage.svelte";
-import { i18n } from "$lib/i18n.svelte";
 import { Card } from "flowbite-svelte";
 import { LinkOutline } from "flowbite-svelte-icons";
 import { DateTime } from "luxon";
+import { getEvents } from "#lib/client/sdk.gen.ts";
+import type { CalendarEventRead } from "#lib/client/types.gen.ts";
+import AlertMessage from "#lib/components/AlertMessage.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 async function loadCalendarEvents(): Promise<
 	Record<number, CalendarEventRead[]>

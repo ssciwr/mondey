@@ -1,12 +1,4 @@
 <script lang="ts">
-import { registerRegister } from "$lib/client/sdk.gen";
-import { type UserCreate } from "$lib/client/types.gen";
-import ResearchCodeInput from "$lib/components/DataInput/ResearchCodeInput.svelte";
-import UserVerify from "$lib/components/UserVerify.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
-import { user } from "$lib/stores/userStore.svelte";
-import { isValidPassword, minPasswordLength, preventDefault } from "$lib/util";
 import {
 	Button,
 	Card,
@@ -16,6 +8,18 @@ import {
 	Input,
 	Label,
 } from "flowbite-svelte";
+import { registerRegister } from "#lib/client/sdk.gen.ts";
+import { type UserCreate } from "#lib/client/types.gen.ts";
+import ResearchCodeInput from "#lib/components/DataInput/ResearchCodeInput.svelte";
+import UserVerify from "#lib/components/UserVerify.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
+import { user } from "#lib/stores/userStore.svelte.ts";
+import {
+	isValidPassword,
+	minPasswordLength,
+	preventDefault,
+} from "#lib/util.ts";
 
 async function submitData(): Promise<void> {
 	if (user.data) {
