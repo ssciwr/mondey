@@ -108,9 +108,7 @@ def create_app() -> FastAPI:
     # ensure static files directory exists
     pathlib.Path(app_settings.STATIC_FILES_PATH).mkdir(parents=True, exist_ok=True)
     app = FastAPI(
-        lifespan=lifespan,
         title="MONDEY API",
-        root_path="/api",
         generate_unique_id_function=generate_unique_id,
     )
     app.include_router(calendarevents.create_router())
@@ -126,6 +124,14 @@ def create_app() -> FastAPI:
         "/static", StaticFiles(directory=app_settings.STATIC_FILES_PATH), name="static"
     )
     return app
+
+
+def create_server_app() -> FastAPI:
+    server_app = FastAPI(
+        lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None
+    )
+    server_app.mount("/api", create_app())
+    return server_app
 
 
 def main():
@@ -150,7 +156,7 @@ def main():
             f"{key}: {'****************' if key in sensitive_settings else value}"
         )
     uvicorn.run(
-        "mondey_backend.main:create_app",
+        "mondey_backend.main:create_server_app",
         host=app_settings.HOST,
         port=app_settings.PORT,
         reload=app_settings.RELOAD,
