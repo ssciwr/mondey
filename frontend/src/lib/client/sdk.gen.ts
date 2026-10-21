@@ -1214,6 +1214,12 @@ export const reauthenticateSession = <ThrowOnError extends boolean = false>(opti
 
 /**
  * Get Research Data
+ *
+ * Return research records as a stream of JSON Lines.
+ *
+ * A progress record naming each stage precedes one data record containing
+ * the array of records. Errors after streaming starts produce an error
+ * record instead.
  */
 export const getResearchData = <ThrowOnError extends boolean = false>(options?: Options<GetResearchDataData, ThrowOnError>): RequestResult<GetResearchDataResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetResearchDataResponses, unknown, ThrowOnError>({
     security: [{

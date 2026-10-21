@@ -13,7 +13,35 @@ export enum WorkerTypes {
 	INIT = "init",
 	FULL_DATA = "fullData",
 	UPDATE = "update",
+	PROGRESS = "progress",
+	ERROR = "error",
 }
+
+export const researchStages = [
+	"checkingAccess",
+	"answerSessions",
+	"milestoneAnswers",
+	"childAges",
+	"userAnswers",
+	"childAnswers",
+	"researchGroups",
+	"assembling",
+	"transferring",
+	"loadingNames",
+	"preparing",
+] as const;
+
+export type ResearchStage = (typeof researchStages)[number];
+
+export type WorkerProgress = {
+	type: WorkerTypes.PROGRESS;
+	stage: ResearchStage;
+};
+
+export type WorkerError = {
+	type: WorkerTypes.ERROR;
+	requestType: WorkerRequestTypes;
+};
 
 // Message types for worker communication
 export type WorkerInitializeRequest = {

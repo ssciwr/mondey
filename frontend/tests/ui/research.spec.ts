@@ -29,25 +29,38 @@ function make_research_data(n_answer_sessions = 20, n_milestones = 5) {
 	return data;
 }
 
-// Mock the /research/data route
+// Mock the progress and final data returned by the /research/data route.
 async function mock_research_data_route(
 	page: Page,
 	n_answer_sessions: number,
 	n_milestones: number,
+	transform = (row: Record<string, string | number | null>) => row,
 ) {
-	await page.route("**/research/data/", async (route) => {
-		const json = make_research_data(n_answer_sessions, n_milestones);
-		await route.fulfill({ json });
+	await page.route("**/research/data/**", async (route) => {
+		const data = make_research_data(n_answer_sessions, n_milestones).map(
+			transform,
+		);
+		await route.fulfill({
+			contentType: "application/jsonl",
+			body: `${JSON.stringify({ type: "progress", stage: "assembling" })}\n${JSON.stringify({ type: "data", data })}\n`,
+		});
 	});
 }
 
 // Mock the /research/names route
-async function mock_research_names_route(page: Page, n_milestones: number) {
+async function mock_research_names_route(
+	page: Page,
+	n_milestones: number,
+	child_question: Record<number, string> = {
+		"1": "Number of Siblings",
+		"2": "Early birth",
+	},
+) {
 	await page.route("**/research/names/**", async (route) => {
 		const json: Record<string, Record<number, string>> = {
 			milestone: {},
 			user_question: { "1": "Parent income" },
-			child_question: { "1": "Number of Siblings", "2": "Early birth" },
+			child_question,
 		};
 		for (let milestone_id = 1; milestone_id <= n_milestones; ++milestone_id) {
 			json.milestone[`${milestone_id}`] =
@@ -60,6 +73,13 @@ async function mock_research_names_route(page: Page, n_milestones: number) {
 			]),
 		);
 		await route.fulfill({ json });
+	});
+}
+
+// Loading takes longer than the default expect timeout when many tests run in parallel.
+async function expect_research_data_loaded(page: Page) {
+	await expect(page.getByTestId("downloadAllResearchData")).toBeEnabled({
+		timeout: 20000,
 	});
 }
 
@@ -214,13 +234,156 @@ test("Research page: valid data", async ({ page }) => {
 
 test("Research page: no data", async ({ page }) => {
 	await mock_research_data_route(page, 0, 0);
+	await mock_research_names_route(page, 0);
+	const dataResponse = page.waitForResponse("**/research/data/**");
 	await page.goto("/userLand/research");
+	await dataResponse;
+	await expect(page.getByText(translationIds.researcher.noData)).toBeVisible();
+	await expect(page.getByTestId("researchLoadProgress")).toHaveCount(0);
 
 	// no plot or table are displayed if there is no data
 	const plot = page.getByTestId("researchPlotLines");
 	await expect(plot).toHaveCount(0);
 	const table = page.getByTestId("researchTable");
 	await expect(table).toHaveCount(0);
+});
+
+test("Research page: grouping by an unanswered question shows no data", async ({
+	page,
+}) => {
+	await mock_research_data_route(page, 20, 5, (row) => ({
+		...row,
+		child_question_2: null,
+	}));
+	await mock_research_names_route(page, 5);
+	await page.goto("/userLand/research");
+	await expect_research_data_loaded(page);
+	await new Multiselect(page, translationIds.researcher.milestones).select(
+		"MS1 :: Group 1 :: Milestone 1",
+	);
+	await expect(page.getByTestId("researchTable")).toBeVisible();
+	await new Multiselect(page, translationIds.researcher.groupbyOptional).select(
+		"Early birth",
+	);
+	await expect(page.getByTestId("researchTable")).toHaveCount(0);
+	await expect(page.getByTestId("researchPlotLines")).toHaveCount(0);
+	await expect(page.getByRole("alert")).toHaveCount(0);
+	await expect(page.getByTestId("downloadAllResearchData")).toBeEnabled();
+});
+
+test("Research page: a failed download keeps the loaded data usable", async ({
+	page,
+}) => {
+	await mock_research_data_route(page, 20, 5);
+	// A question without a name makes the worker fail to build the CSV header.
+	await mock_research_names_route(page, 5, { "1": "Number of Siblings" });
+	await page.goto("/userLand/research");
+	const downloadAll = page.getByTestId("downloadAllResearchData");
+	await downloadAll.click();
+	await expect(page.getByTestId("researchProcessingError")).toBeVisible();
+	await expect(page.getByTestId("researchLoadError")).toHaveCount(0);
+	await expect(downloadAll).toBeEnabled();
+	await new Multiselect(page, translationIds.researcher.milestones).select(
+		"MS1 :: Group 1 :: Milestone 1",
+	);
+	await expect(page.getByTestId("researchTable")).toBeVisible();
+	await expect(page.getByTestId("researchProcessingError")).toHaveCount(0);
+});
+
+test("Research page: progress stays visible until browser preparation finishes", async ({
+	page,
+}) => {
+	await mock_research_data_route(page, 20, 5);
+	let releaseNames!: () => void;
+	const namesGate = new Promise<void>((resolve) => {
+		releaseNames = resolve;
+	});
+	await mock_research_names_route(page, 5);
+	await page.route("**/research/names/**", async (route) => {
+		await namesGate;
+		await route.fallback();
+	});
+	const namesRequest = page.waitForRequest("**/research/names/**");
+	await page.goto("/userLand/research");
+	await namesRequest;
+	const loading = page.getByTestId("researchLoadProgress");
+	const modal = page.getByRole("dialog", {
+		name: translationIds.researcher.loadingResearchData,
+	});
+	await expect(modal).toBeVisible();
+	await expect(modal.getByRole("button")).toHaveText(
+		translationIds.admin.cancel,
+	);
+	await expect(loading).toContainText(translationIds.researcher.loadingNames);
+	await expect(loading.getByRole("progressbar")).toHaveAttribute("value", "9");
+	await expect(page.getByTestId("downloadAllResearchData")).toBeDisabled();
+	await page.keyboard.press("Escape");
+	await expect(modal).toBeVisible();
+	await page.mouse.click(5, 5);
+	await expect(modal).toBeVisible();
+	releaseNames();
+	await expect(loading).toHaveCount(0);
+	await expect(modal).toHaveCount(0);
+	await expect_research_data_loaded(page);
+});
+
+test("Research page: loading can be cancelled and restarted", async ({
+	page,
+}) => {
+	await mock_research_data_route(page, 20, 5);
+	await mock_research_names_route(page, 5);
+	const stall = () => {
+		// Never respond, so loading cannot finish before it is cancelled.
+	};
+	await page.route("**/research/names/**", stall);
+	const namesRequest = page.waitForRequest("**/research/names/**");
+	await page.goto("/userLand/research");
+	await namesRequest;
+	const modal = page.getByRole("dialog", {
+		name: translationIds.researcher.loadingResearchData,
+	});
+	await modal
+		.getByRole("button", { name: translationIds.admin.cancel })
+		.click();
+	await expect(modal).toHaveCount(0);
+	await expect(page.getByTestId("researchLoadError")).toContainText(
+		translationIds.researcher.loadCancelled,
+	);
+	await expect(page.getByTestId("downloadAllResearchData")).toBeDisabled();
+	await page.unroute("**/research/names/**", stall);
+	await page
+		.getByRole("button", { name: translationIds.researcher.retry })
+		.click();
+	await expect(page.getByTestId("researchLoadError")).toHaveCount(0);
+	await expect_research_data_loaded(page);
+});
+
+test("Research page: a failed load can be retried", async ({ page }) => {
+	await mock_research_data_route(page, 20, 5);
+	await mock_research_names_route(page, 5);
+	await page.route(
+		"**/research/data/**",
+		async (route) => {
+			await route.fulfill({
+				contentType: "application/jsonl",
+				body: '{"type":"error"}\n',
+			});
+		},
+		{ times: 1 },
+	);
+	const failedResponse = page.waitForResponse("**/research/data/**");
+	await page.goto("/userLand/research");
+	await failedResponse;
+	await expect(page.getByTestId("researchLoadError")).toBeVisible();
+	await expect(page.getByRole("dialog")).toHaveCount(0);
+	await expect(page.getByTestId("downloadAllResearchData")).toBeDisabled();
+	const retryResponse = page.waitForResponse("**/research/data/**");
+	await page
+		.getByRole("button", { name: translationIds.researcher.retry })
+		.click();
+	await retryResponse;
+	await expect(page.getByTestId("researchLoadError")).toHaveCount(0);
+	await expect_research_data_loaded(page);
 });
 
 test("Research page: Download all CSV contains expected data", async ({
