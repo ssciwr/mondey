@@ -25,6 +25,7 @@ import { i18n } from "#lib/i18n.svelte.ts";
 
 let users = $state([] as Array<UserRead>);
 let saveDisabled = $state({} as Record<string, boolean>);
+let addingResearchGroup = $state({} as Record<string, boolean>);
 
 async function refreshUsers() {
 	const { data, error } = await getUsers();
@@ -60,6 +61,8 @@ async function updateUser(user: UserRead) {
 }
 
 async function addResearchGroup(user: UserRead) {
+	// disable the button until the research group is created, so that a double click doesn't create two
+	addingResearchGroup[user.id] = true;
 	const { data, error } = await createResearchGroup({
 		path: {
 			user_id: user.id,
@@ -70,6 +73,7 @@ async function addResearchGroup(user: UserRead) {
 	} else {
 		await refreshUsers();
 	}
+	addingResearchGroup[user.id] = false;
 }
 
 onMount(async () => {
@@ -116,14 +120,14 @@ onMount(async () => {
 							{user.research_group_id}
 						</Alert>
 							{:else if user.is_researcher}
-							<Button onclick={() => {addResearchGroup(user)}}>{i18n.tr.admin.addResearchCode}</Button>
+							<Button disabled={addingResearchGroup[user.id]} onclick={() => addResearchGroup(user)}>{i18n.tr.admin.addResearchCode}</Button>
 						{/if}
 					</TableBodyCell>
 					<TableBodyCell>
 						<Checkbox bind:checked={user.is_superuser} onchange={() => {saveDisabled[user.id]=false}} />
 					</TableBodyCell>
 					<TableBodyCell>
-						<SaveButton disabled={saveDisabled[user.id]} onclick={() => {updateUser(user)}} />
+						<SaveButton disabled={saveDisabled[user.id]} onclick={() => updateUser(user)} />
 					</TableBodyCell>
 				</TableBodyRow>
 			{/each}

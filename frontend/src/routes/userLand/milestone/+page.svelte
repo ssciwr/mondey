@@ -61,6 +61,9 @@ function prevMilestone() {
 		contentStore.milestoneGroupData.milestones[currentMilestoneIndex];
 }
 
+// true while an answer is being saved, to ignore further answers until the next milestone is shown
+let savingAnswer = false;
+
 async function nextMilestone() {
 	if (
 		!contentStore.milestoneGroupData ||
@@ -71,22 +74,31 @@ async function nextMilestone() {
 	) {
 		return;
 	}
-	const { data, error } = await updateMilestoneAnswer({
-		body: { milestone_id: currentMilestone.id, answer: selectedAnswer },
-		path: {
-			milestone_answer_session_id: milestoneAnswerSession.id,
-		},
-	});
-	if (error) {
+	const milestone = currentMilestone;
+	const answerSession = milestoneAnswerSession;
+	savingAnswer = true;
+	try {
+		const { data, error } = await updateMilestoneAnswer({
+			body: { milestone_id: milestone.id, answer: selectedAnswer },
+			path: {
+				milestone_answer_session_id: answerSession.id,
+			},
+		});
+		if (error) {
+			console.log(error);
+			return;
+		}
+		answerSession.answers[`${milestone.id}`] = data.answer;
+		if (data.session_completed) {
+			goto("/userLand/children/feedback");
+			return;
+		}
+		goToNextMilestone();
+	} catch (error) {
 		console.log(error);
-		return;
+	} finally {
+		savingAnswer = false;
 	}
-	milestoneAnswerSession.answers[`${currentMilestone.id}`] = data.answer;
-	if (data.session_completed) {
-		goto("/userLand/children/feedback");
-		return;
-	}
-	goToNextMilestone();
 }
 
 function goToNextMilestone() {
@@ -110,6 +122,9 @@ function goToNextMilestone() {
 }
 
 function selectAnswer(answer: number) {
+	if (savingAnswer) {
+		return;
+	}
 	if (!currentMilestone) {
 		console.log("selectAnswer: missing currentMilestone");
 		return;
@@ -127,7 +142,7 @@ function selectAnswer(answer: number) {
 		answer: answer,
 	};
 	if (selectedAnswer !== undefined) {
-		nextMilestone();
+		void nextMilestone();
 	}
 }
 

@@ -93,7 +93,7 @@ export async function saveChanges() {
 		</div>
 	{/if}
 	{#snippet footer()}
-		<SaveButton onclick={() => {open = false; saveChanges()}}/>
+		<SaveButton onclick={() => {open = false; return saveChanges();}}/>
 		<CancelButton onclick={() => {open = false;}}/>
 	{/snippet}
 </Modal>
