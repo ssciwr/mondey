@@ -48,7 +48,7 @@ async def delete_expired_access_tokens(session: AsyncSession) -> int:
     return result.rowcount
 
 
-async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_async_session() -> AsyncGenerator[AsyncSession]:
     async with async_session_maker() as session:
         yield session
 

@@ -8,7 +8,7 @@ See [DEVELOPMENT.md](../DEVELOPMENT.md) for the full local development setup, in
 
 Initial setup to edit the frontend locally:
 
-- install Node.js 24 and enable its bundled Corepack, e.g. `corepack enable`; Corepack uses the pnpm version pinned in `package.json`
+- install [pnpm](https://pnpm.io/installation) (pnpm automatically uses the pnpm and Node.js versions pinned in `package.json`)
 - clone the repo, e.g. `git clone https://github.com/ssciwr/mondey.git`
 - go to the frontend folder of the repository, e.g. `cd mondey/frontend`
 - copy `.env.dev.sample` to `.env`

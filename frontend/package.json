@@ -57,5 +57,12 @@
 		"svelte-dnd-action": "^0.9.80",
 		"wcag-contrast-utils": "^1.0.2"
 	},
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": "^24",
+			"onFail": "download"
+		}
+	},
 	"packageManager": "pnpm@12.14.0"
 }

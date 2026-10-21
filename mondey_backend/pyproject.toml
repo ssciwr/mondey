@@ -8,7 +8,7 @@ description = "MONDEY backend"
 readme = "README.md"
 license = { text = "NONE" }
 authors = [{ name = "SSC", email = "ssc@iwr.uni-heidelberg.de" }]
-requires-python = ">=3.10"
+requires-python = ">=3.14"
 dependencies = [
     "fastapi[standard]",
     "fastapi-users[sqlalchemy]",
@@ -28,7 +28,6 @@ dependencies = [
     "python-dateutil",
     "checkdigit",
     "apscheduler",
-    "fastapi-injectable",
     "deepl",
     "pandas",
     "sqlparse",
@@ -36,12 +35,15 @@ dependencies = [
 ]
 dynamic = ["version"]
 
-[project.optional-dependencies]
-tests = ["pytest", "pytest-randomly", "pytest-cov", "pytest-mock", "pytest-asyncio"]
+[dependency-groups]
+dev = ["pytest", "pytest-randomly", "pytest-cov", "pytest-mock", "pytest-asyncio"]
 
 [project.scripts]
 mondey-backend = "mondey_backend.main:main"
 mondey-export-openapi-json = "mondey_backend.export:export_openapi_json"
+
+[tool.uv]
+required-version = ">=0.13"
 
 [tool.hatch.version]
 path = "src/mondey_backend/__init__.py"
