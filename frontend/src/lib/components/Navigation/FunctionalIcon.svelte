@@ -10,7 +10,7 @@ let {
 } = $props();
 </script>
 
-<div class="flex cursor-pointer items-center space-x-4 rtl:space-x-reverse">
+<div class="flex cursor-pointer items-center gap-4">
 	{@render children?.()}
 	{#if tooltip}
 		<Tooltip arrow={false}>{tooltip}</Tooltip>

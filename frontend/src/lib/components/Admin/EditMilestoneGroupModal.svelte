@@ -72,7 +72,7 @@ export async function saveChanges() {
 	{#if milestoneGroup}
 		{#each textKeys as textKey}
 			{@const title = i18n.tr.admin[textKey]}
-			<div class="mb-5">
+			<div>
 				<Label class="mb-2">{title}</Label>
 				{#each i18n.locales as lang_id}
 					<div class="mb-1">
@@ -81,7 +81,7 @@ export async function saveChanges() {
 				{/each}
 			</div>
 		{/each}
-		<div class="mb-5">
+		<div>
 			<Label for="img_upload" class="pb-2">{i18n.tr.admin.image}</Label>
 			<div class="flex flex-row">
 				<img src={image} width="48" height="48" alt="MilestoneGroup" class="mx-2" />

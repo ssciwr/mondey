@@ -1,6 +1,7 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import { goto } from "$app/navigation";
+import { buttonClasses } from "$lib/buttonClasses";
 import { type AdminSettingsPublic, getAdminSettings } from "$lib/client";
 import {
 	type GetSummaryFeedbackForAnswersessionResponse,
@@ -521,7 +522,7 @@ async function printReport(): Promise<void> {
 {#snippet summaryEvaluation(aid: number)}
     {@const overall = overallFeedback(summary[aid])}
     <!-- summary is set to the minimum reached evaluation to draw attention to them, ignoring groups with not enough data.-->
-    <div class="flex flex-col md:flex-row space-y-2 space-x-2 items-center justify-center w-full text-gray-700 dark:text-gray-200 m-2 p-2 mb-4 pb-4 text-sm md:text-base">
+    <div class="flex flex-col md:flex-row gap-2 items-center justify-center w-full text-gray-700 dark:text-gray-200 m-2 p-2 mb-4 pb-4 text-sm md:text-base">
         {#if overall === 1}
             {@render summaryEvaluationElement(CheckCircleSolid, "text-feedback-0", i18n.tr.milestone.recommendOk)}
         {:else if overall === 0}
@@ -538,7 +539,7 @@ async function printReport(): Promise<void> {
 <!--Snippet defining how to render detailed milestone feedback with help button-->
 {#snippet milestoneHelpButton(milestone_or_group: MilestonePublic | undefined)}
 	<span class =  "flex w-full m-2 p-2 justify-center" >
-		<Button class = "btn-white btn-no-min-width" id="b1" onclick={()=>{
+		<Button id="b1" onclick={()=>{
 			showHelp= true;
 		}}>{i18n.tr.milestone.help}</Button>
 		<Modal class="p-2 max-w-164" title={i18n.tr.milestone.help} bind:open={showHelp}>
@@ -565,7 +566,7 @@ async function printReport(): Promise<void> {
 
 <!--Snippet defining how the evaluation for each milestonegroup is shown. 'grade' is the evaluation we get from the backend-->
 {#snippet evaluation( milestone_or_group: MilestonePublic | MilestoneGroupPublic | undefined, grade: number, isMilestone: boolean,)}
-    <div class={`rounded-lg space-x-2 space-y-2 justify-center p-2 pt-0 pb-0 m-2 flex flex-col text-sm text-white bg-milestone-600`}>
+    <div class={`rounded-lg gap-2 justify-center p-2 pt-0 pb-0 m-2 flex flex-col text-sm text-white bg-milestone-600`}>
         {#if grade === 1}
             {@render evaluationElement(CheckCircleSolid, milestone_or_group, "text-feedback-0", isMilestone)}
         {:else if grade === 0}
@@ -638,7 +639,7 @@ async function printReport(): Promise<void> {
         <div class="flex flex-col items-center justify-center w-full text-gray-700 dark:text-gray-200 m-2 p-2 mb-4 pb-4 space-y-4 text-sm md:text-base">
             <CircleMinusSolid size="xl" class="transform scale-150 text-gray-500 dark:text-gray-400" />
             <p class="text-center">{text}</p>
-            <Button class="btn-primary" onclick={() => goto("/userLand/milestone/group")}>
+            <Button class={buttonClasses.primary} onclick={() => goto("/userLand/milestone/group")}>
                 <FlagOutline size="md" />
                 {i18n.tr.childData.nextButtonLabel}
             </Button>
@@ -667,7 +668,7 @@ async function printReport(): Promise<void> {
 
 <!-- Middle part of the page with a buttton that enables the explanation modal for the feedback, and a heading that tells people what they can do next -->
 {#snippet explanationModal()}
-    <div class=" flex flex-col md:flex-row items-center text-gray-700 dark:text-gray-200 justify-between m-2 mb-4 pb-4 space-y-2">
+    <div class=" flex flex-col md:flex-row items-center text-gray-700 dark:text-gray-200 justify-between m-2 mb-4 pb-4 max-md:gap-2">
         <h5 class="flex flex-auto font-bold text-md md:text-xl m-2 p-2">{i18n.tr.milestone.selectFeedback}</h5>
 
         <Button type="button" onclick={() => {
@@ -736,7 +737,7 @@ async function printReport(): Promise<void> {
     <!--Button to print the report out into pdf or physical copy-->
     {#if !adminSettings.hide_all_feedback && Object.keys(answerSessions).length > 0}
         <div class="flex items-center justify-center w-full m-2 p-2 mb-4 pb-4">
-            <Button class="btn-secondary" onclick={async () => {await printReport();}}>{i18n.tr.milestone.printReport}</Button>
+            <Button class={buttonClasses.secondary} onclick={async () => {await printReport();}}>{i18n.tr.milestone.printReport}</Button>
         </div>
     {/if}
 {:catch error}

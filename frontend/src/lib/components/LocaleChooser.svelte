@@ -16,7 +16,7 @@ onMount(() => {
 let dropdownOpen = $state(false);
 </script>
 
-<div class="flex m-1 p-1">
+<div class="flex my-1 p-1">
 
 	<button
 		id={buttonId}

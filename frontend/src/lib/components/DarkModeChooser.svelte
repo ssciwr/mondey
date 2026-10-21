@@ -6,7 +6,7 @@ import { MoonSolid, SunSolid } from "flowbite-svelte-icons";
 </script>
 
 <FunctionalIcon tooltip={i18n.tr.frontpage.toggleDarkmode}>
-    <DarkMode class="apply-icon-style">
+    <DarkMode class="rounded-lg p-2 text-xl text-gray-500 dark:text-gray-500 hover:text-primary-800 dark:hover:text-primary-800">
         {#snippet darkIcon()}
             <MoonSolid />
         {/snippet}

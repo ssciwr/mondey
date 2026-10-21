@@ -1,6 +1,7 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
+import { buttonClasses } from "$lib/buttonClasses";
 import {
 	getMilestoneAnswerSessions,
 	getResearchGroups,
@@ -257,7 +258,7 @@ onMount(async () => {
                     </label>
                     <div class="flex items-center space-x-2">
                         <Button
-                                class="btn btn-primary"
+                                class={`${buttonClasses.primary} max-sm:min-w-full`}
                                 disabled={isUploading}
                                 onclick={() => dataFileInputRef?.click()}
                                 aria-describedby="data-csv-label"
@@ -273,7 +274,7 @@ onMount(async () => {
                                 onchange={handleDataFileChange}
                                 disabled={isUploading}
                                 data-testid="data-csv-file-input"
-                                style="display: none;"
+                                class="hidden"
                         />
                         {#if dataFile}
                             <CheckCircleOutline class="text-green-500" />
@@ -288,7 +289,7 @@ onMount(async () => {
                     </label>
                     <div class="flex items-center space-x-2">
                         <Button
-                                class="btn btn-primary"
+                                class={`${buttonClasses.primary} max-sm:min-w-full`}
                                 disabled={isUploading}
                                 onclick={() => labelsFileInputRef?.click()}
                                 aria-describedby="labels-csv-label"
@@ -304,7 +305,7 @@ onMount(async () => {
                                 onchange={handleLabelsFileChange}
                                 disabled={isUploading}
                                 data-testid="labels-csv-file-input"
-                                style="display: none;"
+                                class="hidden"
                         />
                         {#if labelsFile}
                             <CheckCircleOutline class="text-green-500" />
@@ -332,7 +333,7 @@ onMount(async () => {
                 </div>
 
                 <Button
-                    class="btn btn-primary"
+                    class={`${buttonClasses.primary} max-sm:min-w-full`}
                     onclick={handleImport}
                     disabled={!canImport}
                     data-testid="import-data-button"

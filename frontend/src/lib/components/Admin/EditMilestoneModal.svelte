@@ -118,11 +118,11 @@ async function deleteMilestoneImageAndUpdate() {
 
 <Modal title={i18n.tr.admin.edit} bind:open size="xl">
     {#if milestone}
-        <div class="mb-5">
+        <div>
             <Label class="mb-2">{i18n.tr.admin.name}</Label>
             <Input bind:value={milestone.name} placeholder={i18n.tr.admin.name}/>
         </div>
-        <div class="mb-5">
+        <div>
             <Label class="mb-2">{i18n.tr.admin.milestoneGroup}</Label>
             <Select
 				data-testid="milestoneGroupSelect"
@@ -134,7 +134,7 @@ async function deleteMilestoneImageAndUpdate() {
         </div>
         {#each textKeys as textKey}
             {@const title = i18n.tr.admin[textKey]}
-            <div class="mb-5">
+            <div>
                 <Label class="mb-2">{title}</Label>
                 {#each i18n.locales as lang_id}
                     <div class="mb-1">
@@ -145,14 +145,14 @@ async function deleteMilestoneImageAndUpdate() {
                 {/each}
             </div>
         {/each}
-        <div class="mb-5">
+        <div>
             <Label>{i18n.tr.admin.expectedAge}</Label>
             <div class="flex-row mt-2">
                 {`${milestone.expected_age_months}m (${i18n.tr.admin.minRelevantAge} ${milestone.relevant_age_min}m, ${i18n.tr.admin.maxRelevantAge} ${milestone.relevant_age_max}m)`}
                 <Button class="mx-4" onclick={() => {showMilestoneExpectedAgeModal = true;}}>{i18n.tr.admin.edit}</Button>
             </div>
         </div>
-        <div class="mb-5">
+        <div>
             <Label for="img_upload" class="pb-2">{i18n.tr.admin.images}</Label>
             <div class="flex flex-row">
                 {#each milestone.images as milestoneImage (milestoneImage.id)}

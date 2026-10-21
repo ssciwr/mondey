@@ -117,6 +117,7 @@ let activationEmailSent = $state(false);
 					class="font-semibold text-gray-700 dark:text-gray-400"
 					>{i18n.tr.login.passwordLabel}</Label
 				>
+				<div>
 				<Input
 					type="password"
 					bind:value={password}
@@ -127,6 +128,7 @@ let activationEmailSent = $state(false);
 				/>
 				<a href={`${base}/forgotPassword`} class="text-primary-700 dark:text-primary-500">
 					{i18n.tr.login.forgotPassword} </a>
+				</div>
 			</div>
 
 			<Button

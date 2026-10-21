@@ -143,14 +143,14 @@ async function submitNewPassword() {
 </script>
 
 
-<div class="m-2 p-2 flex flex-col space-y-2 text-gray-700 dark:text-gray-400">
+<div class="m-2 p-2 flex flex-col gap-2 text-gray-700 dark:text-gray-400">
     <Heading
             tag="h4"
             class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
             id="changePasswordHeading">{i18n.tr.settings.changePassword}</Heading
     >
     <form
-            class="m-2 mx-auto w-full flex-col space-y-6"
+            class="mx-auto w-full flex-col space-y-6"
             onsubmit={preventDefault(submitNewPassword)}
     >
         <Label
@@ -226,15 +226,15 @@ async function submitNewPassword() {
         >
     </Modal>
 
-    <hr class="my-8 border-gray-200 dark:border-gray-700"/>
+    <hr class="border-gray-200 dark:border-gray-700"/>
 
     <Heading
             tag="h4"
-            class="m-1 mb-3 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
+            class="mx-1 p-1 text-center font-bold tracking-tight text-gray-700 dark:text-gray-400"
             id="deleteAccountHeading">{i18n.tr.settings.deleteAccount}</Heading
     >
-    <p class="m-2 text-center">{i18n.tr.settings.deleteAccountDescription}</p>
-    <div class="m-2 flex justify-center">
+    <p class="mx-2 text-center">{i18n.tr.settings.deleteAccountDescription}</p>
+    <div class="mx-2 flex justify-center">
         <Button
                 id="deleteAccountButton"
                 color="red"

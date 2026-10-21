@@ -142,8 +142,8 @@ onMount(() => {
 		<AddButton onclick={() => showAddModal = true} />
 	</div>
 
-	<div class="overflow-x-scroll overflow-y-scroll" style="min-width: 100%;">
-		<Table class="w-full" style="min-width: 100%;">
+	<div class="overflow-x-scroll overflow-y-scroll min-w-full">
+		<Table class="w-full min-w-full">
 		<TableHead>
 			<TableHeadCell>{i18n.tr.admin.title}</TableHeadCell>
 			<TableHeadCell>{i18n.tr.admin.desc}</TableHeadCell>
