@@ -6,6 +6,7 @@ import saveAs from "file-saver";
 import {
 	Button,
 	Label,
+	Modal,
 	MultiSelect,
 	type SelectOptionType,
 	Spinner,
@@ -17,26 +18,45 @@ import {
 	TableHeadCell,
 } from "flowbite-svelte";
 import { onMount } from "svelte";
+import CancelButton from "#lib/components/Admin/CancelButton.svelte";
 import PlotLines from "#lib/components/DataDisplay/PlotLines.svelte";
 import { i18n } from "#lib/i18n.svelte.ts";
+import { translationIds } from "#lib/translations.ts";
 import { type PlotData } from "#lib/util.ts";
 import {
+	type ResearchStage,
+	type WorkerError,
 	type WorkerFullData,
 	type WorkerFullDataRequest,
 	type WorkerInit,
 	type WorkerInitializeRequest,
 	type WorkerProcessDataRequest,
+	type WorkerProgress,
 	WorkerRequestTypes,
 	WorkerTypes,
 	type WorkerUpdate,
+	researchStages,
 } from "./utilTypes";
 
 // Web Worker for data processing
 let worker: Worker;
+let load_state = $state<"loading" | "ready" | "failed" | "cancelled">(
+	"loading",
+);
+let initialized = $derived(load_state === "ready");
+// Failing to process the loaded data for a selection or download does not need a reload.
+let processing_error = $state(false);
+let loading_stage = $state<ResearchStage>("checkingAccess");
+let loading_completed = $derived(researchStages.indexOf(loading_stage));
+// Existing server translations may not yet contain the new progress strings.
+let research_text = $derived({
+	...translationIds.researcher,
+	...i18n.tr.researcher,
+});
 
 // State for spinner component
-let is_loading = true;
-let show_spinner: boolean = $state(true);
+let is_loading = false;
+let show_spinner: boolean = $state(false);
 let show_spinner_timeout_id: number;
 
 let is_downloading: boolean = $state(false);
@@ -80,11 +100,26 @@ function createWorker(): Worker {
 
 	// Handle messages from worker
 	worker.onmessage = (
-		event: MessageEvent<WorkerUpdate | WorkerInit | WorkerFullData>, // these are the response types.
+		event: MessageEvent<
+			WorkerUpdate | WorkerInit | WorkerFullData | WorkerProgress | WorkerError
+		>,
 	) => {
 		const response = event.data;
+		if (response.type === WorkerTypes.PROGRESS) {
+			loading_stage = response.stage;
+			return;
+		}
+		if (response.type === WorkerTypes.ERROR) {
+			if (response.requestType === WorkerRequestTypes.INITIALIZE) {
+				handleWorkerError();
+			} else {
+				handleProcessingError();
+			}
+			return;
+		}
 		stop_spinner();
 		if (response.type === WorkerTypes.INIT) {
+			load_state = "ready";
 			columns = response.columns;
 			columns_inv = invert_select_option_array(columns);
 			milestone_ids = response.milestone_ids;
@@ -101,6 +136,8 @@ function createWorker(): Worker {
 			is_downloading = false;
 		}
 	};
+	worker.onerror = handleWorkerError;
+	worker.onmessageerror = handleWorkerError;
 
 	const message: WorkerInitializeRequest = {
 		requestType: WorkerRequestTypes.INITIALIZE,
@@ -113,6 +150,32 @@ function createWorker(): Worker {
 
 function destroyWorker(worker: Worker) {
 	worker.terminate();
+}
+
+function handleWorkerError() {
+	load_state = "failed";
+	is_downloading = false;
+	stop_spinner();
+}
+
+function handleProcessingError() {
+	processing_error = true;
+	json_data = [];
+	plot_data = {} as PlotData;
+	is_downloading = false;
+	stop_spinner();
+}
+
+function cancelLoad() {
+	destroyWorker(worker);
+	load_state = "cancelled";
+}
+
+function retryLoad() {
+	destroyWorker(worker);
+	load_state = "loading";
+	loading_stage = "checkingAccess";
+	worker = createWorker();
 }
 
 onMount(() => {
@@ -128,6 +191,7 @@ onMount(() => {
 	};
 
 	return () => {
+		window.clearTimeout(show_spinner_timeout_id);
 		destroyWorker(worker);
 	};
 });
@@ -151,13 +215,14 @@ function stop_spinner() {
 
 // Ask worker to update the data when selected milestone or group-by columns change
 $effect(() => {
-	if (!worker) return;
+	if (!initialized) return;
 
 	const message: WorkerProcessDataRequest = {
 		requestType: WorkerRequestTypes.PROCESS_DATA,
 		selected_milestones: $state.snapshot(selected_milestones),
 		selected_columns: $state.snapshot(selected_columns),
 	};
+	processing_error = false;
 	worker.postMessage(message);
 	start_spinner();
 });
@@ -180,6 +245,7 @@ function downloadCSV() {
 
 function handleDownloadAll() {
 	if (downloadAllHandler) {
+		processing_error = false;
 		is_downloading = true;
 		downloadAllHandler();
 	}
@@ -193,40 +259,66 @@ let headers = $derived.by(() => {
 });
 </script>
 
+<Modal open={load_state === "loading"} title={research_text.loadingResearchData}
+    aria-label={research_text.loadingResearchData} size="md" permanent outsideclose={false}>
+    <div role="status" aria-live="polite" class="space-y-2" data-testid="researchLoadProgress">
+        <p id="researchLoadingStage">{research_text[loading_stage]}</p>
+        <progress class="w-full h-3" max={researchStages.length} value={loading_completed}
+            aria-label={research_text.loadingResearchData} aria-describedby="researchLoadingStage"></progress>
+        <p class="text-sm">{loading_completed} / {researchStages.length} {research_text.loadingSteps}</p>
+    </div>
+    {#snippet footer()}
+        <CancelButton onclick={cancelLoad} />
+    {/snippet}
+</Modal>
+
 <div class="w-full grow">
 
     <div class="flex flex-col items-stretch m-2">
-        <h4>{i18n.tr.researcher.researchData}</h4>
-        <Button class="mt-9 mb-3" disabled={!columns || columns.length === 0 || is_downloading} onclick={handleDownloadAll} data-testid="downloadAllResearchData">{i18n.tr.researcher.downloadAll}</Button>
+        <h4>{research_text.researchData}</h4>
+        {#if load_state === "failed" || load_state === "cancelled"}
+            <div role="alert" class="my-4" data-testid="researchLoadError">
+                <p>{load_state === "cancelled" ? research_text.loadCancelled : research_text.error}</p>
+                <Button class="mt-2" onclick={retryLoad}>{research_text.retry}</Button>
+            </div>
+        {:else if initialized && milestone_ids.length === 0}
+            <p role="status" class="my-4">{research_text.noData}</p>
+        {/if}
+        <Button class="mt-9 mb-3" disabled={!initialized || !columns || columns.length === 0 || is_downloading} onclick={handleDownloadAll} data-testid="downloadAllResearchData">{research_text.downloadAll}</Button>
         {#if is_downloading}
             <div class="text-center">
-                <Spinner class="mt-5" /> <span class="tertiary">{i18n.tr.researcher.downloadingAllResearchData}</span>
+                <Spinner class="mt-5" /> <span class="tertiary">{research_text.downloadingAllResearchData}</span>
             </div>
         {/if}
     </div>
     <hr class="border-gray-200" />
 
     <div class="flex flex-col items-stretch m-2">
-        <h4>{i18n.tr.researcher.dataPlotsHeading}</h4>
+        <h4>{research_text.dataPlotsHeading}</h4>
         <div class="m-2 grow">
-            <Label id="selectMilestoneLabel">{i18n.tr.researcher.milestones}</Label>
+            <Label id="selectMilestoneLabel">{research_text.milestones}</Label>
             <MultiSelect bind:value={selected_milestones} class="mt-2" items={milestone_ids}
-                         placeholder={i18n.tr.researcher.milestones}
+                         disabled={!initialized}
+                         placeholder={research_text.milestones}
                          aria-labelledby="selectMilestoneLabel" data-testid="selectMilestone"/>
         </div>
         <div class="m-2 grow">
-            <Label id="selectGroupbyLabel">{i18n.tr.researcher.groupbyOptional}</Label>
-            <MultiSelect bind:value={selected_columns} class="mt-2" items={columns} placeholder={i18n.tr.researcher.groupbyOptional}
+            <Label id="selectGroupbyLabel">{research_text.groupbyOptional}</Label>
+            <MultiSelect bind:value={selected_columns} class="mt-2" items={columns} placeholder={research_text.groupbyOptional}
+                         disabled={!initialized}
                          aria-labelledby="selectGroupbyLabel" data-testid="selectGroupby"/>
         </div>
-        <Button class="mt-9 mb-3" onclick={downloadCSV} data-testid="researchDownloadCSV" disabled={!json_data || json_data.length === 0}>{i18n.tr.researcher.downloadAsCsv}</Button>
+        <Button class="mt-9 mb-3" onclick={downloadCSV} data-testid="researchDownloadCSV" disabled={!initialized || !json_data || json_data.length === 0}>{research_text.downloadAsCsv}</Button>
     </div>
+    {#if processing_error}
+        <p role="alert" class="m-2" data-testid="researchProcessingError">{research_text.error}</p>
+    {/if}
     <!-- Loading indicator -->
     {#if show_spinner}
         <div class="flex justify-center items-center h-32">
             <Spinner size="8" />
         </div>
-    {:else if json_data && json_data.length > 0}
+    {:else if initialized && json_data && json_data.length > 0}
         <!-- Plot -->
         {#key plot_data}
             <div class="text-center text-2xl font-bold tracking-tight text-gray-700 dark:text-white" data-testid="researchPlotTitle">{selected_milestone_names.join(", ")} {selected_column_names.join("-")}</div>

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict
+from collections.abc import AsyncIterator
 from collections.abc import Sequence
 
 import numpy as np
@@ -10,6 +11,7 @@ from sqlalchemy import update
 from sqlmodel import col
 from sqlmodel import func
 from sqlmodel import select
+from starlette.concurrency import run_in_threadpool
 
 from mondey_backend.dependencies import SessionDep
 from mondey_backend.dependencies import UserAsyncSessionDep
@@ -747,12 +749,18 @@ def get_answers(
     return df
 
 
-async def extract_research_data(
+async def iter_research_data(
     session: SessionDep,
     user_session: UserAsyncSessionDep,
     research_group_id: int | None = None,
-) -> pd.DataFrame:
+) -> AsyncIterator[str | pd.DataFrame]:
+    """Yield the name of each stage before starting it, then the finished table.
+
+    Synchronous database and dataframe work runs sequentially in the thread pool,
+    leaving the event loop free to deliver progress and serve other requests.
+    """
     logger.info("Extracting research data...")
+    yield "checkingAccess"
     test_user_ids_to_exclude = await get_test_account_user_ids(user_session)
     logger.info(
         f"  - collected {len(test_user_ids_to_exclude)} test user ids to exclude"
@@ -771,28 +779,40 @@ async def extract_research_data(
         answer_session_filter = answer_session_filter.where(
             col(MilestoneAnswerSession.user_id).in_(user_ids)
         )
-    milestone_answer_sessions = answer_sessions_with_valid_answers(
-        session.exec(answer_session_filter).all()
-    )
+    yield "answerSessions"
+
+    def collect_answer_sessions():
+        return answer_sessions_with_valid_answers(
+            session.exec(answer_session_filter).all()
+        )
+
+    milestone_answer_sessions = await run_in_threadpool(collect_answer_sessions)
     logger.info(
         f"  - collected {len(milestone_answer_sessions)} milestone answer sessions"
     )
-    milestone_answers = get_milestone_answers(session)
+    yield "milestoneAnswers"
+    milestone_answers = await run_in_threadpool(get_milestone_answers, session)
     logger.info(f"  - collected {len(milestone_answers)} milestone answers")
-    child_ages = get_answer_session_child_ages_in_months(
-        session, milestone_answer_sessions
+    yield "childAges"
+    child_ages = await run_in_threadpool(
+        get_answer_session_child_ages_in_months, session, milestone_answer_sessions
     )
     logger.info(f"  - collected {len(child_ages)} child ages")
-    user_answers = get_answers(session, "user")
+    yield "userAnswers"
+    user_answers = await run_in_threadpool(get_answers, session, "user")
     logger.info(f"  - collected {len(user_answers)} user answers")
-    child_answers = get_answers(session, "child")
+    yield "childAnswers"
+    child_answers = await run_in_threadpool(get_answers, session, "child")
     logger.info(f"  - collected {len(child_answers)} child answers")
+    yield "researchGroups"
     user_research_group_ids = await get_user_research_group_ids(
         user_session,
         {answer_session.user_id for answer_session in milestone_answer_sessions},
     )
     logger.info(f"  - collected {len(user_research_group_ids)} researcher codes")
-    datatable = make_datatable(
+    yield "assembling"
+    datatable = await run_in_threadpool(
+        make_datatable,
         milestone_answer_sessions,
         milestone_answers,
         user_answers,
@@ -800,5 +820,14 @@ async def extract_research_data(
         child_ages,
         user_research_group_ids,
     )
+    # The generator stays suspended while the caller sends the table, so release these first.
+    del (
+        milestone_answer_sessions,
+        milestone_answers,
+        child_ages,
+        user_answers,
+        child_answers,
+        user_research_group_ids,
+    )
     logger.info("...done")
-    return datatable
+    yield datatable

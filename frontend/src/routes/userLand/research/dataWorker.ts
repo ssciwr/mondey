@@ -5,12 +5,16 @@ import type { GetResearchNamesResponse } from "#lib/client/index.ts";
 import { getResearchData, getResearchNames } from "#lib/client/sdk.gen.ts";
 import type { PlotData } from "#lib/util.ts";
 import { serializeCsv } from "./csv";
+import { readResearchStream } from "./progress";
 import {
+	type ResearchStage,
+	type WorkerError,
 	type WorkerFullData,
 	type WorkerFullDataRequest,
 	type WorkerInit,
 	type WorkerInitializeRequest,
 	type WorkerProcessDataRequest,
+	type WorkerProgress,
 	WorkerRequestTypes,
 	WorkerTypes,
 	type WorkerUpdate,
@@ -22,24 +26,41 @@ let milestone_ids = [] as SelectOptionType<string>[];
 let columns = [] as SelectOptionType<string>[];
 let names = {} as GetResearchNamesResponse;
 
+function progress(stage: ResearchStage) {
+	const message: WorkerProgress = { type: WorkerTypes.PROGRESS, stage };
+	self.postMessage(message);
+}
+
+async function loadResearchData() {
+	const res = await getResearchData({ parseAs: "stream" });
+	if (res.error || !res.data) {
+		throw new Error("Could not load research data");
+	}
+	const data = await readResearchStream(
+		res.data as ReadableStream<Uint8Array>,
+		progress,
+	);
+	progress("loadingNames");
+	return data;
+}
+
 // get research data and construct initial state
 async function init(locale: string) {
 	client.setConfig({
 		baseUrl: import.meta.env.VITE_MONDEY_API_URL,
 	});
-	const res = await getResearchData();
-	if (res.error || !res.data) {
-		console.error(res.error);
-		return;
-	}
-	df_in = new DataFrame(res.data);
-	const res_names = await getResearchNames({
-		query: { lang_id: locale },
-	});
+	// The names are usually ready by the time the much larger data has arrived.
+	const [data, res_names] = await Promise.all([
+		loadResearchData(),
+		getResearchNames({
+			query: { lang_id: locale },
+		}),
+	]);
 	if (res_names.error || !res_names.data) {
-		console.error(res_names.error);
-		return;
+		throw new Error("Could not load research labels");
 	}
+	progress("preparing");
+	df_in = data.length ? new DataFrame(data) : new DataFrame();
 	names = res_names.data;
 	columns = df_in.columns
 		.filter((c) => {
@@ -111,6 +132,9 @@ function get_df(selected_milestones: string[], selected_columns: string[]) {
 
 	// Remove the empty columns/milestones
 	const valid_df_list = df_list.filter((df) => df.size > 0);
+	if (valid_df_list.length === 0) {
+		return new DataFrame();
+	}
 
 	const concatenated = concat({ dfList: valid_df_list, axis: 0 }) as DataFrame;
 
@@ -179,9 +203,6 @@ function update_data(
 	selected_milestones: string[],
 	selected_columns: string[],
 ) {
-	if (!df_in || df_in.size === 0) {
-		return;
-	}
 	const df = get_df(selected_milestones, selected_columns);
 	const message: WorkerUpdate = {
 		type: WorkerTypes.UPDATE,
@@ -205,19 +226,28 @@ function retrieve_all_data() {
 	self.postMessage(message);
 }
 
-self.onmessage = (
+self.onmessage = async (
 	event: MessageEvent<
 		WorkerInitializeRequest | WorkerProcessDataRequest | WorkerFullDataRequest
 	>,
 ) => {
-	if (event.data.requestType === WorkerRequestTypes.INITIALIZE) {
-		init(event.data.locale);
-	} else if (event.data.requestType === WorkerRequestTypes.PROCESS_DATA) {
-		const { selected_milestones, selected_columns } = event.data;
-		update_data(selected_milestones, selected_columns);
-	} else if (event.data.requestType === WorkerRequestTypes.FULL_DATA) {
-		retrieve_all_data();
-	} else {
-		console.warn("Request Type not matched for dataWorker message.");
+	try {
+		if (event.data.requestType === WorkerRequestTypes.INITIALIZE) {
+			await init(event.data.locale);
+		} else if (event.data.requestType === WorkerRequestTypes.PROCESS_DATA) {
+			const { selected_milestones, selected_columns } = event.data;
+			update_data(selected_milestones, selected_columns);
+		} else if (event.data.requestType === WorkerRequestTypes.FULL_DATA) {
+			retrieve_all_data();
+		} else {
+			console.warn("Request Type not matched for dataWorker message.");
+		}
+	} catch (error) {
+		console.error("Research data processing failed", error);
+		const message: WorkerError = {
+			type: WorkerTypes.ERROR,
+			requestType: event.data.requestType,
+		};
+		self.postMessage(message);
 	}
 };
