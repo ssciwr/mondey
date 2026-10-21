@@ -5,7 +5,6 @@ import datetime
 import pathlib
 from collections.abc import Iterable
 from collections.abc import Sequence
-from typing import TypeVar
 
 import numpy as np
 import webp
@@ -96,10 +95,7 @@ def write_pdf_file(file: UploadFile, filename: pathlib.Path | str):
         file.file.close()
 
 
-Entity = TypeVar("Entity")
-
-
-def get(session: SessionDep, entity: type[Entity], ident: int | str) -> Entity:
+def get[Entity](session: SessionDep, entity: type[Entity], ident: int | str) -> Entity:
     instance = session.get(entity, ident)
     if not instance:
         raise HTTPException(

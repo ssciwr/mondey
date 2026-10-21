@@ -19,7 +19,7 @@ Alembic reads this .env file from the directory you run it in, so run the comman
 To apply the latest migrations to your database, run the following command from the mondey_backend directory:
 
 ```
-alembic upgrade head
+uv run alembic upgrade head
 ```
 
 ### Creating a migration
@@ -27,7 +27,7 @@ alembic upgrade head
 To create a new migration after making changes to the database models, run the following command in the mondey_backend directory:
 
 ```
-alembic revision --autogenerate -m "Your migration message"
+uv run alembic revision --autogenerate -m "Your migration message"
 ```
 
 This will create a new migration file in the `alembic/versions` directory.

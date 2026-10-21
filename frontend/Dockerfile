@@ -1,4 +1,5 @@
-FROM node:24-slim AS builder
+# the official pnpm image, the Node.js version is installed by pnpm from the devEngines pin in pnpm-lock.yaml
+FROM ghcr.io/pnpm/pnpm:12.14.0 AS builder
 
 LABEL org.opencontainers.image.source=https://github.com/ssciwr/mondey
 LABEL org.opencontainers.image.description="MONDEY frontend production image"
@@ -9,7 +10,7 @@ WORKDIR /app
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-RUN corepack enable && pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 

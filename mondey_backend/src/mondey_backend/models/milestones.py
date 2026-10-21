@@ -297,7 +297,7 @@ class MilestoneAnswer(SQLModel, table=True):
     milestone: Milestone = back_populates("answers")
 
 
-class SuspiciousState(str, enum.Enum):
+class SuspiciousState(enum.StrEnum):
     """Enum for tracking suspicious state of an answer session.
 
     States:

@@ -6,18 +6,21 @@ See [DEVELOPMENT.md](../DEVELOPMENT.md) for the full local development setup.
 
 ## Installation
 
-Requires Python 3.13.
+Requires [uv](https://docs.astral.sh/uv/), which installs Python 3.14 and the exact dependency versions
+from [uv.lock](uv.lock) into a virtual environment in `.venv`:
 
 ```bash
-pip install -e .[tests]
+uv sync
 ```
+
+To update the dependencies to their latest versions, run `uv lock --upgrade` and commit the updated `uv.lock`.
 
 ## Use
 
 To start a local development server, from this directory:
 
 ```bash
-mondey-backend
+uv run mondey-backend
 ```
 
 This will start the backend on [http://localhost:8000](http://localhost:8000),
@@ -61,7 +64,7 @@ Schema changes are managed with Alembic, see [alembic/README.md](alembic/README.
 ## Tests
 
 ```bash
-pytest
+uv run pytest
 ```
 
 These use in-memory sqlite databases, so the postgres containers don't need to be running.

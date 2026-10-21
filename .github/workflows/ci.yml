@@ -19,11 +19,8 @@ jobs:
       - uses: pnpm/action-setup@v6
         with:
           package_json_file: frontend/package.json
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: 'pnpm'
-          cache-dependency-path: frontend/pnpm-lock.yaml
+          cache: true
+          cache_dependency_path: frontend/pnpm-lock.yaml
       - run: pnpm install
       - run: pnpm build
       - run: pnpm run check
@@ -44,11 +41,12 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: astral-sh/setup-uv@v10.3.0
         with:
-          python-version: "3.13"
-      - run: pip install -e .[tests]
-      - run: python -m pytest --cov=mondey_backend --cov-report=xml -svvv --log-level=debug
+          version: "0.13.4"
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run --locked python -m pytest --cov=mondey_backend --cov-report=xml -svvv --log-level=debug
       - uses: codecov/codecov-action@v7
         with:
           files: ./mondey_backend/coverage.xml
@@ -67,11 +65,8 @@ jobs:
       - uses: pnpm/action-setup@v6
         with:
           package_json_file: frontend/package.json
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: 'pnpm'
-          cache-dependency-path: frontend/pnpm-lock.yaml
+          cache: true
+          cache_dependency_path: frontend/pnpm-lock.yaml
       - run: pnpm install
       - run: pnpm exec playwright install --with-deps
       - run: pnpm build
@@ -88,29 +83,27 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Setup Python for backend
-      - uses: actions/setup-python@v7
+      # Setup uv and install the backend
+      - uses: astral-sh/setup-uv@v10.3.0
         with:
-          python-version: "3.13"
+          version: "0.13.4"
+          enable-cache: true
       - name: Install backend
         working-directory: ./mondey_backend
-        run: pip install -e .
+        run: uv sync --locked --no-dev
 
       - name: Start backend server in directory with e2e test database and SQL.
         working-directory: ./e2e
         run: |
           mkdir -p logs
-          mondey-backend > logs/backend.log 2>&1 &
+          uv run --project ../mondey_backend --locked --no-dev mondey-backend > logs/backend.log 2>&1 &
 
       # Setup Node.js and pnpm for frontend
       - uses: pnpm/action-setup@v6
         with:
           package_json_file: frontend/package.json
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: 'pnpm'
-          cache-dependency-path: frontend/pnpm-lock.yaml
+          cache: true
+          cache_dependency_path: frontend/pnpm-lock.yaml
 
       # Install frontend dependencies
       - name: Install frontend dependencies

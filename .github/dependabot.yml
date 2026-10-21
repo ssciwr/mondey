@@ -6,10 +6,20 @@ updates:
       interval: 'monthly'
 
   - package-ecosystem: 'npm'
-    directory: '/'
+    directory: '/frontend'
     schedule:
       interval: 'monthly'
     versioning-strategy: increase
+    groups:
+      all:
+        applies-to: version-updates
+        patterns:
+          - '*'
+
+  - package-ecosystem: 'uv'
+    directory: '/mondey_backend'
+    schedule:
+      interval: 'monthly'
     groups:
       all:
         applies-to: version-updates

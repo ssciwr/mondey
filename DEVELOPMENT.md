@@ -10,7 +10,7 @@ There are two ways to do this:
   - further from production environment setup
   - but convenient for development - see changes immediately without having to rebuild or restart anything
 
-Requirements: docker and docker compose for both options, plus Python 3.13 and Node.js 24 with Corepack for the second.
+Requirements: docker and docker compose for both options, plus [uv](https://docs.astral.sh/uv/) and [pnpm](https://pnpm.io/installation) for the second.
 
 ## Configuration files
 
@@ -32,7 +32,7 @@ Any setting not present in the `.env` file falls back to the default in
 [settings.py](mondey_backend/src/mondey_backend/settings.py).
 
 The backend reads `.env` from the directory you start it in, so `mondey_backend/.env` only takes effect
-if you run `mondey-backend` and `alembic` from the `mondey_backend` directory.
+if you run `uv run mondey-backend` and `uv run alembic` from the `mondey_backend` directory.
 
 ## Run locally with docker
 
@@ -90,15 +90,18 @@ Ports `5432` (mondey) and `5433` (users) need to be free; check with `docker ps`
 4. install and run the backend development server, from the `mondey_backend` directory:
 
 ```sh
-pip install -e .[tests]
-mondey-backend
+uv sync
+uv run mondey-backend
 ```
+
+`uv sync` creates a virtual environment in `mondey_backend/.venv` with the exact dependency versions from
+[uv.lock](mondey_backend/uv.lock), which are the same versions that the CI and the docker image use.
+`uv run` also keeps this environment in sync with the lockfile, so running `uv sync` first is optional.
 
 5. install and run the frontend development server:
 
 ```sh
 cd ../frontend
-corepack enable
 pnpm install
 pnpm run dev
 ```
@@ -113,7 +116,7 @@ research and statistics features, run `mondey-backend` from the `e2e` directory 
 
 ```sh
 cd e2e
-mondey-backend
+uv run --project ../mondey_backend mondey-backend
 ```
 
 This uses [e2e/.env](e2e/.env), which sets the database hosts to empty. That makes the backend create
@@ -145,7 +148,7 @@ Backend unit tests, from the `mondey_backend` directory (these use in-memory sql
 needs to be running):
 
 ```sh
-pytest
+uv run pytest
 ```
 
 Frontend unit tests and component (ui) tests, from the `frontend` directory:
@@ -176,7 +179,7 @@ Formatting and linting of both the Python and the frontend code is configured in
 To run it locally, install [prek](https://github.com/j178/prek) and install the git hooks:
 
 ```sh
-pip install prek
+uv tool install prek
 prek install
 ```
 
@@ -192,6 +195,6 @@ the CI regenerates them on every pull request and commits any changes.
 To regenerate them yourself after changing a backend endpoint or model:
 
 ```sh
-cd mondey_backend && mondey-export-openapi-json
+cd mondey_backend && uv run mondey-export-openapi-json
 cd ../frontend && pnpm openapi-ts
 ```
