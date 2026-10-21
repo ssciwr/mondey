@@ -6,7 +6,7 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
-		"serve": "ws --port 5173 --directory build --spa index.html --rewrite '/api/(.*) -> http://localhost:8000/$1'",
+		"serve": "ws --port 5173 --directory build --spa index.html --rewrite '/api/(.*) -> http://localhost:8000/api/$1'",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test:unit": "vitest --coverage",

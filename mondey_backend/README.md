@@ -26,8 +26,8 @@ uv run mondey-backend
 This will start the backend on [http://localhost:8000](http://localhost:8000),
 which includes a redoc UI for exploring the API and a swagger UI for interacting with it:
 
-- [http://localhost:8000/redoc](http://localhost:8000/redoc)
-- [http://localhost:8000/docs](http://localhost:8000/docs)
+- [http://localhost:8000/api/redoc](http://localhost:8000/api/redoc)
+- [http://localhost:8000/api/docs](http://localhost:8000/api/docs)
 
 This needs the mondey and users postgres databases to be running, which you can start with:
 
