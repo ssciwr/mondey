@@ -12,6 +12,10 @@ const dynamicColorClass = "dynamic-bg-color";
 
 let wrapperStyle = $derived(`--dynamic-bg-color: ${color};`);
 
+// the flowbite-svelte Progressbar uses small centered text for the label, both on the bar and the label itself
+const textClass =
+	"text-left text-[length:inherit] font-normal leading-[inherit]";
+
 let labelClass = $derived(
 	progress === 100
 		? "text-white rounded-md text-small pl-2"
@@ -22,9 +26,9 @@ let labelClass = $derived(
 <div class="rounded-lg bg-white p-2 pb-4 w-full" style={wrapperStyle}>
     <Progressbar
             animate={true}
-            class={`rounded-full w-${displayProgress}`}
+            class={`h-full rounded-full bg-transparent dark:bg-transparent ${textClass} w-${displayProgress}`}
             labelInside={true}
-            classes={{ label: labelClass }}
+            classes={{ label: `${labelClass} h-auto ${textClass}` }}
             progress={`${displayProgress}`}
             size="h-4"
     />

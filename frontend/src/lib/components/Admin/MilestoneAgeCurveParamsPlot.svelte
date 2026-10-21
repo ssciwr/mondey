@@ -223,15 +223,15 @@ function onPointerMove(event: PointerEvent) {
     </svg>
     <figcaption class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs">
         <span class="flex items-center gap-1">
-            <span class="inline-block h-0.5 w-4" style="background: var(--curve-color)"></span>
+            <span class="inline-block h-0.5 w-4 bg-(--curve-color)"></span>
             {i18n.tr.admin.sampleAgeCurve}
         </span>
         <span class="flex items-center gap-1">
-            <span class="inline-block h-3 w-4 opacity-30" style="background: var(--range-color)"></span>
+            <span class="inline-block h-3 w-4 opacity-30 bg-(--range-color)"></span>
             {i18n.tr.admin.relevantAgeRange}: {Math.round(ages.min)}&ndash;{Math.round(ages.max)} m
         </span>
         <span class="flex items-center gap-1">
-            <span class="inline-block h-3 w-4 border border-dashed opacity-70" style="border-color: var(--range-color)"></span>
+            <span class="inline-block h-3 w-4 border border-dashed opacity-70 border-(--range-color)"></span>
             {i18n.tr.admin.marginExtension}
         </span>
         <span>{i18n.tr.admin.expectedAge}: {Math.round(ages.expected)} m</span>

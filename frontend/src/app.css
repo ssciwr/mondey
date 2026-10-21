@@ -31,6 +31,9 @@
 	--color-additional-color-800: #556c6b;
 	--color-additional-color-900: #4d6261;
 
+	--color-primary: #7c9e9d;
+	--color-muted: #838383;
+
 	--color-milestone-50: #dde1ed;
 	--color-milestone-100: #d5d9e9;
 	--color-milestone-200: #bac1da;
@@ -42,10 +45,6 @@
 	--color-milestone-800: #4d5b8b;
 	--color-milestone-900: #46537e;
 
-	--color-special-bg: rgba(124, 158, 157, 0.15);
-	--color-delete-bg: rgba(200, 30, 30, 0.1);
-	--color-delete-hover: rgba(200, 30, 30, 0.6);
-
 	--color-milestone-answer-0: #f2e8cf;
 	--color-milestone-answer-1: #cdd993;
 	--color-milestone-answer-2: #a7c957;
@@ -55,63 +54,26 @@
 	--color-feedback-0: #98cb6a;
 	--color-feedback-1: #f59c2f;
 	--color-feedback-2: #e9715f;
-	--color-feedback-background-0: #b17a06;
-	--color-feedback-border-0: #f8c554;
 
 	--color-red-50: rgb(255, 202, 202);
-
-	/* font sizes without a default line-height */
-	--text-xs: 0.75rem;
-	--text-xs--line-height: initial;
-	--text-sm: 0.875rem;
-	--text-sm--line-height: initial;
-	--text-base: 1rem;
-	--text-base--line-height: initial;
-	--text-lg: 1.125rem;
-	--text-lg--line-height: initial;
-	--text-xl: 1.25rem;
-	--text-xl--line-height: initial;
-	--text-2xl: 1.5rem;
-	--text-2xl--line-height: initial;
-	--text-3xl: 1.875rem;
-	--text-3xl--line-height: initial;
-	--text-4xl: 2.25rem;
-	--text-4xl--line-height: initial;
-	--text-5xl: 3rem;
-	--text-5xl--line-height: initial;
-	--text-6xl: 4rem;
-	--text-6xl--line-height: initial;
-	--text-7xl: 5rem;
-	--text-7xl--line-height: initial;
-}
-
-/*
-  Keep the Tailwind CSS v3 behaviour of space-x-* and space-y-*:
-  v4 adds the margin to the end of all children except the last one with zero specificity (so the child's own margin wins),
-  v3 added the margin to the start of all children except the first one, overriding the child's own margin.
-  The :not(_) gives the reset of the v4 margin a specificity of (0,0,1), so it overrides v4 but not the child's own margin.
-*/
-@utility space-y-* {
-	:where(& > *):not(_) {
-		margin-block-end: 0;
-	}
-	& > :not([hidden]) ~ :not([hidden]) {
-		margin-top: calc(var(--spacing) * --value(number));
-		margin-bottom: 0;
-	}
-}
-
-@utility space-x-* {
-	:where(& > *):not(_) {
-		margin-inline-end: 0;
-	}
-	& > :not([hidden]) ~ :not([hidden]) {
-		margin-left: calc(var(--spacing) * --value(number));
-		margin-right: 0;
-	}
 }
 
 @layer base {
+	body {
+		@apply dark:text-white;
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column; /* To force the footer to the bottom with flex grid */
+	}
+
+	.main-content {
+		flex: 1; /* This will grow to fill available space leaving the footer at the bottom */
+	}
+
+	h4 {
+		@apply text-2xl;
+	}
+
 	/* Keep the Tailwind CSS v3 default of a pointer cursor for buttons */
 	button:not(:disabled),
 	[role="button"]:not(:disabled) {
@@ -125,136 +87,6 @@
 }
 
 @layer components {
-	.btn {
-		cursor: pointer;
-		transition-property: all;
-		transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-		transition-duration: 100ms;
-	}
-
-	.btn-primary {
-		padding: 0.5rem 1.25rem;
-		min-width: 12rem;
-		margin: 0.25rem;
-		@apply inline-flex items-center justify-center gap-2 rounded-lg font-semibold text-white shadow-md focus:outline-hidden focus:ring-3 focus:ring-additional-color-300/75;
-		border: 2px solid rgb(124, 158, 157);
-		background-color: rgb(124, 158, 157);
-	}
-
-	.btn-primary:hover {
-		border: 2px solid #556c6b !important;
-	}
-
-	.btn-secondary {
-		padding: 0.5rem 1.25rem;
-		min-width: 12rem;
-		margin: 0.25rem;
-		@apply inline-flex items-center justify-center gap-2 rounded-lg font-semibold text-additional-color-700 shadow-md focus:outline-hidden focus:ring-3 focus:ring-additional-color-300/75;
-		border: 2px solid rgb(124, 158, 157);
-		background-color: #e5f4f4 !important;
-		color: #698584 !important;
-		@apply dark:bg-special-bg dark:text-white;
-	}
-
-	.btn-secondary:hover {
-		background-color: #96bfbe !important;
-		border: 2px solid #96bfbe !important;
-		color: white !important;
-	}
-
-	.btn-danger {
-		padding: 0.5rem 1.25rem;
-		min-width: 12rem;
-		margin: 0.25rem;
-		@apply inline-flex items-center justify-center gap-2 rounded-lg font-semibold text-red-700 shadow-md focus:outline-hidden focus:ring-3 focus:ring-red-400/75;
-		background-color: #e5f4f4 !important;
-		border: 2px solid rgb(124, 158, 157);
-		color: rgba(200, 30, 30, 0.8) !important;
-		@apply dark:text-white;
-	}
-
-	.btn-danger:hover {
-		border: 2px solid rgb(240, 82, 82);
-		background-color: rgba(200, 30, 30, 0.3) !important;
-		color: rgba(200, 30, 30, 1) !important;
-	}
-
-	/* Make sure icons have consistent vertical alignment */
-	.btn-primary svg,
-	.btn-secondary svg,
-	.btn-danger svg {
-		@apply inline-block align-middle;
-	}
-
-	/* Sub classes, not for use in HTML */
-	body {
-		@apply dark:text-white;
-		min-height: 100vh;
-		display: flex;
-		flex-direction: column; /* To force the footer to the bottom with flex grid */
-	}
-
-	.main-content {
-		flex: 1; /* This will grow to fill available space leaving the footer at the bottom */
-	}
-
-	.text-muted {
-		color: #838383;
-	}
-
-	.bg-primary {
-		background-color: rgb(124, 158, 157);
-	}
-
-	/* Basic button icon styles */
-	.btn-icon {
-		min-width: unset;
-		@apply py-2 px-2 rounded-md;
-		position: relative;
-		background-color: white;
-	}
-
-	.btn-primary.btn-icon {
-		@apply text-primary-700 dark:text-white bg-white dark:bg-primary-700;
-	}
-
-	.btn-icon-rounded {
-		border-radius: 0.5rem !important;
-	}
-
-	/* Make sure the button that's being hovered appears on top */
-	.btn-icon:hover {
-		z-index: 1;
-	}
-
-	h4 {
-		@apply text-2xl;
-	}
-
-	.circle {
-		display: inline-block;
-		width: 1.2em;
-		height: 1.2em;
-		border-radius: 50%;
-		background-color: #3498db;
-		vertical-align: middle;
-		margin: 0 0.2em;
-	}
-
-	@media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
-		.btn {
-			min-width: 100%;
-		}
-		.btn-icon {
-			min-width: unset;
-		}
-	}
-
-	:root {
-		--range-handle: #3322ff;
-		--range-range-inactive: #000000;
-	}
-
 	/* For countering tailwind wiping list item defaults etc */
 	.restore-default-list-elements-behavior ul {
 		list-style-type: disc;
@@ -274,9 +106,8 @@
 }
 
 /*
-  Button icon group styling
-  (flowbite-svelte Tooltips add a hidden element after the button, so hidden siblings are ignored,
-  and an open Tooltip with the btn-icon class is a popover element, which is not part of the group)
+  Groups of adjacent icon buttons (see buttonClasses.ts)
+  flowbite-svelte Tooltips add a hidden element after the button, so hidden siblings are ignored.
   These rules are not in a layer, as otherwise the rounded-* utility classes of the flowbite-svelte Button would take precedence
 */
 .btn-icon + .btn-icon,
@@ -285,42 +116,18 @@
 }
 
 /* Remove border radius between adjacent buttons */
-.btn-icon:not([popover]):not(:nth-child(1 of .btn-icon:not([popover]))):not(
-		:nth-last-child(1 of .btn-icon:not([popover]))
-	) {
+.btn-icon:not(:nth-child(1 of .btn-icon)):not(:nth-last-child(1 of .btn-icon)) {
 	border-radius: 0;
 }
 
 /* Keep left border radius for first button */
-.btn-icon:nth-child(1 of .btn-icon:not([popover])):not(
-		:nth-last-child(1 of .btn-icon:not([popover]))
-	) {
+.btn-icon:nth-child(1 of .btn-icon):not(:nth-last-child(1 of .btn-icon)) {
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
 }
 
 /* Keep right border radius for last button */
-.btn-icon:nth-last-child(1 of .btn-icon:not([popover])):not(
-		:nth-child(1 of .btn-icon:not([popover]))
-	) {
+.btn-icon:nth-last-child(1 of .btn-icon):not(:nth-child(1 of .btn-icon)) {
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
-}
-
-.apply-icon-style {
-	@apply rounded-lg p-2 text-xl text-gray-500;
-}
-
-.apply-icon-style:hover,
-.apply-icon-style.group-hover {
-	@apply text-primary-800;
-}
-
-.apply-icon-style.dark {
-	@apply text-gray-400;
-}
-
-.apply-icon-style.dark:hover,
-.apply-icon-style.dark.group-hover {
-	@apply text-primary-500;
 }

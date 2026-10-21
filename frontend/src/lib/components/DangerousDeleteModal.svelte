@@ -1,6 +1,7 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
+import { buttonClasses } from "$lib/buttonClasses";
 import type { DeleteResponse } from "$lib/client";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
@@ -96,8 +97,7 @@ $effect(() => {
             </div>
         {:else}
             {i18n.tr.admin.deletionWillAffect}
-            <div class="text-black"
-                 style="background-color:rgb(255,220,220);border: 2px solid darkred;border-radius:10px;padding:10px">
+            <div class="text-black bg-[rgb(255,220,220)] border-2 border-[darkred] rounded-[10px] p-2.5">
                 <ul>
                     {#each Object.entries(deletionWillAffectTotals) as [translationKey, total]}
                         <li>{total} {adminText?.[translationKey] ?? i18n.tr.admin.affectedAnswers}</li>
@@ -107,7 +107,7 @@ $effect(() => {
 
             <div class="mt-10 mb-5">
                 <p>{i18n.tr.admin.deletionConfirm}:</p>
-                <div class="mb-5 p-3 rounded-xl" style="background-color:rgba(127,127,127,0.3)">
+                <div class="mb-5 p-3 rounded-xl bg-[rgb(127_127_127/0.3)]">
                     <b>{intendedConfirmCode}</b></div>
 
                 <Label
@@ -124,6 +124,6 @@ $effect(() => {
             </Button>
         {/if}
 
-        <Button class="btn-secondary">{i18n.tr.admin.noCancel}</Button>
+        <Button class={buttonClasses.secondary}>{i18n.tr.admin.noCancel}</Button>
     </div>
 </Modal>

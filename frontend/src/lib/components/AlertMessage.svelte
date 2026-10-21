@@ -1,7 +1,8 @@
 <svelte:options runes={true} />
 <script lang='ts'>
+import { buttonClasses } from "$lib/buttonClasses";
 import { i18n } from "$lib/i18n.svelte";
-import { Alert } from "flowbite-svelte";
+import { Alert, Button } from "flowbite-svelte";
 import {
 	ExclamationCircleSolid,
 	EyeSolid,
@@ -37,9 +38,9 @@ const color = isError ? "red" : "blue";
 
 	<div class="mb-4 mt-2" >
 		{#if isError}
-			<ExclamationCircleSolid style="display:inline" />
+			<ExclamationCircleSolid class="inline" />
 		{:else}
-			<InfoCircleSolid style="display:inline" />
+			<InfoCircleSolid class="inline" />
 		{/if}
 		&nbsp;
 		<span class="text-lg font-medium">
@@ -51,10 +52,10 @@ const color = isError ? "red" : "blue";
 	</div>
 	<div class="flex gap-2">
 		{#if infopage !== ''}
-			<a class={(isError) ? "btn-danger" : "btn-primary"} href={infopage}><EyeSolid class="me-2 h-4 w-4" />{infotitle}</a>
+			<Button class={`${isError ? buttonClasses.danger : buttonClasses.primary} ${buttonClasses.large}`} href={infopage}><EyeSolid class="me-2 h-4 w-4" />{infotitle}</Button>
 		{/if}
-		<a class={(isError) ? "btn-danger" : "btn-primary"} href={lastpage} {onclick}>
+		<Button class={`${isError ? buttonClasses.danger : buttonClasses.primary} ${buttonClasses.large}`} href={lastpage} {onclick}>
 			{i18n.tr.misc.understood}
-		</a>
+		</Button>
 	</div>
 </Alert>

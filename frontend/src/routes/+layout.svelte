@@ -6,6 +6,7 @@ import logo_dark_mobile from "$lib/assets/mondey_dark_mobile.svg";
 import logo_light from "$lib/assets/mondey_light.svg";
 import logo_light_mobile from "$lib/assets/mondey_light_mobile.svg";
 import { installSessionExpiryHandler } from "$lib/auth/sessionExpiry";
+import { buttonClasses } from "$lib/buttonClasses";
 import DarkModeChooser from "$lib/components/DarkModeChooser.svelte";
 import LocaleChooser from "$lib/components/LocaleChooser.svelte";
 import Footer from "$lib/components/Navigation/Footer.svelte";
@@ -78,6 +79,9 @@ const alertModalColorClasses: Record<"red" | "yellow", string> = {
 	yellow:
 		"bg-yellow-50 text-yellow-800 border-yellow-300 divide-yellow-300 dark:text-yellow-300 dark:border-yellow-800 dark:divide-yellow-800",
 };
+// white icon buttons in the mobile header
+const mobileIconButtonClass = `${buttonClasses.primary} ${buttonClasses.icon} rounded-md p-2 bg-white text-primary-700 hover:bg-white dark:bg-primary-700 dark:text-white dark:hover:bg-primary-700`;
+
 let alertModalColor: "red" | "yellow" | undefined = $derived(
 	alertStore.isError ? "red" : alertStore.isAwaitError ? "yellow" : undefined,
 );
@@ -91,8 +95,7 @@ let alertModalColor: "red" | "yellow" | undefined = $derived(
 
 <ThemeProvider theme={flowbiteTheme}>
 
-	<div style="position:fixed;padding-top:1.1rem;padding-bottom:1rem;left:0px;right:0px;border-bottom:1px solid lightgray"
-		 class="bg-white z-1000 dark:bg-gray-800 md:hidden w-full text-center flex justify-center items-center shadow-lg">
+	<div class="fixed inset-x-0 pt-[1.1rem] pb-4 border-b border-[lightgray] bg-white z-1000 dark:bg-gray-800 md:hidden w-full text-center flex justify-center items-center shadow-lg">
 		<a href="/#">
 			<!-- Desktop logos -->
 			<img src={logo_light} class="hidden sm:block dark:hidden h-10" alt="MONDEY Logo" />
@@ -113,7 +116,7 @@ let alertModalColor: "red" | "yellow" | undefined = $derived(
 			</div>
 			{#if false === isUserLand}
 				<NavHamburger />
-				<NavUl classes={{ ul: "flex flex-col p-0 md:flex-row md:space-x-6 md:justify-right md:text-[1rem] md:font-normal items-center" }}>
+				<NavUl classes={{ ul: "flex flex-col p-0 md:flex-row md:gap-6 md:justify-right md:text-[1rem] md:font-normal items-center" }}>
 					<NavLi class="hover:cursor-pointer md:p-0" href="/aktuelles">{i18n.tr.misc.latest}</NavLi>
 					<NavLi class="hover:cursor-pointer md:p-0" href="/downloads">{i18n.tr.misc.downloads}</NavLi>
 					<NavLi class="hover:cursor-pointer md:p-0" href="/static/kontakt">{i18n.tr.misc.contact}</NavLi>
@@ -122,14 +125,14 @@ let alertModalColor: "red" | "yellow" | undefined = $derived(
 					{#if user.data === null}
 						<Button
 								type="button"
-								class="m-2 w-full"
+								class="my-2 w-full"
 								href="{base}/login"
 								size="lg">{i18n.tr.login.profileButtonLabelDefault}</Button
 						>
 					{:else}
 						<Button
 								type="button"
-								class="m-2 w-full"
+								class="my-2 w-full"
 								href="{base}/userLand/children"
 								size="lg">{i18n.tr.registration.goHome}</Button
 						>
@@ -144,27 +147,26 @@ let alertModalColor: "red" | "yellow" | undefined = $derived(
 	<!-- Mobile Layout -->
 	<div class="md:hidden">
 		<!-- Spacer to account for fixed header -->
-		<div style="min-height:5rem"></div>
+		<div class="min-h-20"></div>
 
 		{#if false === isUserLand}
 			<!-- Mobile Log in -->
-			<div class="z-1000 fixed" style="top:0.8rem;left:1rem;">
-				<a class="btn-primary btn-icon" href="/login">
+			<div class="z-1000 fixed top-[0.8rem] left-4">
+				<Button class={mobileIconButtonClass} href="/login">
 					<UserOutline />
-				</a>
+				</Button>
 			</div>
 			<!-- Mobile Navigation -->
-			<div class="z-1000 fixed" style="top:0.8rem;right:1rem;">
-				<button
-					type="button"
-					class="btn-primary btn-icon"
+			<div class="z-1000 fixed top-[0.8rem] right-4">
+				<Button
+					class={mobileIconButtonClass}
 					onclick={toggleDrawer}
 					aria-label={i18n.tr.misc.menu ?? translationIds.misc.menu}
 					aria-expanded={drawerOpen}
 					aria-controls="sidebar"
 				>
-					<BarsOutline class="cursor-pointer" />
-				</button>
+					<BarsOutline />
+				</Button>
 			</div>
 
 			<!-- Mobile Drawer -->
@@ -238,12 +240,12 @@ let alertModalColor: "red" | "yellow" | undefined = $derived(
 		autoclose>
 		<p class="text-base">{alertStore.message}</p>
 		{#snippet footer()}
-			<button class="btn-primary" onclick={() => {
+			<Button class={`${buttonClasses.primary} ${buttonClasses.large}`} onclick={() => {
 				if (alertStore.callback) {
 					alertStore.callback();
 				}
 				alertStore.hideAlert();
-			}}>{alertStore.buttonText ?? i18n.tr.misc.understood}</button>
+			}}>{alertStore.buttonText ?? i18n.tr.misc.understood}</Button>
 		{/snippet}
 	</Modal>
 

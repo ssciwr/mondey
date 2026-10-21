@@ -1,7 +1,8 @@
 <script lang='ts'>
 import { goto } from "$app/navigation";
+import { buttonClasses } from "$lib/buttonClasses";
 import { i18n } from "$lib/i18n.svelte";
-import { Card, Tooltip } from "flowbite-svelte";
+import { Button, Card, Tooltip } from "flowbite-svelte";
 </script>
 
 <div class="flex justify-center px-4 mt-6">
@@ -9,9 +10,9 @@ import { Card, Tooltip } from "flowbite-svelte";
   <h1 class="h1">{i18n.tr.frontpage.heading}</h1>
   <p class="text-muted">{i18n.tr.frontpage.summary}</p>
   <div class="justify-center mb-1 items-center mt-2">
-      <button class="btn-primary" onclick ={() => {
+      <Button class={`${buttonClasses.primary} ${buttonClasses.large}`} onclick={() => {
         goto("/signup");
-      }}>{i18n.tr.frontpage.buttonLabel}</button>
+      }}>{i18n.tr.frontpage.buttonLabel}</Button>
       <Tooltip>{i18n.tr.frontpage.toolTip}</Tooltip>
   </div>
 </Card>

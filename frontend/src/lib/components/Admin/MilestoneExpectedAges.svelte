@@ -1,6 +1,7 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
+import { buttonClasses } from "$lib/buttonClasses";
 import {
 	getAdminSettings,
 	recalculateMilestoneAgeScores,
@@ -210,7 +211,7 @@ async function saveNewExpectedAges() {
     </div>
     <div class="grid grid-cols-2 justify-items-stretch">
         <div class="grid grid-rows-2">
-            <Button class="btn-primary" disabled={!validation.valid} onclick={getNewExpectedAges}>
+            <Button class={buttonClasses.primary} disabled={!validation.valid} onclick={getNewExpectedAges}>
                 <RefreshOutline class="me-2 h-5 w-5"/> {i18n.tr.admin.recalculateExpectedAge}</Button>
             <div class="m-2">
                 <Progressbar labelInside progress={calculateProgress} size="h-4"/>

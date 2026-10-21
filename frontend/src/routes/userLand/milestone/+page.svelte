@@ -318,7 +318,7 @@ const breadcrumbdata = $derived([
                         {#each answerIndices as answerIndex}
                             <div class="mb-2 mt-3">
                                 <div><b>
-                                    <span class={`circle bg-milestone-answer-${answerIndex}`}></span>
+                                    <span class={`inline-block size-[1.2em] mx-[0.2em] rounded-full align-middle bg-milestone-answer-${answerIndex}`}></span>
                                     {i18n.tr.milestone[`answer${answerIndex}Text`]}:</b></div>
                                 <p><small>{i18n.tr.milestone[`answer${answerIndex}Desc`]}</small></p>
                             </div>

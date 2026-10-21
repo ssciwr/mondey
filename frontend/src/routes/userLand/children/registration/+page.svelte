@@ -2,6 +2,7 @@
 
 <script lang="ts">
 import { goto } from "$app/navigation";
+import { buttonClasses } from "$lib/buttonClasses";
 import {
 	type ChildAnswerPublic,
 	type ChildCreate,
@@ -445,9 +446,9 @@ const yearOptions = Array.from(
 
                                 {#if image !== null && disableEdit === false}
 
-                                    <div class="text-center" style="min-width:100%">
+                                    <div class="text-center min-w-full">
                                         <div>
-                                            <img src={URL.createObjectURL(image)} alt="Child preview" style="width: 100%; max-height: 200px; object-fit: contain;" />
+                                            <img src={URL.createObjectURL(image)} alt="Child preview" class="w-full max-h-[200px] object-contain" />
                                         </div>
                                         <div>
                                         <DeleteButton onclick={() => {
@@ -478,12 +479,13 @@ const yearOptions = Array.from(
                         </span>
                         {/if}
 
-                        <hr class="border-gray-200" style="margin-bottom:10px" />
+                        <hr class="mt-6 mb-7.5 border-gray-200" />
 
                         {#if currentChild.id !== null && disableEdit === true}
+                          <div class="flex flex-wrap gap-x-1 gap-y-4">
                             {#if !adminSettings.hide_all_feedback}
                                     <Button
-                                            class="btn-primary"
+                                            class={buttonClasses.primary}
                                             onclick={() => {
                                                 goto(`/userLand/children/feedback`)
                                             }}>
@@ -492,7 +494,7 @@ const yearOptions = Array.from(
                                     </Button>
                             {/if}
                             <Button
-                                    class="btn-primary"
+                                    class={buttonClasses.primary}
                                     onclick={() => {
                                         goto(`/userLand/milestone/group`)
                                     }}
@@ -500,6 +502,7 @@ const yearOptions = Array.from(
                                 <FlagOutline size="md" />
                                 {i18n.tr.childData.nextButtonLabel}
                             </Button>
+                          </div>
 
 
                         {/if}
@@ -527,11 +530,13 @@ const yearOptions = Array.from(
                             {/each}
                         {/if}
                         {#if disableEdit === false}
-                            <button
-                                    class="btn-primary"
+                          <div>
+                            <Button
+                                    class={buttonClasses.primary}
                                     type="submit"
-                            >{i18n.tr.childData.submitButtonLabel}</button
+                            >{i18n.tr.childData.submitButtonLabel}</Button
                             >
+                          </div>
                         {/if}
                     </form>
                 </Card>

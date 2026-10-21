@@ -1,6 +1,7 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
+import { buttonClasses } from "$lib/buttonClasses";
 import type { DeleteResponse } from "$lib/client";
 import { i18n } from "$lib/i18n.svelte";
 import { alertStore } from "$lib/stores/alertStore.svelte";
@@ -101,8 +102,7 @@ $effect(() => {
             </div>
         {:else}
             {i18n.tr.settings.deleteAccountWillAffect}
-            <div class="text-black"
-                 style="background-color:rgb(255,220,220);border: 2px solid darkred;border-radius:10px;padding:10px">
+            <div class="text-black bg-[rgb(255,220,220)] border-2 border-[darkred] rounded-[10px] p-2.5">
                 <ul>
                     {#each Object.entries(deletionWillAffectTotals) as [translationKey, total]}
                         <li>{total} {settingsText?.[translationKey] ?? translationKey}</li>
@@ -136,7 +136,7 @@ $effect(() => {
             </Button>
         {/if}
 
-        <Button class="btn-secondary" onclick={() => {open = false;}}
+        <Button class={buttonClasses.secondary} onclick={() => {open = false;}}
         >{i18n.tr.settings.deleteAccountCancel}</Button>
     </div>
 </Modal>

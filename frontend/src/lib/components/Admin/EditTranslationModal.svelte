@@ -32,7 +32,7 @@ let successMessage = $state(null as string | null);
 
 <Modal title={i18n.tr.admin.missingTranslations} bind:open size="lg">
     {#if successMessage}
-        <div class="mb-4 px-4 py-2 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+        <div class="px-4 py-2 bg-green-100 border border-green-400 text-green-700 rounded-lg">
             {successMessage}
         </div>
     {/if}
@@ -40,9 +40,9 @@ let successMessage = $state(null as string | null);
     {#if missing_translations.length > 0}
         {@const section_key = missing_translations[0].split(".")[0]}
         {@const item_key = missing_translations[0].split(".")[1]}
-            <Label class="mb-2">{missing_translations[0]}</Label>
+            <Label>{missing_translations[0]}</Label>
             {#each i18n.locales as lang}
-                <div class="mb-1">
+                <div>
                     <InputAutoTranslate bind:value={translations[lang][section_key][item_key]} locale={lang} de_text={translations["de"][section_key][item_key]}/>
                 </div>
             {/each}
