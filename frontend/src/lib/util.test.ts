@@ -1,11 +1,11 @@
+import { describe, expect, it } from "vitest";
 import {
 	answerSessionIdsNewestFirst,
 	clearHiddenAnswers,
 	isCurrentAnswerSession,
 	isQuestionVisible,
 	overallFeedback,
-} from "$lib/util";
-import { describe, expect, it } from "vitest";
+} from "#lib/util.ts";
 
 describe("isQuestionVisible", () => {
 	it("is visible when it has no parent question", () => {

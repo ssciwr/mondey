@@ -85,7 +85,10 @@ test("admin can move a milestone to another group and recalculate statistics", a
 	});
 	await page.getByTestId("recalculateStatsButton").click();
 	await page.keyboard.press("Escape");
-	await expect(page.getByRole("dialog")).toBeVisible();
+	// (the edit modal may still be closing behind the recalculation modal)
+	await expect(
+		page.getByRole("dialog").filter({ hasText: "Statistiken aktualisieren" }),
+	).toBeVisible();
 
 	// wait for the recalculation to finish, then close the modal
 	const closeButton = page.getByTestId("closeUpdateStatsModal");

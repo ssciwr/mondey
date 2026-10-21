@@ -1,10 +1,10 @@
-import type { AuthCookieLoginData, UserRead } from "$lib/client";
+import type { AuthCookieLoginData, UserRead } from "#lib/client/index.ts";
 import {
 	authCookieLogin,
 	authCookieLogout,
 	usersCurrentUser,
-} from "$lib/client/sdk.gen";
-import { sessionStore } from "$lib/stores/sessionStore.svelte";
+} from "#lib/client/sdk.gen.ts";
+import { sessionStore } from "#lib/stores/sessionStore.svelte.ts";
 
 function createUser() {
 	let currentUser = $state(null as null | UserRead);

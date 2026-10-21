@@ -1,6 +1,6 @@
-import { getLanguages } from "$lib/client";
-import { user } from "$lib/stores/userStore.svelte";
-import { translationIds } from "$lib/translations";
+import { getLanguages } from "#lib/client/index.ts";
+import { user } from "#lib/stores/userStore.svelte.ts";
+import { translationIds } from "#lib/translations.ts";
 
 export type Translation = typeof translationIds;
 

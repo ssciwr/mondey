@@ -1,9 +1,9 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { preventDefault } from "$lib/util";
 import { TrashBinOutline } from "flowbite-svelte-icons";
 import Button from "flowbite-svelte/Button.svelte";
+import { preventDefault } from "#lib/util.ts";
 
 let {
 	filename,

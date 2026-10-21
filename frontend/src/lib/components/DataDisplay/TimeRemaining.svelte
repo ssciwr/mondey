@@ -1,8 +1,8 @@
 <svelte:options runes={true}/>
 <script lang="ts">
-import { i18n } from "$lib/i18n.svelte";
 import { ClockOutline } from "flowbite-svelte-icons";
 import { Duration, type DurationUnit } from "luxon";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 let { secondsRemaining = 0.0 }: { secondsRemaining: number } = $props();
 

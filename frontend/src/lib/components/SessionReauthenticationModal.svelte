@@ -1,10 +1,10 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { reauthenticateSession } from "$lib/client/sdk.gen";
-import { i18n } from "$lib/i18n.svelte";
-import { sessionStore } from "$lib/stores/sessionStore.svelte";
 import { Button, Input, Label, Modal } from "flowbite-svelte";
+import { reauthenticateSession } from "#lib/client/sdk.gen.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { sessionStore } from "#lib/stores/sessionStore.svelte.ts";
 
 let password = $state("");
 let errorMessage = $state("");

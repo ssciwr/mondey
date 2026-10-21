@@ -1,11 +1,11 @@
 import { goto } from "$app/navigation";
-import type { RequestOptions } from "$lib/client/client";
+import type { RequestOptions } from "#lib/client/client/index.ts";
 
-import { client } from "$lib/client/client.gen";
-import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
-import { sessionStore } from "$lib/stores/sessionStore.svelte";
-import { user } from "$lib/stores/userStore.svelte";
+import { client } from "#lib/client/client.gen.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
+import { sessionStore } from "#lib/stores/sessionStore.svelte.ts";
+import { user } from "#lib/stores/userStore.svelte.ts";
 
 function expireSession(redirectImmediately: boolean) {
 	if (!user.data) {

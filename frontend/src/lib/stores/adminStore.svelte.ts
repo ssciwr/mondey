@@ -2,12 +2,12 @@ import {
 	getChildQuestionsAdmin,
 	getMilestoneGroupsAdmin,
 	getUserQuestionsAdmin,
-} from "$lib/client";
+} from "#lib/client/index.ts";
 import type {
 	ChildQuestionAdmin,
 	MilestoneGroupAdmin,
 	UserQuestionAdmin,
-} from "$lib/client/types.gen";
+} from "#lib/client/types.gen.ts";
 
 function createAdminStore<T>(
 	fetchFn: () => Promise<{ data?: T[]; error?: any }>,

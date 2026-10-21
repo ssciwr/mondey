@@ -1,7 +1,7 @@
 <script lang="ts">
-import { i18n } from "$lib/i18n.svelte";
 import { Button } from "flowbite-svelte";
 import { CheckCircleOutline } from "flowbite-svelte-icons";
+import { i18n } from "#lib/i18n.svelte.ts";
 </script>
 
 <div

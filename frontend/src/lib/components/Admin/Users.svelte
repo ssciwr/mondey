@@ -1,7 +1,6 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import SaveButton from "$lib/components/Admin/SaveButton.svelte";
 import {
 	Alert,
 	Button,
@@ -13,15 +12,16 @@ import {
 	TableHead,
 	TableHeadCell,
 } from "flowbite-svelte";
+import SaveButton from "#lib/components/Admin/SaveButton.svelte";
 
+import { onMount } from "svelte";
 import {
 	createResearchGroup,
 	getUsers,
 	usersPatchUser,
-} from "$lib/client/sdk.gen";
-import type { UserRead } from "$lib/client/types.gen";
-import { i18n } from "$lib/i18n.svelte";
-import { onMount } from "svelte";
+} from "#lib/client/sdk.gen.ts";
+import type { UserRead } from "#lib/client/types.gen.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 let users = $state([] as Array<UserRead>);
 let saveDisabled = $state({} as Record<string, boolean>);

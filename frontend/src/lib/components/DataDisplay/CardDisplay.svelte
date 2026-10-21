@@ -1,8 +1,8 @@
 <svelte:options runes={true}/>
 <script lang="ts">
-import { isDark } from "$lib/components/DataDisplay/color_utils";
 import { Card } from "flowbite-svelte";
 import type { Snippet } from "svelte";
+import { isDark } from "#lib/components/DataDisplay/color_utils.ts";
 
 let {
 	title = "",

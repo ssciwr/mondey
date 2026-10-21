@@ -1,9 +1,6 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import PlotLines from "$lib/components/DataDisplay/PlotLines.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { type PlotData } from "$lib/util";
 import { download, generateCsv, mkConfig } from "export-to-csv";
 import saveAs from "file-saver";
 import {
@@ -20,6 +17,9 @@ import {
 	TableHeadCell,
 } from "flowbite-svelte";
 import { onMount } from "svelte";
+import PlotLines from "#lib/components/DataDisplay/PlotLines.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { type PlotData } from "#lib/util.ts";
 import {
 	type WorkerFullData,
 	type WorkerFullDataRequest,

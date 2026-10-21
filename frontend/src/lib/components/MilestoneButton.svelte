@@ -1,8 +1,8 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { isDark } from "$lib/components/DataDisplay/color_utils";
 import { Tooltip } from "flowbite-svelte";
+import { isDark } from "#lib/components/DataDisplay/color_utils.ts";
 
 let {
 	selected = false,

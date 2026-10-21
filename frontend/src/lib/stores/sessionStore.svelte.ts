@@ -1,6 +1,6 @@
-import { usersCurrentUser } from "$lib/client/sdk.gen";
-import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
+import { usersCurrentUser } from "#lib/client/sdk.gen.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
 
 const idleExpiresHeader = "X-Session-Idle-Expires-At";
 const absoluteExpiresHeader = "X-Session-Absolute-Expires-At";

@@ -1,22 +1,22 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
+import { Button, Input, Label, Modal, Select } from "flowbite-svelte";
 import {
 	deleteMilestoneImage,
 	updateMilestone,
 	uploadMilestoneImage,
-} from "$lib/client/sdk.gen";
-import type { MilestoneAdmin, MilestoneText } from "$lib/client/types.gen";
-import CancelButton from "$lib/components/Admin/CancelButton.svelte";
-import EditImage from "$lib/components/Admin/EditImage.svelte";
-import InputAutoTranslate from "$lib/components/Admin/InputAutoTranslate.svelte";
-import MilestoneExpectedAgeModal from "$lib/components/Admin/MilestoneExpectedAgeModal.svelte";
-import SaveButton from "$lib/components/Admin/SaveButton.svelte";
-import ImageFileUpload from "$lib/components/DataInput/ImageFileUpload.svelte";
-import DeleteModal from "$lib/components/DeleteModal.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { milestoneGroups } from "$lib/stores/adminStore.svelte";
-import { Button, Input, Label, Modal, Select } from "flowbite-svelte";
+} from "#lib/client/sdk.gen.ts";
+import type { MilestoneAdmin, MilestoneText } from "#lib/client/types.gen.ts";
+import CancelButton from "#lib/components/Admin/CancelButton.svelte";
+import EditImage from "#lib/components/Admin/EditImage.svelte";
+import InputAutoTranslate from "#lib/components/Admin/InputAutoTranslate.svelte";
+import MilestoneExpectedAgeModal from "#lib/components/Admin/MilestoneExpectedAgeModal.svelte";
+import SaveButton from "#lib/components/Admin/SaveButton.svelte";
+import ImageFileUpload from "#lib/components/DataInput/ImageFileUpload.svelte";
+import DeleteModal from "#lib/components/DeleteModal.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { milestoneGroups } from "#lib/stores/adminStore.svelte.ts";
 
 let {
 	open = $bindable(false),

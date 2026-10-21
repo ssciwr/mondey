@@ -1,4 +1,4 @@
-import type { ChildSummaryPublic } from "$lib/client/types.gen";
+import type { ChildSummaryPublic } from "#lib/client/types.gen.ts";
 
 export function preventDefault(fn: (event: Event) => void) {
 	return function (this: unknown, event: Event) {

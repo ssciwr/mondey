@@ -1,17 +1,6 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { buttonClasses } from "$lib/buttonClasses";
-import {
-	getMilestoneAnswerSessions,
-	getResearchGroups,
-	getUsers,
-	importCsvData,
-} from "$lib/client/sdk.gen";
-import type { MilestoneAnswerSession } from "$lib/client/types.gen";
-import AnswerSessionAnalysisModal from "$lib/components/Admin/AnswerSessionAnalysisModal.svelte";
-import RecalculateStatsModal from "$lib/components/Admin/RecalculateStatsModal.svelte";
-import { i18n } from "$lib/i18n.svelte";
 import {
 	Alert,
 	Button,
@@ -37,6 +26,17 @@ import {
 	RefreshOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
+import { buttonClasses } from "#lib/buttonClasses.ts";
+import {
+	getMilestoneAnswerSessions,
+	getResearchGroups,
+	getUsers,
+	importCsvData,
+} from "#lib/client/sdk.gen.ts";
+import type { MilestoneAnswerSession } from "#lib/client/types.gen.ts";
+import AnswerSessionAnalysisModal from "#lib/components/Admin/AnswerSessionAnalysisModal.svelte";
+import RecalculateStatsModal from "#lib/components/Admin/RecalculateStatsModal.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 let answer_sessions = $state([] as Array<MilestoneAnswerSession>);
 let current_answer_session_id = $state(null as null | number);

@@ -1,11 +1,11 @@
 <svelte:options runes={true}/>
 <script lang="ts">
 import { goto } from "$app/navigation";
-import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
-import Progress from "$lib/components/DataDisplay/Progress.svelte";
-import TimeRemaining from "$lib/components/DataDisplay/TimeRemaining.svelte";
-import { currentChild } from "$lib/stores/childrenStore.svelte";
-import type { ChildSummaryWithImage } from "$lib/util";
+import CardDisplay from "#lib/components/DataDisplay/CardDisplay.svelte";
+import Progress from "#lib/components/DataDisplay/Progress.svelte";
+import TimeRemaining from "#lib/components/DataDisplay/TimeRemaining.svelte";
+import { currentChild } from "#lib/stores/childrenStore.svelte.ts";
+import type { ChildSummaryWithImage } from "#lib/util.ts";
 
 let { child }: { child: ChildSummaryWithImage } = $props();
 

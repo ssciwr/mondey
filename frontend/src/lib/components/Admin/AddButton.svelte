@@ -1,10 +1,10 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { buttonClasses } from "$lib/buttonClasses";
-import { i18n } from "$lib/i18n.svelte";
 import PlusOutline from "flowbite-svelte-icons/PlusOutline.svelte";
 import Button from "flowbite-svelte/Button.svelte";
+import { buttonClasses } from "#lib/buttonClasses.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 let {
 	onclick,

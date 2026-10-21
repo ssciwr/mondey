@@ -1,8 +1,8 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import type { MilestoneAgeCurveParams } from "$lib/client/types.gen";
-import { i18n } from "$lib/i18n.svelte";
+import type { MilestoneAgeCurveParams } from "#lib/client/types.gen.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 let {
 	params,

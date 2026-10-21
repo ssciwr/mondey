@@ -1,27 +1,27 @@
 <svelte:options runes={true}/>
 <script lang="ts">
 import { goto } from "$app/navigation";
-import { getAdminSettings } from "$lib/client";
-import {
-	type MilestoneAnswerSessionPublic,
-	type MilestonePublic,
-	getCurrentMilestoneAnswerSession,
-	getMilestoneGroups,
-} from "$lib/client";
-import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
-import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
-import Progress from "$lib/components/DataDisplay/Progress.svelte";
-import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
-import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { contentStore } from "$lib/stores/contentStore.svelte";
 import { Spinner } from "flowbite-svelte";
 import {
 	GridPlusSolid,
 	RectangleListOutline,
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
+import { getAdminSettings } from "#lib/client/index.ts";
+import {
+	type MilestoneAnswerSessionPublic,
+	type MilestonePublic,
+	getCurrentMilestoneAnswerSession,
+	getMilestoneGroups,
+} from "#lib/client/index.ts";
+import CardDisplay from "#lib/components/DataDisplay/CardDisplay.svelte";
+import GalleryDisplay from "#lib/components/DataDisplay/GalleryDisplay.svelte";
+import Progress from "#lib/components/DataDisplay/Progress.svelte";
+import Breadcrumbs from "#lib/components/Navigation/Breadcrumbs.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
+import { currentChild } from "#lib/stores/childrenStore.svelte.ts";
+import { contentStore } from "#lib/stores/contentStore.svelte.ts";
 
 function computeProgress(
 	milestones: MilestonePublic[] | undefined,

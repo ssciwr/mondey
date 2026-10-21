@@ -6,10 +6,10 @@ const mocks = vi.hoisted(() => ({
 	usersCurrentUser: vi.fn(),
 }));
 
-vi.mock("$lib/client/sdk.gen", () => ({
+vi.mock("#lib/client/sdk.gen.ts", () => ({
 	usersCurrentUser: mocks.usersCurrentUser,
 }));
-vi.mock("$lib/i18n.svelte", () => ({
+vi.mock("#lib/i18n.svelte.ts", () => ({
 	i18n: {
 		tr: {
 			login: {
@@ -21,11 +21,11 @@ vi.mock("$lib/i18n.svelte", () => ({
 		},
 	},
 }));
-vi.mock("$lib/stores/alertStore.svelte", () => ({
+vi.mock("#lib/stores/alertStore.svelte.ts", () => ({
 	alertStore: { showAlert: mocks.showAlert },
 }));
 
-import { sessionStore } from "$lib/stores/sessionStore.svelte";
+import { sessionStore } from "#lib/stores/sessionStore.svelte.ts";
 
 function sessionResponse(
 	idleMilliseconds: number,

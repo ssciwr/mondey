@@ -1,5 +1,5 @@
-import { isDark } from "$lib/components/DataDisplay/color_utils";
 import { describe, expect, it } from "vitest";
+import { isDark } from "#lib/components/DataDisplay/color_utils.ts";
 
 describe("isDark", () => {
 	for (const color of [

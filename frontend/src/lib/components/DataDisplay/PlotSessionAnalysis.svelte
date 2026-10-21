@@ -1,10 +1,10 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import type { MilestoneAnswerAnalysis } from "$lib/client/types.gen";
-import { i18n } from "$lib/i18n.svelte";
 import { Axis, GroupedBar, Tooltip, XYContainer, colors } from "@unovis/ts";
 import { onMount } from "svelte";
+import type { MilestoneAnswerAnalysis } from "#lib/client/types.gen.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 let { data = [] }: { data: Array<MilestoneAnswerAnalysis> } = $props();
 let container_scores: HTMLDivElement;
@@ -70,7 +70,8 @@ onMount(() => {
 			type: "x",
 			label: `${i18n.tr.admin.milestoneGroup}`,
 			tickValues: groupTicks.map(({ position }) => position),
-			tickFormat: (tick: number) => groupTickLabels.get(tick) ?? "",
+			tickFormat: (tick: number | Date) =>
+				groupTickLabels.get(Number(tick)) ?? "",
 			tickTextWidth: 120,
 			tickTextForceWordBreak: true,
 		});

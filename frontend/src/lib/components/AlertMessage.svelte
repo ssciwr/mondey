@@ -1,13 +1,13 @@
 <svelte:options runes={true} />
 <script lang='ts'>
-import { buttonClasses } from "$lib/buttonClasses";
-import { i18n } from "$lib/i18n.svelte";
 import { Alert, Button } from "flowbite-svelte";
 import {
 	ExclamationCircleSolid,
 	EyeSolid,
 	InfoCircleSolid,
 } from "flowbite-svelte-icons";
+import { buttonClasses } from "#lib/buttonClasses.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 let {
 	id = "alertMessage",

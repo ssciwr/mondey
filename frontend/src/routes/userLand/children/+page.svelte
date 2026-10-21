@@ -1,16 +1,16 @@
 <svelte:options runes={true}/>
 <script lang="ts">
 import { goto } from "$app/navigation";
-import { getChildImage, getChildren } from "$lib/client/sdk.gen";
-import CardDisplay from "$lib/components/DataDisplay/CardDisplay.svelte";
-import ChildCardDisplay from "$lib/components/DataDisplay/ChildCardDisplay.svelte";
-import GalleryDisplay from "$lib/components/DataDisplay/GalleryDisplay.svelte";
-import { displayChildImages } from "$lib/features";
-import { i18n } from "$lib/i18n.svelte.js";
-import { alertStore } from "$lib/stores/alertStore.svelte.js";
-import { currentChild } from "$lib/stores/childrenStore.svelte";
-import type { ChildSummaryWithImage } from "$lib/util";
 import { Heading, Spinner } from "flowbite-svelte";
+import { getChildImage, getChildren } from "#lib/client/sdk.gen.ts";
+import CardDisplay from "#lib/components/DataDisplay/CardDisplay.svelte";
+import ChildCardDisplay from "#lib/components/DataDisplay/ChildCardDisplay.svelte";
+import GalleryDisplay from "#lib/components/DataDisplay/GalleryDisplay.svelte";
+import { displayChildImages } from "#lib/features.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
+import { currentChild } from "#lib/stores/childrenStore.svelte.ts";
+import type { ChildSummaryWithImage } from "#lib/util.ts";
 
 let searchTerm = $state("");
 

@@ -1,24 +1,24 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
+import { Button, Card, Heading } from "flowbite-svelte";
 import {
 	getCurrentUserAnswers,
 	getUserQuestions,
 	updateCurrentUserAnswers,
-} from "$lib/client/sdk.gen";
+} from "#lib/client/sdk.gen.ts";
 import {
 	type GetUserQuestionsResponse,
 	type UserAnswerPublic,
-} from "$lib/client/types.gen";
-import DataInput from "$lib/components/DataInput/DataInput.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
+} from "#lib/client/types.gen.ts";
+import DataInput from "#lib/components/DataInput/DataInput.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
 import {
 	clearHiddenAnswers,
 	isQuestionVisible,
 	preventDefault,
-} from "$lib/util";
-import { Button, Card, Heading } from "flowbite-svelte";
+} from "#lib/util.ts";
 
 async function submitData() {
 	const response = await updateCurrentUserAnswers({

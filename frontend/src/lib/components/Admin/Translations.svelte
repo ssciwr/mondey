@@ -1,15 +1,15 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { updateI18N } from "$lib/client/sdk.gen";
-import EditTranslationModal from "$lib/components/Admin/EditTranslationModal.svelte";
-import InputAutoTranslate from "$lib/components/Admin/InputAutoTranslate.svelte";
-import SaveButton from "$lib/components/Admin/SaveButton.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import type { TranslationSections } from "$lib/i18n.svelte";
-import { translationIds } from "$lib/translations";
 import { Accordion, AccordionItem, Label } from "flowbite-svelte";
 import { onMount } from "svelte";
+import { updateI18N } from "#lib/client/sdk.gen.ts";
+import EditTranslationModal from "#lib/components/Admin/EditTranslationModal.svelte";
+import InputAutoTranslate from "#lib/components/Admin/InputAutoTranslate.svelte";
+import SaveButton from "#lib/components/Admin/SaveButton.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import type { TranslationSections } from "#lib/i18n.svelte.ts";
+import { translationIds } from "#lib/translations.ts";
 
 let translations: Record<string, TranslationSections> = $state({});
 

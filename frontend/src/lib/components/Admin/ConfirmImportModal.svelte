@@ -1,9 +1,9 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { i18n } from "$lib/i18n.svelte";
 import { Button, Modal } from "flowbite-svelte";
 import ExclamationCircleOutline from "flowbite-svelte-icons/ExclamationCircleOutline.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 let {
 	open = $bindable(false),

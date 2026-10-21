@@ -1,15 +1,15 @@
 <svelte:options runes={true} />
 <script lang="ts">
-import { base } from "$app/paths";
+import { resolve } from "$app/paths";
 
-import { alertStore } from "$lib/stores/alertStore.svelte";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
 
 import { goto } from "$app/navigation";
-import { verifyRequestToken } from "$lib/client/sdk.gen";
-import { i18n } from "$lib/i18n.svelte";
-import { user } from "$lib/stores/userStore.svelte";
-import { preventDefault } from "$lib/util";
 import { Alert, Button, Card, Heading, Input, Label } from "flowbite-svelte";
+import { verifyRequestToken } from "#lib/client/sdk.gen.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { user } from "#lib/stores/userStore.svelte.ts";
+import { preventDefault } from "#lib/util.ts";
 
 import { page } from "$app/state";
 
@@ -126,7 +126,7 @@ let activationEmailSent = $state(false);
 					placeholder={i18n.tr.login.passwordLabel}
 					required
 				/>
-				<a href={`${base}/forgotPassword`} class="text-primary-700 dark:text-primary-500">
+				<a href={resolve("/forgotPassword")} class="text-primary-700 dark:text-primary-500">
 					{i18n.tr.login.forgotPassword} </a>
 				</div>
 			</div>
@@ -163,7 +163,7 @@ let activationEmailSent = $state(false);
 		>{i18n.tr.login.notRegistered}</span
 	>
 	<a
-		href={`${base}/signup`}
+		href={resolve("/signup/[[code]]", {})}
 		class="text-primary-700 hover:underline dark:text-primary-500"
 	>
 		{i18n.tr.login.registerNew}

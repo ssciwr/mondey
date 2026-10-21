@@ -2,18 +2,22 @@
 
 <script lang="ts">
 import { goto } from "$app/navigation";
+import { Button, Heading, Helper, Input, Label, Modal } from "flowbite-svelte";
 import {
 	authCookieLogin,
 	deleteCurrentUserAccount,
 	usersCurrentUser,
 	usersPatchCurrentUser,
-} from "$lib/client/sdk.gen";
-import DeleteAccountModal from "$lib/components/DeleteAccountModal.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
-import { user } from "$lib/stores/userStore.svelte";
-import { isValidPassword, minPasswordLength, preventDefault } from "$lib/util";
-import { Button, Heading, Helper, Input, Label, Modal } from "flowbite-svelte";
+} from "#lib/client/sdk.gen.ts";
+import DeleteAccountModal from "#lib/components/DeleteAccountModal.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
+import { user } from "#lib/stores/userStore.svelte.ts";
+import {
+	isValidPassword,
+	minPasswordLength,
+	preventDefault,
+} from "#lib/util.ts";
 
 let newPassword = $state(undefined) as string | undefined;
 let newPasswordRepeat = $state(undefined) as string | undefined;

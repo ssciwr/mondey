@@ -2,19 +2,6 @@
 
 <script lang="ts">
 import { goto } from "$app/navigation";
-import {
-	type MilestoneAnswerSessionPublic,
-	type MilestonePublic,
-	getCurrentMilestoneAnswerSession,
-	updateMilestoneAnswer,
-} from "$lib/client";
-import MilestoneButton from "$lib/components/MilestoneButton.svelte";
-import Breadcrumbs from "$lib/components/Navigation/Breadcrumbs.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
-import { currentChild } from "$lib/stores/childrenStore.svelte";
-import { contentStore } from "$lib/stores/contentStore.svelte";
-import { translationIds } from "$lib/translations";
 import { Accordion, AccordionItem, Button, Modal } from "flowbite-svelte";
 import {
 	ArrowLeftOutline,
@@ -29,6 +16,19 @@ import {
 	UserSettingsOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
+import {
+	type MilestoneAnswerSessionPublic,
+	type MilestonePublic,
+	getCurrentMilestoneAnswerSession,
+	updateMilestoneAnswer,
+} from "#lib/client/index.ts";
+import MilestoneButton from "#lib/components/MilestoneButton.svelte";
+import Breadcrumbs from "#lib/components/Navigation/Breadcrumbs.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
+import { currentChild } from "#lib/stores/childrenStore.svelte.ts";
+import { contentStore } from "#lib/stores/contentStore.svelte.ts";
+import { translationIds } from "#lib/translations.ts";
 
 onMount(() => {
 	if (contentStore.milestoneGroupData?.milestones) {

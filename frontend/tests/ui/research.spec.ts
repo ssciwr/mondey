@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
-import { translationIds } from "$lib/translations";
 import { type Locator, type Page, expect } from "@playwright/test";
+import { translationIds } from "#lib/translations.ts";
 import { test } from "./test";
 
 // Return a random integer from the inclusive range [min, max]

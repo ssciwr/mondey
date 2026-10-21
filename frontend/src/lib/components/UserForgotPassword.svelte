@@ -1,13 +1,13 @@
 <svelte:options runes={true} />
 <script lang="ts">
 import { goto } from "$app/navigation";
-import { base } from "$app/paths";
-import { resetForgotPassword } from "$lib/client";
-import DataInput from "$lib/components/DataInput/DataInput.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
-import { preventDefault } from "$lib/util";
+import { resolve } from "$app/paths";
 import { Button, Card, Heading, Input } from "flowbite-svelte";
+import { resetForgotPassword } from "#lib/client/index.ts";
+import DataInput from "#lib/components/DataInput/DataInput.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
+import { preventDefault } from "#lib/util.ts";
 
 const maildata = {
 	component: "input",
@@ -94,7 +94,7 @@ async function submitData(): Promise<void> {
 				size="md"
 				type="button"
 				onclick={() => {
-					goto(`/${base}`);
+					goto(resolve("/"));
 				}}>{i18n.tr.forgotPw.success}</Button
 			>
 		</div>

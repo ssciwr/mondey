@@ -1,8 +1,8 @@
 <svelte:options runes={true}/>
 <script lang="ts">
-import { i18n } from "$lib/i18n.svelte";
 import { SidebarDropdownWrapper, SidebarItem } from "flowbite-svelte";
 import { LanguageOutline } from "flowbite-svelte-icons";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 let isOpen = $state(false);
 </script>

@@ -1,13 +1,13 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { getPublicDocuments } from "$lib/client/sdk.gen";
-import type { DocumentPublic } from "$lib/client/types.gen";
-import { i18n } from "$lib/i18n.svelte";
-import { translationIds } from "$lib/translations";
 import { Button, Card } from "flowbite-svelte";
 import DownloadOutline from "flowbite-svelte-icons/DownloadOutline.svelte";
 import { onMount } from "svelte";
+import { getPublicDocuments } from "#lib/client/sdk.gen.ts";
+import type { DocumentPublic } from "#lib/client/types.gen.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { translationIds } from "#lib/translations.ts";
 
 let documents = $state([] as DocumentPublic[]);
 const downloadsText = $derived(i18n.tr.downloads ?? translationIds.downloads);

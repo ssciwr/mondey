@@ -1,9 +1,9 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-import { i18n } from "$lib/i18n.svelte";
 import DOMPurify from "dompurify";
 import { Accordion, AccordionItem } from "flowbite-svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 const sanitizeConfig = {
 	ALLOWED_TAGS: ["strong", "p", "i", "ul", "li", "ol"],

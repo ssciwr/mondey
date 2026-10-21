@@ -1,10 +1,10 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import { buttonClasses } from "$lib/buttonClasses";
-import { i18n } from "$lib/i18n.svelte";
 import ArrowUpDownOutline from "flowbite-svelte-icons/ArrowUpDownOutline.svelte";
 import Button from "flowbite-svelte/Button.svelte";
+import { buttonClasses } from "#lib/buttonClasses.ts";
+import { i18n } from "#lib/i18n.svelte.ts";
 
 let { onclick }: { onclick: (event: Event) => void } = $props();
 </script>

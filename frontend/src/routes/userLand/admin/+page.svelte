@@ -1,20 +1,6 @@
 <svelte:options runes={true}/>
 
 <script lang="ts">
-import AdminDocuments from "$lib/components/Admin/AdminDocuments.svelte";
-import AnswerSessionData from "$lib/components/Admin/AnswerSessionData.svelte";
-import CalendarEvents from "$lib/components/Admin/CalendarEvents.svelte";
-import DeactivateFeedback from "$lib/components/Admin/DeactivateFeedback.svelte";
-import Languages from "$lib/components/Admin/Languages.svelte";
-import MilestoneExpectedAges from "$lib/components/Admin/MilestoneExpectedAges.svelte";
-import MilestoneGroups from "$lib/components/Admin/MilestoneGroups.svelte";
-import Questions from "$lib/components/Admin/Questions.svelte";
-import Translations from "$lib/components/Admin/Translations.svelte";
-import Users from "$lib/components/Admin/Users.svelte";
-import { i18n } from "$lib/i18n.svelte";
-import { milestoneGroups } from "$lib/stores/adminStore.svelte";
-import { alertStore } from "$lib/stores/alertStore.svelte";
-import { user } from "$lib/stores/userStore.svelte";
 import { TabItem, Tabs } from "flowbite-svelte";
 import {
 	BadgeCheckOutline,
@@ -28,6 +14,20 @@ import {
 	UsersOutline,
 } from "flowbite-svelte-icons";
 import { onMount } from "svelte";
+import AdminDocuments from "#lib/components/Admin/AdminDocuments.svelte";
+import AnswerSessionData from "#lib/components/Admin/AnswerSessionData.svelte";
+import CalendarEvents from "#lib/components/Admin/CalendarEvents.svelte";
+import DeactivateFeedback from "#lib/components/Admin/DeactivateFeedback.svelte";
+import Languages from "#lib/components/Admin/Languages.svelte";
+import MilestoneExpectedAges from "#lib/components/Admin/MilestoneExpectedAges.svelte";
+import MilestoneGroups from "#lib/components/Admin/MilestoneGroups.svelte";
+import Questions from "#lib/components/Admin/Questions.svelte";
+import Translations from "#lib/components/Admin/Translations.svelte";
+import Users from "#lib/components/Admin/Users.svelte";
+import { i18n } from "#lib/i18n.svelte.ts";
+import { milestoneGroups } from "#lib/stores/adminStore.svelte.ts";
+import { alertStore } from "#lib/stores/alertStore.svelte.ts";
+import { user } from "#lib/stores/userStore.svelte.ts";
 
 onMount(async () => {
 	try {
