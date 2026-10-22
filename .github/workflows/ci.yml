@@ -68,7 +68,7 @@ jobs:
           cache: true
           cache_dependency_path: frontend/pnpm-lock.yaml
       - run: pnpm install
-      - run: pnpm exec playwright install --with-deps
+      - run: pnpm exec playwright install --with-deps --only-shell chromium firefox
       - run: pnpm build
       - run: pnpm run test:ui || exit 1
       - uses: actions/upload-artifact@v7
@@ -116,7 +116,7 @@ jobs:
         run: pnpm build
       - name: Install Playwright
         working-directory: ./frontend
-        run: pnpm exec playwright install --with-deps
+        run: pnpm exec playwright install --with-deps --only-shell chromium firefox
 
       # Print current time before running e2e tests
       - name: Print current time before e2e tests
