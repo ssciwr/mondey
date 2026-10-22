@@ -19,6 +19,20 @@ export type PlotData = {
 	data: Array<PlotDatum>;
 };
 
+// Keep in sync with is_test_account_user in the backend
+export const testAccountEmailSuffix = "tester@testaccount.com";
+
+// Keep in sync with the email addresses created by the backend import_data code
+export const importedAccountEmailSuffix = "@artificialimporteddata.csv";
+
+export function isTestAccountEmail(email: string): boolean {
+	return email.endsWith(testAccountEmailSuffix);
+}
+
+export function isImportedAccountEmail(email: string): boolean {
+	return email.endsWith(importedAccountEmailSuffix);
+}
+
 export function isValidAge(value: number) {
 	return Math.floor(value) === value && value >= 0 && value <= 72;
 }
