@@ -5,6 +5,7 @@ import {
 	usersCurrentUser,
 } from "#lib/client/sdk.gen.ts";
 import { sessionStore } from "#lib/stores/sessionStore.svelte.ts";
+import { isTestAccountEmail } from "#lib/util.ts";
 
 function createUser() {
 	let currentUser = $state(null as null | UserRead);
@@ -51,7 +52,7 @@ function createUser() {
 		get isTestAccount() {
 			return (
 				currentUser?.email !== undefined &&
-				currentUser?.email?.indexOf("tester@testaccount.com") !== -1
+				isTestAccountEmail(currentUser.email)
 			);
 		},
 		set data(user: UserRead | null) {

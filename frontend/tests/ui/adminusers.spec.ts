@@ -26,6 +26,14 @@ test("admin can make a user a researcher and assign a research code", async ({
 	};
 	let researcherUpdateReceived = false;
 	let researchCodeRequestReceived = false;
+	let releaseUserUpdate!: () => void;
+	const userUpdateResponse = new Promise<void>((resolve) => {
+		releaseUserUpdate = resolve;
+	});
+	let releaseResearchCode!: () => void;
+	const researchCodeResponse = new Promise<void>((resolve) => {
+		releaseResearchCode = resolve;
+	});
 
 	await page.route("**/languages/", async (route) => {
 		await route.fulfill({ json: ["de"] });
@@ -43,17 +51,21 @@ test("admin can make a user a researcher and assign a research code", async ({
 		await route.fulfill({ json: [admin, ordinaryUser] });
 	});
 	await page.route("**/users/4", async (route) => {
+		// research group creation should not need a separate user request
+		expect(route.request().method()).toBe("PATCH");
 		const update = await route.request().postDataJSON();
 		expect(update).toMatchObject({
 			is_researcher: true,
 			full_data_access: false,
 		});
 		researcherUpdateReceived = true;
+		await userUpdateResponse;
 		ordinaryUser = { ...ordinaryUser, ...update };
 		await route.fulfill({ json: ordinaryUser });
 	});
 	await page.route("**/admin/research-groups/4", async (route) => {
 		researchCodeRequestReceived = true;
+		await researchCodeResponse;
 		ordinaryUser = {
 			...ordinaryUser,
 			is_researcher: true,
@@ -81,17 +93,226 @@ test("admin can make a user a researcher and assign a research code", async ({
 	}
 
 	const researcherCheckbox = userRow.getByRole("checkbox").nth(2);
+	const fullDataAccessCheckbox = userRow.getByRole("checkbox").nth(3);
+	const saveButton = userRow.getByRole("button", {
+		name: translationIds.admin.saveChanges,
+	});
+	const addResearchCodeButton = userRow.getByRole("button", {
+		name: translationIds.admin.addResearchCode,
+	});
+
+	// undoing a change leaves nothing to save
+	await expect(saveButton).toBeDisabled();
+	await fullDataAccessCheckbox.check();
+	await expect(saveButton).toBeEnabled();
+	await fullDataAccessCheckbox.uncheck();
+	await expect(saveButton).toBeDisabled();
+
 	await expect(researcherCheckbox).not.toBeChecked();
 	await researcherCheckbox.check();
-	await userRow
-		.getByRole("button", { name: translationIds.admin.saveChanges })
-		.click();
+	await saveButton.click();
 
 	await expect.poll(() => researcherUpdateReceived).toBe(true);
-	await userRow
-		.getByRole("button", { name: translationIds.admin.addResearchCode })
-		.click();
+	await expect(saveButton).toBeDisabled();
+	await expect(addResearchCodeButton).toBeDisabled();
+	// changes made while saving are kept as unsaved changes
+	await fullDataAccessCheckbox.check();
+	releaseUserUpdate();
+	await expect(addResearchCodeButton).toBeEnabled();
+	await expect(researcherCheckbox).toBeChecked();
+	await expect(fullDataAccessCheckbox).toBeChecked();
+	await expect(saveButton).toBeEnabled();
+	await fullDataAccessCheckbox.uncheck();
+	await expect(saveButton).toBeDisabled();
 
+	await addResearchCodeButton.click();
 	await expect.poll(() => researchCodeRequestReceived).toBe(true);
+	await fullDataAccessCheckbox.check();
+	await expect(saveButton).toBeDisabled();
+	await expect(addResearchCodeButton).toBeDisabled();
+	await expect(userRow).not.toContainText("123451");
+	releaseResearchCode();
 	await expect(userRow).toContainText("123451");
+	await expect(researcherCheckbox).toBeChecked();
+	await expect(fullDataAccessCheckbox).toBeChecked();
+	await expect(saveButton).toBeEnabled();
+});
+
+test("admin can search, filter and page through users", async ({ page }) => {
+	const makeUser = (id: number, email: string) => ({
+		id,
+		email,
+		is_active: true,
+		is_superuser: false,
+		is_verified: true,
+		is_researcher: false,
+		full_data_access: false,
+		research_group_id: 0,
+	});
+	const admin = { ...makeUser(1, "admin@example.com"), is_superuser: true };
+	const researcher = {
+		...makeUser(2, "researcher@example.com"),
+		is_researcher: true,
+		research_group_id: 123451,
+	};
+	const users = [admin, researcher];
+	for (let i = 0; i < 60; i++) {
+		users.push(makeUser(100 + i, `user${i}@example.com`));
+		users.push(makeUser(200 + i, `${i}tester@testaccount.com`));
+	}
+	for (let i = 0; i < 30; i++) {
+		users.push(makeUser(300 + i, `parent_of_${i}@artificialimporteddata.csv`));
+	}
+
+	await page.route("**/languages/", async (route) => {
+		await route.fulfill({ json: ["de"] });
+	});
+	await page.route("**/static/i18n/de.json", async (route) => {
+		await route.fulfill({ json: translationIds });
+	});
+	await page.route("**/users/me", async (route) => {
+		await route.fulfill({ json: admin });
+	});
+	await page.route("**/admin/milestone-groups/", async (route) => {
+		await route.fulfill({ json: [] });
+	});
+	let respondWithUsers = () => {};
+	const usersRequested = new Promise<void>((resolve) => {
+		respondWithUsers = resolve;
+	});
+	await page.route("**/admin/users/", async (route) => {
+		await usersRequested;
+		await route.fulfill({ json: users });
+	});
+
+	await page.goto("/userLand/admin");
+	await page.getByRole("tab", { name: translationIds.admin.users }).click();
+
+	// a spinner is shown until the users have loaded
+	const spinner = page.getByTestId("usersLoading");
+	await expect(spinner).toBeVisible();
+	respondWithUsers();
+	await expect(spinner).toBeHidden();
+
+	const bodyRows = page.locator("tbody tr");
+	const count = (n: number) => page.getByText(`${n} / ${users.length}`);
+	const filters = page
+		.locator("label")
+		.filter({ has: page.getByRole("checkbox") });
+	const filter = (label: string) => filters.filter({ hasText: label });
+
+	// test and imported users are hidden by default, and only the first page of users is shown
+	await expect(count(62)).toBeVisible();
+	await expect(bodyRows).toHaveCount(50);
+	await expect(page.locator("tbody")).not.toContainText("tester@");
+	await expect(page.locator("tbody")).not.toContainText(
+		"artificialimporteddata",
+	);
+	await page.getByRole("button", { name: "2", exact: true }).click();
+	await expect(bodyRows).toHaveCount(12);
+
+	// changing a filter goes back to the first page
+	await filter(translationIds.admin.userTestAccounts).click();
+	await expect(count(122)).toBeVisible();
+	await expect(bodyRows).toHaveCount(50);
+	await expect(bodyRows.first()).toContainText(admin.email);
+	await filter(translationIds.admin.userTestAccounts).click();
+	await expect(count(62)).toBeVisible();
+	await page.getByRole("button", { name: "2", exact: true }).click();
+	await expect(bodyRows).toHaveCount(12);
+
+	// searching by email also goes back to the first page
+	const search = page.getByPlaceholder(
+		translationIds.admin.userSearchPlaceholder,
+	);
+	await search.fill("USER");
+	await expect(count(60)).toBeVisible();
+	await expect(bodyRows).toHaveCount(50);
+	await search.fill("USER1");
+	await expect(bodyRows).toHaveCount(11);
+	await search.fill("researcher@");
+	await expect(bodyRows).toHaveCount(1);
+	await expect(bodyRows).toContainText(researcher.email);
+	await search.fill("");
+
+	// account type checkboxes show users with any of the checked types
+	await filter(translationIds.admin.userTestAccounts).click();
+	await expect(count(122)).toBeVisible();
+	await filter(translationIds.admin.userImportedAccounts).click();
+	await expect(count(users.length)).toBeVisible();
+	await filter(translationIds.admin.userNormalAccounts).click();
+	await expect(count(90)).toBeVisible();
+	await search.fill("59tester");
+	await expect(bodyRows).toHaveCount(1);
+	await search.fill("parent_of_29@");
+	await expect(bodyRows).toHaveCount(1);
+	await search.fill("");
+	await filter(translationIds.admin.userTestAccounts).click();
+	await expect(count(30)).toBeVisible();
+	await filter(translationIds.admin.userImportedAccounts).click();
+	await expect(count(0)).toBeVisible();
+	await filter(translationIds.admin.userNormalAccounts).click();
+	await expect(count(62)).toBeVisible();
+
+	// role dropdown only shows users with the selected role
+	const roleSelect = page.getByTestId("userRoleSelect");
+	await roleSelect.selectOption("admin");
+	await expect(bodyRows).toHaveCount(1);
+	await expect(bodyRows).toContainText(admin.email);
+	await roleSelect.selectOption("researcher");
+	await expect(bodyRows).toHaveCount(1);
+	await expect(bodyRows).toContainText(researcher.email);
+	await filter(translationIds.admin.userNormalAccounts).click();
+	await filter(translationIds.admin.userTestAccounts).click();
+	await expect(count(0)).toBeVisible();
+	await roleSelect.selectOption("all");
+	await expect(count(60)).toBeVisible();
+});
+
+test("admin sees an error if the users cannot be loaded", async ({ page }) => {
+	const admin = {
+		id: 1,
+		email: "admin@example.com",
+		is_active: true,
+		is_superuser: true,
+		is_verified: true,
+		is_researcher: false,
+		full_data_access: false,
+		research_group_id: 0,
+	};
+	await page.route("**/languages/", async (route) => {
+		await route.fulfill({ json: ["de"] });
+	});
+	await page.route("**/static/i18n/de.json", async (route) => {
+		await route.fulfill({ json: translationIds });
+	});
+	await page.route("**/users/me", async (route) => {
+		await route.fulfill({ json: admin });
+	});
+	await page.route("**/admin/milestone-groups/", async (route) => {
+		await route.fulfill({ json: [] });
+	});
+	let failUsersRequest = true;
+	await page.route("**/admin/users/", async (route) => {
+		if (failUsersRequest) {
+			await route.fulfill({ status: 500, json: { detail: "error" } });
+		} else {
+			await route.fulfill({ json: [admin] });
+		}
+	});
+
+	await page.goto("/userLand/admin");
+	await page.getByRole("tab", { name: translationIds.admin.users }).click();
+
+	const loadError = page.getByTestId("usersLoadError");
+	await expect(loadError).toContainText(translationIds.admin.userLoadError);
+	await expect(page.locator("table")).toBeHidden();
+
+	failUsersRequest = false;
+	await loadError
+		.getByRole("button", { name: translationIds.admin.userRetry })
+		.click();
+	await expect(loadError).toBeHidden();
+	await expect(page.locator("tbody tr")).toHaveCount(1);
+	await expect(page.getByText("1 / 1")).toBeVisible();
 });

@@ -8,6 +8,7 @@ import { registerRegister } from "#lib/client/sdk.gen.ts";
 import AlertMessage from "#lib/components/AlertMessage.svelte";
 import { i18n } from "#lib/i18n.svelte.ts";
 import { user } from "#lib/stores/userStore.svelte.ts";
+import { testAccountEmailSuffix } from "#lib/util.ts";
 
 let showAlert = $state(false);
 let alertMessage = $state(i18n.tr.registration.alertMessageError);
@@ -15,7 +16,7 @@ let registerTestUserButtonDisabled = $state(false);
 
 const registerTestUser = async () => {
 	let testAccountData: UserCreate = {
-		email: `${((Math.random() + 0.1) * 100000000).toString()}tester@testaccount.com`,
+		email: `${((Math.random() + 0.1) * 100000000).toString()}${testAccountEmailSuffix}`,
 		password: ((Math.random() + 0.1) * 100000000).toString(), // random 8 digit or more password
 		is_active: true,
 		research_group_id: 0,
